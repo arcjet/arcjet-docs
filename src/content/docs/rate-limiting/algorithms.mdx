@@ -9,6 +9,7 @@ import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import FixedWindow from "/src/content/docs/rate-limiting/reference/snippets/nextjs/FixedWindow.ts?raw";
 import SlidingWindow from "/src/content/docs/rate-limiting/reference/snippets/nextjs/SlidingWindow.ts?raw";
 import TokenBucket from "/src/content/docs/rate-limiting/reference/snippets/nextjs/TokenBucket.ts?raw";
+import Comments from "/src/components/Comments.astro";
 
 Arcjet rate limiting allows you to define rules which limit the number of
 requests a client can make over a period of time. It supports 3 different rate
@@ -126,3 +127,5 @@ then make 10 requests over the following 60 seconds. If they make no requests,
 the bucket will refill to 20 tokens at `12:02:00`. If they make no requests
 between `12:01:00` and `12:10:00` then the bucket will refill to 100 tokens at
 `12:10:00`. No further tokens will be added after it reaches 100 tokens.
+
+<Comments />
