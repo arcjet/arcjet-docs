@@ -1,0 +1,141 @@
+/* Block
+  Arcjets main Block component, used all across the app as a layout container.
+*/
+
+/* BlockLink
+  All displays necessary for giving linking interactivity to the block.
+*/
+
+/*
+  Theme vars for the BlockLink background styles.
+*/
+:root[data-theme="dark"] {
+  .BlockLink {
+    --hoverColor: rgba(var(--aj-palette-source-neutralRgb-03) / 0.3);
+    --activeColor: rgba(var(--aj-palette-source-neutralRgb-03) / 0.45);
+    --selectedColor: rgba(var(--aj-palette-source-neutralRgb-04) / 0.45);
+
+    &.EventDeny {
+      --hoverColor: rgba(var(--aj-palette-eventDeny-secondaryBgRgb) / 0.06);
+      --activeColor: rgba(var(--aj-palette-eventDeny-secondaryBgRgb) / 0.12);
+    }
+
+    &.EventDryrun {
+      --hoverColor: rgba(var(--aj-palette-eventDryrun-secondaryBgRgb) / 0.3);
+      --activeColor: rgba(var(--aj-palette-eventDryrun-secondaryBgRgb) / 0.45);
+    }
+
+    &.EventChallenge {
+      --hoverColor: rgba(var(--aj-palette-eventChallenge-secondaryBgRgb) / 0.3);
+      --activeColor: rgba(
+        var(--aj-palette-eventChallenge-secondaryBgRgb) / 0.45
+      );
+    }
+  }
+}
+
+:root[data-theme="light"] {
+  .BlockLink {
+    --hoverColor: rgba(var(--aj-palette-source-neutralRgb-12) / 0.25);
+    --activeColor: rgba(var(--aj-palette-source-neutralRgb-11) / 0.45);
+    --selectedColor: rgba(var(--aj-palette-source-neutralRgb-10) / 0.45);
+
+    &.EventDeny {
+      --hoverColor: rgba(var(--aj-palette-eventDeny-secondaryBgRgb) / 0.12);
+      --activeColor: rgba(var(--aj-palette-eventDeny-secondaryBgRgb) / 0.18);
+    }
+
+    &.EventDryrun {
+      --hoverColor: rgba(var(--aj-palette-eventDryrun-secondaryBgRgb) / 0.15);
+      --activeColor: rgba(var(--aj-palette-eventDryrun-secondaryBgRgb) / 0.45);
+    }
+
+    &.EventChallenge {
+      --hoverColor: rgba(
+        var(--aj-palette-eventChallenge-secondaryBgRgb) / 0.15
+      );
+      --activeColor: rgba(
+        var(--aj-palette-eventChallenge-secondaryBgRgb) / 0.45
+      );
+    }
+  }
+}
+
+.BlockLink {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  z-index: 10;
+
+  transition: background var(--time-sm) var(--easing-default);
+
+  &:hover,
+  &.Hover,
+  &:global(.Mui-focusVisible) {
+    outline: none;
+    background: var(--hoverColor);
+    transition-delay: 0.06s;
+  }
+
+  &:active,
+  &.Active {
+    background: var(--activeColor);
+  }
+
+  &.Selected {
+    background: var(--selectedColor);
+  }
+
+  .BlockLinkIcon {
+    position: absolute;
+    right: calc(var(--sp) * -2 + var(--sp) * -0.75);
+    display: inline-block;
+    background: var(--aj-palette-button-primary-solid-idleBg);
+    width: calc(var(--sp) * 2);
+    height: calc(var(--sp) * 2);
+    border-radius: var(--sp);
+    transform: translateX(calc(var(--sp) * -0.75));
+    opacity: 0;
+    pointer-events: none;
+
+    transition: all var(--time-sm) var(--easing-default);
+
+    & :global {
+      .icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: inline-block;
+        width: calc(var(--sp) * 1.5);
+        height: calc(var(--sp) * 1.5);
+        color: var(--aj-palette-button-primary-solid-idleColor);
+        vertical-align: top;
+      }
+    }
+  }
+
+  &:hover,
+  &.Hover,
+  &:global(.Mui-focusVisible) {
+    .BlockLinkIcon {
+      transform: translateX(0px);
+      transition-delay: 0.06s;
+      opacity: 1;
+    }
+  }
+
+  &:active,
+  &.Active {
+    .BlockLinkIcon {
+      background: var(--aj-palette-button-primary-solid-activeBg);
+
+      transform: translateX(calc(var(--sp) * 0.75));
+      opacity: 1;
+    }
+  }
+}

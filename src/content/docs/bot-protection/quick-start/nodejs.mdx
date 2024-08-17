@@ -1,0 +1,134 @@
+---
+title: "Bot protection for Node.js"
+description: "Quick start guide for adding bot protection to your Node.js server."
+---
+
+import {
+  Tabs,
+  TabItem,
+  LinkCard,
+  CardGrid,
+  Code,
+  Aside,
+} from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import FAQs from "/src/components/FAQs.astro";
+import Step3TS from "/src/content/docs/bot-protection/quick-start/snippets/nodejs/Step3.ts?raw";
+import Step3JS from "/src/content/docs/bot-protection/quick-start/snippets/nodejs/Step3.js?raw";
+
+Arcjet bot detection allows you to manage traffic by automated clients and bots.
+
+<WhatIsArcjet />
+
+## Quick start
+
+This guide will show you how to protect your Node.js application from bots and
+automated clients.
+
+### 1. Install Arcjet
+
+In your project root, run the following command to install the SDK:
+
+{/* prettier-ignore */}
+<Tabs>
+<TabItem label="npm">
+```sh
+npm i @arcjet/node
+```
+</TabItem>
+<TabItem label="pnpm">
+```sh
+pnpm add @arcjet/node
+```
+</TabItem>
+<TabItem label="yarn">
+```sh
+yarn add @arcjet/node
+```
+</TabItem>
+</Tabs>
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key. Add it to a `.env.local` file in your
+project root. `NODE_ENV` isn't set by default, so you also need to tell
+Arcjet you're in development mode.
+
+```ini title=".env.local"
+# NODE_ENV is not set by the environment, so tell Arcjet we're in dev
+# You can leave this unset in prod
+ARCJET_ENV=development
+# Get your site key from https://app.arcjet.com
+ARCJET_KEY=ajkey_yourkey
+```
+
+### 3. Add bot protection
+
+The example below will return a 403 Forbidden response for all requests from
+clients we are sure are automated.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={Step3TS} lang="ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={Step3JS} lang="js" />
+  </TabItem>
+</Tabs>
+
+### 4. Start server
+
+<Aside type="note" title="env files">
+  Node 20+ supports loading environment variables from a local file with
+  `--env-file`. If you're using an older version of Node, you can use a package
+  like [`dotenv`](https://www.npmjs.com/package/dotenv) to load the environment
+  variables from a `.env.local` file.
+</Aside>
+
+{/* prettier-ignore */}
+<Tabs>
+  <TabItem label="TS">
+  ```sh 
+  npx tsx --env-file .env.local index.ts
+  ```
+  </TabItem>
+  <TabItem label="JS">
+  ```sh 
+  node --env-file .env.local index.js
+  ```
+  </TabItem>
+</Tabs>
+
+Make a `curl` request from your terminal to your application. You should see a
+`403 Forbidden` response because `curl` is considered an automated client by
+default. See [the reference
+guide](/bot-protection/reference/nodejs#removing-bot-detection-rules) for how to
+configure this.
+
+```shell
+curl http://localhost:8000
+```
+
+The requests will also show up in the [Arcjet
+dashboard](https://app.arcjet.com).
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+<CardGrid>
+  <LinkCard
+    title="Bot protection reference"
+    href="/bot-protection/reference/nodejs"
+    description="Full details about bot protection."
+  ></LinkCard>
+</CardGrid>
+
+## Get help
+
+Need help with anything? [Email us](mailto:support@arcjet.com) or [join our
+Discord](https://discord.gg/TPra6jqZDC) to get support from our
+engineering team.

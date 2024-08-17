@@ -1,0 +1,64 @@
+---
+title: "Testing Arcjet"
+description: "How to test your Arcjet security rules."
+---
+
+Unlike network-based security solutions, Arcjet can run locally, in staging and
+in production. This makes it easy to test your security rules before deploying
+them.
+
+You can also automate testing against your Arcjet-projected routes using
+standard testing libraries.
+
+## Testing using Newman
+
+[Newman](https://github.com/postmanlabs/newman) is an open source command-line
+collection runner for [Postman](https://www.postman.com/). It allows you to
+define requests in Postman format and run them from the command line without
+requiring Postman itself.
+
+You can find our full example of how to test Arcjet with Express and Newman [on
+GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/express-newman).
+The key files are:
+
+- [`index.js`](https://github.com/arcjet/arcjet-js/blob/main/examples/express-newman/index.js)
+  is a simple Express server that uses Arcjet to protect several routes. This is
+  the application being tested.
+- [`tests/api.test.js`](https://github.com/arcjet/arcjet-js/blob/main/examples/express-newman/tests/api.test.js)
+  is the test runner which loads the test definitions, executes them with
+  Newman, and then asserts the expected results.
+- The
+  [`tests/bots.json`](https://github.com/arcjet/arcjet-js/blob/main/examples/express-newman/tests/bots.json),
+  [`tests/high-rate-limit.json`](https://github.com/arcjet/arcjet-js/blob/main/examples/express-newman/tests/high-rate-limit.json),
+  and
+  [`tests/low-rate-limit.json`](https://github.com/arcjet/arcjet-js/blob/main/examples/express-newman/tests/low-rate-limit.json)
+  files define the test requests in [Postman Collection
+  format](https://learning.postman.com/collection-format/getting-started/overview/).
+
+The example
+[`README`](https://github.com/arcjet/arcjet-js/tree/main/examples/express-newman)
+explains how to start the test application and then execute the tests using
+Newman.
+
+To adapt these to your own application you would modify the `tests/*.json` files
+to point to your application endpoints, and then run them using the Newman CLI.
+This allows you to automate testing and run multiple iterations e.g. to test a
+rate limit.
+
+## Testing triggering rules
+
+Arcjet runs the same in production as locally. This ensures that the behavior
+you see in development is the same as in production. However, there are ways to
+trigger the different rules.
+
+- **Shield:** Send 5 requests with the special header `x-arcjet-suspicious:
+true` to trigger the shield rule on the next request.
+- **Rate limiting:** Make more requests than the rate limit allows.
+- **Bot protection:** Bot detection uses multiple heuristics so the quickest way
+  to get a bot detection `DENY` response is to make a request that is always
+  considered "automated". With a deny rule [bot type](/bot-protection/bot-types)
+  configured as `AUTOMATED`, set the `User-Agent` header to `curl` and you
+  should see a `DENY` response.
+- **Email validation:** Use an email address that has invalid syntax or does not
+  match any other rules you have configured e.g. has no MX records or if from a
+  disposable email service.

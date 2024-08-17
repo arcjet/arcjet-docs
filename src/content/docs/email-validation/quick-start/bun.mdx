@@ -1,0 +1,119 @@
+---
+title: "Email validation for Bun"
+description: "Quick start guide for adding email validation to your Bun app."
+---
+
+import {
+  CardGrid,
+  Code,
+  LinkCard,
+  TabItem,
+  Tabs,
+} from "@astrojs/starlight/components";
+import FAQs from "/src/components/FAQs.astro";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import Step3JS from "/src/content/docs/email-validation/quick-start/snippets/bun/Step3.js?raw";
+import Step3TS from "/src/content/docs/email-validation/quick-start/snippets/bun/Step3.ts?raw";
+
+Arcjet allows you validate & verify an email address. This is useful for
+preventing users from signing up with fake email addresses and can significantly
+reduce the amount of spam or fraudulent accounts.
+
+<WhatIsArcjet />
+
+## Quick start
+
+This guide will show you how to add email validation and verification to a
+Bun API route.
+
+### 1. Install Arcjet
+
+In your project root, run the following command to install the SDK:
+
+{/* prettier-ignore */}
+```sh
+bun add @arcjet/bun
+```
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key. Add it to a `.env.local` file in your
+Bun project root.
+
+Arcjet only accept non-local IP addresses with a fallback to 127.0.0.1 in development mode, and since Bun
+doesn't set `NODE_ENV` for you like Node.js does, you also need to set
+`ARCJET_ENV` in your environment file.
+
+```ini title=".env.local"
+# Run Arcjet in development mode because Bun.sh doesn't explicitly
+# set an environment variable like Node.js does
+ARCJET_ENV=development
+ARCJET_KEY=ajkey_yourkey
+```
+
+### 3. Validate an email address
+
+The example below shows how to use Arcjet to check an email address. If the
+email address is invalid or if no MX records are configured, Arcjet will return
+a deny decision.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={Step3TS} lang="ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={Step3JS} lang="js" />
+  </TabItem>
+</Tabs>
+
+### 4. Start server
+
+{/* prettier-ignore */}
+<Tabs>
+  <TabItem label="TS">
+  ```sh 
+  bun run --hot index.ts
+  ```
+  </TabItem>
+  <TabItem label="JS">
+  ```sh 
+  bun run --hot index.js
+  ```
+  </TabItem>
+</Tabs>
+
+Make a `curl` `POST` request from your terminal to your application with various
+emails to test the result.
+
+```shell
+curl http://localhost:3000/
+```
+
+The requests will also show up in the [Arcjet
+dashboard](https://app.arcjet.com).
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  ></LinkCard>
+  <LinkCard
+    title="Email validation reference"
+    href="/email-validation/reference/bun"
+    description="Full details about email validation."
+  ></LinkCard>
+</CardGrid>
+
+## Get help
+
+Need help with anything? [Email us](mailto:support@arcjet.com) or [join our
+Discord](https://discord.gg/TPra6jqZDC) to get support from our
+engineering team.

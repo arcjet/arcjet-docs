@@ -1,0 +1,460 @@
+---
+title: "Next.js bot protection reference"
+description: "How to use Arcjet to protect your Next.js app from bots."
+---
+
+import { Tabs, TabItem, Code } from "@astrojs/starlight/components";
+import AddingRulesTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/AddingRules.ts?raw";
+import AddingRulesJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/AddingRules.js?raw";
+import RemovingRulesTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/RemovingRules.ts?raw";
+import RemovingRulesJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/RemovingRules.js?raw";
+import PerRouteAppTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/PerRouteApp.ts?raw";
+import PerRoutePagesTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/PerRoutePages.ts?raw";
+import PerRouteAppJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/PerRouteApp.js?raw";
+import PerRoutePagesJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/PerRoutePages.js?raw";
+import CustomizedMiddlewareTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/CustomizedMiddleware.ts?raw";
+import CustomizedMiddlewareJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/CustomizedMiddleware.js?raw";
+import Step3TS from "/src/content/docs/bot-protection/quick-start/snippets/nextjs/Step3.ts?raw";
+import Step3JS from "/src/content/docs/bot-protection/quick-start/snippets/nextjs/Step3.js?raw";
+import MiddlewareMatcher from "/src/content/docs/bot-protection/reference/snippets/nextjs/MiddlewareMatcher.ts?raw";
+import DecisionLogAppTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/DecisionLogApp.ts?raw";
+import DecisionLogPagesTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/DecisionLogPages.ts?raw";
+import DecisionLogAppJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/DecisionLogApp.js?raw";
+import DecisionLogPagesJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/DecisionLogPages.js?raw";
+import BotTypeAppTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/BotTypeApp.ts?raw";
+import BotTypePagesTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/BotTypePages.ts?raw";
+import BotTypeAppJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/BotTypeApp.js?raw";
+import BotTypePagesJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/BotTypePages.js?raw";
+import ErrorsAppTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/ErrorsApp.ts?raw";
+import ErrorsPagesTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/ErrorsPages.ts?raw";
+import ErrorsAppJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/ErrorsApp.js?raw";
+import ErrorsPagesJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/ErrorsPages.js?raw";
+import ProtectPageMiddlewareTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/ProtectPageMiddleware.ts?raw";
+import ProtectPagePagesTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/ProtectPagePages.tsx?raw";
+import ProtectPageMiddlewareJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/ProtectPageMiddleware.js?raw";
+import ProtectPagePagesJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/ProtectPagePages.jsx?raw";
+import WrapAppTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/WrapApp.ts?raw";
+import WrapPagesNodeTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/WrapPagesNode.ts?raw";
+import WrapPagesEdgeTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/WrapPagesEdge.ts?raw";
+import WrapAppJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/WrapApp.js?raw";
+import WrapPagesNodeJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/WrapPagesNode.js?raw";
+import WrapPagesEdgeJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/WrapPagesEdge.js?raw";
+import EdgeAppTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/EdgeApp.ts?raw";
+import EdgePagesTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/EdgePages.ts?raw";
+import EdgeAppJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/EdgeApp.js?raw";
+import EdgePagesJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/EdgePages.js?raw";
+
+Arcjet bot detection allows you to manage traffic by automated clients and bots.
+
+## Configuration
+
+Bot detection is configured by specifying the bot types you wish to block and
+optional user agent patterns to add or remove from the bot detection list.
+
+The configuration definition is:
+
+```ts
+type BotOptions = {
+  mode?: "LIVE" | "DRY_RUN";
+  block?: BotType[];
+  patterns?: {
+    add?: { [key: string]: BotType };
+    remove?: string[];
+  };
+};
+```
+
+The `arcjet` client is configured with one or more `detectBot` rules which take
+one or many `BotOptions`.
+
+:::note
+When specifying multiple rules, the order of the rules is ignored. Rule
+execution ordering is automatically optimized for performance. See
+[decision](#decision) below for details of examining the execution results.
+:::
+
+### Which bots to block?
+
+Which bot types to block is configured by listing one or more types in the
+`block` configuration block. The types are listed on the [bot
+types](/bot-protection/bot-types) page.
+
+### Adding bot detection rules
+
+You can add additional bot detection rules to the `patterns` `add` configuration
+property. Each rule is a regular expression that matches the user agent of the
+bot plus a label to indicate what type of bot it is.
+
+:::note
+The current implementation only supports `AUTOMATED` bot types, while support for the other [bot
+types](/bot-protection/bot-types) is on the roadmap.
+:::
+
+The following example adds a rule to detect AcmeBot as an `AUTOMATED` bot.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={AddingRulesTS} lang="ts" title="/middleware.ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={AddingRulesJS} lang="js" title="/middleware.js" />
+  </TabItem>
+</Tabs>
+
+### Removing bot detection rules
+
+Arcjet includes a set of default matching rules to detect common bots. You can
+remove any of these rules by listing them in the `patterns` `remove`
+configuration property:
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={RemovingRulesTS} lang="ts" title="/middleware.ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={RemovingRulesJS} lang="js" title="/middleware.js" />
+  </TabItem>
+</Tabs>
+
+## Per route vs middleware
+
+Bot protection rules can be configured in two ways:
+
+- **Per API route**: The rule is defined in the API route itself. This allows
+  you to configure the rule alongside the code it is protecting which is useful
+  if you want to use the decision to add context to your own code. However, it
+  means rules are not located in a single place.
+- **Middleware**: The rule is defined in the middleware. This allows you to
+  configure rules in a single place or apply them globally to all routes, but
+  it means the rules are not located alongside the code they are protecting.
+
+### Per route
+
+This configures bot protection on a single route.
+
+{/* prettier-ignore */}
+<Tabs>
+<TabItem label="TS (App)">
+<Code
+  code={PerRouteAppTS}
+  lang="ts"
+  title="/app/api/arcjet/route.ts"
+/>
+</TabItem>
+<TabItem label="TS (Pages)">
+<Code
+  code={PerRoutePagesTS}
+  lang="ts"
+  title="/pages/api/hello.ts"
+/>
+</TabItem>
+<TabItem label="JS (App)">
+<Code
+  code={PerRouteAppJS}
+  lang="js"
+  title="/app/api/arcjet/route.js"
+/>
+</TabItem>
+<TabItem label="JS (Pages)">
+<Code
+  code={PerRoutePagesJS}
+  lang="js"
+  title="/pages/api/hello.ts"
+/>
+</TabItem>
+</Tabs>
+
+### Middleware
+
+This will run on every request to your Next.js app, except for static assets
+(configured in the `matcher` - see [the Next.js
+docs](https://nextjs.org/docs/pages/building-your-application/routing/middleware#matcher)
+for details).
+
+<Tabs>
+<TabItem label="TS">
+
+Create a file called `middleware.ts` in your project root (at the same level as
+`pages` or `app` or inside `src`):
+
+<Code code={Step3TS} lang="ts" title="/middleware.ts" mark={["ARCJET_KEY"]} />
+
+You can also customize the response depending on the decision. In this case we
+will return a 403 Forbidden response only if we detect a hosting provider IP
+address for the bot detection rule result:
+
+<Code code={CustomizedMiddlewareTS} lang="ts" title="/middleware.ts" />
+
+</TabItem>
+<TabItem label="JS">
+
+Create a file called `middleware.js` in your project root (at the same level as
+`pages` or `app` or inside `src`):
+
+<Code code={Step3JS} lang="js" title="/middleware.js" mark={["ARCJET_KEY"]} />
+
+You can also customize the response depending on the decision. In this case we
+will return a 403 Forbidden response only if we detect a hosting provider IP
+address for the bot detection rule result:
+
+<Code code={CustomizedMiddlewareJS} lang="js" title="/middleware.js" />
+
+</TabItem>
+</Tabs>
+
+### Avoiding double protection with middleware
+
+If you use Arcjet in middleware and individual routes, you need to be careful
+that Arcjet is not running multiple times per request. This can be avoided by
+excluding the API route from [the middleware
+matcher](https://nextjs.org/docs/pages/building-your-application/routing/middleware#matcher).
+
+For example, if you already have a bot detection rule defined in the API route
+at `/api/hello`, you can exclude it from the middleware by specifying a matcher
+in `/middleware.ts`:
+
+<Code code={MiddlewareMatcher} lang="ts" title="/middleware.ts" />
+
+## Decision
+
+The [quick start example](/bot-protection/quick-start/nextjs) will deny requests
+that match the bot detection rules, immediately returning a response to the
+client using Next.js middleware.
+
+Arcjet also provides a single `protect` function that is used to execute your
+protection rules. This requires a `request` argument which is the request
+context as passed to the request handler.
+
+This function returns a `Promise` that resolves to an
+`ArcjetDecision` object. This contains the following properties:
+
+- `id` (`string`) - The unique ID for the request. This can be used to look up
+  the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
+  involving the Arcjet cloud API. For decisions taken locally, the prefix is
+  `lreq_`.
+- `conclusion` (`ArcjetConclusion`) - The final conclusion based on evaluating
+  each of the configured rules. If you wish to accept Arcjet's recommended
+  action based on the configured rules then you can use this property.
+- `reason` (`ArcjetReason`) - An object containing more detailed
+  information about the conclusion.
+- `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
+  containing the results of each rule that was executed.
+- `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
+  client IP address. See [IP analysis](/reference/nextjs/#ip-analysis) in the
+  SDK reference for more information.
+
+See [the SDK reference](/reference/nextjs#results) for more details about the
+rule results.
+
+You check if a deny conclusion has been returned by a bot protection rule by
+using `decision.isDenied()` and `decision.reason.isBot()` respectively.
+
+You can iterate through the results and check whether a bot protection rule was
+applied:
+
+```ts
+for (const result of decision.results) {
+  console.log("Rule Result", result);
+}
+```
+
+This example will log the full result as well as the bot protection rule:
+
+<Tabs>
+<TabItem label="TS (App)">
+Create a new API route at `/app/api/route/hello.ts`:
+
+<Code code={DecisionLogAppTS} title="/app/api/route/hello.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="TS (Pages)">
+Create a new API route at `/pages/api/hello.ts`:
+
+<Code code={DecisionLogPagesTS} title="/pages/api/hello.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="JS (App Router)">
+Create a new API route at `/app/api/arcjet/route.js`:
+
+<Code code={DecisionLogAppJS} title="/app/api/route/hello.js" lang="js" />
+
+</TabItem>
+<TabItem label="JS (Pages Router)">
+Create a new API route at `/pages/api/arcjet.js`:
+
+<Code code={DecisionLogPagesJS} title="/pages/api/hello.js" lang="js" />
+
+</TabItem>
+</Tabs>
+
+### Bot type
+
+Arcjet also returns more information about the [bot
+type](/bot-protection/bot-types) of the client we think made the request:
+
+<Tabs>
+<TabItem label="TS (App)">
+Create a new API route at `/app/api/route/hello.ts`:
+
+<Code code={BotTypeAppTS} title="/app/api/route/hello.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="TS (Pages)">
+Create a new API route at `/pages/api/hello.ts`:
+
+<Code code={BotTypePagesTS} title="/pages/api/hello.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="JS (App Router)">
+Create a new API route at `/app/api/arcjet/route.js`:
+
+<Code code={BotTypeAppJS} title="/app/api/route/hello.js" lang="js" />
+
+</TabItem>
+<TabItem label="JS (Pages Router)">
+Create a new API route at `/pages/api/arcjet.js`:
+
+<Code code={BotTypePagesJS} title="/pages/api/hello.js" lang="js" />
+
+</TabItem>
+</Tabs>
+
+## Error handling
+
+Arcjet is designed to fail open so that a service issue or misconfiguration does
+not block all requests. The SDK will also time out and fail open after 500ms
+when `NODE_ENV` is `production` and 1000ms otherwise. However, in most cases,
+the response time will be less than 20-30ms.
+
+If there is an error condition, Arcjet will return an
+`ERROR` type and you can check the `reason` property for more information, like
+accessing `decision.reason.message`.
+
+<Tabs>
+<TabItem label="TS (App)">
+
+<Code code={ErrorsAppTS} title="/app/api/hello/route.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="TS (Pages)">
+
+<Code code={ErrorsPagesTS} title="/pages/api/hello.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="JS (App)">
+
+<Code code={ErrorsAppJS} title="/app/api/hello/route.js" lang="js" />
+
+</TabItem>
+<TabItem label="JS (Pages)">
+
+<Code code={ErrorsPagesJS} title="/pages/api/hello.js" lang="js" />
+
+</TabItem>
+</Tabs>
+
+## Examples
+
+### Protecting a page
+
+You can protect a Next.js page from bots by calling the Arcjet SDK from within
+the page loader:
+
+<Tabs>
+<TabItem label="TS (App)">
+
+Protecting an app router page within the handler itself is not currently
+supported, but you can set up a matcher on the middleware instead:
+
+<Code code={ProtectPageMiddlewareTS} lang="ts" title="/middleware.ts" />
+
+</TabItem>
+<TabItem label="TS (Pages)">
+
+<Code code={ProtectPagePagesTS} title="/pages/hello.tsx" lang="ts" />
+
+</TabItem>
+<TabItem label="JS (App)">
+
+Protecting an app router page within the handler itself is not currently
+supported, but you can set up a matcher on the middleware instead:
+
+<Code code={ProtectPageMiddlewareJS} lang="js" title="/middleware.js" />
+
+</TabItem>
+<TabItem label="JS (Pages)">
+
+<Code code={ProtectPagePagesJS} title="/pages/hello.jsx" lang="js" />
+
+</TabItem>
+</Tabs>
+
+### Wrap existing handler
+
+All the examples on this page show how you can inspect the decision to control
+what to do next. However, if you just wish to send a generic `403 Forbidden`
+response you can delegate this to Arcjet by wrapping your handler `withArcjet`.
+
+<Tabs>
+<TabItem label="TS (App)">
+For both [the Node or Edge runtime](https://nextjs.org/docs/app/building-your-application/routing/route-handlers#edge-and-nodejs-runtimes):
+
+<Code code={WrapAppTS} title="/app/api/hello/route.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="TS (Pages)">
+For the Node (default) runtime:
+
+<Code code={WrapPagesNodeTS} title="/pages/api/hello.ts" lang="ts" />
+
+For the Edge runtime:
+
+<Code code={WrapPagesEdgeTS} title="/pages/api/hello.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="JS (App)">
+
+For both [the Node or Edge runtime](https://nextjs.org/docs/app/building-your-application/routing/route-handlers#edge-and-nodejs-runtimes):
+
+<Code code={WrapAppJS} title="/app/api/hello/route.js" lang="js" />
+
+</TabItem>
+<TabItem label="JS (Pages)">
+
+For the Node (default) runtime:
+
+<Code code={WrapPagesNodeJS} title="/pages/api/hello.js" lang="js" />
+
+For the Edge runtime:
+
+<Code code={WrapPagesEdgeJS} title="/pages/api/hello.js" lang="js" />
+</TabItem>
+</Tabs>
+
+## Edge Functions
+
+Arcjet works in Edge Functions and with the [Edge
+Runtime](https://edge-runtime.vercel.app/).
+
+<Tabs>
+<TabItem label="TS (App)">
+
+<Code code={EdgeAppTS} title="/app/api/hello/route.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="TS (Pages)">
+
+<Code code={EdgePagesTS} title="/pages/api/hello.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="JS (App)">
+
+<Code code={EdgeAppJS} title="/app/api/hello/route.js" lang="js" />
+
+</TabItem>
+<TabItem label="JS (Pages)">
+
+<Code code={EdgePagesJS} title="/pages/api/hello.js" lang="js" />
+
+</TabItem>
+</Tabs>

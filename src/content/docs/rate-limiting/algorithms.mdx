@@ -1,0 +1,128 @@
+---
+title: "Arcjet rate limiting algorithms"
+description: "Arcjet rate limiting supports fixed window, sliding window, and token bucket algorithms."
+prev: false
+---
+
+import { Code } from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import FixedWindow from "/src/content/docs/rate-limiting/reference/snippets/nextjs/FixedWindow.ts?raw";
+import SlidingWindow from "/src/content/docs/rate-limiting/reference/snippets/nextjs/SlidingWindow.ts?raw";
+import TokenBucket from "/src/content/docs/rate-limiting/reference/snippets/nextjs/TokenBucket.ts?raw";
+
+Arcjet rate limiting allows you to define rules which limit the number of
+requests a client can make over a period of time. It supports 3 different rate
+limit algorithms: [fixed window](#fixed-window), [sliding
+window](#sliding-window) and [token bucket](#token-bucket).
+
+<WhatIsArcjet />
+
+## Fixed window
+
+This is the simplest algorithm. It tracks the number of requests made by a
+client over a fixed time window e.g. 60 seconds. If the client exceeds the
+limit, they are blocked until the window expires.
+
+### When to use fixed window
+
+This algorithm is useful when you want to apply a simple fixed limit in a fixed
+time window. For example, a simple limit on the total number of requests a
+client can make.
+
+### Downsides of fixed window
+
+- A burst of requests at the start of the window will exhaust the limit for
+  newer requests.
+- A client can make a burst of requests at the end of the window and continue to
+  burst as the window resets. This can cause request stampedes where clients
+  suddenly become unblocked at the start of a new window.
+
+### Fixed window example
+
+In this example, we define a fixed window rate limit rule which allows a maximum
+of 100 requests in a 60 second window. The rule is applied to all requests to
+`/api/hello` and is tracked by the client's IP address.
+
+<Code code={FixedWindow} lang="ts" />
+
+If the time is `12:00:00` and a client makes a burst of 50 requests, then they
+make another 50 requests over the following 30 seconds, they will be blocked
+from making any further requests until `12:01:00`. At `12:01:00` the window
+resets and they could make another 100 requests immediately.
+
+## Sliding window
+
+This algorithm tracks the number of requests made by a client over a sliding
+window so that the window moves with time.
+
+### When to use sliding window
+
+This algorithm is useful to avoid the stampede problem of the fixed window. It
+provides smoother rate limiting over time and can prevent a client from making a
+burst of requests at the start of a window and then being blocked for the rest
+of the window.
+
+### Downsides of sliding window
+
+- The limit is not as strict as fixed window because the time window is
+  continuously moving.
+- It can be more difficult to reason about the rate limit because the window is
+  always moving.
+
+### Sliding window example
+
+In this example, we define a sliding window rate limit which allows a maximum of
+100 requests in a 60 second window. The rule is applied to all requests to
+`/api/hello` and is tracked by the client's IP address.
+
+<Code code={SlidingWindow} lang="ts" />
+
+If the client made 50 requests in the time period `12:00:00` to `12:01:00` and
+then made another 50 requests in the current time period as of `12:01:30` then we
+would calculate the remaining rate limit as follows:
+
+```ts
+// 50 requests in the previous interval
+// 60 seconds per interval
+// 30 seconds elapsed in the current interval
+// 50 requests made in the current interval
+rate = 50 * ((60 - 30) / 60) + 50 = 100
+limit = 100
+remaining = limit - rate = 0
+```
+
+In this case, the client would be blocked from making any further requests
+because they have reached the limit of 100 requests.
+
+## Token bucket
+
+This algorithm is based on a bucket filled with a specific number of tokens.
+Each request withdraws a token from the bucket and the bucket is refilled at a
+fixed rate. Once the bucket is empty, the client is blocked until the bucket
+refills.
+
+### When to use token bucket
+
+This algorithm is useful when you want to allow clients to make a burst of
+requests and then still be able to make requests at a slower rate.
+
+### Downsides of token bucket
+
+- The bucket can be exhausted by a burst of requests and then (depending on your
+  configured refill rate) take a long time to refill. This can cause a client to
+  be blocked for a long time.
+
+### Token bucket example
+
+In this example, we define a token bucket rate limit with a bucket capacity of
+100 tokens and a refill rate of 10 tokens per minute. The rule is applied to all
+requests to `/api/hello` and is tracked by the client's IP address.
+
+<Code code={TokenBucket} lang="ts" />
+
+If it is `12:00:00` and a client makes 100 requests, further requests will be
+blocked until `12:01:00` when the bucket refills by 10 tokens. The client could
+then make 10 requests over the following 60 seconds. If they make no requests,
+the bucket will refill to 20 tokens at `12:02:00`. If they make no requests
+between `12:01:00` and `12:10:00` then the bucket will refill to 100 tokens at
+`12:10:00`. No further tokens will be added after it reaches 100 tokens.

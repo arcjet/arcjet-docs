@@ -1,0 +1,2259 @@
+:root {
+  // Spacing
+  --sp: 8px; // Base spacing var
+
+  // Grid
+  --content-size-max: 1552px; // 16 * 64px cols w/ 32px gap
+  --content-size-default: 1184px; // 12 * 64px cols w/ 32px gap
+  --content-cols-default: 12;
+  --content-cols-max: 16;
+
+  --grid-gap: calc(var(--sp) * 4);
+
+  --header-max-width: var(--content-size-max);
+  --header-hPadding: calc(var(--sp) * 3); // header grid margin
+  --header-columns: var(--content-cols-max);
+
+  --content-max-width: var(--content-size-default);
+  --content-hPadding: calc(var(--sp) * 4); // content grid margin
+  --content-columns: var(--content-cols-default);
+
+  --content-bottom-padding: calc(var(--sp) * 6);
+
+  // Metrics
+  --Header-height: calc(var(--sp) * 8);
+  --logo-indent: 0px;
+
+  // Transitions
+  --easing-default: ease-in-out;
+  --time-md: 0.2s;
+  --time-sm: 0.1s;
+
+  // Appearance:
+  --blur1: calc(var(--sp) * 4); // Box background blurs
+
+  // Readability:
+  --text-max-width: 640px;
+}
+
+:root {
+  --aj-fontSize-xs: 12px;
+  --aj-fontSize-sm: 14px;
+  --aj-fontSize-md: 16px;
+  --aj-fontSize-lg: 18px;
+  --aj-fontSize-xl: 20px;
+  --aj-fontSize-xl2: 22px;
+  --aj-fontSize-xl3: 24px;
+  --aj-fontSize-xl4: 2.25rem;
+  --aj-fontSize-xxs: 11px;
+  --aj-fontSize-xxxs: 10px;
+  --aj-fontFamily-body: var(--aj-fontFamily-figtree), "SF Pro",
+    var(--aj-fontFamily-fallback);
+  --aj-fontFamily-display: var(--aj-fontFamily-jost), "SF Pro",
+    var(--aj-fontFamily-fallback);
+  --aj-fontFamily-code: var(--aj-fontFamily-ibmPlexMono), "monospace",
+    var(--aj-fontFamily-fallback);
+  --aj-fontFamily-fallback: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol";
+  --aj-fontWeight-sm: 250;
+  --aj-fontWeight-md: 350;
+  --aj-fontWeight-lg: 500;
+  --aj-fontWeight-xl: 550;
+  --aj-fontWeight-xxl: 700;
+  --aj-focus-thickness: 2px;
+  --aj-lineHeight-xs: 1.33334;
+  --aj-lineHeight-sm: 1.42858;
+  --aj-lineHeight-md: 1.5;
+  --aj-lineHeight-lg: 1.55556;
+  --aj-lineHeight-xl: 1.66667;
+  --aj-radius-xs: 2px;
+  --aj-radius-sm: 6px;
+  --aj-radius-md: 8px;
+  --aj-radius-lg: 12px;
+  --aj-radius-xl: 16px;
+  --aj-shadow-xs: var(--aj-shadowRing, 0 0 #000),
+    0px 1px 2px 0px
+      rgba(var(--aj-shadowChannel, 21 21 21) / var(--aj-shadowOpacity, 0.12));
+  --aj-shadow-sm: var(--aj-shadowRing, 0 0 #000),
+    0px 1px 4px -1px rgba(var(--aj-shadowChannel, 21 21 21) /
+          var(--aj-shadowOpacity, 0.08)),
+    0px 3px 8px -1px rgba(var(--aj-shadowChannel, 21 21 21) /
+          var(--aj-shadowOpacity, 0.08)),
+    0px 7px 16px -2px rgba(var(--aj-shadowChannel, 21 21 21) /
+          var(--aj-shadowOpacity, 0.08));
+  --aj-shadow-md: var(--aj-shadowRing, 0 0 #000),
+    0px 2px 8px -1px rgba(var(--aj-shadowChannel, 21 21 21) /
+          var(--aj-shadowOpacity, 0.08)),
+    0px 6px 16px -2px rgba(var(--aj-shadowChannel, 21 21 21) /
+          var(--aj-shadowOpacity, 0.08)),
+    0px 14px 32px -4px rgba(var(--aj-shadowChannel, 21 21 21) /
+          var(--aj-shadowOpacity, 0.08));
+  --aj-shadow-lg: var(--aj-shadowRing, 0 0 #000),
+    0px 4px 16px -2px rgba(var(--aj-shadowChannel, 21 21 21) /
+          var(--aj-shadowOpacity, 0.08)),
+    0px 12px 32px -4px rgba(var(--aj-shadowChannel, 21 21 21) /
+          var(--aj-shadowOpacity, 0.08)),
+    0px 28px 64px -8px rgba(var(--aj-shadowChannel, 21 21 21) /
+          var(--aj-shadowOpacity, 0.08));
+  --aj-shadow-xl: var(--aj-shadowRing, 0 0 #000),
+    0px 2px 8px -2px rgba(var(--aj-shadowChannel, 21 21 21) /
+          var(--aj-shadowOpacity, 0.12)),
+    0px 20px 24px -4px rgba(var(--aj-shadowChannel, 21 21 21) /
+          var(--aj-shadowOpacity, 0.12));
+  --aj-shadow-svgGlowSm: drop-shadow(
+      0 1px 2px rgb(var(--aj-palette-glowChannel) / 0.6)
+    )
+    drop-shadow(0 2px 4px rgb(var(--aj-palette-glowChannel) / 1));
+  --aj-shadow-textGlowSm: 0 1px 2px rgba(var(--aj-palette-glowChannel) / 0.5),
+    0 2px 8px rgba(var(--aj-palette-glowChannel) / 0.8);
+  --aj-shadow-glowSm: 0 1px 4px rgba(var(--aj-palette-glowChannel) / 0.2),
+    0 2px 8px rgba(var(--aj-palette-glowChannel) / 0.3),
+    0 4px 12px rgba(var(--aj-palette-glowChannel) / 0.1);
+  --aj-shadow-glowXsm: 0 1px 2px rgba(var(--aj-palette-glowChannel) / 0.1),
+    0 1px 4px rgba(var(--aj-palette-glowChannel) / 0.25),
+    0 2px 8px rgba(var(--aj-palette-glowChannel) / 0.05);
+  --aj-shadow-svgDangerGlowSm: drop-shadow(
+      0 1px 2px rgb(var(--aj-palette-dangerGlowChannel) / 0.6)
+    )
+    drop-shadow(0 2px 4px rgb(var(--aj-palette-dangerGlowChannel) / 1));
+  --aj-shadow-textDangerGlowSm: 0 1px 2px
+      rgba(var(--aj-palette-dangerGlowChannel) / 0.5),
+    0 2px 8px rgba(var(--aj-palette-dangerGlowChannel) / 0.8);
+  --aj-shadow-dangerGlowSm: 0 1px 4px
+      rgba(var(--aj-palette-dangerGlowChannel) / 0.2),
+    0 2px 8px rgba(var(--aj-palette-dangerGlowChannel) / 0.3),
+    0 4px 12px rgba(var(--aj-palette-dangerGlowChannel) / 0.1);
+  --aj-shadow-dangerGlowXsm: 0 1px 2px
+      rgba(var(--aj-palette-dangerGlowChannel) / 0.1),
+    0 1px 4px rgba(var(--aj-palette-dangerGlowChannel) / 0.25),
+    0 2px 8px rgba(var(--aj-palette-dangerGlowChannel) / 0.05);
+  --aj-zIndex-badge: 1;
+  --aj-zIndex-table: 10;
+  --aj-zIndex-popup: 1000;
+  --aj-zIndex-modal: 1300;
+  --aj-zIndex-snackbar: 1400;
+  --aj-zIndex-tooltip: 1500;
+  --aj-transition-duration-shorter: 0.1s;
+  --aj-transition-duration-short: 0.2s;
+}
+
+:root[data-theme="dark"] {
+  --aj-palette-primary-50: #edf5fd;
+  --aj-palette-primary-100: #e3effb;
+  --aj-palette-primary-200: #c7dff7;
+  --aj-palette-primary-300: #97c3f0;
+  --aj-palette-primary-400: #4393e4;
+  --aj-palette-primary-500: #0b6bcb;
+  --aj-palette-primary-600: #185ea5;
+  --aj-palette-primary-700: #12467b;
+  --aj-palette-primary-800: #0a2744;
+  --aj-palette-primary-900: #051423;
+  --aj-palette-primary-plainColor: var(--aj-palette-primary-300, #97c3f0);
+  --aj-palette-primary-plainHoverBg: var(--aj-palette-primary-800, #0a2744);
+  --aj-palette-primary-plainActiveBg: var(--aj-palette-primary-700, #12467b);
+  --aj-palette-primary-plainDisabledColor: var(
+    --aj-palette-neutral-500,
+    #636b74
+  );
+  --aj-palette-primary-outlinedColor: var(--aj-palette-primary-200, #c7dff7);
+  --aj-palette-primary-outlinedBorder: var(--aj-palette-primary-700, #12467b);
+  --aj-palette-primary-outlinedHoverBg: var(--aj-palette-primary-800, #0a2744);
+  --aj-palette-primary-outlinedActiveBg: var(--aj-palette-primary-700, #12467b);
+  --aj-palette-primary-outlinedDisabledColor: var(
+    --aj-palette-neutral-500,
+    #636b74
+  );
+  --aj-palette-primary-outlinedDisabledBorder: var(
+    --aj-palette-neutral-800,
+    #171a1c
+  );
+  --aj-palette-primary-softColor: var(--aj-palette-primary-200, #c7dff7);
+  --aj-palette-primary-softBg: var(--aj-palette-primary-800, #0a2744);
+  --aj-palette-primary-softHoverBg: var(--aj-palette-primary-700, #12467b);
+  --aj-palette-primary-softActiveColor: var(--aj-palette-primary-100, #e3effb);
+  --aj-palette-primary-softActiveBg: var(--aj-palette-primary-600, #185ea5);
+  --aj-palette-primary-softDisabledColor: var(
+    --aj-palette-neutral-500,
+    #636b74
+  );
+  --aj-palette-primary-softDisabledBg: var(--aj-palette-neutral-800, #171a1c);
+  --aj-palette-primary-solidColor: var(--aj-palette-common-white, #fff);
+  --aj-palette-primary-solidBg: var(--aj-palette-primary-500, #0b6bcb);
+  --aj-palette-primary-solidHoverBg: var(--aj-palette-primary-600, #185ea5);
+  --aj-palette-primary-solidActiveBg: var(--aj-palette-primary-700, #12467b);
+  --aj-palette-primary-solidDisabledColor: var(
+    --aj-palette-neutral-500,
+    #636b74
+  );
+  --aj-palette-primary-solidDisabledBg: var(--aj-palette-neutral-800, #171a1c);
+  --aj-palette-primary-mainChannel: 67 147 228;
+  --aj-palette-primary-lightChannel: 199 223 247;
+  --aj-palette-primary-darkChannel: 18 70 123;
+  --aj-palette-neutral-10: #f8f2fa;
+  --aj-palette-neutral-20: #ece6f0;
+  --aj-palette-neutral-30: #dfd9e4;
+  --aj-palette-neutral-40: #d1cbd8;
+  --aj-palette-neutral-50: #bfb9c8;
+  --aj-palette-neutral-100: #aca6b5;
+  --aj-palette-neutral-200: #9791a1;
+  --aj-palette-neutral-300: #827c8c;
+  --aj-palette-neutral-400: #6e6979;
+  --aj-palette-neutral-500: #5c5866;
+  --aj-palette-neutral-600: #4c4855;
+  --aj-palette-neutral-700: #3d3a45;
+  --aj-palette-neutral-800: #2f2c36;
+  --aj-palette-neutral-900: #232129;
+  --aj-palette-neutral-950: #1a181e;
+  --aj-palette-neutral-990: #111014;
+  --aj-palette-neutral-plainColor: var(--aj-palette-neutral-300, #cdd7e1);
+  --aj-palette-neutral-plainHoverBg: var(--aj-palette-neutral-800, #171a1c);
+  --aj-palette-neutral-plainActiveBg: var(--aj-palette-neutral-700, #32383e);
+  --aj-palette-neutral-plainDisabledColor: var(
+    --aj-palette-neutral-500,
+    #636b74
+  );
+  --aj-palette-neutral-outlinedColor: var(--aj-palette-neutral-200, #dde7ee);
+  --aj-palette-neutral-outlinedBorder: var(--aj-palette-neutral-700, #32383e);
+  --aj-palette-neutral-outlinedHoverBg: var(--aj-palette-neutral-800, #171a1c);
+  --aj-palette-neutral-outlinedActiveBg: var(--aj-palette-neutral-700, #32383e);
+  --aj-palette-neutral-outlinedDisabledColor: var(
+    --aj-palette-neutral-500,
+    #636b74
+  );
+  --aj-palette-neutral-outlinedDisabledBorder: var(
+    --aj-palette-neutral-800,
+    #171a1c
+  );
+  --aj-palette-neutral-softColor: var(--aj-palette-neutral-200, #dde7ee);
+  --aj-palette-neutral-softBg: var(--aj-palette-neutral-800, #171a1c);
+  --aj-palette-neutral-softHoverBg: var(--aj-palette-neutral-700, #32383e);
+  --aj-palette-neutral-softActiveColor: var(--aj-palette-neutral-100, #f0f4f8);
+  --aj-palette-neutral-softActiveBg: var(--aj-palette-neutral-600, #555e68);
+  --aj-palette-neutral-softDisabledColor: var(
+    --aj-palette-neutral-500,
+    #636b74
+  );
+  --aj-palette-neutral-softDisabledBg: var(--aj-palette-neutral-800, #171a1c);
+  --aj-palette-neutral-solidColor: var(--aj-palette-common-white, #fff);
+  --aj-palette-neutral-solidBg: var(--aj-palette-neutral-500, #636b74);
+  --aj-palette-neutral-solidHoverBg: var(--aj-palette-neutral-600, #555e68);
+  --aj-palette-neutral-solidActiveBg: var(--aj-palette-neutral-700, #32383e);
+  --aj-palette-neutral-solidDisabledColor: var(
+    --aj-palette-neutral-500,
+    #636b74
+  );
+  --aj-palette-neutral-solidDisabledBg: var(--aj-palette-neutral-800, #171a1c);
+  --aj-palette-neutral-plainHoverColor: var(--aj-palette-neutral-300, #cdd7e1);
+  --aj-palette-neutral-mainChannel: 110 105 121;
+  --aj-palette-neutral-lightChannel: 151 145 161;
+  --aj-palette-neutral-darkChannel: 61 58 69;
+  --aj-palette-danger-50: #fef6f6;
+  --aj-palette-danger-100: #fce4e4;
+  --aj-palette-danger-200: #f7c5c5;
+  --aj-palette-danger-300: #f09898;
+  --aj-palette-danger-400: #e47474;
+  --aj-palette-danger-500: #c41c1c;
+  --aj-palette-danger-600: #a51818;
+  --aj-palette-danger-700: #7d1212;
+  --aj-palette-danger-800: #430a0a;
+  --aj-palette-danger-900: #240505;
+  --aj-palette-danger-plainColor: var(--aj-palette-danger-300, #f09898);
+  --aj-palette-danger-plainHoverBg: var(--aj-palette-danger-800, #430a0a);
+  --aj-palette-danger-plainActiveBg: var(--aj-palette-danger-700, #7d1212);
+  --aj-palette-danger-plainDisabledColor: var(
+    --aj-palette-neutral-500,
+    #636b74
+  );
+  --aj-palette-danger-outlinedColor: var(--aj-palette-danger-200, #f7c5c5);
+  --aj-palette-danger-outlinedBorder: var(--aj-palette-danger-700, #7d1212);
+  --aj-palette-danger-outlinedHoverBg: var(--aj-palette-danger-800, #430a0a);
+  --aj-palette-danger-outlinedActiveBg: var(--aj-palette-danger-700, #7d1212);
+  --aj-palette-danger-outlinedDisabledColor: var(
+    --aj-palette-neutral-500,
+    #636b74
+  );
+  --aj-palette-danger-outlinedDisabledBorder: var(
+    --aj-palette-neutral-800,
+    #171a1c
+  );
+  --aj-palette-danger-softColor: var(--aj-palette-danger-200, #f7c5c5);
+  --aj-palette-danger-softBg: var(--aj-palette-danger-800, #430a0a);
+  --aj-palette-danger-softHoverBg: var(--aj-palette-danger-700, #7d1212);
+  --aj-palette-danger-softActiveColor: var(--aj-palette-danger-100, #fce4e4);
+  --aj-palette-danger-softActiveBg: var(--aj-palette-danger-600, #a51818);
+  --aj-palette-danger-softDisabledColor: var(--aj-palette-neutral-500, #636b74);
+  --aj-palette-danger-softDisabledBg: var(--aj-palette-neutral-800, #171a1c);
+  --aj-palette-danger-solidColor: var(--aj-palette-common-white, #fff);
+  --aj-palette-danger-solidBg: var(--aj-palette-danger-500, #c41c1c);
+  --aj-palette-danger-solidHoverBg: var(--aj-palette-danger-600, #a51818);
+  --aj-palette-danger-solidActiveBg: var(--aj-palette-danger-700, #7d1212);
+  --aj-palette-danger-solidDisabledColor: var(
+    --aj-palette-neutral-500,
+    #636b74
+  );
+  --aj-palette-danger-solidDisabledBg: var(--aj-palette-neutral-800, #171a1c);
+  --aj-palette-danger-mainChannel: 228 116 116;
+  --aj-palette-danger-lightChannel: 247 197 197;
+  --aj-palette-danger-darkChannel: 125 18 18;
+  --aj-palette-success-50: #f6fef6;
+  --aj-palette-success-100: #e3fbe3;
+  --aj-palette-success-200: #c7f7c7;
+  --aj-palette-success-300: #a1e8a1;
+  --aj-palette-success-400: #51bc51;
+  --aj-palette-success-500: #1f7a1f;
+  --aj-palette-success-600: #136c13;
+  --aj-palette-success-700: #0a470a;
+  --aj-palette-success-800: #042f04;
+  --aj-palette-success-900: #021d02;
+  --aj-palette-success-plainColor: var(--aj-palette-success-300, #a1e8a1);
+  --aj-palette-success-plainHoverBg: var(--aj-palette-success-800, #042f04);
+  --aj-palette-success-plainActiveBg: var(--aj-palette-success-700, #0a470a);
+  --aj-palette-success-plainDisabledColor: var(
+    --aj-palette-neutral-500,
+    #636b74
+  );
+  --aj-palette-success-outlinedColor: var(--aj-palette-success-200, #c7f7c7);
+  --aj-palette-success-outlinedBorder: var(--aj-palette-success-700, #0a470a);
+  --aj-palette-success-outlinedHoverBg: var(--aj-palette-success-800, #042f04);
+  --aj-palette-success-outlinedActiveBg: var(--aj-palette-success-700, #0a470a);
+  --aj-palette-success-outlinedDisabledColor: var(
+    --aj-palette-neutral-500,
+    #636b74
+  );
+  --aj-palette-success-outlinedDisabledBorder: var(
+    --aj-palette-neutral-800,
+    #171a1c
+  );
+  --aj-palette-success-softColor: var(--aj-palette-success-200, #c7f7c7);
+  --aj-palette-success-softBg: var(--aj-palette-success-800, #042f04);
+  --aj-palette-success-softHoverBg: var(--aj-palette-success-700, #0a470a);
+  --aj-palette-success-softActiveColor: var(--aj-palette-success-100, #e3fbe3);
+  --aj-palette-success-softActiveBg: var(--aj-palette-success-600, #136c13);
+  --aj-palette-success-softDisabledColor: var(
+    --aj-palette-neutral-500,
+    #636b74
+  );
+  --aj-palette-success-softDisabledBg: var(--aj-palette-neutral-800, #171a1c);
+  --aj-palette-success-solidColor: var(--aj-palette-common-white, #fff);
+  --aj-palette-success-solidBg: var(--aj-palette-success-500, #1f7a1f);
+  --aj-palette-success-solidHoverBg: var(--aj-palette-success-600, #136c13);
+  --aj-palette-success-solidActiveBg: var(--aj-palette-success-700, #0a470a);
+  --aj-palette-success-solidDisabledColor: var(
+    --aj-palette-neutral-500,
+    #636b74
+  );
+  --aj-palette-success-solidDisabledBg: var(--aj-palette-neutral-800, #171a1c);
+  --aj-palette-success-mainChannel: 81 188 81;
+  --aj-palette-success-lightChannel: 199 247 199;
+  --aj-palette-success-darkChannel: 10 71 10;
+  --aj-palette-warning-50: #fefaf6;
+  --aj-palette-warning-100: #fdf0e1;
+  --aj-palette-warning-200: #fce1c2;
+  --aj-palette-warning-300: #f3c896;
+  --aj-palette-warning-400: #ea9a3e;
+  --aj-palette-warning-500: #9a5b13;
+  --aj-palette-warning-600: #72430d;
+  --aj-palette-warning-700: #492b08;
+  --aj-palette-warning-800: #2e1b05;
+  --aj-palette-warning-900: #1d1002;
+  --aj-palette-warning-plainColor: var(--aj-palette-warning-300, #f3c896);
+  --aj-palette-warning-plainHoverBg: var(--aj-palette-warning-800, #2e1b05);
+  --aj-palette-warning-plainActiveBg: var(--aj-palette-warning-700, #492b08);
+  --aj-palette-warning-plainDisabledColor: var(
+    --aj-palette-neutral-500,
+    #636b74
+  );
+  --aj-palette-warning-outlinedColor: var(--aj-palette-warning-200, #fce1c2);
+  --aj-palette-warning-outlinedBorder: var(--aj-palette-warning-700, #492b08);
+  --aj-palette-warning-outlinedHoverBg: var(--aj-palette-warning-800, #2e1b05);
+  --aj-palette-warning-outlinedActiveBg: var(--aj-palette-warning-700, #492b08);
+  --aj-palette-warning-outlinedDisabledColor: var(
+    --aj-palette-neutral-500,
+    #636b74
+  );
+  --aj-palette-warning-outlinedDisabledBorder: var(
+    --aj-palette-neutral-800,
+    #171a1c
+  );
+  --aj-palette-warning-softColor: var(--aj-palette-warning-200, #fce1c2);
+  --aj-palette-warning-softBg: var(--aj-palette-warning-800, #2e1b05);
+  --aj-palette-warning-softHoverBg: var(--aj-palette-warning-700, #492b08);
+  --aj-palette-warning-softActiveColor: var(--aj-palette-warning-100, #fdf0e1);
+  --aj-palette-warning-softActiveBg: var(--aj-palette-warning-600, #72430d);
+  --aj-palette-warning-softDisabledColor: var(
+    --aj-palette-neutral-500,
+    #636b74
+  );
+  --aj-palette-warning-softDisabledBg: var(--aj-palette-neutral-800, #171a1c);
+  --aj-palette-warning-solidColor: var(--aj-palette-common-white, #fff);
+  --aj-palette-warning-solidBg: var(--aj-palette-warning-500, #9a5b13);
+  --aj-palette-warning-solidHoverBg: var(--aj-palette-warning-600, #72430d);
+  --aj-palette-warning-solidActiveBg: var(--aj-palette-warning-700, #492b08);
+  --aj-palette-warning-solidDisabledColor: var(
+    --aj-palette-neutral-500,
+    #636b74
+  );
+  --aj-palette-warning-solidDisabledBg: var(--aj-palette-neutral-800, #171a1c);
+  --aj-palette-warning-mainChannel: 234 154 62;
+  --aj-palette-warning-lightChannel: 252 225 194;
+  --aj-palette-warning-darkChannel: 73 43 8;
+  --aj-palette-common-white: #ffffff;
+  --aj-palette-common-black: #000000;
+  --aj-palette-common-blackRgb: 0 0 0;
+  --aj-palette-common-whiteRgb: 255 255 255;
+  --aj-palette-text-primary: var(--aj-palette-neutral-100, #f0f4f8);
+  --aj-palette-text-secondary: var(--aj-palette-neutral-300, #cdd7e1);
+  --aj-palette-text-tertiary: var(--aj-palette-neutral-400, #9fa6ad);
+  --aj-palette-text-icon: var(--aj-palette-neutral-400, #9fa6ad);
+  --aj-palette-background-body: #000000;
+  --aj-palette-background-surface: var(--aj-palette-neutral-900, #0b0d0e);
+  --aj-palette-background-popup: var(--aj-palette-common-black, #000);
+  --aj-palette-background-level1: var(--aj-palette-neutral-800, #171a1c);
+  --aj-palette-background-level2: var(--aj-palette-neutral-700, #32383e);
+  --aj-palette-background-level3: var(--aj-palette-neutral-600, #555e68);
+  --aj-palette-background-tooltip: var(--aj-palette-neutral-600, #555e68);
+  --aj-palette-background-backdrop: rgba(
+    var(--aj-palette-neutral-darkChannel, 251 252 254) / 0.25
+  );
+  --aj-palette-background-header: 0 0 0;
+  --aj-palette-background-bodyRgb: 0 0 0;
+  --aj-palette-divider: rgba(
+    var(--aj-palette-neutral-mainChannel, 99 107 116) / 0.16
+  );
+  --aj-palette-focusVisible: var(--aj-palette-primary-500, #0b6bcb);
+  --aj-palette-source-black: #000000;
+  --aj-palette-source-blackRgb: 0 0 0;
+  --aj-palette-source-white: #ffffff;
+  --aj-palette-source-whiteRgb: 255 255 255;
+  --aj-palette-source-neutral-10: #aca6b5;
+  --aj-palette-source-neutral-11: #bfb9c8;
+  --aj-palette-source-neutral-12: #d1cbd8;
+  --aj-palette-source-neutral-13: #dfd9e4;
+  --aj-palette-source-neutral-14: #ece6f0;
+  --aj-palette-source-neutral-15: #f8f2fa;
+  --aj-palette-source-neutral-00: #111014;
+  --aj-palette-source-neutral-01: #1a181e;
+  --aj-palette-source-neutral-02: #232129;
+  --aj-palette-source-neutral-03: #2f2c36;
+  --aj-palette-source-neutral-04: #3d3a45;
+  --aj-palette-source-neutral-05: #4c4855;
+  --aj-palette-source-neutral-06: #5c5866;
+  --aj-palette-source-neutral-07: #6e6979;
+  --aj-palette-source-neutral-08: #827c8c;
+  --aj-palette-source-neutral-09: #9791a1;
+  --aj-palette-source-tint-00-10: #fd7cc0;
+  --aj-palette-source-tint-00-11: #ff9bcc;
+  --aj-palette-source-tint-00-12: #ffb6d7;
+  --aj-palette-source-tint-00-13: #ffcce1;
+  --aj-palette-source-tint-00-14: #ffdfeb;
+  --aj-palette-source-tint-00-15: #fff1f5;
+  --aj-palette-source-tint-00-00: #2e001c;
+  --aj-palette-source-tint-00-01: #41002a;
+  --aj-palette-source-tint-00-02: #560038;
+  --aj-palette-source-tint-00-03: #6c0048;
+  --aj-palette-source-tint-00-04: #801257;
+  --aj-palette-source-tint-00-05: #942567;
+  --aj-palette-source-tint-00-06: #a83678;
+  --aj-palette-source-tint-00-07: #bd4889;
+  --aj-palette-source-tint-00-08: #d2599b;
+  --aj-palette-source-tint-00-09: #e86bae;
+  --aj-palette-source-tint-01-10: #e47deb;
+  --aj-palette-source-tint-01-11: #fa95ff;
+  --aj-palette-source-tint-01-12: #feb3ff;
+  --aj-palette-source-tint-01-13: #ffc9fd;
+  --aj-palette-source-tint-01-14: #ffdcfb;
+  --aj-palette-source-tint-01-15: #ffeefa;
+  --aj-palette-source-tint-01-00: #27002d;
+  --aj-palette-source-tint-01-01: #380040;
+  --aj-palette-source-tint-01-02: #490052;
+  --aj-palette-source-tint-01-03: #5c0067;
+  --aj-palette-source-tint-01-04: #70087c;
+  --aj-palette-source-tint-01-05: #82228e;
+  --aj-palette-source-tint-01-06: #95359f;
+  --aj-palette-source-tint-01-07: #a847b1;
+  --aj-palette-source-tint-01-08: #bb59c4;
+  --aj-palette-source-tint-01-09: #cf6ad7;
+  --aj-palette-source-tint-02-10: #be89ff;
+  --aj-palette-source-tint-02-11: #cca2ff;
+  --aj-palette-source-tint-02-12: #d9b9ff;
+  --aj-palette-source-tint-02-13: #e6cdff;
+  --aj-palette-source-tint-02-14: #f0dfff;
+  --aj-palette-source-tint-02-15: #faefff;
+  --aj-palette-source-tint-02-00: #1c0039;
+  --aj-palette-source-tint-02-01: #2a0050;
+  --aj-palette-source-tint-02-02: #370066;
+  --aj-palette-source-tint-02-03: #45007f;
+  --aj-palette-source-tint-02-04: #52178d;
+  --aj-palette-source-tint-02-05: #642ea0;
+  --aj-palette-source-tint-02-06: #7540b1;
+  --aj-palette-source-tint-02-07: #834fc1;
+  --aj-palette-source-tint-02-08: #9561d4;
+  --aj-palette-source-tint-02-09: #a975e9;
+  --aj-palette-source-tint-03-10: #9696ff;
+  --aj-palette-source-tint-03-11: #ababff;
+  --aj-palette-source-tint-03-12: #bebeff;
+  --aj-palette-source-tint-03-13: #d1cfff;
+  --aj-palette-source-tint-03-14: #e3e0ff;
+  --aj-palette-source-tint-03-15: #f4f1ff;
+  --aj-palette-source-tint-03-00: #040040;
+  --aj-palette-source-tint-03-01: #0f0a57;
+  --aj-palette-source-tint-03-02: #171269;
+  --aj-palette-source-tint-03-03: #1d197c;
+  --aj-palette-source-tint-03-04: #292689;
+  --aj-palette-source-tint-03-05: #3b399c;
+  --aj-palette-source-tint-03-06: #4c4bae;
+  --aj-palette-source-tint-03-07: #5a59bd;
+  --aj-palette-source-tint-03-08: #6a6acf;
+  --aj-palette-source-tint-03-09: #8080e7;
+  --aj-palette-source-tint-04-10: #679fff;
+  --aj-palette-source-tint-04-11: #87b1ff;
+  --aj-palette-source-tint-04-12: #a3c2ff;
+  --aj-palette-source-tint-04-13: #bdd2ff;
+  --aj-palette-source-tint-04-14: #d7e2ff;
+  --aj-palette-source-tint-04-15: #ecf0ff;
+  --aj-palette-source-tint-04-00: #000f2a;
+  --aj-palette-source-tint-04-01: #00193c;
+  --aj-palette-source-tint-04-02: #00214c;
+  --aj-palette-source-tint-04-03: #00295b;
+  --aj-palette-source-tint-04-04: #00326c;
+  --aj-palette-source-tint-04-05: #00428a;
+  --aj-palette-source-tint-04-06: #0051a7;
+  --aj-palette-source-tint-04-07: #175fbb;
+  --aj-palette-source-tint-04-08: #3170cd;
+  --aj-palette-source-tint-04-09: #4d87e5;
+  --aj-palette-source-tint-05-10: #1dabf5;
+  --aj-palette-source-tint-05-11: #57bcff;
+  --aj-palette-source-tint-05-12: #85cbff;
+  --aj-palette-source-tint-05-13: #a9d8ff;
+  --aj-palette-source-tint-05-14: #c9e5ff;
+  --aj-palette-source-tint-05-15: #e4f1ff;
+  --aj-palette-source-tint-05-00: #00111d;
+  --aj-palette-source-tint-05-01: #001c2d;
+  --aj-palette-source-tint-05-02: #00253a;
+  --aj-palette-source-tint-05-03: #002d45;
+  --aj-palette-source-tint-05-04: #003653;
+  --aj-palette-source-tint-05-05: #00486b;
+  --aj-palette-source-tint-05-06: #005882;
+  --aj-palette-source-tint-05-07: #006696;
+  --aj-palette-source-tint-05-08: #0078b0;
+  --aj-palette-source-tint-05-09: #008ecf;
+  --aj-palette-source-tint-06-10: #00b6db;
+  --aj-palette-source-tint-06-11: #3fc7e8;
+  --aj-palette-source-tint-06-12: #62d4f3;
+  --aj-palette-source-tint-06-13: #79e2ff;
+  --aj-palette-source-tint-06-14: #acebff;
+  --aj-palette-source-tint-06-15: #d4f3ff;
+  --aj-palette-source-tint-06-00: #001218;
+  --aj-palette-source-tint-06-01: #001d26;
+  --aj-palette-source-tint-06-02: #002732;
+  --aj-palette-source-tint-06-03: #00313d;
+  --aj-palette-source-tint-06-04: #003b49;
+  --aj-palette-source-tint-06-05: #00485a;
+  --aj-palette-source-tint-06-06: #00596f;
+  --aj-palette-source-tint-06-07: #006a86;
+  --aj-palette-source-tint-06-08: #007e9f;
+  --aj-palette-source-tint-06-09: #0097bd;
+  --aj-palette-source-tint-07-10: #00babe;
+  --aj-palette-source-tint-07-11: #00ccd0;
+  --aj-palette-source-tint-07-12: #00dce0;
+  --aj-palette-source-tint-07-13: #71e5e8;
+  --aj-palette-source-tint-07-14: #9eeef0;
+  --aj-palette-source-tint-07-15: #b6f9fb;
+  --aj-palette-source-tint-07-00: #001213;
+  --aj-palette-source-tint-07-01: #001e1f;
+  --aj-palette-source-tint-07-02: #002829;
+  --aj-palette-source-tint-07-03: #003335;
+  --aj-palette-source-tint-07-04: #003f40;
+  --aj-palette-source-tint-07-05: #004b4d;
+  --aj-palette-source-tint-07-06: #005f61;
+  --aj-palette-source-tint-07-07: #006f72;
+  --aj-palette-source-tint-07-08: #008184;
+  --aj-palette-source-tint-07-09: #009b9f;
+  --aj-palette-source-tint-08-10: #00be9e;
+  --aj-palette-source-tint-08-11: #34cfaf;
+  --aj-palette-source-tint-08-12: #50ddbd;
+  --aj-palette-source-tint-08-13: #7ee7cb;
+  --aj-palette-source-tint-08-14: #a5f0d9;
+  --aj-palette-source-tint-08-15: #c2fae8;
+  --aj-palette-source-tint-08-00: #00130e;
+  --aj-palette-source-tint-08-01: #001f18;
+  --aj-palette-source-tint-08-02: #002a21;
+  --aj-palette-source-tint-08-03: #00352b;
+  --aj-palette-source-tint-08-04: #004135;
+  --aj-palette-source-tint-08-05: #004e40;
+  --aj-palette-source-tint-08-06: #006251;
+  --aj-palette-source-tint-08-07: #00735f;
+  --aj-palette-source-tint-08-08: #00856e;
+  --aj-palette-source-tint-08-09: #009e83;
+  --aj-palette-source-tint-09-10: #53bf7a;
+  --aj-palette-source-tint-09-11: #67d38c;
+  --aj-palette-source-tint-09-12: #78e49b;
+  --aj-palette-source-tint-09-13: #87f3a9;
+  --aj-palette-source-tint-09-14: #a4ffbd;
+  --aj-palette-source-tint-09-15: #cdffd6;
+  --aj-palette-source-tint-09-00: #001306;
+  --aj-palette-source-tint-09-01: #001f0c;
+  --aj-palette-source-tint-09-02: #002a12;
+  --aj-palette-source-tint-09-03: #003619;
+  --aj-palette-source-tint-09-04: #004221;
+  --aj-palette-source-tint-09-05: #00522a;
+  --aj-palette-source-tint-09-06: #006535;
+  --aj-palette-source-tint-09-07: #007941;
+  --aj-palette-source-tint-09-08: #098a4b;
+  --aj-palette-source-tint-09-09: #31a15f;
+  --aj-palette-source-tint-10-10: #88bc56;
+  --aj-palette-source-tint-10-11: #9dd16a;
+  --aj-palette-source-tint-10-12: #afe37c;
+  --aj-palette-source-tint-10-13: #bff28d;
+  --aj-palette-source-tint-10-14: #d1ffa2;
+  --aj-palette-source-tint-10-15: #e9ffcd;
+  --aj-palette-source-tint-10-00: #061300;
+  --aj-palette-source-tint-10-01: #0d1f00;
+  --aj-palette-source-tint-10-02: #142b00;
+  --aj-palette-source-tint-10-03: #1c3700;
+  --aj-palette-source-tint-10-04: #234400;
+  --aj-palette-source-tint-10-05: #2d5400;
+  --aj-palette-source-tint-10-06: #396702;
+  --aj-palette-source-tint-10-07: #4a7919;
+  --aj-palette-source-tint-10-08: #5b8c2b;
+  --aj-palette-source-tint-10-09: #6fa13e;
+  --aj-palette-source-tint-11-10: #b6b836;
+  --aj-palette-source-tint-11-11: #cbcd4a;
+  --aj-palette-source-tint-11-12: #dee05b;
+  --aj-palette-source-tint-11-13: #f0f26a;
+  --aj-palette-source-tint-11-14: #fdff80;
+  --aj-palette-source-tint-11-15: #fffebc;
+  --aj-palette-source-tint-11-00: #121300;
+  --aj-palette-source-tint-11-01: #1d1e00;
+  --aj-palette-source-tint-11-02: #292a00;
+  --aj-palette-source-tint-11-03: #363700;
+  --aj-palette-source-tint-11-04: #444500;
+  --aj-palette-source-tint-11-05: #545500;
+  --aj-palette-source-tint-11-06: #646600;
+  --aj-palette-source-tint-11-07: #767800;
+  --aj-palette-source-tint-11-08: #8b8d00;
+  --aj-palette-source-tint-11-09: #a1a320;
+  --aj-palette-source-tint-12-10: #dfb222;
+  --aj-palette-source-tint-12-11: #f4c537;
+  --aj-palette-source-tint-12-12: #ffd561;
+  --aj-palette-source-tint-12-13: #ffe093;
+  --aj-palette-source-tint-12-14: #ffe8b4;
+  --aj-palette-source-tint-12-15: #fff1d4;
+  --aj-palette-source-tint-12-00: #1a1200;
+  --aj-palette-source-tint-12-01: #281d00;
+  --aj-palette-source-tint-12-02: #372900;
+  --aj-palette-source-tint-12-03: #463600;
+  --aj-palette-source-tint-12-04: #584300;
+  --aj-palette-source-tint-12-05: #6b5300;
+  --aj-palette-source-tint-12-06: #806400;
+  --aj-palette-source-tint-12-07: #977600;
+  --aj-palette-source-tint-12-08: #b18b00;
+  --aj-palette-source-tint-12-09: #c99e00;
+  --aj-palette-source-tint-13-10: #fda630;
+  --aj-palette-source-tint-13-11: #ffba68;
+  --aj-palette-source-tint-13-12: #ffcc95;
+  --aj-palette-source-tint-13-13: #ffd9b1;
+  --aj-palette-source-tint-13-14: #ffe4ca;
+  --aj-palette-source-tint-13-15: #fff0e3;
+  --aj-palette-source-tint-13-00: #201000;
+  --aj-palette-source-tint-13-01: #341d00;
+  --aj-palette-source-tint-13-02: #482a00;
+  --aj-palette-source-tint-13-03: #5e3800;
+  --aj-palette-source-tint-13-04: #744600;
+  --aj-palette-source-tint-13-05: #8b5500;
+  --aj-palette-source-tint-13-06: #a36400;
+  --aj-palette-source-tint-13-07: #bb7400;
+  --aj-palette-source-tint-13-08: #d38400;
+  --aj-palette-source-tint-13-09: #e9951d;
+  --aj-palette-source-tint-14-10: #ff9d67;
+  --aj-palette-source-tint-14-11: #ffb087;
+  --aj-palette-source-tint-14-12: #ffc6a9;
+  --aj-palette-source-tint-14-13: #ffd5c1;
+  --aj-palette-source-tint-14-14: #ffe2d5;
+  --aj-palette-source-tint-14-15: #ffefe9;
+  --aj-palette-source-tint-14-00: #290c00;
+  --aj-palette-source-tint-14-01: #3f1700;
+  --aj-palette-source-tint-14-02: #562200;
+  --aj-palette-source-tint-14-03: #712e00;
+  --aj-palette-source-tint-14-04: #8c3c00;
+  --aj-palette-source-tint-14-05: #a74901;
+  --aj-palette-source-tint-14-06: #bc5815;
+  --aj-palette-source-tint-14-07: #d06725;
+  --aj-palette-source-tint-14-08: #e57634;
+  --aj-palette-source-tint-14-09: #f98642;
+  --aj-palette-source-tint-15-10: #ff998d;
+  --aj-palette-source-tint-15-11: #ffaca2;
+  --aj-palette-source-tint-15-12: #ffc4bc;
+  --aj-palette-source-tint-15-13: #ffd5d0;
+  --aj-palette-source-tint-15-14: #ffe2df;
+  --aj-palette-source-tint-15-15: #ffefed;
+  --aj-palette-source-tint-15-00: #370001;
+  --aj-palette-source-tint-15-01: #550003;
+  --aj-palette-source-tint-15-02: #750006;
+  --aj-palette-source-tint-15-03: #8f1614;
+  --aj-palette-source-tint-15-04: #a92a24;
+  --aj-palette-source-tint-15-05: #bf3a32;
+  --aj-palette-source-tint-15-06: #d5493f;
+  --aj-palette-source-tint-15-07: #ea594d;
+  --aj-palette-source-tint-15-08: #ff685b;
+  --aj-palette-source-tint-15-09: #ff8073;
+  --aj-palette-source-neutralRgb-10: 172 166 181;
+  --aj-palette-source-neutralRgb-11: 191 185 200;
+  --aj-palette-source-neutralRgb-12: 209 203 216;
+  --aj-palette-source-neutralRgb-13: 223 217 228;
+  --aj-palette-source-neutralRgb-14: 236 230 240;
+  --aj-palette-source-neutralRgb-15: 248 242 250;
+  --aj-palette-source-neutralRgb-00: 17 16 20;
+  --aj-palette-source-neutralRgb-01: 26 24 30;
+  --aj-palette-source-neutralRgb-02: 35 33 41;
+  --aj-palette-source-neutralRgb-03: 47 44 54;
+  --aj-palette-source-neutralRgb-04: 61 58 69;
+  --aj-palette-source-neutralRgb-05: 76 72 85;
+  --aj-palette-source-neutralRgb-06: 92 88 102;
+  --aj-palette-source-neutralRgb-07: 110 105 121;
+  --aj-palette-source-neutralRgb-08: 130 124 140;
+  --aj-palette-source-neutralRgb-09: 151 145 161;
+  --aj-palette-source-tint-00Rgb-10: 253 124 192;
+  --aj-palette-source-tint-00Rgb-11: 255 155 204;
+  --aj-palette-source-tint-00Rgb-12: 255 182 215;
+  --aj-palette-source-tint-00Rgb-13: 255 204 225;
+  --aj-palette-source-tint-00Rgb-14: 255 223 235;
+  --aj-palette-source-tint-00Rgb-15: 255 241 245;
+  --aj-palette-source-tint-00Rgb-00: 46 0 28;
+  --aj-palette-source-tint-00Rgb-01: 65 0 42;
+  --aj-palette-source-tint-00Rgb-02: 86 0 56;
+  --aj-palette-source-tint-00Rgb-03: 108 0 72;
+  --aj-palette-source-tint-00Rgb-04: 128 18 87;
+  --aj-palette-source-tint-00Rgb-05: 148 37 103;
+  --aj-palette-source-tint-00Rgb-06: 168 54 120;
+  --aj-palette-source-tint-00Rgb-07: 189 72 137;
+  --aj-palette-source-tint-00Rgb-08: 210 89 155;
+  --aj-palette-source-tint-00Rgb-09: 232 107 174;
+  --aj-palette-source-tint-01Rgb-10: 228 125 235;
+  --aj-palette-source-tint-01Rgb-11: 250 149 255;
+  --aj-palette-source-tint-01Rgb-12: 254 179 255;
+  --aj-palette-source-tint-01Rgb-13: 255 201 253;
+  --aj-palette-source-tint-01Rgb-14: 255 220 251;
+  --aj-palette-source-tint-01Rgb-15: 255 238 250;
+  --aj-palette-source-tint-01Rgb-00: 39 0 45;
+  --aj-palette-source-tint-01Rgb-01: 56 0 64;
+  --aj-palette-source-tint-01Rgb-02: 73 0 82;
+  --aj-palette-source-tint-01Rgb-03: 92 0 103;
+  --aj-palette-source-tint-01Rgb-04: 112 8 124;
+  --aj-palette-source-tint-01Rgb-05: 130 34 142;
+  --aj-palette-source-tint-01Rgb-06: 149 53 159;
+  --aj-palette-source-tint-01Rgb-07: 168 71 177;
+  --aj-palette-source-tint-01Rgb-08: 187 89 196;
+  --aj-palette-source-tint-01Rgb-09: 207 106 215;
+  --aj-palette-source-tint-02Rgb-10: 190 137 255;
+  --aj-palette-source-tint-02Rgb-11: 204 162 255;
+  --aj-palette-source-tint-02Rgb-12: 217 185 255;
+  --aj-palette-source-tint-02Rgb-13: 230 205 255;
+  --aj-palette-source-tint-02Rgb-14: 240 223 255;
+  --aj-palette-source-tint-02Rgb-15: 250 239 255;
+  --aj-palette-source-tint-02Rgb-00: 28 0 57;
+  --aj-palette-source-tint-02Rgb-01: 42 0 80;
+  --aj-palette-source-tint-02Rgb-02: 55 0 102;
+  --aj-palette-source-tint-02Rgb-03: 69 0 127;
+  --aj-palette-source-tint-02Rgb-04: 82 23 141;
+  --aj-palette-source-tint-02Rgb-05: 100 46 160;
+  --aj-palette-source-tint-02Rgb-06: 117 64 177;
+  --aj-palette-source-tint-02Rgb-07: 131 79 193;
+  --aj-palette-source-tint-02Rgb-08: 149 97 212;
+  --aj-palette-source-tint-02Rgb-09: 169 117 233;
+  --aj-palette-source-tint-03Rgb-10: 150 150 255;
+  --aj-palette-source-tint-03Rgb-11: 171 171 255;
+  --aj-palette-source-tint-03Rgb-12: 190 190 255;
+  --aj-palette-source-tint-03Rgb-13: 209 207 255;
+  --aj-palette-source-tint-03Rgb-14: 227 224 255;
+  --aj-palette-source-tint-03Rgb-15: 244 241 255;
+  --aj-palette-source-tint-03Rgb-00: 4 0 64;
+  --aj-palette-source-tint-03Rgb-01: 15 10 87;
+  --aj-palette-source-tint-03Rgb-02: 23 18 105;
+  --aj-palette-source-tint-03Rgb-03: 29 25 124;
+  --aj-palette-source-tint-03Rgb-04: 41 38 137;
+  --aj-palette-source-tint-03Rgb-05: 59 57 156;
+  --aj-palette-source-tint-03Rgb-06: 76 75 174;
+  --aj-palette-source-tint-03Rgb-07: 90 89 189;
+  --aj-palette-source-tint-03Rgb-08: 106 106 207;
+  --aj-palette-source-tint-03Rgb-09: 128 128 231;
+  --aj-palette-source-tint-04Rgb-10: 103 159 255;
+  --aj-palette-source-tint-04Rgb-11: 135 177 255;
+  --aj-palette-source-tint-04Rgb-12: 163 194 255;
+  --aj-palette-source-tint-04Rgb-13: 189 210 255;
+  --aj-palette-source-tint-04Rgb-14: 215 226 255;
+  --aj-palette-source-tint-04Rgb-15: 236 240 255;
+  --aj-palette-source-tint-04Rgb-00: 0 15 42;
+  --aj-palette-source-tint-04Rgb-01: 0 25 60;
+  --aj-palette-source-tint-04Rgb-02: 0 33 76;
+  --aj-palette-source-tint-04Rgb-03: 0 41 91;
+  --aj-palette-source-tint-04Rgb-04: 0 50 108;
+  --aj-palette-source-tint-04Rgb-05: 0 66 138;
+  --aj-palette-source-tint-04Rgb-06: 0 81 167;
+  --aj-palette-source-tint-04Rgb-07: 23 95 187;
+  --aj-palette-source-tint-04Rgb-08: 49 112 205;
+  --aj-palette-source-tint-04Rgb-09: 77 135 229;
+  --aj-palette-source-tint-05Rgb-10: 29 171 245;
+  --aj-palette-source-tint-05Rgb-11: 87 188 255;
+  --aj-palette-source-tint-05Rgb-12: 133 203 255;
+  --aj-palette-source-tint-05Rgb-13: 169 216 255;
+  --aj-palette-source-tint-05Rgb-14: 201 229 255;
+  --aj-palette-source-tint-05Rgb-15: 228 241 255;
+  --aj-palette-source-tint-05Rgb-00: 0 17 29;
+  --aj-palette-source-tint-05Rgb-01: 0 28 45;
+  --aj-palette-source-tint-05Rgb-02: 0 37 58;
+  --aj-palette-source-tint-05Rgb-03: 0 45 69;
+  --aj-palette-source-tint-05Rgb-04: 0 54 83;
+  --aj-palette-source-tint-05Rgb-05: 0 72 107;
+  --aj-palette-source-tint-05Rgb-06: 0 88 130;
+  --aj-palette-source-tint-05Rgb-07: 0 102 150;
+  --aj-palette-source-tint-05Rgb-08: 0 120 176;
+  --aj-palette-source-tint-05Rgb-09: 0 142 207;
+  --aj-palette-source-tint-06Rgb-10: 0 182 219;
+  --aj-palette-source-tint-06Rgb-11: 63 199 232;
+  --aj-palette-source-tint-06Rgb-12: 98 212 243;
+  --aj-palette-source-tint-06Rgb-13: 121 226 255;
+  --aj-palette-source-tint-06Rgb-14: 172 235 255;
+  --aj-palette-source-tint-06Rgb-15: 212 243 255;
+  --aj-palette-source-tint-06Rgb-00: 0 18 24;
+  --aj-palette-source-tint-06Rgb-01: 0 29 38;
+  --aj-palette-source-tint-06Rgb-02: 0 39 50;
+  --aj-palette-source-tint-06Rgb-03: 0 49 61;
+  --aj-palette-source-tint-06Rgb-04: 0 59 73;
+  --aj-palette-source-tint-06Rgb-05: 0 72 90;
+  --aj-palette-source-tint-06Rgb-06: 0 89 111;
+  --aj-palette-source-tint-06Rgb-07: 0 106 134;
+  --aj-palette-source-tint-06Rgb-08: 0 126 159;
+  --aj-palette-source-tint-06Rgb-09: 0 151 189;
+  --aj-palette-source-tint-07Rgb-10: 0 186 190;
+  --aj-palette-source-tint-07Rgb-11: 0 204 208;
+  --aj-palette-source-tint-07Rgb-12: 0 220 224;
+  --aj-palette-source-tint-07Rgb-13: 113 229 232;
+  --aj-palette-source-tint-07Rgb-14: 158 238 240;
+  --aj-palette-source-tint-07Rgb-15: 182 249 251;
+  --aj-palette-source-tint-07Rgb-00: 0 18 19;
+  --aj-palette-source-tint-07Rgb-01: 0 30 31;
+  --aj-palette-source-tint-07Rgb-02: 0 40 41;
+  --aj-palette-source-tint-07Rgb-03: 0 51 53;
+  --aj-palette-source-tint-07Rgb-04: 0 63 64;
+  --aj-palette-source-tint-07Rgb-05: 0 75 77;
+  --aj-palette-source-tint-07Rgb-06: 0 95 97;
+  --aj-palette-source-tint-07Rgb-07: 0 111 114;
+  --aj-palette-source-tint-07Rgb-08: 0 129 132;
+  --aj-palette-source-tint-07Rgb-09: 0 155 159;
+  --aj-palette-source-tint-08Rgb-10: 0 190 158;
+  --aj-palette-source-tint-08Rgb-11: 52 207 175;
+  --aj-palette-source-tint-08Rgb-12: 80 221 189;
+  --aj-palette-source-tint-08Rgb-13: 126 231 203;
+  --aj-palette-source-tint-08Rgb-14: 165 240 217;
+  --aj-palette-source-tint-08Rgb-15: 194 250 232;
+  --aj-palette-source-tint-08Rgb-00: 0 19 14;
+  --aj-palette-source-tint-08Rgb-01: 0 31 24;
+  --aj-palette-source-tint-08Rgb-02: 0 42 33;
+  --aj-palette-source-tint-08Rgb-03: 0 53 43;
+  --aj-palette-source-tint-08Rgb-04: 0 65 53;
+  --aj-palette-source-tint-08Rgb-05: 0 78 64;
+  --aj-palette-source-tint-08Rgb-06: 0 98 81;
+  --aj-palette-source-tint-08Rgb-07: 0 115 95;
+  --aj-palette-source-tint-08Rgb-08: 0 133 110;
+  --aj-palette-source-tint-08Rgb-09: 0 158 131;
+  --aj-palette-source-tint-09Rgb-10: 83 191 122;
+  --aj-palette-source-tint-09Rgb-11: 103 211 140;
+  --aj-palette-source-tint-09Rgb-12: 120 228 155;
+  --aj-palette-source-tint-09Rgb-13: 135 243 169;
+  --aj-palette-source-tint-09Rgb-14: 164 255 189;
+  --aj-palette-source-tint-09Rgb-15: 205 255 214;
+  --aj-palette-source-tint-09Rgb-00: 0 19 6;
+  --aj-palette-source-tint-09Rgb-01: 0 31 12;
+  --aj-palette-source-tint-09Rgb-02: 0 42 18;
+  --aj-palette-source-tint-09Rgb-03: 0 54 25;
+  --aj-palette-source-tint-09Rgb-04: 0 66 33;
+  --aj-palette-source-tint-09Rgb-05: 0 82 42;
+  --aj-palette-source-tint-09Rgb-06: 0 101 53;
+  --aj-palette-source-tint-09Rgb-07: 0 121 65;
+  --aj-palette-source-tint-09Rgb-08: 9 138 75;
+  --aj-palette-source-tint-09Rgb-09: 49 161 95;
+  --aj-palette-source-tint-10Rgb-10: 136 188 86;
+  --aj-palette-source-tint-10Rgb-11: 157 209 106;
+  --aj-palette-source-tint-10Rgb-12: 175 227 124;
+  --aj-palette-source-tint-10Rgb-13: 191 242 141;
+  --aj-palette-source-tint-10Rgb-14: 209 255 162;
+  --aj-palette-source-tint-10Rgb-15: 233 255 205;
+  --aj-palette-source-tint-10Rgb-00: 6 19 0;
+  --aj-palette-source-tint-10Rgb-01: 13 31 0;
+  --aj-palette-source-tint-10Rgb-02: 20 43 0;
+  --aj-palette-source-tint-10Rgb-03: 28 55 0;
+  --aj-palette-source-tint-10Rgb-04: 35 68 0;
+  --aj-palette-source-tint-10Rgb-05: 45 84 0;
+  --aj-palette-source-tint-10Rgb-06: 57 103 2;
+  --aj-palette-source-tint-10Rgb-07: 74 121 25;
+  --aj-palette-source-tint-10Rgb-08: 91 140 43;
+  --aj-palette-source-tint-10Rgb-09: 111 161 62;
+  --aj-palette-source-tint-11Rgb-10: 182 184 54;
+  --aj-palette-source-tint-11Rgb-11: 203 205 74;
+  --aj-palette-source-tint-11Rgb-12: 222 224 91;
+  --aj-palette-source-tint-11Rgb-13: 240 242 106;
+  --aj-palette-source-tint-11Rgb-14: 253 255 128;
+  --aj-palette-source-tint-11Rgb-15: 255 254 188;
+  --aj-palette-source-tint-11Rgb-00: 18 19 0;
+  --aj-palette-source-tint-11Rgb-01: 29 30 0;
+  --aj-palette-source-tint-11Rgb-02: 41 42 0;
+  --aj-palette-source-tint-11Rgb-03: 54 55 0;
+  --aj-palette-source-tint-11Rgb-04: 68 69 0;
+  --aj-palette-source-tint-11Rgb-05: 84 85 0;
+  --aj-palette-source-tint-11Rgb-06: 100 102 0;
+  --aj-palette-source-tint-11Rgb-07: 118 120 0;
+  --aj-palette-source-tint-11Rgb-08: 139 141 0;
+  --aj-palette-source-tint-11Rgb-09: 161 163 32;
+  --aj-palette-source-tint-12Rgb-10: 223 178 34;
+  --aj-palette-source-tint-12Rgb-11: 244 197 55;
+  --aj-palette-source-tint-12Rgb-12: 255 213 97;
+  --aj-palette-source-tint-12Rgb-13: 255 224 147;
+  --aj-palette-source-tint-12Rgb-14: 255 232 180;
+  --aj-palette-source-tint-12Rgb-15: 255 241 212;
+  --aj-palette-source-tint-12Rgb-00: 26 18 0;
+  --aj-palette-source-tint-12Rgb-01: 40 29 0;
+  --aj-palette-source-tint-12Rgb-02: 55 41 0;
+  --aj-palette-source-tint-12Rgb-03: 70 54 0;
+  --aj-palette-source-tint-12Rgb-04: 88 67 0;
+  --aj-palette-source-tint-12Rgb-05: 107 83 0;
+  --aj-palette-source-tint-12Rgb-06: 128 100 0;
+  --aj-palette-source-tint-12Rgb-07: 151 118 0;
+  --aj-palette-source-tint-12Rgb-08: 177 139 0;
+  --aj-palette-source-tint-12Rgb-09: 201 158 0;
+  --aj-palette-source-tint-13Rgb-10: 253 166 48;
+  --aj-palette-source-tint-13Rgb-11: 255 186 104;
+  --aj-palette-source-tint-13Rgb-12: 255 204 149;
+  --aj-palette-source-tint-13Rgb-13: 255 217 177;
+  --aj-palette-source-tint-13Rgb-14: 255 228 202;
+  --aj-palette-source-tint-13Rgb-15: 255 240 227;
+  --aj-palette-source-tint-13Rgb-00: 32 16 0;
+  --aj-palette-source-tint-13Rgb-01: 52 29 0;
+  --aj-palette-source-tint-13Rgb-02: 72 42 0;
+  --aj-palette-source-tint-13Rgb-03: 94 56 0;
+  --aj-palette-source-tint-13Rgb-04: 116 70 0;
+  --aj-palette-source-tint-13Rgb-05: 139 85 0;
+  --aj-palette-source-tint-13Rgb-06: 163 100 0;
+  --aj-palette-source-tint-13Rgb-07: 187 116 0;
+  --aj-palette-source-tint-13Rgb-08: 211 132 0;
+  --aj-palette-source-tint-13Rgb-09: 233 149 29;
+  --aj-palette-source-tint-14Rgb-10: 255 157 103;
+  --aj-palette-source-tint-14Rgb-11: 255 176 135;
+  --aj-palette-source-tint-14Rgb-12: 255 198 169;
+  --aj-palette-source-tint-14Rgb-13: 255 213 193;
+  --aj-palette-source-tint-14Rgb-14: 255 226 213;
+  --aj-palette-source-tint-14Rgb-15: 255 239 233;
+  --aj-palette-source-tint-14Rgb-00: 41 12 0;
+  --aj-palette-source-tint-14Rgb-01: 63 23 0;
+  --aj-palette-source-tint-14Rgb-02: 86 34 0;
+  --aj-palette-source-tint-14Rgb-03: 113 46 0;
+  --aj-palette-source-tint-14Rgb-04: 140 60 0;
+  --aj-palette-source-tint-14Rgb-05: 167 73 1;
+  --aj-palette-source-tint-14Rgb-06: 188 88 21;
+  --aj-palette-source-tint-14Rgb-07: 208 103 37;
+  --aj-palette-source-tint-14Rgb-08: 229 118 52;
+  --aj-palette-source-tint-14Rgb-09: 249 134 66;
+  --aj-palette-source-tint-15Rgb-10: 255 153 141;
+  --aj-palette-source-tint-15Rgb-11: 255 172 162;
+  --aj-palette-source-tint-15Rgb-12: 255 196 188;
+  --aj-palette-source-tint-15Rgb-13: 255 213 208;
+  --aj-palette-source-tint-15Rgb-14: 255 226 223;
+  --aj-palette-source-tint-15Rgb-15: 255 239 237;
+  --aj-palette-source-tint-15Rgb-00: 55 0 1;
+  --aj-palette-source-tint-15Rgb-01: 85 0 3;
+  --aj-palette-source-tint-15Rgb-02: 117 0 6;
+  --aj-palette-source-tint-15Rgb-03: 143 22 20;
+  --aj-palette-source-tint-15Rgb-04: 169 42 36;
+  --aj-palette-source-tint-15Rgb-05: 191 58 50;
+  --aj-palette-source-tint-15Rgb-06: 213 73 63;
+  --aj-palette-source-tint-15Rgb-07: 234 89 77;
+  --aj-palette-source-tint-15Rgb-08: 255 104 91;
+  --aj-palette-source-tint-15Rgb-09: 255 128 115;
+  --aj-palette-source-tints-10: #88bc56;
+  --aj-palette-source-tints-11: #b6b836;
+  --aj-palette-source-tints-12: #dfb222;
+  --aj-palette-source-tints-13: #fda630;
+  --aj-palette-source-tints-14: #f98642;
+  --aj-palette-source-tints-15: #ff685b;
+  --aj-palette-source-tints-00: #fd7cc0;
+  --aj-palette-source-tints-01: #e47deb;
+  --aj-palette-source-tints-02: #be89ff;
+  --aj-palette-source-tints-03: #9696ff;
+  --aj-palette-source-tints-04: #679fff;
+  --aj-palette-source-tints-05: #1dabf5;
+  --aj-palette-source-tints-06: #00b6db;
+  --aj-palette-source-tints-07: #00babe;
+  --aj-palette-source-tints-08: #00be9e;
+  --aj-palette-source-tints-09: #53bf7a;
+  --aj-palette-source-tintsRgb-10: 136 188 86;
+  --aj-palette-source-tintsRgb-11: 182 184 54;
+  --aj-palette-source-tintsRgb-12: 223 178 34;
+  --aj-palette-source-tintsRgb-13: 253 166 48;
+  --aj-palette-source-tintsRgb-14: 249 134 66;
+  --aj-palette-source-tintsRgb-15: 255 104 91;
+  --aj-palette-source-tintsRgb-00: 253 124 192;
+  --aj-palette-source-tintsRgb-01: 228 125 235;
+  --aj-palette-source-tintsRgb-02: 190 137 255;
+  --aj-palette-source-tintsRgb-03: 150 150 255;
+  --aj-palette-source-tintsRgb-04: 103 159 255;
+  --aj-palette-source-tintsRgb-05: 29 171 245;
+  --aj-palette-source-tintsRgb-06: 0 182 219;
+  --aj-palette-source-tintsRgb-07: 0 186 190;
+  --aj-palette-source-tintsRgb-08: 0 190 158;
+  --aj-palette-source-tintsRgb-09: 83 191 122;
+  --aj-palette-button-primary-solid-idleBg: #ffffff;
+  --aj-palette-button-primary-solid-idleColor: #000000;
+  --aj-palette-button-primary-solid-activeBg: #d1cbd8;
+  --aj-palette-button-primary-solid-disabledBg: #2f2c36;
+  --aj-palette-button-primary-plain-idleColor: #ffffff;
+  --aj-palette-button-primary-plain-activeColor: #d1cbd8;
+  --aj-palette-button-primary-plain-disabledColor: #2f2c36;
+  --aj-palette-button-primary-toolbar-idleColor: #ffffff;
+  --aj-palette-button-primary-toolbar-activeColor: #d1cbd8;
+  --aj-palette-button-primary-toolbar-disabledColor: #2f2c36;
+  --aj-palette-button-primary-toolbar-pressedColor: #827c8c;
+  --aj-palette-button-primary-menuItem-idleColor: #9791a1;
+  --aj-palette-button-primary-menuItem-hoverColor: #ffffff;
+  --aj-palette-button-primary-menuItem-activeColor: #d1cbd8;
+  --aj-palette-button-primary-menuItem-disabledColor: #4c4855;
+  --aj-palette-button-secondary-plain-idleColor: #827c8c;
+  --aj-palette-button-secondary-plain-hoverColor: #d1cbd8;
+  --aj-palette-button-secondary-plain-activeColor: #aca6b5;
+  --aj-palette-button-secondary-plain-disabledColor: #2f2c36;
+  --aj-palette-button-secondary-toolbar-idleColor: #827c8c;
+  --aj-palette-button-secondary-toolbar-hoverColor: #d1cbd8;
+  --aj-palette-button-secondary-toolbar-activeColor: #aca6b5;
+  --aj-palette-button-secondary-toolbar-disabledColor: #2f2c36;
+  --aj-palette-button-secondary-toolbar-pressedColor: #ffffff;
+  --aj-palette-button-secondary-subnav-idleColor: #4c4855;
+  --aj-palette-button-secondary-subnav-hoverColor: #827c8c;
+  --aj-palette-button-secondary-subnav-activeColor: #6e6979;
+  --aj-palette-button-secondary-subnav-disabledColor: #2f2c36;
+  --aj-palette-button-secondary-subnav-pressedColor: #bfb9c8;
+  --aj-palette-button-secondary-tablehead-idleColor: #4c4855;
+  --aj-palette-button-secondary-tablehead-hoverColor: #aca6b5;
+  --aj-palette-button-secondary-tablehead-activeColor: #827c8c;
+  --aj-palette-button-secondary-tablehead-sorterIdleColor: #827c8c;
+  --aj-palette-button-secondary-tablehead-sorterHoverColor: #d1cbd8;
+  --aj-palette-button-secondary-tablehead-sorterActiveColor: #aca6b5;
+  --aj-palette-button-danger-solid-idleBg: #ff685b;
+  --aj-palette-button-danger-solid-idleColor: #000000;
+  --aj-palette-button-danger-solid-activeBg: #d5493f;
+  --aj-palette-button-danger-solid-disabledBg: #550003;
+  --aj-palette-button-danger-plain-idleColor: #ff685b;
+  --aj-palette-button-danger-plain-activeColor: #d5493f;
+  --aj-palette-button-danger-plain-disabledColor: #8f1614;
+  --aj-palette-input-placeholderColor: #6e6979;
+  --aj-palette-input-disabledColor: #2f2c36;
+  --aj-palette-input-labelColor: #f8f2fa;
+  --aj-palette-input-msgNeutralColor: #bfb9c8;
+  --aj-palette-input-msgPositiveColor: #53bf7a;
+  --aj-palette-input-msgWarningColor: #fda630;
+  --aj-palette-input-msgNegativeColor: #ff685b;
+  --aj-palette-input-primary-solid-border: 151 145 161;
+  --aj-palette-input-primary-solid-disabledBorder: #2f2c36;
+  --aj-palette-input-primary-solid-bg: #000000;
+  --aj-palette-input-text-primary-solid-color: #ffffff;
+  --aj-palette-input-text-primary-solid-iconColor: #6e6979;
+  --aj-palette-stroke-dividerRgb: 92 88 102;
+  --aj-palette-foreground-color: #ffffff;
+  --aj-palette-foreground-colorRgb: 255 255 255;
+  --aj-palette-txt-primary: #ffffff;
+  --aj-palette-txt-secondary: #bfb9c8;
+  --aj-palette-txt-tertiary: #827c8c;
+  --aj-palette-txt-quaternary: #4c4855;
+  --aj-palette-txt-discreet: #3d3a45;
+  --aj-palette-txt-subtle: #2f2c36;
+  --aj-palette-txt-positive: #53bf7a;
+  --aj-palette-txt-warning: #fda630;
+  --aj-palette-txt-negative: #ff685b;
+  --aj-palette-txt-recommended: #009e83;
+  --aj-palette-txt-primaryRgb: 255 255 255;
+  --aj-palette-txt-secondaryRgb: 191 185 200;
+  --aj-palette-txt-tertiaryRgb: 130 124 140;
+  --aj-palette-txt-quaternaryRgb: 76 72 85;
+  --aj-palette-txt-discreetRgb: 61 58 69;
+  --aj-palette-txt-subtleRgb: 47 44 54;
+  --aj-palette-txt-positiveRgb: 83 191 122;
+  --aj-palette-txt-warningRgb: 253 166 48;
+  --aj-palette-txt-negativeRgb: 255 104 91;
+  --aj-palette-txt-recommendedRgb: 0 158 131;
+  --aj-palette-txt-denyPrimary: #ff998d;
+  --aj-palette-txt-denySecondary: #ff8073;
+  --aj-palette-txt-denyTertiary: #ff685b;
+  --aj-palette-txt-dryrunPrimary: #ffb087;
+  --aj-palette-txt-dryrunSecondary: #ff9d67;
+  --aj-palette-txt-dryrunTertiary: #f98642;
+  --aj-palette-txt-challengePrimary: #feb3ff;
+  --aj-palette-txt-challengeSecondary: #fa95ff;
+  --aj-palette-txt-challengeTertiary: #e47deb;
+  --aj-palette-eventDeny-primaryColor: #ff998d;
+  --aj-palette-eventDeny-secondaryColor: #ff8073;
+  --aj-palette-eventDeny-tertiaryColor: #ff685b;
+  --aj-palette-eventDeny-primaryBg: #ff685b;
+  --aj-palette-eventDeny-secondaryBg: #bf3a32;
+  --aj-palette-eventDeny-primaryColorRgb: 255 153 141;
+  --aj-palette-eventDeny-secondaryColorRgb: 255 128 115;
+  --aj-palette-eventDeny-tertiaryColorRgb: 255 104 91;
+  --aj-palette-eventDeny-primaryBgRgb: 255 104 91;
+  --aj-palette-eventDeny-secondaryBgRgb: 191 58 50;
+  --aj-palette-eventDryrun-primaryColor: #ffb087;
+  --aj-palette-eventDryrun-secondaryColor: #ff9d67;
+  --aj-palette-eventDryrun-tertiaryColor: #f98642;
+  --aj-palette-eventDryrun-primaryBg: #f98642;
+  --aj-palette-eventDryrun-secondaryBg: #bc5815;
+  --aj-palette-eventDryrun-primaryColorRgb: 255 176 135;
+  --aj-palette-eventDryrun-secondaryColorRgb: 255 157 103;
+  --aj-palette-eventDryrun-tertiaryColorRgb: 249 134 66;
+  --aj-palette-eventDryrun-primaryBgRgb: 249 134 66;
+  --aj-palette-eventDryrun-secondaryBgRgb: 188 88 21;
+  --aj-palette-eventChallenge-primaryColor: #feb3ff;
+  --aj-palette-eventChallenge-secondaryColor: #fa95ff;
+  --aj-palette-eventChallenge-tertiaryColor: #e47deb;
+  --aj-palette-eventChallenge-primaryBg: #e47deb;
+  --aj-palette-eventChallenge-secondaryBg: #a847b1;
+  --aj-palette-eventChallenge-primaryColorRgb: 254 179 255;
+  --aj-palette-eventChallenge-secondaryColorRgb: 250 149 255;
+  --aj-palette-eventChallenge-tertiaryColorRgb: 228 125 235;
+  --aj-palette-eventChallenge-primaryBgRgb: 228 125 235;
+  --aj-palette-eventChallenge-secondaryBgRgb: 168 71 177;
+  --aj-palette-block-level1-glare: linear-gradient(
+    rgba(var(--aj-palette-source-whiteRgb) / 0) 12%,
+    rgba(var(--aj-palette-source-whiteRgb) / 0.02) 88%
+  );
+  --aj-palette-block-level1-bg: linear-gradient(
+    rgba(var(--aj-palette-source-neutralRgb-00) / 1) 0%,
+    rgba(var(--aj-palette-source-neutralRgb-00) / 1) 100%
+  );
+  --aj-palette-block-level1-fadeBg: linear-gradient(
+    rgba(var(--aj-palette-source-blackRgb) / 0) 0%,
+    rgba(var(--aj-palette-source-blackRgb) / 1) 100%
+  );
+  --aj-palette-block-level1-blurBg: linear-gradient(
+    rgba(var(--aj-palette-source-neutralRgb-01) / 0.6) 0%,
+    rgba(var(--aj-palette-source-neutralRgb-01) / 0.6) 100%
+  );
+  --aj-palette-block-level1-border: rgba(
+    var(--aj-palette-source-neutralRgb-02) / 1
+  );
+  --aj-palette-block-level1-blurBorder: rgba(
+    var(--aj-palette-source-neutralRgb-07) / 0.3
+  );
+  --aj-palette-block-level2-bg: rgba(
+    var(--aj-palette-source-neutralRgb-01) / 1
+  );
+  --aj-palette-block-level2-blurBg: rgba(
+    var(--aj-palette-source-neutralRgb-02) / 0.6
+  );
+  --aj-palette-block-level2-border: rgba(
+    var(--aj-palette-source-neutralRgb-03) / 1
+  );
+  --aj-palette-block-level2-blurBorder: rgba(
+    var(--aj-palette-source-neutralRgb-08) / 0.3
+  );
+  --aj-palette-block-level3-glare: linear-gradient(
+    rgba(var(--aj-palette-source-whiteRgb) / 0) 12%,
+    rgba(var(--aj-palette-source-whiteRgb) / 0.04) 88%
+  );
+  --aj-palette-block-level3-bg: linear-gradient(
+    rgba(var(--aj-palette-source-neutralRgb-02) / 1) 0%,
+    rgba(var(--aj-palette-source-neutralRgb-02) / 1) 100%
+  );
+  --aj-palette-block-level3-blurBg: linear-gradient(
+    rgba(var(--aj-palette-source-neutralRgb-03) / 0.6) 0%,
+    rgba(var(--aj-palette-source-neutralRgb-03) / 0.6) 100%
+  );
+  --aj-palette-block-level3-border: rgba(
+    var(--aj-palette-source-neutralRgb-04) / 1
+  );
+  --aj-palette-block-level3-blurBorder: rgba(
+    var(--aj-palette-source-neutralRgb-09) / 0.3
+  );
+  --aj-palette-block-level2Event-deny-blurBg: linear-gradient(
+    rgba(var(--aj-palette-source-tint-15Rgb-05) / 0.216) 0%,
+    rgba(var(--aj-palette-source-tint-15Rgb-05) / 0.216) 100%
+  );
+  --aj-palette-block-level2Event-deny-blurBorder: rgba(
+    var(--aj-palette-source-tint-15Rgb-10) / 0.3
+  );
+  --aj-palette-block-level2Event-dryrun-blurBg: linear-gradient(
+    rgba(var(--aj-palette-source-tint-14Rgb-06) / 0.216) 0%,
+    rgba(var(--aj-palette-source-tint-14Rgb-06) / 0.216) 100%
+  );
+  --aj-palette-block-level2Event-dryrun-blurBorder: rgba(
+    var(--aj-palette-source-tint-14Rgb-11) / 0.3
+  );
+  --aj-palette-block-level2Event-challenge-blurBg: linear-gradient(
+    rgba(var(--aj-palette-source-tint-01Rgb-07) / 0.216) 0%,
+    rgba(var(--aj-palette-source-tint-01Rgb-07) / 0.216) 100%
+  );
+  --aj-palette-block-level2Event-challenge-blurBorder: rgba(
+    var(--aj-palette-source-tint-01Rgb-12) / 0.3
+  );
+  --aj-palette-glowChannel: 255 255 255;
+  --aj-palette-dangerGlowChannel: 255 172 162;
+  --aj-shadowRing: 0 0 #000;
+  --aj-shadowChannel: 0 0 0;
+  --aj-shadowOpacity: 0.12;
+}
+
+:root[data-theme="light"] {
+  --aj-palette-primary-50: #edf5fd;
+  --aj-palette-primary-100: #e3effb;
+  --aj-palette-primary-200: #c7dff7;
+  --aj-palette-primary-300: #97c3f0;
+  --aj-palette-primary-400: #4393e4;
+  --aj-palette-primary-500: #0b6bcb;
+  --aj-palette-primary-600: #185ea5;
+  --aj-palette-primary-700: #12467b;
+  --aj-palette-primary-800: #0a2744;
+  --aj-palette-primary-900: #051423;
+  --aj-palette-primary-plainColor: var(--aj-palette-primary-500, #0b6bcb);
+  --aj-palette-primary-plainHoverBg: var(--aj-palette-primary-100, #e3effb);
+  --aj-palette-primary-plainActiveBg: var(--aj-palette-primary-200, #c7dff7);
+  --aj-palette-primary-plainDisabledColor: var(
+    --aj-palette-neutral-400,
+    #9fa6ad
+  );
+  --aj-palette-primary-outlinedColor: var(--aj-palette-primary-500, #0b6bcb);
+  --aj-palette-primary-outlinedBorder: var(--aj-palette-primary-300, #97c3f0);
+  --aj-palette-primary-outlinedHoverBg: var(--aj-palette-primary-100, #e3effb);
+  --aj-palette-primary-outlinedActiveBg: var(--aj-palette-primary-200, #c7dff7);
+  --aj-palette-primary-outlinedDisabledColor: var(
+    --aj-palette-neutral-400,
+    #9fa6ad
+  );
+  --aj-palette-primary-outlinedDisabledBorder: var(
+    --aj-palette-neutral-200,
+    #dde7ee
+  );
+  --aj-palette-primary-softColor: var(--aj-palette-primary-700, #12467b);
+  --aj-palette-primary-softBg: var(--aj-palette-primary-100, #e3effb);
+  --aj-palette-primary-softHoverBg: var(--aj-palette-primary-200, #c7dff7);
+  --aj-palette-primary-softActiveColor: var(--aj-palette-primary-800, #0a2744);
+  --aj-palette-primary-softActiveBg: var(--aj-palette-primary-300, #97c3f0);
+  --aj-palette-primary-softDisabledColor: var(
+    --aj-palette-neutral-400,
+    #9fa6ad
+  );
+  --aj-palette-primary-softDisabledBg: var(--aj-palette-neutral-50, #fbfcfe);
+  --aj-palette-primary-solidColor: var(--aj-palette-common-white, #fff);
+  --aj-palette-primary-solidBg: var(--aj-palette-primary-500, #0b6bcb);
+  --aj-palette-primary-solidHoverBg: var(--aj-palette-primary-600, #185ea5);
+  --aj-palette-primary-solidActiveBg: var(--aj-palette-primary-700, #12467b);
+  --aj-palette-primary-solidDisabledColor: var(
+    --aj-palette-neutral-400,
+    #9fa6ad
+  );
+  --aj-palette-primary-solidDisabledBg: var(--aj-palette-neutral-100, #f0f4f8);
+  --aj-palette-primary-mainChannel: 11 107 203;
+  --aj-palette-primary-lightChannel: 199 223 247;
+  --aj-palette-primary-darkChannel: 18 70 123;
+  --aj-palette-neutral-10: #f8f2fa;
+  --aj-palette-neutral-20: #ece6f0;
+  --aj-palette-neutral-30: #dfd9e4;
+  --aj-palette-neutral-40: #d1cbd8;
+  --aj-palette-neutral-50: #bfb9c8;
+  --aj-palette-neutral-100: #aca6b5;
+  --aj-palette-neutral-200: #9791a1;
+  --aj-palette-neutral-300: #827c8c;
+  --aj-palette-neutral-400: #6e6979;
+  --aj-palette-neutral-500: #5c5866;
+  --aj-palette-neutral-600: #4c4855;
+  --aj-palette-neutral-700: #3d3a45;
+  --aj-palette-neutral-800: #2f2c36;
+  --aj-palette-neutral-900: #232129;
+  --aj-palette-neutral-950: #1a181e;
+  --aj-palette-neutral-990: #111014;
+  --aj-palette-neutral-plainColor: var(--aj-palette-neutral-700, #32383e);
+  --aj-palette-neutral-plainHoverBg: var(--aj-palette-neutral-100, #f0f4f8);
+  --aj-palette-neutral-plainActiveBg: var(--aj-palette-neutral-200, #dde7ee);
+  --aj-palette-neutral-plainDisabledColor: var(
+    --aj-palette-neutral-400,
+    #9fa6ad
+  );
+  --aj-palette-neutral-outlinedColor: var(--aj-palette-neutral-700, #32383e);
+  --aj-palette-neutral-outlinedBorder: var(--aj-palette-neutral-300, #cdd7e1);
+  --aj-palette-neutral-outlinedHoverBg: var(--aj-palette-neutral-100, #f0f4f8);
+  --aj-palette-neutral-outlinedActiveBg: var(--aj-palette-neutral-200, #dde7ee);
+  --aj-palette-neutral-outlinedDisabledColor: var(
+    --aj-palette-neutral-400,
+    #9fa6ad
+  );
+  --aj-palette-neutral-outlinedDisabledBorder: var(
+    --aj-palette-neutral-200,
+    #dde7ee
+  );
+  --aj-palette-neutral-softColor: var(--aj-palette-neutral-700, #32383e);
+  --aj-palette-neutral-softBg: var(--aj-palette-neutral-100, #f0f4f8);
+  --aj-palette-neutral-softHoverBg: var(--aj-palette-neutral-200, #dde7ee);
+  --aj-palette-neutral-softActiveColor: var(--aj-palette-neutral-800, #171a1c);
+  --aj-palette-neutral-softActiveBg: var(--aj-palette-neutral-300, #cdd7e1);
+  --aj-palette-neutral-softDisabledColor: var(
+    --aj-palette-neutral-400,
+    #9fa6ad
+  );
+  --aj-palette-neutral-softDisabledBg: var(--aj-palette-neutral-50, #fbfcfe);
+  --aj-palette-neutral-solidColor: var(--aj-palette-common-white, #fff);
+  --aj-palette-neutral-solidBg: var(--aj-palette-neutral-500, #636b74);
+  --aj-palette-neutral-solidHoverBg: var(--aj-palette-neutral-600, #555e68);
+  --aj-palette-neutral-solidActiveBg: var(--aj-palette-neutral-700, #32383e);
+  --aj-palette-neutral-solidDisabledColor: var(
+    --aj-palette-neutral-400,
+    #9fa6ad
+  );
+  --aj-palette-neutral-solidDisabledBg: var(--aj-palette-neutral-100, #f0f4f8);
+  --aj-palette-neutral-plainHoverColor: var(--aj-palette-neutral-900, #0b0d0e);
+  --aj-palette-neutral-mainChannel: 92 88 102;
+  --aj-palette-neutral-lightChannel: 151 145 161;
+  --aj-palette-neutral-darkChannel: 61 58 69;
+  --aj-palette-danger-50: #fef6f6;
+  --aj-palette-danger-100: #fce4e4;
+  --aj-palette-danger-200: #f7c5c5;
+  --aj-palette-danger-300: #f09898;
+  --aj-palette-danger-400: #e47474;
+  --aj-palette-danger-500: #c41c1c;
+  --aj-palette-danger-600: #a51818;
+  --aj-palette-danger-700: #7d1212;
+  --aj-palette-danger-800: #430a0a;
+  --aj-palette-danger-900: #240505;
+  --aj-palette-danger-plainColor: var(--aj-palette-danger-500, #c41c1c);
+  --aj-palette-danger-plainHoverBg: var(--aj-palette-danger-100, #fce4e4);
+  --aj-palette-danger-plainActiveBg: var(--aj-palette-danger-200, #f7c5c5);
+  --aj-palette-danger-plainDisabledColor: var(
+    --aj-palette-neutral-400,
+    #9fa6ad
+  );
+  --aj-palette-danger-outlinedColor: var(--aj-palette-danger-500, #c41c1c);
+  --aj-palette-danger-outlinedBorder: var(--aj-palette-danger-300, #f09898);
+  --aj-palette-danger-outlinedHoverBg: var(--aj-palette-danger-100, #fce4e4);
+  --aj-palette-danger-outlinedActiveBg: var(--aj-palette-danger-200, #f7c5c5);
+  --aj-palette-danger-outlinedDisabledColor: var(
+    --aj-palette-neutral-400,
+    #9fa6ad
+  );
+  --aj-palette-danger-outlinedDisabledBorder: var(
+    --aj-palette-neutral-200,
+    #dde7ee
+  );
+  --aj-palette-danger-softColor: var(--aj-palette-danger-700, #7d1212);
+  --aj-palette-danger-softBg: var(--aj-palette-danger-100, #fce4e4);
+  --aj-palette-danger-softHoverBg: var(--aj-palette-danger-200, #f7c5c5);
+  --aj-palette-danger-softActiveColor: var(--aj-palette-danger-800, #430a0a);
+  --aj-palette-danger-softActiveBg: var(--aj-palette-danger-300, #f09898);
+  --aj-palette-danger-softDisabledColor: var(--aj-palette-neutral-400, #9fa6ad);
+  --aj-palette-danger-softDisabledBg: var(--aj-palette-neutral-50, #fbfcfe);
+  --aj-palette-danger-solidColor: var(--aj-palette-common-white, #fff);
+  --aj-palette-danger-solidBg: var(--aj-palette-danger-500, #c41c1c);
+  --aj-palette-danger-solidHoverBg: var(--aj-palette-danger-600, #a51818);
+  --aj-palette-danger-solidActiveBg: var(--aj-palette-danger-700, #7d1212);
+  --aj-palette-danger-solidDisabledColor: var(
+    --aj-palette-neutral-400,
+    #9fa6ad
+  );
+  --aj-palette-danger-solidDisabledBg: var(--aj-palette-neutral-100, #f0f4f8);
+  --aj-palette-danger-mainChannel: 196 28 28;
+  --aj-palette-danger-lightChannel: 247 197 197;
+  --aj-palette-danger-darkChannel: 125 18 18;
+  --aj-palette-success-50: #f6fef6;
+  --aj-palette-success-100: #e3fbe3;
+  --aj-palette-success-200: #c7f7c7;
+  --aj-palette-success-300: #a1e8a1;
+  --aj-palette-success-400: #51bc51;
+  --aj-palette-success-500: #1f7a1f;
+  --aj-palette-success-600: #136c13;
+  --aj-palette-success-700: #0a470a;
+  --aj-palette-success-800: #042f04;
+  --aj-palette-success-900: #021d02;
+  --aj-palette-success-plainColor: var(--aj-palette-success-500, #1f7a1f);
+  --aj-palette-success-plainHoverBg: var(--aj-palette-success-100, #e3fbe3);
+  --aj-palette-success-plainActiveBg: var(--aj-palette-success-200, #c7f7c7);
+  --aj-palette-success-plainDisabledColor: var(
+    --aj-palette-neutral-400,
+    #9fa6ad
+  );
+  --aj-palette-success-outlinedColor: var(--aj-palette-success-500, #1f7a1f);
+  --aj-palette-success-outlinedBorder: var(--aj-palette-success-300, #a1e8a1);
+  --aj-palette-success-outlinedHoverBg: var(--aj-palette-success-100, #e3fbe3);
+  --aj-palette-success-outlinedActiveBg: var(--aj-palette-success-200, #c7f7c7);
+  --aj-palette-success-outlinedDisabledColor: var(
+    --aj-palette-neutral-400,
+    #9fa6ad
+  );
+  --aj-palette-success-outlinedDisabledBorder: var(
+    --aj-palette-neutral-200,
+    #dde7ee
+  );
+  --aj-palette-success-softColor: var(--aj-palette-success-700, #0a470a);
+  --aj-palette-success-softBg: var(--aj-palette-success-100, #e3fbe3);
+  --aj-palette-success-softHoverBg: var(--aj-palette-success-200, #c7f7c7);
+  --aj-palette-success-softActiveColor: var(--aj-palette-success-800, #042f04);
+  --aj-palette-success-softActiveBg: var(--aj-palette-success-300, #a1e8a1);
+  --aj-palette-success-softDisabledColor: var(
+    --aj-palette-neutral-400,
+    #9fa6ad
+  );
+  --aj-palette-success-softDisabledBg: var(--aj-palette-neutral-50, #fbfcfe);
+  --aj-palette-success-solidColor: var(--aj-palette-common-white, #fff);
+  --aj-palette-success-solidBg: var(--aj-palette-success-500, #1f7a1f);
+  --aj-palette-success-solidHoverBg: var(--aj-palette-success-600, #136c13);
+  --aj-palette-success-solidActiveBg: var(--aj-palette-success-700, #0a470a);
+  --aj-palette-success-solidDisabledColor: var(
+    --aj-palette-neutral-400,
+    #9fa6ad
+  );
+  --aj-palette-success-solidDisabledBg: var(--aj-palette-neutral-100, #f0f4f8);
+  --aj-palette-success-mainChannel: 31 122 31;
+  --aj-palette-success-lightChannel: 199 247 199;
+  --aj-palette-success-darkChannel: 10 71 10;
+  --aj-palette-warning-50: #fefaf6;
+  --aj-palette-warning-100: #fdf0e1;
+  --aj-palette-warning-200: #fce1c2;
+  --aj-palette-warning-300: #f3c896;
+  --aj-palette-warning-400: #ea9a3e;
+  --aj-palette-warning-500: #9a5b13;
+  --aj-palette-warning-600: #72430d;
+  --aj-palette-warning-700: #492b08;
+  --aj-palette-warning-800: #2e1b05;
+  --aj-palette-warning-900: #1d1002;
+  --aj-palette-warning-plainColor: var(--aj-palette-warning-500, #9a5b13);
+  --aj-palette-warning-plainHoverBg: var(--aj-palette-warning-100, #fdf0e1);
+  --aj-palette-warning-plainActiveBg: var(--aj-palette-warning-200, #fce1c2);
+  --aj-palette-warning-plainDisabledColor: var(
+    --aj-palette-neutral-400,
+    #9fa6ad
+  );
+  --aj-palette-warning-outlinedColor: var(--aj-palette-warning-500, #9a5b13);
+  --aj-palette-warning-outlinedBorder: var(--aj-palette-warning-300, #f3c896);
+  --aj-palette-warning-outlinedHoverBg: var(--aj-palette-warning-100, #fdf0e1);
+  --aj-palette-warning-outlinedActiveBg: var(--aj-palette-warning-200, #fce1c2);
+  --aj-palette-warning-outlinedDisabledColor: var(
+    --aj-palette-neutral-400,
+    #9fa6ad
+  );
+  --aj-palette-warning-outlinedDisabledBorder: var(
+    --aj-palette-neutral-200,
+    #dde7ee
+  );
+  --aj-palette-warning-softColor: var(--aj-palette-warning-700, #492b08);
+  --aj-palette-warning-softBg: var(--aj-palette-warning-100, #fdf0e1);
+  --aj-palette-warning-softHoverBg: var(--aj-palette-warning-200, #fce1c2);
+  --aj-palette-warning-softActiveColor: var(--aj-palette-warning-800, #2e1b05);
+  --aj-palette-warning-softActiveBg: var(--aj-palette-warning-300, #f3c896);
+  --aj-palette-warning-softDisabledColor: var(
+    --aj-palette-neutral-400,
+    #9fa6ad
+  );
+  --aj-palette-warning-softDisabledBg: var(--aj-palette-neutral-50, #fbfcfe);
+  --aj-palette-warning-solidColor: var(--aj-palette-common-white, #fff);
+  --aj-palette-warning-solidBg: var(--aj-palette-warning-500, #9a5b13);
+  --aj-palette-warning-solidHoverBg: var(--aj-palette-warning-600, #72430d);
+  --aj-palette-warning-solidActiveBg: var(--aj-palette-warning-700, #492b08);
+  --aj-palette-warning-solidDisabledColor: var(
+    --aj-palette-neutral-400,
+    #9fa6ad
+  );
+  --aj-palette-warning-solidDisabledBg: var(--aj-palette-neutral-100, #f0f4f8);
+  --aj-palette-warning-mainChannel: 154 91 19;
+  --aj-palette-warning-lightChannel: 252 225 194;
+  --aj-palette-warning-darkChannel: 73 43 8;
+  --aj-palette-common-white: #ffffff;
+  --aj-palette-common-black: #000000;
+  --aj-palette-common-blackRgb: 0 0 0;
+  --aj-palette-common-whiteRgb: 255 255 255;
+  --aj-palette-text-primary: var(--aj-palette-neutral-800, #171a1c);
+  --aj-palette-text-secondary: var(--aj-palette-neutral-700, #32383e);
+  --aj-palette-text-tertiary: var(--aj-palette-neutral-600, #555e68);
+  --aj-palette-text-icon: var(--aj-palette-neutral-500, #636b74);
+  --aj-palette-background-body: #ffffff;
+  --aj-palette-background-surface: var(--aj-palette-neutral-50, #fbfcfe);
+  --aj-palette-background-popup: var(--aj-palette-common-white, #fff);
+  --aj-palette-background-level1: var(--aj-palette-neutral-100, #f0f4f8);
+  --aj-palette-background-level2: var(--aj-palette-neutral-200, #dde7ee);
+  --aj-palette-background-level3: var(--aj-palette-neutral-300, #cdd7e1);
+  --aj-palette-background-tooltip: var(--aj-palette-neutral-500, #636b74);
+  --aj-palette-background-backdrop: rgba(
+    var(--aj-palette-neutral-darkChannel, 11 13 14) / 0.25
+  );
+  --aj-palette-background-header: 255 255 255;
+  --aj-palette-background-bodyRgb: 255 255 255;
+  --aj-palette-divider: rgba(
+    var(--aj-palette-neutral-mainChannel, 99 107 116) / 0.2
+  );
+  --aj-palette-focusVisible: var(--aj-palette-primary-500, #0b6bcb);
+  --aj-palette-source-black: #000000;
+  --aj-palette-source-blackRgb: 0 0 0;
+  --aj-palette-source-white: #ffffff;
+  --aj-palette-source-whiteRgb: 255 255 255;
+  --aj-palette-source-neutral-10: #aca6b5;
+  --aj-palette-source-neutral-11: #bfb9c8;
+  --aj-palette-source-neutral-12: #d1cbd8;
+  --aj-palette-source-neutral-13: #dfd9e4;
+  --aj-palette-source-neutral-14: #ece6f0;
+  --aj-palette-source-neutral-15: #f8f2fa;
+  --aj-palette-source-neutral-00: #111014;
+  --aj-palette-source-neutral-01: #1a181e;
+  --aj-palette-source-neutral-02: #232129;
+  --aj-palette-source-neutral-03: #2f2c36;
+  --aj-palette-source-neutral-04: #3d3a45;
+  --aj-palette-source-neutral-05: #4c4855;
+  --aj-palette-source-neutral-06: #5c5866;
+  --aj-palette-source-neutral-07: #6e6979;
+  --aj-palette-source-neutral-08: #827c8c;
+  --aj-palette-source-neutral-09: #9791a1;
+  --aj-palette-source-tint-00-10: #fd7cc0;
+  --aj-palette-source-tint-00-11: #ff9bcc;
+  --aj-palette-source-tint-00-12: #ffb6d7;
+  --aj-palette-source-tint-00-13: #ffcce1;
+  --aj-palette-source-tint-00-14: #ffdfeb;
+  --aj-palette-source-tint-00-15: #fff1f5;
+  --aj-palette-source-tint-00-00: #2e001c;
+  --aj-palette-source-tint-00-01: #41002a;
+  --aj-palette-source-tint-00-02: #560038;
+  --aj-palette-source-tint-00-03: #6c0048;
+  --aj-palette-source-tint-00-04: #801257;
+  --aj-palette-source-tint-00-05: #942567;
+  --aj-palette-source-tint-00-06: #a83678;
+  --aj-palette-source-tint-00-07: #bd4889;
+  --aj-palette-source-tint-00-08: #d2599b;
+  --aj-palette-source-tint-00-09: #e86bae;
+  --aj-palette-source-tint-01-10: #e47deb;
+  --aj-palette-source-tint-01-11: #fa95ff;
+  --aj-palette-source-tint-01-12: #feb3ff;
+  --aj-palette-source-tint-01-13: #ffc9fd;
+  --aj-palette-source-tint-01-14: #ffdcfb;
+  --aj-palette-source-tint-01-15: #ffeefa;
+  --aj-palette-source-tint-01-00: #27002d;
+  --aj-palette-source-tint-01-01: #380040;
+  --aj-palette-source-tint-01-02: #490052;
+  --aj-palette-source-tint-01-03: #5c0067;
+  --aj-palette-source-tint-01-04: #70087c;
+  --aj-palette-source-tint-01-05: #82228e;
+  --aj-palette-source-tint-01-06: #95359f;
+  --aj-palette-source-tint-01-07: #a847b1;
+  --aj-palette-source-tint-01-08: #bb59c4;
+  --aj-palette-source-tint-01-09: #cf6ad7;
+  --aj-palette-source-tint-02-10: #be89ff;
+  --aj-palette-source-tint-02-11: #cca2ff;
+  --aj-palette-source-tint-02-12: #d9b9ff;
+  --aj-palette-source-tint-02-13: #e6cdff;
+  --aj-palette-source-tint-02-14: #f0dfff;
+  --aj-palette-source-tint-02-15: #faefff;
+  --aj-palette-source-tint-02-00: #1c0039;
+  --aj-palette-source-tint-02-01: #2a0050;
+  --aj-palette-source-tint-02-02: #370066;
+  --aj-palette-source-tint-02-03: #45007f;
+  --aj-palette-source-tint-02-04: #52178d;
+  --aj-palette-source-tint-02-05: #642ea0;
+  --aj-palette-source-tint-02-06: #7540b1;
+  --aj-palette-source-tint-02-07: #834fc1;
+  --aj-palette-source-tint-02-08: #9561d4;
+  --aj-palette-source-tint-02-09: #a975e9;
+  --aj-palette-source-tint-03-10: #9696ff;
+  --aj-palette-source-tint-03-11: #ababff;
+  --aj-palette-source-tint-03-12: #bebeff;
+  --aj-palette-source-tint-03-13: #d1cfff;
+  --aj-palette-source-tint-03-14: #e3e0ff;
+  --aj-palette-source-tint-03-15: #f4f1ff;
+  --aj-palette-source-tint-03-00: #040040;
+  --aj-palette-source-tint-03-01: #0f0a57;
+  --aj-palette-source-tint-03-02: #171269;
+  --aj-palette-source-tint-03-03: #1d197c;
+  --aj-palette-source-tint-03-04: #292689;
+  --aj-palette-source-tint-03-05: #3b399c;
+  --aj-palette-source-tint-03-06: #4c4bae;
+  --aj-palette-source-tint-03-07: #5a59bd;
+  --aj-palette-source-tint-03-08: #6a6acf;
+  --aj-palette-source-tint-03-09: #8080e7;
+  --aj-palette-source-tint-04-10: #679fff;
+  --aj-palette-source-tint-04-11: #87b1ff;
+  --aj-palette-source-tint-04-12: #a3c2ff;
+  --aj-palette-source-tint-04-13: #bdd2ff;
+  --aj-palette-source-tint-04-14: #d7e2ff;
+  --aj-palette-source-tint-04-15: #ecf0ff;
+  --aj-palette-source-tint-04-00: #000f2a;
+  --aj-palette-source-tint-04-01: #00193c;
+  --aj-palette-source-tint-04-02: #00214c;
+  --aj-palette-source-tint-04-03: #00295b;
+  --aj-palette-source-tint-04-04: #00326c;
+  --aj-palette-source-tint-04-05: #00428a;
+  --aj-palette-source-tint-04-06: #0051a7;
+  --aj-palette-source-tint-04-07: #175fbb;
+  --aj-palette-source-tint-04-08: #3170cd;
+  --aj-palette-source-tint-04-09: #4d87e5;
+  --aj-palette-source-tint-05-10: #1dabf5;
+  --aj-palette-source-tint-05-11: #57bcff;
+  --aj-palette-source-tint-05-12: #85cbff;
+  --aj-palette-source-tint-05-13: #a9d8ff;
+  --aj-palette-source-tint-05-14: #c9e5ff;
+  --aj-palette-source-tint-05-15: #e4f1ff;
+  --aj-palette-source-tint-05-00: #00111d;
+  --aj-palette-source-tint-05-01: #001c2d;
+  --aj-palette-source-tint-05-02: #00253a;
+  --aj-palette-source-tint-05-03: #002d45;
+  --aj-palette-source-tint-05-04: #003653;
+  --aj-palette-source-tint-05-05: #00486b;
+  --aj-palette-source-tint-05-06: #005882;
+  --aj-palette-source-tint-05-07: #006696;
+  --aj-palette-source-tint-05-08: #0078b0;
+  --aj-palette-source-tint-05-09: #008ecf;
+  --aj-palette-source-tint-06-10: #00b6db;
+  --aj-palette-source-tint-06-11: #3fc7e8;
+  --aj-palette-source-tint-06-12: #62d4f3;
+  --aj-palette-source-tint-06-13: #79e2ff;
+  --aj-palette-source-tint-06-14: #acebff;
+  --aj-palette-source-tint-06-15: #d4f3ff;
+  --aj-palette-source-tint-06-00: #001218;
+  --aj-palette-source-tint-06-01: #001d26;
+  --aj-palette-source-tint-06-02: #002732;
+  --aj-palette-source-tint-06-03: #00313d;
+  --aj-palette-source-tint-06-04: #003b49;
+  --aj-palette-source-tint-06-05: #00485a;
+  --aj-palette-source-tint-06-06: #00596f;
+  --aj-palette-source-tint-06-07: #006a86;
+  --aj-palette-source-tint-06-08: #007e9f;
+  --aj-palette-source-tint-06-09: #0097bd;
+  --aj-palette-source-tint-07-10: #00babe;
+  --aj-palette-source-tint-07-11: #00ccd0;
+  --aj-palette-source-tint-07-12: #00dce0;
+  --aj-palette-source-tint-07-13: #71e5e8;
+  --aj-palette-source-tint-07-14: #9eeef0;
+  --aj-palette-source-tint-07-15: #b6f9fb;
+  --aj-palette-source-tint-07-00: #001213;
+  --aj-palette-source-tint-07-01: #001e1f;
+  --aj-palette-source-tint-07-02: #002829;
+  --aj-palette-source-tint-07-03: #003335;
+  --aj-palette-source-tint-07-04: #003f40;
+  --aj-palette-source-tint-07-05: #004b4d;
+  --aj-palette-source-tint-07-06: #005f61;
+  --aj-palette-source-tint-07-07: #006f72;
+  --aj-palette-source-tint-07-08: #008184;
+  --aj-palette-source-tint-07-09: #009b9f;
+  --aj-palette-source-tint-08-10: #00be9e;
+  --aj-palette-source-tint-08-11: #34cfaf;
+  --aj-palette-source-tint-08-12: #50ddbd;
+  --aj-palette-source-tint-08-13: #7ee7cb;
+  --aj-palette-source-tint-08-14: #a5f0d9;
+  --aj-palette-source-tint-08-15: #c2fae8;
+  --aj-palette-source-tint-08-00: #00130e;
+  --aj-palette-source-tint-08-01: #001f18;
+  --aj-palette-source-tint-08-02: #002a21;
+  --aj-palette-source-tint-08-03: #00352b;
+  --aj-palette-source-tint-08-04: #004135;
+  --aj-palette-source-tint-08-05: #004e40;
+  --aj-palette-source-tint-08-06: #006251;
+  --aj-palette-source-tint-08-07: #00735f;
+  --aj-palette-source-tint-08-08: #00856e;
+  --aj-palette-source-tint-08-09: #009e83;
+  --aj-palette-source-tint-09-10: #53bf7a;
+  --aj-palette-source-tint-09-11: #67d38c;
+  --aj-palette-source-tint-09-12: #78e49b;
+  --aj-palette-source-tint-09-13: #87f3a9;
+  --aj-palette-source-tint-09-14: #a4ffbd;
+  --aj-palette-source-tint-09-15: #cdffd6;
+  --aj-palette-source-tint-09-00: #001306;
+  --aj-palette-source-tint-09-01: #001f0c;
+  --aj-palette-source-tint-09-02: #002a12;
+  --aj-palette-source-tint-09-03: #003619;
+  --aj-palette-source-tint-09-04: #004221;
+  --aj-palette-source-tint-09-05: #00522a;
+  --aj-palette-source-tint-09-06: #006535;
+  --aj-palette-source-tint-09-07: #007941;
+  --aj-palette-source-tint-09-08: #098a4b;
+  --aj-palette-source-tint-09-09: #31a15f;
+  --aj-palette-source-tint-10-10: #88bc56;
+  --aj-palette-source-tint-10-11: #9dd16a;
+  --aj-palette-source-tint-10-12: #afe37c;
+  --aj-palette-source-tint-10-13: #bff28d;
+  --aj-palette-source-tint-10-14: #d1ffa2;
+  --aj-palette-source-tint-10-15: #e9ffcd;
+  --aj-palette-source-tint-10-00: #061300;
+  --aj-palette-source-tint-10-01: #0d1f00;
+  --aj-palette-source-tint-10-02: #142b00;
+  --aj-palette-source-tint-10-03: #1c3700;
+  --aj-palette-source-tint-10-04: #234400;
+  --aj-palette-source-tint-10-05: #2d5400;
+  --aj-palette-source-tint-10-06: #396702;
+  --aj-palette-source-tint-10-07: #4a7919;
+  --aj-palette-source-tint-10-08: #5b8c2b;
+  --aj-palette-source-tint-10-09: #6fa13e;
+  --aj-palette-source-tint-11-10: #b6b836;
+  --aj-palette-source-tint-11-11: #cbcd4a;
+  --aj-palette-source-tint-11-12: #dee05b;
+  --aj-palette-source-tint-11-13: #f0f26a;
+  --aj-palette-source-tint-11-14: #fdff80;
+  --aj-palette-source-tint-11-15: #fffebc;
+  --aj-palette-source-tint-11-00: #121300;
+  --aj-palette-source-tint-11-01: #1d1e00;
+  --aj-palette-source-tint-11-02: #292a00;
+  --aj-palette-source-tint-11-03: #363700;
+  --aj-palette-source-tint-11-04: #444500;
+  --aj-palette-source-tint-11-05: #545500;
+  --aj-palette-source-tint-11-06: #646600;
+  --aj-palette-source-tint-11-07: #767800;
+  --aj-palette-source-tint-11-08: #8b8d00;
+  --aj-palette-source-tint-11-09: #a1a320;
+  --aj-palette-source-tint-12-10: #dfb222;
+  --aj-palette-source-tint-12-11: #f4c537;
+  --aj-palette-source-tint-12-12: #ffd561;
+  --aj-palette-source-tint-12-13: #ffe093;
+  --aj-palette-source-tint-12-14: #ffe8b4;
+  --aj-palette-source-tint-12-15: #fff1d4;
+  --aj-palette-source-tint-12-00: #1a1200;
+  --aj-palette-source-tint-12-01: #281d00;
+  --aj-palette-source-tint-12-02: #372900;
+  --aj-palette-source-tint-12-03: #463600;
+  --aj-palette-source-tint-12-04: #584300;
+  --aj-palette-source-tint-12-05: #6b5300;
+  --aj-palette-source-tint-12-06: #806400;
+  --aj-palette-source-tint-12-07: #977600;
+  --aj-palette-source-tint-12-08: #b18b00;
+  --aj-palette-source-tint-12-09: #c99e00;
+  --aj-palette-source-tint-13-10: #fda630;
+  --aj-palette-source-tint-13-11: #ffba68;
+  --aj-palette-source-tint-13-12: #ffcc95;
+  --aj-palette-source-tint-13-13: #ffd9b1;
+  --aj-palette-source-tint-13-14: #ffe4ca;
+  --aj-palette-source-tint-13-15: #fff0e3;
+  --aj-palette-source-tint-13-00: #201000;
+  --aj-palette-source-tint-13-01: #341d00;
+  --aj-palette-source-tint-13-02: #482a00;
+  --aj-palette-source-tint-13-03: #5e3800;
+  --aj-palette-source-tint-13-04: #744600;
+  --aj-palette-source-tint-13-05: #8b5500;
+  --aj-palette-source-tint-13-06: #a36400;
+  --aj-palette-source-tint-13-07: #bb7400;
+  --aj-palette-source-tint-13-08: #d38400;
+  --aj-palette-source-tint-13-09: #e9951d;
+  --aj-palette-source-tint-14-10: #ff9d67;
+  --aj-palette-source-tint-14-11: #ffb087;
+  --aj-palette-source-tint-14-12: #ffc6a9;
+  --aj-palette-source-tint-14-13: #ffd5c1;
+  --aj-palette-source-tint-14-14: #ffe2d5;
+  --aj-palette-source-tint-14-15: #ffefe9;
+  --aj-palette-source-tint-14-00: #290c00;
+  --aj-palette-source-tint-14-01: #3f1700;
+  --aj-palette-source-tint-14-02: #562200;
+  --aj-palette-source-tint-14-03: #712e00;
+  --aj-palette-source-tint-14-04: #8c3c00;
+  --aj-palette-source-tint-14-05: #a74901;
+  --aj-palette-source-tint-14-06: #bc5815;
+  --aj-palette-source-tint-14-07: #d06725;
+  --aj-palette-source-tint-14-08: #e57634;
+  --aj-palette-source-tint-14-09: #f98642;
+  --aj-palette-source-tint-15-10: #ff998d;
+  --aj-palette-source-tint-15-11: #ffaca2;
+  --aj-palette-source-tint-15-12: #ffc4bc;
+  --aj-palette-source-tint-15-13: #ffd5d0;
+  --aj-palette-source-tint-15-14: #ffe2df;
+  --aj-palette-source-tint-15-15: #ffefed;
+  --aj-palette-source-tint-15-00: #370001;
+  --aj-palette-source-tint-15-01: #550003;
+  --aj-palette-source-tint-15-02: #750006;
+  --aj-palette-source-tint-15-03: #8f1614;
+  --aj-palette-source-tint-15-04: #a92a24;
+  --aj-palette-source-tint-15-05: #bf3a32;
+  --aj-palette-source-tint-15-06: #d5493f;
+  --aj-palette-source-tint-15-07: #ea594d;
+  --aj-palette-source-tint-15-08: #ff685b;
+  --aj-palette-source-tint-15-09: #ff8073;
+  --aj-palette-source-neutralRgb-10: 172 166 181;
+  --aj-palette-source-neutralRgb-11: 191 185 200;
+  --aj-palette-source-neutralRgb-12: 209 203 216;
+  --aj-palette-source-neutralRgb-13: 223 217 228;
+  --aj-palette-source-neutralRgb-14: 236 230 240;
+  --aj-palette-source-neutralRgb-15: 248 242 250;
+  --aj-palette-source-neutralRgb-00: 17 16 20;
+  --aj-palette-source-neutralRgb-01: 26 24 30;
+  --aj-palette-source-neutralRgb-02: 35 33 41;
+  --aj-palette-source-neutralRgb-03: 47 44 54;
+  --aj-palette-source-neutralRgb-04: 61 58 69;
+  --aj-palette-source-neutralRgb-05: 76 72 85;
+  --aj-palette-source-neutralRgb-06: 92 88 102;
+  --aj-palette-source-neutralRgb-07: 110 105 121;
+  --aj-palette-source-neutralRgb-08: 130 124 140;
+  --aj-palette-source-neutralRgb-09: 151 145 161;
+  --aj-palette-source-tint-00Rgb-10: 253 124 192;
+  --aj-palette-source-tint-00Rgb-11: 255 155 204;
+  --aj-palette-source-tint-00Rgb-12: 255 182 215;
+  --aj-palette-source-tint-00Rgb-13: 255 204 225;
+  --aj-palette-source-tint-00Rgb-14: 255 223 235;
+  --aj-palette-source-tint-00Rgb-15: 255 241 245;
+  --aj-palette-source-tint-00Rgb-00: 46 0 28;
+  --aj-palette-source-tint-00Rgb-01: 65 0 42;
+  --aj-palette-source-tint-00Rgb-02: 86 0 56;
+  --aj-palette-source-tint-00Rgb-03: 108 0 72;
+  --aj-palette-source-tint-00Rgb-04: 128 18 87;
+  --aj-palette-source-tint-00Rgb-05: 148 37 103;
+  --aj-palette-source-tint-00Rgb-06: 168 54 120;
+  --aj-palette-source-tint-00Rgb-07: 189 72 137;
+  --aj-palette-source-tint-00Rgb-08: 210 89 155;
+  --aj-palette-source-tint-00Rgb-09: 232 107 174;
+  --aj-palette-source-tint-01Rgb-10: 228 125 235;
+  --aj-palette-source-tint-01Rgb-11: 250 149 255;
+  --aj-palette-source-tint-01Rgb-12: 254 179 255;
+  --aj-palette-source-tint-01Rgb-13: 255 201 253;
+  --aj-palette-source-tint-01Rgb-14: 255 220 251;
+  --aj-palette-source-tint-01Rgb-15: 255 238 250;
+  --aj-palette-source-tint-01Rgb-00: 39 0 45;
+  --aj-palette-source-tint-01Rgb-01: 56 0 64;
+  --aj-palette-source-tint-01Rgb-02: 73 0 82;
+  --aj-palette-source-tint-01Rgb-03: 92 0 103;
+  --aj-palette-source-tint-01Rgb-04: 112 8 124;
+  --aj-palette-source-tint-01Rgb-05: 130 34 142;
+  --aj-palette-source-tint-01Rgb-06: 149 53 159;
+  --aj-palette-source-tint-01Rgb-07: 168 71 177;
+  --aj-palette-source-tint-01Rgb-08: 187 89 196;
+  --aj-palette-source-tint-01Rgb-09: 207 106 215;
+  --aj-palette-source-tint-02Rgb-10: 190 137 255;
+  --aj-palette-source-tint-02Rgb-11: 204 162 255;
+  --aj-palette-source-tint-02Rgb-12: 217 185 255;
+  --aj-palette-source-tint-02Rgb-13: 230 205 255;
+  --aj-palette-source-tint-02Rgb-14: 240 223 255;
+  --aj-palette-source-tint-02Rgb-15: 250 239 255;
+  --aj-palette-source-tint-02Rgb-00: 28 0 57;
+  --aj-palette-source-tint-02Rgb-01: 42 0 80;
+  --aj-palette-source-tint-02Rgb-02: 55 0 102;
+  --aj-palette-source-tint-02Rgb-03: 69 0 127;
+  --aj-palette-source-tint-02Rgb-04: 82 23 141;
+  --aj-palette-source-tint-02Rgb-05: 100 46 160;
+  --aj-palette-source-tint-02Rgb-06: 117 64 177;
+  --aj-palette-source-tint-02Rgb-07: 131 79 193;
+  --aj-palette-source-tint-02Rgb-08: 149 97 212;
+  --aj-palette-source-tint-02Rgb-09: 169 117 233;
+  --aj-palette-source-tint-03Rgb-10: 150 150 255;
+  --aj-palette-source-tint-03Rgb-11: 171 171 255;
+  --aj-palette-source-tint-03Rgb-12: 190 190 255;
+  --aj-palette-source-tint-03Rgb-13: 209 207 255;
+  --aj-palette-source-tint-03Rgb-14: 227 224 255;
+  --aj-palette-source-tint-03Rgb-15: 244 241 255;
+  --aj-palette-source-tint-03Rgb-00: 4 0 64;
+  --aj-palette-source-tint-03Rgb-01: 15 10 87;
+  --aj-palette-source-tint-03Rgb-02: 23 18 105;
+  --aj-palette-source-tint-03Rgb-03: 29 25 124;
+  --aj-palette-source-tint-03Rgb-04: 41 38 137;
+  --aj-palette-source-tint-03Rgb-05: 59 57 156;
+  --aj-palette-source-tint-03Rgb-06: 76 75 174;
+  --aj-palette-source-tint-03Rgb-07: 90 89 189;
+  --aj-palette-source-tint-03Rgb-08: 106 106 207;
+  --aj-palette-source-tint-03Rgb-09: 128 128 231;
+  --aj-palette-source-tint-04Rgb-10: 103 159 255;
+  --aj-palette-source-tint-04Rgb-11: 135 177 255;
+  --aj-palette-source-tint-04Rgb-12: 163 194 255;
+  --aj-palette-source-tint-04Rgb-13: 189 210 255;
+  --aj-palette-source-tint-04Rgb-14: 215 226 255;
+  --aj-palette-source-tint-04Rgb-15: 236 240 255;
+  --aj-palette-source-tint-04Rgb-00: 0 15 42;
+  --aj-palette-source-tint-04Rgb-01: 0 25 60;
+  --aj-palette-source-tint-04Rgb-02: 0 33 76;
+  --aj-palette-source-tint-04Rgb-03: 0 41 91;
+  --aj-palette-source-tint-04Rgb-04: 0 50 108;
+  --aj-palette-source-tint-04Rgb-05: 0 66 138;
+  --aj-palette-source-tint-04Rgb-06: 0 81 167;
+  --aj-palette-source-tint-04Rgb-07: 23 95 187;
+  --aj-palette-source-tint-04Rgb-08: 49 112 205;
+  --aj-palette-source-tint-04Rgb-09: 77 135 229;
+  --aj-palette-source-tint-05Rgb-10: 29 171 245;
+  --aj-palette-source-tint-05Rgb-11: 87 188 255;
+  --aj-palette-source-tint-05Rgb-12: 133 203 255;
+  --aj-palette-source-tint-05Rgb-13: 169 216 255;
+  --aj-palette-source-tint-05Rgb-14: 201 229 255;
+  --aj-palette-source-tint-05Rgb-15: 228 241 255;
+  --aj-palette-source-tint-05Rgb-00: 0 17 29;
+  --aj-palette-source-tint-05Rgb-01: 0 28 45;
+  --aj-palette-source-tint-05Rgb-02: 0 37 58;
+  --aj-palette-source-tint-05Rgb-03: 0 45 69;
+  --aj-palette-source-tint-05Rgb-04: 0 54 83;
+  --aj-palette-source-tint-05Rgb-05: 0 72 107;
+  --aj-palette-source-tint-05Rgb-06: 0 88 130;
+  --aj-palette-source-tint-05Rgb-07: 0 102 150;
+  --aj-palette-source-tint-05Rgb-08: 0 120 176;
+  --aj-palette-source-tint-05Rgb-09: 0 142 207;
+  --aj-palette-source-tint-06Rgb-10: 0 182 219;
+  --aj-palette-source-tint-06Rgb-11: 63 199 232;
+  --aj-palette-source-tint-06Rgb-12: 98 212 243;
+  --aj-palette-source-tint-06Rgb-13: 121 226 255;
+  --aj-palette-source-tint-06Rgb-14: 172 235 255;
+  --aj-palette-source-tint-06Rgb-15: 212 243 255;
+  --aj-palette-source-tint-06Rgb-00: 0 18 24;
+  --aj-palette-source-tint-06Rgb-01: 0 29 38;
+  --aj-palette-source-tint-06Rgb-02: 0 39 50;
+  --aj-palette-source-tint-06Rgb-03: 0 49 61;
+  --aj-palette-source-tint-06Rgb-04: 0 59 73;
+  --aj-palette-source-tint-06Rgb-05: 0 72 90;
+  --aj-palette-source-tint-06Rgb-06: 0 89 111;
+  --aj-palette-source-tint-06Rgb-07: 0 106 134;
+  --aj-palette-source-tint-06Rgb-08: 0 126 159;
+  --aj-palette-source-tint-06Rgb-09: 0 151 189;
+  --aj-palette-source-tint-07Rgb-10: 0 186 190;
+  --aj-palette-source-tint-07Rgb-11: 0 204 208;
+  --aj-palette-source-tint-07Rgb-12: 0 220 224;
+  --aj-palette-source-tint-07Rgb-13: 113 229 232;
+  --aj-palette-source-tint-07Rgb-14: 158 238 240;
+  --aj-palette-source-tint-07Rgb-15: 182 249 251;
+  --aj-palette-source-tint-07Rgb-00: 0 18 19;
+  --aj-palette-source-tint-07Rgb-01: 0 30 31;
+  --aj-palette-source-tint-07Rgb-02: 0 40 41;
+  --aj-palette-source-tint-07Rgb-03: 0 51 53;
+  --aj-palette-source-tint-07Rgb-04: 0 63 64;
+  --aj-palette-source-tint-07Rgb-05: 0 75 77;
+  --aj-palette-source-tint-07Rgb-06: 0 95 97;
+  --aj-palette-source-tint-07Rgb-07: 0 111 114;
+  --aj-palette-source-tint-07Rgb-08: 0 129 132;
+  --aj-palette-source-tint-07Rgb-09: 0 155 159;
+  --aj-palette-source-tint-08Rgb-10: 0 190 158;
+  --aj-palette-source-tint-08Rgb-11: 52 207 175;
+  --aj-palette-source-tint-08Rgb-12: 80 221 189;
+  --aj-palette-source-tint-08Rgb-13: 126 231 203;
+  --aj-palette-source-tint-08Rgb-14: 165 240 217;
+  --aj-palette-source-tint-08Rgb-15: 194 250 232;
+  --aj-palette-source-tint-08Rgb-00: 0 19 14;
+  --aj-palette-source-tint-08Rgb-01: 0 31 24;
+  --aj-palette-source-tint-08Rgb-02: 0 42 33;
+  --aj-palette-source-tint-08Rgb-03: 0 53 43;
+  --aj-palette-source-tint-08Rgb-04: 0 65 53;
+  --aj-palette-source-tint-08Rgb-05: 0 78 64;
+  --aj-palette-source-tint-08Rgb-06: 0 98 81;
+  --aj-palette-source-tint-08Rgb-07: 0 115 95;
+  --aj-palette-source-tint-08Rgb-08: 0 133 110;
+  --aj-palette-source-tint-08Rgb-09: 0 158 131;
+  --aj-palette-source-tint-09Rgb-10: 83 191 122;
+  --aj-palette-source-tint-09Rgb-11: 103 211 140;
+  --aj-palette-source-tint-09Rgb-12: 120 228 155;
+  --aj-palette-source-tint-09Rgb-13: 135 243 169;
+  --aj-palette-source-tint-09Rgb-14: 164 255 189;
+  --aj-palette-source-tint-09Rgb-15: 205 255 214;
+  --aj-palette-source-tint-09Rgb-00: 0 19 6;
+  --aj-palette-source-tint-09Rgb-01: 0 31 12;
+  --aj-palette-source-tint-09Rgb-02: 0 42 18;
+  --aj-palette-source-tint-09Rgb-03: 0 54 25;
+  --aj-palette-source-tint-09Rgb-04: 0 66 33;
+  --aj-palette-source-tint-09Rgb-05: 0 82 42;
+  --aj-palette-source-tint-09Rgb-06: 0 101 53;
+  --aj-palette-source-tint-09Rgb-07: 0 121 65;
+  --aj-palette-source-tint-09Rgb-08: 9 138 75;
+  --aj-palette-source-tint-09Rgb-09: 49 161 95;
+  --aj-palette-source-tint-10Rgb-10: 136 188 86;
+  --aj-palette-source-tint-10Rgb-11: 157 209 106;
+  --aj-palette-source-tint-10Rgb-12: 175 227 124;
+  --aj-palette-source-tint-10Rgb-13: 191 242 141;
+  --aj-palette-source-tint-10Rgb-14: 209 255 162;
+  --aj-palette-source-tint-10Rgb-15: 233 255 205;
+  --aj-palette-source-tint-10Rgb-00: 6 19 0;
+  --aj-palette-source-tint-10Rgb-01: 13 31 0;
+  --aj-palette-source-tint-10Rgb-02: 20 43 0;
+  --aj-palette-source-tint-10Rgb-03: 28 55 0;
+  --aj-palette-source-tint-10Rgb-04: 35 68 0;
+  --aj-palette-source-tint-10Rgb-05: 45 84 0;
+  --aj-palette-source-tint-10Rgb-06: 57 103 2;
+  --aj-palette-source-tint-10Rgb-07: 74 121 25;
+  --aj-palette-source-tint-10Rgb-08: 91 140 43;
+  --aj-palette-source-tint-10Rgb-09: 111 161 62;
+  --aj-palette-source-tint-11Rgb-10: 182 184 54;
+  --aj-palette-source-tint-11Rgb-11: 203 205 74;
+  --aj-palette-source-tint-11Rgb-12: 222 224 91;
+  --aj-palette-source-tint-11Rgb-13: 240 242 106;
+  --aj-palette-source-tint-11Rgb-14: 253 255 128;
+  --aj-palette-source-tint-11Rgb-15: 255 254 188;
+  --aj-palette-source-tint-11Rgb-00: 18 19 0;
+  --aj-palette-source-tint-11Rgb-01: 29 30 0;
+  --aj-palette-source-tint-11Rgb-02: 41 42 0;
+  --aj-palette-source-tint-11Rgb-03: 54 55 0;
+  --aj-palette-source-tint-11Rgb-04: 68 69 0;
+  --aj-palette-source-tint-11Rgb-05: 84 85 0;
+  --aj-palette-source-tint-11Rgb-06: 100 102 0;
+  --aj-palette-source-tint-11Rgb-07: 118 120 0;
+  --aj-palette-source-tint-11Rgb-08: 139 141 0;
+  --aj-palette-source-tint-11Rgb-09: 161 163 32;
+  --aj-palette-source-tint-12Rgb-10: 223 178 34;
+  --aj-palette-source-tint-12Rgb-11: 244 197 55;
+  --aj-palette-source-tint-12Rgb-12: 255 213 97;
+  --aj-palette-source-tint-12Rgb-13: 255 224 147;
+  --aj-palette-source-tint-12Rgb-14: 255 232 180;
+  --aj-palette-source-tint-12Rgb-15: 255 241 212;
+  --aj-palette-source-tint-12Rgb-00: 26 18 0;
+  --aj-palette-source-tint-12Rgb-01: 40 29 0;
+  --aj-palette-source-tint-12Rgb-02: 55 41 0;
+  --aj-palette-source-tint-12Rgb-03: 70 54 0;
+  --aj-palette-source-tint-12Rgb-04: 88 67 0;
+  --aj-palette-source-tint-12Rgb-05: 107 83 0;
+  --aj-palette-source-tint-12Rgb-06: 128 100 0;
+  --aj-palette-source-tint-12Rgb-07: 151 118 0;
+  --aj-palette-source-tint-12Rgb-08: 177 139 0;
+  --aj-palette-source-tint-12Rgb-09: 201 158 0;
+  --aj-palette-source-tint-13Rgb-10: 253 166 48;
+  --aj-palette-source-tint-13Rgb-11: 255 186 104;
+  --aj-palette-source-tint-13Rgb-12: 255 204 149;
+  --aj-palette-source-tint-13Rgb-13: 255 217 177;
+  --aj-palette-source-tint-13Rgb-14: 255 228 202;
+  --aj-palette-source-tint-13Rgb-15: 255 240 227;
+  --aj-palette-source-tint-13Rgb-00: 32 16 0;
+  --aj-palette-source-tint-13Rgb-01: 52 29 0;
+  --aj-palette-source-tint-13Rgb-02: 72 42 0;
+  --aj-palette-source-tint-13Rgb-03: 94 56 0;
+  --aj-palette-source-tint-13Rgb-04: 116 70 0;
+  --aj-palette-source-tint-13Rgb-05: 139 85 0;
+  --aj-palette-source-tint-13Rgb-06: 163 100 0;
+  --aj-palette-source-tint-13Rgb-07: 187 116 0;
+  --aj-palette-source-tint-13Rgb-08: 211 132 0;
+  --aj-palette-source-tint-13Rgb-09: 233 149 29;
+  --aj-palette-source-tint-14Rgb-10: 255 157 103;
+  --aj-palette-source-tint-14Rgb-11: 255 176 135;
+  --aj-palette-source-tint-14Rgb-12: 255 198 169;
+  --aj-palette-source-tint-14Rgb-13: 255 213 193;
+  --aj-palette-source-tint-14Rgb-14: 255 226 213;
+  --aj-palette-source-tint-14Rgb-15: 255 239 233;
+  --aj-palette-source-tint-14Rgb-00: 41 12 0;
+  --aj-palette-source-tint-14Rgb-01: 63 23 0;
+  --aj-palette-source-tint-14Rgb-02: 86 34 0;
+  --aj-palette-source-tint-14Rgb-03: 113 46 0;
+  --aj-palette-source-tint-14Rgb-04: 140 60 0;
+  --aj-palette-source-tint-14Rgb-05: 167 73 1;
+  --aj-palette-source-tint-14Rgb-06: 188 88 21;
+  --aj-palette-source-tint-14Rgb-07: 208 103 37;
+  --aj-palette-source-tint-14Rgb-08: 229 118 52;
+  --aj-palette-source-tint-14Rgb-09: 249 134 66;
+  --aj-palette-source-tint-15Rgb-10: 255 153 141;
+  --aj-palette-source-tint-15Rgb-11: 255 172 162;
+  --aj-palette-source-tint-15Rgb-12: 255 196 188;
+  --aj-palette-source-tint-15Rgb-13: 255 213 208;
+  --aj-palette-source-tint-15Rgb-14: 255 226 223;
+  --aj-palette-source-tint-15Rgb-15: 255 239 237;
+  --aj-palette-source-tint-15Rgb-00: 55 0 1;
+  --aj-palette-source-tint-15Rgb-01: 85 0 3;
+  --aj-palette-source-tint-15Rgb-02: 117 0 6;
+  --aj-palette-source-tint-15Rgb-03: 143 22 20;
+  --aj-palette-source-tint-15Rgb-04: 169 42 36;
+  --aj-palette-source-tint-15Rgb-05: 191 58 50;
+  --aj-palette-source-tint-15Rgb-06: 213 73 63;
+  --aj-palette-source-tint-15Rgb-07: 234 89 77;
+  --aj-palette-source-tint-15Rgb-08: 255 104 91;
+  --aj-palette-source-tint-15Rgb-09: 255 128 115;
+  --aj-palette-source-tints-10: #5b8c2b;
+  --aj-palette-source-tints-11: #8b8d00;
+  --aj-palette-source-tints-12: #b18b00;
+  --aj-palette-source-tints-13: #d38400;
+  --aj-palette-source-tints-14: #d06725;
+  --aj-palette-source-tints-15: #d5493f;
+  --aj-palette-source-tints-00: #d2599b;
+  --aj-palette-source-tints-01: #bb59c4;
+  --aj-palette-source-tints-02: #9561d4;
+  --aj-palette-source-tints-03: #6a6acf;
+  --aj-palette-source-tints-04: #3170cd;
+  --aj-palette-source-tints-05: #0078b0;
+  --aj-palette-source-tints-06: #007e9f;
+  --aj-palette-source-tints-07: #008184;
+  --aj-palette-source-tints-08: #00856e;
+  --aj-palette-source-tints-09: #098a4b;
+  --aj-palette-source-tintsRgb-10: 45 84 0;
+  --aj-palette-source-tintsRgb-11: 84 85 0;
+  --aj-palette-source-tintsRgb-12: 107 83 0;
+  --aj-palette-source-tintsRgb-13: 139 85 0;
+  --aj-palette-source-tintsRgb-14: 188 88 21;
+  --aj-palette-source-tintsRgb-15: 234 89 77;
+  --aj-palette-source-tintsRgb-00: 148 37 103;
+  --aj-palette-source-tintsRgb-01: 130 34 142;
+  --aj-palette-source-tintsRgb-02: 100 46 160;
+  --aj-palette-source-tintsRgb-03: 59 57 156;
+  --aj-palette-source-tintsRgb-04: 0 66 138;
+  --aj-palette-source-tintsRgb-05: 0 72 107;
+  --aj-palette-source-tintsRgb-06: 0 72 90;
+  --aj-palette-source-tintsRgb-07: 0 75 77;
+  --aj-palette-source-tintsRgb-08: 0 78 64;
+  --aj-palette-source-tintsRgb-09: 0 82 42;
+  --aj-palette-button-primary-solid-idleBg: #000000;
+  --aj-palette-button-primary-solid-idleColor: #ffffff;
+  --aj-palette-button-primary-solid-activeBg: #3d3a45;
+  --aj-palette-button-primary-solid-disabledBg: #d1cbd8;
+  --aj-palette-button-primary-plain-idleColor: #000000;
+  --aj-palette-button-primary-plain-activeColor: #3d3a45;
+  --aj-palette-button-primary-plain-disabledColor: #d1cbd8;
+  --aj-palette-button-primary-toolbar-idleColor: #000000;
+  --aj-palette-button-primary-toolbar-activeColor: #3d3a45;
+  --aj-palette-button-primary-toolbar-disabledColor: #d1cbd8;
+  --aj-palette-button-primary-toolbar-pressedColor: #827c8c;
+  --aj-palette-button-primary-menuItem-idleColor: #6e6979;
+  --aj-palette-button-primary-menuItem-hoverColor: #000000;
+  --aj-palette-button-primary-menuItem-activeColor: #3d3a45;
+  --aj-palette-button-primary-menuItem-disabledColor: #aca6b5;
+  --aj-palette-button-secondary-plain-idleColor: #827c8c;
+  --aj-palette-button-secondary-plain-hoverColor: #4c4855;
+  --aj-palette-button-secondary-plain-activeColor: #6e6979;
+  --aj-palette-button-secondary-plain-disabledColor: #d1cbd8;
+  --aj-palette-button-secondary-toolbar-idleColor: #827c8c;
+  --aj-palette-button-secondary-toolbar-hoverColor: #4c4855;
+  --aj-palette-button-secondary-toolbar-activeColor: #6e6979;
+  --aj-palette-button-secondary-toolbar-disabledColor: #d1cbd8;
+  --aj-palette-button-secondary-toolbar-pressedColor: #000000;
+  --aj-palette-button-secondary-subnav-idleColor: #aca6b5;
+  --aj-palette-button-secondary-subnav-hoverColor: #6e6979;
+  --aj-palette-button-secondary-subnav-activeColor: #827c8c;
+  --aj-palette-button-secondary-subnav-disabledColor: #d1cbd8;
+  --aj-palette-button-secondary-subnav-pressedColor: #3d3a45;
+  --aj-palette-button-secondary-tablehead-sorterIdleColor: #6e6979;
+  --aj-palette-button-secondary-tablehead-sorterHoverColor: #2f2c36;
+  --aj-palette-button-secondary-tablehead-sorterActiveColor: #4c4855;
+  --aj-palette-button-secondary-tablehead-idleColor: #aca6b5;
+  --aj-palette-button-secondary-tablehead-hoverColor: #4c4855;
+  --aj-palette-button-secondary-tablehead-activeColor: #6e6979;
+  --aj-palette-button-danger-solid-idleBg: #bf3a32;
+  --aj-palette-button-danger-solid-idleColor: #ffffff;
+  --aj-palette-button-danger-solid-activeBg: #ff8073;
+  --aj-palette-button-danger-solid-disabledBg: #ffc4bc;
+  --aj-palette-button-danger-plain-idleColor: #bf3a32;
+  --aj-palette-button-danger-plain-activeColor: #ff8073;
+  --aj-palette-button-danger-plain-disabledColor: #ffc4bc;
+  --aj-palette-input-placeholderColor: #827c8c;
+  --aj-palette-input-disabledColor: #d1cbd8;
+  --aj-palette-input-labelColor: #111014;
+  --aj-palette-input-msgNeutralColor: #3d3a45;
+  --aj-palette-input-msgPositiveColor: #098a4b;
+  --aj-palette-input-msgWarningColor: #d38400;
+  --aj-palette-input-msgNegativeColor: #d5493f;
+  --aj-palette-input-primary-solid-border: 92 88 102;
+  --aj-palette-input-primary-solid-disabledBorder: #d1cbd8;
+  --aj-palette-input-primary-solid-bg: #ffffff;
+  --aj-palette-input-text-primary-solid-color: #000000;
+  --aj-palette-input-text-primary-solid-iconColor: #827c8c;
+  --aj-palette-stroke-dividerRgb: 151 145 161;
+  --aj-palette-foreground-color: #000000;
+  --aj-palette-foreground-colorRgb: 0 0 0;
+  --aj-palette-txt-primary: #000000;
+  --aj-palette-txt-secondary: #3d3a45;
+  --aj-palette-txt-tertiary: #6e6979;
+  --aj-palette-txt-quaternary: #aca6b5;
+  --aj-palette-txt-discreet: #bfb9c8;
+  --aj-palette-txt-subtle: #d1cbd8;
+  --aj-palette-txt-positive: #098a4b;
+  --aj-palette-txt-warning: #d38400;
+  --aj-palette-txt-negative: #d5493f;
+  --aj-palette-txt-recommended: #006251;
+  --aj-palette-txt-primaryRgb: 0 0 0;
+  --aj-palette-txt-secondaryRgb: 61 58 69;
+  --aj-palette-txt-tertiaryRgb: 110 105 121;
+  --aj-palette-txt-quaternaryRgb: 172 166 181;
+  --aj-palette-txt-discreetRgb: 191 185 200;
+  --aj-palette-txt-subtleRgb: 209 203 216;
+  --aj-palette-txt-positiveRgb: 0 82 42;
+  --aj-palette-txt-warningRgb: 139 85 0;
+  --aj-palette-txt-negativeRgb: 234 89 77;
+  --aj-palette-txt-recommendedRgb: 0 98 81;
+  --aj-palette-txt-denyPrimary: #8f1614;
+  --aj-palette-txt-denySecondary: #a92a24;
+  --aj-palette-txt-denyTertiary: #bf3a32;
+  --aj-palette-txt-dryrunPrimary: #8c3c00;
+  --aj-palette-txt-dryrunSecondary: #a74901;
+  --aj-palette-txt-dryrunTertiary: #bc5815;
+  --aj-palette-txt-challengePrimary: #82228e;
+  --aj-palette-txt-challengeSecondary: #95359f;
+  --aj-palette-txt-challengeTertiary: #a847b1;
+  --aj-palette-eventDeny-primaryColor: #8f1614;
+  --aj-palette-eventDeny-secondaryColor: #a92a24;
+  --aj-palette-eventDeny-tertiaryColor: #bf3a32;
+  --aj-palette-eventDeny-primaryBg: #bf3a32;
+  --aj-palette-eventDeny-secondaryBg: #ff685b;
+  --aj-palette-eventDeny-primaryColorRgb: 143 22 20;
+  --aj-palette-eventDeny-secondaryColorRgb: 169 42 36;
+  --aj-palette-eventDeny-tertiaryColorRgb: 191 58 50;
+  --aj-palette-eventDeny-primaryBgRgb: 191 58 50;
+  --aj-palette-eventDeny-secondaryBgRgb: 255 104 91;
+  --aj-palette-eventDryrun-primaryColor: #8c3c00;
+  --aj-palette-eventDryrun-secondaryColor: #a74901;
+  --aj-palette-eventDryrun-tertiaryColor: #bc5815;
+  --aj-palette-eventDryrun-primaryBg: #bc5815;
+  --aj-palette-eventDryrun-secondaryBg: #f98642;
+  --aj-palette-eventDryrun-primaryColorRgb: 140 60 0;
+  --aj-palette-eventDryrun-secondaryColorRgb: 167 73 1;
+  --aj-palette-eventDryrun-tertiaryColorRgb: 188 88 21;
+  --aj-palette-eventDryrun-primaryBgRgb: 188 88 21;
+  --aj-palette-eventDryrun-secondaryBgRgb: 249 134 66;
+  --aj-palette-eventChallenge-primaryColor: #82228e;
+  --aj-palette-eventChallenge-secondaryColor: #95359f;
+  --aj-palette-eventChallenge-tertiaryColor: #a847b1;
+  --aj-palette-eventChallenge-primaryBg: #a847b1;
+  --aj-palette-eventChallenge-secondaryBg: #e47deb;
+  --aj-palette-eventChallenge-primaryColorRgb: 130 34 142;
+  --aj-palette-eventChallenge-secondaryColorRgb: 149 53 159;
+  --aj-palette-eventChallenge-tertiaryColorRgb: 168 71 177;
+  --aj-palette-eventChallenge-primaryBgRgb: 168 71 177;
+  --aj-palette-eventChallenge-secondaryBgRgb: 228 125 235;
+  --aj-palette-block-level1-glare: linear-gradient(
+    rgba(var(--aj-palette-source-blackRgb) / 0) 12%,
+    rgba(var(--aj-palette-source-blackRgb) / 0.03) 88%
+  );
+  --aj-palette-block-level1-bg: linear-gradient(
+    rgba(var(--aj-palette-source-neutralRgb-15) / 1) 0%,
+    rgba(var(--aj-palette-source-neutralRgb-15) / 1) 100%
+  );
+  --aj-palette-block-level1-fadeBg: linear-gradient(
+    rgba(var(--aj-palette-source-whiteRgb) / 0) 0%,
+    rgba(var(--aj-palette-source-whiteRgb) / 1) 100%
+  );
+  --aj-palette-block-level1-blurBg: linear-gradient(
+    rgba(var(--aj-palette-source-neutralRgb-14) / 0.6) 0%,
+    rgba(var(--aj-palette-source-neutralRgb-14) / 0.6) 100%
+  );
+  --aj-palette-block-level1-border: rgba(
+    var(--aj-palette-source-neutralRgb-13) / 1
+  );
+  --aj-palette-block-level1-blurBorder: rgba(
+    var(--aj-palette-source-neutralRgb-08) / 0.3
+  );
+  --aj-palette-block-level2-bg: rgba(
+    var(--aj-palette-source-neutralRgb-14) / 1
+  );
+  --aj-palette-block-level2-blurBg: rgba(
+    var(--aj-palette-source-neutralRgb-13) / 0.6
+  );
+  --aj-palette-block-level2-border: rgba(
+    var(--aj-palette-source-neutralRgb-12) / 1
+  );
+  --aj-palette-block-level2-blurBorder: rgba(
+    var(--aj-palette-source-neutralRgb-07) / 0.3
+  );
+  --aj-palette-block-level3-glare: linear-gradient(
+    rgba(var(--aj-palette-source-blackRgb) / 0) 12%,
+    rgba(var(--aj-palette-source-blackRgb) / 0.04) 88%
+  );
+  --aj-palette-block-level3-bg: linear-gradient(
+    rgba(var(--aj-palette-source-neutralRgb-13) / 1) 0%,
+    rgba(var(--aj-palette-source-neutralRgb-13) / 1) 100%
+  );
+  --aj-palette-block-level3-blurBg: linear-gradient(
+    rgba(var(--aj-palette-source-neutralRgb-12) / 0.6) 0%,
+    rgba(var(--aj-palette-source-neutralRgb-12) / 0.6) 100%
+  );
+  --aj-palette-block-level3-border: rgba(
+    var(--aj-palette-source-neutralRgb-11) / 1
+  );
+  --aj-palette-block-level3-blurBorder: rgba(
+    var(--aj-palette-source-neutralRgb-06) / 0.3
+  );
+  --aj-palette-block-level2Event-deny-blurBg: linear-gradient(
+    rgba(var(--aj-palette-source-tint-15Rgb-08) / 0.216) 0%,
+    rgba(var(--aj-palette-source-tint-15Rgb-08) / 0.216) 100%
+  );
+  --aj-palette-block-level2Event-deny-blurBorder: rgba(
+    var(--aj-palette-source-tint-15Rgb-03) / 0.3
+  );
+  --aj-palette-block-level2Event-dryrun-blurBg: linear-gradient(
+    rgba(var(--aj-palette-source-tint-14Rgb-09) / 0.216) 0%,
+    rgba(var(--aj-palette-source-tint-14Rgb-09) / 0.216) 100%
+  );
+  --aj-palette-block-level2Event-dryrun-blurBorder: rgba(
+    var(--aj-palette-source-tint-14Rgb-04) / 0.3
+  );
+  --aj-palette-block-level2Event-challenge-blurBg: linear-gradient(
+    rgba(var(--aj-palette-source-tint-01Rgb-10) / 0.216) 0%,
+    rgba(var(--aj-palette-source-tint-01Rgb-10) / 0.216) 100%
+  );
+  --aj-palette-block-level2Event-challenge-blurBorder: rgba(
+    var(--aj-palette-source-tint-01Rgb-05) / 0.3
+  );
+  --aj-palette-glowChannel: 130 124 140;
+  --aj-palette-dangerGlowChannel: 191 58 50;
+  --aj-shadowRing: 0 0 #000;
+  --aj-shadowChannel: 21 21 21;
+  --aj-shadowOpacity: 0.12;
+}

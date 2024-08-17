@@ -1,0 +1,62 @@
+---
+title: "Protect your OpenAI application with Arcjet"
+description: "Protect your OpenAI chat interface from abuse with Arcjet rate limiting and bot protection."
+prev: false
+next: false
+---
+
+import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import OpenAINextJSChat from "/src/content/docs/integrations/snippets/OpenAINextJSChat.ts?raw";
+
+If you are building an AI application using
+[OpenAI](https://platform.openai.com/) then you will want to protect it from
+abuse. Arcjet rate limiting and bot protection can help manage your OpenAI
+developer token budget.
+
+<WhatIsArcjet />
+
+## Example use case
+
+- You have a chat interface that uses OpenAI to generate responses.
+- You want to prevent automated bots from accessing your application.
+- You want to implement a rate limit for each user logged in to your
+  application.
+- The rate limit should be based on the OpenAI tokens, which is how you are
+  billed for your usage of the OpenAI API.
+
+## How it works
+
+- Arcjet rate limits allow [custom
+  characteristics](/rate-limiting/configuration#custom-characteristics) to
+  identify the client and apply the limit. We provide the user ID to identify the
+  user. This can use any authentication system you have in place, such as
+  [Clerk](/integrations/clerk).
+- Define a rate limit of `2,000` tokens per hour with a maximum of `5,000`
+  tokens in the bucket. This allows for a reasonable conversation length without
+  consuming too many tokens.
+- Also apply a bot rule to block clients we are sure are automated.
+- Use the `openai-chat-tokens` package to count the number of tokens in each
+  chat API request.
+- Pass the token estimate to the Arcjet `protect` call to deduct the tokens from
+  the user's rate limit.
+
+The example below shows the API route for a Next.js application with a
+`gpt-3.5-turbo` AI chatbot. See the full [example Next.js implementation on
+GitHub](https://github.com/arcjet/arcjet-js/blob/main/examples/nextjs-14-clerk-rl).
+
+<Tabs>
+<TabItem label="TS (App)">
+
+<Code code={OpenAINextJSChat} title="/app/api/chat/route.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="TS (Pages)">
+
+The Next.js pages router does not support streaming responses so you should use
+the app router for this example. You can still use the `pages/` directory for
+the rest of your application. See the [Next.js AI docs for
+details](https://sdk.vercel.ai/docs/guides/frameworks/nextjs-pages).
+
+</TabItem>
+</Tabs>

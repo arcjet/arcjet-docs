@@ -1,0 +1,154 @@
+---
+title: "Email validation for Next.js"
+description: "Quick start guide for adding email validation to your Next.js app."
+---
+
+import {
+  CardGrid,
+  Code,
+  LinkCard,
+  TabItem,
+  Tabs,
+} from "@astrojs/starlight/components";
+import FAQs from "/src/components/FAQs.astro";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import Step3AppJS from "/src/content/docs/email-validation/quick-start/snippets/nextjs/Step3App.js?raw";
+import Step3AppTS from "/src/content/docs/email-validation/quick-start/snippets/nextjs/Step3App.ts?raw";
+import Step3PagesJS from "/src/content/docs/email-validation/quick-start/snippets/nextjs/Step3Pages.js?raw";
+import Step3PagesTS from "/src/content/docs/email-validation/quick-start/snippets/nextjs/Step3Pages.ts?raw";
+
+Arcjet allows you validate & verify an email address. This is useful for
+preventing users from signing up with fake email addresses and can significantly
+reduce the amount of spam or fraudulent accounts.
+
+<WhatIsArcjet />
+
+## Quick start
+
+This guide will show you how to add email validation and verification to a
+Next.js API route.
+
+### 1. Install Arcjet
+
+In your project root, run the following command to install the SDK:
+
+{/* prettier-ignore */}
+<Tabs>
+<TabItem label="npm">
+```sh
+npm i @arcjet/next
+```
+</TabItem>
+<TabItem label="pnpm">
+```sh
+pnpm add @arcjet/next
+```
+</TabItem>
+<TabItem label="yarn">
+```sh
+yarn add @arcjet/next
+```
+</TabItem>
+</Tabs>
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key. Add it to a `.env.local` file in your
+Next.js project root:
+
+```ini title=".env.local"
+ARCJET_KEY=ajkey_yourkey
+```
+
+### 3. Validate an email address
+
+The example below shows how to use Arcjet to check an email address. If the
+email address is invalid or if no MX records are configured, Arcjet will return
+a deny decision.
+
+<Tabs>
+<TabItem label="TS (App)">
+Create a new API route at `/app/api/arcjet/route.ts`:
+
+<Code
+  code={Step3AppTS}
+  lang="ts"
+  title="/app/api/arcjet/route.ts"
+  mark={["ARCJET_KEY"]}
+/>
+
+</TabItem>
+<TabItem label="TS (Pages)">
+Create a new API route at `/pages/api/arcjet.ts`:
+
+<Code
+  code={Step3PagesTS}
+  lang="ts"
+  title="/pages/api/arcjet.ts"
+  mark={["ARCJET_KEY"]}
+/>
+
+</TabItem>
+<TabItem label="JS (App Router)">
+Create a new API route at `/app/api/arcjet/route.js`:
+
+<Code
+  code={Step3AppJS}
+  lang="ts"
+  title="/app/api/arcjet/route.js"
+  mark={["ARCJET_KEY"]}
+/>
+
+</TabItem>
+<TabItem label="JS (Pages Router)">
+Create a new API route at `/pages/api/arcjet.js`:
+
+<Code
+  code={Step3PagesJS}
+  lang="ts"
+  title="/pages/api/arcjet.js"
+  mark={["ARCJET_KEY"]}
+/>
+</TabItem>
+<TabItem label="Server Actions">
+See our [example in the SDK reference](/reference/nextjs#server-actions).
+</TabItem>
+</Tabs>
+
+### 4. Start app
+
+Start your app and load `http://localhost:3000/api/arcjet`. The email address is
+from a disposable email service, so the decision is to deny. This can be adapted
+to API routes in your application which accept user submissions e.g. a signup
+form.
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples/nextjs-14-app-dir-validate-email"
+    description="Check out the Next.js example."
+  ></LinkCard>
+  <LinkCard
+    title="Email validation reference"
+    href="/email-validation/reference/nextjs"
+    description="Full details about email validation."
+  ></LinkCard>
+  <LinkCard
+    title="Signup form protection"
+    href="/signup-protection/reference/nextjs"
+    description="Combine rate limiting, bot protection & email validation."
+  ></LinkCard>
+</CardGrid>
+
+## Get help
+
+Need help with anything? [Email us](mailto:support@arcjet.com) or [join our
+Discord](https://discord.gg/TPra6jqZDC) to get support from our
+engineering team.

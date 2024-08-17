@@ -1,0 +1,710 @@
+---
+title: "Arcjet Next.js SDK reference"
+prev: false
+---
+
+import {
+  Tabs,
+  TabItem,
+  LinkCard,
+  CardGrid,
+  Code,
+} from "@astrojs/starlight/components";
+import SDKVersionNextjs from "../../../components/SDKVersionNextjs.astro";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import ConfigurationTS from "/src/content/docs/reference/snippets/nextjs/Configuration.ts?raw";
+import ConfigurationJS from "/src/content/docs/reference/snippets/nextjs/Configuration.js?raw";
+import MultipleRulesTS from "/src/content/docs/reference/snippets/nextjs/MultipleRules.ts?raw";
+import MultipleRulesJS from "/src/content/docs/reference/snippets/nextjs/MultipleRules.js?raw";
+import LoggerTS from "/src/content/docs/reference/snippets/nextjs/Logger.ts?raw";
+import LoggerJS from "/src/content/docs/reference/snippets/nextjs/Logger.js?raw";
+import ClientOverrideTS from "/src/content/docs/reference/snippets/nextjs/ClientOverride.ts?raw";
+import ClientOverrideJS from "/src/content/docs/reference/snippets/nextjs/ClientOverride.js?raw";
+import ProtectAppTS from "/src/content/docs/reference/snippets/nextjs/ProtectApp.ts?raw";
+import ProtectPagesTS from "/src/content/docs/reference/snippets/nextjs/ProtectPages.ts?raw";
+import ProtectAppJS from "/src/content/docs/reference/snippets/nextjs/ProtectApp.js?raw";
+import ProtectPagesJS from "/src/content/docs/reference/snippets/nextjs/ProtectPages.js?raw";
+import ServerAction from "/src/content/docs/reference/snippets/nextjs/ServerAction.tsx?raw";
+import WithRuleAppTS from "/src/content/docs/reference/snippets/nextjs/WithRuleApp.ts?raw";
+import WithRulePagesTS from "/src/content/docs/reference/snippets/nextjs/WithRulePages.ts?raw";
+import WithRuleAppJS from "/src/content/docs/reference/snippets/nextjs/WithRuleApp.js?raw";
+import WithRulePagesJS from "/src/content/docs/reference/snippets/nextjs/WithRulePages.js?raw";
+import DecisionLogAppTS from "/src/content/docs/reference/snippets/nextjs/DecisionLogApp.ts?raw";
+import DecisionLogPagesTS from "/src/content/docs/reference/snippets/nextjs/DecisionLogPages.ts?raw";
+import DecisionLogAppJS from "/src/content/docs/reference/snippets/nextjs/DecisionLogApp.js?raw";
+import DecisionLogPagesJS from "/src/content/docs/reference/snippets/nextjs/DecisionLogPages.js?raw";
+import IPLocationAppTS from "/src/content/docs/reference/snippets/nextjs/IPLocationApp.ts?raw";
+import IPLocationPagesTS from "/src/content/docs/reference/snippets/nextjs/IPLocationPages.ts?raw";
+import IPLocationAppJS from "/src/content/docs/reference/snippets/nextjs/IPLocationApp.js?raw";
+import IPLocationPagesJS from "/src/content/docs/reference/snippets/nextjs/IPLocationPages.js?raw";
+import ErrorHandlingAppTS from "/src/content/docs/reference/snippets/nextjs/ErrorHandlingApp.ts?raw";
+import ErrorHandlingPagesTS from "/src/content/docs/reference/snippets/nextjs/ErrorHandlingPages.ts?raw";
+import ErrorHandlingAppJS from "/src/content/docs/reference/snippets/nextjs/ErrorHandlingApp.js?raw";
+import ErrorHandlingPagesJS from "/src/content/docs/reference/snippets/nextjs/ErrorHandlingPages.js?raw";
+
+[<SDKVersionNextjs/>](https://www.npmjs.com/package/@arcjet/next)
+
+This is the reference guide for the Arcjet Next.js SDK, [available on
+GitHub](https://github.com/arcjet/arcjet-js) and licensed under the Apache 2.0
+license.
+
+<WhatIsArcjet />
+
+## Installation
+
+In your project root, run the following command to install the SDK:
+
+{/* prettier-ignore */}
+<Tabs>
+<TabItem label="npm">
+```sh
+npm i @arcjet/next
+```
+</TabItem>
+<TabItem label="pnpm">
+```sh
+pnpm add @arcjet/next
+```
+</TabItem>
+<TabItem label="yarn">
+```sh
+yarn add @arcjet/next
+```
+</TabItem>
+</Tabs>
+
+## Quick start
+
+Check out the [quick start guide](/get-started/nextjs).
+
+## Configuration
+
+Create a new `Arcjet` object with your API key and rules. This should be outside
+of the request handler.
+
+The required fields are:
+
+- `key` (`string`) - Your Arcjet site key. This can be found in the SDK
+  Installation section for the site in the [Arcjet
+  Dashboard](https://app.arcjet.com).
+- `rules` - The rules to apply to the request. See the various sections of the
+  docs for how to configure these e.g. [shield](/shield/reference/nextjs), [rate
+  limiting](/rate-limiting/reference/nextjs), [bot
+  protection](/bot-protection/reference/nextjs), [email
+  validation](/email-validation/reference/nextjs).
+
+The optional fields are:
+
+- `characteristics` (`string[]`) - A list of
+  [characteristics](/architecture#built-in-characteristics) to be used to
+  uniquely identify clients.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={ConfigurationTS} lang="ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={ConfigurationJS} lang="js" />
+  </TabItem>
+</Tabs>
+
+### Rule modes
+
+Each rule can be configured in either `LIVE` or `DRY_RUN` mode. When in
+`DRY_RUN` mode, each rule will return its decision, but the end conclusion will
+always be `ALLOW`.
+
+This allows you to run Arcjet in passive / demo mode to test rules before
+enabling them. Arcjet will log what it would have done.
+
+```ts
+import arcjet, { fixedWindow } from "@arcjet/next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY,
+  characteristics: ["ip.src"],
+  rules: [
+    fixedWindow(
+      // This rule is live
+      {
+        mode: "LIVE",
+        match: "/api/hello",
+        window: "1h",
+        max: 60,
+      },
+      // This rule is in dry run mode, so will log but not block
+      {
+        mode: "DRY_RUN",
+        match: "/api/hello",
+        characteristics: ['http.request.headers["x-api-key"]'],
+        window: "1h",
+        // max could also be a dynamic value applied after looking up a limit
+        // elsewhere e.g. in a database for the authenticated user
+        max: 600,
+      },
+    ),
+  ],
+});
+```
+
+### Multiple rules
+
+You can combine rules to create a more complex protection strategy. For example,
+you can combine rate limiting and bot protection rules to protect your API from
+automated clients.
+
+:::note
+When specifying multiple rules, the order of the rules is ignored. Rule
+execution ordering is automatically optimized for performance.
+:::
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={MultipleRulesTS} title="index.ts" lang="ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={MultipleRulesJS} title="index.js" lang="js" />
+  </TabItem>
+</Tabs>
+
+### Environment variables
+
+The following environment variables can be used to configure the SDK at runtime:
+
+- `ARCJET_BASE_URL` - Will override the decision API which the SDK communicates
+  with. This defaults to `https://decide.arcjet.com` and should only be changed
+  if directed by Arcjet support.
+- `ARCJET_LOG_LEVEL` - The log level to use, either `debug`, `info`, `warn`, or
+  `error`. Defaults to `warn`. If a rule is in dry run mode, a warning will be
+  output with the decision that would have been applied.
+- `ARCJET_ENV` - Set to `development` to force Arcjet into development mode.
+  This will allow private/internal addresses so that the SDKs work correctly
+  locally. You usually do not need to set this because it uses `NODE_ENV` when
+  set. See
+  [Troubleshooting](/troubleshooting#generatefingerprint-ip-is-empty--failed_precondition-client-ip-not-provided)
+  for when this may be needed.
+
+### Custom logging
+
+The SDK uses a lightweight logger which mirrors the
+[Pino](https://github.com/pinojs/pino) [structured
+logger](https://github.com/pinojs/pino/blob/8db130eba0439e61c802448d31eb1998cebfbc98/docs/api.md#logger)
+interface. You can use this to customize the logging output.
+
+First, install the required packages:
+
+```shell
+npm install pino pino-pretty
+```
+
+Then, create a custom logger that will log to JSON in production and pretty
+print in development:
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={LoggerTS} title="/app/api/route/hello.ts" lang="ts" mark={28} />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={LoggerJS} title="/app/api/route/hello.js" lang="js" mark={28} />
+  </TabItem>
+</Tabs>
+
+Finally, Next.js
+[requires](https://github.com/vercel/next.js/discussions/46987#discussioncomment-8464812)
+marking Pino as an external package in your Next.js config file:
+
+```js title="next.config.js"
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  experimental: {
+    // https://github.com/vercel/next.js/discussions/46987#discussioncomment-8464812
+    serverComponentsExternalPackages: ["pino", "pino-pretty"],
+  },
+};
+
+module.exports = nextConfig;
+```
+
+## Protect
+
+Arcjet provides a single `protect` function that is used to execute your
+protection rules. This requires a `request` object which is the request
+argument as passed to the Next.js request handler. Rules you add to the SDK may
+require additional details, such as the `validateEmail` rule requiring an
+additional `email` prop.
+
+This function returns a `Promise` that resolves to an `ArcjetDecision` object,
+which provides a high-level conclusion and detailed explanations of the decision
+made by Arcjet.
+
+<Tabs>
+  <TabItem label="TS (App)">
+    <Code code={ProtectAppTS} title="/app/api/route/hello.ts" lang="ts" />
+  </TabItem>
+  <TabItem label="TS (Pages)">
+    <Code code={ProtectPagesTS} title="/pages/api/hello.ts" lang="ts" />
+  </TabItem>
+  <TabItem label="JS (App Router)">
+    <Code code={ProtectAppJS} title="/app/api/route/hello.js" lang="js" />
+  </TabItem>
+  <TabItem label="JS (Pages Router)">
+    <Code code={ProtectPagesJS} title="/pages/api/hello.js" lang="js" />
+  </TabItem>
+</Tabs>
+
+### Server actions
+
+Arcjet currently doesn't support Next.js server actions directly because the
+request context is not passed to the handler. Full support for server actions is
+[on our roadmap](https://github.com/arcjet/arcjet-js/issues/1200). In the
+meantime, the workaround is to create the request object manually.
+
+This is an example form that calls a server action on submission and uses Arcjet
+to validate it. It uses [the Next.js headers
+function](https://nextjs.org/docs/app/api-reference/functions/headers) to get
+the request context. The client IP address is also parsed out, which can be
+replaced by the [Vercel Functions IP helper
+package](https://vercel.com/docs/functions/vercel-functions-package#ipaddress)
+if you are deploying on Vercel.
+
+<Code code={ServerAction} title="/app/form/page.tsx" lang="ts" />
+
+## Decision
+
+The `protect` function function returns a `Promise` that resolves to an
+`ArcjetDecision` object. This contains the following properties:
+
+- `id` (`string`) - The unique ID for the request. This can be used to look up
+  the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
+  involving the Arcjet cloud API. For decisions taken locally, the prefix is
+  `lreq_`.
+- `conclusion` (`"ALLOW" | "DENY" | "CHALLENGE" | "ERROR"`) - The final
+  conclusion based on evaluating each of the configured rules. If you wish to
+  accept Arcjet's recommended action based on the configured rules then you can
+  use this property.
+- `reason` (`ArcjetReason`) - An object containing more detailed
+  information about the conclusion.
+- `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
+  containing the results of each rule that was executed.
+- `ttl` (`uint32`) - The time-to-live for the decision in seconds. This is the
+  time that the decision is valid for. After this time, the decision will be
+  re-evaluated. The SDK automatically caches `DENY` decisions for the length of
+  the TTL.
+- `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
+  client IP address. See [IP analysis](#ip-analysis) below for more information.
+
+### Conclusion
+
+The `ArcjetDecision` object has the following methods that should be used to
+check the conclusion:
+
+- `isAllowed()` (`bool`) - The request should be allowed.
+- `isDenied()` (`bool`) - The request should be denied.
+- `isErrored()` (`bool`) - There was an unrecoverable error.
+
+### Reason
+
+The `reason` property of the `ArcjetDecision` object contains an `ArcjetReason`
+object which provides more detailed information about the conclusion. This is
+the final decision reason and is based on the configured rules.
+
+The `ArcjetReason` object has the following methods that can be used to check
+which rule caused the conclusion:
+
+- `isBot()` (`bool`) - Returns `true` if the bot protection rules have been
+  applied and the request was considered to have been made by a bot.
+- `isRateLimit()` (`bool`) - Returns `true` if the rate limit rules have been
+  applied and the request has exceeded the rate limit.
+- `isShield()` (`bool`) - Returns `true` if the shield rules have been applied
+  and the request is suspicious based on analysis by Arcjet Shield.
+- `isEmail()` (`bool`) - Returns `true` if the email validation rules have been
+  applied and the email address has a problem.
+- `isErrored()` (`bool`) - Returns `true` if there was an error processing the
+  request.
+
+### Results
+
+The `results` property of the `ArcjetDecision` object contains an array of
+`ArcjetRuleResult` objects. There will be one for each configured rule so you
+can inspect the individual results:
+
+- `id` (`string`) - The ID of the rule result. Not yet implemented.
+- `state` (`ArcjetRuleState`) - Whether the rule was executed or not.
+- `conclusion` (`ArcjetConclusion`) - The conclusion of the rule. This will be
+  one of the above conclusions: `ALLOW`, `DENY`, `CHALLENGE`, or `ERROR`.
+- `reason` (`ArcjetReason`) - An object containing more detailed information
+  about the conclusion for this rule. Each rule type has its own reason object
+  with different properties.
+
+You can iterate through the results and check the conclusion for each rule.
+
+```ts
+for (const result of decision.results) {
+  console.log("Rule Result", result);
+}
+```
+
+This example will log the full result as well as each rate limit rule:
+
+<Tabs>
+  <TabItem label="TS (App)">
+    <Code code={DecisionLogAppTS} title="/app/api/route/hello.ts" lang="ts" />
+  </TabItem>
+  <TabItem label="TS (Pages)">
+    <Code code={DecisionLogPagesTS} title="/pages/api/hello.ts" lang="ts" />
+  </TabItem>
+  <TabItem label="JS (App Router)">
+    <Code code={DecisionLogAppJS} title="/app/api/route/hello.js" lang="js" />
+  </TabItem>
+  <TabItem label="JS (Pages Router)">
+    <Code code={DecisionLogPagesJS} title="/pages/api/hello.js" lang="js" />
+  </TabItem>
+</Tabs>
+
+#### Rule state
+
+The `state` property of the `ArcjetRuleResult` object is an `ArcjetRuleState`.
+Each rule is evaluated individually and can be in one of the following states:
+
+- `DRY_RUN` - The rule was executed in dry run mode. This means that the rule
+  was executed but the conclusion was not applied to the request. This is useful
+  for testing rules before enabling them.
+- `RUN` - The rule was executed and the conclusion was applied to the request.
+- `NOT_RUN` - The rule was not executed. This can happen if another rule has
+  already reached a conclusion that applies to the request. For example, if a
+  rate limit rule is configured then these are evaluated before all other rules.
+  If the client has reached the maximum number of requests then other rules will
+  not be evaluated.
+- `CACHED` - The rule was not executed because the previous result was cached.
+  Results are cached when the decision conclusion is `DENY`. Subsequent requests
+  from the same client will not be evaluated against the rule until the cache
+  expires.
+
+#### Rule reason
+
+The `reason` property of the `ArcjetRuleResult` object contains an
+`ArcjetReason` object which provides more detailed information about the
+conclusion for that configured rule.
+
+##### Shield
+
+The `ArcjetReason` object for shield rules has the following properties:
+
+```ts
+shieldTriggered: boolean;
+```
+
+See the [shield documentation](/shield/reference/nextjs) for more information
+about these properties.
+
+##### Bot protection
+
+The `ArcjetReason` object for bot protection rules has the following properties:
+
+```ts
+// See https://docs.arcjet.com/bot-protection/bot-types#bot-detection-result
+// for an explanation of each prop
+botType: ArcjetBotType;
+botScore: number;
+userAgentMatch: boolean;
+ipHosting: boolean;
+ipVpn: boolean;
+ipProxy: boolean;
+ipTor: boolean;
+ipRelay: boolean;
+```
+
+An `ArcjetBotType` is one of the following strings:
+
+```ts
+// See https://docs.arcjet.com/bot-protection/bot-types
+// for an explanation of each prop
+"NOT_ANALYZED" |
+  "AUTOMATED" |
+  "LIKELY_AUTOMATED" |
+  "LIKELY_NOT_A_BOT" |
+  "VERIFIED_BOT";
+```
+
+See the [bot protection documentation](/bot-protection/reference/nextjs) for
+more information about these properties.
+
+##### Rate limiting
+
+The `ArcjetReason` object for rate limiting rules has the following properties:
+
+```ts
+max: number;
+remaining: number;
+window: number;
+reset: number;
+```
+
+See the [rate limiting documentation](/rate-limiting/reference/nextjs) for more
+information about these properties.
+
+##### Email validation & verification
+
+The `ArcjetReason` object for email rules has the following properties:
+
+```ts
+emailTypes: ArcjetEmailType[];
+```
+
+An `ArcjetEmailType` is one of the following strings:
+
+```ts
+"DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
+```
+
+See the [email validation documentation](/email-validation/reference/nextjs) for
+more information about these properties.
+
+### IP analysis
+
+As of SDK version `1.0.0-alpha.11`, the `ArcjetDecision` object contains an `ip`
+property. This includes additional data about the client IP address:
+
+#### IP location
+
+The IP location fields may be `undefined`, but you can use various methods to
+check their availability. Using the methods will also refine the type to remove
+the need for null or undefined checks.
+
+- `hasLatitude()` (`bool`): returns whether the `latitude` and `accuracyRadius`
+  fields are available.
+- `hasLongitude()` (`bool`): returns whether the `longitude` and
+  `accuracyRadius` fields are available.
+- `hasAccuracyRadius()` (`bool`): returns whether the `longitude`, `latitude`,
+  and `accuracyRadius` fields are available.
+- `hasTimezone()` (`bool`): returns whether the `timezone` field is available.
+- `hasPostalCode()` (`bool`): returns whether the `postalCode` field is
+  available.
+- `hasCity()` (`bool`): returns whether the `city` field is available.
+- `hasRegion()` (`bool`): returns whether the `region` field is available.
+- `hasCountry()` (`bool`): returns whether the `country` and `countryName`
+  fields are available.
+- `hasContinent()` (`bool`): returns whether the `continent` and `continentName`
+  fields are available.
+- `latitude` (`number | undefined`): the latitude of the client IP address.
+- `longitude` (`number | undefined`): the longitude of the client IP address.
+- `accuracyRadius` (`number | undefined`): how accurate the location is in
+  kilometers.
+- `timezone` (`string | undefined`): the timezone of the client IP address.
+- `postalCode` (`string | undefined`): the postal or zip code of the client IP
+  address.
+- `city` (`string | undefined`): the city of the client IP address.
+- `region` (`string | undefined`): the region of the client IP address.
+- `country` (`string | undefined`): the country code the client IP address.
+- `countryName` (`string | undefined`): the country name of the client IP
+  address.
+- `continent` (`string | undefined`): the continent code of the client IP
+  address.
+- `continentName` (`string | undefined`): the continent name of the client IP
+  address.
+
+##### Location accuracy
+
+IP geolocation can be notoriously inaccurate, especially for mobile devices,
+satellite internet providers, and even just normal users. Likewise with the
+specific fields like `city` and `region`, which can be very inaccurate. Country
+is usually accurate, but there are often cases where IP addresses are
+mis-located. These fields are provided for convenience e.g. suggesting a user
+location, but should not be relied upon by themselves.
+
+#### IP AS
+
+This is useful for identifying the network operator of the client IP address.
+This is useful for understanding whether the client is likely to be automated or
+not, or being stricter with requests from certain networks.
+
+The IP AS fields may be `undefined`, but you can use the `hasAsn()` method to
+check their availability. Using this method will also refine the type to remove
+the need for null-ish checks.
+
+- `hasAsn()` (`bool`): returns whether all of the ASN fields are available.
+- `asn` (`string | undefined`): the autonomous system (AS) number of the client
+  IP address.
+- `asnName` (`string | undefined`): the name of the AS of the client IP address.
+- `asnDomain` (`string | undefined`): the domain of the AS of the client IP
+  address.
+- `asnType` (`'isp' | 'hosting' | 'business' | 'education'`): the type of the AS
+  of the client IP address. Real users are more likely to be on an ISP or
+  business network rather than a hosting provider. Education networks often have
+  a single or small number of IP addresses even though there are many users. A
+  common mistake is to block a single IP because of too many requests when it is
+  a university or company network using
+  [NAT](https://en.wikipedia.org/wiki/Carrier-grade_NAT) (Network Address
+  Translation) to give many users the same IP.
+- `asnCountry` (`string | undefined`): the country code of the AS of the client
+  IP address. This is the administrative country of the AS, not necessarily the
+  country of the client IP address.
+
+#### IP type
+
+The `service` field may be `undefined`, but you can use the `hasService()`
+method to check the availability. Using this method will also refine the type to
+remove the need for null-ish checks.
+
+- `hasService()` (`bool`): whether the `service` field is available.
+- `service` (`string | undefined`): the name of the service associated with the
+  IP address—e.g. `Apple Private Relay`.
+- `isHosting()` (`bool`): returns whether the IP address of the client is owned
+  by a hosting provider. Requests originating from a hosting provider IP
+  significantly increase the likelihood that this is an automated client.
+- `isVpn()` (`bool`): returns whether the IP address of the client is owned by a
+  VPN provider. Many people use VPNs for privacy or work purposes, so by itself
+  this is not an indicator of the client being automated. However, it does
+  increase the risk score of the client and depending on your use case it may be
+  a characteristic you wish to restrict.
+- `isProxy()` (`bool`): returns whether the IP address of the client is owned by
+  a proxy provider. Similar to `isVpn()`, but proxies are more likely to involve
+  automated traffic.
+- `isTor()` (`bool`): returns whether the IP address of the client is known to
+  be part of the Tor network. As with `isVpn()`, there are legitimate uses for
+  hiding your identity through Tor, however it is also often a way to hide the
+  origin of malicious traffic.
+- `isRelay()` (`bool`): returns whether the IP address of the client is owned by
+  a relay service. The most common example is Apple iCloud Relay, which
+  indicates the client is less likely to be automated because Apple requires a
+  paid subscription linked to an Apple account in good standing.
+
+#### Example
+
+<Tabs>
+  <TabItem label="TS (App)">
+    <Code code={IPLocationAppTS} title="/app/api/route/hello.ts" lang="ts" />
+  </TabItem>
+  <TabItem label="TS (Pages)">
+    <Code code={IPLocationPagesTS} title="/pages/api/hello.ts" lang="ts" />
+  </TabItem>
+  <TabItem label="JS (App Router)">
+    <Code code={IPLocationAppJS} title="/app/api/route/hello.js" lang="js" />
+  </TabItem>
+  <TabItem label="JS (Pages Router)">
+    <Code code={IPLocationPagesJS} title="/pages/api/hello.js" lang="js" />
+  </TabItem>
+</Tabs>
+
+For the IP address `8.8.8.8` you might get the following response. Only the
+fields we have data for will be returned:
+
+```json
+{
+  "name": "Hello United States!",
+  "ip": {
+    "country": "US",
+    "countryName": "United States",
+    "continent": "NA",
+    "continentName": "North America",
+    "asn": "AS15169",
+    "asnName": "Google LLC",
+    "asnDomain": "google.com"
+  }
+}
+```
+
+## Error handling
+
+Arcjet is designed to fail open so that a service issue or misconfiguration does
+not block all requests. The SDK will also time out and fail open after 500ms
+when `NODE_ENV` is `production` and 1000ms otherwise. However, in most cases,
+the response time will be less than 20-30ms.
+
+If there is an error condition, Arcjet will return an `ERROR` `conclusion`.
+
+<Tabs>
+  <TabItem label="TS (App)">
+    <Code code={ErrorHandlingAppTS} title="/app/api/route/hello.ts" lang="ts" />
+  </TabItem>
+  <TabItem label="TS (Pages)">
+    <Code code={ErrorHandlingPagesTS} title="/pages/api/hello.ts" lang="ts" />
+  </TabItem>
+  <TabItem label="JS (App Router)">
+    <Code code={ErrorHandlingAppJS} title="/app/api/route/hello.js" lang="js" />
+  </TabItem>
+  <TabItem label="JS (Pages Router)">
+    <Code code={ErrorHandlingPagesJS} title="/pages/api/hello.js" lang="js" />
+  </TabItem>
+</Tabs>
+
+## Ad hoc rules
+
+Sometimes it is useful to add additional protection via a rule based on the
+logic in your handler; however, you usually want to inherit the rules, cache,
+and other configuration from our primary SDK. This can be achieved using the
+`withRule` function which accepts an ad-hoc rule and can be chained to add
+multiple rules. It returns an augmented client with the specialized `protect`
+function.
+
+<Tabs>
+  <TabItem label="TS (App)">
+    <Code code={WithRuleAppTS} title="/app/api/route/hello.ts" lang="ts" />
+  </TabItem>
+  <TabItem label="TS (Pages)">
+    <Code code={WithRulePagesTS} title="/pages/api/hello.ts" lang="ts" />
+  </TabItem>
+  <TabItem label="JS (App Router)">
+    <Code code={WithRuleAppJS} title="/app/api/route/hello.js" lang="js" />
+  </TabItem>
+  <TabItem label="JS (Pages Router)">
+    <Code code={WithRulePagesJS} title="/pages/api/hello.js" lang="js" />
+  </TabItem>
+</Tabs>
+
+## IP address detection
+
+Arcjet will automatically detect the IP address of the client making the request
+based on the context provided. The implementation is open source in our
+[@arcjet/ip package](https://github.com/arcjet/arcjet-js/blob/main/ip).
+
+In non-production environments (`NODE_ENV !== "production"`), we allow
+private/internal addresses so that the SDKs work correctly locally.
+
+## Client override
+
+The default client can be overridden. If no client is specified, a default one
+will be used. Generally you should not need to provide a client - the Arcjet
+Next.js SDK will automatically handle this for you, including when using the
+[Edge Runtime](https://edge-runtime.vercel.app).
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={ClientOverrideTS} lang="ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={ClientOverrideJS} lang="js" />
+  </TabItem>
+</Tabs>
+
+## Version support
+
+### Node
+
+Arcjet supports the [active and maintenance LTS
+versions](https://github.com/nodejs/release) of Node.js:
+
+- Node.js 18.x LTS
+- Node.js 20.x LTS
+
+When a Node.js version goes end of life, we will bump the major version of the
+Arcjet SDK. [Technical support](/support) is provided for the current major
+version of the Arcjet SDK for all users and for the current and previous major
+versions for paid users. We will provide security fixes for the current and
+previous major SDK versions.
+
+### Next.js
+
+Arcjet supports the current major version of Next.js for both the app router and
+pages router. When a new major version of Next.js is released, we will bump the
+major version of the Arcjet SDK.
+
+- Current supported major version: Next.js 14.x
+
+The pages router will be supported for as long as Next.js supports it.
+
+[Technical support](/support) is provided for the current major
+version of the Arcjet SDK for all users and for the current and previous major
+versions for paid users. We will provide security fixes for the current and
+previous major versions.

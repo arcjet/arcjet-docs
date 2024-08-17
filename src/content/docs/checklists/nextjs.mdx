@@ -1,0 +1,215 @@
+---
+title: "Next.js security checklist"
+description: "A checklist to help you secure your Next.js application."
+next: false
+prev: false
+---
+
+This checklist is a guide to help you secure your Next.js application. It is not
+exhaustive, but it covers the most important security best practices.
+
+## Checklist
+
+0. Are your dependencies up to date?
+1. Are you validating and sanitizing data?
+2. Are you using any environment variables prefixed with `NEXT_PUBLIC_`?
+3. Have you guarded against server-side code being exposed to the client?
+4. Have you added security headers?
+5. Is security-related functionality centralized?
+6. Is your code editor helping you write secure code?
+
+## 0. Dependencies
+
+This may seem simple, but quickly applying patches is one of the most important
+ways to keep your application secure. Use a tool like
+[Dependabot](https://docs.github.com/en/code-security/dependabot) to
+automatically get notified of new versions of your dependencies and open pull
+requests to update them.
+
+Keeping up to date with the latest versions makes it much easier to upgrade if a
+security update is released. Otherwise, you may find yourself needing to work
+through multiple releases to get to the latest version in a stressful situation
+where a security vulnerability has been discovered.
+
+Running [Socket](https://socket.dev/) can help assess the security of new
+dependencies and identify potential supply chain risks when new updates are
+released. Running `npm audit` is an alternative.
+
+Make sure you pin your dependencies to specific versions using
+`package-lock.json` or equivalent.
+
+## 1. Data validation and sanitization
+
+Once of the major advantages of using Next.js is that it inherits the built-in
+security escaping and sanitization features of React. However, it [doesn't do
+everything](https://github.com/facebook/react/issues/3473) and you should still
+always validate data you receive from both users and APIs.
+
+TypeScript helps with basic type checking, but that is not the same as
+validating data.
+
+Use a package like [zod](https://zod.dev/) or [Valibot](https://valibot.dev/) to
+validate data from users and APIs. Zod has [a good comparison of the
+options](https://zod.dev/?id=comparison).
+
+If you are using an ORM like Drizzle then these can be integrated at the same
+time e.g. [drizzle-zod](https://orm.drizzle.team/docs/zod). API frameworks like
+[tRPC](https://trpc.io/docs/server/validators) also support validation.
+
+### Watch out for
+
+These features have their uses, but should warrant extra caution and review:
+
+- Any use of
+  [`dangerouslySetInnerHTML`](https://react.dev/reference/react-dom/components/common#dangerously-setting-the-inner-html)
+  in your application is a risk. This is a potential vector for cross-site
+  scripting (XSS) attacks, which is why it is named "dangerous".
+- Any use of
+  [innerHTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML).
+  A better option is
+  [innerText](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/innerText),
+  which does not parse HTML.
+
+In both cases, setting the HTML directly bypasses React's built-in security. Try
+to create logic within the component which can use props to build the HTML
+instead rather than hard coding it.
+
+## 2. Environment variables
+
+Next.js [automatically loads environment
+variables](https://nextjs.org/docs/app/building-your-application/configuring/environment-variables)
+and only makes them available to server side code. To expose them to the client
+you must prefix them with `NEXT_PUBLIC_`.
+
+This is a good default, and means you can pay extra attention to any variables
+prefixed with `NEXT_PUBLIC_` to ensure they are safe to expose to the client.
+
+If you are self-hosting Next.js or want to add an extra layer of safety to
+ensure no environment variables leak into the deployed version, you can [use a
+tool like Trufflehog to scan the build
+artifacts](https://blog.arcjet.com/secret-scanning-and-next-js-builds/).
+
+## 3. Server only
+
+Server components, client components, server side rendering, server
+actions...these can be confusing.
+
+Next.js has [a video on static vs dynamic
+rendering](https://www.youtube.com/watch?v=w2lKYy-9EJE), docs on [server actions
+and
+mutations](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations)
+and [data fetching
+patterns](https://nextjs.org/docs/app/building-your-application/data-fetching/patterns),
+but it's too easy to accidentally expose server-side code to the client. This
+can expose credentials or cause unexpected data leaks.
+
+One way to guard against this is to tag modules with 'server-only' when you want
+to guarantee they will never be used on the client. If a client component tries
+to use a server-only module, the Next.js build will fail.
+
+Just add this to the top of your module:
+
+```ts
+import "server-only";
+```
+
+This is also extra protection against accidentally exposing sensitive
+environment variables.
+
+## 4. Security headers
+
+There are a few security headers that you should consider adding to your
+application:
+
+- [Content Security Policy
+  (CSP)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) helps prevent
+  cross-site scripting, malware injection, and data theft. It ensures only the
+  expected content is loaded on your page. It is [recommended that you set a
+  strict policy](https://web.dev/articles/strict-csp) because denying everything
+  by default avoids needing an exhaustive list of allowed sources.
+- [`Strict-Transport-Security`
+  (HSTS)](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security)
+  tells browsers your site should only be accessed over HTTPS.
+- [`X-Content-Type-Options`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options)
+  prevents vulnerabilities related to content sniffing.
+- Permissions-Policy: This header allows a site to control which features and
+  APIs can be used in the browser.
+- [`Referrer-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy)
+  controls how much referrer information is included when navigating away from a
+  page.
+
+### Setting security headers in Next.js
+
+The [next-safe package](https://github.com/trezy/next-safe) provides a simple
+way to configure and add these security headers to Next.js. For general JS apps
+and those using Express, the [Helmet
+package](https://github.com/helmetjs/helmet) is a popular choice.
+
+The [tldrsec/awesome-secure-defaults
+repo](https://github.com/tldrsec/awesome-secure-defaults) has a list of other
+useful secure-default libraries for various languages, including Node.js.
+
+Next.js also provides [an example of how to manually set just the CSP
+header](https://nextjs.org/docs/app/building-your-application/configuring/content-security-policy)
+using middleware.
+
+Once you have a CSP policy, you can evaluate it with the [CSP Evaluator tool
+from Google](https://csp-evaluator.withgoogle.com/).
+
+### Other headers
+
+- `X-Frames-Options`: This header prevents your content from being embedded into
+  other sites. It is now [part of the Content Security Policy
+  specification](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-ancestors),
+  so you can set the `frame-ancestors` directive in your CSP to achieve the same
+  effect. This header is useful for [older
+  browsers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-ancestors#browser_compatibility)
+  that don't support CSP.
+
+* `X-XSS-Protection`: This header was a feature of Internet Explorer, Chrome,
+  and Safari that enabled the browser's built-in XSS filter. It is [deprecated
+  and should not be
+  used](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection).
+
+## 5. Centralize security functions
+
+It's a good idea to centralize security-related functionality in your
+application. This makes it easier to test, review, and audit. Some examples:
+
+- A single function for session management and authentication (AuthN). Ideally
+  this is handled automatically without needing a developer to specifically call
+  it - middleware is a good place for this. Clerk is a good option that
+  [supports authentication
+  middleware](https://clerk.com/docs/references/nextjs/auth-middleware). Another
+  alternative is
+  [NextAuth](https://next-auth.js.org/configuration/nextjs#middleware), but
+  their middleware doesn't support edge functions so you may need to use the
+  [`getServerSession` function](https://next-auth.js.org/configuration/nextjs).
+- A single function for checking whether users have access to a particular
+  resource (AuthZ). Similar to AuthN, this should be handled automatically
+  without needing a developer to specifically call it.
+  [Oso](https://www.osohq.com/) is a framework which allows modeling
+  authorization controls, but you could also have a simple function that runs
+  the check based on passed in parameters.
+
+## 6. Code editor
+
+Your code editor can help you write secure code by showing linting and static
+analysis errors. Install [Trunk](https://trunk.io/) to automatically bootstrap
+relevant linters and manage the configuration for you.
+
+In particular, enable [Trivy](https://github.com/aquasecurity/trivy),
+[Trufflehog](https://github.com/trufflesecurity/trufflehog),
+[Gitleaks](https://github.com/gitleaks/gitleaks), and
+[Semgrep](https://semgrep.dev/) to scan your code for potential security
+vulnerabilities. These can also be enabled in CI.
+
+## Resources
+
+Other resources to help you secure your Next.js application:
+
+- [Next.js production
+  checklist](https://nextjs.org/docs/app/building-your-application/deploying/production-checklist#security)
+- [Blog: How to Think About Security in
+  Next.js](https://nextjs.org/blog/security-nextjs-server-components-actions)
+- [Blog: Secret scanning and Next.js builds](https://blog.arcjet.com/secret-scanning-and-next-js-builds/)

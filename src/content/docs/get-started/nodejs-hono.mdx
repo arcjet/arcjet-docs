@@ -1,0 +1,157 @@
+---
+title: "Get started: Node.js + Hono and Arcjet"
+description: "Getting started with Arcjet and Node.js + Express. Quick start guide for adding rate limiting, bot protection, and email validation to your Node.js + Hono app."
+prev: false
+next: false
+---
+
+import {
+  Tabs,
+  TabItem,
+  LinkCard,
+  CardGrid,
+  Code,
+  Aside,
+} from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import FAQs from "/src/components/FAQs.astro";
+import NodeJSHono from "/src/content/docs/get-started/snippets/NodeJSHono.ts?raw";
+
+This guide will help you protect your [Hono +
+Node.js](https://hono.dev/getting-started/nodejs) app using Arcjet.
+
+<WhatIsArcjet />
+
+<Aside type="note" title="Other runtimes">
+  We're working on support for other runtimes. See [our getting started guide
+  for Bun + Hono](/get-started/bun-hono) and [let us know](/support) if you're
+  building with something else.
+</Aside>
+
+## SDK installation
+
+Follow these steps to get started:. You can also [find an example app on
+GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nodejs-hono-rl).
+
+### 1. Install Arcjet
+
+In your project root, run the following command to install the SDK:
+
+{/* prettier-ignore */}
+<Tabs>
+<TabItem label="npm">
+```sh
+npm i @arcjet/node
+```
+</TabItem>
+<TabItem label="pnpm">
+```sh
+pnpm add @arcjet/node
+```
+</TabItem>
+<TabItem label="yarn">
+```sh
+yarn add @arcjet/node
+```
+</TabItem>
+</Tabs>
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key. Add it to a `.env.local` file in your
+project root. `NODE_ENV` isn't set by default, so you also need to tell
+Arcjet you're in development mode.
+
+```ini title=".env.local"
+# NODE_ENV is not set by the environment, so tell Arcjet we're in dev
+# You can leave this unset in prod
+ARCJET_ENV=development
+# Get your site key from https://app.arcjet.com
+ARCJET_KEY=ajkey_yourkey
+```
+
+We instantiate the Arcjet client outside of the request context so it only needs
+to be loaded once, however [Hono only supports reading environment
+variables](https://hono.dev/helpers/adapter#env) inside the request context. You
+can adjust the `dev` command to read them in:
+
+```json title="package.json"
+{
+  "scripts": {
+    "dev": "tsx watch --env-file=.env.local src/index.ts"
+  }
+}
+```
+
+### 3. Add a rate limit to a route
+
+The rate limit example below applies a token bucket rate limit rule to a route
+where we identify the user based on their ID e.g. if they are logged in. The
+bucket is configured with a maximum capacity of 10 tokens and refills by 5
+tokens every 10 seconds. Each request consumes 5 tokens.
+
+<Code code={NodeJSHono} lang="ts" title="src/index.ts" />
+
+### 4. Start server
+
+{/* prettier-ignore */}
+```sh
+npm run dev
+````
+
+Then make some requests to hit the rate limit:
+
+```sh
+curl http://localhost:3000
+```
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can customize bot protection, rate
+limiting for your API and minimize fraudulent registrations with the signup form
+protection.
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  ></LinkCard>
+  <LinkCard
+    title="Arcjet Shield"
+    href="/shield/quick-start/nodejs"
+    description="Protect your app from common attacks."
+  />
+  <LinkCard
+    title="Bot protection"
+    href="/bot-protection/quick-start/nodejs"
+    description="Protect your app from bots and scrapers."
+  />
+  <LinkCard
+    title="Rate limiting"
+    href="/rate-limiting/reference/nodejs"
+    description="Protect your app from abuse."
+  />
+  <LinkCard
+    title="Email validation"
+    href="/email-validation/quick-start/nodejs"
+    description="Minimize fraudulent registrations."
+  />
+  <LinkCard
+    title="SDK reference"
+    href="/reference/nodejs"
+    description="Node.js SDK reference guide."
+  />
+</CardGrid>
+
+## Get help
+
+Need help with anything? [Email us](mailto:support@arcjet.com) or [join our
+Discord](https://discord.gg/TPra6jqZDC) to get support from our
+engineering team.

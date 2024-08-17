@@ -1,0 +1,109 @@
+---
+title: "Arcjet / Auth.js integration"
+description: "Integrating Auth.js and Arcjet. Add rate limits to Auth.js login endpoints."
+prev: false
+next: false
+---
+
+import { Aside, Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import AuthJSAppTS from "/src/content/docs/integrations/snippets/AuthJSApp.ts?raw";
+import AuthJSPagesTS from "/src/content/docs/integrations/snippets/AuthJSPages.ts?raw";
+import AuthJSUserAppTS from "/src/content/docs/integrations/snippets/AuthJSUserApp.ts?raw";
+import AuthJSUserPagesTS from "/src/content/docs/integrations/snippets/AuthJSUserPages.ts?raw";
+import AuthJSMiddleware from "/src/content/docs/integrations/snippets/AuthJSMiddleware.ts?raw";
+
+Arcjet can protect your [Auth.js](https://authjs.dev/) login and signup routes
+from brute force attacks and other abuse. You can also use the Auth.js
+authenticated user ID to implement user-specific rate limits.
+
+<WhatIsArcjet />
+
+<Aside type="note" title="NextAuth 4 and Auth.js 5">
+  NextAuth 4 is the current stable version, but is [being renamed
+  Auth.js](https://twitter.com/balazsorban44/status/1603082914362986496) with
+  version 5. This guide is about integrating Arcjet with the beta version of
+  [Auth.js](https://authjs.dev/) 5. See the [Arcjet / NextAuth integration
+  docs](/integrations/nextauth) for instructions specific to the old (stable)
+  version.
+</Aside>
+
+## Example use case
+
+- Protect your Auth.js route handlers by rate limiting requests and
+  blocking bots.
+- Provide a higher rate limit for authenticated clients based on their
+  Auth.js user ID.
+
+See an [example Next.js implementation on
+GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nextjs-14-authjs-5).
+
+## Protect Auth.js route handlers
+
+Arcjet can extend the Auth.js route handler to protect it from abuse.
+
+This example configures a rate limit on the Auth.js route `POST` handler which
+is used for authentication and logout attempts. It allows up to 10 requests
+within a 60 second window and also prevents bots from making requests.
+
+<Tabs>
+  <TabItem label="NextJS (App)">
+    Auth.js [recommends](https://authjs.dev/reference/nextjs#handlers) creating
+    a catch-all API route to handle all authentication requests. Arcjet extends
+    this handler:
+    <Code
+      code={AuthJSAppTS}
+      lang="ts"
+      title="/app/api/auth/[...nextauth]/route.ts"
+      mark={["ARCJET_KEY"]}
+    />
+  </TabItem>
+  <TabItem label="NextJS (Pages)">
+    Auth.js
+    [recommends](https://next-auth.js.org/configuration/initialization#api-routes-pages)
+    creating a [catch-all API
+    route](https://nextjs.org/docs/pages/building-your-application/routing/api-routes#catch-all-api-routes)
+    to handle all authentication requests. Arcjet extends this handler:
+    <Code
+      code={AuthJSPagesTS}
+      lang="ts"
+      title="/pages/api/auth/[...nextauth].ts"
+      mark={["ARCJET_KEY"]}
+    />
+  </TabItem>
+</Tabs>
+
+## Rate limits using Auth.js user ID
+
+Arcjet rate limits allow [custom
+characteristics](/rate-limiting/configuration#custom-characteristics) to
+identify the client and apply the limit. Using the Auth.js
+[`auth`](https://authjs.dev/reference/nextjs#auth) helper you can pass through a
+user ID.
+
+<Tabs>
+  <TabItem label="NextJS (App)">
+    <Code
+      code={AuthJSUserAppTS}
+      lang="ts"
+      title="/app/api/private/route.ts"
+      mark={["ARCJET_KEY"]}
+    />
+  </TabItem>
+  <TabItem label="NextJS (Pages)">
+    <Code
+      code={AuthJSUserPagesTS}
+      lang="ts"
+      title="/pages/api/private.ts"
+      mark={["ARCJET_KEY"]}
+    />
+  </TabItem>
+</Tabs>
+
+## Chaining middleware
+
+If you want to protect every page with [Arcjet Shield](/shield/concepts)
+automatically you can run it through Next.js middleware. Auth.js can also use
+middleware to add authentication to your pages. You can chain the two together.
+
+<Code code={AuthJSMiddleware} lang="ts" title="/middleware.ts" />

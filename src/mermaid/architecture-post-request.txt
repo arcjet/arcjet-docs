@@ -1,0 +1,9 @@
+flowchart TD
+    A[Client] -->|Request| B(Arcjet SDK)
+    B --> C{Evaluate Arcjet Rules}
+    C -->|Rate Limit Rule| D[✦ Arcjet API]
+    D -->|Request Context| F{Post-Request
+    Analysis}
+    F -->|Results|D
+    D -->|Allow| E[Execute application code]
+    E -->|200 Response| A[Client]

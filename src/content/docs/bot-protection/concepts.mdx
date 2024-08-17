@@ -1,0 +1,45 @@
+---
+title: "Arcjet bot protection"
+description: "Arcjet bot protection allows you to manage traffic by automated clients and bots."
+prev: false
+---
+
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+
+Arcjet bot detection allows you to manage traffic by automated clients and bots.
+
+<WhatIsArcjet />
+
+## Why configure bot protection?
+
+Bots can be good (such as search engine crawlers or monitoring agents) or bad
+(such as scrapers or automated scripts). You might also want to allow automated
+clients access to your API (even though they might seem like bots), but deny
+access to a signup form. In an ideal world, all bots would respect the
+`robots.txt` file, but unfortunately this is not always the case. Arcjet allows
+you to configure bot protection so you can decide which bots are allowed.
+
+## Bot detection realities
+
+It's impossible to create a system that can block all bots. Good bots identify
+themselves in a consistent manner so it is straightforward to identify them, but
+those are often not the bots you wish to block! Bad bots pretend to be real
+clients and use various mechanisms to evade bot detection.
+
+Arcjet's bot protect works best when combined with [rate
+limiting](/rate-limiting/concepts). This allows you to block clients that are
+causing problems whilst minimizing the impact on real users. See [an example of
+this in the Node.js SDK reference](/reference/nodejs#multiple-rules).
+
+Arcjet will help you reduce bot traffic and give you more control over which
+requests reach your application, but it's important to understand that it's not
+possible to achieve 100% accuracy.
+
+## Blocking based on fingerprint
+
+If Arcjet detects bot traffic, it will block further traffic based on a
+[fingerprint of the client](/architecture#fingerprinting), which includes the IP
+address. This could temporarily block traffic from legitimate clients using the
+same IP address. Although this trade-off might affect a small number users on
+shared networks, we are constantly improving our systems to minimize
+false-positives while ensuring overall security.

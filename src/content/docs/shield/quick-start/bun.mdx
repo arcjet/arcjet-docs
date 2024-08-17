@@ -1,0 +1,169 @@
+---
+title: "Arcjet Shield for Bun"
+description: "Quick start guide for adding protecting your Bun app with Arcjet Shield."
+prev: false
+next: false
+---
+
+import {
+  CardGrid,
+  LinkCard,
+  Tabs,
+  TabItem,
+  Code,
+  Aside,
+} from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import FAQs from "/src/components/FAQs.astro";
+import Step3TS from "/src/content/docs/shield/quick-start/snippets/bun/Step3.ts?raw";
+import Step3JS from "/src/content/docs/shield/quick-start/snippets/bun/Step3.js?raw";
+
+Arcjet Shield protects your application against common attacks, including the
+[OWASP Top 10](https://owasp.org/www-project-top-ten/).
+
+<WhatIsArcjet />
+
+## Quick start
+
+This guide will show you how to configure Arcjet for a Bun app.
+
+### 1. Install SDK
+
+In your project root, run the following command to install the SDK:
+
+{/* prettier-ignore */}
+```sh
+bun add @arcjet/bun
+```
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key. Add it to a `.env.local` file in your
+Bun project root.
+
+Arcjet only accept non-local IP addresses with a fallback to 127.0.0.1 in development mode, and since Bun
+doesn't set `NODE_ENV` for you like Node.js does, you also need to set
+`ARCJET_ENV` in your environment file.
+
+```ini title=".env.local"
+# Run Arcjet in development mode because Bun.sh doesn't explicitly
+# set an environment variable like Node.js does
+ARCJET_ENV=development
+ARCJET_KEY=ajkey_yourkey
+```
+
+### 3. Protect a route
+
+This example shows how to protect your app with Arcjet Shield.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={Step3TS} lang="ts" title="/index.ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={Step3JS} lang="js" title="/src/index.js" />
+  </TabItem>
+</Tabs>
+
+### 4. Start app
+
+Start your app and load `http://localhost:3000`. Refresh the page and you will
+see the requests showing up in the [Arcjet dashboard](https://app.arcjet.com).
+Your entire application is protected.
+
+### 5. Simulate a suspicious request
+
+To see Arcjet Shield in action, try making a request with the special header
+`x-arcjet-suspicious` set to `true`. After 5 requests, Arcjet Shield will be
+triggered and will block the request. This simulates the threshold being
+reached and is a constant, so you can use it as part of your tests.
+
+<Aside type="caution" title="This will block your client">
+  Running this simulation will trigger Arcjet Shield and block your client for
+  15 minutes. The ability to configure this threshold and manage blocked clients
+  is coming soon.
+</Aside>
+
+```sh
+curl -v -H "x-arcjet-suspicious: true" http://localhost:3000
+```
+
+The default response for a blocked request is a 403 Forbidden which you will see
+when you make the 6th request:
+
+```sh
+# ...5 requests made previously
+curl -v -H "x-arcjet-suspicious: true" http://localhost:3000
+...
+> GET / HTTP/2
+> Host: localhost:3000
+> User-Agent: curl/8.4.0
+> Accept: */*
+> x-arcjet-suspicious: true
+>
+< HTTP/2 403
+< content-type: application/json; charset=utf-8
+< date: Tue, 09 Jan 2024 13:43:04 GMT
+< etag: "7a3v9j8es220"
+< vary: Accept-Encoding
+< content-length: 72
+<
+* Connection #0 to host localhost left intact
+{"message":"Forbidden"}%
+```
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can customize bot protection, rate
+limiting for your API and minimize fraudulent registrations with the signup form
+protection.
+
+<CardGrid>
+  <LinkCard
+    title="Arcjet Shield reference"
+    href="/shield/reference/bun"
+    description="Full details about Arcjet shield."
+  />
+  <LinkCard
+    title="Example app"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples/bun"
+    description="Check out our Bun example code in GitHub."
+  ></LinkCard>
+  <LinkCard
+    title="Bot protection"
+    href="/bot-protection/quick-start/bun"
+    description="Protect your app from bots and scrapers."
+  />
+  <LinkCard
+    title="Rate limiting"
+    href="/rate-limiting/quick-start/bun"
+    description="Protect your app from abuse."
+  />
+  <LinkCard
+    title="Email validation"
+    href="/email-validation/quick-start/bun"
+    description="Minimize fraudulent registrations."
+  />
+  <LinkCard
+    title="Signup form protection"
+    href="/signup-protection/quick-start/bun"
+    description="Protect your signup form from abuse."
+  />
+  <LinkCard
+    title="SDK reference"
+    href="/reference/bun"
+    description="Bun SDK reference guide."
+  />
+</CardGrid>
+
+## Get help
+
+Need help with anything? [Email us](mailto:support@arcjet.com) or [join our
+Discord](https://discord.gg/TPra6jqZDC) to get support from our
+engineering team.

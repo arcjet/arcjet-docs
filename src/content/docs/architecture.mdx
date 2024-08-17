@@ -1,0 +1,260 @@
+---
+title: "Architecture"
+description: "Arcjet has been architected around a few key principles: proper security protections need the full context of the application, which is why security rules and protections should be located alongside the code they are protecting; security rules should be easy to test; Arcjet should not interfere with the rest of the application. It should be easy to install, must not add significant latency to requests, and should not require changes to the application's architecture."
+---
+
+Arcjet has been architected around a few key principles:
+
+- Proper security protections need the full context of the application, which is
+  why security rules and protections should be located alongside the code they
+  are protecting.
+- Security rules should be easy to test. You should be able to run them in
+  development as well as production.
+- Arcjet should not interfere with the rest of the application. It should be
+  easy to install, must not add significant latency to requests, and should not
+  require changes to the application's architecture.
+
+## Primitives
+
+Arcjet provides a set of key primitives which can be used to build security
+functionality. Each primitive can be used independently or combined as part of a
+pre-configured product.
+
+### Core primitives
+
+- **[Shield](/shield/concepts)** - Protect against common attacks.
+- **[Rate Limiting](/rate-limiting/concepts)** - Limit the number of requests from a
+  client over a period of time.
+- **[Bot Protection](/bot-protection/concepts)** - Detect and block automated clients.
+- **[Email Validation & Verification](/email-validation/concepts)** - Check that an email
+  address is valid.
+
+## Components
+
+Arcjet has two components:
+
+1. **Arcjet SDK** installed into your application.
+2. **Arcjet Cloud API** used to make or report decisions.
+
+### Arcjet SDK
+
+The SDK integrates Arcjet into your application. Security rules are configured
+in your code using the SDK and they execute either through a middleware layer or
+directly from your application code. You can inspect the response in your code
+and decide how to handle it. This could be as simple as blocking the request or
+more advanced like flagging an account for review.
+
+The SDK includes a WebAssembly module which is used to analyze requests locally
+in your own environment. Where possible, a decision is taken locally and then
+reported to Arcjet so that you can view the details in the Arcjet dashboard.
+Decisions may also be cached in memory.
+
+#### Example: Local analysis
+
+In this example flow, a client makes a request to your application. The Arcjet
+SDK is configured as middleware so it intercepts the request before it reaches
+your application code. The SDK analyzes the request locally based on the rules
+you configured, then makes a decision to allow the request. The SDK returns the
+result and your application code continues to execute as normally. An
+asynchronous report is made to the Arcjet API for post-request analysis.
+
+!["Diagram - Local analysis"](../../assets/mermaid/architecture-local-analysis.png)
+
+### Arcjet Cloud API
+
+In many cases, Arcjet can make a decision locally and report that decision
+asynchronously to the Arcjet API. However, there are some cases where Arcjet
+needs to make a decision in the cloud.
+
+For example, if you are want to enforce a rate limit, the number of requests for
+each client must be tracked. This means you typically need to manage something
+like Redis or another database, something that is particularly tricky in
+serverless environments. If you are using Arcjet, this is managed for you with
+no additional infrastructure. The Arcjet SDK will make a call to the Arcjet API
+to get the current rate limit for the client.
+
+The API has been designed for high performance and low latency, and combines all
+the security functionality into a single request. This means it typically
+outperforms other similar solutions. Arcjet will also attempt to cache decisions
+locally using an in-memory cache. In many cases, the total latency will be less
+than 1ms.
+
+#### Example: Rate limit rule (allow)
+
+In this example flow, a client makes a request to your application. The Arcjet
+SDK is configured with a rate limit rule on an API route. The SDK passes the
+request context through to the Arcjet API which checks the rate limit for that
+client and then returns an allow decision. The SDK returns the details and your
+application code continues to execute as normally.
+
+!["Diagram - Rate limit rule (allow)"](../../assets/mermaid/architecture-rl-allow.png)
+
+#### Example: Rate limit rule (deny)
+
+In this example, a client makes another request to your application with a rate
+limit rule configured. As before, the SDK passes the request context through to
+the Arcjet API which determines that the limit has been exceeded. The SDK
+provides the details and your application code returns a 429 response to the
+client. The decision is also cached locally by the SDK so that subsequent
+requests which match the rate limit rule do not need to rely on a call to the
+Arcjet API.
+
+!["Diagram - Rate limit rule (cached)"](../../assets/mermaid/architecture-rl-cached.png)
+
+This means that if the same client makes another request, the SDK will read from
+the local cache and return the response immediately:
+
+!["Diagram - Rate limit rule (deny)"](../../assets/mermaid/architecture-rl-deny.png)
+
+#### When the API is required
+
+A call to the Arcjet API is required when:
+
+- A [shield](/shield/concepts) rule is configured. Behavior must be compared
+  across multiple requests to protect against common attacks.
+- A [rate limit](/rate-limiting/concepts) rule is configured. Client state must
+  be tracked across requests to enforce the rate limit. Arcjet manages tracking
+  this state for you so you do not need deal with other infrastructure or
+  services.
+- A [bot protection](/bot-protection/concepts) rule is configured and local
+  analysis of the client request does not provide enough information to make a
+  decision. Local analysis is limited to the request headers whereas the Arcjet
+  API also checks a live database of known bots, IP addresses, VPNs, proxies,
+  Tor nodes, and other relays.
+- An [email validation](/email-validation/concepts) rule is configured and the
+  email address syntax is valid. The Arcjet SDK analyzes the email address
+  locally to check the syntax. If it is invalid, the SDK will return a decision
+  immediately. If it is valid, the SDK will make a call to the Arcjet API to
+  verify the email address e.g. does it have a valid MX record or is it a
+  disposable email address.
+
+#### API latency
+
+The Arcjet SDK tries to do as much as possible asynchronously and locally to
+minimize latency for each request. This adds less than 1ms of overhead to a
+typical request.
+
+When a call to the Arcjet API is required there is some additional latency
+before a decision is made. The Arcjet API has been designed for high performance
+and low latency, and is deployed to multiple regions around the world. The SDK
+will automatically use the closest region which means the total overhead is
+typically no more than 20-30ms, often significantly less.
+
+Arcjet only ever makes a single call to the API regardless of the number of
+rules configured.
+
+Where a decision has been cached locally e.g. blocking a client, Arcjet will
+continue to function even if the service is unavailable. In the event of a
+network problem or outage and a call to the API is needed, the Arcjet SDK
+defaults to failing open so all requests will be allowed. This is a deliberate
+design decision to ensure that your application continues to function even if
+there is a problem, but you can configure the SDK to fail closed if you prefer.
+See an example of how to handle errors and fail open or closed in the [Node.js
+SDK reference](/reference/nodejs#error-handling).
+
+## Fingerprinting
+
+Arcjet tracks clients across multiple requests so that suspicious activity can
+be detected. This is done by fingerprinting each request within your environment
+through a component within the Arcjet SDK.
+
+The fingerprint is a SHA-256 string generated based on request characteristics.
+The goal is that a single client will always generate the same fingerprint so we
+can detect suspicious requests and block the client. Behind the scenes, Arcjet
+uses this to cache decisions locally in your environment and in the Arcjet
+decision API.
+
+The fingerprint is configured based on the characteristics configured on the
+root of the SDK instance. If not specified, the IP address is used by default.
+You can can override this with any of the built-in or custom characteristics.
+The fingerprint can also be [configured on each rate limit
+rule](/rate-limiting/configuration) to apply a different rule to different
+clients based on their characteristics. If not specified, the root fingerprint
+is used.
+
+### Built-in characteristics
+
+The built-in options are managed by the SDK and are always available.
+If more than one option is provided, they will be combined.
+
+:::caution
+If you specify different characteristics and do not include `ip.src`, you may
+inadvertently generate the same fingerprint for multiple users.
+Be sure to include a characteristic which can narrowly identify each client.
+For example, use a header value to limit based on a session token or authentication header.
+:::
+
+| Option                                        |     Description      |
+| :-------------------------------------------- | :------------------: |
+| `ip.src`                                      |  Client IP address   |
+| `http.host`                                   |     Request host     |
+| `http.request.headers["<header_name>"]`       | Request header value |
+| `http.request.cookie["<cookie_name>"]`        | Request cookie value |
+| `http.request.uri.args["<query_param_name>"]` | Request query value  |
+| `http.request.uri.path`                       |     Request path     |
+
+### Custom characteristics
+
+You can use custom characteristics to track rate limits. For example, you can
+set up a limit for a logged in user by setting their user ID as the identifier.
+This will apply the limit to all requests made by that user regardless of their
+device and IP address.
+
+Custom characteristics are defined with a string key when configuring the sdk.
+The value is then passed as a `string`, `number` or `boolean` when
+calling the `protect` method. You can use any string value for the key.
+
+:::caution
+Avoid passing personal information such as an email address as a custom
+characteristic. The value is hashed on Arcjet's servers, but it's still a best
+practice to avoid sending us sensitive information.
+:::
+
+### IP address detection
+
+The client IP address is a key part of the fingerprint. The IP should not be
+trusted as it can be spoofed in most cases, especially when loaded via the
+`Headers` object. Each Arcjet SDK uses a native method to detect the IP address
+generally following the guidance provided by the [MDN X-Forwarded-For
+documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For).
+
+When choosing the IP address to use, Arcjet uses the first non-private IP that
+is a valid address. However, in non-production environments, we allow
+private/internal addresses so that the SDKs work correctly. See the individual
+SDK references for more details.
+
+## Request analysis
+
+Arcjet analyzes every request to your application in real-time. This is based on
+the rules you configure and the SDK provides the result so you can decide
+whether to deny or allow requests, or to take other actions.
+
+Post-request analysis is also performed by the Arcjet platform. This allows
+Arcjet to detect other types of attacks, such as SQL injection or other
+suspicious activity. This is threshold-based to avoid false positives. Once a
+client reaches a threshold of suspicious activity, Arcjet will issue a deny
+decision for that client for a period of time.
+
+This threshold is dynamic and regularly updated based on the latest attack
+patterns. This protection is automatic and does not require any configuration.
+You can see the details of all requests, including those that are denied, in
+the [Arcjet dashboard](https://app.arcjet.com).
+
+The results of this analysis are used regardless of the rules configured. This
+means Arcjet is continuously analyzing requests to your application and
+protecting it from attacks.
+
+In the example below, the results of the post-request analysis from previous
+requests are used to inform the decision for the current request.
+
+!["Diagram - Post request analysis"](../../assets/mermaid/architecture-post-request.png)
+
+## Credits
+
+Arcjet Labs, Inc. is headquartered in San Francisco, California.
+
+The Arcjet team are based across the 🇺🇸 USA, 🇮🇹 Italy, 🇮🇪 Ireland, and 🇬🇧 UK.
+
+The Arcjet IP analysis database is created from multiple sources including
+[IPInfo](https://ipinfo.io/) Creative Commons Attribution-ShareAlike 4.0
+International Licensed data.

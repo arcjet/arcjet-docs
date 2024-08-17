@@ -1,0 +1,85 @@
+---
+title: "Arcjet / Clerk integration"
+description: "Arcjet rate limiting using a Clerk user ID."
+prev: false
+next: false
+---
+
+import { Aside, Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import NextJSClerkApp from "/src/content/docs/integrations/snippets/ClerkNextJSApp.ts?raw";
+import NextJSClerkMiddleware from "/src/content/docs/integrations/snippets/ClerkNextJSMiddleware.ts?raw";
+import NextJSClerkPages from "/src/content/docs/integrations/snippets/ClerkNextJSPages.ts?raw";
+import NextJSClerkAJMiddleware from "/src/content/docs/integrations/snippets/ClerkNextJSAJMiddleware.ts?raw";
+
+Arcjet and [Clerk](https://clerk.com/) work well together to provide rate
+limiting based on user authentication. Clerk provides the user authentication
+and Arcjet provides the rate limiting.
+
+<WhatIsArcjet />
+
+<Aside type="note" title="@clerk/nextjs v5 / Clerk Core 2">
+  These examples have been updated for the latest version of Clerk Core 2 which
+  is included in the `@clerk/nextjs` SDK v5. See the [Clerk upgrade guide for
+  details](https://clerk.com/docs/upgrade-guides/core-2/overview).
+</Aside>
+
+## Example use case
+
+- Limiting access to a free API endpoint based on the client IP address.
+- Providing a higher rate limit for authenticated clients based on their Clerk
+  user ID.
+
+See an [example Next.js implementation on
+GitHub](https://github.com/arcjet/arcjet-js/blob/main/examples/nextjs-14-clerk-rl).
+
+## Rate limits using Clerk user ID
+
+Arcjet rate limits allow [custom
+characteristics](/rate-limiting/configuration#custom-characteristics) to
+identify the client and apply the limit. Using Clerk's
+[`currentUser()`](https://clerk.com/docs/references/nextjs/current-user) (app
+router) or [`getAuth()`](https://clerk.com/docs/references/nextjs/get-auth)
+(pages router) helpers you can pass through a user ID.
+
+<Tabs>
+<TabItem label="NextJS (App)">
+<Code
+  code={NextJSClerkApp}
+  lang="ts"
+  title="/app/api/private/route.ts"
+  mark={["ARCJET_KEY"]}
+/>
+<Code
+  code={NextJSClerkMiddleware}
+  lang="ts"
+  title="/middleware.ts"
+/>
+
+</TabItem>
+<TabItem label="NextJS (Pages)">
+<Code
+  code={NextJSClerkPages}
+  lang="ts"
+  title="/pages/api/private.ts"
+  mark={["ARCJET_KEY"]}
+/>
+
+<Code
+  code={NextJSClerkMiddleware}
+  lang="ts"
+  title="/middleware.ts"
+/>
+</TabItem>
+</Tabs>
+
+## Chaining middleware
+
+If you want to protect every page with [Arcjet Shield](/shield/concepts)
+automatically you can run it through Next.js middleware. Clerk also uses
+middleware to add authentication to your pages. You can chain the two together.
+
+See an [example Next.js implementation on
+GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nextjs-14-clerk-shield).
+
+<Code code={NextJSClerkAJMiddleware} lang="ts" title="/middleware.ts" />

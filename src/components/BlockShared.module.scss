@@ -1,0 +1,275 @@
+/*
+  Arcjet Block shared styles
+  --
+  Used by Block, Select, ... .
+  Changes made here will affect the common styling of all Blocks and select dropdowns, thread gently.
+*/
+
+/*
+  Theme vars for the BlockLink background styles.
+*/
+:root[data-theme="dark"] {
+  .BlockShared {
+    --selectedColor: rgba(var(--aj-palette-source-neutralRgb-03) / 0.35);
+  }
+}
+
+:root[data-theme="light"] {
+  .BlockShared {
+    --selectedColor: rgba(var(--aj-palette-source-neutralRgb-11) / 0.35);
+  }
+}
+
+.BlockShared {
+  --padT: calc(var(--sp) * 4);
+  --padR: calc(var(--sp) * 4);
+  --padB: calc(var(--sp) * 4);
+  --padL: calc(var(--sp) * 4);
+  --rad: calc(var(--sp) * 2);
+
+  position: relative;
+  border: none;
+  background-color: transparent;
+  box-shadow: none;
+  outline: none;
+
+  border-radius: var(--rad);
+
+  &:before,
+  &:after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    border-radius: inherit;
+    border: 0px solid transparent;
+  }
+
+  &:before {
+    z-index: 0;
+  }
+
+  &:after {
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  &.Disabled {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  /** Selected styles */
+  &:global {
+    &.selected {
+      &:after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        border-radius: inherit;
+        border: 0px solid transparent;
+        z-index: 0;
+        background: var(--selectedColor);
+      }
+    }
+  }
+
+  &.EventDeny {
+    &:global {
+      &.selected {
+        &:after {
+          background: rgba(var(--aj-palette-eventDeny-secondaryBgRgb) / 0.06);
+        }
+      }
+    }
+  }
+
+  &.EventDryrun {
+    &:global {
+      &.selected {
+        &:after {
+          background: rgba(var(--aj-palette-eventDryrun-secondaryBgRgb) / 0.35);
+        }
+      }
+    }
+  }
+
+  &.EventChallenge {
+    &:global {
+      &.selected {
+        &:after {
+          background: rgba(
+            var(--aj-palette-eventChallenge-secondaryBgRgb) / 0.35
+          );
+        }
+      }
+    }
+  }
+
+  &.Border:after {
+    border: 1px solid transparent;
+  }
+
+  .BlockInner {
+    pointer-events: none;
+
+    padding-top: var(--padT);
+    padding-right: var(--padR);
+    padding-bottom: var(--padB);
+    padding-left: var(--padL);
+
+    position: relative;
+    z-index: 20;
+
+    &:global {
+      & > * {
+        pointer-events: all;
+      }
+    }
+  }
+
+  &.Scrollable {
+    .BlockInner {
+      pointer-events: all;
+      overflow-y: auto;
+      max-height: inherit;
+    }
+  }
+
+  &.Blur {
+    &:before {
+      backdrop-filter: blur(var(--blur1));
+    }
+  }
+
+  &.Level1 {
+    &.Solid:before {
+      background: var(--aj-palette-block-level1-glare),
+        var(--aj-palette-block-level1-bg);
+    }
+
+    &.Blur {
+      &.Solid:before {
+        background: var(--aj-palette-block-level1-glare),
+          var(--aj-palette-block-level1-blurBg);
+      }
+    }
+
+    &.Border:after {
+      border-color: var(--aj-palette-block-level1-border);
+    }
+
+    &.Blur {
+      &.Border:after {
+        border-color: var(--aj-palette-block-level1-blurBorder);
+      }
+    }
+  }
+
+  &.Level2 {
+    &.Solid:before {
+      background-color: var(--aj-palette-block-level2-bg);
+    }
+
+    &.Blur {
+      &.Solid {
+        &:before {
+          background-color: var(--aj-palette-block-level2-blurBg);
+        }
+
+        &.EventDeny:before {
+          background: var(--aj-palette-block-level2Event-deny-blurBg);
+        }
+
+        &.EventDryrun:before {
+          background: var(--aj-palette-block-level2Event-dryrun-blurBg);
+        }
+
+        &.EventChallenge:before {
+          background: var(--aj-palette-block-level2Event-challenge-blurBg);
+        }
+      }
+    }
+
+    &.Border:after {
+      border-color: var(--aj-palette-block-level2-border);
+    }
+
+    &.Blur {
+      &.Border {
+        &:after {
+          border-color: var(--aj-palette-block-level2-blurBorder);
+        }
+
+        &.EventDeny:after {
+          border-color: var(--aj-palette-block-level2Event-deny-blurBorder);
+        }
+
+        &.EventDryrun:after {
+          border-color: var(--aj-palette-block-level2Event-dryrun-blurBorder);
+        }
+
+        &.EventChallenge:after {
+          border-color: var(
+            --aj-palette-block-level2Event-challenge-blurBorder
+          );
+        }
+      }
+    }
+  }
+
+  &.Level3 {
+    &.Solid:before {
+      background: var(--aj-palette-block-level3-glare),
+        var(--aj-palette-block-level3-bg);
+    }
+
+    &.Blur {
+      &.Solid:before {
+        background: var(--aj-palette-block-level3-glare),
+          var(--aj-palette-block-level3-blurBg);
+      }
+    }
+
+    &.Border:after {
+      border-color: var(--aj-palette-block-level3-border);
+    }
+
+    &.Blur {
+      &.Border:after {
+        border-color: var(--aj-palette-block-level3-blurBorder);
+      }
+    }
+  }
+
+  &.Shadow1 {
+    box-shadow: var(--aj-shadow-sm);
+  }
+
+  &.Shadow2 {
+    box-shadow: var(--aj-shadow-md);
+  }
+
+  &.Shadow3 {
+    box-shadow: var(--aj-shadow-lg);
+  }
+}
+
+// Type: Menu
+.BlockShared.Menu {
+  /* Overrides Popper.js inline styles*/
+  margin-top: var(--sp) !important;
+  padding: 0;
+
+  & :global {
+    .MuiListDivider-root {
+      margin: calc(var(--sp) * 0.75) 0;
+      --Divider-lineColor: rgba(var(--aj-palette-stroke-dividerRgb) / 0.3);
+    }
+  }
+}

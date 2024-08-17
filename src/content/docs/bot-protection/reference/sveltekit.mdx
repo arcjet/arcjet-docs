@@ -1,0 +1,275 @@
+---
+title: "SvelteKit bot protection reference"
+description: "How to use Arcjet to protect your SvelteKit app from bots."
+---
+
+import { Tabs, TabItem, Code } from "@astrojs/starlight/components";
+import AddingRulesTS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/AddingRules.ts?raw";
+import AddingRulesJS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/AddingRules.js?raw";
+import RemovingRulesTS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/RemovingRules.ts?raw";
+import RemovingRulesJS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/RemovingRules.js?raw";
+import PerRouteTS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/PerRoute.ts?raw";
+import PerRouteJS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/PerRoute.js?raw";
+import Step3TS from "/src/content/docs/bot-protection/quick-start/snippets/sveltekit/Step3.ts?raw";
+import Step3JS from "/src/content/docs/bot-protection/quick-start/snippets/sveltekit/Step3.js?raw";
+import HookMatcher from "/src/content/docs/bot-protection/reference/snippets/sveltekit/HookMatcher.ts?raw";
+import DecisionLogTS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/DecisionLog.ts?raw";
+import DecisionLogJS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/DecisionLog.js?raw";
+import ErrorsTS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/Errors.ts?raw";
+import ErrorsJS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/Errors.js?raw";
+
+Arcjet bot detection allows you to manage traffic by automated clients and bots.
+
+## Configuration
+
+Bot detection is configured by specifying the bot types you wish to block and
+optional user agent patterns to add or remove from the bot detection list.
+
+The configuration definition is:
+
+```ts
+type BotOptions = {
+  mode?: "LIVE" | "DRY_RUN";
+  block?: BotType[];
+  patterns?: {
+    add?: { [key: string]: BotType };
+    remove?: string[];
+  };
+};
+```
+
+The `arcjet` client is configured with one or more `detectBot` rules which take
+one or many `BotOptions`.
+
+:::note
+When specifying multiple rules, the order of the rules is ignored. Rule
+execution ordering is automatically optimized for performance. See
+[decision](#decision) below for details of examining the execution results.
+:::
+
+### Which bots to block?
+
+Which bot types to block is configured by listing one or more types in the
+`block` configuration block. The types are listed on the [bot
+types](/bot-protection/bot-types) page.
+
+### Adding bot detection rules
+
+You can add additional bot detection rules to the `patterns` `add` configuration
+property. Each rule is a regular expression that matches the user agent of the
+bot plus a label to indicate what type of bot it is.
+
+:::note
+The current implementation only supports `AUTOMATED` bot types, while support for the other [bot
+types](/bot-protection/bot-types) is on the roadmap.
+:::
+
+The following example adds a rule to detect AcmeBot as an `AUTOMATED` bot.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code
+      code={AddingRulesTS}
+      lang="ts"
+      title="/src/hooks.server.ts"
+      mark={[{ range: "8-20" }]}
+    />
+  </TabItem>
+  <TabItem label="JS">
+    <Code
+      code={AddingRulesJS}
+      lang="js"
+      title="/src/hooks.server.js"
+      mark={[{ range: "8-20" }]}
+    />
+  </TabItem>
+</Tabs>
+
+### Removing bot detection rules
+
+Arcjet includes a set of default matching rules to detect common bots. You can
+remove any of these rules by listing them in the `patterns` `remove`
+configuration property:
+
+<Tabs>
+  <TabItem label="TS">
+    <Code
+      code={RemovingRulesTS}
+      lang="ts"
+      title="/src/hooks.server.ts"
+      mark={[{ range: "8-24" }]}
+    />
+  </TabItem>
+  <TabItem label="JS">
+    <Code
+      code={RemovingRulesJS}
+      lang="js"
+      title="/src/hooks.server.js"
+      mark={[{ range: "8-24" }]}
+    />
+  </TabItem>
+</Tabs>
+
+## Per route vs hooks
+
+Bot protection rules can be configured in two ways:
+
+- **Per route**: The rule is defined in the route handler itself. This allows
+  you to configure the rule alongside the code it is protecting which is useful
+  if you want to use the decision to add context to your own code. However, it
+  means rules are not located in a single place.
+- **Hooks**: The rule is defined as a hook. This allows you to
+  configure rules in a single place or apply them globally to all routes, but
+  it means the rules are not located alongside the code they are protecting.
+
+### Per route
+
+This configures bot protection on a single route.
+
+{/* prettier-ignore */}
+<Tabs>
+<TabItem label="TS">
+<Code
+  code={PerRouteTS} 
+  lang="ts"
+  title="/src/routes/api/arcjet/+server.ts"
+/>
+</TabItem>
+<TabItem label="JS">
+<Code
+  code={PerRouteJS}
+  lang="js"
+  title="/src/routes/api/arcjet/+server.js"
+/>
+</TabItem>
+</Tabs>
+
+### Hooks
+
+This will run on every request to your SvelteKit app - see
+[the SvelteKit Hooks docs](https://kit.svelte.dev/docs/hooks) for details.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={Step3TS} lang="ts" title="/src/hooks.server.ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={Step3JS} lang="js" title="/src/hooks.server.js" />
+  </TabItem>
+</Tabs>
+
+### Avoiding double protection with hooks
+
+If you use Arcjet in hooks and individual routes, you need to be careful
+that Arcjet is not running multiple times per request. This can be avoided by
+excluding the individual routes before running Arcjet in the hook.
+
+For example, if you already have rules defined in the API route
+at `/api/arcjet`, you can exclude it from the hook like this:
+
+<Code
+  code={HookMatcher}
+  lang="ts"
+  title="/src/hooks.server.ts"
+  mark={[{ range: "22-28" }]}
+/>
+
+## Decision
+
+The [quick start example](/bot-protection/quick-start/sveltekit) will deny requests
+that match the bot detection rules, immediately returning a response to the
+client using SvelteKit hooks.
+
+Arcjet also provides a single `protect` function that is used to execute your
+protection rules. This requires a `RequestEvent` property which is the event
+context as passed to the request handler.
+
+This function returns a `Promise` that resolves to an
+`ArcjetDecision` object. This contains the following properties:
+
+- `id` (`string`) - The unique ID for the request. This can be used to look up
+  the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
+  involving the Arcjet cloud API. For decisions taken locally, the prefix is
+  `lreq_`.
+- `conclusion` (`ArcjetConclusion`) - The final conclusion based on evaluating
+  each of the configured rules. If you wish to accept Arcjet's recommended
+  action based on the configured rules then you can use this property.
+- `reason` (`ArcjetReason`) - An object containing more detailed
+  information about the conclusion.
+- `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
+  containing the results of each rule that was executed.
+- `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
+  client IP address. See [IP analysis](/reference/sveltekit/#ip-analysis) in the
+  SDK reference for more information.
+
+See [the SDK reference](/reference/sveltekit#results) for more details about the
+rule results.
+
+You check if a deny conclusion has been returned by a bot protection rule by
+using `decision.isDenied()` and `decision.reason.isBot()` respectively.
+
+You can iterate through the results and check whether a bot protection rule was
+applied:
+
+```ts
+for (const result of decision.results) {
+  console.log("Rule Result", result);
+}
+```
+
+This example will log the full result as well as the bot protection rule:
+
+<Tabs>
+  <TabItem label="TS">
+    <Code
+      code={DecisionLogTS}
+      title="/src/routes/api/arcjet/+server.ts"
+      lang="ts"
+      mark={[{ range: "17,19-29" }]}
+    />
+  </TabItem>
+  <TabItem label="JS">
+    <Code
+      code={DecisionLogJS}
+      title="/src/routes/api/arcjet/+server.js"
+      lang="js"
+      mark={[{ range: "17,19-29" }]}
+    />
+  </TabItem>
+</Tabs>
+
+### Bot type
+
+In the code above, you will see that Arcjet also returns more information in
+the `decicion` object about the [bot type](/bot-protection/bot-types) of the
+client we think made the request.
+
+## Error handling
+
+Arcjet is designed to fail open so that a service issue or misconfiguration does
+not block all requests. The SDK will also time out and fail open after 500ms
+when `NODE_ENV` is `production` and 1000ms otherwise. However, in most cases,
+the response time will be less than 20-30ms.
+
+If there is an error condition, Arcjet will return an
+`ERROR` type and you can check the `reason` property for more information, like
+accessing `decision.reason.message`.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code
+      code={ErrorsTS}
+      title="/app/api/arcjet/route.ts"
+      lang="ts"
+      mark={[{ range: "18-23" }]}
+    />
+  </TabItem>
+  <TabItem label="JS">
+    <Code
+      code={ErrorsJS}
+      title="/app/api/arcjet/route.js"
+      lang="js"
+      mark={[{ range: "18-23" }]}
+    />
+  </TabItem>
+</Tabs>

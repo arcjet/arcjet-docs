@@ -1,0 +1,701 @@
+---
+title: "Next.js rate limiting reference"
+description: "How to use Arcjet to add rate limiting to your Next.js app."
+next: false
+---
+
+import { Tabs, TabItem, Code } from "@astrojs/starlight/components";
+import FixedWindow from "/src/content/docs/rate-limiting/reference/snippets/nextjs/FixedWindow.ts?raw";
+import SlidingWindow from "/src/content/docs/rate-limiting/reference/snippets/nextjs/SlidingWindow.ts?raw";
+import TokenBucket from "/src/content/docs/rate-limiting/reference/snippets/nextjs/TokenBucket.ts?raw";
+import ByUserIdAppTS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ByUserIdApp.ts?raw";
+import ByUserIdPagesTS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ByUserIdPages.ts?raw";
+import ByUserIdAppJS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ByUserIdApp.js?raw";
+import ByUserIdPagesJS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ByUserIdPages.js?raw";
+import SingleRateLimit from "/src/content/docs/rate-limiting/reference/snippets/nextjs/SingleRateLimit.ts?raw";
+import MultipleRateLimits from "/src/content/docs/rate-limiting/reference/snippets/nextjs/MultipleRateLimits.ts?raw";
+import DryRun from "/src/content/docs/rate-limiting/reference/snippets/nextjs/DryRun.ts?raw";
+import MiddlewareSingleRoute from "/src/content/docs/rate-limiting/reference/snippets/nextjs/MiddlewareSingleRoute.ts?raw";
+import MiddlewareMatchingPaths from "/src/content/docs/rate-limiting/reference/snippets/nextjs/MiddlewareMatchingPaths.ts?raw";
+import MiddlewareAllRoutes from "/src/content/docs/rate-limiting/reference/snippets/nextjs/MiddlewareAllRoutes.ts?raw";
+import MiddlewareMatcher from "/src/content/docs/rate-limiting/reference/snippets/nextjs/MiddlewareMatcher.ts?raw";
+import DecisionLogAppTS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/DecisionLogApp.ts?raw";
+import DecisionLogPagesTS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/DecisionLogPages.ts?raw";
+import DecisionLogAppJS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/DecisionLogApp.js?raw";
+import DecisionLogPagesJS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/DecisionLogPages.js?raw";
+import TokenBucketAppTS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/TokenBucketApp.ts?raw";
+import TokenBucketPagesTS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/TokenBucketPages.ts?raw";
+import TokenBucketAppJS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/TokenBucketApp.js?raw";
+import TokenBucketPagesJS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/TokenBucketPages.js?raw";
+import HeadersAppTS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/HeadersApp.ts?raw";
+import HeadersPagesTS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/HeadersPages.ts?raw";
+import HeadersAppJS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/HeadersApp.js?raw";
+import HeadersPagesJS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/HeadersPages.js?raw";
+import ErrorsAppTS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ErrorsApp.ts?raw";
+import ErrorsPagesTS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ErrorsPages.ts?raw";
+import ErrorsAppJS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ErrorsApp.js?raw";
+import ErrorsPagesJS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ErrorsPages.js?raw";
+import ByIPAppTS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ByIPApp.ts?raw";
+import ByIPPagesTS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ByIPPages.ts?raw";
+import ByIPAppJS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ByIPApp.js?raw";
+import ByIPPagesJS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ByIPPages.js?raw";
+import ByIPCustomResponseAppTS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ByIPCustomResponseApp.ts?raw";
+import ByIPCustomResponsePagesTS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ByIPCustomResponsePages.ts?raw";
+import ByIPCustomResponseAppJS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ByIPCustomResponseApp.js?raw";
+import ByIPCustomResponsePagesJS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ByIPCustomResponsePages.js?raw";
+import AIChatBotAppTS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/AIChatBotApp.ts?raw";
+import AIChatBotAppJS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/AIChatBotApp.js?raw";
+import ByAPIKeyHeader from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ByAPIKeyHeader.ts?raw";
+import MiddlewareGlobal from "/src/content/docs/rate-limiting/reference/snippets/nextjs/MiddlewareGlobal.ts?raw";
+import MiddlewareResponsePath from "/src/content/docs/rate-limiting/reference/snippets/nextjs/MiddlewareResponsePath.ts?raw";
+import MiddlewareRewriteRedirect from "/src/content/docs/rate-limiting/reference/snippets/nextjs/MiddlewareRewriteRedirect.ts?raw";
+import WrapAppTS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/WrapApp.ts?raw";
+import WrapPagesNodeTS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/WrapPagesNode.ts?raw";
+import WrapPagesEdgeTS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/WrapPagesEdge.ts?raw";
+import WrapAppJS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/WrapApp.js?raw";
+import WrapPagesNodeJS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/WrapPagesNode.js?raw";
+import WrapPagesEdgeJS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/WrapPagesEdge.js?raw";
+import ByIPEdgeAppTS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ByIPEdgeApp.ts?raw";
+import ByIPEdgePagesTS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ByIPEdgePages.ts?raw";
+import ByIPEdgeAppJS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ByIPEdgeApp.js?raw";
+import ByIPEdgePagesJS from "/src/content/docs/rate-limiting/reference/snippets/nextjs/ByIPEdgePages.js?raw";
+
+Arcjet rate limiting allows you to define rules which limit the number of
+requests a client can make over a period of time.
+
+## Configuration options
+
+Each rate limit is configured on an exact path with a set of client
+characteristics and algorithm specific options.
+
+### Fixed window rate limit options
+
+Tracks the number of requests made by a client over a fixed time window. Options
+are explained in the [Configuration](/rate-limiting/configuration)
+documentation. See the [fixed window algorithm
+description](/rate-limiting/algorithms#fixed-window) for more details about how
+the algorithm works.
+
+```ts
+// Options for fixed window rate limit
+// See https://docs.arcjet.com/rate-limiting/configuration
+type FixedWindowRateLimitOptions = {
+  mode?: "LIVE" | "DRY_RUN"; // "LIVE" will block requests. "DRY_RUN" will log only
+  match?: string; // request path the rate limit applies to
+  characteristics?: string[]; // how the client is identified. Defaults to the global characteristics if unset
+  window: string; // time window the rate limit applies to
+  max: number; // maximum number of requests allowed in the time window
+};
+```
+
+#### Fixed window example
+
+<Code code={FixedWindow} lang="ts" />
+
+### Sliding window rate limit options
+
+Tracks the number of requests made by a client over a sliding window so that the
+window moves with time. Options are explained in the
+[Configuration](/rate-limiting/configuration) documentation. See the [sliding
+window algorithm description](/rate-limiting/algorithms#sliding-window) for more
+details about how the algorithm works.
+
+```ts
+// Options for sliding window rate limit
+// See https://docs.arcjet.com/rate-limiting/configuration
+type SlidingWindowRateLimitOptions = {
+  mode?: "LIVE" | "DRY_RUN"; // "LIVE" will block requests. "DRY_RUN" will log only
+  match?: string; // request path the rate limit applies to
+  characteristics?: string[]; // how the client is identified. Defaults to the global characteristics if unset
+  interval: number; // the time interval in seconds for the rate limit
+  max: number; // maximum number of requests allowed over the time interval
+};
+```
+
+#### Sliding window example
+
+<Code code={SlidingWindow} lang="ts" />
+
+### Token bucket rate limit options
+
+Based on a bucket filled with a specific number of tokens. Each request
+withdraws a token from the bucket and the bucket is refilled at a fixed rate.
+Once the bucket is empty, the client is blocked until the bucket refills.
+Options are explained in the [Configuration](/rate-limiting/configuration)
+documentation. See the [token bucket algorithm
+description](/rate-limiting/algorithms#token-bucket) for more details about how
+the algorithm works.
+
+```ts
+// Options for token bucket rate limit
+// See https://docs.arcjet.com/rate-limiting/configuration
+type TokenBucketRateLimitOptions = {
+  mode?: "LIVE" | "DRY_RUN"; // "LIVE" will block requests. "DRY_RUN" will log only
+  match?: string; // request path the rate limit applies to
+  characteristics?: string[]; // how the client is identified. Defaults to the global characteristics if unset
+  refillRate: number; // number of tokens to add to the bucket at each interval
+  interval: number; // the interval in seconds to add tokens to the bucket
+  capacity: number; // the maximum number of tokens the bucket can hold
+};
+```
+
+#### Token bucket example
+
+See the [token bucket example](#token-bucket-request) for how to specify the
+number of tokens to request.
+
+<Code code={TokenBucket} lang="ts" />
+
+## Identifying users
+
+Rate limit rules use `characteristics` to identify the client and apply the
+limit across requests. The default is to use the client's IP address. However,
+you can specify other
+[characteristics](/rate-limiting/configuration#characteristics) such as a user
+ID or other metadata from your application.
+
+:::caution
+Avoid passing personal information such as an email address as a custom
+characteristic. The value is hashed on Arcjet's servers, but it's still a best
+practice to avoid sending us sensitive information.
+:::
+
+In this example we define a rate limit rule that applies to a specific user ID.
+The custom characteristic is `userId` with the value passed as a prop on the
+`protect` function. You can use any string for the characteristic name and any
+`string`, `number` or `boolean` for the value.
+
+<Tabs>
+<TabItem label="TS (App)">
+Create a new API route at `/app/api/arcjet/route.ts`:
+
+<Code code={ByUserIdAppTS} lang="ts" title="/app/api/arcjet/route.ts" />
+
+</TabItem>
+<TabItem label="TS (Pages)">
+Create a new API route at `/pages/api/arcjet.ts`:
+
+<Code
+  code={ByUserIdPagesTS}
+  lang="ts"
+  title="/pages/api/arcjet.ts"
+  mark={["ARCJET_KEY"]}
+/>
+
+</TabItem>
+<TabItem label="JS (App)">
+Create a new API route at `/app/api/arcjet/route.js`:
+
+<Code
+  code={ByUserIdAppJS}
+  lang="js"
+  title="/app/api/arcjet/route.js"
+  mark={["ARCJET_KEY"]}
+/>
+
+</TabItem>
+<TabItem label="JS (Pages)">
+Create a new API route at `/pages/api/arcjet.js`:
+
+<Code
+  code={ByUserIdPagesJS}
+  lang="js"
+  title="/pages/api/arcjet.js"
+  mark={["ARCJET_KEY"]}
+/>
+
+</TabItem>
+</Tabs>
+
+## Rules
+
+The `arcjet` client is configured with one or more rules which take one or many
+of the above options.
+
+### Example - single rate limit
+
+Set a single rate limit rule on the `/api/hello` API route that applies a 60
+request limit per hour per IP address (the default if no `characteristics` are
+specified).
+
+<Code code={SingleRateLimit} lang="ts" />
+
+### Example - dry run mode for new rules
+
+Rate limits can be combined in the `arcjet` client which allows you to test new
+configurations in dry run mode first before enabling them in live mode. You can
+inspect the results of each rule by logging them or using the [Arcjet
+Dashboard](https://app.arcjet.com).
+
+<Code code={DryRun} lang="ts" />
+
+## Per route vs middleware
+
+Rate limit rules can be configured in two ways:
+
+- **Per API route**: The rule is defined in the API route itself. This allows
+  you to configure the rule alongside the code it is protecting which is useful
+  if you want to use the decision to add context to your own code. However, it
+  means rules are not located in a single place.
+- **Middleware**: The rule is defined in the middleware. This allows you to
+  configure rules in a single place or apply them globally to all routes, but
+  it means the rules are not located alongside the code they are protecting.
+
+### Per route
+
+If you define your rate limit within an API route and do not specify a value for
+`match`, Arcjet assumes that the limit applies only to that route. If you define
+your rate limit in middleware, you should specify a path for `match` otherwise
+the rate limit will apply to all routes.
+
+#### Rate limit only on `/api/hello`
+
+<Code code={MiddlewareSingleRoute} title="/middleware.ts" lang="ts" />
+
+#### Rate limit on all routes
+
+<Code code={MiddlewareAllRoutes} title="/middleware.ts" lang="ts" />
+
+### Avoiding double protection with middleware
+
+If you use Arcjet in middleware and individual routes, you need to be careful
+that Arcjet is not running multiple times per request. This can be avoided by
+excluding the API route from [the middleware
+matcher](https://nextjs.org/docs/pages/building-your-application/routing/middleware#matcher).
+
+For example, if you already have a rate limit defined in the API route at
+`/api/hello`, you can exclude it from the middleware by specifying a matcher in
+`/middleware.ts`:
+
+<Code code={MiddlewareMatcher} title="/middleware.ts" lang="ts" />
+
+## Decision
+
+Arcjet provides a single `protect` function that is used to execute your
+protection rules. This requires a `request` argument which is the request
+context as passed to the request handler.
+
+This function returns a `Promise` that resolves to an
+`ArcjetDecision` object. This contains the following properties:
+
+- `id` (`string`) - The unique ID for the request. This can be used to look up
+  the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
+  involving the Arcjet cloud API. For decisions taken locally, the prefix is
+  `lreq_`.
+- `conclusion` (`ArcjetConclusion`) - The final conclusion based on evaluating
+  each of the configured rules. If you wish to accept Arcjet's recommended
+  action based on the configured rules then you can use this property.
+- `reason` (`ArcjetReason`) - An object containing more detailed
+  information about the conclusion.
+- `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
+  containing the results of each rule that was executed.
+- `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
+  client IP address. See [IP analysis](/reference/nextjs/#ip-analysis) in the
+  SDK reference for more information.
+
+See [the SDK reference](/reference/nextjs#results) for more details about the
+rule results.
+
+You check if a deny conclusion has been returned by a rate limit rule by using
+`decision.isDenied()` and `decision.reason.isRateLimit()`.
+
+You can iterate through the results and check whether a rate limit was applied:
+
+```ts
+for (const result of decision.results) {
+  console.log("Rule Result", result);
+}
+```
+
+This example will log the full result as well as each rate limit rule:
+
+<Tabs>
+<TabItem label="TS (App)">
+Create a new API route at `/app/api/route/hello.ts`:
+
+<Code code={DecisionLogAppTS} title="/app/api/route/hello.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="TS (Pages)">
+Create a new API route at `/pages/api/hello.ts`:
+
+<Code code={DecisionLogPagesTS} title="/pages/api/hello.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="JS (App Router)">
+Create a new API route at `/app/api/arcjet/route.js`:
+
+<Code code={DecisionLogAppJS} title="/app/api/route/hello.js" lang="js" />
+
+</TabItem>
+<TabItem label="JS (Pages Router)">
+Create a new API route at `/pages/api/arcjet.js`:
+
+<Code code={DecisionLogPagesJS} title="/pages/api/hello.js" lang="js" />
+
+</TabItem>
+</Tabs>
+
+### Token bucket request
+
+When using a token bucket rule, an additional `requested` prop should be passed
+to the `protect` function. This is the number of tokens the client is requesting
+to withdraw from the bucket.
+
+<Tabs>
+<TabItem label="TS (App)">
+Create a new API route at `/app/api/route/hello.ts`:
+
+<Code code={TokenBucketAppTS} title="/app/api/route/hello.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="TS (Pages)">
+Create a new API route at `/pages/api/hello.ts`:
+
+<Code code={TokenBucketPagesTS} title="/pages/api/hello.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="JS (App Router)">
+Create a new API route at `/app/api/arcjet/route.js`:
+
+<Code code={TokenBucketAppJS} title="/app/api/route/hello.js" lang="js" />
+
+</TabItem>
+<TabItem label="JS (Pages Router)">
+Create a new API route at `/pages/api/arcjet.js`:
+
+<Code code={TokenBucketPagesJS} title="/pages/api/hello.js" lang="js" />
+
+</TabItem>
+</Tabs>
+
+### Rate limit headers
+
+With a rate limit rule enabled, you can access additional metadata in every
+Arcjet decision result:
+
+- `max` (`number`): The configured maximum number of requests applied to this
+  request.
+- `remaining` (`number`): The number of requests remaining before `max` is
+  reached within the window.
+- `window` (`number`): The total amount of seconds in which requests are
+  counted.
+- `reset` (`number`): The remaining amount of seconds in the window.
+
+These can be used to return `RateLimit` HTTP headers ([draft
+RFC](https://ietf-wg-httpapi.github.io/ratelimit-headers/draft-ietf-httpapi-ratelimit-headers.html)) to
+offer the client more detail.
+
+We provide the [@arcjet/decorate
+package](https://github.com/arcjet/arcjet-js/tree/main/decorate) for decorating
+your responses with appropriate `RateLimit` headers based on a decision.
+
+<Tabs>
+<TabItem label="TS (App)">
+Create a new API route at `/app/api/route/hello.ts`:
+
+<Code code={HeadersAppTS} title="/app/api/route/hello.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="TS (Pages)">
+Create a new API route at `/pages/api/hello.ts`:
+
+<Code code={HeadersPagesTS} title="/pages/api/hello.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="JS (App Router)">
+Create a new API route at `/app/api/arcjet/route.js`:
+
+<Code code={HeadersAppJS} title="/app/api/route/hello.js" lang="js" />
+
+</TabItem>
+<TabItem label="JS (Pages Router)">
+Create a new API route at `/pages/api/arcjet.js`:
+
+<Code code={HeadersPagesJS} title="/pages/api/hello.js" lang="js" />
+
+</TabItem>
+</Tabs>
+
+## Error handling
+
+Arcjet is designed to fail open so that a service issue or misconfiguration does
+not block all requests. The SDK will also time out and fail open after 500ms
+when `NODE_ENV` is `production` and 1000ms otherwise. However, in most cases,
+the response time will be less than 20-30ms.
+
+If there is an error condition, Arcjet will return an `ERROR` `conclusion`.
+
+<Tabs>
+<TabItem label="TS (App)">
+
+<Code code={ErrorsAppTS} title="/app/api/hello/route.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="TS (Pages)">
+
+<Code code={ErrorsPagesTS} title="/pages/api/hello.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="JS (App)">
+
+<Code code={ErrorsAppJS} title="/app/api/hello/route.js" lang="js" />
+
+</TabItem>
+<TabItem label="JS (Pages)">
+
+<Code code={ErrorsPagesJS} title="/pages/api/hello.js" lang="js" />
+
+</TabItem>
+</Tabs>
+
+## Examples
+
+### Rate limit by IP address
+
+The example below shows how to configure a rate limit on a single API route. It
+applies a limit of 60 requests per hour per IP address. If the limit is
+exceeded, the client is blocked for 10 minutes before being able to make any
+further requests.
+
+Applying a rate limit by IP address is the default if no
+`characteristics` are specified.
+
+<Tabs>
+<TabItem label="TS (App)">
+
+<Code code={ByIPAppTS} title="/app/api/hello/route.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="TS (Pages)">
+
+<Code code={ByIPPagesTS} title="/pages/api/hello.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="JS (App)">
+
+<Code code={ByIPAppJS} title="/app/api/hello/route.js" lang="js" />
+
+</TabItem>
+<TabItem label="JS (Pages)">
+
+<Code code={ByIPPagesJS} title="/pages/api/hello.js" lang="js" />
+
+</TabItem>
+</Tabs>
+
+### Rate limit by IP address with custom response
+
+The example below is the same as the one above. However this example also shows
+a customized response rather than the default
+
+<Tabs>
+<TabItem label="TS (App)">
+
+<Code
+  code={ByIPCustomResponseAppTS}
+  title="/app/api/hello/route.ts"
+  lang="ts"
+/>
+
+</TabItem>
+<TabItem label="TS (Pages)">
+
+<Code code={ByIPCustomResponsePagesTS} title="/pages/api/hello.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="JS (App)">
+
+<Code
+  code={ByIPCustomResponseAppJS}
+  title="/app/api/hello/route.js"
+  lang="js"
+/>
+
+</TabItem>
+<TabItem label="JS (Pages)">
+
+<Code code={ByIPCustomResponsePagesJS} title="/pages/api/hello.js" lang="js" />
+
+</TabItem>
+</Tabs>
+
+### Rate limit by AI tokens
+
+If you are building an AI application you may be more interested in the number
+of AI tokens rather than the number of HTTP requests. Popular AI APIs such as
+OpenAI are billed based on the number of tokens consumed and the number of
+tokens is variable depending on the request e.g. conversation length or image
+size.
+
+The token bucket algorithm is a good fit for this use case because you can vary
+the number of tokens withdrawn from the bucket with every request.
+
+The example below configures a token bucket rate limit using the
+[openai-chat-tokens library](https://github.com/hmarr/openai-chat-tokens) to
+track the number of tokens used by a `gpt-3.5-turbo` AI chatbot. It sets a limit
+of `2,000` tokens per hour with a maximum of `5,000` tokens in the bucket. This
+allows for a reasonable conversation length without consuming too many tokens.
+
+See the [arcjet-js GitHub repo](https://github.com/arcjet/arcjet-js) for [a
+full example using
+Next.js](https://github.com/arcjet/arcjet-js/tree/main/examples/nextjs-14-openai).
+
+<Tabs>
+<TabItem label="TS (App)">
+
+<Code code={AIChatBotAppTS} title="/app/api/chat/route.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="TS (Pages)">
+
+The Next.js pages router does not support streaming responses so you should use
+the app router for this example. You can still use the `pages/` directory for
+the rest of your application. See the [Next.js AI docs for
+details](https://sdk.vercel.ai/docs/guides/frameworks/nextjs-pages).
+
+</TabItem>
+<TabItem label="JS (App)">
+
+<Code code={AIChatBotAppJS} title="/app/api/chat/route.ts" lang="js" />
+
+</TabItem>
+<TabItem label="JS (Pages)">
+
+The Next.js pages router does not support streaming responses so you should use
+the app router for this example. You can still use the `pages/` directory for
+the rest of your application. See the [Next.js AI docs for
+details](https://sdk.vercel.ai/docs/guides/frameworks/nextjs-pages).
+
+</TabItem>
+</Tabs>
+
+### Rate limit by API key header
+
+APIs are commonly protected by keys. You may wish to apply a rate limit based on
+the key, regardless of which IPs the requests come from. To achieve this, you
+can specify the characteristics Arcjet will use to track the limit.
+
+The example below shows how to configure a rate limit on a single API route. It
+applies a limit of 60 requests per hour per API key, where the key is provided
+in a custom header called `x-api-key`. If the limit is exceeded, the client is
+blocked for 10 minutes before being able to make any further requests.
+
+:::caution
+If you specify different characteristics and do not include `ip.src`, you may
+inadvertently rate limit everyone. Be sure to include a characteristic which can
+narrowly identify each client, such as an API key as shown here.
+:::
+
+<Code code={ByAPIKeyHeader} lang="ts" />
+
+### Wildcard matching paths
+
+The Arcjet rate limit `match` configuration does not currently support
+wildcards. This is on our roadmap, but in the meantime you can use conditionals
+in your Next.js middleware instead.
+
+<Code code={MiddlewareMatchingPaths} title="/middleware.ts" lang="ts" />
+
+### Global rate limit
+
+Using Next.js middleware allows you to set a rate limit that applies to every
+route:
+
+:::note
+Middleware runs on every route so be careful to [avoid double
+protection](#avoiding-double-protection-with-middleware) if you are
+configuring Arcjet directly on other routes.
+:::
+
+<Code code={MiddlewareGlobal} title="/middleware.ts" lang="ts" />
+
+### Response based on the path
+
+You can also use the `req`
+[`NextRequest`](https://nextjs.org/docs/api-reference/next/server#nextrequest)
+object to customize the response based on the path. In this example, we'll
+return a JSON response for API requests, and a HTML response for other requests.
+
+<Code code={MiddlewareResponsePath} title="/middleware.ts" lang="ts" />
+
+### Rewrite or redirect
+
+The
+[`NextResponse`](https://nextjs.org/docs/advanced-features/middleware#nextresponse)
+object returned to the client can also be used to rewrite or redirect the
+request. For example, you might want to return a JSON response for API route
+requests, but redirect all page route requests to an error page.
+
+<Code code={MiddlewareRewriteRedirect} title="/middleware.ts" lang="ts" />
+
+### Wrap existing handler
+
+All the examples on this page show how you can inspect the decision to control
+what to do next. However, if you just wish to send a generic `429 Too Many
+Requests` response you can delegate this to Arcjet by wrapping your handler
+`withArcjet`.
+
+<Tabs>
+<TabItem label="TS (App)">
+For both [the Node or Edge runtime](https://nextjs.org/docs/app/building-your-application/routing/route-handlers#edge-and-nodejs-runtimes):
+
+<Code code={WrapAppTS} title="/app/api/hello/route.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="TS (Pages)">
+For the Node (default) runtime:
+
+<Code code={WrapPagesNodeTS} title="/pages/api/hello.ts" lang="ts" />
+
+For the Edge runtime:
+
+<Code code={WrapPagesEdgeTS} title="/pages/api/hello.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="JS (App)">
+
+For both [the Node or Edge runtime](https://nextjs.org/docs/app/building-your-application/routing/route-handlers#edge-and-nodejs-runtimes):
+
+<Code code={WrapAppJS} title="/app/api/hello/route.js" lang="js" />
+
+</TabItem>
+<TabItem label="JS (Pages)">
+
+For the Node (default) runtime:
+
+<Code code={WrapPagesNodeJS} title="/pages/api/hello.js" lang="js" />
+
+For the Edge runtime:
+
+<Code code={WrapPagesEdgeJS} title="/pages/api/hello.js" lang="js" />
+</TabItem>
+</Tabs>
+
+## Edge Functions
+
+Arcjet works in Edge Functions and with the [Edge
+Runtime](https://edge-runtime.vercel.app/).
+
+<Tabs>
+<TabItem label="TS (App)">
+
+<Code code={ByIPEdgeAppTS} title="/app/api/hello/route.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="TS (Pages)">
+
+<Code code={ByIPEdgePagesTS} title="/pages/api/hello.ts" lang="ts" />
+
+</TabItem>
+<TabItem label="JS (App)">
+
+<Code code={ByIPEdgeAppJS} title="/app/api/hello/route.js" lang="js" />
+
+</TabItem>
+<TabItem label="JS (Pages)">
+
+<Code code={ByIPEdgePagesJS} title="/pages/api/hello.js" lang="js" />
+
+</TabItem>
+</Tabs>

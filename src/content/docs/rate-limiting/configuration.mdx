@@ -1,0 +1,166 @@
+---
+title: "Configuration"
+description: "Configuring Arcjet rate rules."
+next: false
+---
+
+import { Code } from "@astrojs/starlight/components";
+import FixedWindowCustomCharacteristicRule from "/src/content/docs/rate-limiting/reference/snippets/nextjs/FixedWindowCustomCharacteristicRule.ts?raw";
+
+Each Arcjet rate limit rule has its own configuration depending on the algorithm
+used.
+
+## Match
+
+**Type:** `string` (optional)
+
+**Algorithms:** `fixedWindow`, `slidingWindow`, `tokenBucket`.
+
+The exact request path the rate limit applies to. If not specified and Arcjet is
+running on a specific API route, it defaults to the path for that route. If not
+specified and Arcjet is running from middleware, it applies to all routes.
+
+Wildcards are not currently supported. This is on our roadmap, but in the
+meantime see [this Next.js
+example](/rate-limiting/reference/nextjs#wildcard-matching-paths) for using
+middleware conditionals.
+
+## Characteristics
+
+**Type:** `Array<string>` (optional)
+
+**Algorithms:** `fixedWindow`, `slidingWindow`, `tokenBucket`.
+
+Defines how Arcjet will track the rate limit.
+
+If this is not set then the characteristics set on the root Arcjet object will be used.
+
+:::note
+For most use cases it is better to use the [global characteristics set on the root Arcjet object.](/architecture#built-in-characteristics)
+This is because we cache rate limit decisions using a fingerprint that is generated with these characteristics.
+If the characteristics used to compute the fingerprint are different from those used to apply the rate limit
+it can result in cached rate limit decisions being applied to the wrong set of users.
+:::
+
+### Built-in characteristics
+
+The built-in options are managed by the SDK and are always available.
+If more than one option is provided, they will be combined.
+
+:::caution
+If you specify different characteristics and do not include `ip.src`, you may
+inadvertently rate limit everyone. Be sure to include a characteristic which can
+narrowly identify each client. For example, use a header value to limit based on
+a session token or authentication header.
+:::
+
+| Option                                        |     Description      |
+| :-------------------------------------------- | :------------------: |
+| `ip.src`                                      |  Client IP address   |
+| `http.host`                                   |     Request host     |
+| `http.request.headers["<header_name>"]`       | Request header value |
+| `http.request.cookie["<cookie_name>"]`        | Request cookie value |
+| `http.request.uri.args["<query_param_name>"]` | Request query value  |
+| `http.request.uri.path`                       |     Request path     |
+
+### Custom characteristics
+
+You can use custom characteristics to track rate limits. For example, you can
+set up a limit for a logged in user by setting their user ID as the identifier.
+This will apply the limit to all requests made by that user regardless of their
+device and IP address.
+
+Custom characteristics are defined with a string key when configuring the rate
+limit rule. The value is then passed as a `string`, `number` or `boolean` when
+calling the `protect` method. You can use any string value for the key.
+
+:::caution
+Avoid passing personal information such as an email address as a custom
+characteristic. The value is hashed on Arcjet's servers, but it's still a best
+practice to avoid sending us sensitive information.
+:::
+
+In this example we create a custom characteristic called `userId`, but you can use any string value:
+
+<Code code={FixedWindowCustomCharacteristicRule} lang="ts" />
+
+Then when calling the `protect` method, you would pass a value for the key:
+
+```ts
+// Pass userId as a string to identify the user. This can be any string,
+// number or boolean value. Multiple values will be combined.
+const decision = await aj.protect(req, { userId: "user123" });
+```
+
+## Max
+
+**Type:** `int` (required)
+
+**Algorithms:** `fixedWindow`, `slidingWindow`.
+
+The maximum number of requests allowed in the time window. This is an integer
+value ranging from `0` to `4,294,967,295`.
+
+## Window
+
+**Type:** `string | int` (required)
+
+**Algorithms:** `fixedWindow`.
+
+The time window the rate limit applies to. Can be an `int` specifying the window
+size in seconds ranging from `0` to `4,294,967,295`. Alternatively, you can use
+a `string` with a sequence of numbers, each with a unit suffix e.g. `1s` for 1
+second, `1h45m` for 1 hour and 45 minutes, `1d` for 1 day.
+
+Valid string time units are:
+
+- `s` for seconds.
+- `m` for minutes.
+- `h` for hours.
+- `d` for days.
+
+## Interval
+
+**Type:** `string | int` (required)
+
+**Algorithms:** `slidingWindow`, `tokenBucket`.
+
+For `slidingWindow`, the time interval for the rate limit. For example, if you set
+the interval to `60` the sliding window will be 60 seconds.
+
+For `tokenBucket`, the time interval for the refill rate (see below). For
+example, if you set the interval to `60` and the refill rate to `10`, the bucket
+will refill 10 tokens every 60 seconds.
+
+In both cases, the value can be an `int` in seconds ranging from `0` to
+`4,294,967,295`. Alternatively, you can use a `string` with a sequence of
+numbers, each with a unit suffix e.g. `1s` for 1 second, `1h45m` for 1 hour and
+45 minutes, `1d` for 1 day.
+
+Valid string time units are:
+
+- `s` for seconds.
+- `m` for minutes.
+- `h` for hours.
+- `d` for days.
+
+## Refill rate
+
+**Type:** `int` (required)
+
+**Algorithms:** `tokenBucket`.
+
+The number of tokens to add to the bucket at each interval (see above). This is
+an integer value ranging from `0` to `4,294,967,295`. For example, if you set
+the interval to `60` and the refill rate to `10`, the bucket will refill 10
+tokens every 60 seconds.
+
+## Capacity
+
+**Type:** `int` (required)
+
+**Algorithms:** `tokenBucket`.
+
+The maximum number of tokens the bucket can hold. The bucket will refill until
+it hits the capacity. This is an integer value ranging from `0` to
+`4,294,967,295`.

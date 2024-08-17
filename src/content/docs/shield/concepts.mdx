@@ -1,0 +1,121 @@
+---
+title: "Arcjet Shield"
+description: "Arcjet Shield protects your application against common attacks, including the OWASP Top 10."
+prev: false
+next: false
+---
+
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+
+Arcjet Shield protects your application against common attacks, including the
+[OWASP Top 10](https://owasp.org/www-project-top-ten/).
+
+<WhatIsArcjet />
+
+## What does Arcjet Shield do?
+
+Arcjet Shield analyzes every request to your application to detect suspicious
+activity. Once a certain suspicion threshold is reached, subsequent requests
+from that client are blocked for a period of time.
+
+## Which attacks will Arcjet Shield block?
+
+Arcjet implements a variety of detection rules based on the [OWASP Core Rule
+Set](https://coreruleset.org/). This includes the [OWASP Top
+10](https://owasp.org/www-project-top-ten/) to protect against common categories
+such as:
+
+- SQL injection (SQLi)
+- Cross-site scripting (XSS)
+- Local file inclusion (LFI)
+- Remote file inclusion (RFI)
+- PHP code injection
+- Java code injection
+- HTTPoxy
+- Shellshock
+- Unix/Windows shell injection
+- Session fixation
+
+## How are attacks detected?
+
+Most attacks involve an "enumeration" step, where the attacker tries to learn
+how your application is built and discover potential vulnerabilities. This often
+involves sending a variety of requests to fuzz your application and see how it
+responds.
+
+For example, an attacker might first look for a WordPress admin panel, an
+accidentally uploaded `.git` directory, or a login form. If they find something
+interesting they might then test it for SQL injection, directory traversal, or
+command injection.
+
+This process could involve many hundreds of requests. Each one might seem
+innocent by itself, but together they form a suspicious pattern.
+
+Arcjet Shield detects these patterns, but only blocks requests once a certain
+threshold is reached. This significantly reduces the risk of false positives and
+helps to avoid blocking legitimate users.
+
+Although this means Arcjet Shield doesn't block suspicious requests immediately,
+most attacks do not succeed on the first attempt. This allows for a balance of
+security and usability, minimizing the risk of blocking legitimate users.
+
+### Responding to suspicious requests
+
+When a request is blocked by Arcjet Shield, the Arcjet SDK includes the details
+in the response to your application. You can simply accept the default and block
+the client. However, you can also customize the response to suit your
+application.
+
+For example, on critical user-facing website pages you might want to return an
+error page. In an API you might want to return a formatted response that follows
+your API schema in JSON or XML. And in critical application flows such as a
+checkout or sensitive action you might store the request context and flag the
+account for review in case it's a legitimate user.
+
+Generic, network-level protections are insufficient for modern applications
+where the context and sensitivity changes across the application. Arcjet allows
+developers to build with security in mind without sacrificing usability.
+
+## How does Arcjet Shield work?
+
+The Arcjet SDK communicates with the Arcjet API on every request as part of
+applying your configured rules. The request is included as part of this process
+because rules are executed based on the request content. This also allows Arcjet
+Shield to analyze the request. Analysis happens on the Arcjet platform so it
+requires no additional resources from your application and adds no overhead to
+the request processing. See [Architecture](/architecture) for details.
+
+## Is Arcjet Shield a Web Application Firewall (WAF)?
+
+Arcjet Shield is like a Web Application Firewall (WAF) because it analyzes every
+request for possible attacks. However, there are several problems with WAFs:
+
+1. They are slow, often adding hundreds of milliseconds to every request.
+2. They sit in front of your production application and are difficult to deploy
+   locally or in test environments. This means turning them on or changing rules
+   is risky because you can't test them properly. Engineers only get involved
+   when something breaks rather than being able to test them during development.
+3. This also means WAFs are a separate system with no context about your
+   application. Therefore, the results can't be used as part of your application
+   logic e.g. customizing errors or flagging accounts, rather than just blocking
+   requests.
+4. They have a high false positive rate, blocking legitimate users and
+   frustrating customers.
+
+Arcjet Shield solves these problems by being part of the Arcjet SDK integrated
+into your application, but running analysis on the Arcjet platform so it
+consumes no resources from your application. Using a threshold system allows
+false positives to be minimized.
+
+Finally, you can integrate the results into your application logic which allows
+you to control how you handle suspicious requests. This allows engineers to test
+everything locally and in staging, avoiding the risk of breaking production.
+
+## Blocking based on fingerprint
+
+If Arcjet detects suspicious activity, it will block further traffic based on a
+[fingerprint of the client](/architecture#fingerprinting), which includes the IP
+address. This could temporarily block traffic from legitimate clients using the
+same IP address. Although this trade-off might affect a small number users on
+shared networks, we are constantly improving our systems to minimize
+false-positives while ensuring overall security.

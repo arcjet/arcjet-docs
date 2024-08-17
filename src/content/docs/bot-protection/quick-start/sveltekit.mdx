@@ -1,0 +1,145 @@
+---
+title: "Bot protection for SvelteKit"
+description: "Quick start guide for adding bot protection to your SvelteKit app."
+---
+
+import {
+  Tabs,
+  TabItem,
+  LinkCard,
+  CardGrid,
+  Code,
+} from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import FAQs from "/src/components/FAQs.astro";
+import Step3TS from "/src/content/docs/bot-protection/quick-start/snippets/sveltekit/Step3.ts?raw";
+import Step3JS from "/src/content/docs/bot-protection/quick-start/snippets/sveltekit/Step3.js?raw";
+
+Arcjet bot detection allows you to manage traffic by automated clients and bots.
+
+<WhatIsArcjet />
+
+## Quick start
+
+This guide will show you how to protect your entire SvelteKit application from
+bots and automated clients.
+
+### 1. Install Arcjet
+
+In your project root, run the following command to install the SDK:
+
+{/* prettier-ignore */}
+<Tabs>
+<TabItem label="npm">
+```sh
+npm i @arcjet/sveltekit
+```
+</TabItem>
+<TabItem label="pnpm">
+```sh
+pnpm add @arcjet/sveltekit
+```
+</TabItem>
+<TabItem label="yarn">
+```sh
+yarn add @arcjet/sveltekit
+```
+</TabItem>
+</Tabs>
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key. Add it to a `.env.local` file in your
+SvelteKit project root:
+
+```ini title=".env.local"
+ARCJET_KEY=ajkey_yourkey
+```
+
+### 3. Add bot protection hooks
+
+If you wish to enable Arcjet Bot Protection across your entire SvelteKit
+pplication, you can install the SDK as a hook. [SvelteKit
+hooks](https://kit.svelte.dev/docs/hooks) run before every request, allowing
+Arcjet to protect your entire application before your code runs.
+
+<Tabs>
+<TabItem label="TS">
+Create a file called `hooks.server.ts` in your project (inside `src`):
+<Code code={Step3TS} lang="ts" title="/src/hooks.server.ts" mark={[{range:"8-11"}]} />
+</TabItem>
+<TabItem label="JS">
+
+Create a file called `hooks.server.js` in your project (inside `src`):
+
+<Code code={Step3JS} lang="js" title="/src/hooks.server.js" />
+
+</TabItem>
+</Tabs>
+
+### 4. Start app
+
+Make a `curl` request from your terminal to your application. You should see a
+`403 Forbidden` response because `curl` is considered an automated client by
+default. See [the reference
+guide](/bot-protection/reference/sveltekit#removing-bot-detection-rules) for how to
+configure this.
+
+```shell
+# Will show just the response headers, which should be 403 forbidden
+curl -I http://localhost:5173
+```
+
+The requests will also show up in the [Arcjet
+dashboard](https://app.arcjet.com).
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+<CardGrid>
+  <LinkCard
+    title="Bot protection reference"
+    href="/bot-protection/reference/sveltekit"
+    description="Full details about bot protection."
+  ></LinkCard>
+  <LinkCard
+    title="Example app"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples/sveltekit"
+    description="Check out our SvelteKit example code in GitHub."
+  ></LinkCard>
+  <LinkCard
+    title="Arcjet Shield"
+    href="/shield/quick-start/sveltekit"
+    description="Protect your app from common attacks."
+  />
+  <LinkCard
+    title="Rate limiting"
+    href="/rate-limiting/quick-start/sveltekit"
+    description="Protect your app from abuse."
+  />
+  <LinkCard
+    title="Email validation"
+    href="/email-validation/quick-start/sveltekit"
+    description="Minimize fraudulent registrations."
+  />
+  <LinkCard
+    title="Signup form protection"
+    href="/signup-protection/quick-start/sveltekit"
+    description="Protect your signup form from abuse."
+  />
+  <LinkCard
+    title="SDK reference"
+    href="/reference/sveltekit"
+    description="SvelteKit SDK reference guide."
+  />
+</CardGrid>
+
+## Get help
+
+Need help with anything? [Email us](mailto:support@arcjet.com) or [join our
+Discord](https://discord.gg/TPra6jqZDC) to get support from our
+engineering team.

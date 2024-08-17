@@ -1,0 +1,41 @@
+---
+title: "Arcjet limitations"
+description: "Things to be aware of and limitations with Arcjet."
+---
+
+No security product is perfect and Arcjet is no exception. Here are some things
+to be aware of when building your application with Arcjet.
+
+## Rate limits are scoped per region
+
+Rate limits are currently enforced per region. The SDK automatically picks the
+closest region to where your application is running, but if your code runs in
+multiple locations then the rate limits will be enforced separately.
+
+This is generally not a problem if you are using rate limits based on IP address
+because a client will typically always connect to the same region. However, if
+you are using rate limits based on a user's account ID or an API key then you
+should be aware of this limitation.
+
+We are working on an option to sync rate limits globally.
+
+## Your application will receive traffic
+
+Network based security products block traffic before it hits your application.
+This works well for high volume network attacks so those are best handled by the
+DDoS protection built into your hosting platform.
+
+Arcjet is designed to integrate into your application and understand more about
+the request context. This allows the right rules to be applied and allows you to
+customize the response based on the signals provided by Arcjet. You can also
+show useful error messages rather than returning generic status codes.
+
+For example, it is difficult for network based security products to distinguish
+between a free user making excessive API calls vs your largest paying customer
+performing important queries. Likewise, you may want to manually review users
+signing up from behind a proxy who have disposable email addresses, but allow
+those with business emails to sign up instantly.
+
+We believe application context is critical and so this where Arcjet shines.
+However, it also means that your application will receive more traffic than if
+it were simply blocked on the network.

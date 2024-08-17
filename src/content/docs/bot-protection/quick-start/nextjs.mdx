@@ -1,0 +1,162 @@
+---
+title: "Bot protection for Next.js"
+description: "Quick start guide for adding bot protection to your Next.js app."
+---
+
+import {
+  CardGrid,
+  Code,
+  LinkCard,
+  TabItem,
+  Tabs,
+} from "@astrojs/starlight/components";
+import { YouTube } from "astro-embed";
+import FAQs from "/src/components/FAQs.astro";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import Step3JS from "/src/content/docs/bot-protection/quick-start/snippets/nextjs/Step3.js?raw";
+import Step3AdvancedJS from "/src/content/docs/bot-protection/quick-start/snippets/nextjs/Step3Advanced.js?raw";
+import Step3TS from "/src/content/docs/bot-protection/quick-start/snippets/nextjs/Step3.ts?raw";
+import Step3AdvancedTS from "/src/content/docs/bot-protection/quick-start/snippets/nextjs/Step3Advanced.ts?raw";
+
+Arcjet bot detection allows you to manage traffic by automated clients and bots.
+
+<WhatIsArcjet />
+
+## Video quick start
+
+<YouTube
+  id="umEz1JrmiOc"
+  title="Rate limiting & bot detection for Next.js in 10 mins"
+/>
+
+## Quick start
+
+This guide will show you how to protect your entire Next.js application from
+bots and automated clients.
+
+### 1. Install Arcjet
+
+In your project root, run the following command to install the SDK:
+
+{/* prettier-ignore */}
+<Tabs>
+<TabItem label="npm">
+```sh
+npm i @arcjet/next
+```
+</TabItem>
+<TabItem label="pnpm">
+```sh
+pnpm add @arcjet/next
+```
+</TabItem>
+<TabItem label="yarn">
+```sh
+yarn add @arcjet/next
+```
+</TabItem>
+</Tabs>
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key. Add it to a `.env.local` file in your
+Next.js project root:
+
+```ini title=".env.local"
+ARCJET_KEY=ajkey_yourkey
+```
+
+### 3. Add bot protection middleware
+
+If you wish to enable Arcjet Bot Protection across your entire Next.js
+application, you can install the SDK as middleware. [Next.js
+middleware](https://nextjs.org/docs/app/building-your-application/routing/middleware)
+runs before every request, allowing Arcjet to protect your entire application
+before your code runs.
+
+The **basic** option exports the middleware directly whereas the **advanced**
+option allows you to [customize the
+response](/bot-protection/reference/nextjs#bot-type) based on the Arcjet
+decision.
+
+<Tabs>
+<TabItem label="TS (Basic)">
+
+Create a file called `middleware.ts` in your project root (at the same level as
+`pages` or `app` or inside `src`).
+
+<Code code={Step3TS} lang="ts" title="/middleware.ts" mark={["ARCJET_KEY"]} />
+
+</TabItem>
+<TabItem label="TS (Advanced)">
+
+Create a file called `middleware.ts` in your project root (at the same level as
+`pages` or `app` or inside `src`).
+
+<Code
+  code={Step3AdvancedTS}
+  lang="ts"
+  title="/middleware.ts"
+  mark={["ARCJET_KEY"]}
+/>
+
+</TabItem>
+<TabItem label="JS (Basic)">
+
+Create a file called `middleware.js` in your project root (at the same level as
+`pages` or `app` or inside `src`):
+
+<Code code={Step3JS} lang="js" title="/middleware.js" mark={["ARCJET_KEY"]} />
+
+</TabItem>
+<TabItem label="JS (Advanced)">
+
+Create a file called `middleware.js` in your project root (at the same level as
+`pages` or `app` or inside `src`):
+
+<Code
+  code={Step3AdvancedJS}
+  lang="js"
+  title="/middleware.js"
+  mark={["ARCJET_KEY"]}
+/>
+
+</TabItem>
+</Tabs>
+
+### 4. Start app
+
+Make a `curl` request from your terminal to your application. You should see a
+`403 Forbidden` response because `curl` is considered an automated client by
+default. See [the reference
+guide](/bot-protection/reference/nextjs#removing-bot-detection-rules) for how to
+configure this.
+
+```shell
+# Will show just the response headers, which should be 403 forbidden
+curl -I http://localhost:3000
+```
+
+The requests will also show up in the [Arcjet
+dashboard](https://app.arcjet.com).
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+<CardGrid>
+  <LinkCard
+    title="Bot protection reference"
+    href="/bot-protection/reference/nextjs"
+    description="Full details about bot protection."
+  ></LinkCard>
+</CardGrid>
+
+## Get help
+
+Need help with anything? [Email us](mailto:support@arcjet.com) or [join our
+Discord](https://discord.gg/TPra6jqZDC) to get support from our
+engineering team.

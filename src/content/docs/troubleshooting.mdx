@@ -1,0 +1,222 @@
+---
+title: "Troubleshooting"
+description: "Debugging common problems and errors with Arcjet."
+---
+
+import { Tabs, TabItem, Code } from "@astrojs/starlight/components";
+import RequestFieldsTS from "/src/content/docs/reference/snippets/nodejs/RequestFields.ts?raw";
+import RequestFieldsHonoNodeTS from "/src/content/docs/reference/snippets/nodejs/RequestFieldsHonoNode.ts?raw";
+
+## Common problems
+
+### Multiple decisions for the same request
+
+If you are seeing multiple decisions for the same request, it is likely that
+Arcjet is running in multiple places in your application. This can happen if you
+are using a middleware and also calling the Arcjet SDK in a route handler.
+
+You can fix this by ensuring that Arcjet is only called once per request. You
+can combine multiple rules into a single client configuration and/or you can
+exclude routes from your middleware.
+
+## Common errors
+
+### [unauthenticated] invalid key
+
+```text
+✦Aj Encountered problem getting remote decision: [unauthenticated] invalid key
+```
+
+This error means that the Arcjet key you are using is invalid. Each site has a
+unique key to identify it within Arcjet. You can find your key in the Arcjet
+dashboard by clicking your site name and then going to the SDK installation tab.
+
+Arcjet keys are always prefixed with `ajkey_`
+
+You provide the Arcjet SDK with the key when instantiating the client. For
+example in this case the key is defined in an environment variable called
+`ARCJET_KEY`:
+
+```ts "process.env.ARCJET_KEY"
+import arcjet from "arcjet";
+
+const aj = arcjet({
+  // Get your site key from https://app.arcjet.com
+  // and set it as an environment variable rather than hard coding.
+  // See: https://www.npmjs.com/package/dotenv
+  key: process.env.ARCJET_KEY,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
+```
+
+### [deadline_exceeded] the operation timed out
+
+```text
+✦Aj Encountered problem getting remote decision: [deadline_exceeded] the operation timed out
+ConnectError: [deadline_exceeded] the operation timed out
+```
+
+This error means that the Arcjet SDK was unable to connect to the Arcjet API
+within the short timeout period. This is usually caused by a network issue. The
+SDK is designed to fail open so that in the event of a network problem or
+outage, requests will be allowed.
+
+If you are seeing this error frequently, please [contact us](/support) so we can
+investigate.
+
+### generateFingerprint: ip is empty / [failed_precondition] client IP not provided
+
+Arcjet normally detects when it is running in a local environment and uses a
+default IP address of `127.0.0.1`. However, if it can't determine whether it is
+running locally or not then it will be safe and assume it is running in
+production. In production environments we disallow private/internal addresses,
+but they are allowed in development to allow you to test locally.
+
+You can force the SDK to run in development mode by setting the environment
+variable `ARCJET_ENV` to `development` in your `.env.local` file:
+
+```ini title=".env.local"
+ARCJET_ENV=development
+```
+
+Arcjet uses the client IP address as part of a fingerprint to identify where
+each request is coming from. If the IP address is not provided, or it is running
+in production and a private/internal address is provided, then Arcjet will show
+this error.
+
+### [failed_precondition] request details failed validation
+
+Arcjet expects certain fields to exist on the object used to analyze each
+request. This is normally handled by the SDK for the framework you are using,
+but if you are doing something custom then you will need to provide the correct
+fields:
+
+The required fields are:
+
+- `ip` - The client IP address. Internally our SDKs use our [`@arcjet/ip`
+  package](https://github.com/arcjet/arcjet-js/tree/main/ip#example) to detect
+  the correct IP which you can also use directly.
+- `method` - The HTTP method of the request.
+- `host` - The host of the request.
+- `path` - The path of the request.
+- `headers` - The headers of the request.
+
+Here are some examples of how to provide these fields:
+
+<Tabs>
+  <TabItem label="Node.js">
+    This example uses a pure Node.js server:
+    <Code code={RequestFieldsTS} lang="js" />
+  </TabItem>
+  <TabItem label="Hono + Node.js">
+    This example uses the [Hono framework with
+    Node.js](https://hono.dev/getting-started/nodejs). It requires a bit more
+    manual setup until we officially support Hono, see
+    [arcjet-js#477](https://github.com/arcjet/arcjet-js/issues/477).
+    <Code code={RequestFieldsHonoNodeTS} lang="js" />
+  </TabItem>
+</Tabs>
+
+### Property '[INTERNALS]' is missing in type
+
+When using the Arcjet Next.js SDK you may see a warning in your editor like this:
+
+```text
+Argument of type x is not assignable to parameter of type 'NextMiddleware'.
+  Types of parameters 'req' and 'request' are incompatible.
+    Property '[INTERNALS]' is missing in type 'import(".../next/dist/server/web/spec-extension/request").NextRequest' but required in type 'import(".../next/dist/server/web/spec-extension/request").NextRequest'.ts(2345)
+request.d.ts(7, 5): '[INTERNALS]' is declared here.
+```
+
+This is usually caused by a mismatch between the version of Next.js you are using
+and the version of the Arcjet SDK. You have several options for fixing this:
+
+1. Update the Arcjet SDK to the latest version and update your version of
+   Next.js to the latest version. We try to keep the SDK up to date with the
+   latest Next.js releases so they should generally match.
+2. Add a [resolution
+   override](https://docs.npmjs.com/cli/v10/configuring-npm/package-json#overrides)
+   to your `package.json` to force the SDK to use the same version of Next.js.
+   For example, if you are using Next.js 14.1.4 you can add this override to
+   your `package.json` to force the Arcjet SDK to use the same version:
+
+   ```json
+   {
+     "overrides": {
+       "next": "14.1.4"
+     }
+   }
+   ```
+
+3. You can ignore the warning. The warning is just a TypeScript error and does
+   not affect the runtime behavior of your application. You can add a comment on
+   the line that is causing the error to ignore it: `// @ts-ignore`
+
+### Calling `protect()` with no rules is deprecated
+
+When using the Arcjet SDK you may see a warning like this:
+
+```text
+Calling `protect()` with no rules is deprecated. Did you mean to configure the Shield rule?
+```
+
+Prior to the JS SDK release `v1.0.0-alpha.12` we allowed empty rules and
+automatically configured a Shield rule for you. From `v1.0.0-alpha.12` onwards
+you must explicitly configure the Shield rule. This allows you to choose if you
+want to block suspicious requests or not. We are maintaining the old behavior
+for a while to give you time to update your code, which is why this is warning
+you. Shield is still configured automatically but you should now migrate to
+explicitly configuring it.
+
+Check out the [Shield documentation](/shield/concepts) to learn how to configure
+Shield rules. To restore the old behavior you can add a simple Shield rule:
+
+```ts
+import arcjet, { shield } from "@arcjet/next";
+
+const aj = arcjet({
+  // Get your site key from https://app.arcjet.com
+  // and set it as an environment variable rather than hard coding.
+  // See: https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables
+  key: process.env.ARCJET_KEY,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
+```
+
+### The current file is a CommonJS module whose imports will produce 'require' calls
+
+When using the Arcjet SDK you may see a warning like this:
+
+```text
+The current file is a CommonJS module whose imports will produce 'require'
+calls; however, the referenced file is an ECMAScript module and cannot be
+imported with 'require'.
+```
+
+This warning is caused by a mismatch between the module system used by the
+Arcjet SDK and the module system used by your application. The Arcjet SDK uses
+ECMAScript modules (ESM) but your application is using CommonJS modules (CJS).
+
+The Arcjet SDK does not support CJS. You can fix this by changing your
+application to use ESM. This is usually done by adding `"type": "module"` to
+your `package.json`.
+
+Alternatively, you can rename the files where you are using the Arcjet SDK to use
+the `.mjs` or `.mts` extension. This will tell Node.js to treat the file as an
+ESM file.
+
+## Get help
+
+We provide [technical support](/support) for all Arcjet users so if you need
+help, [email us](mailto:support@arcjet.com) or [join our
+Discord](https://discord.gg/TPra6jqZDC).
