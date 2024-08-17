@@ -44,7 +44,7 @@ export default defineConfig({
         },
       ],
       editLink: {
-        baseUrl: "https://github.com/arcjet/arcjet-docs",
+        baseUrl: "https://github.com/arcjet/arcjet-docs/blob/main",
       },
       customCss: [
         "@fontsource-variable/jost",
