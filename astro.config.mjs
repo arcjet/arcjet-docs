@@ -463,20 +463,6 @@ export default defineConfig({
           ],
         },
         {
-          label: "Checklists",
-          collapsed: true,
-          items: [
-            {
-              label: "Next.js",
-              link: "https://blog.arcjet.com/next-js-security-checklist/",
-            },
-          ],
-        },
-        {
-          label: "Testing",
-          link: "/testing",
-        },
-        {
           label: "Examples",
           link: "https://github.com/arcjet/arcjet-js/tree/main/examples",
         },
@@ -485,24 +471,34 @@ export default defineConfig({
           link: "/troubleshooting",
         },
         {
-          label: "Architecture",
-          link: "/architecture",
-        },
-        {
-          label: "Changelog",
-          link: "https://blog.arcjet.com/tag/changelog/",
-        },
-        {
-          label: "Limitations",
-          link: "/limitations",
-        },
-        {
-          label: "Security",
-          link: "/security",
-        },
-        {
-          label: "Privacy",
-          link: "/privacy",
+          label: "Platform",
+          collapsed: true,
+          items: [
+            {
+              label: "Architecture",
+              link: "/architecture",
+            },
+            {
+              label: "Testing",
+              link: "/testing",
+            },
+            {
+              label: "Limitations",
+              link: "/limitations",
+            },
+            {
+              label: "Security",
+              link: "/security",
+            },
+            {
+              label: "Privacy",
+              link: "/privacy",
+            },
+            {
+              label: "Changelog",
+              link: "https://blog.arcjet.com/tag/changelog/",
+            },
+          ],
         },
         {
           label: "Support",
