@@ -483,6 +483,10 @@ export default defineConfig({
               link: "/testing",
             },
             {
+              label: "Regions",
+              link: "/regions",
+            },
+            {
               label: "Limitations",
               link: "/limitations",
             },
