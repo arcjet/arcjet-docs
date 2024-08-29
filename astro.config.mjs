@@ -38,7 +38,7 @@ export default defineConfig({
           tag: "script",
           attrs: {
             src: "https://plausible.io/js/script.js",
-            "data-domain": "docs.arcjet.com",
+            "data-domain": "arcjet.com",
             defer: true,
           },
         },
