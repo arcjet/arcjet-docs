@@ -402,10 +402,6 @@ export default defineConfig({
                   label: "Quick start",
                   link: "/signup-protection/quick-start/sveltekit",
                 },
-                {
-                  label: "Reference",
-                  link: "/signup-protection/reference/sveltekit",
-                },
               ],
             },
           ],
