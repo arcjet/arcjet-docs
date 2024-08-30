@@ -510,7 +510,7 @@ export default defineConfig({
         },
         {
           label: "Pricing",
-          link: "/pricing",
+          link: "https://arcjet.com/pricing",
         },
         {
           label: "Arcjet",
@@ -533,6 +533,7 @@ export default defineConfig({
     }),
     react(),
   ],
+  // External redirects go in /vercel.json
   redirects: {
     "/shield": "/shield/concepts",
     "/rate-limiting": "/rate-limiting/concepts",
@@ -540,6 +541,5 @@ export default defineConfig({
     "/email-validation": "/email-validation/concepts",
     "/signup-protection": "/signup-protection/concepts",
     "/reference/ts-js": "/reference/nodejs",
-    "/checklists/nextjs": "https://blog.arcjet.com/next-js-security-checklist/",
   },
 });
