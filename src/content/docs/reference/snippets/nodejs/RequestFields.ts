@@ -1,5 +1,6 @@
 import { createConnectTransport } from "@connectrpc/connect-node";
 import arcjet, { shield } from "arcjet";
+import { readBody } from "@arcjet/body";
 import { createClient } from "@arcjet/protocol/client.js";
 import { baseUrl } from "@arcjet/env";
 import * as http from "http";
@@ -41,8 +42,20 @@ const server = http.createServer(async function (
     headers: req.headers,
   };
 
-  // @ts-ignore
-  const decision = await aj.protect({}, details);
+  // Provide a function to get the body in case it is needed by a rule.
+  const getBody = async () => {
+    try {
+      return await readBody(req, {
+        // Only read up to 1 MiB of the body
+        limit: 1048576,
+      });
+    } catch {
+      // Return undefined in case of failure to allow the rule that called `getBody` handle it.
+      return undefined;
+    }
+  };
+
+  const decision = await aj.protect({ getBody }, details);
   console.log(decision);
 
   if (decision.isDenied()) {
