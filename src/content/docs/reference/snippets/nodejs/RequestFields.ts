@@ -23,7 +23,7 @@ const aj = arcjet({
     }),
     timeout: 500,
     sdkStack: "NODEJS",
-    sdkVersion: "1.0.0-alpha.19",
+    sdkVersion: "1.0.0-alpha.22",
   }),
 });
 
@@ -41,6 +41,7 @@ const server = http.createServer(async function (
     headers: req.headers,
   };
 
+  // @ts-ignore
   const decision = await aj.protect({}, details);
   console.log(decision);
 
