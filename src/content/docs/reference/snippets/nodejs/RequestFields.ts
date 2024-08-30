@@ -44,10 +44,15 @@ const server = http.createServer(async function (
 
   // Provide a function to get the body in case it is needed by a rule.
   const getBody = async () => {
-    return await readBody(req, {
-      // Only read up to 1 MiB of the body
-      limit: 1048576,
-    });
+    try {
+      return await readBody(req, {
+        // Only read up to 1 MiB of the body
+        limit: 1048576,
+      });
+    } catch {
+      // Return undefined in case of failure to allow the rule that called `getBody` handle it.
+      return undefined;
+    }
   };
 
   const decision = await aj.protect({ getBody }, details);
