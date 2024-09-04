@@ -6,7 +6,7 @@ const aj = arcjet({
   rules: [
     detectBot({
       mode: "LIVE",
-      block: ["AUTOMATED", "LIKELY_AUTOMATED"],
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });
@@ -20,14 +20,7 @@ export async function POST(req) {
         error: "You are a bot!",
         // Useful for debugging, but don't return these to the client in
         // production
-        botType: decision.reason.botType,
-        botScore: decision.reason.botScore,
-        ipHosting: decision.reason.ipHosting,
-        ipVpn: decision.reason.ipVpn,
-        ipProxy: decision.reason.ipProxy,
-        ipTor: decision.reason.ipTor,
-        ipRelay: decision.reason.ipRelay,
-        userAgentMatch: decision.reason.ipRelay,
+        denied: decision.reason.denied,
       },
       { status: 403 },
     );

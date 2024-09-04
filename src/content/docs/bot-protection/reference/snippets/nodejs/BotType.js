@@ -6,7 +6,7 @@ const aj = arcjet({
   rules: [
     detectBot({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-      block: ["AUTOMATED", "LIKELY_AUTOMATED"],
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });
@@ -22,14 +22,7 @@ const server = http.createServer(async function (req, res) {
         error: "Forbidden",
         // Useful for debugging, but don't return these to the client in
         // production
-        botType: decision.reason.botType,
-        botScore: decision.reason.botScore,
-        ipHosting: decision.reason.ipHosting,
-        ipVpn: decision.reason.ipVpn,
-        ipProxy: decision.reason.ipProxy,
-        ipTor: decision.reason.ipTor,
-        ipRelay: decision.reason.ipRelay,
-        userAgentMatch: decision.reason.ipRelay,
+        denied: decision.reason.denied,
       }),
     );
   } else {

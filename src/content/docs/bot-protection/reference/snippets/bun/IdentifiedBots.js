@@ -16,6 +16,11 @@ export default {
   fetch: aj.handler(async (req) => {
     const decision = await aj.protect(req);
 
+    if (decision.reason.isBot()) {
+      console.log("detected + allowed bots", decision.reason.allowed);
+      console.log("detected + denied bots", decision.reason.denied);
+    }
+
     if (decision.isDenied()) {
       return new Response("Forbidden", { status: 403 });
     }

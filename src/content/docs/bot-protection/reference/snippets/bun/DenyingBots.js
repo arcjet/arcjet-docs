@@ -6,16 +6,13 @@ const aj = arcjet({
   rules: [
     detectBot({
       mode: "LIVE",
-      block: [
-        // Only block clients we're sure are automated bots
-        "AUTOMATED",
+      // selectively deny known bots from our list of almost 600 bots while
+      // allowing all other detected bots
+      deny: [
+        "PERPLEXITY_CRAWLER", // denies PerplexityBot
+        "CURL", // denies the default user-agent of the `curl` tool
+        "ANTHROPIC_CRAWLER", // denies Claudebot
       ],
-      patterns: {
-        add: {
-          // Allows you to add arbitrary bot definitions
-          "AcmeBot\\/": "AUTOMATED",
-        },
-      },
     }),
   ],
 });

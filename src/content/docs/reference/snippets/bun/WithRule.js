@@ -19,7 +19,7 @@ function getClient(userId) {
     return aj.withRule(
       detectBot({
         mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-        block: ["AUTOMATED"], // blocks all automated clients
+        allow: [], // "allow none" will block all detected bots
       }),
     );
   }

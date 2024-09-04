@@ -15,10 +15,7 @@ const aj = arcjet({
     }),
     detectBot({
       mode: "LIVE",
-      block: [
-        // Only block clients we're sure are automated bots
-        "AUTOMATED",
-      ],
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });

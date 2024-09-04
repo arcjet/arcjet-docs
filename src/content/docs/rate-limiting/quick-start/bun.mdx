@@ -39,13 +39,13 @@ bun add @arcjet/bun
 instructions to add a site and get a key. Add it to a `.env.local` file in your
 Bun project root.
 
-Arcjet only accept non-local IP addresses with a fallback to 127.0.0.1 in development mode, and since Bun
-doesn't set `NODE_ENV` for you like Node.js does, you also need to set
-`ARCJET_ENV` in your environment file.
+Arcjet only accepts non-local IP addresses with a fallback to 127.0.0.1 in
+development mode. Since Bun doesn't set `NODE_ENV` for you, you also need to
+set `ARCJET_ENV` in your environment file.
 
 ```ini title=".env.local"
-# Run Arcjet in development mode because Bun.sh doesn't explicitly
-# set an environment variable like Node.js does
+# NODE_ENV is not set automatically, so tell Arcjet we're in dev
+# You can leave this unset in prod
 ARCJET_ENV=development
 ARCJET_KEY=ajkey_yourkey
 ```
@@ -71,12 +71,12 @@ tokens every 10 seconds. Each request consumes 5 tokens.
 {/* prettier-ignore */}
 <Tabs>
   <TabItem label="TS">
-  ```sh 
+  ```sh
   bun run --hot index.ts
   ```
   </TabItem>
   <TabItem label="JS">
-  ```sh 
+  ```sh
   bun run --hot index.js
   ```
   </TabItem>

@@ -1,0 +1,27 @@
+---
+title: "Identifying bots"
+description: "Arcjet can detect many different bots and automated clients."
+next: false
+---
+
+import Comments from "/src/components/Comments.astro";
+
+Using an ever-evolving list of well known bots, Arcjet can detect and identify
+almost 600 different bots. Using these, developers can choose to allow or deny
+any or all of these bots.
+
+:::note
+Please be aware that requests without User-Agent headers can not be identified
+as any particular bot and will be marked as an errored decision. Developers
+should take caution to check `decision.isErrored()` and respond appropriately
+:::
+
+## Well known bots
+
+Arcjet identifies and maintains a list of nearly 600 well known bots, which
+are available via our SDK in the
+[well-known-bots.ts](https://github.com/arcjet/arcjet-js/blob/main/protocol/well-known-bots.ts)
+file. If you are using TypeScript, these will be shown as autocomplete values
+to `allow` or `deny` options while writing your rules.
+
+<Comments />

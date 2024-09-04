@@ -8,10 +8,7 @@ const aj = arcjet({
   rules: [
     detectBot({
       mode: "DRY_RUN",
-      block: ["AUTOMATED"],
-      patterns: {
-        remove: ["datadog agent"],
-      },
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });
