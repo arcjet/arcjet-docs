@@ -407,6 +407,68 @@ export default defineConfig({
           ],
         },
         {
+          label: "Sensitive information",
+          collapsed: true,
+          items: [
+            {
+              label: "Concepts",
+              link: "/sensitive-info/concepts",
+            },
+            {
+              label: "Bun",
+              items: [
+                {
+                  label: "Quick start",
+                  link: "/sensitive-info/quick-start/bun",
+                },
+                {
+                  label: "Reference",
+                  link: "/sensitive-info/reference/bun",
+                },
+              ],
+            },
+            {
+              label: "Next.js",
+              items: [
+                {
+                  label: "Quick start",
+                  link: "/sensitive-info/quick-start/nextjs",
+                },
+                {
+                  label: "Reference",
+                  link: "/sensitive-info/reference/nextjs",
+                },
+              ],
+            },
+            {
+              label: "Node.js",
+              items: [
+                {
+                  label: "Quick start",
+                  link: "/sensitive-info/quick-start/nodejs",
+                },
+                {
+                  label: "Reference",
+                  link: "/sensitive-info/reference/nodejs",
+                },
+              ],
+            },
+            {
+              label: "SvelteKit",
+              items: [
+                {
+                  label: "Quick start",
+                  link: "/sensitive-info/quick-start/sveltekit",
+                },
+                {
+                  label: "Reference",
+                  link: "/sensitive-info/reference/sveltekit",
+                },
+              ],
+            },
+          ],
+        },
+        {
           label: "SDK reference",
           collapsed: true,
           items: [
