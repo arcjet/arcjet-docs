@@ -1,4 +1,4 @@
-import arcjet, { createMiddleware, shield } from "@arcjet/next";
+import arcjet, { createMiddleware, sensitiveInfo, shield } from "@arcjet/next";
 export const config = {
   // matcher tells Next.js which routes to run the middleware on.
   // This runs the middleware on all routes except for static assets.
