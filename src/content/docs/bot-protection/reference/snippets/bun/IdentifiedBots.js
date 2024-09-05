@@ -6,7 +6,7 @@ const aj = arcjet({
   rules: [
     detectBot({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-      block: ["AUTOMATED", "LIKELY_AUTOMATED"],
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });
@@ -15,9 +15,13 @@ export default {
   port: 3000,
   fetch: aj.handler(async (req) => {
     const decision = await aj.protect(req);
-    console.log("Arcjet decision", decision);
 
-    if (decision.isDenied() && decision.reason.isBot()) {
+    if (decision.reason.isBot()) {
+      console.log("detected + allowed bots", decision.reason.allowed);
+      console.log("detected + denied bots", decision.reason.denied);
+    }
+
+    if (decision.isDenied()) {
       return new Response("Forbidden", { status: 403 });
     }
 

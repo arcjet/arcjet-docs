@@ -5,14 +5,11 @@ import Head from "next/head";
 import React from "react";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   rules: [
     detectBot({
       mode: "DRY_RUN",
-      block: ["AUTOMATED"],
-      patterns: {
-        remove: ["datadog agent"],
-      },
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });

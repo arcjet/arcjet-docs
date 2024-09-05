@@ -11,7 +11,9 @@ const aj = arcjet({
   rules: [
     detectBot({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-      block: ["AUTOMATED"], // blocks all automated clients
+      // configured with a list of bots to allow from
+      // https://arcjet.com/bot-list
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });
@@ -21,8 +23,7 @@ export default async function middleware(request: NextRequest) {
 
   if (
     // If this deny comes from a bot rule then block the request. You can
-    // customize this logic to fit your needs e.g. checking the IP address type
-    // or changing the status code. See https://docs.arcjet.com/bot-protection/reference/nextjs#bot-type
+    // customize this logic to fit your needs e.g. changing the status code.
     decision.isDenied() &&
     decision.reason.isBot()
   ) {

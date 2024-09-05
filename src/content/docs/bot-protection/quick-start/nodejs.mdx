@@ -52,12 +52,15 @@ yarn add @arcjet/node
 ### 2. Set your key
 
 [Create a free Arcjet account](https://app.arcjet.com) then follow the
-instructions to add a site and get a key. Add it to a `.env.local` file in your
-project root. `NODE_ENV` isn't set by default, so you also need to tell
-Arcjet you're in development mode.
+instructions to add a site and get a key.Add it to a `.env.local` file in your
+project root.
+
+Arcjet only accepts non-local IP addresses with a fallback to 127.0.0.1 in
+development mode. Since Node.js doesn't set `NODE_ENV` for you, you also need to
+set `ARCJET_ENV` in your environment file.
 
 ```ini title=".env.local"
-# NODE_ENV is not set by the environment, so tell Arcjet we're in dev
+# NODE_ENV is not set automatically, so tell Arcjet we're in dev
 # You can leave this unset in prod
 ARCJET_ENV=development
 # Get your site key from https://app.arcjet.com
@@ -90,12 +93,12 @@ clients we are sure are automated.
 {/* prettier-ignore */}
 <Tabs>
   <TabItem label="TS">
-  ```sh 
+  ```sh
   npx tsx --env-file .env.local index.ts
   ```
   </TabItem>
   <TabItem label="JS">
-  ```sh 
+  ```sh
   node --env-file .env.local index.js
   ```
   </TabItem>
@@ -104,8 +107,8 @@ clients we are sure are automated.
 Make a `curl` request from your terminal to your application. You should see a
 `403 Forbidden` response because `curl` is considered an automated client by
 default. See [the reference
-guide](/bot-protection/reference/nodejs#removing-bot-detection-rules) for how to
-configure this.
+guide](/bot-protection/reference/nodejs#only-allowing-specific-bots) to learn
+about configuring this.
 
 ```shell
 curl http://localhost:8000
@@ -113,6 +116,15 @@ curl http://localhost:8000
 
 The requests will also show up in the [Arcjet
 dashboard](https://app.arcjet.com).
+
+### 5. Choose bots to allow or deny
+
+Arcjet maintains a list of known bots so you can choose to either only [allow
+specific bots](/bot-protection/reference/nodejs#only-allowing-specific-bots) or
+only [deny specific
+bots](/bot-protection/reference/nodejs#only-denying-specific-bots).
+
+Check out our [full list of bots](https://arcjet.com/bot-list).
 
 ## FAQs
 

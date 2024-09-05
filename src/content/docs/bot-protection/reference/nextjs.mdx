@@ -4,10 +4,14 @@ description: "How to use Arcjet to protect your Next.js app from bots."
 ---
 
 import { Tabs, TabItem, Code } from "@astrojs/starlight/components";
-import AddingRulesTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/AddingRules.ts?raw";
-import AddingRulesJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/AddingRules.js?raw";
-import RemovingRulesTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/RemovingRules.ts?raw";
-import RemovingRulesJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/RemovingRules.js?raw";
+import AllowingBotsAppTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/AllowingBotsApp.ts?raw";
+import AllowingBotsPagesTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/AllowingBotsPages.ts?raw";
+import AllowingBotsAppJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/AllowingBotsPages.js?raw";
+import AllowingBotsPagesJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/AllowingBotsPages.js?raw";
+import DenyingBotsAppTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/DenyingBotsApp.ts?raw";
+import DenyingBotsPagesTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/DenyingBotsPages.ts?raw";
+import DenyingBotsAppJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/DenyingBotsApp.js?raw";
+import DenyingBotsPagesJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/DenyingBotsPages.js?raw";
 import PerRouteAppTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/PerRouteApp.ts?raw";
 import PerRoutePagesTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/PerRoutePages.ts?raw";
 import PerRouteAppJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/PerRouteApp.js?raw";
@@ -21,10 +25,10 @@ import DecisionLogAppTS from "/src/content/docs/bot-protection/reference/snippet
 import DecisionLogPagesTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/DecisionLogPages.ts?raw";
 import DecisionLogAppJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/DecisionLogApp.js?raw";
 import DecisionLogPagesJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/DecisionLogPages.js?raw";
-import BotTypeAppTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/BotTypeApp.ts?raw";
-import BotTypePagesTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/BotTypePages.ts?raw";
-import BotTypeAppJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/BotTypeApp.js?raw";
-import BotTypePagesJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/BotTypePages.js?raw";
+import IdentifiedBotsAppTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/IdentifiedBotsApp.ts?raw";
+import IdentifiedBotsPagesTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/IdentifiedBotsPages.ts?raw";
+import IdentifiedBotsAppJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/IdentifiedBotsApp.js?raw";
+import IdentifiedBotsPagesJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/IdentifiedBotsPages.js?raw";
 import ErrorsAppTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/ErrorsApp.ts?raw";
 import ErrorsPagesTS from "/src/content/docs/bot-protection/reference/snippets/nextjs/ErrorsPages.ts?raw";
 import ErrorsAppJS from "/src/content/docs/bot-protection/reference/snippets/nextjs/ErrorsApp.js?raw";
@@ -49,19 +53,25 @@ Arcjet bot detection allows you to manage traffic by automated clients and bots.
 
 ## Configuration
 
-Bot detection is configured by specifying the bot types you wish to block and
-optional user agent patterns to add or remove from the bot detection list.
+Bot detection is configured by allowing or denying a subset of bots. The `allow`
+and `deny` lists are mutually-exclusive, such that using `allow` will result in
+a `DENY` decision for any detected bot that is not specified in the `allow` list
+and using `deny` will result in an `ALLOW` decision for any detected bot that is
+not specified in the `deny` list.
 
-The configuration definition is:
+You can use only one of the following configuration definitions:
 
 ```ts
-type BotOptions = {
+type BotOptionsAllow = {
   mode?: "LIVE" | "DRY_RUN";
-  block?: BotType[];
-  patterns?: {
-    add?: { [key: string]: BotType };
-    remove?: string[];
-  };
+  allow: ArcjetWellKnownBot[];
+};
+```
+
+```ts
+type BotOptionsDeny = {
+  mode?: "LIVE" | "DRY_RUN";
+  deny: ArcjetWellKnownBot[];
 };
 ```
 
@@ -74,47 +84,86 @@ execution ordering is automatically optimized for performance. See
 [decision](#decision) below for details of examining the execution results.
 :::
 
-### Which bots to block?
+### Only allowing specific bots
 
-Which bot types to block is configured by listing one or more types in the
-`block` configuration block. The types are listed on the [bot
-types](/bot-protection/bot-types) page.
+Most applications want to block almost all bots. However, it is common to allow
+some bots to access your system, such as bots for search indexing or API
+access from the command line.
 
-### Adding bot detection rules
+This behavior is configured with an `allow` list from our [full list of
+bots](https://arcjet.com/bot-list).
 
-You can add additional bot detection rules to the `patterns` `add` configuration
-property. Each rule is a regular expression that matches the user agent of the
-bot plus a label to indicate what type of bot it is.
-
-:::note
-The current implementation only supports `AUTOMATED` bot types, while support for the other [bot
-types](/bot-protection/bot-types) is on the roadmap.
-:::
-
-The following example adds a rule to detect AcmeBot as an `AUTOMATED` bot.
-
+{/* prettier-ignore */}
 <Tabs>
-  <TabItem label="TS">
-    <Code code={AddingRulesTS} lang="ts" title="/middleware.ts" />
-  </TabItem>
-  <TabItem label="JS">
-    <Code code={AddingRulesJS} lang="js" title="/middleware.js" />
-  </TabItem>
+<TabItem label="TS (App)">
+<Code
+  code={AllowingBotsAppTS}
+  lang="ts"
+  title="/app/api/arcjet/route.ts"
+/>
+</TabItem>
+<TabItem label="TS (Pages)">
+<Code
+  code={AllowingBotsPagesTS}
+  lang="ts"
+  title="/pages/api/hello.ts"
+/>
+</TabItem>
+<TabItem label="JS (App)">
+<Code
+  code={AllowingBotsAppJS}
+  lang="js"
+  title="/app/api/arcjet/route.js"
+/>
+</TabItem>
+<TabItem label="JS (Pages)">
+<Code
+  code={AllowingBotsPagesJS}
+  lang="js"
+  title="/pages/api/hello.ts"
+/>
+</TabItem>
 </Tabs>
 
-### Removing bot detection rules
+### Only denying specific bots
 
-Arcjet includes a set of default matching rules to detect common bots. You can
-remove any of these rules by listing them in the `patterns` `remove`
-configuration property:
+Some applications may only want to block a small subset of bots, while allowing
+the majority continued access. This may be due to many reasons, such as
+misconfigured or high-traffic bots.
 
+This behavior is configured with an `deny` list from our [full list of
+bots](https://arcjet.com/bot-list).
+
+{/* prettier-ignore */}
 <Tabs>
-  <TabItem label="TS">
-    <Code code={RemovingRulesTS} lang="ts" title="/middleware.ts" />
-  </TabItem>
-  <TabItem label="JS">
-    <Code code={RemovingRulesJS} lang="js" title="/middleware.js" />
-  </TabItem>
+<TabItem label="TS (App)">
+<Code
+  code={DenyingBotsAppTS}
+  lang="ts"
+  title="/app/api/arcjet/route.ts"
+/>
+</TabItem>
+<TabItem label="TS (Pages)">
+<Code
+  code={DenyingBotsPagesTS}
+  lang="ts"
+  title="/pages/api/hello.ts"
+/>
+</TabItem>
+<TabItem label="JS (App)">
+<Code
+  code={DenyingBotsAppJS}
+  lang="js"
+  title="/app/api/arcjet/route.js"
+/>
+</TabItem>
+<TabItem label="JS (Pages)">
+<Code
+  code={DenyingBotsPagesJS}
+  lang="js"
+  title="/pages/api/hello.ts"
+/>
+</TabItem>
 </Tabs>
 
 ## Per route vs middleware
@@ -288,34 +337,36 @@ Create a new API route at `/pages/api/arcjet.js`:
 </TabItem>
 </Tabs>
 
-### Bot type
+### Identified bots
 
-Arcjet also returns more information about the [bot
-type](/bot-protection/bot-types) of the client we think made the request:
+The decision also contains all of the [identified
+bots](/bot-protection/identifying-bots) detected from the request. A request may
+be identified as zero, one, or more bots—all of which will be available on the
+`decision.allowed` and `decision.denied` properties.
 
 <Tabs>
 <TabItem label="TS (App)">
 Create a new API route at `/app/api/route/hello.ts`:
 
-<Code code={BotTypeAppTS} title="/app/api/route/hello.ts" lang="ts" />
+<Code code={IdentifiedBotsAppTS} title="/app/api/route/hello.ts" lang="ts" />
 
 </TabItem>
 <TabItem label="TS (Pages)">
 Create a new API route at `/pages/api/hello.ts`:
 
-<Code code={BotTypePagesTS} title="/pages/api/hello.ts" lang="ts" />
+<Code code={IdentifiedBotsPagesTS} title="/pages/api/hello.ts" lang="ts" />
 
 </TabItem>
 <TabItem label="JS (App Router)">
 Create a new API route at `/app/api/arcjet/route.js`:
 
-<Code code={BotTypeAppJS} title="/app/api/route/hello.js" lang="js" />
+<Code code={IdentifiedBotsAppJS} title="/app/api/route/hello.js" lang="js" />
 
 </TabItem>
 <TabItem label="JS (Pages Router)">
 Create a new API route at `/pages/api/arcjet.js`:
 
-<Code code={BotTypePagesJS} title="/pages/api/hello.js" lang="js" />
+<Code code={IdentifiedBotsPagesJS} title="/pages/api/hello.js" lang="js" />
 
 </TabItem>
 </Tabs>
@@ -330,6 +381,14 @@ the response time will be less than 20-30ms.
 If there is an error condition, Arcjet will return an
 `ERROR` type and you can check the `reason` property for more information, like
 accessing `decision.reason.message`.
+
+:::note
+Please be aware that requests without `User-Agent` headers can not be identified
+as any particular bot and will be marked as an errored decision. Developers
+should take caution to check `decision.isErrored()` and decide if you want to
+allow or deny the request. Our recommendation is to block requests without
+`User-Agent` headers because most clients always send this header.
+:::
 
 <Tabs>
 <TabItem label="TS (App)">

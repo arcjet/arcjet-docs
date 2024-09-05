@@ -2,7 +2,7 @@ import arcjet, { slidingWindow } from "@arcjet/next";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   // Tracking by ip.src is the default if not specified
   //characteristics: ["ip.src"],
   rules: [

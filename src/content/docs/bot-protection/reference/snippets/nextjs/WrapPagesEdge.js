@@ -1,5 +1,5 @@
 import arcjet, { detectBot, withArcjet } from "@arcjet/next";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 export const config = {
   runtime: "edge",
@@ -10,7 +10,7 @@ const aj = arcjet({
   rules: [
     detectBot({
       mode: "LIVE",
-      block: ["AUTOMATED", "LIKELY_AUTOMATED"],
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });

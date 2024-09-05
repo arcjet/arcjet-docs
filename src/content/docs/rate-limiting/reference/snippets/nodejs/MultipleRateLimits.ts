@@ -1,7 +1,7 @@
 import arcjet, { fixedWindow } from "@arcjet/node";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   characteristics: ["ip.src"],
   rules: [
     fixedWindow(

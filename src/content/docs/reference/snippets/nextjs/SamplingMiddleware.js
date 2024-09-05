@@ -34,7 +34,7 @@ function sampleSecurity() {
       .withRule(
         detectBot({
           mode: "LIVE",
-          block: ["AUTOMATED"], // blocks all automated clients
+          allow: [], // "allow none" will block all detected bots
         }),
       );
   } else {

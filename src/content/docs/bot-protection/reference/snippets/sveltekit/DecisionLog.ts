@@ -1,13 +1,18 @@
 import { env } from "$env/dynamic/private";
-import arcjet, { detectBot } from "@arcjet/sveltekit";
+import arcjet, { detectBot, fixedWindow } from "@arcjet/sveltekit";
 import { error, json, type RequestEvent } from "@sveltejs/kit";
 
 const aj = arcjet({
   key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
   rules: [
+    fixedWindow({
+      mode: "LIVE",
+      window: "1h",
+      max: 60,
+    }),
     detectBot({
       mode: "LIVE",
-      block: ["AUTOMATED", "LIKELY_AUTOMATED"],
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });

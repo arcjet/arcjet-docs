@@ -27,7 +27,11 @@ The configuration definition is:
 ```ts
 type ProtectSignupOptions = {
   rateLimit?: SlidingWindowRateLimitOptions | SlidingWindowRateLimitOptions[];
-  bots?: BotOptions | BotOptions[];
+  bots?:
+    | BotOptionsAllow
+    | BotOptionsDeny
+    | BotOptionsAllow[]
+    | BotOptionsDeny[];
   email?: EmailOptions | EmailOptions[];
 };
 ```

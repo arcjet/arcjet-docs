@@ -11,7 +11,7 @@ const aj = arcjet({
   rules: [
     detectBot({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-      block: ["AUTOMATED"], // blocks all automated clients
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });
@@ -24,7 +24,7 @@ export default async function middleware(request) {
     // address is from a known hosting provider, then block the request
     decision.isDenied() &&
     decision.reason.isBot() &&
-    decision.reason.ipHosting
+    decision.ip.isHosting()
   ) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   } else {

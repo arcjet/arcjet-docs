@@ -2,7 +2,7 @@ import arcjet, { fixedWindow, detectBot } from "@arcjet/next";
 import { NextResponse } from "next/server";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   // Tracking by ip.src is the default if not specified
   //characteristics: ["ip.src"],
   rules: [
@@ -13,7 +13,7 @@ const aj = arcjet({
     }),
     detectBot({
       mode: "LIVE",
-      block: ["AUTOMATED", "LIKELY_AUTOMATED"],
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });

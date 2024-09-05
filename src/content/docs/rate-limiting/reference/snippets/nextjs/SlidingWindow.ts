@@ -1,7 +1,7 @@
 import arcjet, { slidingWindow } from "@arcjet/next";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   characteristics: ["ip.src"], // track requests by IP address
   rules: [
     slidingWindow({

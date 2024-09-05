@@ -6,11 +6,11 @@ export const config = {
 };
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   rules: [
     detectBot({
       mode: "LIVE",
-      block: ["AUTOMATED", "LIKELY_AUTOMATED"],
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });
@@ -23,9 +23,6 @@ export default async function handler(
 
   if (decision.isDenied()) {
     return res.status(403).json({ error: "You are a bot!" });
-    // Returning the reason is useful for debugging, but don't return it to the
-    // client in production
-    // .json({ error: "You are a bot!", reason: decision.reason });
   }
 
   res.status(200).json({ name: "Hello world" });

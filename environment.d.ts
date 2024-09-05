@@ -1,7 +1,7 @@
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
-      readonly ARCJET_KEY: string;
+      readonly [key: string]: string | undefined;
     }
   }
 }

@@ -4,14 +4,14 @@ description: "How to use Arcjet to protect your Bun server from bots."
 ---
 
 import { Tabs, TabItem, Code } from "@astrojs/starlight/components";
-import AddingRulesTS from "/src/content/docs/bot-protection/reference/snippets/bun/AddingRules.ts?raw";
-import AddingRulesJS from "/src/content/docs/bot-protection/reference/snippets/bun/AddingRules.js?raw";
-import RemovingRulesTS from "/src/content/docs/bot-protection/reference/snippets/bun/RemovingRules.ts?raw";
-import RemovingRulesJS from "/src/content/docs/bot-protection/reference/snippets/bun/RemovingRules.js?raw";
+import AllowingBotsTS from "/src/content/docs/bot-protection/reference/snippets/bun/AllowingBots.ts?raw";
+import AllowingBotsJS from "/src/content/docs/bot-protection/reference/snippets/bun/AllowingBots.js?raw";
+import DenyingBotsTS from "/src/content/docs/bot-protection/reference/snippets/bun/DenyingBots.ts?raw";
+import DenyingBotsJS from "/src/content/docs/bot-protection/reference/snippets/bun/DenyingBots.js?raw";
 import DecisionLogTS from "/src/content/docs/bot-protection/reference/snippets/bun/DecisionLog.ts?raw";
 import DecisionLogJS from "/src/content/docs/bot-protection/reference/snippets/bun/DecisionLog.js?raw";
-import BotTypeTS from "/src/content/docs/bot-protection/reference/snippets/bun/BotType.ts?raw";
-import BotTypeJS from "/src/content/docs/bot-protection/reference/snippets/bun/BotType.js?raw";
+import IdentifiedBotsTS from "/src/content/docs/bot-protection/reference/snippets/bun/IdentifiedBots.ts?raw";
+import IdentifiedBotsJS from "/src/content/docs/bot-protection/reference/snippets/bun/IdentifiedBots.js?raw";
 import ErrorsTS from "/src/content/docs/bot-protection/reference/snippets/bun/Errors.ts?raw";
 import ErrorsJS from "/src/content/docs/bot-protection/reference/snippets/bun/Errors.js?raw";
 import Comments from "/src/components/Comments.astro";
@@ -20,19 +20,25 @@ Arcjet bot detection allows you to manage traffic by automated clients and bots.
 
 ## Configuration
 
-Bot detection is configured by specifying the bot types you wish to block and
-optional user agent patterns to add or remove from the bot detection list.
+Bot detection is configured by allowing or denying a subset of bots. The `allow`
+and `deny` lists are mutually-exclusive, such that using `allow` will result in
+a `DENY` decision for any detected bot that is not specified in the `allow` list
+and using `deny` will result in an `ALLOW` decision for any detected bot that is
+not specified in the `deny` list.
 
-The configuration definition is:
+You can use only one of the following configuration definitions:
 
 ```ts
-type BotOptions = {
+type BotOptionsAllow = {
   mode?: "LIVE" | "DRY_RUN";
-  block?: BotType[];
-  patterns?: {
-    add?: { [key: string]: BotType };
-    remove?: string[];
-  };
+  allow: ArcjetWellKnownBot[];
+};
+```
+
+```ts
+type BotOptionsDeny = {
+  mode?: "LIVE" | "DRY_RUN";
+  deny: ArcjetWellKnownBot[];
 };
 ```
 
@@ -45,58 +51,47 @@ execution ordering is automatically optimized for performance. See
 [decision](#decision) below for details of examining the execution results.
 :::
 
-### Which bots to block?
+### Only allowing specific bots
 
-Which bot types to block is configured by listing one or more types in the
-`block` configuration block. The types are listed on the [bot
-types](/bot-protection/bot-types) page.
+Most applications want to block almost all bots. However, it is common to allow
+some bots to access your system, such as bots for search indexing or API
+access from the command line.
 
-### Adding bot detection rules
-
-You can add additional bot detection rules to the `patterns` `add` configuration
-property. Each rule is a regular expression that matches the user agent of the
-bot plus a label to indicate what type of bot it is.
-
-:::note
-The current implementation only supports `AUTOMATED` bot types, while support for the other [bot
-types](/bot-protection/bot-types) is on the roadmap.
-:::
-
-The following example adds a rule to detect AcmeBot as an `AUTOMATED` bot.
+This behavior is configured with an `allow` list from our [full list of
+bots](https://arcjet.com/bot-list).
 
 <Tabs>
   <TabItem label="TS">
-    <Code code={AddingRulesTS} lang="ts" />
+    <Code code={AllowingBotsTS} lang="ts" />
   </TabItem>
   <TabItem label="JS">
-    <Code code={AddingRulesJS} lang="js" />
+    <Code code={AllowingBotsJS} lang="js" />
   </TabItem>
 </Tabs>
 
-### Removing bot detection rules
+### Only denying specific bots
 
-Arcjet includes a set of default matching rules to detect common bots. You can
-remove any of these rules by listing them in the `patterns` `remove`
-configuration property:
+Some applications may only want to block a small subset of bots, while allowing
+the majority continued access. This may be due to many reasons, such as
+misconfigured or high-traffic bots.
+
+This behavior is configured with an `deny` list from our [full list of
+bots](https://arcjet.com/bot-list).
 
 <Tabs>
   <TabItem label="TS">
-    <Code code={RemovingRulesTS} lang="ts" />
+    <Code code={DenyingBotsTS} lang="ts" />
   </TabItem>
   <TabItem label="JS">
-    <Code code={RemovingRulesJS} lang="js" />
+    <Code code={DenyingBotsJS} lang="js" />
   </TabItem>
 </Tabs>
 
 ## Decision
 
-The [quick start example](/bot-protection/quick-start/bun) will deny requests
-that match the bot detection rules, immediately returning a response to the
-client.
-
-Arcjet also provides a single `protect` function that is used to execute your
-protection rules. This requires a `request` argument which is the request
-context as passed to the request handler.
+Arcjet provides the `protect` function which is used to execute your protection
+rules. This requires a `request` argument which is the request context as passed
+to the request handler.
 
 This function returns a `Promise` that resolves to an
 `ArcjetDecision` object. This contains the following properties:
@@ -142,17 +137,19 @@ This example will log the full result as well as the bot protection rule:
   </TabItem>
 </Tabs>
 
-### Bot type
+### Identified bots
 
-Arcjet also returns more information about the [bot
-type](/bot-protection/bot-types) of the client we think made the request:
+The decision also contains all of the [identified
+bots](/bot-protection/identifying-bots) detected from the request. A request may
+be identified as zero, one, or more bots—all of which will be available on the
+`decision.allowed` and `decision.denied` properties.
 
 <Tabs>
   <TabItem label="TS">
-    <Code code={BotTypeTS} lang="ts" />
+    <Code code={IdentifiedBotsTS} lang="ts" />
   </TabItem>
   <TabItem label="JS">
-    <Code code={BotTypeJS} lang="js" />
+    <Code code={IdentifiedBotsJS} lang="js" />
   </TabItem>
 </Tabs>
 
@@ -166,6 +163,14 @@ the response time will be less than 20-30ms.
 If there is an error condition, Arcjet will return an
 `ERROR` type and you can check the `reason` property for more information, like
 accessing `decision.reason.message`.
+
+:::note
+Please be aware that requests without `User-Agent` headers can not be identified
+as any particular bot and will be marked as an errored decision. Developers
+should take caution to check `decision.isErrored()` and decide if you want to
+allow or deny the request. Our recommendation is to block requests without
+`User-Agent` headers because most clients always send this header.
+:::
 
 <Tabs>
   <TabItem label="TS">

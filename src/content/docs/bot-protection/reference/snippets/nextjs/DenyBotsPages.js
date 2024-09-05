@@ -5,7 +5,13 @@ const aj = arcjet({
   rules: [
     detectBot({
       mode: "LIVE",
-      block: ["AUTOMATED", "LIKELY_AUTOMATED"],
+      // configured with a list of bots to deny from
+      // https://arcjet.com/bot-list - all other detected bots will be allowed
+      deny: [
+        "PERPLEXITY_CRAWLER", // denies PerplexityBot
+        "CURL", // denies the default user-agent of the `curl` tool
+        "ANTHROPIC_CRAWLER", // denies Claudebot
+      ],
     }),
   ],
 });
@@ -19,14 +25,7 @@ export default async function handler(req, res) {
       error: "Forbidden",
       // Useful for debugging, but don't return these to the client in
       // production
-      botType: decision.reason.botType,
-      botScore: decision.reason.botScore,
-      ipHosting: decision.reason.ipHosting,
-      ipVpn: decision.reason.ipVpn,
-      ipProxy: decision.reason.ipProxy,
-      ipTor: decision.reason.ipTor,
-      ipRelay: decision.reason.ipRelay,
-      userAgentMatch: decision.reason.ipRelay,
+      denied: decision.reason.denied,
     });
   }
 

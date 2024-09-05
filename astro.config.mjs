@@ -229,8 +229,8 @@ export default defineConfig({
               link: "/bot-protection/concepts",
             },
             {
-              label: "Bot types",
-              link: "/bot-protection/bot-types",
+              label: "Identifying Bots",
+              link: "/bot-protection/identifying-bots",
             },
             {
               label: "Bun",
@@ -537,5 +537,6 @@ export default defineConfig({
     "/email-validation": "/email-validation/concepts",
     "/signup-protection": "/signup-protection/concepts",
     "/reference/ts-js": "/reference/nodejs",
+    "/bot-protection/bot-types": "/bot-protection/identifying-bots",
   },
 });

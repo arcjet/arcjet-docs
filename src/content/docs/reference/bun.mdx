@@ -184,7 +184,7 @@ print in development:
 ## Protect
 
 Arcjet provides a single `protect` function that is used to execute your
-protection rules. This requires a `request` object which is the event
+protection rules. This requires a `request` object which is the request
 argument as passed to the Bun fetch method. Rules you add to the SDK may
 require additional details, such as the `validateEmail` rule requiring an
 additional `email` prop.
@@ -340,32 +340,12 @@ about these properties.
 The `ArcjetReason` object for bot protection rules has the following properties:
 
 ```ts
-// See https://docs.arcjet.com/bot-protection/bot-types#bot-detection-result
-// for an explanation of each prop
-botType: ArcjetBotType;
-botScore: number;
-userAgentMatch: boolean;
-ipHosting: boolean;
-ipVpn: boolean;
-ipProxy: boolean;
-ipTor: boolean;
-ipRelay: boolean;
+allowed: string[];
+denied: string[];
 ```
 
-An `ArcjetBotType` is one of the following strings:
-
-```ts
-// See https://docs.arcjet.com/bot-protection/bot-types
-// for an explanation of each prop
-"NOT_ANALYZED" |
-  "AUTOMATED" |
-  "LIKELY_AUTOMATED" |
-  "LIKELY_NOT_A_BOT" |
-  "VERIFIED_BOT";
-```
-
-See the [bot protection documentation](/bot-protection/reference/bun) for
-more information about these properties.
+Each of the `allowed` and `denied` arrays contains the identifiers of the bots
+allowed or denied from our [full list of bots](https://arcjet.com/bot-list).
 
 ##### Rate limiting
 
@@ -550,9 +530,8 @@ based on the context provided. The implementation is open source in our
 [@arcjet/ip package](https://github.com/arcjet/arcjet-js/blob/main/ip).
 
 In non-production environments, we allow private/internal addresses so that the
-SDKs work correctly locally. As Bun doesn't set `NODE_ENV` for you like Node.js
-does, you need to set `ARCJET_ENV=development` in your environment file
-for this to work.
+SDKs work correctly locally. As Bun doesn't set `NODE_ENV` for you, you need to
+set `ARCJET_ENV=development` in your environment file for this to work.
 
 ## Client override
 

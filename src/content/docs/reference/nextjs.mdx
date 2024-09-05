@@ -404,32 +404,12 @@ about these properties.
 The `ArcjetReason` object for bot protection rules has the following properties:
 
 ```ts
-// See https://docs.arcjet.com/bot-protection/bot-types#bot-detection-result
-// for an explanation of each prop
-botType: ArcjetBotType;
-botScore: number;
-userAgentMatch: boolean;
-ipHosting: boolean;
-ipVpn: boolean;
-ipProxy: boolean;
-ipTor: boolean;
-ipRelay: boolean;
+allowed: string[];
+denied: string[];
 ```
 
-An `ArcjetBotType` is one of the following strings:
-
-```ts
-// See https://docs.arcjet.com/bot-protection/bot-types
-// for an explanation of each prop
-"NOT_ANALYZED" |
-  "AUTOMATED" |
-  "LIKELY_AUTOMATED" |
-  "LIKELY_NOT_A_BOT" |
-  "VERIFIED_BOT";
-```
-
-See the [bot protection documentation](/bot-protection/reference/nextjs) for
-more information about these properties.
+Each of the `allowed` and `denied` arrays contains the identifiers of the bots
+allowed or denied from our [full list of bots](https://arcjet.com/bot-list).
 
 ##### Rate limiting
 
