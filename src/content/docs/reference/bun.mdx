@@ -490,9 +490,9 @@ remove the need for null-ish checks.
 ## Error handling
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
-not block all requests. The SDK will also time out and fail open after 500ms
-when `ARCJET_ENV` is `"production"` and 1000ms otherwise. However, in most cases,
-the response time will be less than 20-30ms.
+not block all requests. The SDK will also time out and fail open after 1000ms
+when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
+in most cases, the response time will be less than 20-30ms.
 
 If there is an error condition, Arcjet will return an `ERROR` `conclusion`.
 
@@ -529,9 +529,9 @@ Arcjet will automatically detect the IP address of the client making the request
 based on the context provided. The implementation is open source in our
 [@arcjet/ip package](https://github.com/arcjet/arcjet-js/blob/main/ip).
 
-In non-production environments, we allow private/internal addresses so that the
-SDKs work correctly locally. As Bun doesn't set `NODE_ENV` for you, you need to
-set `ARCJET_ENV=development` in your environment file for this to work.
+In development environments (`NODE_ENV === "development"` or
+`ARCJET_ENV === "development"`), we allow private/internal addresses so that the
+SDKs work correctly locally.
 
 ## Client override
 
