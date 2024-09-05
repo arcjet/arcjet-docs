@@ -2,7 +2,7 @@ import arcjet, { tokenBucket } from "@arcjet/next";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   characteristics: ["ip.src"],
   rules: [
     tokenBucket({

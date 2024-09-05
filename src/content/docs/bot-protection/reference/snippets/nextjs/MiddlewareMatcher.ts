@@ -5,7 +5,7 @@ export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico|api/hello).*)"],
 };
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   rules: [
     detectBot({
       mode: "LIVE",

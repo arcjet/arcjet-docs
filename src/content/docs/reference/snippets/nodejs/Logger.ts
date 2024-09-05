@@ -17,7 +17,7 @@ const logger: Logger =
       });
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   rules: [
     // Protect against common attacks with Arcjet Shield
     shield({

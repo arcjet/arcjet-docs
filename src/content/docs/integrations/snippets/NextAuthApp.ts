@@ -18,7 +18,7 @@ export const authOptions = {
 const handler = NextAuth(authOptions);
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   rules: [
     slidingWindow({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only

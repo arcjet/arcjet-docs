@@ -4,7 +4,7 @@ import OpenAI from "openai";
 import { promptTokensEstimate } from "openai-chat-tokens";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
   characteristics: ["userId"], // track requests by user ID
   rules: [
     tokenBucket({

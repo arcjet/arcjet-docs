@@ -12,7 +12,7 @@ export const config = {
 const { auth } = NextAuth(config);
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   characteristics: ["userId"], // Track based on the Clerk userId
   rules: [
     // Create a token bucket rate limit. Other algorithms are supported.

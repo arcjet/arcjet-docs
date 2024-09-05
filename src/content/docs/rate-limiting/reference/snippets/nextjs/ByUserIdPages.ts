@@ -2,7 +2,7 @@ import arcjet, { fixedWindow } from "@arcjet/next";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   // Define a custom userId characteristic.
   // See https://docs.arcjet.com/architecture#custom-characteristics
   characteristics: ["userId"],

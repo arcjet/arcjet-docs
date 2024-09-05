@@ -4,7 +4,7 @@ export const config = {
   matcher: ["/hello"],
 };
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   rules: [
     detectBot({
       mode: "LIVE",
