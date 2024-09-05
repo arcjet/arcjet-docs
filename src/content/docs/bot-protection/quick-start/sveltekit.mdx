@@ -68,7 +68,7 @@ Arcjet to protect your entire application before your code runs.
 <Tabs>
 <TabItem label="TS">
 Create a file called `hooks.server.ts` in your project (inside `src`):
-<Code code={Step3TS} lang="ts" title="/src/hooks.server.ts" mark={[{range:"8-11"}]} />
+<Code code={Step3TS} lang="ts" title="/src/hooks.server.ts" />
 </TabItem>
 <TabItem label="JS">
 
@@ -94,6 +94,16 @@ curl -I http://localhost:5173
 
 The requests will also show up in the [Arcjet
 dashboard](https://app.arcjet.com).
+
+### 5. Choose bots to allow or deny
+
+Arcjet maintains a list of known bots so you can choose to either only [allow
+specific bots](/bot-protection/reference/sveltekit#only-allowing-specific-bots)
+or only [deny specific
+bots](/bot-protection/reference/sveltekit#only-denying-specific-bots).
+
+Find the [list of bots in our SDK
+repository](https://github.com/arcjet/arcjet-js/blob/main/protocol/well-known-bots.ts).
 
 ## FAQs
 

@@ -1,8 +1,6 @@
-import arcjet, { detectBot } from "@arcjet/bun";
-import { env } from "bun";
-
+import arcjet, { detectBot } from "@arcjet/node";
 const aj = arcjet({
-  key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY,
   rules: [
     detectBot({
       mode: "LIVE",
@@ -20,16 +18,3 @@ const aj = arcjet({
     }),
   ],
 });
-
-export default {
-  port: 3000,
-  fetch: aj.handler(async (req) => {
-    const decision = await aj.protect(req);
-
-    if (decision.isDenied()) {
-      return new Response("Forbidden", { status: 403 });
-    }
-
-    return new Response("Hello world");
-  }),
-};

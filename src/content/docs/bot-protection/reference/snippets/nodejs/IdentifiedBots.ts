@@ -19,13 +19,13 @@ const server = http.createServer(async function (
   console.log("Arcjet decision", decision);
 
   if (decision.isDenied() && decision.reason.isBot()) {
+    console.log("detected + allowed bots", decision.reason.allowed);
+    console.log("detected + denied bots", decision.reason.denied);
+
     res.writeHead(403, { "Content-Type": "application/json" });
     res.end(
       JSON.stringify({
         error: "Forbidden",
-        // Useful for debugging, but don't return these to the client in
-        // production
-        denied: decision.reason.denied,
       }),
     );
   } else {

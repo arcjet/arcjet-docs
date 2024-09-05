@@ -4,10 +4,10 @@ description: "How to use Arcjet to protect your SvelteKit app from bots."
 ---
 
 import { Tabs, TabItem, Code } from "@astrojs/starlight/components";
-import AddingRulesTS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/AddingRules.ts?raw";
-import AddingRulesJS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/AddingRules.js?raw";
-import RemovingRulesTS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/RemovingRules.ts?raw";
-import RemovingRulesJS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/RemovingRules.js?raw";
+import AllowingBotsTS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/AllowingBots.ts?raw";
+import AllowingBotsJS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/AllowingBots.js?raw";
+import DenyingBotsTS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/DenyingBots.ts?raw";
+import DenyingBotsJS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/DenyingBots.js?raw";
 import PerRouteTS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/PerRoute.ts?raw";
 import PerRouteJS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/PerRoute.js?raw";
 import Step3TS from "/src/content/docs/bot-protection/quick-start/snippets/sveltekit/Step3.ts?raw";
@@ -15,6 +15,8 @@ import Step3JS from "/src/content/docs/bot-protection/quick-start/snippets/svelt
 import HookMatcher from "/src/content/docs/bot-protection/reference/snippets/sveltekit/HookMatcher.ts?raw";
 import DecisionLogTS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/DecisionLog.ts?raw";
 import DecisionLogJS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/DecisionLog.js?raw";
+import IdentifiedBotsTS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/IdentifiedBots.ts?raw";
+import IdentifiedBotsJS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/IdentifiedBots.js?raw";
 import ErrorsTS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/Errors.ts?raw";
 import ErrorsJS from "/src/content/docs/bot-protection/reference/snippets/sveltekit/Errors.js?raw";
 import Comments from "/src/components/Comments.astro";
@@ -23,19 +25,25 @@ Arcjet bot detection allows you to manage traffic by automated clients and bots.
 
 ## Configuration
 
-Bot detection is configured by specifying the bot types you wish to block and
-optional user agent patterns to add or remove from the bot detection list.
+Bot detection is configured by allowing or denying a subset of bots. The `allow`
+and `deny` lists are mutually-exclusive, such that using `allow` will result in
+a `DENY` decision for any detected bot that is not specified in the `allow` list
+and using `deny` will result in an `ALLOW` decision for any detected bot that is
+not specified in the `deny` list.
 
-The configuration definition is:
+You can use only one of the following configuration definitions:
 
 ```ts
-type BotOptions = {
+type BotOptionsAllow = {
   mode?: "LIVE" | "DRY_RUN";
-  block?: BotType[];
-  patterns?: {
-    add?: { [key: string]: BotType };
-    remove?: string[];
-  };
+  allow: ArcjetWellKnownBot[];
+};
+```
+
+```ts
+type BotOptionsDeny = {
+  mode?: "LIVE" | "DRY_RUN";
+  deny: ArcjetWellKnownBot[];
 };
 ```
 
@@ -48,66 +56,41 @@ execution ordering is automatically optimized for performance. See
 [decision](#decision) below for details of examining the execution results.
 :::
 
-### Which bots to block?
+### Only allowing specific bots
 
-Which bot types to block is configured by listing one or more types in the
-`block` configuration block. The types are listed on the [bot
-types](/bot-protection/bot-types) page.
+Most applications want to block almost all bots. However, it is common to allow
+some bots to access your system, such as bots for search indexing or API
+access from the command line.
 
-### Adding bot detection rules
-
-You can add additional bot detection rules to the `patterns` `add` configuration
-property. Each rule is a regular expression that matches the user agent of the
-bot plus a label to indicate what type of bot it is.
-
-:::note
-The current implementation only supports `AUTOMATED` bot types, while support for the other [bot
-types](/bot-protection/bot-types) is on the roadmap.
-:::
-
-The following example adds a rule to detect AcmeBot as an `AUTOMATED` bot.
+This behavior is configured with an `allow` list from the [list of bots in our
+SDK
+repository](https://github.com/arcjet/arcjet-js/blob/main/protocol/well-known-bots.ts).
 
 <Tabs>
   <TabItem label="TS">
-    <Code
-      code={AddingRulesTS}
-      lang="ts"
-      title="/src/hooks.server.ts"
-      mark={[{ range: "8-20" }]}
-    />
+    <Code code={AllowingBotsTS} lang="ts" title="/src/hooks.server.ts" />
   </TabItem>
   <TabItem label="JS">
-    <Code
-      code={AddingRulesJS}
-      lang="js"
-      title="/src/hooks.server.js"
-      mark={[{ range: "8-20" }]}
-    />
+    <Code code={AllowingBotsJS} lang="js" title="/src/hooks.server.js" />
   </TabItem>
 </Tabs>
 
-### Removing bot detection rules
+### Only denying specific bots
 
-Arcjet includes a set of default matching rules to detect common bots. You can
-remove any of these rules by listing them in the `patterns` `remove`
-configuration property:
+Some applications may only want to block a small subset of bots, while allowing
+the majority continued access. This may be due to many reasons, such as
+misconfigured or high-traffic bots.
+
+This behavior is configured with an `deny` list from the [list of bots in our
+SDK
+repository](https://github.com/arcjet/arcjet-js/blob/main/protocol/well-known-bots.ts).
 
 <Tabs>
   <TabItem label="TS">
-    <Code
-      code={RemovingRulesTS}
-      lang="ts"
-      title="/src/hooks.server.ts"
-      mark={[{ range: "8-24" }]}
-    />
+    <Code code={DenyingBotsTS} lang="ts" title="/src/hooks.server.ts" />
   </TabItem>
   <TabItem label="JS">
-    <Code
-      code={RemovingRulesJS}
-      lang="js"
-      title="/src/hooks.server.js"
-      mark={[{ range: "8-24" }]}
-    />
+    <Code code={DenyingBotsJS} lang="js" title="/src/hooks.server.js" />
   </TabItem>
 </Tabs>
 
@@ -168,12 +151,7 @@ excluding the individual routes before running Arcjet in the hook.
 For example, if you already have rules defined in the API route
 at `/api/arcjet`, you can exclude it from the hook like this:
 
-<Code
-  code={HookMatcher}
-  lang="ts"
-  title="/src/hooks.server.ts"
-  mark={[{ range: "22-28" }]}
-/>
+<Code code={HookMatcher} lang="ts" title="/src/hooks.server.ts" />
 
 ## Decision
 
@@ -226,7 +204,6 @@ This example will log the full result as well as the bot protection rule:
       code={DecisionLogTS}
       title="/src/routes/api/arcjet/+server.ts"
       lang="ts"
-      mark={[{ range: "17,19-29" }]}
     />
   </TabItem>
   <TabItem label="JS">
@@ -234,16 +211,25 @@ This example will log the full result as well as the bot protection rule:
       code={DecisionLogJS}
       title="/src/routes/api/arcjet/+server.js"
       lang="js"
-      mark={[{ range: "17,19-29" }]}
     />
   </TabItem>
 </Tabs>
 
-### Bot type
+### Identified bots
 
-In the code above, you will see that Arcjet also returns more information in
-the `decicion` object about the [bot type](/bot-protection/bot-types) of the
-client we think made the request.
+The decision also contains all of the [identified
+bots](/bot-protection/identifying-bots) detected from the request. A request may
+be identified as zero, one, or more bots—all of which will be available on the
+`decision.allowed` and `decision.denied` properties.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={IdentifiedBotsTS} lang="ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={IdentifiedBotsJS} lang="js" />
+  </TabItem>
+</Tabs>
 
 ## Error handling
 
@@ -256,22 +242,20 @@ If there is an error condition, Arcjet will return an
 `ERROR` type and you can check the `reason` property for more information, like
 accessing `decision.reason.message`.
 
+:::note
+Please be aware that requests without `User-Agent` headers can not be identified
+as any particular bot and will be marked as an errored decision. Developers
+should take caution to check `decision.isErrored()` and decide if you want to
+allow or deny the request. Our recommendation is to block requests without
+`User-Agent` headers because most clients always send this header.
+:::
+
 <Tabs>
   <TabItem label="TS">
-    <Code
-      code={ErrorsTS}
-      title="/app/api/arcjet/route.ts"
-      lang="ts"
-      mark={[{ range: "18-23" }]}
-    />
+    <Code code={ErrorsTS} title="/app/api/arcjet/route.ts" lang="ts" />
   </TabItem>
   <TabItem label="JS">
-    <Code
-      code={ErrorsJS}
-      title="/app/api/arcjet/route.js"
-      lang="js"
-      mark={[{ range: "18-23" }]}
-    />
+    <Code code={ErrorsJS} title="/app/api/arcjet/route.js" lang="js" />
   </TabItem>
 </Tabs>
 

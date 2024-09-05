@@ -25,9 +25,6 @@ export async function GET(req: Request) {
     return NextResponse.json(
       {
         error: "You are a bot!",
-        // Useful for debugging, but don't return it to the client in
-        // production
-        //reason: decision.reason,
       },
       {
         status: 403,

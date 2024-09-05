@@ -7,10 +7,14 @@ const aj = arcjet({
   rules: [
     detectBot({
       mode: "LIVE",
-      // selectively allow known bots from our list of almost 600 bots while
-      // blocking all other detected bots
+      // configured with a list of bots to allow from
+      // https://arcjet.com/bot-list - all other detected bots will be blocked
       allow: [
-        "GOOGLE_CRAWLER", // allows Googlebot
+        // Google has multiple crawlers, each with a different user-agent. Check
+        // the full list for more options
+        "GOOGLE_CRAWLER", // allows Google's main crawler
+        "GOOGLE_ADSBOT", // allows Google Adsbot
+        "GOOGLE_CRAWLER_NEWS", // allows Google News crawler
         "CURL", // allows the default user-agent of the `curl` tool
         "DISCORD_CRAWLER", // allows Discordbot
       ],
@@ -27,7 +31,10 @@ export async function handle({
 }): Promise<Response> {
   const decision = await aj.protect(event);
 
-  if (decision.isDenied()) {
+  if (decision.isDenied() && decision.reason.isBot()) {
+    console.log("detected + allowed bots", decision.reason.allowed);
+    console.log("detected + denied bots", decision.reason.denied);
+
     return error(403, "You are a bot!");
   }
 

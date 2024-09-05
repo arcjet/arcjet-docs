@@ -2,11 +2,17 @@ import arcjet, { detectBot } from "@arcjet/next";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   rules: [
     detectBot({
       mode: "LIVE",
-      allow: [], // "allow none" will block all detected bots
+      // configured with a list of bots to deny from
+      // https://arcjet.com/bot-list - all other detected bots will be allowed
+      deny: [
+        "PERPLEXITY_CRAWLER", // denies PerplexityBot
+        "CURL", // denies the default user-agent of the `curl` tool
+        "ANTHROPIC_CRAWLER", // denies Claudebot
+      ],
     }),
   ],
 });
@@ -19,11 +25,11 @@ export default async function handler(
   console.log("Decision", decision);
 
   if (decision.isDenied() && decision.reason.isBot()) {
-    console.log("detected + allowed bots", decision.reason.allowed);
-    console.log("detected + denied bots", decision.reason.denied);
-
     return res.status(403).json({
       error: "Forbidden",
+      // Useful for debugging, but don't return these to the client in
+      // production
+      denied: decision.reason.denied,
     });
   }
 

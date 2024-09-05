@@ -2,20 +2,17 @@ import arcjet, { detectBot } from "@arcjet/bun";
 import { env } from "bun";
 
 const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
   rules: [
     detectBot({
       mode: "LIVE",
-      block: [
-        // Only block clients we're sure are automated bots
-        "AUTOMATED",
+      // configured with a list of bots to deny from
+      // https://arcjet.com/bot-list - all other detected bots will be allowed
+      deny: [
+        "PERPLEXITY_CRAWLER", // denies PerplexityBot
+        "CURL", // denies the default user-agent of the `curl` tool
+        "ANTHROPIC_CRAWLER", // denies Claudebot
       ],
-      patterns: {
-        add: {
-          // Allows you to add arbitrary bot definitions
-          "AcmeBot\\/": "AUTOMATED",
-        },
-      },
     }),
   ],
 });

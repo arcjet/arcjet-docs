@@ -61,9 +61,9 @@ true` to trigger the shield rule on the next request.
 - **Rate limiting:** Make more requests than the rate limit allows.
 - **Bot protection:** Bot detection uses multiple heuristics so the quickest way
   to get a bot detection `DENY` response is to make a request that is always
-  considered "automated". With a deny rule [bot type](/bot-protection/bot-types)
-  configured as `AUTOMATED`, set the `User-Agent` header to `curl` and you
-  should see a `DENY` response.
+  considered a bot. With a deny rule set to `CURL` you should see a `DENY`
+  response if you make a request using the `curl` command. See [Identifying
+  Bots](/bot-protection/identifying-bots) for more information.
 - **Email validation:** Use an email address that has invalid syntax or does not
   match any other rules you have configured e.g. has no MX records or if from a
   disposable email service.

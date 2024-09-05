@@ -53,11 +53,13 @@ execution ordering is automatically optimized for performance. See
 
 ### Only allowing specific bots
 
-Most applications want to block most of the ~600 bots we will detect. However,
-it is common to allow some bots to access your system, such as bots for search
-indexing or application monitoring.
+Most applications want to block almost all bots. However, it is common to allow
+some bots to access your system, such as bots for search indexing or API
+access from the command line.
 
-This behavior is configured with an `allow` list, as shown here:
+This behavior is configured with an `allow` list from the [list of bots in our
+SDK
+repository](https://github.com/arcjet/arcjet-js/blob/main/protocol/well-known-bots.ts).
 
 <Tabs>
   <TabItem label="TS">
@@ -74,8 +76,9 @@ Some applications may only want to block a small subset of bots, while allowing
 the majority continued access. This may be due to many reasons, such as
 misconfigured or high-traffic bots.
 
-If you know which bots you'd explicitly like to deny, you'll configure a `deny`
-list, as shown here:
+This behavior is configured with an `deny` list from the [list of bots in our
+SDK
+repository](https://github.com/arcjet/arcjet-js/blob/main/protocol/well-known-bots.ts).
 
 <Tabs>
   <TabItem label="TS">
@@ -139,7 +142,7 @@ This example will log the full result as well as the bot protection rule:
 ### Identified bots
 
 The decision also contains all of the [identified
-bots](/bot-protection/identifying-bot) detected from the request. A request may
+bots](/bot-protection/identifying-bots) detected from the request. A request may
 be identified as zero, one, or more bots—all of which will be available on the
 `decision.allowed` and `decision.denied` properties.
 
@@ -164,10 +167,11 @@ If there is an error condition, Arcjet will return an
 accessing `decision.reason.message`.
 
 :::note
-If the request is missing a User-Agent header, the decision will be marked as an
-error! You should check for this and make a decision about the request since
-requests without a User-Agent could indicate a crafted request from an automated
-client.
+Please be aware that requests without `User-Agent` headers can not be identified
+as any particular bot and will be marked as an errored decision. Developers
+should take caution to check `decision.isErrored()` and decide if you want to
+allow or deny the request. Our recommendation is to block requests without
+`User-Agent` headers because most clients always send this header.
 :::
 
 <Tabs>

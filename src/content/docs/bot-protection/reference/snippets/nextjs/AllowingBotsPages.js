@@ -1,8 +1,7 @@
-import arcjet, { detectBot } from "@arcjet/bun";
-import { env } from "bun";
+import arcjet, { detectBot } from "@arcjet/next";
 
 const aj = arcjet({
-  key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY,
   rules: [
     detectBot({
       mode: "LIVE",
@@ -21,15 +20,18 @@ const aj = arcjet({
   ],
 });
 
-export default {
-  port: 3000,
-  fetch: aj.handler(async (req) => {
-    const decision = await aj.protect(req);
+export default async function handler(req, res) {
+  const decision = await aj.protect(req);
+  console.log("Decision", decision);
 
-    if (decision.isDenied()) {
-      return new Response("Forbidden", { status: 403 });
-    }
+  if (decision.isDenied() && decision.reason.isBot()) {
+    return res.status(403).json({
+      error: "Forbidden",
+      // Useful for debugging, but don't return these to the client in
+      // production
+      denied: decision.reason.denied,
+    });
+  }
 
-    return new Response("Hello world");
-  }),
-};
+  res.status(200).json({ name: "Hello world" });
+}

@@ -1,8 +1,8 @@
-import arcjet, { detectBot } from "@arcjet/bun";
-import { env } from "bun";
+import arcjet, { detectBot } from "@arcjet/next";
+import { NextResponse } from "next/server";
 
 const aj = arcjet({
-  key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY,
   rules: [
     detectBot({
       mode: "LIVE",
@@ -21,15 +21,22 @@ const aj = arcjet({
   ],
 });
 
-export default {
-  port: 3000,
-  fetch: aj.handler(async (req) => {
-    const decision = await aj.protect(req);
+export async function POST(req) {
+  const decision = await aj.protect(req);
 
-    if (decision.isDenied()) {
-      return new Response("Forbidden", { status: 403 });
-    }
+  if (decision.isDenied() && decision.reason.isBot()) {
+    return NextResponse.json(
+      {
+        error: "You are a bot!",
+        // Useful for debugging, but don't return these to the client in
+        // production
+        denied: decision.reason.denied,
+      },
+      { status: 403 },
+    );
+  }
 
-    return new Response("Hello world");
-  }),
-};
+  return NextResponse.json({
+    message: "Hello world",
+  });
+}
