@@ -16,7 +16,6 @@ const server = http.createServer(async function (
   res: http.ServerResponse,
 ) {
   const decision = await aj.protect(req);
-  console.log("Arcjet decision", decision);
 
   // If the request is missing a User-Agent header, the decision will be
   // marked as an error! You should check for this and make a decision about
