@@ -53,8 +53,11 @@ yarn add @arcjet/node
 
 [Create a free Arcjet account](https://app.arcjet.com) then follow the
 instructions to add a site and get a key. Add it to a `.env.local` file in your
-project root. `NODE_ENV` isn't set by default, so you also need to tell
-Arcjet you're in development mode.
+project root.
+
+Arcjet only accepts non-local IP addresses with a fallback to 127.0.0.1 in
+development mode. Since Node.js doesn't set `NODE_ENV` for you, you also need to
+set `ARCJET_ENV` in your environment file.
 
 ```ini title=".env.local"
 # NODE_ENV is not set automatically, so tell Arcjet we're in dev
