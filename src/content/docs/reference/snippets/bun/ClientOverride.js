@@ -4,9 +4,9 @@ import { baseUrl } from "@arcjet/env";
 const client = createRemoteClient({
   baseUrl: baseUrl(Bun.env),
   // timeout is the maximum time to wait for a response from the server. It
-  // defaults to 500ms when NODE_ENV is "production" and 1000ms otherwise. This
-  // is a conservative limit to fail open by default. In most cases, the
-  // response time will be <20-30ms.
+  // defaults to 1000ms when NODE_ENV or ARCJET_ENV is "development" and 500ms
+  // otherwise. This is a conservative limit to fail open by default. In most
+  // cases, the response time will be <20-30ms.
   timeout: 500,
 });
 import { env } from "bun";
