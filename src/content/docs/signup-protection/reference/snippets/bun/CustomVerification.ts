@@ -14,8 +14,9 @@ const aj = arcjet({
       },
       bots: {
         mode: "LIVE",
-        // Block clients that we are sure are automated
-        block: ["AUTOMATED"],
+        // configured with a list of bots to allow from
+        // https://arcjet.com/bot-list
+        allow: [], // "allow none" will block all detected bots
       },
       rateLimit: {
         // uses a sliding window rate limit
@@ -35,7 +36,7 @@ function isProxyOrTor(decision: ArcjetDecision): boolean {
   for (const result of decision.results) {
     if (
       result.reason.isBot() &&
-      (result.reason.ipProxy || result.reason.ipTor)
+      (decision.ip.isProxy() || decision.ip.isTor())
     ) {
       return true;
     }

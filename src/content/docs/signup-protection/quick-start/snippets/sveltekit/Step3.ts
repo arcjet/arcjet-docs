@@ -13,8 +13,9 @@ const aj = arcjet({
       },
       bots: {
         mode: "LIVE",
-        // Block clients that we are sure are automated
-        block: ["AUTOMATED"],
+        // configured with a list of bots to allow from
+        // https://arcjet.com/bot-list
+        allow: [], // "allow none" will block all detected bots
       },
       // It would be unusual for a form to be submitted more than 5 times in 10
       // minutes from the same IP address
