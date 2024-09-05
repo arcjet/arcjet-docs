@@ -12,15 +12,14 @@ const aj = arcjet({
 
 export default async function handler(req, res) {
   const decision = await aj.protect(req);
-  console.log("Decision", decision);
 
-  if (decision.isDenied() && decision.reason.isBot()) {
+  if (decision.reason.isBot()) {
     console.log("detected + allowed bots", decision.reason.allowed);
     console.log("detected + denied bots", decision.reason.denied);
+  }
 
-    return res.status(403).json({
-      error: "Forbidden",
-    });
+  if (decision.isDenied()) {
+    return res.status(403).json({ error: "Forbidden" });
   }
 
   res.status(200).json({ name: "Hello world" });

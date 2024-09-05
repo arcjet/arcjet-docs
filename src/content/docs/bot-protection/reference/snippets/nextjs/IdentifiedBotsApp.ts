@@ -11,19 +11,16 @@ const aj = arcjet({
   ],
 });
 
-export async function POST(req) {
+export async function POST(req: Request) {
   const decision = await aj.protect(req);
 
-  if (decision.isDenied() && decision.reason.isBot()) {
+  if (decision.reason.isBot()) {
     console.log("detected + allowed bots", decision.reason.allowed);
     console.log("detected + denied bots", decision.reason.denied);
+  }
 
-    return NextResponse.json(
-      {
-        error: "You are a bot!",
-      },
-      { status: 403 },
-    );
+  if (decision.isDenied()) {
+    return NextResponse.json({ error: "You are a bot!" }, { status: 403 });
   }
 
   return NextResponse.json({

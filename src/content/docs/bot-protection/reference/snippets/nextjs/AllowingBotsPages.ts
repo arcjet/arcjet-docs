@@ -26,7 +26,6 @@ export default async function handler(
   res: NextApiResponse,
 ) {
   const decision = await aj.protect(req);
-  console.log("Decision", decision);
 
   if (decision.isDenied() && decision.reason.isBot()) {
     return res.status(403).json({

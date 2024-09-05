@@ -1,5 +1,5 @@
 import arcjet, { detectBot } from "@arcjet/next";
-import { NextResponse } from "next/server";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY,
@@ -11,22 +11,20 @@ const aj = arcjet({
   ],
 });
 
-export async function POST(req: Request) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   const decision = await aj.protect(req);
 
-  if (decision.isDenied() && decision.reason.isBot()) {
+  if (decision.reason.isBot()) {
     console.log("detected + allowed bots", decision.reason.allowed);
     console.log("detected + denied bots", decision.reason.denied);
-
-    return NextResponse.json(
-      {
-        error: "You are a bot!",
-      },
-      { status: 403 },
-    );
   }
 
-  return NextResponse.json({
-    message: "Hello world",
-  });
+  if (decision.isDenied()) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+
+  res.status(200).json({ name: "Hello world" });
 }

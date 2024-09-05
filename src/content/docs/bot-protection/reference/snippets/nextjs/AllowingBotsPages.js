@@ -22,7 +22,6 @@ const aj = arcjet({
 
 export default async function handler(req, res) {
   const decision = await aj.protect(req);
-  console.log("Decision", decision);
 
   if (decision.isDenied() && decision.reason.isBot()) {
     return res.status(403).json({
