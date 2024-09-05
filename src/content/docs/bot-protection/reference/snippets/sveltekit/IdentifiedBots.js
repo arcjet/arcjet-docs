@@ -25,10 +25,12 @@ const aj = arcjet({
 export async function handle({ event, resolve }) {
   const decision = await aj.protect(event);
 
-  if (decision.isDenied() && decision.reason.isBot()) {
+  if (decision.reason.isBot()) {
     console.log("detected + allowed bots", decision.reason.allowed);
     console.log("detected + denied bots", decision.reason.denied);
+  }
 
+  if (decision.isDenied()) {
     return error(403, "You are a bot!");
   }
 
