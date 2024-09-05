@@ -77,9 +77,8 @@ runs before every request, allowing Arcjet to protect your entire application
 before your code runs.
 
 The **basic** option exports the middleware directly whereas the **advanced**
-option allows you to [customize the
-response](/bot-protection/reference/nextjs#bot-type) based on the Arcjet
-decision.
+option allows you to customize the response based on the [Arcjet
+decision](/bot-protection/reference/nextjs#decision).
 
 <Tabs>
 <TabItem label="TS (Basic)">
@@ -131,8 +130,8 @@ Create a file called `middleware.js` in your project root (at the same level as
 Make a `curl` request from your terminal to your application. You should see a
 `403 Forbidden` response because `curl` is considered an automated client by
 default. See [the reference
-guide](/bot-protection/reference/nextjs#removing-bot-detection-rules) for how to
-configure this.
+guide](/bot-protection/reference/nextjs#only-allowing-specific-bots) to learn
+about configuring this.
 
 ```shell
 # Will show just the response headers, which should be 403 forbidden
