@@ -24,7 +24,7 @@ export default async function middleware(request) {
     // address is from a known hosting provider, then block the request
     decision.isDenied() &&
     decision.reason.isBot() &&
-    decision.reason.ipHosting
+    decision.ip.isHosting()
   ) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   } else {
