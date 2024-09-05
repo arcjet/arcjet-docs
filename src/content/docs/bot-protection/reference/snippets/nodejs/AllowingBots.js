@@ -1,4 +1,5 @@
 import arcjet, { detectBot } from "@arcjet/node";
+
 const aj = arcjet({
   key: process.env.ARCJET_KEY,
   rules: [
