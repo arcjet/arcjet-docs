@@ -1,4 +1,4 @@
-import arcjet, { createMiddleware, sensitiveInfo, shield } from "@arcjet/next";
+import arcjet, { createMiddleware, sensitiveInfo } from "@arcjet/next";
 export const config = {
   // matcher tells Next.js which routes to run the middleware on.
   // This runs the middleware on all routes except for static assets.
@@ -11,10 +11,6 @@ const aj = arcjet({
     sensitiveInfo({
       deny: ["EMAIL"],
       mode: "LIVE",
-    }),
-    // Protect against common attacks with Arcjet Shield
-    shield({
-      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
     }),
   ],
 });

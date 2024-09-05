@@ -1,12 +1,22 @@
 import arcjet, { sensitiveInfo } from "@arcjet/bun";
 import { env } from "bun";
 
+// This function is called by the `sensitiveInfo` rule to perform custom detection on strings.
+function detectDash(tokens) {
+  return tokens.map((token) => {
+    if (token.includes("-")) {
+      return "CONTAINS_DASH";
+    }
+  });
+}
+
 const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
   rules: [
     sensitiveInfo({
       deny: ["EMAIL"],
       mode: "LIVE",
+      detect: detectDash,
     }),
   ],
 });

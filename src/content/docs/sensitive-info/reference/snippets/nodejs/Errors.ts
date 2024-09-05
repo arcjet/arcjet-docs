@@ -1,12 +1,9 @@
-import arcjet, { sensitiveInfo, shield } from "@arcjet/node";
+import arcjet, { sensitiveInfo } from "@arcjet/node";
 import http from "node:http";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
   rules: [
-    shield({
-      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-    }),
     sensitiveInfo({
       deny: ["EMAIL"],
       mode: "LIVE",

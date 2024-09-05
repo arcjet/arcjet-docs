@@ -1,4 +1,4 @@
-import arcjet, { shield, sensitiveInfo } from "@arcjet/next";
+import arcjet, { sensitiveInfo } from "@arcjet/next";
 import { NextResponse } from "next/server";
 
 export const config = {
@@ -10,9 +10,6 @@ const aj = arcjet({
   rules: [
     sensitiveInfo({
       deny: ["EMAIL"],
-      mode: "LIVE",
-    }),
-    shield({
       mode: "LIVE",
     }),
   ],

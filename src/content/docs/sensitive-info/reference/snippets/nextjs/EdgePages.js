@@ -26,7 +26,7 @@ export default async function handler(req, res) {
       .json({ error: "Unexpected sensitive info received" });
     // Returning the reason is useful for debugging, but don't return it to the
     // client in production
-    // .json({ error: "You are suspicious!", reason: decision.reason });
+    // .json({ error: "Unexpected sensitive info received", reason: decision.reason });
   }
 
   res.status(200).json({ name: "Hello world" });

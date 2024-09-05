@@ -1,4 +1,4 @@
-import arcjet, { sensitiveInfo, shield } from "@arcjet/bun";
+import arcjet, { sensitiveInfo } from "@arcjet/bun";
 import { env } from "bun";
 
 const aj = arcjet({
@@ -6,9 +6,6 @@ const aj = arcjet({
   rules: [
     sensitiveInfo({
       deny: ["EMAIL"],
-      mode: "LIVE",
-    }),
-    shield({
       mode: "LIVE",
     }),
   ],
@@ -24,10 +21,6 @@ export default {
 
       if (result.reason.isSensitiveInfo()) {
         console.log("Sensitive info rule", result);
-      }
-
-      if (result.reason.isShield()) {
-        console.log("Shield rule", result);
       }
     }
 

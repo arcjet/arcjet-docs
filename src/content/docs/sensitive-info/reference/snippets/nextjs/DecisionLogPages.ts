@@ -1,4 +1,4 @@
-import arcjet, { sensitiveInfo, shield } from "@arcjet/next";
+import arcjet, { sensitiveInfo } from "@arcjet/next";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 const aj = arcjet({
@@ -8,9 +8,6 @@ const aj = arcjet({
   rules: [
     sensitiveInfo({
       deny: ["EMAIL"],
-      mode: "LIVE",
-    }),
-    shield({
       mode: "LIVE",
     }),
   ],
@@ -28,10 +25,6 @@ export default async function handler(
 
     if (result.reason.isSensitiveInfo()) {
       console.log("Sensitive info rule", result);
-    }
-
-    if (result.reason.isShield()) {
-      console.log("Shield rule", result);
     }
   }
 

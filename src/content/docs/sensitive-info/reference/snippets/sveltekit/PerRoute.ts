@@ -1,5 +1,5 @@
 import { env } from "$env/dynamic/private";
-import arcjet, { sensitiveInfo, shield } from "@arcjet/sveltekit";
+import arcjet, { sensitiveInfo } from "@arcjet/sveltekit";
 import { error, type RequestEvent } from "@sveltejs/kit";
 
 const aj = arcjet({
@@ -8,9 +8,6 @@ const aj = arcjet({
     sensitiveInfo({
       deny: ["EMAIL"],
       mode: "LIVE",
-    }),
-    shield({
-      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
     }),
   ],
 });

@@ -7,6 +7,8 @@ next: false
 import { Tabs, TabItem, Code } from "@astrojs/starlight/components";
 import Step3TS from "/src/content/docs/sensitive-info/quick-start/snippets/bun/Step3.ts?raw";
 import Step3JS from "/src/content/docs/sensitive-info/quick-start/snippets/bun/Step3.js?raw";
+import CustomDetectTS from "/src/content/docs/sensitive-info/reference/snippets/bun/CustomDetect.ts?raw";
+import CustomDetectJS from "/src/content/docs/sensitive-info/reference/snippets/bun/CustomDetect.js?raw";
 import DecisionLogTS from "/src/content/docs/sensitive-info/reference/snippets/bun/DecisionLog.ts?raw";
 import DecisionLogJS from "/src/content/docs/sensitive-info/reference/snippets/bun/DecisionLog.js?raw";
 import ErrorsTS from "/src/content/docs/sensitive-info/reference/snippets/bun/Errors.ts?raw";
@@ -104,6 +106,23 @@ This example will log the full result as well as the sensitive info rule:
   </TabItem>
   <TabItem label="JS">
     <Code code={DecisionLogJS} lang="js" />
+  </TabItem>
+</Tabs>
+
+## Custom entity detection
+
+When configuring Arcjet Sensitive Info you can provide a custom detect function,
+this enables you to detect entities that we don't support out of the box using
+custom logic. Just write a function that returns either the name of the entity
+or undefined if its not detected. Be sure to add it to either the `deny` or `allow`
+list as appropriate.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={ErrorsTS} lang="ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={ErrorsJS} lang="js" />
   </TabItem>
 </Tabs>
 

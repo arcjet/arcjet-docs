@@ -1,4 +1,4 @@
-import arcjet, { sensitiveInfo, shield } from "@arcjet/node";
+import arcjet, { sensitiveInfo } from "@arcjet/node";
 import http from "node:http";
 
 const aj = arcjet({
@@ -7,9 +7,6 @@ const aj = arcjet({
   rules: [
     sensitiveInfo({
       deny: ["EMAIL"],
-      mode: "LIVE",
-    }),
-    shield({
       mode: "LIVE",
     }),
   ],
@@ -24,17 +21,16 @@ const server = http.createServer(async function (req, res) {
     if (result.reason.isRateLimit()) {
       console.log("Rate limit rule", result);
     }
-
-    if (result.reason.isShield()) {
-      console.log("Shield rule", result);
-    }
   }
 
   if (decision.isDenied()) {
-    if (decision.reason.isRateLimit()) {
-      res.writeHead(429, { "Content-Type": "application/json" });
+    if (decision.reason.isSensitiveInfo()) {
+      res.writeHead(400, { "Content-Type": "application/json" });
       res.end(
-        JSON.stringify({ error: "Too Many Requests", reason: decision.reason }),
+        JSON.stringify({
+          error: "Unexpected sensitive info detected",
+          reason: decision.reason,
+        }),
       );
       res.end(JSON.stringify({ error: "Forbidden" }));
     } else {

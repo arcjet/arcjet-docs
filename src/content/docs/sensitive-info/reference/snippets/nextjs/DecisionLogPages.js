@@ -1,4 +1,4 @@
-import arcjet, { sensitiveInfo, shield } from "@arcjet/next";
+import arcjet, { sensitiveInfo } from "@arcjet/next";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY,
@@ -7,9 +7,6 @@ const aj = arcjet({
   rules: [
     sensitiveInfo({
       deny: ["EMAIL"],
-      mode: "LIVE",
-    }),
-    shield({
       mode: "LIVE",
     }),
   ],
@@ -24,10 +21,6 @@ export default async function handler(req, res) {
 
     if (result.reason.isSensitiveInfo()) {
       console.log("Sensitive info rule", result);
-    }
-
-    if (result.reason.isShield()) {
-      console.log("Shield rule", result);
     }
   }
 

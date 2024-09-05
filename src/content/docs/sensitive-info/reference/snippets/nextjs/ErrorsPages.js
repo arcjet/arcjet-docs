@@ -1,13 +1,10 @@
-import arcjet, { shield } from "@arcjet/next";
+import arcjet, { sensitiveInfo } from "@arcjet/next";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY,
   rules: [
     sensitiveInfo({
       deny: ["EMAIL"],
-      mode: "LIVE",
-    }),
-    shield({
       mode: "LIVE",
     }),
   ],

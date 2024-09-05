@@ -1,4 +1,4 @@
-import arcjet, { sensitiveInfo, shield } from "@arcjet/next";
+import arcjet, { sensitiveInfo } from "@arcjet/next";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 const aj = arcjet({
@@ -6,9 +6,6 @@ const aj = arcjet({
   rules: [
     sensitiveInfo({
       deny: ["EMAIL"],
-      mode: "LIVE",
-    }),
-    shield({
       mode: "LIVE",
     }),
   ],
@@ -27,8 +24,6 @@ export default async function handler(
     // Returning the reason is useful for debugging, but don't return it to the
     // client in production
     // .json({ error: "You are suspicious!", reason: decision.reason });
-  } else if (decision.isDenied() && decision.reason.isShield()) {
-    return res.status(403).json({ error: "You are suspicious!" });
   }
 
   res.status(200).json({ name: "Hello world" });

@@ -1,4 +1,4 @@
-import arcjet, { shield } from "@arcjet/next";
+import arcjet, { sensitiveInfo } from "@arcjet/next";
 import { NextResponse } from "next/server";
 
 const aj = arcjet({
@@ -6,9 +6,6 @@ const aj = arcjet({
   rules: [
     sensitiveInfo({
       deny: ["EMAIL"],
-      mode: "LIVE",
-    }),
-    shield({
       mode: "LIVE",
     }),
   ],
@@ -27,12 +24,12 @@ export async function GET(req) {
   if (decision.isDenied()) {
     return NextResponse.json(
       {
-        error: "You are suspicious!",
+        error: "Unexpected sensitive info received",
         // Useful for debugging, but don't return it to the client in
         // production
         //reason: decision.reason,
       },
-      { status: 403 },
+      { status: 400 },
     );
   }
 
