@@ -11,10 +11,9 @@ const aj = arcjet({
       },
       bots: {
         mode: "LIVE",
-        block: ["AUTOMATED"],
+        allow: [],
       },
       rateLimit: {
-        // uses a sliding window rate limit
         mode: "LIVE",
         interval: "10m",
         max: 5,

@@ -3,7 +3,7 @@ import { env } from "bun";
 import pino, { type Logger } from "pino";
 
 const logger: Logger =
-  env.ARCJET_ENV === "production"
+  env.ARCJET_ENV !== "development"
     ? // JSON in production, default to warn
       pino({ level: process.env.ARCJET_LOG_LEVEL || "warn" })
     : // Pretty print in development, default to debug

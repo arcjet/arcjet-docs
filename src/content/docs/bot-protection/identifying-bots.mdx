@@ -1,0 +1,30 @@
+---
+title: "Identifying bots"
+description: "Arcjet can detect many different bots and automated clients."
+next: false
+---
+
+import Comments from "/src/components/Comments.astro";
+
+For basic detection, Arcjet uses the `User-Agent` header to identify specific
+bots. Advanced bot detection supplements this with additional fingerprinting
+techniques such as IP address analysis.
+
+Arcjet identifies and maintains a list of known bots, which are available in our
+[bot list](https://arcjet.com/bot-list). If you are using TypeScript, these will
+be shown as autocomplete values to `allow` or `deny` options while writing your
+rules.
+
+This list is used to allow developers to choose to allow or deny any or all of
+these bots.
+
+:::note
+Please be aware that requests without `User-Agent` headers can not be identified
+as any particular bot and will be marked as an errored decision. Developers
+should take caution to check `decision.isErrored()` and decide if you want to
+allow or deny the request. See the Error Handling section in the SDK reference
+for an example. Our recommendation is to block requests without `User-Agent`
+headers because most clients always send this header.
+:::
+
+<Comments />

@@ -2,11 +2,11 @@ import arcjet, { detectBot } from "@arcjet/next";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   rules: [
     detectBot({
       mode: "LIVE",
-      block: ["AUTOMATED", "LIKELY_AUTOMATED"],
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });
@@ -17,10 +17,14 @@ export default async function handler(
 ) {
   const decision = await aj.protect(req);
 
+  // If the request is missing a User-Agent header, the decision will be
+  // marked as an error! You should check for this and make a decision about
+  // the request since requests without a User-Agent could indicate a crafted
+  // request from an automated client.
   if (decision.isErrored()) {
     // Fail open by logging the error and continuing
     console.warn("Arcjet error", decision.reason.message);
-    // You could also fail closed here for very sensitive routes
+    // You could also fail closed here if the request is missing a User-Agent
     //return res.status(503).json({ error: "Service unavailable" });
   }
 

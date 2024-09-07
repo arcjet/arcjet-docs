@@ -2,11 +2,11 @@ import arcjet, { detectBot } from "@arcjet/next";
 import { NextResponse } from "next/server";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   rules: [
     detectBot({
       mode: "LIVE",
-      block: ["AUTOMATED", "LIKELY_AUTOMATED"],
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });
@@ -18,9 +18,6 @@ export async function GET(req: Request) {
     return NextResponse.json(
       {
         error: "You are a bot!",
-        // Useful for debugging, but don't return it to the client in
-        // production
-        //reason: decision.reason,
       },
       { status: 403 },
     );

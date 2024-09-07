@@ -61,14 +61,14 @@ ARCJET_KEY=ajkey_yourkey
 ### 3. Add bot protection hooks
 
 If you wish to enable Arcjet Bot Protection across your entire SvelteKit
-pplication, you can install the SDK as a hook. [SvelteKit
+application, you can install the SDK as a hook. [SvelteKit
 hooks](https://kit.svelte.dev/docs/hooks) run before every request, allowing
 Arcjet to protect your entire application before your code runs.
 
 <Tabs>
 <TabItem label="TS">
 Create a file called `hooks.server.ts` in your project (inside `src`):
-<Code code={Step3TS} lang="ts" title="/src/hooks.server.ts" mark={[{range:"8-11"}]} />
+<Code code={Step3TS} lang="ts" title="/src/hooks.server.ts" />
 </TabItem>
 <TabItem label="JS">
 
@@ -84,8 +84,8 @@ Create a file called `hooks.server.js` in your project (inside `src`):
 Make a `curl` request from your terminal to your application. You should see a
 `403 Forbidden` response because `curl` is considered an automated client by
 default. See [the reference
-guide](/bot-protection/reference/sveltekit#removing-bot-detection-rules) for how to
-configure this.
+guide](/bot-protection/reference/sveltekit#only-allowing-specific-bots) to learn
+about configuring this.
 
 ```shell
 # Will show just the response headers, which should be 403 forbidden
@@ -94,6 +94,15 @@ curl -I http://localhost:5173
 
 The requests will also show up in the [Arcjet
 dashboard](https://app.arcjet.com).
+
+### 5. Choose bots to allow or deny
+
+Arcjet maintains a list of known bots so you can choose to either only [allow
+specific bots](/bot-protection/reference/sveltekit#only-allowing-specific-bots)
+or only [deny specific
+bots](/bot-protection/reference/sveltekit#only-denying-specific-bots).
+
+Check out our [full list of bots](https://arcjet.com/bot-list).
 
 ## FAQs
 

@@ -1,9 +1,8 @@
 import arcjet, { detectBot, tokenBucket } from "@arcjet/node";
-import { env } from "bun";
 
 // Create an Arcjet instance with multiple rules
 const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
   rules: [
     tokenBucket({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
@@ -13,7 +12,7 @@ const aj = arcjet({
     }),
     detectBot({
       mode: "LIVE",
-      block: ["AUTOMATED", "LIKELY_AUTOMATED"],
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });

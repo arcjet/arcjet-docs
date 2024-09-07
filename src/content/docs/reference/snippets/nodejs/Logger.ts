@@ -2,7 +2,7 @@ import arcjet, { shield } from "@arcjet/node";
 import pino, { type Logger } from "pino";
 
 const logger: Logger =
-  process.env.NODE_ENV === "production"
+  process.env.ARCJET_ENV !== "development"
     ? // JSON in production, default to warn
       pino({ level: process.env.ARCJET_LOG_LEVEL || "warn" })
     : // Pretty print in development, default to debug
@@ -17,7 +17,7 @@ const logger: Logger =
       });
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   rules: [
     // Protect against common attacks with Arcjet Shield
     shield({

@@ -2,7 +2,7 @@ import arcjet, { detectBot, validateEmail } from "@arcjet/next";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   rules: [
     validateEmail({
       mode: "LIVE",
@@ -10,7 +10,7 @@ const aj = arcjet({
     }),
     detectBot({
       mode: "LIVE",
-      block: ["AUTOMATED", "LIKELY_AUTOMATED"],
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });

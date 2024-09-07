@@ -2,7 +2,7 @@ import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/next";
 import { NextResponse } from "next/server";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   rules: [
     // Protect against common attacks with Arcjet Shield
     shield({
@@ -28,7 +28,7 @@ function getClient(userId?: string) {
         .withRule(
           detectBot({
             mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-            block: ["AUTOMATED"], // blocks all automated clients
+            allow: [], // "allow none" will block all detected bots
           }),
         )
     );

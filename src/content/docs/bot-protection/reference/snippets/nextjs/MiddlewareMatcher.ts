@@ -5,11 +5,11 @@ export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico|api/hello).*)"],
 };
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   rules: [
     detectBot({
       mode: "LIVE",
-      block: ["AUTOMATED", "LIKELY_AUTOMATED"],
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });

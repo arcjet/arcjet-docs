@@ -13,7 +13,7 @@ export const config = {
 const handlers = NextAuth(config);
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   rules: [
     slidingWindow({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
@@ -22,7 +22,7 @@ const aj = arcjet({
     }),
     detectBot({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-      block: ["AUTOMATED"], // blocks all automated clients
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });
