@@ -54,7 +54,7 @@ The configuration definition is:
     ```ts
     type RedactOptions = {
       chatModel: ChatModel,
-      redact?: Array<SensitiveInfoType>;
+      entities?: Array<SensitiveInfoType>;
       contextWindowSize?: number;
       detect?: (tokens: string[]) -> Array<SensitiveInfoType | undefined>;
       replace?: (detectedEntity: SensitiveInfoType) -> string | undefined;
@@ -65,7 +65,7 @@ The configuration definition is:
     ```ts
     type RedactOptions = {
       llm: LLM,
-      redact?: Array<SensitiveInfoType>;
+      entities?: Array<SensitiveInfoType>;
       contextWindowSize?: number;
       detect?: (tokens: string[]) -> Array<SensitiveInfoType | undefined>;
       replace?: (detectedEntity: SensitiveInfoType) -> string | undefined;
@@ -75,7 +75,7 @@ The configuration definition is:
 </Tabs>
 
 - `chatModel` or `llm`: The chat model or llm that you are wrapping. (eg: `OpenAIChat`)
-- `redact`: The list of entities that you wish to redact. If undefined then all entities are redacted. Valid values are: `email`, `phone-number`, `ip-address`, '`credit-card`, or any string returned from `detect`.
+- `entities`: The list of entities that you wish to redact. If undefined then all entities are redacted. Valid values are: `email`, `phone-number`, `ip-address`, '`credit-card`, or any string returned from `detect`.
 - `contextWindowSize` - How many tokens to pass to the `detect` function at a time. Setting this to a higher value allows for more context to be used when determing if a token is sensitive or not.
 - `detect` - An optional function that allows you to detect custom entities. It will be passed a list of tokens as big as `contextWindowSize` and should return a list of detected entities of the same length.
 - `replace` - An optional function that allows you to define your own replacements for detected entities. It is passed a string with the type of entity detected and it should either return a replacement for that entity type or `undefined`.
