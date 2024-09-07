@@ -113,16 +113,20 @@ This example will log the full result as well as the sensitive info rule:
 
 When configuring Arcjet Sensitive Info you can provide a custom detect function,
 this enables you to detect entities that we don't support out of the box using
-custom logic. Just write a function that returns either the name of the entity
-or undefined if its not detected. Be sure to add it to either the `deny` or `allow`
-list as appropriate.
+custom logic.
+
+The function will take a list of tokens and must return a list of either `undefined`,
+if the corresponding token in the input list is not sensitive, or the name of the
+entity if it does match. The number of tokens that are provided to the function
+is controlled by the `contextWindowSize` option, which defaults to 1. If you need
+additional context to perform detections then you can increase this value.
 
 <Tabs>
   <TabItem label="TS">
-    <Code code={ErrorsTS} lang="ts" />
+    <Code code={CustomDetectTS} lang="ts" />
   </TabItem>
   <TabItem label="JS">
-    <Code code={ErrorsJS} lang="js" />
+    <Code code={CustomDetectJS} lang="js" />
   </TabItem>
 </Tabs>
 

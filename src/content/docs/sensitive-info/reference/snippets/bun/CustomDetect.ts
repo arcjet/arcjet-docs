@@ -17,6 +17,7 @@ const aj = arcjet({
       deny: ["EMAIL", "CONTAINS_DASH"],
       mode: "LIVE",
       detect: detectDash,
+      contextWindowSize: 2,
     }),
   ],
 });
