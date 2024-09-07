@@ -34,8 +34,8 @@ type SensitiveInfoOptions = {
 };
 ```
 
-The `arcjet` client is configured with one or more `sensitiveInfo` rules which take
-one or many `SensitiveInfoOptions`.
+The `arcjet` client is configured with one or more `sensitiveInfo` rules which
+take one or many `SensitiveInfoOptions`.
 
 :::note
 When specifying multiple rules, the order of the rules is ignored. Rule
@@ -87,10 +87,12 @@ This function returns a `Promise` that resolves to an
 See [the SDK reference](/reference/bun#results) for more details about the
 rule results.
 
-You check if a deny conclusion has been returned by a sensitive info rule by using
-`decision.isDenied()` and `decision.reason.isSensitiveInfo()` respectively.
+You check if a deny conclusion has been returned by a sensitive info rule by
+using `decision.isDenied()` and `decision.reason.isSensitiveInfo()`
+respectively.
 
-You can iterate through the results and check whether a sensitive-info rule was applied:
+You can iterate through the results and check whether a sensitive-info rule was
+applied:
 
 ```ts
 for (const result of decision.results) {
@@ -115,11 +117,12 @@ When configuring Arcjet Sensitive Info you can provide a custom detect function,
 this enables you to detect entities that we don't support out of the box using
 custom logic.
 
-The function will take a list of tokens and must return a list of either `undefined`,
-if the corresponding token in the input list is not sensitive, or the name of the
-entity if it does match. The number of tokens that are provided to the function
-is controlled by the `contextWindowSize` option, which defaults to 1. If you need
-additional context to perform detections then you can increase this value.
+The function will take a list of tokens and must return a list of either
+`undefined`, if the corresponding token in the input list is not sensitive, or
+the name of the entity if it does match. The number of tokens that are provided
+to the function is controlled by the `contextWindowSize` option, which defaults
+to 1. If you need additional context to perform detections then you can increase
+this value.
 
 <Tabs>
   <TabItem label="TS">
@@ -134,8 +137,12 @@ additional context to perform detections then you can increase this value.
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
 not block all requests. The SDK will also time out and fail open after 500ms
-when `ARCJET_ENV` is `"production"` and 1000ms otherwise. However, in most cases,
-the response time will be less than 20-30ms.
+when `ARCJET_ENV` is `"production"` and 1000ms otherwise. However, in most
+cases, the response time will be less than 20-30ms.
+
+If you only configure a sensitiveInfo rule, Arcjet performs all analysis locally
+and does not require a call to the Arcjet cloud API. The result is reported to
+Arcjet asynchronously, but no sensitive information is sent to the cloud.
 
 If there is an error condition, Arcjet will return an
 `ERROR` type and you can check the `reason` property for more information, like

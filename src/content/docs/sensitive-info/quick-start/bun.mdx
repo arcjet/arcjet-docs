@@ -79,11 +79,8 @@ To see Arcjet Sensitive Information detection in action, try making a request
 with a blocked entity in the body of the request. For example if you have configured
 Arcjet to block requests containing email addresses then try and send an email address.
 
-```sh
-curl -v http://localhost:3000 --data "My email address is test@example.com"
-```
-
-The default response for a request containing unexpected sensitive information is a 400:
+The default response for a request containing unexpected sensitive information
+is a 400:
 
 ```sh
 curl -v http://localhost:3000 --data "My email address is test@example.com"
