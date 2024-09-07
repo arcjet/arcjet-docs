@@ -1,6 +1,6 @@
 ---
-title: "Arcjet / LangChain Intecration"
-description: "Integrating Arcjet and LangChain. Redact your most sensitive information before sending it to third parties."
+title: "Arcjet / LangChain Integration"
+description: "Redact sensitive information from prompts locally before it is sent to a third-party LLM or Chat Model"
 prev: false
 next: false
 ---
@@ -10,42 +10,31 @@ import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import LangChainLLM from "/src/content/docs/integrations/snippets/LangChainLLM.ts?raw";
 import LangChainChatModel from "/src/content/docs/integrations/snippets/LangChainChatModel.ts?raw";
 
-Arcjet and LangChain work together to redact sentitive information from
-prompts locally before it is sent to a third-party LLM or Chat Model.
+Arcjet and [LangChain](https://www.langchain.com/) work together to redact
+sensitive information from prompts locally before it is sent to a third-party
+LLM or Chat Model.
 
 <WhatIsArcjet />
 
-The Arcjet LangChain integration wraps your LLM and Chat Model calls to perform
-redaction and unredaction on sensitive information that it being sent to and from
-third party AI services.
+The Arcjet LangChain integration wraps your
+[LLM](https://js.langchain.com/v0.2/docs/concepts/#llms) and [Chat
+Model](https://js.langchain.com/v0.2/docs/concepts/#chat-models) calls to
+perform redaction and unredaction on sensitive information that is being sent to
+and from third party AI services.
 
-# Installation
+This currently works with the [LangChain JS
+SDK](https://js.langchain.com/v0.2/docs/introduction/).
 
-To use Arcjet with LangChain you need to install both the `@arcjet/redact` and `@langchain/community` packages.
+## Installation
 
-{/* prettier-ignore */}
-<Tabs>
-<TabItem label="npm">
-```sh
-npm i @arcjet/redact
-npm i @langchain/community
+To use Arcjet with LangChain you need to install both the `@arcjet/redact` and
+`@langchain/community` packages.
+
+```bash
+npm i @arcjet/redact @langchain/community
 ```
-</TabItem>
-<TabItem label="pnpm">
-```sh
-pnpm add @arcjet/redact
-pnpm add @langchain/community
-```
-</TabItem>
-<TabItem label="yarn">
-```sh
-yarn add @arcjet/redact
-yarn add @langchain/community
-```
-</TabItem>
-</Tabs>
 
-# Configuration
+## Configuration
 
 The configuration definition is:
 
@@ -74,13 +63,23 @@ The configuration definition is:
   </TabItem>
 </Tabs>
 
-- `chatModel` or `llm`: The chat model or llm that you are wrapping. (eg: `OpenAIChat`)
-- `entities`: The list of entities that you wish to redact. If undefined then all entities are redacted. Valid values are: `email`, `phone-number`, `ip-address`, '`credit-card`, or any string returned from `detect`.
-- `contextWindowSize` - How many tokens to pass to the `detect` function at a time. Setting this to a higher value allows for more context to be used when determing if a token is sensitive or not.
-- `detect` - An optional function that allows you to detect custom entities. It will be passed a list of tokens as big as `contextWindowSize` and should return a list of detected entities of the same length.
-- `replace` - An optional function that allows you to define your own replacements for detected entities. It is passed a string with the type of entity detected and it should either return a replacement for that entity type or `undefined`.
+- `chatModel` or `llm`: The chat model or llm that you are wrapping. (eg:
+  `OpenAIChat`)
+- `entities`: The list of entities that you wish to redact. If undefined then
+  all entities are redacted. Valid values are: `email`, `phone-number`,
+  `ip-address`, `credit-card`, or any string returned from `detect`.
+- `contextWindowSize` - How many tokens to pass to the `detect` function at a
+  time. Setting this to a higher value allows for more context to be used when
+  determing if a token is sensitive or not.
+- `detect` - An optional function that allows you to detect custom entities. It
+  will be passed a list of tokens as big as `contextWindowSize` and should
+  return a list of detected entities of the same length.
+- `replace` - An optional function that allows you to define your own
+  replacements for detected entities. It is passed a string with the type of
+  entity detected and it should either return a replacement for that entity type
+  or `undefined`.
 
-# Example
+## Example
 
 <Tabs>
   <TabItem label="Chat Model (eg ChatGPT)">
