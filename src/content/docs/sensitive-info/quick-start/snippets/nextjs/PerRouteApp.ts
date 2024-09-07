@@ -2,7 +2,7 @@ import arcjet, { sensitiveInfo } from "@arcjet/next";
 import { NextResponse } from "next/server";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   rules: [
     // This allows all sensitive entities other than email addresses and those containing a dash character.
     sensitiveInfo({

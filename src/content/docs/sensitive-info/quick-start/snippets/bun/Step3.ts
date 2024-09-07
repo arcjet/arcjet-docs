@@ -7,7 +7,7 @@ const aj = arcjet({
     // This allows all sensitive entities other than email addresses and those containing a dash character.
     sensitiveInfo({
       // allow: ["EMAIL"], Will block all sensitive information types other than email.
-      deny: ["EMAIL", "CONTAINS_DASH"], // Will block email and any custom detected values that "contain dash"
+      deny: ["EMAIL"], // Will block email and any custom detected values that "contain dash"
       mode: "LIVE", // Will block requests, use "DRY_RUN" to log only
     }),
   ],

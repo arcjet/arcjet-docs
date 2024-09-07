@@ -2,7 +2,7 @@ import arcjet, { sensitiveInfo } from "@arcjet/next";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   rules: [
     sensitiveInfo({
       deny: ["EMAIL"],
