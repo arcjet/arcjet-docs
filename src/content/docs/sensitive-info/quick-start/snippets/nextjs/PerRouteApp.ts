@@ -1,25 +1,14 @@
 import arcjet, { sensitiveInfo } from "@arcjet/next";
 import { NextResponse } from "next/server";
 
-// This function is called by the `sensitiveInfo` rule to perform custom detection on strings.
-function detectDash(tokens: string[]): Array<"CONTAINS_DASH" | undefined> {
-  return tokens.map((token) => {
-    if (token.includes("-")) {
-      return "CONTAINS_DASH";
-    }
-  });
-}
-
 const aj = arcjet({
   key: process.env.ARCJET_KEY,
   rules: [
     // This allows all sensitive entities other than email addresses and those containing a dash character.
     sensitiveInfo({
       // allow: ["EMAIL"], Will block all sensitive information types other than email.
-      deny: ["EMAIL", "CONTAINS_DASH"], // Will block email and any custom detected values that "contain dash"
+      deny: ["EMAIL"], // Will block email addresses
       mode: "LIVE", // Will block requests, use "DRY_RUN" to log only
-      detect: detectDash,
-      contextWindowSize: 2, // Two tokens will be provided to the custom detect function at a time.
     }),
   ],
 });
