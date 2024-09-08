@@ -36,14 +36,13 @@ type RedactOptions = {
 };
 ```
 
-- `chatModel` or `llm`: The chat model or llm that you are wrapping. (eg:
-  `OpenAIChat`)
-- `redact`: The list of entities that you wish to redact. If undefined then all
+- `entities`: The list of entities that you wish to redact. If undefined then all
   entities are redacted. Valid values are: `email`, `phone-number`,
   `ip-address`, '`credit-card`, or any string returned from `detect`.
 - `contextWindowSize` - How many tokens to pass to the `detect` function at a
   time. Setting this to a higher value allows for more context to be used when
-  determing if a token is sensitive or not.
+  determing if a token is sensitive or not. For best performance this should be
+  set to as low a number as possible to provide the context that you need.
 - `detect` - An optional function that allows you to detect custom entities. It
   will be passed a list of tokens as big as `contextWindowSize` and should
   return a list of detected entities of the same length.
