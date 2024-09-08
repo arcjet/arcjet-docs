@@ -9,6 +9,8 @@ import PerRouteTS from "/src/content/docs/sensitive-info/reference/snippets/svel
 import PerRouteJS from "/src/content/docs/sensitive-info/reference/snippets/sveltekit/PerRoute.js?raw";
 import Step3TS from "/src/content/docs/sensitive-info/quick-start/snippets/sveltekit/Step3.ts?raw";
 import Step3JS from "/src/content/docs/sensitive-info/quick-start/snippets/sveltekit/Step3.js?raw";
+import CustomDetectTS from "/src/content/docs/sensitive-info/reference/snippets/sveltekit/CustomDetect.ts?raw";
+import CustomDetectJS from "/src/content/docs/sensitive-info/reference/snippets/sveltekit/CustomDetect.js?raw";
 import FilterRoutesTS from "/src/content/docs/sensitive-info/reference/snippets/sveltekit/FilterRoutes.ts?raw";
 import FilterRoutesJS from "/src/content/docs/sensitive-info/reference/snippets/sveltekit/FilterRoutes.js?raw";
 import DecisionLogTS from "/src/content/docs/sensitive-info/reference/snippets/sveltekit/DecisionLog.ts?raw";
@@ -184,6 +186,28 @@ Create a new API route at `/src/routes/api/arcjet/+server.js`:
 />
 
 </TabItem>
+</Tabs>
+
+## Custom entity detection
+
+When configuring Arcjet Sensitive Info you can provide a custom detect function,
+this enables you to detect entities that we don't support out of the box using
+custom logic.
+
+The function will take a list of tokens and must return a list of either
+`undefined`, if the corresponding token in the input list is not sensitive, or
+the name of the entity if it does match. The number of tokens that are provided
+to the function is controlled by the `contextWindowSize` option, which defaults
+to 1. If you need additional context to perform detections then you can increase
+this value.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={CustomDetectTS} lang="ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={CustomDetectJS} lang="js" />
+  </TabItem>
 </Tabs>
 
 ## Error handling
