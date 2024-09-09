@@ -429,6 +429,20 @@ export default defineConfig({
           ],
         },
         {
+          label: "Redact",
+          collapsed: true,
+          items: [
+            {
+              label: "Quick start",
+              link: "/redact/quick-start",
+            },
+            {
+              label: "Reference",
+              link: "/redact/reference",
+            },
+          ],
+        },
+        {
           label: "Integrations",
           collapsed: true,
           items: [

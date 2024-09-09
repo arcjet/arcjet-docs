@@ -1,0 +1,60 @@
+---
+title: "Arcjet Redact quick start"
+description: "Quick start guide for redacting sensitive information locally."
+---
+
+import {
+  Tabs,
+  TabItem,
+  LinkCard,
+  CardGrid,
+  Code,
+} from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import FAQs from "/src/components/FAQs.astro";
+import QuickStartRedact from "/src/content/docs/redact/snippets/QuickStartRedact.ts?raw";
+import QuickStartUnredact from "/src/content/docs/redact/snippets/QuickStartUnredact.ts?raw";
+import Comments from "/src/components/Comments.astro";
+
+The Arcjet Redaction library makes it easy to redact sensitive information
+locally. It is a utility library independent of the main Arcjet SDK so can be
+used with or without other Arcjet rules.
+
+<WhatIsArcjet />
+
+## SDK installation
+
+Follow these steps to get started:
+
+### 1. Install Arcjet Redact
+
+In your project root, run the following command to install the Arcjet redact
+library:
+
+```bash
+npm i @arcjet/redact
+```
+
+### 2. Redact some text
+
+Now all you have to do to Redact text is to call the `redact` function. It can
+be configured to redact a number of built-in entity types, or else you can
+provide a custom detect function to redact your own types. The types that we support
+by default are: `email`, `phone-number`, `ip-address`, `credit-card`.
+
+<Code code={QuickStartRedact} lang="ts" />
+
+### 3. Unredact a response
+
+If you want to un-redact some text that contains the replacements from the redact
+function just call `unredact`, it is passed as the value in the return array.
+
+<Code code={QuickStartUnredact} lang="ts" />
+
+## Get help
+
+Need help with anything? [Email us](mailto:support@arcjet.com) or [join our
+Discord](https://discord.gg/TPra6jqZDC) to get support from our
+engineering team.
+
+<Comments />
