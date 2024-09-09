@@ -1,5 +1,5 @@
 import arcjet, { sensitiveInfo } from "@arcjet/next";
-import { NextApiRequest, NextApiResponse } from "next";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 // This function is called by the `sensitiveInfo` rule to perform custom detection on strings.
 function detectDash(tokens: string[]): Array<"CONTAINS_DASH" | undefined> {
