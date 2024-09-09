@@ -1,0 +1,174 @@
+---
+title: "Arcjet Sensitive Info for Next.js"
+description: "Quick start guide for adding protecting your Next.js app with Arcjet Sensitive Info."
+prev: false
+next: false
+---
+
+import {
+  CardGrid,
+  LinkCard,
+  Tabs,
+  TabItem,
+  Code,
+  Aside,
+} from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import FAQs from "/src/components/FAQs.astro";
+import PerRouteAppTS from "/src/content/docs/sensitive-info/quick-start/snippets/nextjs/PerRouteApp.ts?raw";
+import PerRoutePagesTS from "/src/content/docs/sensitive-info/quick-start/snippets/nextjs/PerRoutePages.ts?raw";
+import PerRouteAppJS from "/src/content/docs/sensitive-info/quick-start/snippets/nextjs/PerRouteApp.js?raw";
+import PerRoutePagesJS from "/src/content/docs/sensitive-info/quick-start/snippets/nextjs/PerRoutePages.js?raw";
+import Comments from "/src/components/Comments.astro";
+
+Arcjet Sensitive Information Detection protects against clients sending you
+sensitive information such as PII that you do not wish to handle.
+
+<WhatIsArcjet />
+
+## Quick start
+
+This guide will show you how to configure Arcjet for a Next.js app.
+
+### 1. Install SDK
+
+In your project root, run the following command to install the SDK:
+
+{/* prettier-ignore */}
+<Tabs>
+<TabItem label="npm">
+```sh
+npm i @arcjet/next
+```
+</TabItem>
+<TabItem label="pnpm">
+```sh
+pnpm add @arcjet/next
+```
+</TabItem>
+<TabItem label="yarn">
+```sh
+yarn add @arcjet/next
+```
+</TabItem>
+</Tabs>
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key. Add it to a `.env.local` file in your
+Next.js project root:
+
+```ini title=".env.local"
+ARCJET_KEY=ajkey_yourkey
+```
+
+### 3. Protect a route
+
+This example shows how to protect your app with Arcjet. You can also use
+it in middleware to protect every route, but we'll start with a single route.
+
+{/* prettier-ignore */}
+<Tabs>
+<TabItem label="TS (App)">
+<Code
+  code={PerRouteAppTS}
+  lang="ts"
+  title="/app/api/arcjet/route.ts"
+/>
+</TabItem>
+<TabItem label="TS (Pages)">
+<Code
+  code={PerRoutePagesTS}
+  lang="ts"
+  title="/pages/api/hello.ts"
+/>
+</TabItem>
+<TabItem label="JS (App)">
+<Code
+  code={PerRouteAppJS}
+  lang="js"
+  title="/app/api/arcjet/route.js"
+/>
+</TabItem>
+<TabItem label="JS (Pages)">
+<Code
+  code={PerRoutePagesJS}
+  lang="js"
+  title="/pages/api/hello.ts"
+/>
+</TabItem>
+</Tabs>
+
+### 4. Start app
+
+Start your app and load `http://localhost:3000`. Refresh the page and you will
+see the requests showing up in the [Arcjet dashboard](https://app.arcjet.com).
+
+### 5. Test sending personal info
+
+To see Arcjet Sensitive Information detection in action, try making a request
+with a blocked entity in the body of the request. For example if you have configured
+Arcjet to block requests containing email addresses then try and send an email address.
+
+```sh
+curl -v http://localhost:3000 --data "My email address is test@example.com"
+```
+
+You should see this in your logs
+
+```text
+Rule Result ArcjetRuleResult {
+  ruleId: '',
+  ttl: 0,
+  state: 'RUN',
+  conclusion: 'DENY',
+  reason: ArcjetSensitiveInfoReason {
+    type: 'SENSITIVE_INFO',
+    denied: [ { start: 5, end: 21, identifiedType: 'EMAIL' } ],
+    allowed: []
+  }
+},
+Conclusion ALLOW
+```
+
+The final conclusion is `ALLOW` even though the rule result conclusion is
+`DENY`. This is because the rule is in dry run mode. Switch it to `LIVE` mode to
+actually block the request.
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can customize bot protection, rate
+limiting for your API and minimize fraudulent registrations with the signup form
+protection.
+
+<CardGrid>
+  <LinkCard
+    title="Arcjet Sensitive Info reference"
+    href="/sensitive-info/reference/nextjs"
+    description="Full details about Sensitive Info."
+  />
+  <LinkCard
+    title="SDK reference"
+    href="/reference/nextjs"
+    description="Next.js SDK reference guide."
+  />
+  <LinkCard
+    title="Testing"
+    href="/testing"
+    description="Write tests for your rules."
+  />
+</CardGrid>
+
+## Get help
+
+Need help with anything? [Email us](mailto:support@arcjet.com) or [join our
+Discord](https://discord.gg/TPra6jqZDC) to get support from our
+engineering team.
+
+<Comments />

@@ -1,0 +1,141 @@
+---
+title: "Arcjet Sensitive Info for Bun"
+description: "Quick start guide for adding protecting your Bun app with Arcjet Sensitive Information."
+prev: false
+next: false
+---
+
+import {
+  CardGrid,
+  LinkCard,
+  Tabs,
+  TabItem,
+  Code,
+  Aside,
+} from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import FAQs from "/src/components/FAQs.astro";
+import Step3TS from "/src/content/docs/sensitive-info/quick-start/snippets/bun/Step3.ts?raw";
+import Step3JS from "/src/content/docs/sensitive-info/quick-start/snippets/bun/Step3.js?raw";
+import Comments from "/src/components/Comments.astro";
+
+Arcjet Sensitive Information Detection protects against clients sending you
+sensitive information such as PII that you do not wish to handle.
+
+<WhatIsArcjet />
+
+## Quick start
+
+This guide will show you how to configure Arcjet for a Bun app.
+
+### 1. Install SDK
+
+In your project root, run the following command to install the SDK:
+
+{/* prettier-ignore */}
+```sh
+bun add @arcjet/bun
+```
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key. Add it to a `.env.local` file in your
+Bun project root.
+
+Arcjet only accept non-local IP addresses with a fallback to 127.0.0.1 in development mode, and since Bun
+doesn't set `NODE_ENV` for you like Node.js does, you also need to set
+`ARCJET_ENV` in your environment file.
+
+```ini title=".env.local"
+# Run Arcjet in development mode because Bun.sh doesn't explicitly
+# set an environment variable like Node.js does
+ARCJET_ENV=development
+ARCJET_KEY=ajkey_yourkey
+```
+
+### 3. Protect a route
+
+This example shows how to protect your app with Arcjet Sensitive Info.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={Step3TS} lang="ts" title="/index.ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={Step3JS} lang="js" title="/src/index.js" />
+  </TabItem>
+</Tabs>
+
+### 4. Start app
+
+Start your app and load `http://localhost:3000`. Refresh the page and you will
+see the requests showing up in the [Arcjet dashboard](https://app.arcjet.com).
+Your entire application is protected.
+
+### 5. Test sending personal info
+
+To see Arcjet Sensitive Information detection in action, try making a request
+with a blocked entity in the body of the request. For example if you have configured
+Arcjet to block requests containing email addresses then try and send an email address.
+
+The default response for a request containing unexpected sensitive information
+is a 400:
+
+```sh
+curl -v http://localhost:3000 --data "My email address is test@example.com"
+...
+> POST / HTTP/2
+> Host: localhost:8000
+> User-Agent: curl/8.4.0
+> Content-Type: text/plain
+> Accept: */*
+>
+> My email address is "test@example.com"
+>
+< HTTP/2 400
+< content-type: application/json; charset=utf-8
+< date: Tue, 09 Jan 2024 13:43:04 GMT
+< vary: Accept-Encoding
+< content-length: 72
+<
+* Connection #0 to host localhost left intact
+{"message":"Forbidden"}%
+```
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can customize bot protection, rate
+limiting for your API and minimize fraudulent registrations with the signup form
+protection.
+
+<CardGrid>
+  <LinkCard
+    title="Arcjet Sensitive Info reference"
+    href="/sensitive-info/reference/bun"
+    description="Full details about Arcjet Sensitive Information."
+  />
+  <LinkCard
+    title="SDK reference"
+    href="/reference/bun"
+    description="Bun SDK reference guide."
+  />
+  <LinkCard
+    title="Testing"
+    href="/testing"
+    description="Write tests for your rules."
+  />
+</CardGrid>
+
+## Get help
+
+Need help with anything? [Email us](mailto:support@arcjet.com) or [join our
+Discord](https://discord.gg/TPra6jqZDC) to get support from our
+engineering team.
+
+<Comments />
