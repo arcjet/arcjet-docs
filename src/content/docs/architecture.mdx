@@ -60,7 +60,7 @@ you configured, then makes a decision to allow the request. The SDK returns the
 result and your application code continues to execute as normally. An
 asynchronous report is made to the Arcjet API for post-request analysis.
 
-!["Diagram - Local analysis"](../../assets/mermaid/architecture-local-analysis.png)
+!["Diagram - Local analysis"](/src/assets/mermaid/architecture-local-analysis.png)
 
 ### Arcjet Cloud API
 
@@ -89,7 +89,7 @@ request context through to the Arcjet API which checks the rate limit for that
 client and then returns an allow decision. The SDK returns the details and your
 application code continues to execute as normally.
 
-!["Diagram - Rate limit rule (allow)"](../../assets/mermaid/architecture-rl-allow.png)
+!["Diagram - Rate limit rule (allow)"](/src/assets/mermaid/architecture-rl-allow.png)
 
 #### Example: Rate limit rule (deny)
 
@@ -101,12 +101,12 @@ client. The decision is also cached locally by the SDK so that subsequent
 requests which match the rate limit rule do not need to rely on a call to the
 Arcjet API.
 
-!["Diagram - Rate limit rule (cached)"](../../assets/mermaid/architecture-rl-cached.png)
+!["Diagram - Rate limit rule (cached)"](/src/assets/mermaid/architecture-rl-cached.png)
 
 This means that if the same client makes another request, the SDK will read from
 the local cache and return the response immediately:
 
-!["Diagram - Rate limit rule (deny)"](../../assets/mermaid/architecture-rl-deny.png)
+!["Diagram - Rate limit rule (deny)"](/src/assets/mermaid/architecture-rl-deny.png)
 
 #### When the API is required
 
@@ -249,7 +249,7 @@ protecting it from attacks.
 In the example below, the results of the post-request analysis from previous
 requests are used to inform the decision for the current request.
 
-!["Diagram - Post request analysis"](../../assets/mermaid/architecture-post-request.png)
+!["Diagram - Post request analysis"](/src/assets/mermaid/architecture-post-request.png)
 
 ## Credits
 
