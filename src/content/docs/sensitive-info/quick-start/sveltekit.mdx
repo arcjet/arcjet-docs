@@ -1,0 +1,161 @@
+---
+title: "Arcjet Sensitive Info for SvelteKit"
+description: "Quick start guide for adding protecting your SvelteKit app with Arcjet Sensitive Info."
+prev: false
+next: false
+---
+
+import {
+  CardGrid,
+  LinkCard,
+  Tabs,
+  TabItem,
+  Code,
+  Aside,
+} from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import FAQs from "/src/components/FAQs.astro";
+import Step3TS from "/src/content/docs/sensitive-info/quick-start/snippets/sveltekit/Step3.ts?raw";
+import Step3JS from "/src/content/docs/sensitive-info/quick-start/snippets/sveltekit/Step3.js?raw";
+import Comments from "/src/components/Comments.astro";
+
+Arcjet Sensitive Information Detection protects against clients sending you
+sensitive information such as PII that you do not wish to handle.
+
+<WhatIsArcjet />
+
+## Quick start
+
+This guide will show you how to configure Arcjet for a SvelteKit app.
+
+### 1. Install SDK
+
+In your project root, run the following command to install the SDK:
+
+{/* prettier-ignore */}
+<Tabs>
+<TabItem label="npm">
+```sh
+npm i @arcjet/sveltekit
+```
+</TabItem>
+<TabItem label="pnpm">
+```sh
+pnpm add @arcjet/sveltekit
+```
+</TabItem>
+<TabItem label="yarn">
+```sh
+yarn add @arcjet/sveltekit
+```
+</TabItem>
+</Tabs>
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key. Add it to a `.env.local` file in your
+SvelteKit project root:
+
+```ini title=".env.local"
+ARCJET_KEY=ajkey_yourkey
+```
+
+### 3. Protect every route
+
+If you wish to enable Arcjet across your entire SvelteKit application, you
+can install the SDK as a hook. [SvelteKit
+hooks](https://kit.svelte.dev/docs/hooks) run before every request, allowing
+Arcjet to protect your entire application before your code runs.
+
+<Tabs>
+<TabItem label="TS">
+
+Create a file called `hooks.server.ts` in your project (inside `src`):
+
+<Code code={Step3TS} lang="ts" title="/src/hooks.server.ts" />
+</TabItem>
+<TabItem label="JS">
+
+Create a file called `hooks.server.js` in your project (inside `src`):
+
+<Code code={Step3JS} lang="js" title="/src/hooks.server.js" />
+</TabItem>
+</Tabs>
+
+### 4. Start app
+
+Start your app and load `http://localhost:5173`. Refresh the page and you will
+see the requests showing up in the [Arcjet dashboard](https://app.arcjet.com).
+Your entire application is protected.
+
+### 5. Test sending personal info
+
+To see Arcjet Sensitive Information detection in action, try making a request
+with a blocked entity in the body of the request. For example if you have configured
+Arcjet to block requests containing email addresses then try and send an email address.
+
+```sh
+curl -v http://localhost:5173 --data "My email address is test@example.com"
+```
+
+The default response for a request containing unexpected sensitive information is a 400:
+
+```sh
+curl -v http://localhost:5173 --data "My email address is test@example.com"
+...
+> POST / HTTP/2
+> Host: localhost:5173
+> User-Agent: curl/8.4.0
+> Content-Type: text/plain
+> Accept: */*
+>
+> My email address is "test@example.com"
+>
+< HTTP/2 400
+< content-type: application/json; charset=utf-8
+< date: Tue, 09 Jan 2024 13:43:04 GMT
+< etag: "7a3v9j8es220"
+< vary: Accept-Encoding
+< content-length: 72
+<
+* Connection #0 to host localhost left intact
+{"message":"Forbidden"}%
+```
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can customize bot protection, rate
+limiting for your API and minimize fraudulent registrations with the signup form
+protection.
+
+<CardGrid>
+  <LinkCard
+    title="Arcjet Sensitive Info reference"
+    href="/sensitive-info/reference/sveltekit"
+    description="Full details about Arcjet sensitive information detection."
+  />
+  <LinkCard
+    title="SDK reference"
+    href="/reference/sveltekit"
+    description="SvelteKit SDK reference guide."
+  />
+  <LinkCard
+    title="Testing"
+    href="/testing"
+    description="Write tests for your rules."
+  />
+</CardGrid>
+
+## Get help
+
+Need help with anything? [Email us](mailto:support@arcjet.com) or [join our
+Discord](https://discord.gg/TPra6jqZDC) to get support from our
+engineering team.
+
+<Comments />
