@@ -7,7 +7,7 @@ const openai = new ChatOpenAI({
   model: "gpt-3.5-turbo-0125",
 });
 
-const arcjetRedactOptions = {
+const arcjetRedact = new ArcjetRedact({
   // Specify a LLM that Arcjet Redact will call once it has redacted the input.
   chatModel: openai,
 
@@ -33,9 +33,8 @@ const arcjetRedactOptions = {
   replace: (identifiedType: string) => {
     return identifiedType === "email" ? "redacted@example.com" : undefined;
   },
-};
+});
 
-const arcjetRedact = new ArcjetRedact(arcjetRedactOptions);
 const response = await arcjetRedact.invoke(
   "My email address is test@example.com, here is some-sensitive-info",
 );

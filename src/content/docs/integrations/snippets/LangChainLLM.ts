@@ -7,13 +7,13 @@ const openai = new OpenAI({
   openAIApiKey: process.env.OPENAI_API_KEY,
 });
 
-const arcjetRedactOptions = {
+const arcjetRedact = new ArcjetRedact({
   // Specify a LLM that Arcjet Redact will call once it has redacted the input.
   llm: openai,
 
   // Specify the list of entities that should be redacted.
   // If this isn't specified then all entities will be redacted.
-  entities: ["email", "phone-number", "ip-address", "credit-card"],
+  entities: ["email", "phone-number", "ip-address", "credit-card-number"],
 
   // You can provide a custom detect function to detect entities that we don't support yet.
   // It takes a list of tokens and you return a list of identified types or undefined.
@@ -33,9 +33,8 @@ const arcjetRedactOptions = {
   replace: (identifiedType: string) => {
     return identifiedType === "email" ? "redacted@example.com" : undefined;
   },
-};
+});
 
-const arcjetRedact = new ArcjetRedact(arcjetRedactOptions);
 const response = await arcjetRedact.invoke(
   "My email address is test@example.com, here is some-sensitive-info",
 );
