@@ -1,0 +1,95 @@
+---
+title: "Arcjet / LangChain Integration"
+description: "How to Redact sensitive information before it is sent to a third-party AI LLM or Chat Model"
+prev: false
+next: false
+---
+
+import { Aside, Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import LangChainLLM from "/src/content/docs/integrations/snippets/LangChainLLM.ts?raw";
+import LangChainChatModel from "/src/content/docs/integrations/snippets/LangChainChatModel.ts?raw";
+
+Arcjet and [LangChain](https://www.langchain.com/) work together to redact
+sensitive information from prompts locally before it is sent to a third-party
+LLM or Chat Model.
+
+<WhatIsArcjet />
+
+The Arcjet LangChain integration wraps your
+[LLM](https://js.langchain.com/v0.2/docs/concepts/#llms) and [Chat
+Model](https://js.langchain.com/v0.2/docs/concepts/#chat-models) calls to
+perform redaction and un-redaction on sensitive information that is being sent
+to and from third party AI services.
+
+This currently works with the [LangChain JS
+SDK](https://js.langchain.com/v0.2/docs/introduction/).
+
+## Installation
+
+To use Arcjet with LangChain you need to install both the `@arcjet/redact` and
+`@langchain/community` packages.
+
+```bash
+npm i @arcjet/redact @langchain/community
+```
+
+### Requirements
+
+- `@langchain/community` 0.2.33 or later
+
+## Configuration
+
+The configuration definition is:
+
+<Tabs>
+  <TabItem label="Chat Model (eg ChatGPT)">
+    ```ts
+    type RedactOptions = {
+      chatModel: ChatModel,
+      entities?: Array<SensitiveInfoType>;
+      contextWindowSize?: number;
+      detect?: (tokens: string[]) -> Array<SensitiveInfoType | undefined>;
+      replace?: (detectedEntity: SensitiveInfoType) -> string | undefined;
+    };
+    ```
+  </TabItem>
+  <TabItem label="LLM (eg GPT4 API)">
+    ```ts
+    type RedactOptions = {
+      llm: LLM,
+      entities?: Array<SensitiveInfoType>;
+      contextWindowSize?: number;
+      detect?: (tokens: string[]) -> Array<SensitiveInfoType | undefined>;
+      replace?: (detectedEntity: SensitiveInfoType) -> string | undefined;
+    };
+    ```
+  </TabItem>
+</Tabs>
+
+- `chatModel` or `llm`: The chat model or llm that you are wrapping. (eg:
+  `OpenAIChat`)
+- `entities`: The list of entities that you wish to redact. If undefined then
+  all entities are redacted. Valid values are: `email`, `phone-number`,
+  `ip-address`, `credit-card`, or any string returned from `detect`.
+- `contextWindowSize` - How many tokens to pass to the `detect` function at a
+  time. Setting this to a higher value allows for more context to be used when
+  determing if a token is sensitive or not.
+- `detect` - An optional function that allows you to detect custom entities. It
+  will be passed a list of tokens as big as `contextWindowSize` and should
+  return a list of detected entities of the same length.
+- `replace` - An optional function that allows you to define your own
+  replacements for detected entities. It is passed a string with the type of
+  entity detected and it should either return a replacement for that entity type
+  or `undefined`.
+
+## Example
+
+<Tabs>
+  <TabItem label="Chat Model (eg ChatGPT)">
+    <Code code={LangChainChatModel} lang="ts" />
+  </TabItem>
+  <TabItem label="LLM (eg GPT4 API)">
+    <Code code={LangChainLLM} lang="ts" />
+  </TabItem>
+</Tabs>
