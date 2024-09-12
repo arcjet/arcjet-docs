@@ -521,6 +521,10 @@ export default defineConfig({
               link: "https://fly.io/docs/reference/arcjet/",
             },
             {
+              label: "LangChain",
+              link: "/integrations/langchain",
+            },
+            {
               label: "NextAuth",
               link: "/integrations/nextauth",
             },
