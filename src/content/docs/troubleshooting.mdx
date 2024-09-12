@@ -217,6 +217,26 @@ Alternatively, you can rename the files where you are using the Arcjet SDK to us
 the `.mjs` or `.mts` extension. This will tell Node.js to treat the file as an
 ESM file.
 
+### Error: Log is required / Error: Client is required
+
+You may see an error like this:
+
+```text
+Error: Log is required
+    at arcjet (/node_modules/arcjet/index.js:520:15)
+...
+Error: Client is required
+    at arcjet (/node_modules/arcjet/index.js:526:15)
+```
+
+This error usually means that you are trying to use the base `arcjet` package
+rather than an adapter. You probably meant to use the `@arcjet/node` package
+instead.
+
+The `arcjet` package is a low-level package that is used to build adapters for
+different [frameworks and runtimes we support](/get-started). Unless you are
+doing something custom, we recommend using one of the adapters.
+
 ## Get help
 
 We provide [technical support](/support) for all Arcjet users so if you need
