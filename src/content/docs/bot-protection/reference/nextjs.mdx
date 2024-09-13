@@ -33,6 +33,10 @@ import ErrorsAppTS from "/src/snippets/bot-protection/reference/nextjs/ErrorsApp
 import ErrorsPagesTS from "/src/snippets/bot-protection/reference/nextjs/ErrorsPages.ts?raw";
 import ErrorsAppJS from "/src/snippets/bot-protection/reference/nextjs/ErrorsApp.js?raw";
 import ErrorsPagesJS from "/src/snippets/bot-protection/reference/nextjs/ErrorsPages.js?raw";
+import FilteringAppTS from "/src/snippets/bot-protection/reference/nextjs/FilteringApp.ts?raw";
+import FilteringPagesTS from "/src/snippets/bot-protection/reference/nextjs/FilteringPages.ts?raw";
+import FilteringAppJS from "/src/snippets/bot-protection/reference/nextjs/FilteringApp.js?raw";
+import FilteringPagesJS from "/src/snippets/bot-protection/reference/nextjs/FilteringPages.js?raw";
 import ProtectPageMiddlewareTS from "/src/snippets/bot-protection/reference/nextjs/ProtectPageMiddleware.ts?raw";
 import ProtectPagePagesTS from "/src/snippets/bot-protection/reference/nextjs/ProtectPagePages.tsx?raw";
 import ProtectPageMiddlewareJS from "/src/snippets/bot-protection/reference/nextjs/ProtectPageMiddleware.js?raw";
@@ -64,14 +68,14 @@ You can use only one of the following configuration definitions:
 ```ts
 type BotOptionsAllow = {
   mode?: "LIVE" | "DRY_RUN";
-  allow: ArcjetWellKnownBot[];
+  allow: Array<ArcjetWellKnownBot | ArcjetBotCategory>;
 };
 ```
 
 ```ts
 type BotOptionsDeny = {
   mode?: "LIVE" | "DRY_RUN";
-  deny: ArcjetWellKnownBot[];
+  deny: Array<ArcjetWellKnownBot | ArcjetBotCategory>;
 };
 ```
 
@@ -91,7 +95,8 @@ some bots to access your system, such as bots for search indexing or API
 access from the command line.
 
 This behavior is configured with an `allow` list from our [full list of
-bots](https://arcjet.com/bot-list).
+bots](https://arcjet.com/bot-list) and/or [bot
+categories](/bot-protection/identifying-bots#bot-categories).
 
 {/* prettier-ignore */}
 <Tabs>
@@ -131,8 +136,9 @@ Some applications may only want to block a small subset of bots, while allowing
 the majority continued access. This may be due to many reasons, such as
 misconfigured or high-traffic bots.
 
-This behavior is configured with an `deny` list from our [full list of
-bots](https://arcjet.com/bot-list).
+This behavior is configured with a `deny` list from our [full list of
+bots](https://arcjet.com/bot-list) and/or [bot
+categories](/bot-protection/identifying-bots#bot-categories).
 
 {/* prettier-ignore */}
 <Tabs>
@@ -340,9 +346,10 @@ Create a new API route at `/pages/api/arcjet.js`:
 ### Identified bots
 
 The decision also contains all of the [identified
-bots](/bot-protection/identifying-bots) detected from the request. A request may
-be identified as zero, one, or more bots—all of which will be available on the
-`decision.allowed` and `decision.denied` properties.
+bots and matched categories](/bot-protection/identifying-bots) detected from the
+request. A request may be identified as zero, one, or more bots/categories—all
+of which will be available on the `decision.allowed` and `decision.denied`
+properties.
 
 <Tabs>
 <TabItem label="TS (App)">
@@ -411,6 +418,27 @@ allow or deny the request. Our recommendation is to block requests without
 <Code code={ErrorsPagesJS} title="/pages/api/hello.js" lang="js" />
 
 </TabItem>
+</Tabs>
+
+## Filtering categories
+
+All categories are also provided as enumerations, which allows for programmatic
+access. For example, you may want to allow most of `CATEGORY:GOOGLE` except
+their "advertising quality" bot.
+
+<Tabs>
+  <TabItem label="TS (App)">
+    <Code code={FilteringAppTS} title="/app/api/hello/route.ts" lang="ts" />
+  </TabItem>
+  <TabItem label="TS (Pages)">
+    <Code code={FilteringPagesTS} title="/pages/api/hello.ts" lang="ts" />
+  </TabItem>
+  <TabItem label="JS (App)">
+    <Code code={FilteringAppJS} title="/app/api/hello/route.js" lang="js" />
+  </TabItem>
+  <TabItem label="JS (Pages)">
+    <Code code={FilteringPagesJS} title="/pages/api/hello.js" lang="js" />
+  </TabItem>
 </Tabs>
 
 ## Testing

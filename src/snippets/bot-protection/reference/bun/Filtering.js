@@ -1,19 +1,18 @@
-import arcjet, { detectBot } from "@arcjet/bun";
+import arcjet, { botCategories, detectBot } from "@arcjet/bun";
 import { env } from "bun";
 
 const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
   rules: [
     detectBot({
       mode: "LIVE",
       // configured with a list of bots to allow from
       // https://arcjet.com/bot-list - all other detected bots will be blocked
       allow: [
-        // Google has multiple crawlers, each with a different user-agent, so we
-        // allow the entire Google category
-        "CATEGORY:GOOGLE",
-        "CURL", // allows the default user-agent of the `curl` tool
-        "DISCORD_CRAWLER", // allows Discordbot
+        // filter a category to remove individual bots from our provided lists
+        ...botCategories["CATEGORY:GOOGLE"].filter(
+          (bot) => bot !== "GOOGLE_ADSBOT" && bot !== "GOOGLE_ADSBOT_MOBILE",
+        ),
       ],
     }),
   ],

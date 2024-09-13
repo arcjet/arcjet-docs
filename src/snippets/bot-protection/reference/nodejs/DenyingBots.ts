@@ -8,9 +8,8 @@ const aj = arcjet({
       // configured with a list of bots to deny from
       // https://arcjet.com/bot-list - all other detected bots will be allowed
       deny: [
-        "PERPLEXITY_CRAWLER", // denies PerplexityBot
+        "CATEGORY:AI", // denies all detected AI and LLM scrapers
         "CURL", // denies the default user-agent of the `curl` tool
-        "ANTHROPIC_CRAWLER", // denies Claudebot
       ],
     }),
   ],

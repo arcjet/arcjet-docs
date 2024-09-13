@@ -1,5 +1,5 @@
 import { env } from "$env/dynamic/private";
-import arcjet, { detectBot } from "@arcjet/sveltekit";
+import arcjet, { botCategories, detectBot } from "@arcjet/sveltekit";
 import { error } from "@sveltejs/kit";
 
 const aj = arcjet({
@@ -7,11 +7,13 @@ const aj = arcjet({
   rules: [
     detectBot({
       mode: "LIVE",
-      // configured with a list of bots to deny from
-      // https://arcjet.com/bot-list - all other detected bots will be allowed
-      deny: [
-        "CATEGORY:AI", // denies all detected AI and LLM scrapers
-        "CURL", // denies the default user-agent of the `curl` tool
+      // configured with a list of bots to allow from
+      // https://arcjet.com/bot-list - all other detected bots will be blocked
+      allow: [
+        // filter a category to remove individual bots from our provided lists
+        ...botCategories["CATEGORY:GOOGLE"].filter(
+          (bot) => bot !== "GOOGLE_ADSBOT" && bot !== "GOOGLE_ADSBOT_MOBILE",
+        ),
       ],
     }),
   ],
