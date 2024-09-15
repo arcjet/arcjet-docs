@@ -11,6 +11,8 @@ import CustomDetectTS from "/src/snippets/sensitive-info/reference/nodejs/Custom
 import CustomDetectJS from "/src/snippets/sensitive-info/reference/nodejs/CustomDetect.js?raw";
 import DecisionLogTS from "/src/snippets/sensitive-info/reference/nodejs/DecisionLog.ts?raw";
 import DecisionLogJS from "/src/snippets/sensitive-info/reference/nodejs/DecisionLog.js?raw";
+import AccessBodyTS from "/src/snippets/sensitive-info/reference/nodejs/AccessBody.ts?raw";
+import AccessBodyJS from "/src/snippets/sensitive-info/reference/nodejs/AccessBody.js?raw";
 import ErrorsTS from "/src/snippets/sensitive-info/reference/nodejs/Errors.ts?raw";
 import ErrorsJS from "/src/snippets/sensitive-info/reference/nodejs/Errors.js?raw";
 import Comments from "/src/components/Comments.astro";
@@ -128,6 +130,23 @@ this value.
   </TabItem>
   <TabItem label="JS">
     <Code code={CustomDetectJS} lang="js" />
+  </TabItem>
+</Tabs>
+
+## Accessing the body
+
+The Arcjet Sensitive Info rule accesses the request body, so if you also need to
+access the body in your application code, you should reference it before calling
+`protect`. Otherwise, you may see an error `Body already read`.
+
+For example, using Express:
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={AccessBodyTS} lang="ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={AccessBodyJS} lang="js" />
   </TabItem>
 </Tabs>
 

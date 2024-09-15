@@ -8,9 +8,9 @@ const aj = arcjet({
   rules: [
     // This allows all sensitive entities other than email addresses and those containing a dash character.
     sensitiveInfo({
+      mode: "LIVE", // Will block requests, use "DRY_RUN" to log only
       // allow: ["EMAIL"], Will block all sensitive information types other than email.
       deny: ["EMAIL"], // Will block email addresses
-      mode: "LIVE", // Will block requests, use "DRY_RUN" to log only
     }),
   ],
 });
