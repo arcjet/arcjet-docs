@@ -7,9 +7,9 @@ const aj = arcjet({
   rules: [
     detectBot({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-      // configured with a list of bots to allow from
-      // https://arcjet.com/bot-list
-      allow: [], // "allow none" will block all detected bots
+      // Block all bots except search engine crawlers. See the full list of bots
+      // for other options: https://arcjet.com/bot-list
+      allow: ["CATEGORY:SEARCH_ENGINE"],
     }),
   ],
 });

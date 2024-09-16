@@ -44,4 +44,44 @@ updates will be included in the next SDK release. Since bot detection is handled
 within the Arcjet WebAssembly module bundled with the SDK, new patterns must be
 compiled into the module as part of the release process.
 
+## Bot categories
+
+In addition to identifying individual bots, we also group bots into various
+categories. You can leverage these categories for easier configuration of your
+allow or deny lists.
+
+Currently, we provide the following categories. You can see which bots are in
+each category from the [bot list](https://arcjet.com/bot-list):
+
+- `CATEGORY:ACADEMIC`: Scrape data for research purposes
+- `CATEGORY:ADVERTISING`: Scrape data for advertising and marketing purposes
+- `CATEGORY:AI`: Scrape data for AI and LLM purposes
+- `CATEGORY:AMAZON`: Scrape data for Amazon products and services
+- `CATEGORY:ARCHIVE`: Scrape data for archival purposes
+- `CATEGORY:FEEDFETCHER`: Request data for RSS and other feeds
+- `CATEGORY:GOOGLE`: Scrape data for Google products and services
+- `CATEGORY:META`: Scrape data for Meta/Facebook products and services
+- `CATEGORY:MICROSOFT`: Scrape data for Microsoft products and services
+- `CATEGORY:MONITOR`: Interact for monitoring purposes
+- `CATEGORY:OPTIMIZER`: Interact for optimization purposes
+- `CATEGORY:PREVIEW`: Request data for image and URL previews
+- `CATEGORY:PROGRAMMATIC`: Interact via programming language libraries
+- `CATEGORY:SEARCH_ENGINE`: Index data for search engines
+- `CATEGORY:SLACK`: Scrape data for Slack products and services
+- `CATEGORY:SOCIAL`: Scrape data for social media products and services
+- `CATEGORY:TOOL`: Interact via command line and GUI tools
+- `CATEGORY:UNKNOWN`: Undetermined purposes
+- `CATEGORY:VERCEL`: Scrape data for Vercel products and services
+- `CATEGORY:YAHOO`: Scrape data for Yahoo products and services
+
+We're continuously evaluating bots to decide if things should be reclassified.
+If we determine enough bots exist for a new category, we'll consider adding new
+ones. Please open an issue on our
+[arcjet/well-known-bots](https://github.com/arcjet/well-known-bots) repository
+if you need a specific category.
+
+Only configured categories are checked for performance reasons. Each detected
+bot must be compared to a category, so the worst case performance is
+`count(detectedBot) * count(configuredCategories)`.
+
 <Comments />

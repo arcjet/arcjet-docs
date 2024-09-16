@@ -1,5 +1,5 @@
 import { env } from "$env/dynamic/private";
-import arcjet, { detectBot } from "@arcjet/sveltekit";
+import arcjet, { botCategories, detectBot } from "@arcjet/sveltekit";
 import { error, type RequestEvent } from "@sveltejs/kit";
 
 const aj = arcjet({
@@ -7,7 +7,14 @@ const aj = arcjet({
   rules: [
     detectBot({
       mode: "LIVE",
-      allow: [], // "allow none" will block all detected bots
+      // configured with a list of bots to allow from
+      // https://arcjet.com/bot-list - all other detected bots will be blocked
+      allow: [
+        // filter a category to remove individual bots from our provided lists
+        ...botCategories["CATEGORY:GOOGLE"].filter(
+          (bot) => bot !== "GOOGLE_ADSBOT" && bot !== "GOOGLE_ADSBOT_MOBILE",
+        ),
+      ],
     }),
   ],
 });
@@ -20,11 +27,6 @@ export async function handle({
   resolve: (event: RequestEvent) => Response | Promise<Response>;
 }): Promise<Response> {
   const decision = await aj.protect(event);
-
-  if (decision.reason.isBot()) {
-    console.log("detected + allowed bots", decision.reason.allowed);
-    console.log("detected + denied bots", decision.reason.denied);
-  }
 
   if (decision.isDenied()) {
     return error(403, "You are a bot!");

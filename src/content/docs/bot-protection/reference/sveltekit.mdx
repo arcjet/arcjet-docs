@@ -19,6 +19,8 @@ import IdentifiedBotsTS from "/src/snippets/bot-protection/reference/sveltekit/I
 import IdentifiedBotsJS from "/src/snippets/bot-protection/reference/sveltekit/IdentifiedBots.js?raw";
 import ErrorsTS from "/src/snippets/bot-protection/reference/sveltekit/Errors.ts?raw";
 import ErrorsJS from "/src/snippets/bot-protection/reference/sveltekit/Errors.js?raw";
+import FilteringTS from "/src/snippets/bot-protection/reference/sveltekit/Filtering.ts?raw";
+import FilteringJS from "/src/snippets/bot-protection/reference/sveltekit/Filtering.js?raw";
 import Comments from "/src/components/Comments.astro";
 
 Arcjet bot detection allows you to manage traffic by automated clients and bots.
@@ -36,14 +38,14 @@ You can use only one of the following configuration definitions:
 ```ts
 type BotOptionsAllow = {
   mode?: "LIVE" | "DRY_RUN";
-  allow: ArcjetWellKnownBot[];
+  allow: Array<ArcjetWellKnownBot | ArcjetBotCategory>;
 };
 ```
 
 ```ts
 type BotOptionsDeny = {
   mode?: "LIVE" | "DRY_RUN";
-  deny: ArcjetWellKnownBot[];
+  deny: Array<ArcjetWellKnownBot | ArcjetBotCategory>;
 };
 ```
 
@@ -63,7 +65,8 @@ some bots to access your system, such as bots for search indexing or API
 access from the command line.
 
 This behavior is configured with an `allow` list from our [full list of
-bots](https://arcjet.com/bot-list).
+bots](https://arcjet.com/bot-list) and/or [bot
+categories](/bot-protection/identifying-bots#bot-categories).
 
 <Tabs>
   <TabItem label="TS">
@@ -80,8 +83,9 @@ Some applications may only want to block a small subset of bots, while allowing
 the majority continued access. This may be due to many reasons, such as
 misconfigured or high-traffic bots.
 
-This behavior is configured with an `deny` list from our [full list of
-bots](https://arcjet.com/bot-list).
+This behavior is configured with a `deny` list from our [full list of
+bots](https://arcjet.com/bot-list) and/or [bot
+categories](/bot-protection/identifying-bots#bot-categories).
 
 <Tabs>
   <TabItem label="TS">
@@ -216,16 +220,17 @@ This example will log the full result as well as the bot protection rule:
 ### Identified bots
 
 The decision also contains all of the [identified
-bots](/bot-protection/identifying-bots) detected from the request. A request may
-be identified as zero, one, or more bots—all of which will be available on the
-`decision.allowed` and `decision.denied` properties.
+bots and matched categories](/bot-protection/identifying-bots) detected from the
+request. A request may be identified as zero, one, or more bots/categories—all
+of which will be available on the `decision.allowed` and `decision.denied`
+properties.
 
 <Tabs>
   <TabItem label="TS">
-    <Code code={IdentifiedBotsTS} lang="ts" />
+    <Code code={IdentifiedBotsTS} lang="ts" title="/src/hooks.server.ts" />
   </TabItem>
   <TabItem label="JS">
-    <Code code={IdentifiedBotsJS} lang="js" />
+    <Code code={IdentifiedBotsJS} lang="js" title="/src/hooks.server.js" />
   </TabItem>
 </Tabs>
 
@@ -250,10 +255,25 @@ allow or deny the request. Our recommendation is to block requests without
 
 <Tabs>
   <TabItem label="TS">
-    <Code code={ErrorsTS} title="/app/api/arcjet/route.ts" lang="ts" />
+    <Code code={ErrorsTS} lang="ts" title="/src/routes/api/arcjet/+server.ts" />
   </TabItem>
   <TabItem label="JS">
-    <Code code={ErrorsJS} title="/app/api/arcjet/route.js" lang="js" />
+    <Code code={ErrorsJS} lang="js" title="/src/routes/api/arcjet/+server.js" />
+  </TabItem>
+</Tabs>
+
+## Filtering categories
+
+All categories are also provided as enumerations, which allows for programmatic
+access. For example, you may want to allow most of `CATEGORY:GOOGLE` except
+their "advertising quality" bot.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={FilteringTS} lang="ts" title="/src/hooks.server.ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={FilteringJS} lang="js" title="/src/hooks.server.js" />
   </TabItem>
 </Tabs>
 
