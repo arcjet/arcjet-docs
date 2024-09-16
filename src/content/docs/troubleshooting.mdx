@@ -237,6 +237,15 @@ The `arcjet` package is a low-level package that is used to build adapters for
 different [frameworks and runtimes we support](/get-started). Unless you are
 doing something custom, we recommend using one of the adapters.
 
+### Body already read
+
+This happens when you try to access the request body after it has already been
+processed by an Arcjet Sensitive Info rule. To fix this, you need to parse the
+body before calling `protect`.
+
+See the example in the [Accessing the
+body](/sensitive-info/reference/nodejs#accessing-the-body) section.
+
 ## Get help
 
 We provide [technical support](/support) for all Arcjet users so if you need
