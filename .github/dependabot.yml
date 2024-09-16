@@ -23,3 +23,9 @@ updates:
         patterns:
           - "arcjet"
           - "@arcjet/*"
+    ignore:
+      # Ignore Connect RPC updates until merged in arcjet-js
+      - dependency-name: "@connectrpc/connect-node"
+        versions: [">1.5.0"]
+      - dependency-name: "@connectrpc/connect-web"
+        versions: [">1.5.0"]
