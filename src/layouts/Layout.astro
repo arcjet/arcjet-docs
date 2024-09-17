@@ -1,0 +1,10 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { main as sidebar } from "/src/lib/sidebars";
+
+const { frontmatter, headings } = Astro.props;
+---
+
+<StarlightPage frontmatter={frontmatter} headings={headings} sidebar={sidebar}>
+  <slot />
+</StarlightPage>

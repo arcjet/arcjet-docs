@@ -1,0 +1,18 @@
+---
+import { getEntry } from "astro:content";
+import Layout from "/src/layouts/Layout.astro";
+
+const { slug } = Astro.params;
+if (slug === undefined) throw new Error("Slug is required");
+const entry = await getEntry("docs", slug);
+if (entry === undefined) return Astro.redirect("/404");
+
+const {data: frontmatter} = entry;
+const { headings, Content } = await entry.render();
+
+export const prerender = false;
+---
+
+<Layout frontmatter={frontmatter} headings={headings}>
+  <Content />
+</Layout>
