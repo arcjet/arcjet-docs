@@ -1,6 +1,6 @@
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
-import vercel from "@astrojs/vercel/serverless";
+import vercelStatic from "@astrojs/vercel/static";
 import robotsTxt from "astro-robots-txt";
 import { defineConfig } from "astro/config";
 import starlightLinksValidator from "starlight-links-validator";
@@ -8,8 +8,8 @@ import starlightLinksValidator from "starlight-links-validator";
 // https://astro.build/config
 export default defineConfig({
   site: "https://docs.arcjet.com",
-  output: "hybrid",
-  adapter: vercel(),
+  output: "static",
+  adapter: vercelStatic(),
   // This is a fix for https://github.com/withastro/astro/issues/8297
   vite: {
     ssr: {
