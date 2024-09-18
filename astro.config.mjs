@@ -54,6 +54,9 @@ export default defineConfig({
         "./src/styles/vars.scss",
       ],
       plugins: [starlightLinksValidator()],
+      components: {
+        PageSidebar: "./src/components/overrides/PageSidebar.astro",
+      },
       sidebar: [
         {
           label: "Get started",

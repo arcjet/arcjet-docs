@@ -1,0 +1,10 @@
+---
+import FrameworkSwitcher from "@/components/FrameworkSwitcher";
+import Default from "@astrojs/starlight/components/PageSidebar.astro";
+import type { Props } from "@astrojs/starlight/props";
+---
+
+<FrameworkSwitcher client:load />
+<Default {...Astro.props}>
+  <slot />
+</Default>
