@@ -13,7 +13,7 @@ import {
   type PropsWithChildren,
 } from "react";
 
-// Type guard util for interaction input
+// Type guard utility for interaction input
 const isFrameworkKey = (
   frameworks: typeof availableFrameworks,
   key: string,
@@ -38,8 +38,10 @@ const FrameworkSwitcher = forwardRef(
       if (val == selected) return;
       setTypedStorage<Prefs>("selected-framework", val as FrameworkKey);
       setSelected(val as FrameworkKey);
+      window.dispatchEvent(new Event("change:selected-framework"));
     };
 
+    // Sync with local storage value if present
     useEffect(() => {
       const storedFramework = getTypedStorage<Prefs>("selected-framework");
       if (storedFramework) {
@@ -52,6 +54,8 @@ const FrameworkSwitcher = forwardRef(
         setSelected(storedFramework as FrameworkKey);
       }
     }, []);
+
+    // TODO: Replace with Arcjet's select component.
 
     return (
       <select ref={ref} {...props} onChange={onChange} value={selected}>
