@@ -1,0 +1,115 @@
+---
+title: "Rate limiting"
+description: "Quick start guide for adding Arcjet rate limiting to your app."
+---
+
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import SlotByFramework from "@/components/SlotByFramework";
+import TextByFramework from "@/components/TextByFramework";
+import FrameworkName from "@/components/FrameworkName";
+import VideoQuickStart from "@/snippets/rate-limiting/quick-start/nextjs/VideoQuickStart.astro";
+import Step1Bun from "@/snippets/rate-limiting/quick-start/bun/Step1.mdx";
+import Step1NextJs from "@/snippets/rate-limiting/quick-start/nextjs/Step1.mdx";
+import Step1NodeJs from "@/snippets/rate-limiting/quick-start/nodejs/Step1.mdx";
+import Step1SvelteKit from "@/snippets/rate-limiting/quick-start/sveltekit/Step1.mdx";
+import Step2 from "@/snippets/rate-limiting/quick-start/shared/Step2.mdx";
+import Step2SetEnv from "@/snippets/rate-limiting/quick-start/shared/Step2SetEnv.mdx";
+import Step3Bun from "@/snippets/rate-limiting/quick-start/bun/Step3.mdx";
+import Step3NextJs from "@/snippets/rate-limiting/quick-start/nextjs/Step3.mdx";
+import Step3NodeJs from "@/snippets/rate-limiting/quick-start/nodejs/Step3.mdx";
+import Step3SvelteKit from "@/snippets/rate-limiting/quick-start/sveltekit/Step3.mdx";
+import Step4StartApp from "@/snippets/rate-limiting/quick-start/shared/Step4StartApp.astro";
+import Step4Bun from "@/snippets/rate-limiting/quick-start/bun/Step4.astro";
+import Step4NodeJs from "@/snippets/rate-limiting/quick-start/nodejs/Step4.astro";
+import FAQs from "/src/components/FAQs.astro";
+import Comments from "/src/components/Comments.astro";
+
+Arcjet rate limiting allows you to define rules which limit the number of
+requests a client can make over a period of time.
+
+{/* <TextByFramework client:load nextJs="Next.js" bun="Bun" nodeJs="Node.js" sveltekit="SvelteKit" /> */}
+
+<WhatIsArcjet />
+
+<SlotByFramework client:load>
+  <VideoQuickStart slot="nextJs">
+
+## Video quick start
+
+  </VideoQuickStart>
+</SlotByFramework>
+
+## Quick start
+
+This guide will show you how to add a simple rate limit to your <FrameworkName client:load /> app.
+
+### 1. Install Arcjet
+
+In your project root, run the following command to install the SDK:
+
+<SlotByFramework client:load>
+  <Step1Bun slot="bun" />
+  <Step1NextJs slot="nextJs" />
+  <Step1NodeJs slot="nodeJs" />
+  <Step1SvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key. Add it to a `.env.local` file in your <FrameworkName client:load /> project root.
+
+<SlotByFramework client:load>
+  <Step2SetEnv slot="bun" />
+  <Step2 slot="nextJs" />
+  <Step2SetEnv slot="nodeJs" />
+  <Step2 slot="sveltekit" />
+</SlotByFramework>
+
+### 3. Add a rate limit to a route
+
+The example below applies a token bucket rate limit rule to a route where we
+identify the user based on their ID e.g. if they are logged in. The bucket is
+configured with a maximum capacity of 10 tokens and refills by 5 tokens every
+10 seconds. Each request consumes 5 tokens.
+
+<SlotByFramework client:load>
+  <Step3Bun slot="bun" />
+  <Step3NextJs slot="nextJs" />
+  <Step3NodeJs slot="nodeJs" />
+  <Step3SvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+<SlotByFramework client:load>
+  <Step4Bun slot="bun">
+
+### 4. Start server
+
+  </Step4Bun>
+  <Step4StartApp slot="nextJs">
+
+### 4. Start app
+
+  </Step4StartApp>
+  <Step4NodeJs slot="nodeJs">
+
+### 4. Start server
+
+  </Step4NodeJs>
+  <Step4StartApp slot="sveltekit">
+
+### 4. Start app
+
+  </Step4StartApp>
+</SlotByFramework>
+
+## FAQs
+
+<FAQs />
+
+## Get help
+
+Need help with anything? Email support@arcjet.com to get support from our
+engineering team.
+
+<Comments />

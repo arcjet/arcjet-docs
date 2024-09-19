@@ -1,0 +1,28 @@
+import { Aside, TabItem, Tabs } from "@astrojs/starlight/components";
+
+<Aside type="note" title="env files">
+  Node 20+ supports loading environment variables from a local file with
+  `--env-file`. If you're using an older version of Node, you can use a package
+  like [`dotenv`](https://www.npmjs.com/package/dotenv) to load the environment
+  variables from a `.env.local` file.
+</Aside>
+
+{/* prettier-ignore */}
+<Tabs syncKey="language">
+  <TabItem label="TS">
+  ```sh
+  npx tsx --env-file .env.local index.ts
+  ```
+  </TabItem>
+  <TabItem label="JS">
+  ```sh
+  node --env-file .env.local index.js
+  ```
+  </TabItem>
+</Tabs>
+
+Then make some requests to hit the rate limit:
+
+```sh
+curl http://localhost:8000
+```

@@ -1,0 +1,13 @@
+import FrameworkName from "@/components/FrameworkName";
+
+Arcjet only accepts non-local IP addresses with a fallback to 127.0.0.1 in
+development mode. Since <FrameworkName client:load /> doesn't set `NODE_ENV` for you, you also need to
+set `ARCJET_ENV` in your environment file.
+
+```ini title=".env.local"
+# NODE_ENV is not set automatically, so tell Arcjet we're in dev
+# You can leave this unset in prod
+ARCJET_ENV=development
+# Get your site key from https://app.arcjet.com
+ARCJET_KEY=ajkey_yourkey
+```
