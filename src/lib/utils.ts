@@ -25,3 +25,19 @@ export const getTypedStorage = <T>(key: keyof T): T[keyof T] => {
 export const removeTypedStorage = <T>(key: keyof T): void => {
   return localStorage.removeItem(safeToString(key));
 };
+
+/**
+ * Data parsing
+ * --------------------------------------------------------------------------------------------------------------
+ */
+
+// Convert icon objects to an icon name string
+export const convertIconObjsToString = (actions: any[]): any => {
+  const parsed = actions.map((action) => {
+    return {
+      ...action,
+      icon: action.icon?.type ? action.icon.name : action.icon,
+    };
+  });
+  return parsed;
+};

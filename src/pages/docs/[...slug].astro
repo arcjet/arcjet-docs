@@ -1,5 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import { convertIconObjsToString } from "@/lib/utils";
 import type { CollectionEntry } from "astro:content";
 import { getCollection } from "astro:content";
 
@@ -11,8 +12,14 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const {data: frontmatter} = entry;
 const { headings, Content } = await entry.render();
+
+const {data: frontmatter} = entry;
+
+// Fix type mismatch for hero actions
+if (frontmatter.hero?.actions) {
+  frontmatter.hero.actions = convertIconObjsToString(frontmatter.hero?.actions);
+}
 ---
 
 <Layout frontmatter={frontmatter} headings={headings}>
