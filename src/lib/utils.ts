@@ -41,3 +41,14 @@ export const convertIconObjsToString = (actions: any[]): any => {
   });
   return parsed;
 };
+
+// Converts "kebab-case" to "camelCase"
+export const kebabToCamel = (str: string) => {
+  return str
+    .toLowerCase()
+    .split("-")
+    .map((word, index) =>
+      index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1),
+    )
+    .join("");
+};
