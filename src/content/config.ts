@@ -1,4 +1,4 @@
-import { FrameworkKey } from "@/lib/prefs";
+import type { FrameworkKey } from "@/lib/prefs";
 import { docsSchema } from "@astrojs/starlight/schema";
 import { defineCollection, z } from "astro:content";
 
