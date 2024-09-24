@@ -80,11 +80,12 @@ developers to build with security in mind without sacrificing usability.
 ## How does Arcjet Shield work?
 
 The Arcjet SDK communicates with the Arcjet API on every request as part of
-applying your configured rules. The request is included as part of this process
-because rules are executed based on the request content. This also allows Arcjet
-Shield to analyze the request. Analysis happens on the Arcjet platform so it
-requires no additional resources from your application and adds no overhead to
-the request processing. See [Architecture](/architecture) for details.
+applying your configured rules. The request ([except the
+body](/limitations#shield-analysis-does-not-use-the-request-body)) is included
+as part of this process and rules are executed based on the request content.
+Analysis happens on the Arcjet platform so it requires no additional resources
+from your application and adds no overhead to the request processing. See
+[Architecture](/architecture) for details.
 
 ## Is Arcjet Shield a Web Application Firewall (WAF)?
 
