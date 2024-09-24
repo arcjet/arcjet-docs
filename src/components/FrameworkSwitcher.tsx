@@ -1,65 +1,74 @@
-import type { Framework, FrameworkKey, Prefs } from "@/lib/prefs";
-import { availableFrameworks, defaultFramework } from "@/lib/prefs";
+import type { Framework, FrameworkKey } from "@/lib/prefs";
 import {
-  getTypedStorage,
-  removeTypedStorage,
-  setTypedStorage,
-} from "@/lib/utils";
+  defaultSelectedFramework,
+  getClosestFrameworkMatch,
+  getFrameworks,
+  getStoredSelectedFramework,
+  storeDisplayedFramework,
+  storeSelectedFramework,
+} from "@/lib/prefs";
 import {
   forwardRef,
   useEffect,
+  useMemo,
   useState,
   type ForwardedRef,
   type PropsWithChildren,
 } from "react";
 
-// Type guard utility for interaction input
-const isFrameworkKey = (
-  frameworks: typeof availableFrameworks,
-  key: string,
-) => {
-  return frameworks.find((f) => f.key == key);
-};
+interface Props extends PropsWithChildren {
+  frameworks?: FrameworkKey[];
+}
 
 /**
  * Framework Switcher
- * Select one of the available frameworks.
+ * Selects one of the available frameworks.
+ * Composes the options from the provided `frameworks` or returns a default list.
+ *
+ * @param frameworks - The list of framework options to display.
  */
 const FrameworkSwitcher = forwardRef(
-  ({ ...props }: PropsWithChildren, ref: ForwardedRef<HTMLSelectElement>) => {
-    const [selected, setSelected] = useState<FrameworkKey>(defaultFramework);
+  ({ frameworks, ...props }: Props, ref: ForwardedRef<HTMLSelectElement>) => {
+    // Get the frameworks to display.
+    const displayedFrameworks = useMemo(() => {
+      return getFrameworks(frameworks);
+    }, [frameworks]);
 
+    // The selected option
+    const [selected, setSelected] = useState<FrameworkKey>(
+      defaultSelectedFramework,
+    );
+
+    // Select change callback
     const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
       const val = e.target.value;
 
-      // Sanitize
-      if (!isFrameworkKey(availableFrameworks, val)) return;
+      if (!storeSelectedFramework(val, frameworks)) return;
+      storeDisplayedFramework(val, frameworks);
 
-      if (val == selected) return;
-      setTypedStorage<Prefs>("selected-framework", val as FrameworkKey);
       setSelected(val as FrameworkKey);
       window.dispatchEvent(new Event("change:selected-framework"));
+      window.dispatchEvent(new Event("change:displayed-framework"));
     };
 
     // Sync with local storage value if present
     useEffect(() => {
-      const storedFramework = getTypedStorage<Prefs>("selected-framework");
-      if (storedFramework) {
-        // Sanitize | clean
-        if (!isFrameworkKey(availableFrameworks, storedFramework)) {
-          removeTypedStorage<Prefs>("selected-framework");
-          return;
-        }
+      const storedFramework = getStoredSelectedFramework(frameworks);
+      if (!storedFramework) return;
 
-        setSelected(storedFramework as FrameworkKey);
-      }
-    }, []);
+      // Not all stored frameworks may be in the list, so we try to return the closest match
+      const match = getClosestFrameworkMatch(storedFramework, frameworks);
+      if (match) setSelected(match);
+
+      storeDisplayedFramework(match, frameworks);
+      window.dispatchEvent(new Event("change:displayed-framework"));
+    }, [frameworks]);
 
     // TODO: Replace with Arcjet's select component.
 
     return (
       <select ref={ref} {...props} onChange={onChange} value={selected}>
-        {availableFrameworks.map((framework: Framework, idx: number) => {
+        {displayedFrameworks.map((framework: Framework, idx: number) => {
           return (
             <option key={`framework-option-${idx}`} value={framework.key}>
               {framework.label}

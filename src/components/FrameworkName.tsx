@@ -1,36 +1,47 @@
 import type { FrameworkKey } from "@/lib/prefs";
-import { availableFrameworks, defaultFramework } from "@/lib/prefs";
-import { getTypedStorage } from "@/lib/utils";
+import {
+  defaultSelectedFramework,
+  getFrameworks,
+  getStoredDisplayedFramework,
+} from "@/lib/prefs";
 import type { ForwardedRef, PropsWithChildren } from "react";
-import { forwardRef, useEffect, useState } from "react";
-
-interface Props extends PropsWithChildren {}
+import { forwardRef, useEffect, useMemo, useState } from "react";
 
 /**
  * Framework Name
  *
  * Renders the appropriate framework name based on the selected framework.
+ *
+ * @param frameworks - The list of framework options to display.
  */
 const FrameworkName = forwardRef(
-  ({ ...props }: Props, ref: ForwardedRef<HTMLElement>) => {
-    const [selectedFramework, setSelectedFramework] =
-      useState<FrameworkKey>(defaultFramework);
+  ({ ...props }: PropsWithChildren, ref: ForwardedRef<HTMLElement>) => {
+    // Get the frameworks to display.
+    const displayedFrameworks = useMemo(() => {
+      return getFrameworks();
+    }, []);
 
+    // The selected framework
+    const [selectedFramework, setSelectedFramework] = useState<FrameworkKey>(
+      defaultSelectedFramework,
+    );
+
+    // Sync with local storage value if present
     useEffect(() => {
       const update = () => {
-        const selected = getTypedStorage("selected-framework");
-        setSelectedFramework(selected);
+        const storedFramework = getStoredDisplayedFramework();
+        if (storedFramework) setSelectedFramework(storedFramework);
       };
 
       update();
-      window.addEventListener("change:selected-framework", update);
+      window.addEventListener("change:displayed-framework", update);
       return () => {
-        window.removeEventListener("change:selected-framework", update);
+        window.removeEventListener("change:displayed-framework", update);
       };
     }, []);
 
     return (
-      availableFrameworks.find((f) => f.key == selectedFramework)?.label || ""
+      displayedFrameworks.find((f) => f.key == selectedFramework)?.label || ""
     );
   },
 );

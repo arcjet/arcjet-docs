@@ -1,7 +1,9 @@
 import useElementInView from "@/effects/useElementInView";
 import type { FrameworkKey } from "@/lib/prefs";
-import { defaultFramework } from "@/lib/prefs";
-import { getTypedStorage } from "@/lib/utils";
+import {
+  defaultSelectedFramework,
+  getStoredDisplayedFramework,
+} from "@/lib/prefs";
 import type { CollectionEntry } from "astro:content"; // Import CollectionEntry from astro:content
 import type { ForwardedRef, PropsWithChildren } from "react";
 import { forwardRef, useCallback, useEffect, useState } from "react";
@@ -29,24 +31,25 @@ const TOC = forwardRef(
       astro.entry.data.ajToc,
     );
 
-    const [selectedFramework, setSelectedFramework] =
-      useState<FrameworkKey>(defaultFramework);
+    const [selectedFramework, setSelectedFramework] = useState<FrameworkKey>(
+      defaultSelectedFramework,
+    );
 
     useEffect(() => {
       const update = () => {
-        const selected = getTypedStorage("selected-framework");
-        setSelectedFramework(selected);
+        const storedFramework = getStoredDisplayedFramework();
+        if (storedFramework) setSelectedFramework(storedFramework);
       };
 
       update();
-      window.addEventListener("change:selected-framework", update);
+      window.addEventListener("change:displayed-framework", update);
       return () => {
-        window.removeEventListener("change:selected-framework", update);
+        window.removeEventListener("change:displayed-framework", update);
       };
     }, []);
 
     // TODO: Correct TOC types in schema
-    // Make recursive?
+    // TODO: Make recursive?
 
     const onEntryClick = useCallback(
       (anchor: string) => {
@@ -138,6 +141,8 @@ const TOCLink = forwardRef(
     useEffect(() => {
       if (isInView) click(entry.anchor);
     }, [isInView]);
+
+    // TODO: Improve observer threshold
 
     return (
       <a
