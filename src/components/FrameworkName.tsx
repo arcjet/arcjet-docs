@@ -7,6 +7,10 @@ import {
 import type { ForwardedRef, PropsWithChildren } from "react";
 import { forwardRef, useEffect, useMemo, useState } from "react";
 
+interface Props extends PropsWithChildren {
+  frameworks?: FrameworkKey[];
+}
+
 /**
  * Framework Name
  *
@@ -15,10 +19,10 @@ import { forwardRef, useEffect, useMemo, useState } from "react";
  * @param frameworks - The list of framework options to display.
  */
 const FrameworkName = forwardRef(
-  ({ ...props }: PropsWithChildren, ref: ForwardedRef<HTMLElement>) => {
+  ({ frameworks, ...props }: Props, ref: ForwardedRef<HTMLElement>) => {
     // Get the frameworks to display.
     const displayedFrameworks = useMemo(() => {
-      return getFrameworks();
+      return getFrameworks(frameworks);
     }, []);
 
     // The selected framework
@@ -29,7 +33,7 @@ const FrameworkName = forwardRef(
     // Sync with local storage value if present
     useEffect(() => {
       const update = () => {
-        const storedFramework = getStoredDisplayedFramework();
+        const storedFramework = getStoredDisplayedFramework(frameworks);
         if (storedFramework) setSelectedFramework(storedFramework);
       };
 
