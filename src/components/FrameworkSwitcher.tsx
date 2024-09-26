@@ -66,6 +66,18 @@ const FrameworkSwitcher = forwardRef(
       availableFrameworks.set(getFrameworks(frameworks));
     }, [frameworks]);
 
+    useEffect(() => {
+      const params = new URLSearchParams(window.location.search);
+      const f = params.get("f");
+
+      if (!f || !storeFramework(f)) return;
+
+      setSelected(f as FrameworkKey);
+
+      // Update store
+      displayedFramework.set(f as FrameworkKey);
+    }, []);
+
     // TODO: Replace with Arcjet's select component.
 
     return (
