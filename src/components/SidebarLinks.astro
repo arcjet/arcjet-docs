@@ -1,0 +1,56 @@
+---
+import LogoMarkSpark from "@/components/icons/LogoMarkSpark"
+---
+
+<style>
+  .sidebar-links {
+    display: flex;
+    flex-flow: row wrap;
+    row-gap: calc(var(--sp) * .25);
+    column-gap: calc(var(--sp) * 1.25);
+    align-items: center;
+
+    padding: 1rem calc(var(--sl-sidebar-pad-x) + var(--sp));
+  }
+
+  .link {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: calc(var(--sp) * .75);
+
+    font-size: .75rem;
+
+    .brand {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+
+  a.link:link,
+  a.link:visited {
+    color: var(--aj-palette-txt-secondary);
+    --Link-underlineOpacity: 0;
+  }
+
+  a.link:hover {
+    --Link-underlineOpacity: 0.3;
+  }
+
+  a.link:active {
+    --Link-underlineOpacity: 0;
+    color: var(--aj-palette-txt-tertiary);
+  }
+
+  .divider {
+    color: var(--aj-palette-txt-subtle);
+  }
+</style>
+
+<span class="sidebar-links">
+  <a class="link" href="https://arcjet.com" target="site"><LogoMarkSpark /> arcjet.com</a>
+  <span class="divider">/</span>
+  <a class="link" href="https://blog.arcjet.com" target="blog">Blog</a>
+  <span class="divider">/</span>
+  <a class="link" href="https://app.arcjet.com" target="app">Sign in</a>
+</span>

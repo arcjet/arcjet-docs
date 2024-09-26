@@ -55,6 +55,7 @@ export default defineConfig({
       ],
       plugins: [starlightLinksValidator()],
       components: {
+        Sidebar: "./src/components/overrides/Sidebar.astro",
         PageSidebar: "./src/components/overrides/PageSidebar.astro",
       },
       sidebar: [
