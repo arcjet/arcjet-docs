@@ -63,7 +63,12 @@ const TOC = forwardRef(
         <h2>On this page</h2>
         <ul>
           {toc.map((entry: (typeof toc)[number], idx: number) => {
-            if (entry.framework && selectedFramework != entry.framework) return;
+            if (
+              entry.framework &&
+              selectedFramework != entry.framework &&
+              !entry.framework.includes(selectedFramework)
+            )
+              return;
 
             return (
               <li key={`toc-entry-l1-${idx}`}>
@@ -78,9 +83,11 @@ const TOC = forwardRef(
                       (childEntry: (typeof toc)[number], idx: number) => {
                         if (
                           childEntry.framework &&
-                          selectedFramework != childEntry.framework
+                          selectedFramework != childEntry.framework &&
+                          !childEntry.framework.includes(selectedFramework)
                         )
                           return;
+
                         return (
                           <li key={`toc-entry-l2-${idx}`}>
                             <TOCLink

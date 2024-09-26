@@ -16,27 +16,24 @@ ajToc:
         anchor: "3-add-a-rate-limit-to-a-route"
       - text: 4. Start server
         anchor: "4-start-server"
-        framework: "bun"
+        framework: ["bun", "node-js"]
       - text: 4. Start app
         anchor: "4-start-app"
-        framework: "next-js"
-      - text: 4. Start server
-        anchor: "4-start-server"
-        framework: "node-js"
-      - text: 4. Start app
-        anchor: "4-start-app"
-        framework: "sveltekit"
+        framework: ["next-js", "sveltekit"]
   - text: "FAQs"
     anchor: "faqs"
+  - text: "What next?"
+    anchor: "what-next"
   - text: "Get help"
     anchor: "get-help"
 ---
 
+import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
 import FrameworkName from "@/components/FrameworkName";
-import VideoQuickStart from "@/snippets/rate-limiting/quick-start/nextjs/VideoQuickStart.astro";
+import VideoQuickStart from "@/snippets/rate-limiting/quick-start/nextjs/VideoQuickStart.mdx";
 import Step1Bun from "@/snippets/rate-limiting/quick-start/bun/Step1.mdx";
 import Step1NextJs from "@/snippets/rate-limiting/quick-start/nextjs/Step1.mdx";
 import Step1NodeJs from "@/snippets/rate-limiting/quick-start/nodejs/Step1.mdx";
@@ -47,9 +44,10 @@ import Step3Bun from "@/snippets/rate-limiting/quick-start/bun/Step3.mdx";
 import Step3NextJs from "@/snippets/rate-limiting/quick-start/nextjs/Step3.mdx";
 import Step3NodeJs from "@/snippets/rate-limiting/quick-start/nodejs/Step3.mdx";
 import Step3SvelteKit from "@/snippets/rate-limiting/quick-start/sveltekit/Step3.mdx";
-import Step4StartApp from "@/snippets/rate-limiting/quick-start/shared/Step4StartApp.astro";
-import Step4Bun from "@/snippets/rate-limiting/quick-start/bun/Step4.astro";
-import Step4NodeJs from "@/snippets/rate-limiting/quick-start/nodejs/Step4.astro";
+import Step4 from "@/snippets/rate-limiting/quick-start/nextjs/Step4.mdx";
+import Step4SvelteKit from "@/snippets/rate-limiting/quick-start/sveltekit/Step4.mdx";
+import Step4Bun from "@/snippets/rate-limiting/quick-start/bun/Step4.mdx";
+import Step4NodeJs from "@/snippets/rate-limiting/quick-start/nodejs/Step4.mdx";
 import FAQs from "/src/components/FAQs.astro";
 import Comments from "/src/components/Comments.astro";
 
@@ -61,11 +59,7 @@ requests a client can make over a period of time.
 <WhatIsArcjet />
 
 <SlotByFramework client:load>
-  <VideoQuickStart slot="next-js">
-
-## Video quick start
-
-  </VideoQuickStart>
+  <VideoQuickStart slot="next-js" />
 </SlotByFramework>
 
 ## Quick start
@@ -110,31 +104,50 @@ configured with a maximum capacity of 10 tokens and refills by 5 tokens every
 </SlotByFramework>
 
 <SlotByFramework client:load>
-  <Step4Bun slot="bun">
-
-### 4. Start server
-
-  </Step4Bun>
-  <Step4StartApp slot="next-js">
-
-### 4. Start app
-
-  </Step4StartApp>
-  <Step4NodeJs slot="node-js">
-
-### 4. Start server
-
-  </Step4NodeJs>
-  <Step4StartApp slot="sveltekit">
-
-### 4. Start app
-
-  </Step4StartApp>
+  <Step4Bun slot="bun" />
+  <Step4 slot="next-js" />
+  <Step4NodeJs slot="node-js" />
+  <Step4SvelteKit slot="sveltekit" />
 </SlotByFramework>
 
 ## FAQs
 
 <FAQs />
+
+## What next?
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can customize bot protection, rate
+limiting for your API and minimize fraudulent registrations with the signup form
+protection.
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  />
+  <LinkCard
+    title="Rate limit algorithms"
+    href="/rate-limiting/algorithms"
+    description="Learn which algorithm to use."
+  />
+  <LinkCard
+    title="Rate limiting reference"
+    href="/rate-limiting/reference/bun"
+    description="Full details about rate limiting."
+  />
+  <LinkCard
+    title="SDK reference"
+    href="/reference/nodejs"
+    description="Node.js SDK reference guide."
+  />
+  <LinkCard
+    title="Testing"
+    href="/testing"
+    description="Write tests for your rules."
+  />
+</CardGrid>
 
 ## Get help
 

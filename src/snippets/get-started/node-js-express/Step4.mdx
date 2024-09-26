@@ -1,4 +1,4 @@
-import { Aside, TabItem, Tabs } from "@astrojs/starlight/components";
+import { Aside } from "@astrojs/starlight/components";
 
 ### 4. Start server
 
@@ -10,21 +10,12 @@ import { Aside, TabItem, Tabs } from "@astrojs/starlight/components";
 </Aside>
 
 {/* prettier-ignore */}
-<Tabs syncKey="language">
-  <TabItem label="TS">
-  ```sh
-  npx tsx --env-file .env.local index.ts
-  ```
-  </TabItem>
-  <TabItem label="JS">
-  ```sh
-  node --env-file .env.local index.js
-  ```
-  </TabItem>
-</Tabs>
+```sh
+node --env-file .env.local index.js
+```
 
 Then make some requests to hit the rate limit:
 
 ```sh
-curl http://localhost:8000
+curl http://localhost:3000
 ```
