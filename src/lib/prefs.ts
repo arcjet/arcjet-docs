@@ -106,38 +106,23 @@ export const getFrameworks = (keys: FrameworkKey[]): Array<Framework> => {
 /**
  * Type guard utility for sanitizing interaction input
  * @param key - The framework key to validate.
- * @param frameworksList - Restricts results to a provided list of frameworks.
  */
-export const isValidFrameworkKey = (
-  key: string,
-  frameworksList?: FrameworkKey[],
-) => {
-  const frameworksSet = frameworksList
-    ? getFrameworks(frameworksList)
-    : frameworks;
-  return frameworksSet.find((f) => f.key == key);
+export const isValidFrameworkKey = (key: string) => {
+  return frameworks.find((f) => f.key == key);
 };
 
 /**
  * Utility that retrieves the stored selected framework safely, or executes a clean up.
- * @param storageField - The storage field.
- * @param frameworksList - Restricts results to a provided list of frameworks.
  */
-const getStoredFramework = (
-  storageField: keyof Prefs,
-  frameworksList?: FrameworkKey[],
-): FrameworkKey | undefined => {
-  const stored = getTypedStorage<Prefs>(storageField);
+export const getStoredFramework = (): FrameworkKey | undefined => {
+  const stored = getTypedStorage<Prefs>("selected-framework");
 
   if (!stored) return undefined;
 
   // Sanitize | clean
-  if (!isValidFrameworkKey(stored, frameworksList)) {
-    if (!isValidFrameworkKey(stored)) {
-      // Remove from storage is value is bad
-      removeTypedStorage<Prefs>(storageField);
-    }
-    return undefined;
+  if (!isValidFrameworkKey(stored)) {
+    // Remove from storage is value is bad
+    removeTypedStorage<Prefs>("selected-framework");
   }
 
   return stored;
@@ -145,67 +130,17 @@ const getStoredFramework = (
 
 /**
  * Utility that saves the selected framework in storage safely.
- * @param storageField - The storage field.
  * @param key - The framework key to store.
- * @param frameworksList - Restricts results to a provided list of frameworks.
  */
-const storeFramework = (
-  storageField: keyof Prefs,
-  key: string,
-  frameworksList?: FrameworkKey[],
-): boolean => {
+export const storeFramework = (key: string): boolean => {
   // Sanitize
-  if (!isValidFrameworkKey(key, frameworksList)) return false;
+  if (!isValidFrameworkKey(key)) return false;
 
-  const alreadyStored = getStoredFramework(storageField, frameworksList) == key;
+  const alreadyStored = getStoredFramework() == key;
   if (alreadyStored) return false;
 
-  setTypedStorage<Prefs>(storageField, key as FrameworkKey);
+  setTypedStorage<Prefs>("selected-framework", key as FrameworkKey);
   return true;
-};
-
-/**
- * Utility that retrieves the stored selected framework safely, or executes a clean up.
- * @param frameworksList - Restricts results to a provided list of frameworks.
- */
-export const getStoredSelectedFramework = (
-  frameworksList?: FrameworkKey[],
-): FrameworkKey | undefined => {
-  return getStoredFramework("selected-framework", frameworksList);
-};
-
-/**
- * Utility that saves the selected framework in storage safely.
- * @param key - The framework key to store.
- * @param frameworksList - Restricts results to a provided list of frameworks.
- */
-export const storeSelectedFramework = (
-  key: string,
-  frameworksList?: FrameworkKey[],
-): boolean => {
-  return storeFramework("selected-framework", key, frameworksList);
-};
-
-/**
- * Utility that retrieves the stored displayed framework safely, or executes a clean up.
- * @param frameworksList - Restricts results to a provided list of frameworks.
- */
-export const getStoredDisplayedFramework = (
-  frameworksList?: FrameworkKey[],
-): FrameworkKey | undefined => {
-  return getStoredFramework("displayed-framework", frameworksList);
-};
-
-/**
- * Utility that saves the displayed framework in storage safely.
- * @param key - The framework key to store.
- * @param frameworksList - Restricts results to a provided list of frameworks.
- */
-export const storeDisplayedFramework = (
-  key: string,
-  frameworksList?: FrameworkKey[],
-): boolean => {
-  return storeFramework("displayed-framework", key, frameworksList);
 };
 
 /**

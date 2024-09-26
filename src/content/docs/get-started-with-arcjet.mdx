@@ -83,7 +83,7 @@ import VideoQuickStart from "@/snippets/rate-limiting/quick-start/nextjs/VideoQu
 import FAQs from "/src/components/FAQs.astro";
 import Comments from "/src/components/Comments.astro";
 
-This guide will help you protect your <SlotByFramework inline client:load frameworks={frontmatter.frameworks}><Fragment slot="bun">Bun</Fragment><Fragment slot="bun-hono">[Bun +
+This guide will help you protect your <SlotByFramework inline client:load><Fragment slot="bun">Bun</Fragment><Fragment slot="bun-hono">[Bun +
 Hono](https://hono.dev/getting-started/bun)</Fragment><Fragment slot="next-js">Next.js</Fragment><Fragment slot="node-js">Node.js</Fragment><Fragment slot="node-js-express">Node.js + Express</Fragment><Fragment slot="node-js-hono">[Node.js + Hono](https://hono.dev/getting-started/nodejs)</Fragment><Fragment slot="sveltekit">SvelteKit</Fragment></SlotByFramework> app using Arcjet.
 
 <WhatIsArcjet />
@@ -94,11 +94,7 @@ Hono](https://hono.dev/getting-started/bun)</Fragment><Fragment slot="next-js">N
 </SlotByFramework>
 
 <SlotByFramework client:load>
-  <VideoQuickStart slot="next-js">
-
-## Video quick start
-
-  </VideoQuickStart>
+  <VideoQuickStart slot="next-js" />
 </SlotByFramework>
 
 ## SDK installation
@@ -134,7 +130,7 @@ In your project root, run the following command to install the SDK:
 ### 2. Set your key
 
 [Create a free Arcjet account](https://app.arcjet.com) then follow the
-instructions to add a site and get a key. Add it to a `.env.local` file in your <FrameworkName client:load frameworks={frontmatter.frameworks} /> project root.
+instructions to add a site and get a key. Add it to a `.env.local` file in your <FrameworkName client:load /> project root.
 
 <SlotByFramework client:load>
   <Step2SetEnv slot="bun" />

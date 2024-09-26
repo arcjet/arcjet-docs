@@ -3,14 +3,14 @@ import {
   defaultSelectedFramework,
   getClosestFrameworkMatch,
   getFrameworks,
-  getStoredSelectedFramework,
-  storeDisplayedFramework,
-  storeSelectedFramework,
+  getStoredFramework,
+  storeFramework,
 } from "@/lib/prefs";
+import { availableFrameworks, displayedFramework } from "@/store";
+import { useStore } from "@nanostores/react";
 import {
   forwardRef,
   useEffect,
-  useMemo,
   useState,
   type ForwardedRef,
   type PropsWithChildren,
@@ -29,10 +29,7 @@ interface Props extends PropsWithChildren {
  */
 const FrameworkSwitcher = forwardRef(
   ({ frameworks, ...props }: Props, ref: ForwardedRef<HTMLSelectElement>) => {
-    // Get the frameworks to display.
-    const displayedFrameworks = useMemo(() => {
-      return getFrameworks(frameworks);
-    }, [frameworks]);
+    const $availableFrameworks = useStore(availableFrameworks);
 
     // The selected option
     const [selected, setSelected] = useState<FrameworkKey>(
@@ -43,32 +40,37 @@ const FrameworkSwitcher = forwardRef(
     const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
       const val = e.target.value;
 
-      if (!storeSelectedFramework(val, frameworks)) return;
-      storeDisplayedFramework(val, frameworks);
+      if (!storeFramework(val)) return;
 
       setSelected(val as FrameworkKey);
-      window.dispatchEvent(new Event("change:selected-framework"));
-      window.dispatchEvent(new Event("change:displayed-framework"));
+
+      // Update store
+      displayedFramework.set(val as FrameworkKey);
     };
 
     // Sync with local storage value if present
     useEffect(() => {
-      const storedFramework = getStoredSelectedFramework(frameworks);
+      const storedFramework = getStoredFramework();
       if (!storedFramework) return;
 
       // Not all stored frameworks may be in the list, so we try to return the closest match
       const match = getClosestFrameworkMatch(storedFramework, frameworks);
       if (match) setSelected(match);
 
-      storeDisplayedFramework(match, frameworks);
-      window.dispatchEvent(new Event("change:displayed-framework"));
+      // Update store
+      displayedFramework.set(match);
+    }, [frameworks]);
+
+    // Sync store with current page frontmatter
+    useEffect(() => {
+      availableFrameworks.set(getFrameworks(frameworks));
     }, [frameworks]);
 
     // TODO: Replace with Arcjet's select component.
 
     return (
       <select ref={ref} {...props} onChange={onChange} value={selected}>
-        {displayedFrameworks.map((framework: Framework, idx: number) => {
+        {$availableFrameworks.map((framework: Framework, idx: number) => {
           return (
             <option key={`framework-option-${idx}`} value={framework.key}>
               {framework.label}

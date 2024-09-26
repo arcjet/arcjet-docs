@@ -1,9 +1,8 @@
 import useElementInView from "@/effects/useElementInView";
 import type { FrameworkKey } from "@/lib/prefs";
-import {
-  defaultSelectedFramework,
-  getStoredDisplayedFramework,
-} from "@/lib/prefs";
+import { defaultSelectedFramework } from "@/lib/prefs";
+import { displayedFramework } from "@/store";
+import { useStore } from "@nanostores/react";
 import type { CollectionEntry } from "astro:content"; // Import CollectionEntry from astro:content
 import type { ForwardedRef, PropsWithChildren } from "react";
 import { forwardRef, useCallback, useEffect, useState } from "react";
@@ -23,6 +22,8 @@ interface Props extends PropsWithChildren {
  */
 const TOC = forwardRef(
   ({ astro, ...props }: Props, ref: ForwardedRef<HTMLDivElement>) => {
+    const $displayedFramework = useStore(displayedFramework);
+
     const cls = "TOC " + styles.TOC;
 
     const [selectedEntry, setSelectedEntry] = useState<string>("");
@@ -31,25 +32,16 @@ const TOC = forwardRef(
       astro.entry.data.ajToc,
     );
 
+    // The selected framework
     const [selectedFramework, setSelectedFramework] = useState<FrameworkKey>(
       defaultSelectedFramework,
     );
 
     useEffect(() => {
-      const update = () => {
-        const storedFramework = getStoredDisplayedFramework();
-        if (storedFramework) setSelectedFramework(storedFramework);
-      };
+      setSelectedFramework($displayedFramework);
+    }, [$displayedFramework]);
 
-      update();
-      window.addEventListener("change:displayed-framework", update);
-      return () => {
-        window.removeEventListener("change:displayed-framework", update);
-      };
-    }, []);
-
-    // TODO: Correct TOC types in schema
-    // TODO: Make recursive?
+    // TODO: Make recursive 3+ levels?
 
     const onEntryClick = useCallback(
       (anchor: string) => {

@@ -1,16 +1,14 @@
 import type { FrameworkKey } from "@/lib/prefs";
-import {
-  defaultSelectedFramework,
-  getStoredDisplayedFramework,
-} from "@/lib/prefs";
+import { defaultSelectedFramework } from "@/lib/prefs";
 import { kebabToCamel } from "@/lib/utils";
+import { displayedFramework } from "@/store";
+import { useStore } from "@nanostores/react";
 import type { ForwardedRef, PropsWithChildren } from "react";
 import { forwardRef, useEffect, useMemo, useState } from "react";
 
 import "@/components/SlotByFramework.scss";
 
 interface Props extends PropsWithChildren {
-  frameworks?: FrameworkKey[];
   inline?: boolean;
 }
 
@@ -31,30 +29,20 @@ const extractSlot = (props: any, selectedFramework: FrameworkKey) => {
  * see: https://docs.astro.build/en/guides/framework-components/#passing-children-to-framework-components)
  * so we parse them with the "extractSlot" function to consume them.
  *
- * @param frameworks - The list of framework options to display.
  * @param inline - Renders the content without a wrapping element.
  */
 const SlotByFramework = forwardRef(
-  (
-    { frameworks, inline, ...props }: Props,
-    ref: ForwardedRef<HTMLDivElement>,
-  ) => {
+  ({ inline, ...props }: Props, ref: ForwardedRef<HTMLDivElement>) => {
+    const $displayedFramework = useStore(displayedFramework);
+
+    // The selected framework
     const [selectedFramework, setSelectedFramework] = useState<FrameworkKey>(
       defaultSelectedFramework,
     );
 
     useEffect(() => {
-      const update = () => {
-        const storedFramework = getStoredDisplayedFramework(frameworks);
-        if (storedFramework) setSelectedFramework(storedFramework);
-      };
-
-      update();
-      window.addEventListener("change:displayed-framework", update);
-      return () => {
-        window.removeEventListener("change:displayed-framework", update);
-      };
-    }, []);
+      setSelectedFramework($displayedFramework);
+    }, [$displayedFramework]);
 
     const content = useMemo(() => {
       return (
