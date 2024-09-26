@@ -8,7 +8,7 @@ const isAjToc = Astro.props.entry.data.ajToc != undefined;
 const frameworks = Astro.props.entry.data.frameworks;
 ---
 
-<FrameworkSwitcher client:load frameworks={frameworks} />
+{frameworks && <FrameworkSwitcher client:load frameworks={frameworks} />}
 
 {
   isAjToc ? (
