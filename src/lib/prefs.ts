@@ -86,17 +86,6 @@ export const frameworks: Array<Framework> = [
 ];
 
 /**
- * Default Frameworks
- * The default frameworks list when they are not specified.
- */
-export const defaultFrameworks: FrameworkKey[] = [
-  "bun",
-  "next-js",
-  "node-js",
-  "sveltekit",
-];
-
-/**
  * Default Selected Framework
  * The framework selected by default if the user didn't make a choice.
  */
@@ -107,13 +96,11 @@ export const defaultSelectedFramework: FrameworkKey = "next-js";
  *******************************************************************************************************/
 
 /**
- * Utility to build a frameworks list from given keys if defined or returns default frameworks.
+ * Utility to build a frameworks list from given keys.
  * @param keys - The keys of the frameworks to include in the list
  */
-export const getFrameworks = (keys?: FrameworkKey[]): Array<Framework> => {
-  return frameworks.filter((f) =>
-    keys ? keys.includes(f.key) : defaultFrameworks.includes(f.key),
-  );
+export const getFrameworks = (keys: FrameworkKey[]): Array<Framework> => {
+  return frameworks.filter((f) => keys.includes(f.key));
 };
 
 /**
@@ -228,7 +215,7 @@ export const storeDisplayedFramework = (
  */
 export const getClosestFrameworkMatch = (
   key: FrameworkKey,
-  frameworksList?: FrameworkKey[],
+  frameworksList: FrameworkKey[],
 ): FrameworkKey => {
   const frameworksSet = getFrameworks(frameworksList);
 

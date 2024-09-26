@@ -8,7 +8,7 @@ import type { ForwardedRef, PropsWithChildren } from "react";
 import { forwardRef, useEffect, useMemo, useState } from "react";
 
 interface Props extends PropsWithChildren {
-  frameworks?: FrameworkKey[];
+  frameworks: FrameworkKey[];
 }
 
 /**

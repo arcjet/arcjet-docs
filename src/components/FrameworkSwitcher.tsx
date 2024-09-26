@@ -17,13 +17,13 @@ import {
 } from "react";
 
 interface Props extends PropsWithChildren {
-  frameworks?: FrameworkKey[];
+  frameworks: FrameworkKey[];
 }
 
 /**
  * Framework Switcher
  * Selects one of the available frameworks.
- * Composes the options from the provided `frameworks` or returns a default list.
+ * Composes the options from the provided `frameworks`.
  *
  * @param frameworks - The list of framework options to display.
  */
