@@ -91,12 +91,8 @@ export const main = [
             link: "/docs/rate-limiting/algorithms",
           },
           {
-            label: "Configuration",
-            link: "/docs/rate-limiting/configuration",
-          },
-          {
             label: "Reference",
-            link: "/docs/rate-limiting/reference/nodejs",
+            link: "/docs/rate-limiting/reference",
           },
         ],
       },
