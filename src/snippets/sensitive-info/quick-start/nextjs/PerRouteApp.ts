@@ -13,28 +13,22 @@ const aj = arcjet({
   ],
 });
 
-export async function GET(req: Request) {
+export async function POST(req: Request) {
   const decision = await aj.protect(req);
-
-  for (const result of decision.results) {
-    console.log("Rule Result", result);
-  }
-
-  console.log("Conclusion", decision.conclusion);
+  console.log("Arcjet decision", decision);
 
   if (decision.isDenied() && decision.reason.isSensitiveInfo()) {
     return NextResponse.json(
       {
-        error: "The requests body contains unexpected sensitive information",
-        // Useful for debugging, but don't return it to the client in
-        // production
-        //reason: decision.reason,
+        error: "Sensitive Information Identified",
+        reason: decision.reason,
       },
-      { status: 400 },
+      {
+        status: 400,
+      },
     );
   }
 
-  return NextResponse.json({
-    message: "Hello world",
-  });
+  const message = await req.text();
+  return NextResponse.json({ message: `You said: ${message}` });
 }

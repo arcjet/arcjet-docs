@@ -100,36 +100,31 @@ it in middleware to protect every route, but we'll start with a single route.
 </TabItem>
 </Tabs>
 
-### 4. Start app
+### 4. Test sending personal info
 
-Start your app and load `http://localhost:3000`. Refresh the page and you will
-see the requests showing up in the [Arcjet dashboard](https://app.arcjet.com).
-
-### 5. Test sending personal info
-
-To see Arcjet Sensitive Information detection in action, try making a request
-with a blocked entity in the body of the request. For example if you have configured
-Arcjet to block requests containing email addresses then try and send an email address.
+To see Arcjet Sensitive Information detection in action, start your app and try
+making a request with an email address in the body of the request:
 
 ```sh
-curl -v http://localhost:3000 --data "My email address is test@example.com"
+curl -v http://localhost:3000/api/arcjet --data "My email address is test@example.com"
 ```
 
 You should see this in your logs
 
 ```text
-Rule Result ArcjetRuleResult {
-  ruleId: '',
+Arcjet decision ArcjetDenyDecision {
+  id: '', // This will contain the Arcjet request ID
   ttl: 0,
-  state: 'RUN',
-  conclusion: 'DENY',
-  reason: ArcjetSensitiveInfoReason {
-    type: 'SENSITIVE_INFO',
-    denied: [ { start: 5, end: 21, identifiedType: 'EMAIL' } ],
-    allowed: []
-  }
-},
-Conclusion ALLOW
+  results: [
+    ArcjetRuleResult {
+      ruleId: '',
+      ttl: 0,
+      state: 'RUN',
+      conclusion: 'DENY',
+      reason: [ArcjetSensitiveInfoReason]
+    }
+  ],
+...
 ```
 
 The final conclusion is `ALLOW` even though the rule result conclusion is
