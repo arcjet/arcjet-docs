@@ -11,7 +11,7 @@ const aj = arcjet({
   ],
 });
 
-export async function GET(req: Request) {
+export async function POST(req: Request) {
   const decision = await aj.protect(req);
 
   if (decision.isDenied() && decision.reason.isSensitiveInfo()) {

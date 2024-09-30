@@ -18,20 +18,12 @@ export default async function handler(
   res: NextApiResponse,
 ) {
   const decision = await aj.protect(req);
+  console.log("Arcjet decision", decision);
 
-  for (const result of decision.results) {
-    console.log("Rule Result", result);
-  }
-
-  console.log("Conclusion", decision.conclusion);
-
-  if (decision.isDenied() && decision.reason.isShield()) {
+  if (decision.isDenied() && decision.reason.isSensitiveInfo()) {
     return res.status(400).json({
-      error: "The requests body contains unexpected sensitive information",
+      error: "The request body contains unexpected sensitive information",
     });
-    // Returning the reason is useful for debugging, but don't return it to the
-    // client in production
-    // .json({ error: "You are suspicious!", reason: decision.reason });
   }
 
   res.status(200).json({ name: "Hello world" });
