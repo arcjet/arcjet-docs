@@ -67,6 +67,10 @@ export default defineConfig({
               link: "/get-started/bun-hono",
             },
             {
+              label: "Deno",
+              link: "/get-started/deno",
+            },
+            {
               label: "Next.js",
               link: "/get-started/nextjs",
             },
