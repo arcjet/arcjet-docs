@@ -14,8 +14,10 @@ import { ArcjetModule, ArcjetGuard, detectBot } from "@arcjet/nest";
       key: process.env.ARCJET_KEY!,
       rules: [
         detectBot({
-          mode: "LIVE",
-          allow: [],
+          mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+          // configured with a list of bots to allow from
+          // https://arcjet.com/bot-list
+          allow: [], // all other detected bots will be blocked
         }),
       ],
     }),
