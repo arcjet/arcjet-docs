@@ -5,13 +5,7 @@ prev: false
 next: false
 ---
 
-import {
-  Tabs,
-  TabItem,
-  LinkCard,
-  CardGrid,
-  Code,
-} from "@astrojs/starlight/components";
+import { LinkCard, CardGrid, Code } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import FAQs from "/src/components/FAQs.astro";
 import Step3TS from "/src/snippets/get-started/Deno.ts?raw";
@@ -70,11 +64,7 @@ seconds. Each request consumes 5 tokens.
 We also configure a Shield rule which adds protection against common attacks,
 such as SQL injection.
 
-<Tabs>
-  <TabItem label="TS">
-    <Code code={Step3TS} lang="ts" title="/index.ts" />
-  </TabItem>
-</Tabs>
+<Code code={Step3TS} lang="ts" title="/index.ts" />
 
 ### 4. Start app
 
