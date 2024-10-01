@@ -71,6 +71,10 @@ export default defineConfig({
               link: "/get-started/deno",
             },
             {
+              label: "NestJS",
+              link: "/get-started/nestjs",
+            },
+            {
               label: "Next.js",
               link: "/get-started/nextjs",
             },
