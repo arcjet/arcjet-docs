@@ -7,8 +7,6 @@ const aj = arcjet({
   rules: [
     fixedWindow({
       mode: "LIVE",
-      // no match means it runs on every route
-      //match: "/api",
       window: "1h",
       max: 60,
     }),

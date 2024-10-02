@@ -48,7 +48,6 @@ the algorithm works.
 // See https://docs.arcjet.com/rate-limiting/configuration
 type FixedWindowRateLimitOptions = {
   mode?: "LIVE" | "DRY_RUN"; // "LIVE" will block requests. "DRY_RUN" will log only
-  match?: string; // request path the rate limit applies to
   characteristics?: string[]; // how the client is identified. Defaults to the global characteristics if unset
   window: string; // time window the rate limit applies to
   max: number; // maximum number of requests allowed in the time window
@@ -72,7 +71,6 @@ details about how the algorithm works.
 // See https://docs.arcjet.com/rate-limiting/configuration
 type SlidingWindowRateLimitOptions = {
   mode?: "LIVE" | "DRY_RUN"; // "LIVE" will block requests. "DRY_RUN" will log only
-  match?: string; // request path the rate limit applies to
   characteristics?: string[]; // how the client is identified. Defaults to the global characteristics if unset
   interval: number; // the time interval in seconds for the rate limit
   max: number; // maximum number of requests allowed over the time interval
@@ -98,7 +96,6 @@ the algorithm works.
 // See https://docs.arcjet.com/rate-limiting/configuration
 type TokenBucketRateLimitOptions = {
   mode?: "LIVE" | "DRY_RUN"; // "LIVE" will block requests. "DRY_RUN" will log only
-  match?: string; // request path the rate limit applies to
   characteristics?: string[]; // how the client is identified. Defaults to the global characteristics if unset
   refillRate: number; // number of tokens to add to the bucket at each interval
   interval: number; // the interval in seconds to add tokens to the bucket
