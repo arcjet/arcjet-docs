@@ -82,11 +82,10 @@ guard. Only bots specified in `allow: []` will be allowed to access your routes.
 <Code code={Step3TS} lang="ts" title="/src/main.ts" />
 
 :::caution
-You can enable ArcjetGuard globally on every route using the `APP_GUARD` token;
-however, this is NOT recommended for large apps. If you need to inject the
-ArcjetNest client, you want to make sure you aren't also running ArcjetGuard on
-the handlers calling `protect()` to avoid making multiple requests to Arcjet and
-you can't opt-out of this global Guard.
+This example runs the Arcjet `APP_GUARD` on every route. This is useful for
+global protection, but you can't opt out specific routes. Instead, we recommend
+using the `ArcjetGuard` on specific routes to give you more control over the
+rules applied to each route. [See an example](https://github.com/arcjet/arcjet-js/blob/39db93e02a55787f63c21e69b67a922646d2101c/examples/nestjs/src/detect-bot/detect-bot.controller.ts).
 :::
 
 ### 4. Start server
