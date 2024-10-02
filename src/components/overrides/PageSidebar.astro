@@ -12,7 +12,7 @@ const frameworks = Astro.props.entry.data.frameworks;
 
 {
   isAjToc ? (
-<TOC client:load astro={Astro.props} />
+<TOC client:load astroEntry={Astro.props.entry} />
   ) : (
 <Default {...Astro.props}>
   <slot />

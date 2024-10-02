@@ -10,7 +10,7 @@ import { forwardRef, useCallback, useEffect, useState } from "react";
 import styles from "./TOC.module.scss";
 
 interface Props extends PropsWithChildren {
-  astro: any;
+  astroEntry: any;
 }
 
 /**
@@ -18,10 +18,10 @@ interface Props extends PropsWithChildren {
  *
  * Renders the page TOC according to custom options like SDK framework, etc. .
  *
- * @param astro - The Astro.props
+ * @param astroEntry - The Astro.props.entry
  */
 const TOC = forwardRef(
-  ({ astro, ...props }: Props, ref: ForwardedRef<HTMLDivElement>) => {
+  ({ astroEntry, ...props }: Props, ref: ForwardedRef<HTMLDivElement>) => {
     const $displayedFramework = useStore(displayedFramework);
 
     const cls = "TOC " + styles.TOC;
@@ -29,7 +29,7 @@ const TOC = forwardRef(
     const [selectedEntry, setSelectedEntry] = useState<string>("");
 
     const [toc] = useState<CollectionEntry<"docs">["data"]["ajToc"]>(
-      astro.entry.data.ajToc,
+      astroEntry.data.ajToc,
     );
 
     // The selected framework
