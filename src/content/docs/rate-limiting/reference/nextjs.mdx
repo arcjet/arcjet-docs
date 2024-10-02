@@ -244,10 +244,10 @@ Rate limit rules can be configured in two ways:
 
 ### Per route
 
-If you define your rate limit within an API route and do not specify a value for
-`match`, Arcjet assumes that the limit applies only to that route. If you define
-your rate limit in middleware, you should specify a path for `match` otherwise
-the rate limit will apply to all routes.
+If you define your rate limit within an API route Arcjet assumes that the limit
+applies only to that route. If you define your rate limit in middleware, you
+should either use the Next.js `matcher` config to choose which paths to execute
+the middleware for, or use `request.nextUrl.pathname.startsWith`.
 
 #### Rate limit only on `/api/*`
 
