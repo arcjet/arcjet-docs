@@ -1,0 +1,159 @@
+---
+title: "Get started: NestJS and Arcjet"
+description: "Getting started with Arcjet and NestJS. Quick start guide for adding rate limiting, bot protection, and email validation to your NestJS app."
+prev: false
+next: false
+---
+
+import {
+  Tabs,
+  TabItem,
+  LinkCard,
+  CardGrid,
+  Code,
+  Aside,
+} from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import FAQs from "/src/components/FAQs.astro";
+import Step3TS from "/src/snippets/get-started/NestJS.ts?raw";
+import Comments from "/src/components/Comments.astro";
+
+This guide will help you protect your NestJS app using Arcjet.
+
+<WhatIsArcjet />
+
+## SDK installation
+
+Follow these steps to get started. You can also [find an example app on
+GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nestjs).
+
+### 1. Install Arcjet
+
+In your project root, run the following command to install the SDK:
+
+{/* prettier-ignore */}
+<Tabs>
+<TabItem label="npm">
+```sh
+npm i @arcjet/nest
+```
+</TabItem>
+<TabItem label="pnpm">
+```sh
+pnpm add @arcjet/nest
+```
+</TabItem>
+<TabItem label="yarn">
+```sh
+yarn add @arcjet/nest
+```
+</TabItem>
+</Tabs>
+
+#### Requirements
+
+- Node.js 18 or later
+- NestJS 10 or later
+- CommonJS is not supported. Arcjet is ESM only.
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key. Add it to a `.env.local` file in your
+project root.
+
+Arcjet only accepts non-local IP addresses with a fallback to 127.0.0.1 in
+development mode. Since Node.js doesn't set `NODE_ENV` for you, you also need to
+set `ARCJET_ENV` in your environment file.
+
+```ini title=".env.local"
+# NODE_ENV is not set automatically, so tell Arcjet we're in dev
+# You can leave this unset in prod
+ARCJET_ENV=development
+# Get your site key from https://app.arcjet.com
+ARCJET_KEY=ajkey_yourkey
+```
+
+### 3. Add ArcjetGuard to protect against bots
+
+The example below applies bot protection to all of your routes via a global
+guard. Only bots specified in `allow: []` will be allowed to access your routes.
+
+<Code code={Step3TS} lang="ts" title="/src/main.ts" />
+
+:::caution
+This example runs the Arcjet `APP_GUARD` on every route. This is useful for
+global protection, but you can't opt out specific routes. Instead, we recommend
+using the `ArcjetGuard` on specific routes to give you more control over the
+rules applied to each route. [See an example](https://github.com/arcjet/arcjet-js/blob/39db93e02a55787f63c21e69b67a922646d2101c/examples/nestjs/src/detect-bot/detect-bot.controller.ts).
+:::
+
+### 4. Start server
+
+{/* prettier-ignore */}
+```sh
+nest start
+```
+
+Then make some a request with `curl` to trigger the bot protection:
+
+```sh
+curl http://localhost:3000
+```
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can customize bot protection, rate
+limiting for your API and minimize fraudulent registrations with the signup form
+protection.
+
+<CardGrid>
+  <LinkCard
+    title="Example app"
+    href="https://github.com/arcjet/arcjet-js/blob/main/examples/nestjs"
+    description="Check out our NestJS example code in GitHub."
+  ></LinkCard>
+  <LinkCard
+    title="Arcjet Shield"
+    href="/shield/quick-start/nodejs"
+    description="Protect your app from common attacks."
+  />
+  <LinkCard
+    title="Bot protection"
+    href="/bot-protection/quick-start/nodejs"
+    description="Protect your app from bots and scrapers."
+  />
+  <LinkCard
+    title="Rate limiting"
+    href="/rate-limiting/reference/nodejs"
+    description="Protect your app from abuse."
+  />
+  <LinkCard
+    title="Email validation"
+    href="/email-validation/quick-start/nodejs"
+    description="Minimize fraudulent registrations."
+  />
+  <LinkCard
+    title="SDK reference"
+    href="/reference/nodejs"
+    description="Node.js SDK reference guide."
+  />
+  <LinkCard
+    title="Testing"
+    href="/testing"
+    description="Write tests for your rules."
+  />
+</CardGrid>
+
+## Get help
+
+Need help with anything? [Email us](mailto:support@arcjet.com) or [join our
+Discord](https://discord.gg/TPra6jqZDC) to get support from our
+engineering team.
+
+<Comments />
