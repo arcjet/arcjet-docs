@@ -12,21 +12,6 @@ import Comments from "/src/components/Comments.astro";
 Each Arcjet rate limit rule has its own configuration depending on the algorithm
 used.
 
-## Match
-
-**Type:** `string` (optional)
-
-**Algorithms:** `fixedWindow`, `slidingWindow`, `tokenBucket`.
-
-The exact request path the rate limit applies to. If not specified and Arcjet is
-running on a specific API route, it defaults to the path for that route. If not
-specified and Arcjet is running from middleware, it applies to all routes.
-
-Wildcards are not currently supported. This is on our roadmap, but in the
-meantime see [this Next.js
-example](/rate-limiting/reference/nextjs#wildcard-matching-paths) for using
-middleware conditionals.
-
 ## Characteristics
 
 **Type:** `Array<string>` (optional)

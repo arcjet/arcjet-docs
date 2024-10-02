@@ -14,7 +14,6 @@ import ByUserIdAppJS from "/src/snippets/rate-limiting/reference/nextjs/ByUserId
 import ByUserIdPagesJS from "/src/snippets/rate-limiting/reference/nextjs/ByUserIdPages.js?raw";
 import SingleRateLimit from "/src/snippets/rate-limiting/reference/nextjs/SingleRateLimit.ts?raw";
 import DryRun from "/src/snippets/rate-limiting/reference/nextjs/DryRun.ts?raw";
-import MiddlewareSingleRoute from "/src/snippets/rate-limiting/reference/nextjs/MiddlewareSingleRoute.ts?raw";
 import MiddlewareMatchingPaths from "/src/snippets/rate-limiting/reference/nextjs/MiddlewareMatchingPaths.ts?raw";
 import MiddlewareAllRoutes from "/src/snippets/rate-limiting/reference/nextjs/MiddlewareAllRoutes.ts?raw";
 import MiddlewareMatcher from "/src/snippets/rate-limiting/reference/nextjs/MiddlewareMatcher.ts?raw";
@@ -81,7 +80,6 @@ the algorithm works.
 // See https://docs.arcjet.com/rate-limiting/configuration
 type FixedWindowRateLimitOptions = {
   mode?: "LIVE" | "DRY_RUN"; // "LIVE" will block requests. "DRY_RUN" will log only
-  match?: string; // request path the rate limit applies to
   characteristics?: string[]; // how the client is identified. Defaults to the global characteristics if unset
   window: string; // time window the rate limit applies to
   max: number; // maximum number of requests allowed in the time window
@@ -105,7 +103,6 @@ details about how the algorithm works.
 // See https://docs.arcjet.com/rate-limiting/configuration
 type SlidingWindowRateLimitOptions = {
   mode?: "LIVE" | "DRY_RUN"; // "LIVE" will block requests. "DRY_RUN" will log only
-  match?: string; // request path the rate limit applies to
   characteristics?: string[]; // how the client is identified. Defaults to the global characteristics if unset
   interval: number; // the time interval in seconds for the rate limit
   max: number; // maximum number of requests allowed over the time interval
@@ -131,7 +128,6 @@ the algorithm works.
 // See https://docs.arcjet.com/rate-limiting/configuration
 type TokenBucketRateLimitOptions = {
   mode?: "LIVE" | "DRY_RUN"; // "LIVE" will block requests. "DRY_RUN" will log only
-  match?: string; // request path the rate limit applies to
   characteristics?: string[]; // how the client is identified. Defaults to the global characteristics if unset
   refillRate: number; // number of tokens to add to the bucket at each interval
   interval: number; // the interval in seconds to add tokens to the bucket
@@ -248,14 +244,16 @@ Rate limit rules can be configured in two ways:
 
 ### Per route
 
-If you define your rate limit within an API route and do not specify a value for
-`match`, Arcjet assumes that the limit applies only to that route. If you define
-your rate limit in middleware, you should specify a path for `match` otherwise
-the rate limit will apply to all routes.
+If you define your rate limit within an API route Arcjet assumes that the limit
+applies only to that route. If you define your rate limit in middleware, you
+should either use the Next.js `matcher` config to choose which paths to execute
+the middleware for, or use `request.nextUrl.pathname.startsWith`.
 
-#### Rate limit only on `/api/hello`
+#### Rate limit only on `/api/*`
 
-<Code code={MiddlewareSingleRoute} title="/middleware.ts" lang="ts" />
+You can use conditionals in your Next.js middleware to match multiple paths.
+
+<Code code={MiddlewareMatchingPaths} title="/middleware.ts" lang="ts" />
 
 #### Rate limit on all routes
 
@@ -604,14 +602,6 @@ narrowly identify each client, such as an API key as shown here.
 :::
 
 <Code code={ByAPIKeyHeader} lang="ts" />
-
-### Wildcard matching paths
-
-The Arcjet rate limit `match` configuration does not currently support
-wildcards. This is on our roadmap, but in the meantime you can use conditionals
-in your Next.js middleware instead.
-
-<Code code={MiddlewareMatchingPaths} title="/middleware.ts" lang="ts" />
 
 ### Global rate limit
 

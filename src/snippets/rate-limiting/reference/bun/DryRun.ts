@@ -8,14 +8,12 @@ const aj = arcjet({
     // This rule is live
     fixedWindow({
       mode: "LIVE",
-      match: "/api/hello",
       window: "1h",
       max: 60,
     }),
     // This rule is in dry run mode, so will log but not block
     fixedWindow({
       mode: "DRY_RUN",
-      match: "/api/hello",
       // Setting the characteristics in the rule itself overrides the global
       // setting
       characteristics: ['http.request.headers["x-api-key"]'],

@@ -7,14 +7,12 @@ const aj = arcjet({
     // This rule is live
     fixedWindow({
       mode: "LIVE",
-      match: "/api/hello",
       window: "1h",
       max: 60,
     }),
     // This rule is in dry run mode, so will log but not block
     fixedWindow({
       mode: "DRY_RUN",
-      match: "/api/hello",
       characteristics: ['http.request.headers["x-api-key"]'],
       window: "1h",
       // max could also be a dynamic value applied after looking up a limit
