@@ -11,7 +11,7 @@ const aj = arcjet({
   ],
 });
 
-export async function GET(req) {
+export async function POST(req) {
   const decision = await aj.protect(req);
 
   if (decision.isErrored()) {
