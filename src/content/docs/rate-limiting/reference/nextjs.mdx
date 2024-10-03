@@ -242,6 +242,12 @@ Rate limit rules can be configured in two ways:
   configure rules in a single place or apply them globally to all routes, but
   it means the rules are not located alongside the code they are protecting.
 
+:::note
+If you use a platform that performs health checks or liveness probes, ensure
+that Arcjet is not enabled for those routes. These requests will not have all
+of the metadata that Arcjet requires to make security decisions.
+:::
+
 ### Per route
 
 If you define your rate limit within an API route Arcjet assumes that the limit

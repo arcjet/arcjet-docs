@@ -9,6 +9,10 @@ import { Tabs, TabItem, Code } from "@astrojs/starlight/components";
 import RequestFieldsExpressTS from "/src/snippets/reference/nodejs/RequestFieldsExpress.ts?raw";
 import RequestFieldsTS from "/src/snippets/reference/nodejs/RequestFields.ts?raw";
 import RequestFieldsHonoNodeTS from "/src/snippets/reference/nodejs/RequestFieldsHonoNode.ts?raw";
+import HealthzRouteAppJS from "/src/snippets/reference/nextjs/HealthzRouteApp.js?raw";
+import HealthzRouteAppTS from "/src/snippets/reference/nextjs/HealthzRouteApp.ts?raw";
+import HealthzRoutePagesJS from "/src/snippets/reference/nextjs/HealthzRoutePages.js?raw";
+import HealthzRoutePagesTS from "/src/snippets/reference/nextjs/HealthzRoutePages.ts?raw";
 
 ## Common problems
 
@@ -36,9 +40,8 @@ In order to fix this, omit your healthcheck route from your Arcjet middleware.
 
 #### Next.js
 
-Assuming your app is configured to use the `src` directory and you have your
-Arcjet middleware at `src/middleware.ts`, adjust the `config.matcher` regex
-to include an omission for the `/healthz` route:
+Assuming you have your Arcjet middleware at `middleware.ts`, adjust the
+`config.matcher` regex to include an omission for the `/healthz` route:
 
 ```diff
  export const config = {
@@ -54,26 +57,28 @@ Do not include the leading slash in the match that you add. That will cause
 the regex to match on `//healthz`, which is almost certainly not what you want.
 :::
 
-Then create an API route for your health check logic:
+<Tabs>
+<TabItem label="TS (App)">
+Then create an API route at `/app/healthz/route.ts`:
 
-```ts
-// src/app/healthz/route.ts
-import { NextRequest, NextResponse } from "next/server";
+<Code code={HealthzRouteAppTS} title="app/healthz/route.ts" lang="ts" />
+</TabItem>
+<TabItem label="TS (Pages)">
+Then create an API route at `/pages/healthz.ts`:
 
-export const GET = async (req: NextRequest) => {
-  // Adjust or remove this as needed depending on how your platform is configured.
-  if (req.headers.get("user-agent") !== "healthz") {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
+<Code code={HealthzRoutePagesTS} title="pages/healthz.ts" lang="ts" />
+</TabItem>
+<TabItem label="JS (App)">
+Then create an API route at `/app/healthz/route.js`:
 
-  return new Response("OK", {
-    status: 200,
-    headers: {
-      "Content-Type": "text/plain",
-    },
-  });
-};
-```
+<Code code={HealthzRouteAppJS} title="app/healthz/route.js" lang="js" />
+</TabItem>
+<TabItem label="JS (Pages)">
+Then create an API route at `/pages/healthz.js`:
+
+<Code code={HealthzRoutePagesJS} title="pages/healthz.js" lang="js" />
+</TabItem>
+</Tabs>
 
 When you deploy your app next, Arcjet should not trigger on this route.
 
