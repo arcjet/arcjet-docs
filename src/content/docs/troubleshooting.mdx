@@ -22,6 +22,61 @@ You can fix this by ensuring that Arcjet is only called once per request. You
 can combine multiple rules into a single client configuration and/or you can
 exclude routes from your middleware.
 
+### Decision errors from platform liveness or health checks when using Arcjet as a middleware
+
+Platforms like Kubernetes have support for automatic liveness and health
+check probes. These requests do not come from a browser and do not have all
+the same metadata that browsers do (and will not include important headers
+like `X-Real-Ip` or `X-Forwarded-For`). This will cause Arcjet to reject these
+probes, which will make the platform think your app is either not alive or
+unhealthy. This can manifest in CrashLoopBackoff errors in Kubernetes or your
+platform of choice restarting your app constantly.
+
+In order to fix this, omit your healthcheck route from your Arcjet middleware.
+
+#### Next.js
+
+Assuming your app is configured to use the `src` directory and you have your
+Arcjet middleware at `src/middleware.ts`, adjust the `config.matcher` regex
+to include an omission for the `/_healthz` route:
+
+```diff
+ export const config = {
+   // matcher tells Next.js which routes to run the middleware on.
+   // This runs the middleware on all routes except for static assets.
+-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
++  matcher: ["/((?!_next/static|_next/image|favicon.ico|_healthz).*)"],
+ };
+```
+
+:::note
+Do not include the leading slash in the match that you add. That will cause
+the regex to match on `//_healthz`, which is almost certainly not what you want.
+:::
+
+Then create an API route for your health check logic:
+
+```ts
+// src/app/_healthz/route.ts
+import { NextRequest, NextResponse } from "next/server";
+
+export const GET = async (req: NextRequest) => {
+  // Adjust or remove this as needed depending on how your platform is configured.
+  if (req.headers.get("user-agent") !== "healthz") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  return new Response("OK", {
+    status: 200,
+    headers: {
+      "Content-Type": "text/plain",
+    },
+  });
+};
+```
+
+When you deploy your app next, Arcjet should not trigger on this route.
+
 ## Common errors
 
 ### [unauthenticated] invalid key
