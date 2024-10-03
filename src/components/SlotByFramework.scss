@@ -28,3 +28,12 @@
   > :is(h1, h2, h3, h4, h5, h6):not(:where(.not-content *)) {
   margin-top: 1.5em;
 }
+
+.sl-markdown-content
+  :not(h1, h2, h3, h4, h5, h6)
+  + astro-island
+  > .SlotByFramework
+  > astro-slot
+  > :is(aside):not(:where(.not-content *)) {
+  margin-top: 2rem;
+}
