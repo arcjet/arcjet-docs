@@ -8,15 +8,9 @@ import {
 } from "@/lib/prefs";
 import { availableFrameworks, displayedFramework } from "@/store";
 import { useStore } from "@nanostores/react";
-import {
-  forwardRef,
-  useEffect,
-  useState,
-  type ForwardedRef,
-  type PropsWithChildren,
-} from "react";
+import { forwardRef, useEffect, useState, type ForwardedRef } from "react";
 
-interface Props extends PropsWithChildren {
+interface Props extends React.HTMLAttributes<HTMLSelectElement> {
   frameworks: FrameworkKey[];
 }
 
@@ -29,6 +23,9 @@ interface Props extends PropsWithChildren {
  */
 const FrameworkSwitcher = forwardRef(
   ({ frameworks, ...props }: Props, ref: ForwardedRef<HTMLSelectElement>) => {
+    let cls = "FrameworkSwitcher";
+    if (props.className) cls += " " + props.className;
+
     const $availableFrameworks = useStore(availableFrameworks);
 
     // The selected option
@@ -81,7 +78,13 @@ const FrameworkSwitcher = forwardRef(
     // TODO: Replace with Arcjet's select component.
 
     return (
-      <select ref={ref} {...props} onChange={onChange} value={selected}>
+      <select
+        className={cls}
+        ref={ref}
+        {...props}
+        onChange={onChange}
+        value={selected}
+      >
         {$availableFrameworks.map((framework: Framework, idx: number) => {
           return (
             <option key={`framework-option-${idx}`} value={framework.key}>

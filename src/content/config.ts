@@ -2,7 +2,7 @@ import type { FrameworkKey } from "@/lib/prefs";
 import { docsSchema } from "@astrojs/starlight/schema";
 import { defineCollection, z } from "astro:content";
 
-type TocNode = {
+export type TocNode = {
   text: string;
   anchor: string;
   framework: FrameworkKey | FrameworkKey[];

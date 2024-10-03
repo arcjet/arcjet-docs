@@ -1,3 +1,5 @@
+import FrameworkSwitcher from "@/components/FrameworkSwitcher";
+import type { TocNode } from "@/content/config";
 import useElementInView from "@/effects/useElementInView";
 import type { FrameworkKey } from "@/lib/prefs";
 import { defaultSelectedFramework } from "@/lib/prefs";
@@ -5,7 +7,7 @@ import { displayedFramework } from "@/store";
 import { useStore } from "@nanostores/react";
 import type { CollectionEntry } from "astro:content"; // Import CollectionEntry from astro:content
 import type { ForwardedRef, PropsWithChildren } from "react";
-import { forwardRef, useCallback, useEffect, useState } from "react";
+import { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
 
 import styles from "./TOC.module.scss";
 
@@ -26,7 +28,7 @@ const TOC = forwardRef(
 
     const cls = "TOC " + styles.TOC;
 
-    const [selectedEntry, setSelectedEntry] = useState<string>("");
+    const [selectedEntry, setSelectedEntry] = useState<TocNode>();
 
     const [toc] = useState<CollectionEntry<"docs">["data"]["ajToc"]>(
       astroEntry.data.ajToc,
@@ -41,62 +43,93 @@ const TOC = forwardRef(
       setSelectedFramework($displayedFramework);
     }, [$displayedFramework]);
 
-    // TODO: Make recursive 3+ levels?
-
     const onEntryClick = useCallback(
-      (anchor: string) => {
-        setSelectedEntry(anchor);
+      (entry: TocNode) => {
+        setSelectedEntry(entry);
       },
       [selectedEntry],
     );
 
+    // Renders list items recursively
+    const recursiveRenderTocList = useCallback(
+      (toc: TocNode[], depth = 0) => {
+        return (
+          <ul style={{ "--depth": depth } as React.CSSProperties}>
+            {toc.map((entry: (typeof toc)[number], idx: number) => {
+              if (
+                entry.framework &&
+                selectedFramework != entry.framework &&
+                !entry.framework.includes(selectedFramework)
+              )
+                return;
+
+              return (
+                <li key={`toc-entry-l1-${idx}`}>
+                  <TOCLink
+                    entry={entry}
+                    onClick={onEntryClick}
+                    selected={entry.anchor == selectedEntry?.anchor}
+                  />
+                  {entry.children &&
+                    recursiveRenderTocList(entry.children, depth + 1)}
+                </li>
+              );
+            })}
+          </ul>
+        );
+      },
+      [selectedFramework, selectedEntry],
+    );
+
+    // Render framework switcher
+    const switcher = useMemo(() => {
+      return (
+        <FrameworkSwitcher
+          className={styles.Switcher}
+          frameworks={astroEntry.data.frameworks}
+        />
+      );
+    }, [astroEntry.data.frameworks]);
+
+    const [mobileDropdownVisible, setMobileDropdownVisible] =
+      useState<boolean>(false);
+
     return (
       <div className={cls} ref={ref} {...props}>
-        <h2>On this page</h2>
-        <ul>
-          {toc.map((entry: (typeof toc)[number], idx: number) => {
-            if (
-              entry.framework &&
-              selectedFramework != entry.framework &&
-              !entry.framework.includes(selectedFramework)
-            )
-              return;
-
-            return (
-              <li key={`toc-entry-l1-${idx}`}>
-                <TOCLink
-                  entry={entry}
-                  onClick={onEntryClick}
-                  selected={entry.anchor == selectedEntry}
-                />
-                {entry.children && (
-                  <ul>
-                    {entry.children.map(
-                      (childEntry: (typeof toc)[number], idx: number) => {
-                        if (
-                          childEntry.framework &&
-                          selectedFramework != childEntry.framework &&
-                          !childEntry.framework.includes(selectedFramework)
-                        )
-                          return;
-
-                        return (
-                          <li key={`toc-entry-l2-${idx}`}>
-                            <TOCLink
-                              entry={childEntry}
-                              onClick={onEntryClick}
-                              selected={childEntry.anchor == selectedEntry}
-                            />
-                          </li>
-                        );
-                      },
-                    )}
-                  </ul>
-                )}
-              </li>
-            );
-          })}
-        </ul>
+        <div className={styles.NavDesktop + " sl-hidden lg:sl-block"}>
+          {switcher}
+          <h2>On this page</h2>
+          {recursiveRenderTocList(toc)}
+        </div>
+        <div className={styles.NavMobile + " lg:sl-hidden"}>
+          <summary className="sl-flex">
+            {switcher}
+            <div
+              className={
+                "toggle sl-flex" + (mobileDropdownVisible ? " open" : "")
+              }
+              onClick={() => setMobileDropdownVisible(!mobileDropdownVisible)}
+            >
+              On this page
+              <svg
+                aria-hidden="true"
+                className="caret"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"></path>
+              </svg>
+            </div>
+            <span className="display-current">{selectedEntry?.text}</span>
+          </summary>
+          {mobileDropdownVisible && (
+            <div className="dropdown">
+              <ul className="isMobile">{recursiveRenderTocList(toc)}</ul>
+            </div>
+          )}
+        </div>
       </div>
     );
   },
@@ -126,8 +159,8 @@ const TOCLink = forwardRef(
     ref: ForwardedRef<HTMLAnchorElement>,
   ) => {
     const click = useCallback(
-      (anchor: string) => {
-        onClick(anchor);
+      (entry: TocNode) => {
+        onClick(entry);
       },
       [selected],
     );
@@ -138,7 +171,7 @@ const TOCLink = forwardRef(
     });
 
     useEffect(() => {
-      if (isInView) click(entry.anchor);
+      if (isInView) click(entry);
     }, [isInView]);
 
     // TODO: Improve observer threshold
@@ -148,7 +181,7 @@ const TOCLink = forwardRef(
         ref={ref}
         className={selected ? styles.Selected : ""}
         href={"#" + entry.anchor}
-        onClick={() => click(entry.anchor)}
+        onClick={() => click({ ...entry })}
         {...props}
       >
         {entry.text}
