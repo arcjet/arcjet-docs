@@ -53,7 +53,11 @@ export default defineConfig({
         "./src/styles/custom.scss",
         "./src/styles/vars.scss",
       ],
-      plugins: [starlightLinksValidator()],
+      plugins: [
+        starlightLinksValidator({
+          exclude: ["**/*f=*"], // exclude urls with `f` param from validation
+        }),
+      ],
       components: {
         Sidebar: "./src/components/overrides/Sidebar.astro",
         PageSidebar: "./src/components/overrides/PageSidebar.astro",

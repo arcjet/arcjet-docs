@@ -1,7 +1,7 @@
 export const main = [
   {
     label: "Get started",
-    link: "/docs/get-started-index",
+    link: "/docs/get-started-intro",
   },
   {
     label: "Examples",
