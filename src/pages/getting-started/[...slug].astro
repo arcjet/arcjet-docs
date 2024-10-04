@@ -1,0 +1,105 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import WhatIsArcjet from "../../components/WhatIsArcjet.astro";
+import FAQs from "../../components/FAQs.astro";
+import Comments from "../../components/Comments.astro";
+
+const snippet = await getEntry('getting-started', Astro.params.slug);
+console.log(snippet)
+
+// 1. Generate a new path for every collection entry
+export async function getStaticPaths() {
+  const pages = await getCollection('getting-started');
+  return pages.map(page => ({
+    params: { slug: page.id },
+    props: { data: page },
+  }));
+}
+
+---
+
+This guide will help you protect your [Bun +
+Hono](https://hono.dev/getting-started/bun) app using Arcjet.
+
+<WhatIsArcjet />
+
+## SDK installation
+
+Follow these steps to get started. You can also [find an example app on
+GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/bun-rl).
+
+### 1. Install Arcjet
+
+In your project root, run the following command to install the SDK:
+
+```bash
+bun add @arcjet/bun
+```
+
+#### Requirements
+
+- Bun 1.1.27 or later
+- Hono 4.3 or later
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key. Add it to a `.env.local` file in your
+Bun project root.
+
+Arcjet only accepts non-local IP addresses with a fallback to 127.0.0.1 in
+development mode. Since Bun doesn't set `NODE_ENV` for you, you also need to
+set `ARCJET_ENV` in your environment file.
+
+```ini title=".env.local"
+# NODE_ENV is not set automatically, so tell Arcjet we're in dev
+# You can leave this unset in prod
+ARCJET_ENV=development
+ARCJET_KEY=ajkey_yourkey
+```
+
+### 3. Add a rate limit to a route
+
+The example below applies a token bucket rate limit rule to a route where we
+identify the user based on their ID e.g. if they are logged in. The bucket is
+configured with a maximum capacity of 10 tokens and refills by 5 tokens every 10
+seconds. Each request consumes 5 tokens.
+
+We also configure a Shield rule which adds protection against common attacks,
+such as SQL injection.
+
+<code>
+{snippet.data.content}
+</code>
+
+### 4. Start app
+
+Start your app and load `http://localhost:3000`.
+
+```bash
+bun run --hot index.ts
+```
+
+Refresh the page a few times to trigger the rate limit. The requests will also
+show up in the [Arcjet dashboard](https://app.arcjet.com). Note: If you load
+this in a browser, you may see 2 requests - one for the page and one for a
+favicon.
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can customize bot protection, rate
+limiting for your API and minimize fraudulent registrations with the signup form
+protection.
+
+## Get help
+
+Need help with anything? [Email us](mailto:support@arcjet.com) or [join our
+Discord](https://discord.gg/TPra6jqZDC) to get support from our
+engineering team.
+
+<Comments />
