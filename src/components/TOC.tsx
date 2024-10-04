@@ -43,12 +43,9 @@ const TOC = forwardRef(
       setSelectedFramework($displayedFramework);
     }, [$displayedFramework]);
 
-    const onEntryClick = useCallback(
-      (entry: TocNode) => {
-        setSelectedEntry(entry);
-      },
-      [selectedEntry],
-    );
+    const onEntryClick = useCallback((entry: TocNode) => {
+      setSelectedEntry(entry);
+    }, []);
 
     // Renders list items recursively
     const recursiveRenderTocList = useCallback(

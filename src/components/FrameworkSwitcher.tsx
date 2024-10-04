@@ -28,7 +28,7 @@ const FrameworkSwitcher = forwardRef(
 
     const $availableFrameworks = useStore(availableFrameworks);
 
-    // The selected option
+    // The selected framework option
     const [selected, setSelected] = useState<FrameworkKey>(
       defaultSelectedFramework,
     );
@@ -63,6 +63,7 @@ const FrameworkSwitcher = forwardRef(
       availableFrameworks.set(getFrameworks(frameworks));
     }, [frameworks]);
 
+    // Handle query params
     useEffect(() => {
       const params = new URLSearchParams(window.location.search);
       const f = params.get("f");
