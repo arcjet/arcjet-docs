@@ -40,8 +40,6 @@ const FrameworkSwitcher = forwardRef(
 
       if (!storeFramework(val)) return;
 
-      setSelected(val as FrameworkKey);
-
       // Update store
       displayedFramework.set(val as FrameworkKey);
     };
@@ -56,7 +54,6 @@ const FrameworkSwitcher = forwardRef(
         storedFramework,
         $availableFrameworks.map((f) => f.key),
       );
-      if (match) setSelected(match);
 
       // Update store
       displayedFramework.set(match);
@@ -75,8 +72,6 @@ const FrameworkSwitcher = forwardRef(
       const f = params.get("f");
 
       if (!f || !storeFramework(f)) return;
-
-      setSelected(f as FrameworkKey);
 
       // Update store
       displayedFramework.set(f as FrameworkKey);
