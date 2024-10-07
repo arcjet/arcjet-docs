@@ -4,9 +4,14 @@ import {
   getClosestFrameworkMatch,
   getFrameworks,
   getStoredFramework,
+  isValidFrameworkKey,
   storeFramework,
 } from "@/lib/prefs";
-import { availableFrameworks, displayedFramework } from "@/store";
+import {
+  availableFrameworks,
+  displayedFramework,
+  queryParamFramework,
+} from "@/store";
 import { useStore } from "@nanostores/react";
 import { forwardRef, useEffect, useState, type ForwardedRef } from "react";
 
@@ -28,6 +33,7 @@ const FrameworkSwitcher = forwardRef(
 
     const $availableFrameworks = useStore(availableFrameworks);
     const $displayedFramework = useStore(displayedFramework);
+    const $queryParamFramework = useStore(queryParamFramework);
 
     // The selected framework option
     const [selected, setSelected] = useState<FrameworkKey>(
@@ -37,27 +43,11 @@ const FrameworkSwitcher = forwardRef(
     // Select change callback
     const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
       const val = e.target.value;
-
       if (!storeFramework(val)) return;
 
       // Update store
       displayedFramework.set(val as FrameworkKey);
     };
-
-    // Sync with local storage value if present
-    useEffect(() => {
-      const storedFramework = getStoredFramework();
-      if (!storedFramework) return;
-
-      // Not all stored frameworks may be in the list, so we try to return the closest match
-      const match = getClosestFrameworkMatch(
-        storedFramework,
-        $availableFrameworks.map((f) => f.key),
-      );
-
-      // Update store
-      displayedFramework.set(match);
-    }, [$availableFrameworks]);
 
     // Sync store with current page frontmatter
     useEffect(() => {
@@ -66,20 +56,42 @@ const FrameworkSwitcher = forwardRef(
       }
     }, [frameworks]);
 
-    // Handle query params
+    // Sync with query param for framework or local storage value if present
     useEffect(() => {
+      let framework: FrameworkKey | undefined = undefined;
+
+      // Get the framework to display from query params
       const params = new URLSearchParams(window.location.search);
       const f = params.get("f");
 
-      if (!f || !storeFramework(f)) return;
+      if (f && f != $queryParamFramework && isValidFrameworkKey(f)) {
+        framework = f as FrameworkKey;
+        queryParamFramework.set(f as FrameworkKey);
+        storeFramework(f);
+      }
 
-      // Update store
-      displayedFramework.set(f as FrameworkKey);
-    }, []);
+      // Or get it from storage
+      if (!framework) {
+        const storedFramework = getStoredFramework();
+        if (storedFramework) framework = storedFramework;
+      }
+
+      // We update based on the framework choice if any
+      if (framework) {
+        // Not all stored frameworks may be in the list currently,
+        // so we try to return the closest match
+        const match = getClosestFrameworkMatch(
+          framework,
+          $availableFrameworks.map((f) => f.key),
+        );
+
+        displayedFramework.set(match);
+      }
+    }, [$availableFrameworks, $queryParamFramework]);
 
     // Handle change in the displayed framework
-    // If the nano store for this has changed then we assume
-    // local storage has also been updated and only change the displayed selection.
+    // If the nano store for this has changed then we assume local storage
+    // has also been updated and only change the displayed selection.
     useEffect(() => {
       setSelected($displayedFramework);
     }, [$displayedFramework]);
