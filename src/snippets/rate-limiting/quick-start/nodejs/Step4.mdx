@@ -1,4 +1,5 @@
-import { Aside, TabItem, Tabs } from "@astrojs/starlight/components";
+import { Aside } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
 
 ### 4. Start server
 
@@ -10,18 +11,18 @@ import { Aside, TabItem, Tabs } from "@astrojs/starlight/components";
 </Aside>
 
 {/* prettier-ignore */}
-<Tabs syncKey="language">
-  <TabItem label="TS">
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <Fragment slot="TS">
   ```sh
   npx tsx --env-file .env.local index.ts
   ```
-  </TabItem>
-  <TabItem label="JS">
+  </Fragment>
+  <Fragment slot="JS">
   ```sh
   node --env-file .env.local index.js
   ```
-  </TabItem>
-</Tabs>
+  </Fragment>
+</SelectableContent>
 
 Then make some requests to hit the rate limit:
 

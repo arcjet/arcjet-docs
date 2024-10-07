@@ -1,9 +1,10 @@
 import Step3TS from "/src/snippets/rate-limiting/quick-start/sveltekit/Step3.ts?raw";
 import Step3JS from "/src/snippets/rate-limiting/quick-start/sveltekit/Step3.js?raw";
-import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
 
-<Tabs syncKey="language">
-<TabItem label="TS">
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <Fragment slot="TS">
 Create a new API route at `/src/routes/api/arcjet/+server.ts`:
 
 <Code
@@ -13,8 +14,8 @@ Create a new API route at `/src/routes/api/arcjet/+server.ts`:
   mark={[{ range: "11-18,23-24" }]}
 />
 
-</TabItem>
-<TabItem label="JS">
+  </Fragment>
+  <Fragment slot="JS">
 Create a new API route at `/src/routes/api/arcjet/+server.js`:
 
 <Code
@@ -24,5 +25,5 @@ Create a new API route at `/src/routes/api/arcjet/+server.js`:
   mark={[{ range: "11-18,23-24" }]}
 />
 
-</TabItem>
-</Tabs>
+  </Fragment>
+</SelectableContent>
