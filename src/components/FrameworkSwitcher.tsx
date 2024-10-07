@@ -11,7 +11,7 @@ import { useStore } from "@nanostores/react";
 import { forwardRef, useEffect, useState, type ForwardedRef } from "react";
 
 interface Props extends React.HTMLAttributes<HTMLSelectElement> {
-  frameworks: FrameworkKey[];
+  frameworks?: FrameworkKey[];
 }
 
 /**
@@ -51,16 +51,21 @@ const FrameworkSwitcher = forwardRef(
       if (!storedFramework) return;
 
       // Not all stored frameworks may be in the list, so we try to return the closest match
-      const match = getClosestFrameworkMatch(storedFramework, frameworks);
+      const match = getClosestFrameworkMatch(
+        storedFramework,
+        $availableFrameworks.map((f) => f.key),
+      );
       if (match) setSelected(match);
 
       // Update store
       displayedFramework.set(match);
-    }, [frameworks]);
+    }, [$availableFrameworks]);
 
     // Sync store with current page frontmatter
     useEffect(() => {
-      availableFrameworks.set(getFrameworks(frameworks));
+      if (frameworks && frameworks.length > 0) {
+        availableFrameworks.set(getFrameworks(frameworks));
+      }
     }, [frameworks]);
 
     // Handle query params
