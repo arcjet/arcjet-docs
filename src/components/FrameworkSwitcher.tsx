@@ -27,6 +27,7 @@ const FrameworkSwitcher = forwardRef(
     if (props.className) cls += " " + props.className;
 
     const $availableFrameworks = useStore(availableFrameworks);
+    const $displayedFramework = useStore(displayedFramework);
 
     // The selected framework option
     const [selected, setSelected] = useState<FrameworkKey>(
@@ -80,6 +81,13 @@ const FrameworkSwitcher = forwardRef(
       // Update store
       displayedFramework.set(f as FrameworkKey);
     }, []);
+
+    // Handle change in the displayed framework
+    // If the nano store for this has changed then we assume
+    // local storage has also been updated and only change the displayed selection.
+    useEffect(() => {
+      setSelected($displayedFramework);
+    }, [$displayedFramework]);
 
     // TODO: Replace with Arcjet's select component.
 
