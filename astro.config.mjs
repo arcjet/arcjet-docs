@@ -30,6 +30,8 @@ export default defineConfig({
       favicon: "favicon.png",
       social: {
         github: "https://github.com/arcjet",
+        twitter: "https://twitter.com/arcjethq",
+        youtube: "https://www.youtube.com/@arcjethq",
         discord: "https://discord.gg/TPra6jqZDC",
         email: "mailto:support@arcjet.com",
       },

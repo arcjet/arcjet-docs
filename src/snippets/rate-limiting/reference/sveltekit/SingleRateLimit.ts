@@ -6,7 +6,6 @@ const aj = arcjet({
   rules: [
     fixedWindow({
       mode: "LIVE",
-      match: "/api/arcjet",
       window: "1h",
       max: 60,
     }),

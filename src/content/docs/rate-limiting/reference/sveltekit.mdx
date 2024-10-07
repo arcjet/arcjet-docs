@@ -12,7 +12,6 @@ import ByUserIdTS from "/src/snippets/rate-limiting/reference/sveltekit/ByUserId
 import ByUserIdJS from "/src/snippets/rate-limiting/reference/sveltekit/ByUserId.js?raw";
 import SingleRateLimit from "/src/snippets/rate-limiting/reference/sveltekit/SingleRateLimit.ts?raw";
 import DryRun from "/src/snippets/rate-limiting/reference/sveltekit/DryRun.ts?raw";
-import HookSingleRoute from "/src/snippets/rate-limiting/reference/sveltekit/HookSingleRoute.ts?raw";
 import HookMatchingPaths from "/src/snippets/rate-limiting/reference/sveltekit/HookMatchingPaths.ts?raw";
 import HookAllRoutes from "/src/snippets/rate-limiting/reference/sveltekit/HookAllRoutes.ts?raw";
 import HookMatcher from "/src/snippets/rate-limiting/reference/sveltekit/HookMatcher.ts?raw";
@@ -57,7 +56,6 @@ the algorithm works.
 // See https://docs.arcjet.com/rate-limiting/configuration
 type ConfigFixedWindowRateLimitOptions = {
   mode?: "LIVE" | "DRY_RUN"; // "LIVE" will block requests. "DRY_RUN" will log only
-  match?: string; // request path the rate limit applies to
   characteristics?: string[]; // how the client is identified. Defaults to the global characteristics if unset
   window: string; // time window the rate limit applies to
   max: number; // maximum number of requests allowed in the time window
@@ -81,7 +79,6 @@ details about how the algorithm works.
 // See https://docs.arcjet.com/rate-limiting/configuration
 type ConfigSlidingWindowRateLimitOptions = {
   mode?: "LIVE" | "DRY_RUN"; // "LIVE" will block requests. "DRY_RUN" will log only
-  match?: string; // request path the rate limit applies to
   characteristics?: string[]; // how the client is identified. Defaults to the global characteristics if unset
   interval: number; // the time interval in seconds for the rate limit
   max: number; // maximum number of requests allowed over the time interval
@@ -107,7 +104,6 @@ the algorithm works.
 // See https://docs.arcjet.com/rate-limiting/configuration
 type TokenBucketRateLimitOptions = {
   mode?: "LIVE" | "DRY_RUN"; // "LIVE" will block requests. "DRY_RUN" will log only
-  match?: string; // request path the rate limit applies to
   characteristics?: string[]; // how the client is identified. Defaults to the global characteristics if unset
   refillRate: number; // number of tokens to add to the bucket at each interval
   interval: number; // the interval in seconds to add tokens to the bucket
@@ -201,28 +197,22 @@ Rate limit rules can be configured in two ways:
 
 ### Per route
 
-If you define your rate limit within a route and do not specify a value for
-`match`, Arcjet assumes that the limit applies only to that route. If you define
-your rate limit in hooks, you should specify a path for `match` otherwise
-the rate limit will apply to all routes.
+If you define your rate limit within an API route Arcjet assumes that the limit
+applies only to that route. If you define your rate limit in hooks, you should
+use `event.url.pathname.startsWith`.
 
-#### Rate limit only on `/api`
+#### Rate limit only on `/api/*`
 
 <Code
-  code={HookSingleRoute}
+  code={HookMatchingPaths}
   title="/src/hooks.server.ts"
   lang="ts"
-  mark={[{ range: "10-11" }]}
+  mark={[{ range: "23-24" }]}
 />
 
 #### Rate limit on all routes
 
-<Code
-  code={HookAllRoutes}
-  title="/src/hooks.server.ts"
-  lang="ts"
-  mark={[{ range: "10-11" }]}
-/>
+<Code code={HookAllRoutes} title="/src/hooks.server.ts" lang="ts" />
 
 ### Avoiding double protection with hooks
 
@@ -522,19 +512,6 @@ narrowly identify each client, such as an API key as shown here.
 :::
 
 <Code code={ByAPIKeyHeader} lang="ts" mark={[{ range: "9" }]} />
-
-### Wildcard matching paths
-
-The Arcjet rate limit `match` configuration does not currently support
-wildcards. This is on our roadmap, but in the meantime you can use conditionals
-in your SvelteKit hook instead.
-
-<Code
-  code={HookMatchingPaths}
-  title="/src/hooks.server.ts"
-  lang="ts"
-  mark={[{ range: "23-24" }]}
-/>
 
 ### Global rate limit
 

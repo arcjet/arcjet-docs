@@ -9,6 +9,10 @@ import { Tabs, TabItem, Code } from "@astrojs/starlight/components";
 import RequestFieldsExpressTS from "/src/snippets/reference/nodejs/RequestFieldsExpress.ts?raw";
 import RequestFieldsTS from "/src/snippets/reference/nodejs/RequestFields.ts?raw";
 import RequestFieldsHonoNodeTS from "/src/snippets/reference/nodejs/RequestFieldsHonoNode.ts?raw";
+import HealthzRouteAppJS from "/src/snippets/reference/nextjs/HealthzRouteApp.js?raw";
+import HealthzRouteAppTS from "/src/snippets/reference/nextjs/HealthzRouteApp.ts?raw";
+import HealthzRoutePagesJS from "/src/snippets/reference/nextjs/HealthzRoutePages.js?raw";
+import HealthzRoutePagesTS from "/src/snippets/reference/nextjs/HealthzRoutePages.ts?raw";
 
 ## Common problems
 
@@ -21,6 +25,62 @@ are using a middleware and also calling the Arcjet SDK in a route handler.
 You can fix this by ensuring that Arcjet is only called once per request. You
 can combine multiple rules into a single client configuration and/or you can
 exclude routes from your middleware.
+
+### Decision errors from platform liveness or health checks when using Arcjet as a middleware
+
+Platforms like Kubernetes have support for automatic liveness and health
+check probes. These requests do not come from a browser and do not have all
+the same metadata that browsers do (and will not include important headers
+like `X-Real-Ip` or `X-Forwarded-For`). This will cause Arcjet to reject these
+probes, which will make the platform think your app is either not alive or
+unhealthy. This can manifest in CrashLoopBackoff errors in Kubernetes or your
+platform of choice restarting your app constantly.
+
+In order to fix this, omit your healthcheck route from your Arcjet middleware.
+
+#### Next.js
+
+Assuming you have your Arcjet middleware at `middleware.ts`, adjust the
+`config.matcher` regex to include an omission for the `/healthz` route:
+
+```diff
+ export const config = {
+   // matcher tells Next.js which routes to run the middleware on.
+   // This runs the middleware on all routes except for static assets.
+-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
++  matcher: ["/((?!_next/static|_next/image|favicon.ico|healthz).*)"],
+ };
+```
+
+:::note
+Do not include the leading slash in the match that you add. That will cause
+the regex to match on `//healthz`, which is almost certainly not what you want.
+:::
+
+<Tabs>
+<TabItem label="TS (App)">
+Then create an API route at `/app/healthz/route.ts`:
+
+<Code code={HealthzRouteAppTS} title="app/healthz/route.ts" lang="ts" />
+</TabItem>
+<TabItem label="TS (Pages)">
+Then create an API route at `/pages/healthz.ts`:
+
+<Code code={HealthzRoutePagesTS} title="pages/healthz.ts" lang="ts" />
+</TabItem>
+<TabItem label="JS (App)">
+Then create an API route at `/app/healthz/route.js`:
+
+<Code code={HealthzRouteAppJS} title="app/healthz/route.js" lang="js" />
+</TabItem>
+<TabItem label="JS (Pages)">
+Then create an API route at `/pages/healthz.js`:
+
+<Code code={HealthzRoutePagesJS} title="pages/healthz.js" lang="js" />
+</TabItem>
+</Tabs>
+
+When you deploy your app next, Arcjet should not trigger on this route.
 
 ## Common errors
 
