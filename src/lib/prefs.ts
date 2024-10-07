@@ -162,3 +162,25 @@ export const getClosestFrameworkMatch = (
 
   return match.bestMatch.target as FrameworkKey;
 };
+
+/**
+ * Utility that retrieves a stored syncKey.
+ */
+export const getStoredSyncKey = (suffix: string): string | undefined => {
+  const stored = getTypedStorage<Prefs>(`starlight-synced-tabs__${suffix}`);
+
+  if (!stored) return undefined;
+  return stored;
+};
+
+/**
+ * Utility that saves the selected framework in storage safely.
+ * @param key - The framework key to store.
+ */
+export const storeSyncKey = (suffix: string, key: string): boolean => {
+  const alreadyStored = getStoredSyncKey(suffix) == key;
+  if (alreadyStored) return false;
+
+  setTypedStorage<Prefs>(`starlight-synced-tabs__${suffix}`, key);
+  return true;
+};

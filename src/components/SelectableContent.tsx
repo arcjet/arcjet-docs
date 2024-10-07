@@ -2,6 +2,8 @@ import FrameworkSwitcher from "@/components/FrameworkSwitcher";
 import type { ForwardedRef, HTMLProps, ReactNode } from "react";
 import { forwardRef, useEffect, useState } from "react";
 
+import { getStoredSyncKey, storeSyncKey } from "@/lib/prefs";
+import { getComparator } from "@/lib/utils";
 import styles from "./SelectableContent.module.scss";
 
 type Slot = {
@@ -11,6 +13,7 @@ type Slot = {
 
 interface Props extends HTMLProps<HTMLDivElement> {
   syncKey: string;
+  frameworkSwitcher: boolean;
 }
 
 /**
@@ -19,10 +22,17 @@ interface Props extends HTMLProps<HTMLDivElement> {
  * Displays content based on user selection of syncKey and framework.
  *
  * @param syncKey - The sync key to persist the selection.
+ * @param frameworkSwitcher - Shows the framework switcher.
  */
 const SelectableContent = forwardRef(
   (
-    { syncKey, className, children, ...props }: Props,
+    {
+      syncKey,
+      frameworkSwitcher = false,
+      className,
+      children,
+      ...props
+    }: Props,
     ref: ForwardedRef<HTMLDivElement>,
   ) => {
     let cls = "SelectableContent " + styles.SelectableContent;
@@ -35,6 +45,8 @@ const SelectableContent = forwardRef(
     const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
       const val = e.target.value;
 
+      storeSyncKey(syncKey, val);
+
       if (slots && slots.length > 0) {
         setSelectedSlot(slots.find((s) => s.key == val));
       }
@@ -43,9 +55,11 @@ const SelectableContent = forwardRef(
     // Map props to slots
     useEffect(() => {
       setSlots(() => {
-        return Object.entries(props).map((entry) => {
-          return { key: entry[0], value: entry[1] };
-        });
+        return Object.entries(props)
+          .map((entry) => {
+            return { key: entry[0], value: entry[1] };
+          })
+          .sort(getComparator("desc", "key"));
       });
     }, []);
 
@@ -56,11 +70,27 @@ const SelectableContent = forwardRef(
       }
     }, [slots]);
 
+    // Handle stored syncKey value
+    const [storedSyncKeyValue, setStoredSyncKeyValue] = useState<string>();
+    useEffect(() => {
+      const stored = getStoredSyncKey(syncKey);
+      if (stored) setStoredSyncKeyValue(stored);
+    }, []);
+
+    useEffect(() => {
+      if (storedSyncKeyValue) {
+        const slot = slots?.find((slot) => slot.key == storedSyncKeyValue);
+        if (slot) setSelectedSlot(slot);
+      }
+    }, [storedSyncKeyValue]);
+
+    // TODO: sync sync key with nano store
+
     return (
       <div ref={ref} className={cls}>
         <div className={styles.Toolbar}>
           {slots && (
-            <select onChange={onChange}>
+            <select onChange={onChange} value={selectedSlot?.key}>
               {slots.map((slot: Slot, idx: number) => {
                 return (
                   <option key={`content-slot-key-${idx}`} value={slot.key}>
@@ -70,7 +100,7 @@ const SelectableContent = forwardRef(
               })}
             </select>
           )}
-          <FrameworkSwitcher />
+          {frameworkSwitcher && <FrameworkSwitcher />}
         </div>
         <div>{selectedSlot?.value}</div>
       </div>
