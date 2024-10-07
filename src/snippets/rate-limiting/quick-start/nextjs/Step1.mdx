@@ -1,20 +1,20 @@
-import { TabItem, Tabs } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
 
 {/* prettier-ignore */}
-<Tabs syncKey="packageManager">
-<TabItem label="npm">
+<SelectableContent client:load syncKey="packageManager">
+<Fragment slot="npm">
 ```sh
 npm i @arcjet/next
 ```
-</TabItem>
-<TabItem label="pnpm">
+</Fragment>
+<Fragment slot="pnpm">
 ```sh
 pnpm add @arcjet/next
 ```
-</TabItem>
-<TabItem label="yarn">
+</Fragment>
+<Fragment slot="yarn">
 ```sh
 yarn add @arcjet/next
 ```
-</TabItem>
-</Tabs>
+</Fragment>
+</SelectableContent>
