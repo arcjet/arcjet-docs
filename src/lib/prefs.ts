@@ -44,6 +44,7 @@ export type Prefs = {
   "selected-framework"?: FrameworkKey;
   // The framework currently displayed (might differ from what the user has selected if not available in the current page)
   "displayed-framework"?: FrameworkKey;
+  [key: `starlight-synced-tabs__${string}`]: string;
 };
 
 /**
@@ -125,7 +126,7 @@ export const getStoredFramework = (): FrameworkKey | undefined => {
     removeTypedStorage<Prefs>("selected-framework");
   }
 
-  return stored;
+  return stored as FrameworkKey;
 };
 
 /**
