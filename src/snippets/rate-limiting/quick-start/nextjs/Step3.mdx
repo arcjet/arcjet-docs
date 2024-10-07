@@ -3,9 +3,10 @@ import Step3AppTS from "/src/snippets/rate-limiting/quick-start/nextjs/Step3App.
 import Step3PagesJS from "/src/snippets/rate-limiting/quick-start/nextjs/Step3Pages.js?raw";
 import Step3PagesTS from "/src/snippets/rate-limiting/quick-start/nextjs/Step3Pages.ts?raw";
 import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
 
-<Tabs syncKey="language">
-<TabItem label="TS (App)">
+<SelectableContent client:load syncKey="language">
+<Fragment slot="TS (App)">
 Create a new API route at `/app/api/arcjet/route.ts`:
 
 <Code
@@ -14,9 +15,8 @@ Create a new API route at `/app/api/arcjet/route.ts`:
   title="/app/api/arcjet/route.ts"
   mark={["ARCJET_KEY"]}
 />
-
-</TabItem>
-<TabItem label="TS (Pages)">
+</Fragment>
+<Fragment slot="TS (Pages)">
 Create a new API route at `/pages/api/arcjet.ts`:
 
 <Code
@@ -25,9 +25,8 @@ Create a new API route at `/pages/api/arcjet.ts`:
   title="/pages/api/arcjet.ts"
   mark={["ARCJET_KEY"]}
 />
-
-</TabItem>
-<TabItem label="JS (App)">
+</Fragment>
+<Fragment slot="JS (App)">
 Create a new API route at `/app/api/arcjet/route.js`:
 
 <Code
@@ -36,9 +35,8 @@ Create a new API route at `/app/api/arcjet/route.js`:
   title="/app/api/arcjet/route.js"
   mark={["ARCJET_KEY"]}
 />
-
-</TabItem>
-<TabItem label="JS (Pages)">
+</Fragment>
+<Fragment slot="JS (Pages)">
 Create a new API route at `/pages/api/arcjet.js`:
 
 <Code
@@ -47,6 +45,5 @@ Create a new API route at `/pages/api/arcjet.js`:
   title="/pages/api/arcjet.js"
   mark={["ARCJET_KEY"]}
 />
-
-</TabItem>
-</Tabs>
+</Fragment>
+</SelectableContent>
