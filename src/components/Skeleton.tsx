@@ -1,37 +1,39 @@
-import type { ComponentPropsWithRef, CSSProperties, ElementType } from "react";
+import type { CSSProperties, ForwardedRef, HTMLProps } from "react";
 import { forwardRef } from "react";
 
 import styles from "./Skeleton.module.scss";
 
-type Props<T extends ElementType> = {
-  as?: T;
+interface Props extends HTMLProps<HTMLSpanElement> {
   elevation?: 1 | 2 | 3;
   appearance?: "Fade";
   radius?: number;
-  inline: boolean;
-} & ComponentPropsWithRef<T>;
+  inline?: boolean;
+}
 
 /**
  * Skeleton
  *
  * Shows a loading skeleton.
  *
- * @param as - Pass an optional html element type, eg: "span" for an inline loading skeleton.
+ * @param elevation Appearance based on desired layout hirerachy position: 1 | 2 | 3.
+ * @param radius The skeleton corner radius.
+ * @param appearance Visual appearance option.
+ * @param inline Shows the element inline.
+ *
  */
 const Skeleton = forwardRef(
-  <T extends ElementType = "div">(
+  (
     {
-      as: Element = "div",
       elevation = 1,
       appearance,
       radius = 2,
+      inline,
       className,
       style,
       children,
-      inline,
       ...props
-    }: Props<T>,
-    ref: React.Ref<Element>,
+    }: Props,
+    ref: ForwardedRef<HTMLSpanElement>,
   ) => {
     let cls = `Skeleton ${styles.Skeleton}`;
     if (className) cls += " " + className;
@@ -42,7 +44,7 @@ const Skeleton = forwardRef(
     if (inline) cls += " " + styles.Inline;
 
     return (
-      <Element
+      <span
         ref={ref}
         className={cls}
         style={
@@ -51,7 +53,7 @@ const Skeleton = forwardRef(
         {...props}
       >
         {children}
-      </Element>
+      </span>
     );
   },
 );

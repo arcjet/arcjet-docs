@@ -57,28 +57,30 @@ const TOC = forwardRef(
     const recursiveRenderTocList = useCallback(
       (toc: TocNode[], depth = 0) => {
         return (
-          <ul style={{ "--depth": depth } as React.CSSProperties}>
-            {toc.map((entry: (typeof toc)[number], idx: number) => {
-              if (
-                entry.framework &&
-                selectedFramework != entry.framework &&
-                !entry.framework.includes(selectedFramework)
-              )
-                return;
+          selectedFramework && (
+            <ul style={{ "--depth": depth } as React.CSSProperties}>
+              {toc.map((entry: (typeof toc)[number], idx: number) => {
+                if (
+                  entry.framework &&
+                  selectedFramework != entry.framework &&
+                  !entry.framework.includes(selectedFramework)
+                )
+                  return;
 
-              return (
-                <li key={`toc-entry-l1-${idx}`}>
-                  <TOCLink
-                    entry={entry}
-                    onClick={onEntryClick}
-                    selected={entry.anchor == selectedEntry?.anchor}
-                  />
-                  {entry.children &&
-                    recursiveRenderTocList(entry.children, depth + 1)}
-                </li>
-              );
-            })}
-          </ul>
+                return (
+                  <li key={`toc-entry-l1-${idx}`}>
+                    <TOCLink
+                      entry={entry}
+                      onClick={onEntryClick}
+                      selected={entry.anchor == selectedEntry?.anchor}
+                    />
+                    {entry.children &&
+                      recursiveRenderTocList(entry.children, depth + 1)}
+                  </li>
+                );
+              })}
+            </ul>
+          )
         );
       },
       [selectedFramework, selectedEntry],
