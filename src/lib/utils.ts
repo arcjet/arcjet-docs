@@ -19,7 +19,7 @@ export const setTypedStorage = <T>(key: keyof T, value: T[keyof T]) => {
 };
 
 export const getTypedStorage = <T>(key: keyof T): T[keyof T] => {
-  return safeParse(localStorage.getItem(safeToString(key)) || "{}");
+  return safeParse(localStorage.getItem(safeToString(key)));
 };
 
 export const removeTypedStorage = <T>(key: keyof T): void => {
