@@ -1,5 +1,5 @@
 import type { ForwardedRef, HTMLProps } from "react";
-import { forwardRef } from "react";
+import { forwardRef, useCallback, useId, useState } from "react";
 
 import styles from "./Select.module.scss";
 
@@ -10,13 +10,35 @@ interface Props extends HTMLProps<HTMLSelectElement> {}
  */
 const Select = forwardRef(
   ({ className, ...props }: Props, ref: ForwardedRef<HTMLSelectElement>) => {
+    const id = useId();
+
     let cls = "Select " + styles.Select;
-    if (className) cls += " " + className;
+
+    const [focus, setFocus] = useState(false);
+    const handleFocus = useCallback(() => {
+      setFocus(true);
+    }, []);
+    const handleBlur = useCallback(() => {
+      setFocus(false);
+    }, []);
+
+    let clsWrapper = "SelectWrapper " + styles.SelectWrapper;
+    if (className) clsWrapper += " " + className;
+    if (focus) clsWrapper += " Focus " + styles.Focus;
 
     return (
-      <select ref={ref} className={cls} {...props}>
-        {props.children}
-      </select>
+      <label htmlFor={id} className={clsWrapper}>
+        <select
+          id={id}
+          ref={ref}
+          className={cls}
+          {...props}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+        >
+          {props.children}
+        </select>
+      </label>
     );
   },
 );
