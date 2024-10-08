@@ -6,6 +6,7 @@ import { defaultSelectedFramework } from "@/lib/prefs";
 import { displayedFramework } from "@/store";
 import { useStore } from "@nanostores/react";
 import type { CollectionEntry } from "astro:content"; // Import CollectionEntry from astro:content
+import { onSet } from "nanostores";
 import type { ForwardedRef, PropsWithChildren } from "react";
 import { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
 
@@ -24,17 +25,16 @@ interface Props extends PropsWithChildren {
  */
 const TOC = forwardRef(
   ({ astroEntry, ...props }: Props, ref: ForwardedRef<HTMLDivElement>) => {
-    const $displayedFramework = useStore(displayedFramework);
-
     const cls = "TOC " + styles.TOC;
 
-    const [selectedEntry, setSelectedEntry] = useState<TocNode>();
-
+    // The toc data
     const [toc] = useState<CollectionEntry<"docs">["data"]["ajToc"]>(
       astroEntry.data.ajToc,
     );
 
-    // The selected framework
+    // Managet the selected framework
+    const $displayedFramework = useStore(displayedFramework);
+
     const [selectedFramework, setSelectedFramework] = useState<FrameworkKey>(
       defaultSelectedFramework,
     );
@@ -42,6 +42,15 @@ const TOC = forwardRef(
     useEffect(() => {
       setSelectedFramework($displayedFramework);
     }, [$displayedFramework]);
+
+    useEffect(() => {
+      onSet(displayedFramework, ({ newValue }) => {
+        setSelectedFramework(newValue);
+      });
+    }, []);
+
+    // The selected TOC link
+    const [selectedEntry, setSelectedEntry] = useState<TocNode>();
 
     const onEntryClick = useCallback((entry: TocNode) => {
       setSelectedEntry(entry);
@@ -88,6 +97,7 @@ const TOC = forwardRef(
       );
     }, [astroEntry.data.frameworks]);
 
+    // Mobile drodpwon state
     const [mobileDropdownVisible, setMobileDropdownVisible] =
       useState<boolean>(false);
 
