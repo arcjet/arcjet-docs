@@ -1,5 +1,5 @@
+import Skeleton from "@/components/Skeleton";
 import type { FrameworkKey } from "@/lib/prefs";
-import { defaultSelectedFramework } from "@/lib/prefs";
 import { kebabToCamel } from "@/lib/utils";
 import { displayedFramework } from "@/store";
 import { useStore } from "@nanostores/react";
@@ -36,9 +36,7 @@ const SlotByFramework = forwardRef(
     const $displayedFramework = useStore(displayedFramework);
 
     // The selected framework
-    const [selectedFramework, setSelectedFramework] = useState<FrameworkKey>(
-      defaultSelectedFramework,
-    );
+    const [selectedFramework, setSelectedFramework] = useState<FrameworkKey>();
 
     useEffect(() => {
       setSelectedFramework($displayedFramework);
@@ -47,13 +45,22 @@ const SlotByFramework = forwardRef(
     const content = useMemo(() => {
       return (
         <>
-          {extractSlot(props, selectedFramework)}
+          {selectedFramework && extractSlot(props, selectedFramework)}
           {props.children}
         </>
       );
     }, [selectedFramework]);
 
-    return inline ? (
+    // Loading handling
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      if (selectedFramework) setLoading(false);
+    }, [selectedFramework]);
+
+    return loading ? (
+      <Skeleton radius={1} />
+    ) : inline ? (
       content
     ) : (
       <div ref={ref} className="SlotByFramework">

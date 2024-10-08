@@ -1,5 +1,5 @@
+import Skeleton from "@/components/Skeleton";
 import type { FrameworkKey } from "@/lib/prefs";
-import { defaultSelectedFramework } from "@/lib/prefs";
 import { availableFrameworks, displayedFramework } from "@/store";
 import { useStore } from "@nanostores/react";
 import type { ForwardedRef, PropsWithChildren } from "react";
@@ -16,15 +16,22 @@ const FrameworkName = forwardRef(
     const $availableFrameworks = useStore(availableFrameworks);
 
     // The selected framework
-    const [selectedFramework, setSelectedFramework] = useState<FrameworkKey>(
-      defaultSelectedFramework,
-    );
+    const [selectedFramework, setSelectedFramework] = useState<FrameworkKey>();
 
     useEffect(() => {
       setSelectedFramework($displayedFramework);
     }, [$displayedFramework]);
 
-    return (
+    // Loading handling
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      if (selectedFramework) setLoading(false);
+    }, [selectedFramework]);
+
+    return loading ? (
+      <Skeleton as="span" radius={0.5} inline />
+    ) : (
       $availableFrameworks.find((f) => f.key == selectedFramework)?.label || ""
     );
   },

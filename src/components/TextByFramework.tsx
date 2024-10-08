@@ -5,6 +5,7 @@ import { displayedFramework } from "@/store";
 import { useStore } from "@nanostores/react";
 import type { ForwardedRef, PropsWithChildren } from "react";
 import { forwardRef, useEffect, useState } from "react";
+import Skeleton from "./Skeleton";
 
 /**
  * Text By Framework
@@ -24,9 +25,20 @@ const TextByFramework = forwardRef(
       setSelectedFramework($displayedFramework);
     }, [$displayedFramework]);
 
+    // Loading handling
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      if (selectedFramework) setLoading(false);
+    }, [selectedFramework]);
+
     return (
       <>
-        {(props as any)[kebabToCamel(selectedFramework)]}
+        {loading ? (
+          <Skeleton as="span" radius={0.5} inline />
+        ) : (
+          (props as any)[kebabToCamel(selectedFramework)]
+        )}
         {props.children}
       </>
     );
