@@ -1,7 +1,6 @@
 import Select from "@/components/Select";
 import type { Framework, FrameworkKey } from "@/lib/prefs";
 import {
-  defaultSelectedFramework,
   getClosestFrameworkMatch,
   getFrameworks,
   getStoredFramework,
@@ -41,9 +40,7 @@ const FrameworkSwitcher = forwardRef(
     const $queryParamFramework = useStore(queryParamFramework);
 
     // The selected framework option
-    const [selected, setSelected] = useState<FrameworkKey>(
-      defaultSelectedFramework,
-    );
+    const [selected, setSelected] = useState<FrameworkKey>();
 
     // Select change callback
     const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -106,9 +103,15 @@ const FrameworkSwitcher = forwardRef(
       setOptions($availableFrameworks);
     }, [$availableFrameworks]);
 
-    // TODO: Replace with Arcjet's select component.
+    // Loading handling
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      if (selected) setLoading(false);
+    }, [selected]);
 
     return (
+      !loading &&
       options && (
         <Select
           className={cls}
