@@ -1,3 +1,4 @@
+import Select from "@/components/Select";
 import type { Framework, FrameworkKey } from "@/lib/prefs";
 import {
   defaultSelectedFramework,
@@ -109,7 +110,7 @@ const FrameworkSwitcher = forwardRef(
 
     return (
       options && (
-        <select
+        <Select
           className={cls}
           ref={ref}
           {...props}
@@ -123,7 +124,7 @@ const FrameworkSwitcher = forwardRef(
               </option>
             );
           })}
-        </select>
+        </Select>
       )
     );
   },

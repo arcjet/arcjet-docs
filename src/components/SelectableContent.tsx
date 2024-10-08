@@ -1,9 +1,10 @@
 import FrameworkSwitcher from "@/components/FrameworkSwitcher";
+import Select from "@/components/Select";
+import { getStoredSyncKey, storeSyncKey } from "@/lib/prefs";
+import { getComparator } from "@/lib/utils";
 import type { ForwardedRef, HTMLProps, ReactNode } from "react";
 import { forwardRef, useEffect, useState } from "react";
 
-import { getStoredSyncKey, storeSyncKey } from "@/lib/prefs";
-import { getComparator } from "@/lib/utils";
 import styles from "./SelectableContent.module.scss";
 
 type Slot = {
@@ -90,7 +91,7 @@ const SelectableContent = forwardRef(
       <div ref={ref} className={cls}>
         <div className={styles.Toolbar}>
           {slots && (
-            <select onChange={onChange} value={selectedSlot?.key}>
+            <Select onChange={onChange} value={selectedSlot?.key}>
               {slots.map((slot: Slot, idx: number) => {
                 return (
                   <option key={`content-slot-key-${idx}`} value={slot.key}>
@@ -98,7 +99,7 @@ const SelectableContent = forwardRef(
                   </option>
                 );
               })}
-            </select>
+            </Select>
           )}
           {frameworkSwitcher && <FrameworkSwitcher />}
         </div>
