@@ -31,6 +31,10 @@ const FrameworkSwitcher = forwardRef(
     let cls = "FrameworkSwitcher";
     if (props.className) cls += " " + props.className;
 
+    const [options, setOptions] = useState(
+      frameworks ? getFrameworks(frameworks) : undefined,
+    );
+
     const $availableFrameworks = useStore(availableFrameworks);
     const $displayedFramework = useStore(displayedFramework);
     const $queryParamFramework = useStore(queryParamFramework);
@@ -96,24 +100,31 @@ const FrameworkSwitcher = forwardRef(
       setSelected($displayedFramework);
     }, [$displayedFramework]);
 
+    // Handle change in the framework options
+    useEffect(() => {
+      setOptions($availableFrameworks);
+    }, [$availableFrameworks]);
+
     // TODO: Replace with Arcjet's select component.
 
     return (
-      <select
-        className={cls}
-        ref={ref}
-        {...props}
-        onChange={onChange}
-        value={selected}
-      >
-        {$availableFrameworks.map((framework: Framework, idx: number) => {
-          return (
-            <option key={`framework-option-${idx}`} value={framework.key}>
-              {framework.label}
-            </option>
-          );
-        })}
-      </select>
+      options && (
+        <select
+          className={cls}
+          ref={ref}
+          {...props}
+          onChange={onChange}
+          value={selected}
+        >
+          {options.map((framework: Framework, idx: number) => {
+            return (
+              <option key={`framework-option-${idx}`} value={framework.key}>
+                {framework.label}
+              </option>
+            );
+          })}
+        </select>
+      )
     );
   },
 );
