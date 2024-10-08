@@ -83,29 +83,29 @@ import VideoQuickStart from "@/snippets/rate-limiting/quick-start/nextjs/VideoQu
 import FAQs from "/src/components/FAQs.astro";
 import Comments from "/src/components/Comments.astro";
 
-This guide will help you protect your <SlotByFramework inline client:load><Fragment slot="bun">Bun</Fragment><Fragment slot="bun-hono">[Bun +
+This guide will help you protect your <SlotByFramework inline client:idle><Fragment slot="bun">Bun</Fragment><Fragment slot="bun-hono">[Bun +
 Hono](https://hono.dev/getting-started/bun)</Fragment><Fragment slot="next-js">Next.js</Fragment><Fragment slot="node-js">Node.js</Fragment><Fragment slot="node-js-express">Node.js + Express</Fragment><Fragment slot="node-js-hono">[Node.js + Hono](https://hono.dev/getting-started/nodejs)</Fragment><Fragment slot="sveltekit">SvelteKit</Fragment></SlotByFramework> app using Arcjet.
 
 <WhatIsArcjet />
 
-<SlotByFramework client:load>
+<SlotByFramework client:idle>
   <BunHonoNotice slot="bun-hono" />
   <NodeJsHonoNotice slot="node-js-hono" />
 </SlotByFramework>
 
-<SlotByFramework client:load>
+<SlotByFramework client:idle>
   <VideoQuickStart slot="next-js" />
 </SlotByFramework>
 
 ## SDK installation
 
-Follow these steps to get started. You can also <SlotByFramework client:load inline><Fragment slot="bun">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/bun-rl)</Fragment><Fragment slot="bun-hono">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/bun-rl)</Fragment><Fragment slot="next-js">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nextjs-14-app-dir-rl)</Fragment><Fragment slot="node-js">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nodejs-rl)</Fragment><Fragment slot="node-js-express">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nodejs-express-rl)</Fragment><Fragment slot="node-js-hono">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nodejs-hono-rl)</Fragment><Fragment slot="sveltekit">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/sveltekit)</Fragment></SlotByFramework>.
+Follow these steps to get started. You can also <SlotByFramework client:idle inline><Fragment slot="bun">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/bun-rl)</Fragment><Fragment slot="bun-hono">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/bun-rl)</Fragment><Fragment slot="next-js">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nextjs-14-app-dir-rl)</Fragment><Fragment slot="node-js">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nodejs-rl)</Fragment><Fragment slot="node-js-express">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nodejs-express-rl)</Fragment><Fragment slot="node-js-hono">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nodejs-hono-rl)</Fragment><Fragment slot="sveltekit">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/sveltekit)</Fragment></SlotByFramework>.
 
 ### 1. Install Arcjet
 
 In your project root, run the following command to install the SDK:
 
-<SlotByFramework client:load>
+<SlotByFramework client:idle>
   <Step1Bun slot="bun" />
   <Step1Bun slot="bun-hono" />
   <Step1NextJs slot="next-js" />
@@ -117,7 +117,7 @@ In your project root, run the following command to install the SDK:
 
 #### Requirements
 
-<SlotByFramework client:load>
+<SlotByFramework client:idle>
   <RequirementsBun slot="bun" />
   <RequirementsBunHono slot="bun-hono" />
   <RequirementsNextJs slot="next-js" />
@@ -130,9 +130,9 @@ In your project root, run the following command to install the SDK:
 ### 2. Set your key
 
 [Create a free Arcjet account](https://app.arcjet.com) then follow the
-instructions to add a site and get a key. Add it to a `.env.local` file in your <FrameworkName client:load /> project root.
+instructions to add a site and get a key. Add it to a `.env.local` file in your <FrameworkName client:idle /> project root.
 
-<SlotByFramework client:load>
+<SlotByFramework client:idle>
   <Step2SetEnv slot="bun" />
   <Step2SetEnv slot="bun-hono" />
   <Step2 slot="next-js" />
@@ -149,7 +149,7 @@ identify the user based on their ID e.g. if they are logged in. The bucket is
 configured with a maximum capacity of 10 tokens and refills by 5 tokens every 10
 seconds. Each request consumes 5 tokens.
 
-<SlotByFramework client:load>
+<SlotByFramework client:idle>
   <Fragment slot="bun">
 
 We also configure a Shield rule which adds protection against common attacks,
@@ -174,7 +174,7 @@ such as SQL injection.
   <Step3SvelteKit slot="sveltekit" />
 </SlotByFramework>
 
-<SlotByFramework client:load>
+<SlotByFramework client:idle>
   <Step4Bun slot="bun" />
   <Step4Bun slot="bun-hono" />
   <Step4 slot="next-js" />

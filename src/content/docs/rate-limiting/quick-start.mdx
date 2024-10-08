@@ -59,23 +59,23 @@ import Comments from "/src/components/Comments.astro";
 Arcjet rate limiting allows you to define rules which limit the number of
 requests a client can make over a period of time.
 
-{/* <TextByFramework client:load nextJs="Next.js" bun="Bun" nodeJs="Node.js" sveltekit="SvelteKit" /> */}
+{/* <TextByFramework client:idle nextJs="Next.js" bun="Bun" nodeJs="Node.js" sveltekit="SvelteKit" /> */}
 
 <WhatIsArcjet />
 
-<SlotByFramework client:load>
+<SlotByFramework client:idle>
   <VideoQuickStart slot="next-js" />
 </SlotByFramework>
 
 ## Quick start
 
-This guide will show you how to add a simple rate limit to your <FrameworkName client:load /> app.
+This guide will show you how to add a simple rate limit to your <FrameworkName client:idle /> app.
 
 ### 1. Install Arcjet
 
 In your project root, run the following command to install the SDK:
 
-<SlotByFramework client:load>
+<SlotByFramework client:idle>
   <Step1Bun slot="bun" />
   <Step1NextJs slot="next-js" />
   <Step1NodeJs slot="node-js" />
@@ -85,9 +85,9 @@ In your project root, run the following command to install the SDK:
 ### 2. Set your key
 
 [Create a free Arcjet account](https://app.arcjet.com) then follow the
-instructions to add a site and get a key. Add it to a `.env.local` file in your <FrameworkName client:load /> project root.
+instructions to add a site and get a key. Add it to a `.env.local` file in your <FrameworkName client:idle /> project root.
 
-<SlotByFramework client:load>
+<SlotByFramework client:idle>
   <Step2SetEnv slot="bun" />
   <Step2 slot="next-js" />
   <Step2SetEnv slot="node-js" />
@@ -101,14 +101,14 @@ identify the user based on their ID e.g. if they are logged in. The bucket is
 configured with a maximum capacity of 10 tokens and refills by 5 tokens every
 10 seconds. Each request consumes 5 tokens.
 
-<SlotByFramework client:load>
+<SlotByFramework client:idle>
   <Step3Bun slot="bun" />
   <Step3NextJs slot="next-js" />
   <Step3NodeJs slot="node-js" />
   <Step3SvelteKit slot="sveltekit" />
 </SlotByFramework>
 
-<SlotByFramework client:load>
+<SlotByFramework client:idle>
   <Step4Bun slot="bun" />
   <Step4 slot="next-js" />
   <Step4NodeJs slot="node-js" />
