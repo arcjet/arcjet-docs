@@ -1,6 +1,12 @@
 import { SelectChevron } from "@/components/icons/SelectChevron";
 import type { Color, Option, Size } from "@/lib/ui";
-import type { ChangeEvent, FocusEvent, ForwardedRef, HTMLProps } from "react";
+import type {
+  ChangeEvent,
+  FocusEvent,
+  ForwardedRef,
+  HTMLProps,
+  ReactNode,
+} from "react";
 import {
   forwardRef,
   useCallback,
@@ -29,6 +35,8 @@ export interface Props extends HTMLProps<HTMLSelectElement> {
   dropdown?: {
     size?: Size;
   };
+  decoratorLeft?: ReactNode;
+  decoratorRight?: ReactNode;
 }
 
 /**
@@ -41,6 +49,8 @@ const Select = forwardRef(
       level = "primary",
       trigger = { size: "md" },
       dropdown,
+      decoratorLeft,
+      decoratorRight,
       className,
       onChange,
       onFocus,
@@ -109,6 +119,9 @@ const Select = forwardRef(
 
     return (
       <label htmlFor={id} className={clsWrapper}>
+        {decoratorLeft && (
+          <span className={styles.DecoratorLeft}>{decoratorLeft}</span>
+        )}
         <span className={styles.TriggerText}>
           {selected && triggerTextFromOptions(selected)}
         </span>
@@ -123,6 +136,9 @@ const Select = forwardRef(
         >
           {props.children}
         </select>
+        {decoratorRight && (
+          <span className={styles.DecoratorLeft}>{decoratorRight}</span>
+        )}
         <SelectChevron className={styles.IndicatorDropdown} />
       </label>
     );

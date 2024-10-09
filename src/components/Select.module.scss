@@ -59,16 +59,19 @@
 
   &.Size-lg {
     --indicator-right-size: calc(var(--sp) * 1.625);
+    --decorator-size: calc(var(--sp) * 2.25);
     --trigger-col-gap: calc(var(--sp) * 1.25);
   }
 
   &.Size-md {
     --indicator-right-size: calc(var(--sp) * 1.5);
+    --decorator-size: calc(var(--sp) * 2);
     --trigger-col-gap: var(--sp);
   }
 
   &.Size-sm {
     --indicator-right-size: calc(var(--sp) * 1.375);
+    --decorator-size: calc(var(--sp) * 1.75);
     --trigger-col-gap: calc(var(--sp) * 0.75);
   }
 
@@ -141,6 +144,10 @@
   flex-flow: row nowrap;
   align-items: center;
   column-gap: var(--trigger-col-gap);
+  transition: all var(--time-sm) ease-in-out;
+  color: var(--trigger-color);
+  background-color: var(--trigger-bg);
+  border: var(--trigger-border);
 
   .Select {
     /* Resets */
@@ -172,8 +179,26 @@
   .IndicatorDropdown {
     width: var(--indicator-right-size);
     height: var(--indicator-right-size);
+    color: var(--trigger-color);
     flex: 0 0 auto;
     margin: 0;
+  }
+
+  .DecoratorLeft,
+  .DecoratorRight {
+    width: var(--decorator-size);
+    height: var(--decorator-size);
+    color: var(--trigger-color);
+
+    & :global {
+      .aj-Icon {
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        vertical-align: top;
+      }
+    }
   }
 
   &.Size-lg {
@@ -213,15 +238,6 @@
 
     font-size: 13px;
     line-height: 18px;
-  }
-
-  transition: all var(--time-sm) ease-in-out;
-  color: var(--trigger-color);
-  background-color: var(--trigger-bg);
-  border: var(--trigger-border);
-
-  .IndicatorDropdown {
-    color: var(--trigger-color);
   }
 
   &:disabled {
