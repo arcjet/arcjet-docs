@@ -145,7 +145,7 @@ const FrameworkSwitcher = forwardRef(
           ref={ref}
           onChange={onChange}
           value={selected}
-          decoratorLeft={frameworkIcon[selected]}
+          decoratorLeft={selected && frameworkIcon[selected]}
           {...props}
           {...select}
         >
