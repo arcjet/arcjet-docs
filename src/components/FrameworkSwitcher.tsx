@@ -1,3 +1,4 @@
+import type { Props as SelectProps } from "@/components/Select";
 import Select from "@/components/Select";
 import type { Framework, FrameworkKey } from "@/lib/prefs";
 import {
@@ -17,6 +18,7 @@ import { forwardRef, useEffect, useState, type ForwardedRef } from "react";
 
 interface Props extends React.HTMLAttributes<HTMLSelectElement> {
   frameworks?: FrameworkKey[];
+  select?: SelectProps;
 }
 
 /**
@@ -27,7 +29,10 @@ interface Props extends React.HTMLAttributes<HTMLSelectElement> {
  * @param frameworks - The list of framework options to display.
  */
 const FrameworkSwitcher = forwardRef(
-  ({ frameworks, ...props }: Props, ref: ForwardedRef<HTMLSelectElement>) => {
+  (
+    { frameworks, select, ...props }: Props,
+    ref: ForwardedRef<HTMLSelectElement>,
+  ) => {
     let cls = "FrameworkSwitcher";
     if (props.className) cls += " " + props.className;
 
@@ -116,9 +121,10 @@ const FrameworkSwitcher = forwardRef(
         <Select
           className={cls}
           ref={ref}
-          {...props}
           onChange={onChange}
           value={selected}
+          {...props}
+          {...select}
         >
           {options.map((framework: Framework, idx: number) => {
             return (

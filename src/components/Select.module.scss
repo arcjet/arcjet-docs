@@ -47,7 +47,6 @@
 
 .SelectWrapper {
   /* Resets */
-  display: inline-block;
   box-sizing: border-box;
   padding-left: 0;
   padding-right: 0;
@@ -55,59 +54,177 @@
   padding-block: 0;
   border: 1px solid transparent;
 
-  background: var(--primary-solid-idleBg);
+  /* Defs */
+  --trigger-border: 1px solid transparent;
 
-  /* Size md */
-  height: calc(var(--sp) * 4);
-  font-size: 15px;
-  line-height: 20px;
-  padding-top: calc(var(--sp) * 0.625);
-  padding-bottom: calc(var(--sp) * 0.625);
-  padding-left: calc(var(--sp) * 1.125);
-  padding-right: calc(var(--sp) * 1.125);
-  border-radius: calc(var(--sp) * 0.75);
-
-  /* solid */
-  background-color: var(--primary-solid-idleBg);
-
-  /* solid + plain */
-  transition: all var(--time-sm) ease-in-out;
-  color: var(--primary-plain-idleColor);
-
-  &:hover,
-  &.Focus {
-    color: var(--primary-plain-hoverColor);
-    background-color: var(--primary-plain-hoverBg);
-    outline: none;
+  &.Size-lg {
+    --indicator-right-size: calc(var(--sp) * 1.625);
+    --trigger-col-gap: calc(var(--sp) * 1.25);
   }
 
-  &:active {
-    color: var(--primary-plain-activeColor);
-    border: var(--primary-plain-activeBorder);
-    outline: none;
+  &.Size-md {
+    --indicator-right-size: calc(var(--sp) * 1.5);
+    --trigger-col-gap: var(--sp);
   }
 
-  &:disabled {
-    background-color: transparent;
-    border: none;
-    color: var(--primary-plain-disabledColor);
-    cursor: default;
+  &.Size-sm {
+    --indicator-right-size: calc(var(--sp) * 1.375);
+    --trigger-col-gap: calc(var(--sp) * 0.75);
   }
 
-  &:before {
-    border: none;
-    box-shadow: none;
+  &.Level-primary {
+    --trigger-color: var(--primary-plain-idleColor);
+
+    &.Appearance-default {
+      --trigger-bg: var(--primary-solid-idleBg);
+    }
+    &.Appearance-discreet {
+      --trigger-bg: transparent;
+    }
+
+    &:hover,
+    &.Focus {
+      --trigger-color: var(--primary-plain-hoverColor);
+      --trigger-bg: var(--primary-plain-hoverBg);
+    }
+
+    &:active {
+      --trigger-color: var(--primary-plain-activeColor);
+      --trigger-border: var(--primary-plain-activeBorder);
+    }
+
+    &:disabled {
+      --trigger-color: var(--primary-plainColor);
+      --trigger-bg: transparent;
+      --trigger-border: none;
+    }
+
+    &:before {
+      --trigger-border: none;
+    }
   }
+
+  &.Level-secondary {
+    --trigger-color: var(--secondary-plain-idleColor);
+
+    &.Appearance-default {
+      --trigger-bg: var(--secondary-solid-idleBg);
+    }
+    &.Appearance-discreet {
+      --trigger-bg: transparent;
+    }
+
+    &:hover,
+    &.Focus {
+      --trigger-color: var(--secondary-plain-hoverColor);
+      --trigger-bg: var(--secondary-plain-hoverBg);
+    }
+
+    &:active {
+      --trigger-color: var(--secondary-plain-activeColor);
+      --trigger-border: var(--secondary-plain-activeBorder);
+    }
+
+    &:disabled {
+      --trigger-color: var(--secondary-plainColor);
+      --trigger-bg: transparent;
+      --trigger-border: none;
+    }
+
+    &:before {
+      --trigger-border: none;
+    }
+  }
+
+  position: relative;
+  display: inline-flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  column-gap: var(--trigger-col-gap);
 
   .Select {
+    /* Resets */
     vertical-align: top;
     border: none;
     background: none;
     outline: none;
+    padding: 0;
+    margin: 0;
 
-    font-size: 14px;
-    line-height: 18px;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    opacity: 0;
+    cursor: pointer;
+  }
 
+  .TriggerText {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1 1 auto;
+  }
+
+  .IndicatorDropdown {
+    width: var(--indicator-right-size);
+    height: var(--indicator-right-size);
+    flex: 0 0 auto;
+    margin: 0;
+  }
+
+  &.Size-lg {
+    height: calc(var(--sp) * 4.5);
+    min-width: 120px;
+    padding-top: calc(var(--sp) * 0.875);
+    padding-bottom: calc(var(--sp) * 0.875);
+    padding-left: calc(var(--sp) * 1.25);
+    padding-right: calc(var(--sp) * 1.25);
+    border-radius: calc(var(--sp) * 0.75);
+
+    font-size: 17px;
+    line-height: 22px;
+  }
+
+  &.Size-md {
+    height: calc(var(--sp) * 4);
     min-width: 100px;
+    padding-top: calc(var(--sp) * 0.625);
+    padding-bottom: calc(var(--sp) * 0.625);
+    padding-left: calc(var(--sp) * 1.125);
+    padding-right: calc(var(--sp) * 1.125);
+    border-radius: calc(var(--sp) * 0.75);
+
+    font-size: 15px;
+    line-height: 20px;
+  }
+
+  &.Size-sm {
+    height: calc(var(--sp) * 3.25);
+    min-width: 80px;
+    padding-top: calc(var(--sp) * 0.5);
+    padding-bottom: calc(var(--sp) * 0.5);
+    padding-left: calc(var(--sp) * 1);
+    padding-right: calc(var(--sp) * 0.5);
+    border-radius: calc(var(--sp) * 0.75);
+
+    font-size: 13px;
+    line-height: 18px;
+  }
+
+  transition: all var(--time-sm) ease-in-out;
+  color: var(--trigger-color);
+  background-color: var(--trigger-bg);
+  border: var(--trigger-border);
+
+  .IndicatorDropdown {
+    color: var(--trigger-color);
+  }
+
+  &:disabled {
+    cursor: default;
   }
 }

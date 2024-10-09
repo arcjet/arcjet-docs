@@ -91,7 +91,12 @@ const SelectableContent = forwardRef(
       <div ref={ref} className={cls}>
         <div className={styles.Toolbar}>
           {slots && (
-            <Select onChange={onChange} value={selectedSlot?.key}>
+            <Select
+              onChange={onChange}
+              value={selectedSlot?.key}
+              trigger={{ size: "sm" }}
+              level="secondary"
+            >
               {slots.map((slot: Slot, idx: number) => {
                 return (
                   <option key={`content-slot-key-${idx}`} value={slot.key}>
@@ -101,7 +106,11 @@ const SelectableContent = forwardRef(
               })}
             </Select>
           )}
-          {frameworkSwitcher && <FrameworkSwitcher />}
+          {frameworkSwitcher && (
+            <FrameworkSwitcher
+              select={{ level: "secondary", trigger: { size: "sm" } }}
+            />
+          )}
         </div>
         <div>{selectedSlot?.value}</div>
       </div>
