@@ -102,7 +102,7 @@ const Select = forwardRef(
           })),
         );
       }
-    }, [elRef]);
+    }, [elRef, props.value]);
 
     let clsWrapper = "SelectWrapper " + styles.SelectWrapper;
     if (className) clsWrapper += " " + className;
