@@ -90,7 +90,9 @@ const TOC = forwardRef(
     const switcher = useMemo(() => {
       return (
         <div className={styles.Switcher}>
-          <div className={styles.SwitcherLabel}>Framework</div>
+          <div className={styles.SwitcherLabel + " sl-hidden lg:sl-block"}>
+            Framework
+          </div>
           <FrameworkSwitcher frameworks={astroEntry.data.frameworks} />
         </div>
       );
