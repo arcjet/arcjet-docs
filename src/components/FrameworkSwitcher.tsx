@@ -1,3 +1,11 @@
+import { Bun as IconBun } from "@/components/icons/tech/Bun";
+import { Deno as IconDeno } from "@/components/icons/tech/Deno";
+import { Express as IconExpress } from "@/components/icons/tech/Express";
+import { Hono as IconHono } from "@/components/icons/tech/Hono";
+import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
+import { NextJs as IconNextJs } from "@/components/icons/tech/NextJs";
+import { NodeJs as IconNodeJs } from "@/components/icons/tech/NodeJs";
+import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
 import type { Props as SelectProps } from "@/components/Select";
 import Select from "@/components/Select";
 import type { Framework, FrameworkKey } from "@/lib/prefs";
@@ -15,6 +23,20 @@ import {
 } from "@/store";
 import { useStore } from "@nanostores/react";
 import { forwardRef, useEffect, useState, type ForwardedRef } from "react";
+
+const frameworkIcon = {
+  deno: <IconDeno />,
+  bun: <IconBun />,
+  express: <IconExpress />,
+  hono: <IconHono />,
+  "nest-js": <IconNestJs />,
+  "next-js": <IconNextJs />,
+  "node-js": <IconNodeJs />,
+  sveltekit: <IconSvelteKit />,
+  "node-js-express": <IconNodeJs />,
+  "node-js-hono": <IconNodeJs />,
+  "bun-hono": <IconBun />,
+};
 
 interface Props extends React.HTMLAttributes<HTMLSelectElement> {
   frameworks?: FrameworkKey[];
@@ -123,6 +145,7 @@ const FrameworkSwitcher = forwardRef(
           ref={ref}
           onChange={onChange}
           value={selected}
+          decoratorLeft={frameworkIcon[selected]}
           {...props}
           {...select}
         >
