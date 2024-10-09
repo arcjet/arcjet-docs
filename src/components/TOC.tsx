@@ -89,10 +89,10 @@ const TOC = forwardRef(
     // Render framework switcher
     const switcher = useMemo(() => {
       return (
-        <FrameworkSwitcher
-          className={styles.Switcher}
-          frameworks={astroEntry.data.frameworks}
-        />
+        <div className={styles.Switcher}>
+          <div className={styles.SwitcherLabel}>Framework</div>
+          <FrameworkSwitcher frameworks={astroEntry.data.frameworks} />
+        </div>
       );
     }, [astroEntry.data.frameworks]);
 
