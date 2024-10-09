@@ -17,7 +17,9 @@ export type FrameworkKey =
   | "node-js"
   | "node-js-express"
   | "node-js-hono"
-  | "sveltekit";
+  | "sveltekit"
+  | "nest-js"
+  | "express";
 
 /** The framework display labels */
 export type FrameworkLabel =
@@ -27,7 +29,9 @@ export type FrameworkLabel =
   | "Node.js"
   | "Node.js + Express"
   | "Node.js + Hono"
-  | "SvelteKit";
+  | "SvelteKit"
+  | "NestJs"
+  | "Express";
 
 /** The full framework type */
 export type Framework = {
@@ -84,6 +88,14 @@ export const frameworks: Array<Framework> = [
     key: "sveltekit",
     label: "SvelteKit",
   },
+  // {
+  //   key: "nest-js",
+  //   label: "NestJs",
+  // },
+  // {
+  //   key: "express",
+  //   label: "Express",
+  // },
 ];
 
 /**
