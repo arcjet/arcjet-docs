@@ -59,7 +59,7 @@ const SlotByFramework = forwardRef(
     }, [selectedFramework]);
 
     return loading ? (
-      <Skeleton radius={1} />
+      <Skeleton radius={1} appearance="Fade" />
     ) : inline ? (
       content
     ) : (
