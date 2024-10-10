@@ -9,7 +9,7 @@ export const main = [
     attrs: { target: "_blank", class: "external-link" },
   },
   {
-    label: "Primitives & features",
+    label: "Features",
     collapsed: false,
     items: [
       {
@@ -347,60 +347,6 @@ export const main = [
     ],
   },
   {
-    label: "Utilities",
-    collapsed: false,
-    items: [
-      {
-        label: "Redact",
-        collapsed: true,
-        items: [
-          {
-            label: "Quick start",
-            link: "/docs/redact/quick-start",
-          },
-          {
-            label: "Reference",
-            link: "/docs/redact/reference",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    label: "Integrations",
-    collapsed: false,
-    items: [
-      {
-        label: "Auth.js",
-        link: "/docs/integrations/authjs",
-      },
-      {
-        label: "Clerk",
-        link: "/docs/integrations/clerk",
-      },
-      {
-        label: "Fly.io",
-        link: "https://fly.io/docs/reference/arcjet/",
-      },
-      {
-        label: "LangChain",
-        link: "/docs/integrations/langchain",
-      },
-      {
-        label: "NextAuth",
-        link: "/docs/integrations/nextauth",
-      },
-      {
-        label: "OpenAI",
-        link: "/docs/integrations/openai",
-      },
-      {
-        label: "Vercel",
-        link: "https://vercel.com/integrations/arcjet",
-      },
-    ],
-  },
-  {
     label: "Advanced",
     collapsed: false,
     items: [
@@ -450,19 +396,65 @@ export const main = [
             label: "Limitations",
             link: "/docs/limitations",
           },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Utilities",
+    collapsed: false,
+    items: [
+      {
+        label: "Redact",
+        collapsed: true,
+        items: [
           {
-            label: "Security",
-            link: "/docs/security",
+            label: "Quick start",
+            link: "/docs/redact/quick-start",
           },
           {
-            label: "Privacy",
-            link: "/docs/privacy",
-          },
-          {
-            label: "Changelog",
-            link: "https://blog.arcjet.com/tag/changelog/",
+            label: "Reference",
+            link: "/docs/redact/reference",
           },
         ],
+      },
+    ],
+  },
+  {
+    label: "Integrations",
+    collapsed: false,
+    items: [
+      {
+        label: "Auth.js",
+        link: "/docs/integrations/authjs",
+      },
+      {
+        label: "Clerk",
+        link: "/docs/integrations/clerk",
+      },
+      {
+        label: "Fly.io",
+        link: "https://fly.io/docs/reference/arcjet/",
+      },
+      {
+        label: "LangChain",
+        link: "/docs/integrations/langchain",
+      },
+      {
+        label: "Netlify",
+        link: "https://www.netlify.com/integrations/arcjet/",
+      },
+      {
+        label: "NextAuth",
+        link: "/docs/integrations/nextauth",
+      },
+      {
+        label: "OpenAI",
+        link: "/docs/integrations/openai",
+      },
+      {
+        label: "Vercel",
+        link: "https://vercel.com/integrations/arcjet",
       },
     ],
   },
@@ -470,6 +462,18 @@ export const main = [
     label: "Info",
     collapsed: false,
     items: [
+      {
+        label: "Changelog",
+        link: "https://blog.arcjet.com/tag/changelog/",
+      },
+      {
+        label: "Security",
+        link: "/docs/security",
+      },
+      {
+        label: "Privacy",
+        link: "/docs/privacy",
+      },
       {
         label: "Support",
         link: "/docs/support",
