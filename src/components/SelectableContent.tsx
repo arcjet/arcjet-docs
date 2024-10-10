@@ -60,7 +60,7 @@ const SelectableContent = forwardRef(
           .map((entry) => {
             return { key: entry[0], value: entry[1] };
           })
-          .sort(getComparator("desc", "key"));
+          .sort(getComparator("asc", "key"));
       });
     }, []);
 
