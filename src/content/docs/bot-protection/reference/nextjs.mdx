@@ -390,11 +390,13 @@ If there is an error condition, Arcjet will return an
 accessing `decision.reason.message`.
 
 :::note
-Please be aware that requests without `User-Agent` headers can not be identified
-as any particular bot and will be marked as an errored decision. Developers
-should take caution to check `decision.isErrored()` and decide if you want to
-allow or deny the request. Our recommendation is to block requests without
-`User-Agent` headers because most clients always send this header.
+Requests without `User-Agent` headers can not be identified as any particular
+bot and will be marked as an errored decision. Check `decision.isErrored()` and
+decide if you want to allow or deny the request. Our recommendation is to block
+requests without `User-Agent` headers because most legitimate clients always
+send this header.
+
+See [an example of how to do this](/bot-protection/concepts#user-agent-header).
 :::
 
 <Tabs>
