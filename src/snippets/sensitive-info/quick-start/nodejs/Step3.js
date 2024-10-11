@@ -25,8 +25,10 @@ const server = http.createServer(async function (req, res) {
   console.log("Conclusion", decision.conclusion);
 
   if (decision.isDenied()) {
-    res.writeHead(403, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: "Forbidden" }));
+    res.writeHead(400, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({ error: "Bad request - sensitive information detected" }),
+    );
   } else {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ message: "Hello world" }));

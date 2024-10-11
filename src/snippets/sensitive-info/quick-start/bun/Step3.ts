@@ -19,7 +19,9 @@ export default {
     console.log("Arcjet decision", decision);
 
     if (decision.isDenied()) {
-      return new Response("Forbidden", { status: 400 });
+      return new Response("Bad request - sensitive information detected", {
+        status: 400,
+      });
     }
 
     return new Response("Hello world");

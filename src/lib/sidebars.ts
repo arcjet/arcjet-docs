@@ -1,7 +1,7 @@
 export const main = [
   {
     label: "Get started",
-    link: "/docs/get-started-intro",
+    link: "/docs/get-started",
   },
   {
     label: "Examples",
@@ -243,60 +243,16 @@ export const main = [
         collapsed: true,
         items: [
           {
+            label: "Quick start",
+            link: "/docs/sensitive-info/quick-start",
+          },
+          {
             label: "Concepts",
             link: "/docs/sensitive-info/concepts",
           },
           {
-            label: "Bun",
-            items: [
-              {
-                label: "Quick start",
-                link: "/docs/sensitive-info/quick-start/bun",
-              },
-              {
-                label: "Reference",
-                link: "/docs/sensitive-info/reference/bun",
-              },
-            ],
-          },
-          {
-            label: "Next.js",
-            items: [
-              {
-                label: "Quick start",
-                link: "/docs/sensitive-info/quick-start/nextjs",
-              },
-              {
-                label: "Reference",
-                link: "/docs/sensitive-info/reference/nextjs",
-              },
-            ],
-          },
-          {
-            label: "Node.js",
-            items: [
-              {
-                label: "Quick start",
-                link: "/docs/sensitive-info/quick-start/nodejs",
-              },
-              {
-                label: "Reference",
-                link: "/docs/sensitive-info/reference/nodejs",
-              },
-            ],
-          },
-          {
-            label: "SvelteKit",
-            items: [
-              {
-                label: "Quick start",
-                link: "/docs/sensitive-info/quick-start/sveltekit",
-              },
-              {
-                label: "Reference",
-                link: "/docs/sensitive-info/reference/sveltekit",
-              },
-            ],
+            label: "Reference",
+            link: "/docs/sensitive-info/reference",
           },
         ],
       },

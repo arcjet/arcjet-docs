@@ -1,0 +1,179 @@
+---
+title: "Sensitive information quick start"
+description: "Quick start guide for detecting sensitive information with Arcjet in your Next.js, Node.js, Bun, or SvelteKit app."
+frameworks:
+  - bun
+  - next-js
+  - node-js
+  - sveltekit
+ajToc:
+  - text: "Video quick start"
+    anchor: "video-quick-start"
+    framework: "next-js"
+  - text: "Quick start"
+    anchor: "quick-start"
+    children:
+      - text: 1. Install Arcjet
+        anchor: "1-install-arcjet"
+      - text: 2. Set your key
+        anchor: "2-set-your-key"
+      - text: 3. Protect a route
+        anchor: "3-protect-a-route"
+      - text: 4. Test sending personal info
+        anchor: "4-test-sending-personal-info"
+  - text: "FAQs"
+    anchor: "faqs"
+  - text: "What next?"
+    anchor: "what-next"
+  - text: "Get help"
+    anchor: "get-help"
+---
+
+import { LinkCard, CardGrid } from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import SlotByFramework from "@/components/SlotByFramework";
+import TextByFramework from "@/components/TextByFramework";
+import FrameworkName from "@/components/FrameworkName";
+import Step1Bun from "@/snippets/sensitive-info/quick-start/bun/Step1.mdx";
+import Step1NextJs from "@/snippets/sensitive-info/quick-start/nextjs/Step1.mdx";
+import Step1NodeJs from "@/snippets/sensitive-info/quick-start/nodejs/Step1.mdx";
+import Step1SvelteKit from "@/snippets/sensitive-info/quick-start/sveltekit/Step1.mdx";
+import Step2 from "@/snippets/sensitive-info/quick-start/shared/Step2.mdx";
+import Step2SetEnv from "@/snippets/sensitive-info/quick-start/shared/Step2SetEnv.mdx";
+import Step3Bun from "@/snippets/sensitive-info/quick-start/bun/Step3.mdx";
+import Step3NextJs from "@/snippets/sensitive-info/quick-start/nextjs/Step3.mdx";
+import Step3NodeJs from "@/snippets/sensitive-info/quick-start/nodejs/Step3.mdx";
+import Step3SvelteKit from "@/snippets/sensitive-info/quick-start/sveltekit/Step3.mdx";
+import Step4 from "@/snippets/sensitive-info/quick-start/nextjs/Step4.mdx";
+import Step4Bun from "@/snippets/sensitive-info/quick-start/bun/Step4.mdx";
+import Step4NextJs from "@/snippets/sensitive-info/quick-start/nextjs/Step4.mdx";
+import Step4NodeJs from "@/snippets/sensitive-info/quick-start/nodejs/Step4.mdx";
+import Step4SvelteKit from "@/snippets/sensitive-info/quick-start/sveltekit/Step4.mdx";
+import FAQs from "/src/components/FAQs.astro";
+import Comments from "/src/components/Comments.astro";
+
+Arcjet Sensitive Information Detection protects against clients sending you
+sensitive information such as personally identifiable information (PII) that
+you do not wish to handle.
+
+<WhatIsArcjet />
+
+## Quick start
+
+This guide will show you how to configure Arcjet for a <FrameworkName client:idle />
+app.
+
+### 1. Install Arcjet
+
+In your project root, run the following command to install the SDK:
+
+<SlotByFramework client:idle>
+  <Step1Bun slot="bun" />
+  <Step1NextJs slot="next-js" />
+  <Step1NodeJs slot="node-js" />
+  <Step1SvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key. Add it to a `.env.local` file in your
+project root.
+
+<SlotByFramework client:idle>
+  <Step2SetEnv slot="bun" />
+  <Step2 slot="next-js" />
+  <Step2SetEnv slot="node-js" />
+  <Step2 slot="sveltekit" />
+</SlotByFramework>
+
+### 3. Protect a route
+
+Add Arcjet to detect sensitive data from a specific route in your app.
+
+<SlotByFramework client:idle>
+  <Step3Bun slot="bun" />
+  <Step3NextJs slot="next-js" />
+  <Step3NodeJs slot="node-js" />
+  <Step3SvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+### 4. Test sending personal info
+
+Start your app and try making a request with an email address in the body of the
+request:
+
+<SlotByFramework client:idle>
+  <Step4Bun slot="bun" />
+  <Step4NextJs slot="next-js" />
+  <Step4NodeJs slot="node-js" />
+  <Step4SvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+You should see this in your logs
+
+```text
+Arcjet decision ArcjetDenyDecision {
+  id: '', // This will contain the Arcjet request ID
+  ttl: 0,
+  results: [
+    ArcjetRuleResult {
+      ruleId: '',
+      ttl: 0,
+      state: 'RUN',
+      conclusion: 'DENY',
+      reason: [ArcjetSensitiveInfoReason]
+    }
+  ],
+...
+```
+
+The default response for a request containing unexpected sensitive information
+is a 400:
+
+```sh
+< HTTP/2 400
+< content-type: application/json; charset=utf-8
+< date: Tue, 09 Jan 2024 13:43:04 GMT
+< vary: Accept-Encoding
+< content-length: 72
+<
+* Connection #0 to host localhost left intact
+{"message":"Forbidden"}%
+```
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can customize bot protection, rate
+limiting for your API and minimize fraudulent registrations with the signup form
+protection.
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  />
+  <LinkCard
+    title="Arcjet Sensitive Info reference"
+    href="/sensitive-info/reference"
+    description="Full details about Sensitive Info."
+  />
+  <LinkCard
+    title="Testing"
+    href="/testing"
+    description="Write tests for your rules."
+  />
+</CardGrid>
+
+## Get help
+
+Need help with anything? Email support@arcjet.com to get support from our
+engineering team.
+
+<Comments />

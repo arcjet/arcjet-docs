@@ -20,7 +20,7 @@ export async function POST(req) {
   if (decision.isDenied() && decision.reason.isSensitiveInfo()) {
     return NextResponse.json(
       {
-        error: "Sensitive Information Identified",
+        error: "Bad request - sensitive information detected",
         reason: decision.reason,
       },
       {
