@@ -1,9 +1,13 @@
-import Step3TS from "/src/snippets/rate-limiting/quick-start/nodejs/Step3.ts?raw";
-import Step3JS from "/src/snippets/rate-limiting/quick-start/nodejs/Step3.js?raw";
+import Step3TS from "/src/snippets/rate-limiting/quick-start/bun/Step3.ts?raw";
+import Step3JS from "/src/snippets/rate-limiting/quick-start/bun/Step3.js?raw";
 import { Code } from "@astrojs/starlight/components";
 import SelectableContent from "@/components/SelectableContent";
 
 <SelectableContent client:idle syncKey="language" frameworkSwitcher>
+
+The example below will return a 403 Forbidden response for all requests from
+clients we are sure are automated.
+
   <Fragment slot="TS">
     <Code code={Step3TS} lang="ts" title="index.ts" />
   </Fragment>

@@ -4,26 +4,22 @@ import { Code } from "@astrojs/starlight/components";
 import SelectableContent from "@/components/SelectableContent";
 
 <SelectableContent client:idle syncKey="language" frameworkSwitcher>
-  <Fragment slot="TS">
-Create a new API route at `/src/routes/api/arcjet/+server.ts`:
 
-<Code
-  code={Step3TS}
-  lang="ts"
-  title="/src/routes/api/arcjet/+server.ts"
-  mark={[{ range: "11-18,23-24" }]}
-/>
+For this quick start we will enable Arcjet Bot Protection across your entire
+SvelteKit application as a hook. [SvelteKit
+hooks](https://kit.svelte.dev/docs/hooks) run before every request, allowing
+Arcjet to protect your entire application before your code runs.
+
+  <Fragment slot="TS">
+Create a file called `hooks.server.ts` in your project (inside `src`):
+
+<Code code={Step3TS} lang="ts" title="/src/hooks.server.ts" />
 
   </Fragment>
   <Fragment slot="JS">
-Create a new API route at `/src/routes/api/arcjet/+server.js`:
+Create a file called `hooks.server.js` in your project (inside `src`):
 
-<Code
-  code={Step3JS}
-  lang="js"
-  title="/src/routes/api/arcjet/+server.js"
-  mark={[{ range: "11-18,23-24" }]}
-/>
+<Code code={Step3JS} lang="js" title="/src/hooks.server.js" />
 
   </Fragment>
 </SelectableContent>
