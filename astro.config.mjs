@@ -71,8 +71,15 @@ export default defineConfig({
   // External redirects go in /vercel.json
   redirects: {
     "/shield": "/shield/concepts",
-    "/rate-limiting": "/rate-limiting/concepts",
-    "/bot-protection": "/bot-protection/concepts",
+    "/rate-limiting": "/rate-limiting/quick-start",
+    "/bot-protection": "/bot-protection/quick-start",
+    "/bot-protection/quick-start/bun": "/bot-protection/quick-start?f=bun",
+    "/bot-protection/quick-start/nextjs":
+      "/docs/bot-protection/quick-start?f=next-js",
+    "/bot-protection/quick-start/nodejs":
+      "/docs/bot-protection/quick-start?f=node-js",
+    "/bot-protection/quick-start/sveltekit":
+      "/docs/bot-protection/quick-start?f=sveltekit",
     "/email-validation": "/email-validation/concepts",
     "/signup-protection": "/signup-protection/concepts",
     "/reference/ts-js": "/reference/nodejs",

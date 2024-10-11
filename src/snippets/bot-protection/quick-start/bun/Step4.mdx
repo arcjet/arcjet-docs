@@ -1,0 +1,29 @@
+import SelectableContent from "@/components/SelectableContent";
+
+### 4. Start server
+
+Start your Bun server:
+
+{/* prettier-ignore */}
+<SelectableContent client:idle syncKey="language" frameworkSwitcher>
+<Fragment slot="TS">
+  ```sh
+  bun run --hot index.ts
+  ```
+</Fragment>
+<Fragment slot="JS">
+  ```sh
+  bun run --hot index.js
+  ```
+</Fragment>
+</SelectableContent>
+
+Make a `curl` request from your terminal. You should see a `403 Forbidden`
+response because `curl` is considered an automated client by default.
+
+```sh
+curl http://localhost:3000
+```
+
+The requests will also show up in the [Arcjet
+dashboard](https://app.arcjet.com).

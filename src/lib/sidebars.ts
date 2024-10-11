@@ -101,6 +101,10 @@ export const main = [
         collapsed: true,
         items: [
           {
+            label: "Quick start",
+            link: "/docs/bot-protection/quick-start",
+          },
+          {
             label: "Concepts",
             link: "/docs/bot-protection/concepts",
           },
@@ -109,56 +113,8 @@ export const main = [
             link: "/docs/bot-protection/identifying-bots",
           },
           {
-            label: "Bun",
-            items: [
-              {
-                label: "Quick start",
-                link: "/docs/bot-protection/quick-start/bun",
-              },
-              {
-                label: "Reference",
-                link: "/docs/bot-protection/reference/bun",
-              },
-            ],
-          },
-          {
-            label: "Next.js",
-            items: [
-              {
-                label: "Quick start",
-                link: "/docs/bot-protection/quick-start/nextjs",
-              },
-              {
-                label: "Reference",
-                link: "/docs/bot-protection/reference/nextjs",
-              },
-            ],
-          },
-          {
-            label: "Node.js",
-            items: [
-              {
-                label: "Quick start",
-                link: "/docs/bot-protection/quick-start/nodejs",
-              },
-              {
-                label: "Reference",
-                link: "/docs/bot-protection/reference/nodejs",
-              },
-            ],
-          },
-          {
-            label: "SvelteKit",
-            items: [
-              {
-                label: "Quick start",
-                link: "/docs/bot-protection/quick-start/sveltekit",
-              },
-              {
-                label: "Reference",
-                link: "/docs/bot-protection/reference/sveltekit",
-              },
-            ],
+            label: "Reference",
+            link: "/docs/bot-protection/reference",
           },
         ],
       },
