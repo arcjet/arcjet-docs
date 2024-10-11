@@ -1,5 +1,37 @@
+import SelectableContent from "@/components/SelectableContent";
+
 ### 4. Start app
 
-Start your app and load `http://localhost:5173/api/arcjet`. Refresh the page and
-you will see the rate limit in action. The requests will also show up in the
-[Arcjet dashboard](https://app.arcjet.com).
+Start your SvelteKit app:
+
+{/* prettier-ignore */}
+<SelectableContent client:idle syncKey="packageManager">
+<Fragment slot="npm">
+```sh
+npm run dev
+```
+</Fragment>
+<Fragment slot="pnpm">
+```sh
+pnpm run dev
+```
+</Fragment>
+<Fragment slot="yarn">
+```sh
+yarn run dev
+```
+</Fragment>
+</SelectableContent>
+
+Make a `curl` request from your terminal to your application. You should see a
+`403 Forbidden` response because `curl` is considered an automated client by
+default. See [the reference guide](/bot-protection/reference) to learn about
+configuring this.
+
+```shell
+# Will show just the response headers, which should be 403 forbidden
+curl -I http://localhost:5173
+```
+
+The requests will also show up in the [Arcjet
+dashboard](https://app.arcjet.com).
