@@ -10,9 +10,16 @@ import SelectableContent from "@/components/SelectableContent";
   variables from a `.env.local` file.
 </Aside>
 
+{/* prettier-ignore */}
 <SelectableContent client:idle syncKey="language" frameworkSwitcher>
   <Fragment slot="TS">
-    ```sh npx tsx --env-file .env.local index.ts ```
+    ```sh
+    npx tsx --env-file .env.local index.ts
+    ```
   </Fragment>
-  <Fragment slot="JS">```sh node --env-file .env.local index.js ```</Fragment>
+  <Fragment slot="JS">
+  ```sh
+  node --env-file .env.local index.js
+  ```
+  </Fragment>
 </SelectableContent>
