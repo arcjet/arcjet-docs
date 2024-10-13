@@ -1,0 +1,49 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import Step3AppJS from "/src/snippets/email-validation/quick-start/nextjs/Step3App.js?raw";
+import Step3AppTS from "/src/snippets/email-validation/quick-start/nextjs/Step3App.ts?raw";
+import Step3PagesJS from "/src/snippets/email-validation/quick-start/nextjs/Step3Pages.js?raw";
+import Step3PagesTS from "/src/snippets/email-validation/quick-start/nextjs/Step3Pages.ts?raw";
+
+If you are using server actions, see the [example in the SDK
+reference](/docs/reference/nextjs#server-a
+ctions).
+
+<SelectableContent client:idle syncKey="language" frameworkSwitcher>
+<Fragment slot="TS (App)">
+Create a new API route at `/app/api/arcjet/route.ts`:
+
+<Code
+  code={Step3AppTS}
+  lang="ts"
+  title="/app/api/arcjet/route.ts"
+/>
+</Fragment>
+<Fragment slot="TS (Pages)">
+Create a new API route at `/pages/api/arcjet.ts`:
+
+<Code
+  code={Step3PagesTS}
+  lang="ts"
+  title="/pages/api/arcjet.ts"
+/>
+</Fragment>
+<Fragment slot="JS (App)">
+Create a new API route at `/app/api/arcjet/route.js`:
+
+<Code
+  code={Step3AppJS}
+  lang="js"
+  title="/app/api/arcjet/route.js"
+/>
+</Fragment>
+<Fragment slot="JS (Pages)">
+Create a new API route at `/pages/api/arcjet.js`:
+
+<Code
+  code={Step3PagesJS}
+  lang="js"
+  title="/pages/api/arcjet.js"
+/>
+</Fragment>
+</SelectableContent>
