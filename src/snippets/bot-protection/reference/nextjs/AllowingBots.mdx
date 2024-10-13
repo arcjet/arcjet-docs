@@ -1,0 +1,21 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import AllowingBotsAppTS from "/src/snippets/bot-protection/reference/nextjs/AllowingBotsApp.ts?raw";
+import AllowingBotsPagesTS from "/src/snippets/bot-protection/reference/nextjs/AllowingBotsPages.ts?raw";
+import AllowingBotsAppJS from "/src/snippets/bot-protection/reference/nextjs/AllowingBotsPages.js?raw";
+import AllowingBotsPagesJS from "/src/snippets/bot-protection/reference/nextjs/AllowingBotsPages.js?raw";
+
+<SelectableContent client:idle syncKey="language" frameworkSwitcher>
+  <Fragment slot="TS (App)">
+    <Code code={AllowingBotsAppTS} lang="ts" title="/app/api/arcjet/route.ts" />
+  </Fragment>
+  <Fragment slot="TS (Pages)">
+    <Code code={AllowingBotsPagesTS} lang="ts" title="/pages/api/hello.ts" />
+  </Fragment>
+  <Fragment slot="JS (App)">
+    <Code code={AllowingBotsAppJS} lang="js" title="/app/api/arcjet/route.js" />
+  </Fragment>
+  <Fragment slot="JS (Pages)">
+    <Code code={AllowingBotsPagesJS} lang="js" title="/pages/api/hello.ts" />
+  </Fragment>
+</SelectableContent>

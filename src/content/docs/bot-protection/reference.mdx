@@ -1,7 +1,88 @@
 ---
 title: "Bot protection reference"
 description: "How to use Arcjet to bot protection to your app."
-next: false
+frameworks:
+  - next-js
+  - node-js
+ajToc:
+  - text: "Configuration"
+    anchor: "configuration"
+    children:
+      - text: "Only allowing specific bots"
+        anchor: "only-allowing-specific-bots"
+      - text: "Only denying specific bots"
+        anchor: "only-denying-specific-bots"
 ---
 
-TODO
+import SlotByFramework from "@/components/SlotByFramework";
+import TextByFramework from "@/components/TextByFramework";
+import FrameworkName from "@/components/FrameworkName";
+import AllowingBotsNextJs from "@/snippets/bot-protection/reference/nextjs/AllowingBots.mdx";
+import DenyingBotsNodeJs from "@/snippets/bot-protection/reference/nodejs/DenyingBots.mdx";
+import DenyingBotsNextJs from "@/snippets/bot-protection/reference/nextjs/DenyingBots.mdx";
+import AllowingBotsNodeJs from "@/snippets/bot-protection/reference/nodejs/AllowingBots.mdx";
+
+Arcjet bot detection allows you to manage traffic by automated clients and bots.
+
+## Configuration
+
+Bot detection is configured by allowing or denying a subset of bots. The `allow`
+and `deny` lists are mutually-exclusive, such that using `allow` will result in
+a `DENY` decision for any detected bot that is not specified in the `allow` list
+and using `deny` will result in an `ALLOW` decision for any detected bot that is
+not specified in the `deny` list.
+
+You can use only one of the following configuration definitions:
+
+```ts
+type BotOptionsAllow = {
+  mode?: "LIVE" | "DRY_RUN";
+  allow: Array<ArcjetWellKnownBot | ArcjetBotCategory>;
+};
+```
+
+```ts
+type BotOptionsDeny = {
+  mode?: "LIVE" | "DRY_RUN";
+  deny: Array<ArcjetWellKnownBot | ArcjetBotCategory>;
+};
+```
+
+The `arcjet` client is configured with one or more `detectBot` rules which take
+one or many `BotOptions`.
+
+:::note
+When specifying multiple rules, the order of the rules is ignored. Rule
+execution ordering is automatically optimized for performance. See below for
+how to examine the execution results.
+:::
+
+### Only allowing specific bots
+
+Most applications want to block almost all bots. However, it is common to allow
+some bots to access your system, such as bots for search indexing or API
+access from the command line.
+
+This behavior is configured with an `allow` list from our [full list of
+bots](https://arcjet.com/bot-list) and/or [bot
+categories](/bot-protection/identifying-bots#bot-categories).
+
+<SlotByFramework client:idle>
+  <AllowingBotsNextJs slot="next-js" />
+  <AllowingBotsNodeJs slot="node-js" />
+</SlotByFramework>
+
+### Only denying specific bots
+
+Some applications may only want to block a small subset of bots, while allowing
+the majority continued access. This may be due to many reasons, such as
+misconfigured or high-traffic bots.
+
+This behavior is configured with a `deny` list from our [full list of
+bots](https://arcjet.com/bot-list) and/or [bot
+categories](/bot-protection/identifying-bots#bot-categories).
+
+<SlotByFramework client:idle>
+  <DenyingBotsNextJs slot="next-js" />
+  <DenyingBotsNodeJs slot="node-js" />
+</SlotByFramework>

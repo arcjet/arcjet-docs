@@ -1,0 +1,13 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import DenyingBotsTS from "/src/snippets/bot-protection/reference/nodejs/DenyingBots.ts?raw";
+import DenyingBotsJS from "/src/snippets/bot-protection/reference/nodejs/DenyingBots.js?raw";
+
+<SelectableContent client:idle syncKey="language" frameworkSwitcher>
+  <Fragment slot="TS">
+    <Code code={DenyingBotsTS} lang="ts" />
+  </Fragment>
+  <Fragment slot="JS">
+    <Code code={DenyingBotsJS} lang="js" />
+  </Fragment>
+</SelectableContent>
