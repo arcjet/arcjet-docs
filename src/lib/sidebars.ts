@@ -123,60 +123,16 @@ export const main = [
         collapsed: true,
         items: [
           {
+            label: "Quick start",
+            link: "/docs/email-validation/quick-start",
+          },
+          {
             label: "Concepts",
             link: "/docs/email-validation/concepts",
           },
           {
-            label: "Bun",
-            items: [
-              {
-                label: "Quick start",
-                link: "/docs/email-validation/quick-start/bun",
-              },
-              {
-                label: "Reference",
-                link: "/docs/email-validation/reference/bun",
-              },
-            ],
-          },
-          {
-            label: "Next.js",
-            items: [
-              {
-                label: "Quick start",
-                link: "/docs/email-validation/quick-start/nextjs",
-              },
-              {
-                label: "Reference",
-                link: "/docs/email-validation/reference/nextjs",
-              },
-            ],
-          },
-          {
-            label: "Node.js",
-            items: [
-              {
-                label: "Quick start",
-                link: "/docs/email-validation/quick-start/nodejs",
-              },
-              {
-                label: "Reference",
-                link: "/docs/email-validation/reference/nodejs",
-              },
-            ],
-          },
-          {
-            label: "SvelteKit",
-            items: [
-              {
-                label: "Quick start",
-                link: "/docs/email-validation/quick-start/sveltekit",
-              },
-              {
-                label: "Reference",
-                link: "/docs/email-validation/reference/sveltekit",
-              },
-            ],
+            label: "Reference",
+            link: "/docs/email-validation/reference",
           },
         ],
       },
