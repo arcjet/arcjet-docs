@@ -1,0 +1,35 @@
+import { Aside } from "@astrojs/starlight/components";
+
+<Aside type="caution" title="This will block your client">
+  Running this simulation will trigger Arcjet Shield and block your client for
+  15 minutes. The ability to configure this threshold and manage blocked clients
+  is coming soon.
+</Aside>
+
+```sh
+curl -v -H "x-arcjet-suspicious: true" http://localhost:3000
+```
+
+The default response for a blocked request is a 403 Forbidden which you will see
+when you make the 6th request:
+
+```sh
+# ...5 requests made previously
+curl -v -H "x-arcjet-suspicious: true" http://localhost:3000
+...
+> GET / HTTP/2
+> Host: localhost:3000
+> User-Agent: curl/8.4.0
+> Accept: */*
+> x-arcjet-suspicious: true
+>
+< HTTP/2 403
+< content-type: application/json; charset=utf-8
+< date: Tue, 09 Jan 2024 13:43:04 GMT
+< etag: "7a3v9j8es220"
+< vary: Accept-Encoding
+< content-length: 72
+<
+* Connection #0 to host localhost left intact
+{"message":"Forbidden"}%
+```

@@ -1,0 +1,44 @@
+import Step3AppJS from "/src/snippets/shield/quick-start/nextjs/PerRouteApp.js?raw";
+import Step3AppTS from "/src/snippets/shield/quick-start/nextjs/PerRouteApp.ts?raw";
+import Step3PagesJS from "/src/snippets/shield/quick-start/nextjs/PerRoutePages.js?raw";
+import Step3PagesTS from "/src/snippets/shield/quick-start/nextjs/PerRoutePages.ts?raw";
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+
+This example shows how to protect your app with Arcjet Shield. You can also use
+it in middleware to protect every route, but we'll start with a single route.
+
+<SelectableContent client:idle syncKey="language" frameworkSwitcher>
+<Fragment slot="TS (App)">
+
+<Code
+  code={Step3AppTS}
+  lang="ts"
+  title="/app/api/arcjet/route.ts"
+/>
+</Fragment>
+<Fragment slot="TS (Pages)">
+
+<Code
+  code={Step3PagesTS}
+  lang="ts"
+  title="/pages/api/hello.ts"
+/>
+</Fragment>
+<Fragment slot="JS (App)">
+
+<Code
+  code={Step3AppJS}
+  lang="js"
+  title="/app/api/arcjet/route.js"
+/>
+</Fragment>
+<Fragment slot="JS (Pages)">
+
+<Code
+  code={Step3PagesJS}
+  lang="js"
+  title="/pages/api/hello.js"
+/>
+</Fragment>
+</SelectableContent>

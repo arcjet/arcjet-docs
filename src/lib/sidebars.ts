@@ -17,60 +17,16 @@ export const main = [
         collapsed: true,
         items: [
           {
+            label: "Quick start",
+            link: "/docs/shield/quick-start",
+          },
+          {
             label: "Concepts",
             link: "/docs/shield/concepts",
           },
           {
-            label: "Bun",
-            items: [
-              {
-                label: "Quick start",
-                link: "/docs/shield/quick-start/bun",
-              },
-              {
-                label: "Reference",
-                link: "/docs/shield/reference/bun",
-              },
-            ],
-          },
-          {
-            label: "Next.js",
-            items: [
-              {
-                label: "Quick start",
-                link: "/docs/shield/quick-start/nextjs",
-              },
-              {
-                label: "Reference",
-                link: "/docs/shield/reference/nextjs",
-              },
-            ],
-          },
-          {
-            label: "Node.js",
-            items: [
-              {
-                label: "Quick start",
-                link: "/docs/shield/quick-start/nodejs",
-              },
-              {
-                label: "Reference",
-                link: "/docs/shield/reference/nodejs",
-              },
-            ],
-          },
-          {
-            label: "SvelteKit",
-            items: [
-              {
-                label: "Quick start",
-                link: "/docs/shield/quick-start/sveltekit",
-              },
-              {
-                label: "Reference",
-                link: "/docs/shield/reference/sveltekit",
-              },
-            ],
+            label: "Reference",
+            link: "/docs/shield/reference",
           },
         ],
       },
