@@ -1,0 +1,19 @@
+import Step3TS from "/src/snippets/shield/quick-start/sveltekit/Step3.ts?raw";
+import Step3JS from "/src/snippets/shield/quick-start/sveltekit/Step3.js?raw";
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+
+<SelectableContent client:idle syncKey="language" frameworkSwitcher>
+  <Fragment slot="TS">
+Create a file called `hooks.server.ts` in your project (inside `src`):
+
+<Code code={Step3TS} lang="ts" title="/src/hooks.server.ts" />
+
+  </Fragment>
+  <Fragment slot="JS">
+Create a file called `hooks.server.js` in your project (inside `src`):
+
+<Code code={Step3JS} lang="js" title="/src/hooks.server.js" />
+
+  </Fragment>
+</SelectableContent>
