@@ -1,0 +1,37 @@
+import Step3Svelte from "/src/snippets/signup-protection/quick-start/sveltekit/Step3.svelte?raw";
+import Step3TS from "/src/snippets/signup-protection/quick-start/sveltekit/Step3.ts?raw";
+import Step3JS from "/src/snippets/shield/quick-start/sveltekit/Step3.js?raw";
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+
+Create the Svelte page containing the form:
+
+<Fragment >
+
+<Code code={Step3Svelte} lang="js" title="/src/routes/form/+page.svelte" />
+</Fragment>
+
+Next, create the server-side code to handle the page submission:
+
+<SelectableContent client:idle syncKey="language" frameworkSwitcher>
+  <Fragment slot="TS">
+
+<Code
+  code={Step3TS}
+  lang="ts"
+  title="/src/routes/form/+server.ts"
+  mark={["ARCJET_KEY"]}
+/>
+
+  </Fragment>
+  <Fragment slot="JS">
+
+<Code
+  code={Step3JS}
+  lang="js"
+  title="/src/routes/form/+server.js"
+  mark={["ARCJET_KEY"]}
+/>
+
+  </Fragment>
+</SelectableContent>
