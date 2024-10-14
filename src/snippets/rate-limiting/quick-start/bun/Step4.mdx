@@ -4,16 +4,20 @@ import SelectableContent from "@/components/SelectableContent";
 
 {/* prettier-ignore */}
 <SelectableContent client:idle syncKey="language" frameworkSwitcher>
-<Fragment slot="TS">
-  ```sh
-  bun run --hot index.ts
-  ```
-</Fragment>
-<Fragment slot="JS">
-  ```sh
-  bun run --hot index.js
-  ```
-</Fragment>
+<div slot="TS" slotIdx="1">
+
+```sh
+bun run --hot index.ts
+```
+
+</div>
+<div slot="JS" slotIdx="2">
+
+```sh
+bun run --hot index.js
+```
+
+</div>
 </SelectableContent>
 
 Then make some requests to hit the rate limit:

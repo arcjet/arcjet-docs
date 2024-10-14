@@ -3,14 +3,18 @@ import Step3JS from "/src/snippets/shield/quick-start/bun/Step3.js?raw";
 import { Code } from "@astrojs/starlight/components";
 import SelectableContent from "@/components/SelectableContent";
 
-<SelectableContent client:idle syncKey="language" frameworkSwitcher>
-
 This example shows how to protect your app with Arcjet Shield.
 
-  <Fragment slot="TS">
+<SelectableContent client:idle syncKey="language" frameworkSwitcher>
+
+  <div slot="TS" slotIdx="1">
+
     <Code code={Step3TS} lang="ts" title="index.ts" />
-  </Fragment>
-  <Fragment slot="JS">
+
+  </div>
+  <div slot="JS" slotIdx="2">
+
     <Code code={Step3JS} lang="ts" title="index.js" />
-  </Fragment>
+
+  </div>
 </SelectableContent>
