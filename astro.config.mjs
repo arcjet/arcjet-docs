@@ -33,7 +33,7 @@ export default defineConfig({
         github: "https://github.com/arcjet",
         twitter: "https://twitter.com/arcjethq",
         youtube: "https://www.youtube.com/@arcjethq",
-        discord: "https://discord.gg/TPra6jqZDC",
+        discord: "https://arcjet.com/discord",
         email: "mailto:support@arcjet.com",
       },
       head: [

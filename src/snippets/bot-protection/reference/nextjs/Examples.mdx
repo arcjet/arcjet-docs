@@ -1,0 +1,104 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import EdgeAppJS from "/src/snippets/bot-protection/reference/nextjs/EdgeApp.js?raw";
+import EdgeAppTS from "/src/snippets/bot-protection/reference/nextjs/EdgeApp.ts?raw";
+import EdgePagesJS from "/src/snippets/bot-protection/reference/nextjs/EdgePages.js?raw";
+import EdgePagesTS from "/src/snippets/bot-protection/reference/nextjs/EdgePages.ts?raw";
+import ProtectPageMiddlewareJS from "/src/snippets/bot-protection/reference/nextjs/ProtectPageMiddleware.js?raw";
+import ProtectPageMiddlewareTS from "/src/snippets/bot-protection/reference/nextjs/ProtectPageMiddleware.ts?raw";
+import ProtectPagePagesJS from "/src/snippets/bot-protection/reference/nextjs/ProtectPagePages.jsx?raw";
+import ProtectPagePagesTS from "/src/snippets/bot-protection/reference/nextjs/ProtectPagePages.tsx?raw";
+import WrapAppJS from "/src/snippets/bot-protection/reference/nextjs/WrapApp.js?raw";
+import WrapAppTS from "/src/snippets/bot-protection/reference/nextjs/WrapApp.ts?raw";
+import WrapPagesEdgeJS from "/src/snippets/bot-protection/reference/nextjs/WrapPagesEdge.js?raw";
+import WrapPagesEdgeTS from "/src/snippets/bot-protection/reference/nextjs/WrapPagesEdge.ts?raw";
+import WrapPagesNodeJS from "/src/snippets/bot-protection/reference/nextjs/WrapPagesNode.js?raw";
+import WrapPagesNodeTS from "/src/snippets/bot-protection/reference/nextjs/WrapPagesNode.ts?raw";
+
+### Protecting a page
+
+You can protect a Next.js page from bots by calling the Arcjet SDK from within
+the page loader:
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS (App)" slotIdx="1">
+    Protecting an app router page within the handler itself is not currently
+supported, but you can set up a matcher on the middleware instead:
+
+    <Code code={ProtectPageMiddlewareTS} lang="ts" title="/middleware.ts" />
+
+  </div>
+  <div slot="TS (Pages)" slotIdx="2">
+    <Code code={ProtectPagePagesTS} lang="ts" title="/pages/hello.tsx" />
+  </div>
+  <div slot="JS (App)" slotIdx="3">
+    Protecting an app router page within the handler itself is not currently
+supported, but you can set up a matcher on the middleware instead:
+
+    <Code code={ProtectPageMiddlewareJS} lang="js" title="/middleware.js" />
+
+  </div>
+  <div slot="JS (Pages)" slotIdx="4">
+    <Code code={ProtectPagePagesJS} lang="js" title="/pages/api/hello.ts" />
+  </div>
+</SelectableContent>
+
+### Wrap existing handler
+
+All the examples on this page show how you can inspect the decision to control
+what to do next. However, if you just wish to send a generic `403 Forbidden`
+response you can delegate this to Arcjet by wrapping your handler `withArcjet`.
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS (App)" slotIdx="1">
+    For both [the Node or Edge runtime](https://nextjs.org/docs/app/building-your-application/routing/route-handlers#edge-and-nodejs-runtimes):
+
+    <Code code={WrapAppTS} lang="ts" title="/app/api/hello/route.ts" />
+
+  </div>
+  <div slot="TS (Pages)" slotIdx="2">
+    For the Node (default) runtime:
+
+    <Code code={WrapPagesNodeTS} lang="ts" title="/pages/api/hello.ts" />
+
+    For the Edge runtime:
+
+    <Code code={WrapPagesEdgeTS} lang="ts" title="/pages/api/hello.ts" />
+
+  </div>
+  <div slot="JS (App)" slotIdx="3">
+    For both [the Node or Edge runtime](https://nextjs.org/docs/app/building-your-application/routing/route-handlers#edge-and-nodejs-runtimes):
+
+    <Code code={WrapAppJS} lang="js" title="/app/api/hello/route.js" />
+
+  </div>
+  <div slot="JS (Pages)" slotIdx="4">
+    For the Node (default) runtime:
+
+<Code code={WrapPagesNodeJS} title="/pages/api/hello.js" lang="js" />
+
+For the Edge runtime:
+
+<Code code={WrapPagesEdgeJS} title="/pages/api/hello.js" lang="js" />
+  </div>
+</SelectableContent>
+
+## Edge Functions
+
+Arcjet works in Edge Functions and with the [Edge
+Runtime](https://edge-runtime.vercel.app/).
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS (App)" slotIdx="1">
+    <Code code={EdgeAppTS} title="/app/api/hello/route.ts" lang="ts" />
+  </div>
+  <div slot="TS (Pages)" slotIdx="2">
+    <Code code={EdgePagesTS} title="/pages/api/hello.ts" lang="ts" />
+  </div>
+  <div slot="JS (App)" slotIdx="3">
+    <Code code={EdgeAppJS} title="/app/api/hello/route.js" lang="js" />
+  </div>
+  <div slot="JS (Pages)" slotIdx="4">
+    <Code code={EdgePagesJS} title="/pages/api/hello.js" lang="js" />
+  </div>
+</SelectableContent>

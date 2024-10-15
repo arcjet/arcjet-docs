@@ -1,0 +1,34 @@
+import SelectableContent from "@/components/SelectableContent";
+import SlotByFramework from "@/components/SlotByFramework";
+import MiddlewareNextJs from "@/snippets/bot-protection/reference/nextjs/Middleware.mdx";
+import PerRouteNextJs from "@/snippets/bot-protection/reference/nextjs/PerRoute.mdx";
+import DecisionLogAppJS from "/src/snippets/bot-protection/reference/nextjs/DecisionLogApp.js?raw";
+import DecisionLogAppTS from "/src/snippets/bot-protection/reference/nextjs/DecisionLogApp.ts?raw";
+import DecisionLogPagesJS from "/src/snippets/bot-protection/reference/nextjs/DecisionLogPages.js?raw";
+import DecisionLogPagesTS from "/src/snippets/bot-protection/reference/nextjs/DecisionLogPages.ts?raw";
+
+## Per route vs middleware
+
+Bot protection rules can be configured in two ways:
+
+- **Per API route**: The rule is defined in the API route itself. This allows
+  you to configure the rule alongside the code it is protecting which is useful
+  if you want to use the decision to add context to your own code. However, it
+  means rules are not located in a single place.
+- **Middleware**: The rule is defined in the middleware. This allows you to
+  configure rules in a single place or apply them globally to all routes, but
+  it means the rules are not located alongside the code they are protecting.
+
+### Per route
+
+This configures bot protection on a single route.
+
+<SlotByFramework client:load>
+  <PerRouteNextJs slot="next-js" />
+</SlotByFramework>
+
+### Middleware
+
+<SlotByFramework client:load>
+  <MiddlewareNextJs slot="next-js" />
+</SlotByFramework>

@@ -1,0 +1,21 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import FilteringAppJS from "/src/snippets/bot-protection/reference/nextjs/FilteringApp.js?raw";
+import FilteringAppTS from "/src/snippets/bot-protection/reference/nextjs/FilteringApp.ts?raw";
+import FilteringPagesJS from "/src/snippets/bot-protection/reference/nextjs/FilteringPages.js?raw";
+import FilteringPagesTS from "/src/snippets/bot-protection/reference/nextjs/FilteringPages.ts?raw";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS (App)" slotIdx="1">
+    <Code code={FilteringAppTS} lang="ts" title="/app/api/arcjet/route.ts" />
+  </div>
+  <div slot="TS (Pages)" slotIdx="2">
+    <Code code={FilteringPagesTS} lang="ts" title="/pages/api/hello.ts" />
+  </div>
+  <div slot="JS (App)" slotIdx="3">
+    <Code code={FilteringAppJS} lang="js" title="/app/api/arcjet/route.js" />
+  </div>
+  <div slot="JS (Pages)" slotIdx="4">
+    <Code code={FilteringPagesJS} lang="js" title="/pages/api/hello.ts" />
+  </div>
+</SelectableContent>

@@ -1,0 +1,21 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import DecisionLogAppJS from "/src/snippets/bot-protection/reference/nextjs/DecisionLogApp.js?raw";
+import DecisionLogAppTS from "/src/snippets/bot-protection/reference/nextjs/DecisionLogApp.ts?raw";
+import DecisionLogPagesJS from "/src/snippets/bot-protection/reference/nextjs/DecisionLogPages.js?raw";
+import DecisionLogPagesTS from "/src/snippets/bot-protection/reference/nextjs/DecisionLogPages.ts?raw";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS (App)" slotIdx="1">
+    <Code code={DecisionLogAppTS} lang="ts" title="/app/api/arcjet/route.ts" />
+  </div>
+  <div slot="TS (Pages)" slotIdx="2">
+    <Code code={DecisionLogPagesTS} lang="ts" title="/pages/api/hello.ts" />
+  </div>
+  <div slot="JS (App)" slotIdx="3">
+    <Code code={DecisionLogAppJS} lang="js" title="/app/api/arcjet/route.js" />
+  </div>
+  <div slot="JS (Pages)" slotIdx="4">
+    <Code code={DecisionLogPagesJS} lang="js" title="/pages/api/hello.ts" />
+  </div>
+</SelectableContent>
