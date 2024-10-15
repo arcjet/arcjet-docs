@@ -97,56 +97,16 @@ export const main = [
         collapsed: true,
         items: [
           {
+            label: "Quick start",
+            link: "/docs/signup-protection/quick-start",
+          },
+          {
             label: "Concepts",
             link: "/docs/signup-protection/concepts",
           },
           {
-            label: "Bun",
-            items: [
-              {
-                label: "Quick start",
-                link: "/docs/signup-protection/quick-start/bun",
-              },
-              {
-                label: "Reference",
-                link: "/docs/signup-protection/reference/bun",
-              },
-            ],
-          },
-          {
-            label: "Next.js",
-            items: [
-              {
-                label: "Quick start",
-                link: "/docs/signup-protection/quick-start/nextjs",
-              },
-              {
-                label: "Reference",
-                link: "/docs/signup-protection/reference/nextjs",
-              },
-            ],
-          },
-          {
-            label: "Node.js",
-            items: [
-              {
-                label: "Quick start",
-                link: "/docs/signup-protection/quick-start/nodejs",
-              },
-              {
-                label: "Reference",
-                link: "/docs/signup-protection/reference/nodejs",
-              },
-            ],
-          },
-          {
-            label: "SvelteKit",
-            items: [
-              {
-                label: "Quick start",
-                link: "/docs/signup-protection/quick-start/sveltekit",
-              },
-            ],
+            label: "Reference",
+            link: "/docs/signup-protection/reference",
           },
         ],
       },

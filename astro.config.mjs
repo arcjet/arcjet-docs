@@ -394,7 +394,15 @@ export default defineConfig({
       "/email-validation/quick-start?f=node-js",
     "/email-validation/quick-start/sveltekit":
       "/email-validation/quick-start?f=sveltekit",
-    "/signup-protection": "/signup-protection/concepts",
+    "/signup-protection": "/signup-protection/quick-start",
+    "/signup-protection/quick-start/bun":
+      "/signup-protection/quick-start?f=bun",
+    "/signup-protection/quick-start/nextjs":
+      "/docs/signup-protection/quick-start?f=next-js",
+    "/signup-protection/quick-start/nodejs":
+      "/docs/signup-protection/quick-start?f=node-js",
+    "/signup-protection/quick-start/sveltekit":
+      "/docs/signup-protection/quick-start?f=sveltekit",
     "/reference/ts-js": "/reference/nodejs",
     "/bot-protection/bot-types": "/bot-protection/identifying-bots",
   },
