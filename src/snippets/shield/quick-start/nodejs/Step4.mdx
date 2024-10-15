@@ -12,14 +12,18 @@ import SelectableContent from "@/components/SelectableContent";
 
 {/* prettier-ignore */}
 <SelectableContent client:idle syncKey="language" frameworkSwitcher>
-  <Fragment slot="TS">
+  <div slot="TS" slotIdx="1">
+
     ```sh
     npx tsx --env-file .env.local index.ts
     ```
-  </Fragment>
-  <Fragment slot="JS">
-  ```sh
-  node --env-file .env.local index.js
-  ```
-  </Fragment>
+
+  </div>
+  <div slot="JS" slotIdx="2">
+
+```sh
+node --env-file .env.local index.js
+```
+
+  </div>
 </SelectableContent>

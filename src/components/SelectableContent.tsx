@@ -1,9 +1,9 @@
 import FrameworkSwitcher from "@/components/FrameworkSwitcher";
 import Select from "@/components/Select";
 import { getStoredSyncKey, storeSyncKey } from "@/lib/prefs";
-import { getComparator } from "@/lib/utils";
 import type { ForwardedRef, HTMLProps, ReactNode } from "react";
 import { forwardRef, useEffect, useState } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 
 import styles from "./SelectableContent.module.scss";
 
@@ -21,6 +21,16 @@ interface Props extends HTMLProps<HTMLDivElement> {
  * Selectable Content
  *
  * Displays content based on user selection of syncKey and framework.
+ *
+ * For correctly sorting the drodpown options pass the slotIdx="..."
+ * to the slot element with the desired number. Any html element works
+ * however most often you'll want:
+ *
+ * &lt;div slotIdx="1"&gt;...&lt;/div&gt;
+ *
+ * &lt;div slotIdx="2"&gt;...&lt;/div&gt;
+ *
+ * ...
  *
  * @param syncKey - The sync key to persist the selection.
  * @param frameworkSwitcher - Shows the framework switcher.
@@ -56,11 +66,27 @@ const SelectableContent = forwardRef(
     // Map props to slots
     useEffect(() => {
       setSlots(() => {
-        return Object.entries(props)
-          .map((entry) => {
-            return { key: entry[0], value: entry[1] };
-          })
-          .sort(getComparator("desc", "key"));
+        return (
+          Object.entries(props)
+            .reduce((s, entry) => {
+              // Get the slot html and retrieve the slotIdx attr if in use
+              const el = document.createElement("div");
+              el.innerHTML = renderToStaticMarkup(entry[1]);
+              const indexedSlot = el.querySelector("[slotIdx]");
+              const idx = parseInt(indexedSlot?.getAttribute("slotIdx") || "");
+
+              // Add element to array at slotIdx or just push
+              if (indexedSlot && idx) {
+                s[idx] = { key: entry[0], value: entry[1] };
+              } else {
+                s.push({ key: entry[0], value: entry[1] });
+              }
+
+              return s;
+            }, [] as Slot[])
+            // Clean empty or undefined entries
+            .filter((r) => r != undefined && r != null)
+        );
       });
     }, []);
 
@@ -112,7 +138,8 @@ const SelectableContent = forwardRef(
             />
           )}
         </div>
-        <div>{selectedSlot?.value}</div>
+        {selectedSlot?.value}
+        {children}
       </div>
     );
   },

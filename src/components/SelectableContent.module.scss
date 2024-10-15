@@ -1,5 +1,5 @@
 .SelectableContent {
-  margin-top: calc(var(--sp) * 3);
+  margin-top: calc(var(--sp) * 2);
 
   .Toolbar {
     display: flex;
@@ -16,6 +16,12 @@
       .FrameworkSwitcher {
         margin: 0;
       }
+    }
+  }
+
+  & :global {
+    astro-slot > *:first-child {
+      margin-top: 1rem;
     }
   }
 }

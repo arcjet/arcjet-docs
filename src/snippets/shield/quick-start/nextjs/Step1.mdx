@@ -1,20 +1,26 @@
 import SelectableContent from "@/components/SelectableContent";
 
 {/* prettier-ignore */}
-<SelectableContent client:idle syncKey="packageManager">
-<Fragment slot="npm">
+<SelectableContent client:idle syncKey="packageManager" frameworkSwitcher>
+<div slot="npm" slotIdx="1">
+
 ```sh
 npm i @arcjet/next
 ```
-</Fragment>
-<Fragment slot="pnpm">
+
+</div>
+<div slot="pnpm" slotIdx="2">
+
 ```sh
 pnpm add @arcjet/next
 ```
-</Fragment>
-<Fragment slot="yarn">
+
+</div>
+<div slot="yarn" slotIdx="3">
+
 ```sh
 yarn add @arcjet/next
 ```
-</Fragment>
+
+</div>
 </SelectableContent>
