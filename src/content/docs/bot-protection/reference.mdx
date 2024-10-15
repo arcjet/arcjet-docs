@@ -2,8 +2,10 @@
 title: "Bot protection reference"
 description: "Reference guide for adding Arcjet bot protection to your Next.js, Node.js, Bun, or SvelteKit app.."
 frameworks:
+  - bun
   - next-js
   - node-js
+  - sveltekit
 ajToc:
   - text: "Configuration"
     anchor: "configuration"
@@ -22,6 +24,16 @@ ajToc:
         anchor: "middleware"
       - text: "Avoiding double protection with middleware"
         anchor: "avoiding-double-protection-with-middleware"
+  - text: "Per route vs hooks"
+    anchor: "per-route-vs-hooks"
+    framework: ["sveltekit"]
+    children:
+      - text: "Per route"
+        anchor: "per-route"
+      - text: "Hooks"
+        anchor: "hooks"
+      - text: "Avoiding double protection with hooks"
+        anchor: "avoiding-double-protection-with-hooks"
   - text: "Decision"
     anchor: "decision"
     children:
@@ -35,10 +47,17 @@ ajToc:
     anchor: "testing"
   - text: "Examples"
     anchor: "examples"
+    framework: ["next-js"]
 ---
 
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
+import AllowingBotsBun from "@/snippets/bot-protection/reference/bun/AllowingBots.mdx";
+import DecisionLogBun from "@/snippets/bot-protection/reference/bun/DecisionLog.mdx";
+import DenyingBotsBun from "@/snippets/bot-protection/reference/bun/DenyingBots.mdx";
+import ErrorsBun from "@/snippets/bot-protection/reference/bun/Errors.mdx";
+import FilteringBun from "@/snippets/bot-protection/reference/bun/Filtering.mdx";
+import IdentifiedBotsBun from "@/snippets/bot-protection/reference/bun/IdentifiedBots.mdx";
 import AllowingBotsNextJs from "@/snippets/bot-protection/reference/nextjs/AllowingBots.mdx";
 import DecisionLogNextJs from "@/snippets/bot-protection/reference/nextjs/DecisionLog.mdx";
 import DenyingBotsNextJs from "@/snippets/bot-protection/reference/nextjs/DenyingBots.mdx";
@@ -53,6 +72,13 @@ import DenyingBotsNodeJs from "@/snippets/bot-protection/reference/nodejs/Denyin
 import ErrorsNodeJs from "@/snippets/bot-protection/reference/nodejs/Errors.mdx";
 import FilteringNodeJs from "@/snippets/bot-protection/reference/nodejs/Filtering.mdx";
 import IdentifiedBotsNodeJs from "@/snippets/bot-protection/reference/nodejs/IdentifiedBots.mdx";
+import AllowingBotsSvelteKit from "@/snippets/bot-protection/reference/sveltekit/AllowingBots.mdx";
+import DecisionLogSvelteKit from "@/snippets/bot-protection/reference/sveltekit/DecisionLog.mdx";
+import DenyingBotsSvelteKit from "@/snippets/bot-protection/reference/sveltekit/DenyingBots.mdx";
+import ErrorsSvelteKit from "@/snippets/bot-protection/reference/sveltekit/Errors.mdx";
+import FilteringSvelteKit from "@/snippets/bot-protection/reference/sveltekit/Filtering.mdx";
+import IdentifiedBotsSvelteKit from "@/snippets/bot-protection/reference/sveltekit/IdentifiedBots.mdx";
+import PerRouteVsHooksSvelteKit from "@/snippets/bot-protection/reference/sveltekit/PerRouteVsHooks.mdx";
 import Comments from "/src/components/Comments.astro";
 
 Arcjet bot detection allows you to manage traffic by automated clients and bots.
@@ -101,8 +127,10 @@ bots](https://arcjet.com/bot-list) and/or [bot
 categories](/bot-protection/identifying-bots#bot-categories).
 
 <SlotByFramework client:load>
+  <AllowingBotsBun slot="bun" />
   <AllowingBotsNextJs slot="next-js" />
   <AllowingBotsNodeJs slot="node-js" />
+  <AllowingBotsSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
 ### Only denying specific bots
@@ -116,12 +144,15 @@ bots](https://arcjet.com/bot-list) and/or [bot
 categories](/bot-protection/identifying-bots#bot-categories).
 
 <SlotByFramework client:load>
+  <DenyingBotsBun slot="bun" />
   <DenyingBotsNextJs slot="next-js" />
   <DenyingBotsNodeJs slot="node-js" />
+  <DenyingBotsSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
 <SlotByFramework client:load>
   <PerRouteVsMiddlewareNextJs slot="next-js" />
+  <PerRouteVsHooksSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
 ## Decision
@@ -165,8 +196,10 @@ for (const result of decision.results) {
 This example will log the full result as well as the bot protection rule:
 
 <SlotByFramework client:load>
+  <DecisionLogBun slot="bun" />
   <DecisionLogNextJs slot="next-js" />
   <DecisionLogNodeJs slot="node-js" />
+  <DecisionLogSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
 ### Identified bots
@@ -178,8 +211,10 @@ of which will be available on the `decision.allowed` and `decision.denied`
 properties.
 
 <SlotByFramework client:load>
+  <IdentifiedBotsBun slot="bun" />
   <IdentifiedBotsNextJs slot="next-js" />
   <IdentifiedBotsNextJs slot="node-js" />
+  <IdentifiedBotsSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
 ## Error handling
@@ -204,8 +239,10 @@ See [an example of how to do this](/bot-protection/concepts#user-agent-header).
 :::
 
 <SlotByFramework client:load>
+  <ErrorsBun slot="bun" />
   <ErrorsNextJs slot="next-js" />
   <ErrorsNodeJs slot="node-js" />
+  <ErrorsSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
 ## Filtering categories
@@ -215,8 +252,10 @@ access. For example, you may want to allow most of `CATEGORY:GOOGLE` except
 their "advertising quality" bot.
 
 <SlotByFramework client:load>
+  <FilteringBun slot="bun" />
   <FilteringNextJs slot="next-js" />
   <FilteringNodeJs slot="node-js" />
+  <FilteringSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
 ## Testing
@@ -229,8 +268,6 @@ We have an example test framework you can use to automatically test your rules.
 Arcjet can also be triggered based using a sample of your traffic.
 
 See the [Testing](/testing) section of the docs for details.
-
-## Examples
 
 <SlotByFramework client:load>
   <ExamplesNextJs slot="next-js" />
