@@ -4,6 +4,7 @@ import vercelStatic from "@astrojs/vercel/static";
 import robotsTxt from "astro-robots-txt";
 import { defineConfig } from "astro/config";
 import starlightLinksValidator from "starlight-links-validator";
+import { main as sidebar } from "/src/lib/sidebars";
 
 // https://astro.build/config
 export default defineConfig({
@@ -64,309 +65,7 @@ export default defineConfig({
         Sidebar: "./src/components/overrides/Sidebar.astro",
         PageSidebar: "./src/components/overrides/PageSidebar.astro",
       },
-      sidebar: [
-        {
-          label: "Get started",
-          link: "/docs/get-started",
-        },
-        {
-          label: "Shield",
-          collapsed: true,
-          items: [
-            {
-              label: "Concepts",
-              link: "/docs/shield/concepts",
-            },
-            {
-              label: "Quick start",
-              link: "/docs/shield/quick-start",
-            },
-            {
-              label: "Reference",
-              link: "/docs/shield/reference",
-            },
-          ],
-        },
-        {
-          label: "Rate limiting",
-          collapsed: true,
-          items: [
-            {
-              label: "Quick start",
-              link: "/docs/rate-limiting/quick-start/bun",
-            },
-            {
-              label: "Concepts",
-              link: "/docs/rate-limiting/concepts",
-            },
-            {
-              label: "Algorithms",
-              link: "/docs/rate-limiting/algorithms",
-            },
-            {
-              label: "Configuration",
-              link: "/docs/rate-limiting/configuration",
-            },
-            {
-              label: "Reference",
-              link: "/docs/rate-limiting/reference",
-            },
-          ],
-        },
-        {
-          label: "Bot protection",
-          collapsed: true,
-          items: [
-            {
-              label: "Quick start",
-              link: "/docs/bot-protection/quick-start/bun",
-            },
-            {
-              label: "Concepts",
-              link: "/docs/bot-protection/concepts",
-            },
-            {
-              label: "Identifying Bots",
-              link: "/docs/bot-protection/identifying-bots",
-            },
-            {
-              label: "Reference",
-              link: "/docs/bot-protection/reference",
-            },
-          ],
-        },
-        {
-          label: "Email validation",
-          collapsed: true,
-          items: [
-            {
-              label: "Quick start",
-              link: "/email-validation/quick-start",
-            },
-            {
-              label: "Concepts",
-              link: "/email-validation/concepts",
-            },
-            {
-              label: "Reference",
-              link: "/email-validation/reference",
-            },
-          ],
-        },
-        {
-          label: "Signup form protection",
-          collapsed: true,
-          items: [
-            {
-              label: "Concepts",
-              link: "/signup-protection/concepts",
-            },
-            {
-              label: "Bun",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/signup-protection/quick-start/bun",
-                },
-                {
-                  label: "Reference",
-                  link: "/signup-protection/reference/bun",
-                },
-              ],
-            },
-            {
-              label: "Next.js",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/signup-protection/quick-start/nextjs",
-                },
-                {
-                  label: "Reference",
-                  link: "/signup-protection/reference/nextjs",
-                },
-              ],
-            },
-            {
-              label: "Node.js",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/signup-protection/quick-start/nodejs",
-                },
-                {
-                  label: "Reference",
-                  link: "/signup-protection/reference/nodejs",
-                },
-              ],
-            },
-            {
-              label: "SvelteKit",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/signup-protection/quick-start/sveltekit",
-                },
-              ],
-            },
-          ],
-        },
-        {
-          label: "Sensitive information",
-          collapsed: true,
-          items: [
-            {
-              label: "Quick start",
-              link: "/sensitive-info/quick-start",
-            },
-            {
-              label: "Concepts",
-              link: "/sensitive-info/concepts",
-            },
-            {
-              label: "Reference",
-              link: "/sensitive-info/reference",
-            },
-          ],
-        },
-        {
-          label: "SDK reference",
-          collapsed: true,
-          items: [
-            {
-              label: "Bun",
-              link: "/reference/bun",
-            },
-            {
-              label: "Next.js",
-              link: "/reference/nextjs",
-            },
-            {
-              label: "Node.js",
-              link: "/reference/nodejs",
-            },
-            {
-              label: "SvelteKit",
-              link: "/reference/sveltekit",
-            },
-          ],
-        },
-        {
-          label: "Redact",
-          collapsed: true,
-          items: [
-            {
-              label: "Quick start",
-              link: "/redact/quick-start",
-            },
-            {
-              label: "Reference",
-              link: "/redact/reference",
-            },
-          ],
-        },
-        {
-          label: "Integrations",
-          collapsed: true,
-          items: [
-            {
-              label: "Auth.js",
-              link: "/integrations/authjs",
-            },
-            {
-              label: "Clerk",
-              link: "/integrations/clerk",
-            },
-            {
-              label: "Fly.io",
-              link: "https://fly.io/docs/reference/arcjet/",
-            },
-            {
-              label: "LangChain",
-              link: "/integrations/langchain",
-            },
-            {
-              label: "NextAuth",
-              link: "/integrations/nextauth",
-            },
-            {
-              label: "OpenAI",
-              link: "/integrations/openai",
-            },
-            {
-              label: "Vercel",
-              link: "https://vercel.com/integrations/arcjet",
-            },
-          ],
-        },
-        {
-          label: "Examples",
-          link: "https://github.com/arcjet/arcjet-js/tree/main/examples",
-        },
-        {
-          label: "Troubleshooting",
-          link: "/troubleshooting",
-        },
-        {
-          label: "Platform",
-          collapsed: true,
-          items: [
-            {
-              label: "Architecture",
-              link: "/architecture",
-            },
-            {
-              label: "Testing",
-              link: "/testing",
-            },
-            {
-              label: "Regions",
-              link: "/regions",
-            },
-            {
-              label: "Limitations",
-              link: "/limitations",
-            },
-            {
-              label: "Security",
-              link: "/security",
-            },
-            {
-              label: "Privacy",
-              link: "/privacy",
-            },
-            {
-              label: "Changelog",
-              link: "https://blog.arcjet.com/tag/changelog/",
-            },
-          ],
-        },
-        {
-          label: "Support",
-          link: "/support",
-        },
-        {
-          label: "Pricing",
-          link: "https://arcjet.com/pricing",
-        },
-        {
-          label: "Arcjet",
-          items: [
-            {
-              label: "Home",
-              link: "https://arcjet.com",
-            },
-            {
-              label: "Blog",
-              link: "https://blog.arcjet.com",
-            },
-            {
-              label: "Login",
-              link: "https://app.arcjet.com",
-            },
-          ],
-        },
-      ],
+      sidebar: sidebar,
     }),
     react(),
   ],
@@ -374,18 +73,18 @@ export default defineConfig({
   redirects: {
     "/shield": "/shield/quick-start",
     "/shield/quick-start/bun": "/shield/quick-start?f=bun",
-    "/shield/quick-start/nextjs": "/docs/shield/quick-start?f=next-js",
-    "/shield/quick-start/nodejs": "/docs/shield/quick-start?f=node-js",
-    "/shield/quick-start/sveltekit": "/docs/shield/quick-start?f=sveltekit",
+    "/shield/quick-start/nextjs": "/shield/quick-start?f=next-js",
+    "/shield/quick-start/nodejs": "/shield/quick-start?f=node-js",
+    "/shield/quick-start/sveltekit": "/shield/quick-start?f=sveltekit",
     "/rate-limiting": "/rate-limiting/quick-start",
     "/bot-protection": "/bot-protection/quick-start",
     "/bot-protection/quick-start/bun": "/bot-protection/quick-start?f=bun",
     "/bot-protection/quick-start/nextjs":
-      "/docs/bot-protection/quick-start?f=next-js",
+      "/bot-protection/quick-start?f=next-js",
     "/bot-protection/quick-start/nodejs":
-      "/docs/bot-protection/quick-start?f=node-js",
+      "/bot-protection/quick-start?f=node-js",
     "/bot-protection/quick-start/sveltekit":
-      "/docs/bot-protection/quick-start?f=sveltekit",
+      "/bot-protection/quick-start?f=sveltekit",
     "/email-validation": "/email-validation/concepts",
     "/email-validation/quick-start/bun": "/email-validation/quick-start?f=bun",
     "/email-validation/quick-start/nextjs":
@@ -398,11 +97,11 @@ export default defineConfig({
     "/signup-protection/quick-start/bun":
       "/signup-protection/quick-start?f=bun",
     "/signup-protection/quick-start/nextjs":
-      "/docs/signup-protection/quick-start?f=next-js",
+      "/signup-protection/quick-start?f=next-js",
     "/signup-protection/quick-start/nodejs":
-      "/docs/signup-protection/quick-start?f=node-js",
+      "/signup-protection/quick-start?f=node-js",
     "/signup-protection/quick-start/sveltekit":
-      "/docs/signup-protection/quick-start?f=sveltekit",
+      "/signup-protection/quick-start?f=sveltekit",
     "/reference/ts-js": "/reference/nodejs",
     "/bot-protection/bot-types": "/bot-protection/identifying-bots",
   },

@@ -1,7 +1,7 @@
 export const main = [
   {
     label: "Get started",
-    link: "/docs/get-started",
+    link: "/get-started",
   },
   {
     label: "Examples",
@@ -18,15 +18,15 @@ export const main = [
         items: [
           {
             label: "Quick start",
-            link: "/docs/shield/quick-start",
+            link: "/shield/quick-start",
           },
           {
             label: "Concepts",
-            link: "/docs/shield/concepts",
+            link: "/shield/concepts",
           },
           {
             label: "Reference",
-            link: "/docs/shield/reference",
+            link: "/shield/reference",
           },
         ],
       },
@@ -36,19 +36,19 @@ export const main = [
         items: [
           {
             label: "Quick start",
-            link: "/docs/rate-limiting/quick-start",
+            link: "/rate-limiting/quick-start",
           },
           {
             label: "Concepts",
-            link: "/docs/rate-limiting/concepts",
+            link: "/rate-limiting/concepts",
           },
           {
             label: "Algorithms",
-            link: "/docs/rate-limiting/algorithms",
+            link: "/rate-limiting/algorithms",
           },
           {
             label: "Reference",
-            link: "/docs/rate-limiting/reference",
+            link: "/rate-limiting/reference",
           },
         ],
       },
@@ -58,19 +58,19 @@ export const main = [
         items: [
           {
             label: "Quick start",
-            link: "/docs/bot-protection/quick-start",
+            link: "/bot-protection/quick-start",
           },
           {
             label: "Concepts",
-            link: "/docs/bot-protection/concepts",
+            link: "/bot-protection/concepts",
           },
           {
             label: "Identifying Bots",
-            link: "/docs/bot-protection/identifying-bots",
+            link: "/bot-protection/identifying-bots",
           },
           {
             label: "Reference",
-            link: "/docs/bot-protection/reference",
+            link: "/bot-protection/reference",
           },
         ],
       },
@@ -80,15 +80,15 @@ export const main = [
         items: [
           {
             label: "Quick start",
-            link: "/docs/email-validation/quick-start",
+            link: "/email-validation/quick-start",
           },
           {
             label: "Concepts",
-            link: "/docs/email-validation/concepts",
+            link: "/email-validation/concepts",
           },
           {
             label: "Reference",
-            link: "/docs/email-validation/reference",
+            link: "/email-validation/reference",
           },
         ],
       },
@@ -98,15 +98,15 @@ export const main = [
         items: [
           {
             label: "Quick start",
-            link: "/docs/signup-protection/quick-start",
+            link: "/signup-protection/quick-start",
           },
           {
             label: "Concepts",
-            link: "/docs/signup-protection/concepts",
+            link: "/signup-protection/concepts",
           },
           {
             label: "Reference",
-            link: "/docs/signup-protection/reference",
+            link: "/signup-protection/reference",
           },
         ],
       },
@@ -116,15 +116,15 @@ export const main = [
         items: [
           {
             label: "Quick start",
-            link: "/docs/sensitive-info/quick-start",
+            link: "/sensitive-info/quick-start",
           },
           {
             label: "Concepts",
-            link: "/docs/sensitive-info/concepts",
+            link: "/sensitive-info/concepts",
           },
           {
             label: "Reference",
-            link: "/docs/sensitive-info/reference",
+            link: "/sensitive-info/reference",
           },
         ],
       },
@@ -140,29 +140,29 @@ export const main = [
         items: [
           {
             label: "Bun",
-            link: "/docs/reference/bun",
+            link: "/reference/bun",
           },
           {
             label: "Next.js",
-            link: "/docs/reference/nextjs",
+            link: "/reference/nextjs",
           },
           {
             label: "Node.js",
-            link: "/docs/reference/nodejs",
+            link: "/reference/nodejs",
           },
           {
             label: "SvelteKit",
-            link: "/docs/reference/sveltekit",
+            link: "/reference/sveltekit",
           },
         ],
       },
       {
         label: "Troubleshooting",
-        link: "/docs/troubleshooting",
+        link: "/troubleshooting",
       },
       {
         label: "Testing",
-        link: "/docs/testing",
+        link: "/testing",
       },
       {
         label: "Platform",
@@ -170,15 +170,15 @@ export const main = [
         items: [
           {
             label: "Architecture",
-            link: "/docs/architecture",
+            link: "/architecture",
           },
           {
             label: "Regions",
-            link: "/docs/regions",
+            link: "/regions",
           },
           {
             label: "Limitations",
-            link: "/docs/limitations",
+            link: "/limitations",
           },
         ],
       },
@@ -194,11 +194,11 @@ export const main = [
         items: [
           {
             label: "Quick start",
-            link: "/docs/redact/quick-start",
+            link: "/redact/quick-start",
           },
           {
             label: "Reference",
-            link: "/docs/redact/reference",
+            link: "/redact/reference",
           },
         ],
       },
@@ -210,35 +210,38 @@ export const main = [
     items: [
       {
         label: "Auth.js",
-        link: "/docs/integrations/authjs",
+        link: "/integrations/authjs",
       },
       {
         label: "Clerk",
-        link: "/docs/integrations/clerk",
+        link: "/integrations/clerk",
       },
       {
         label: "Fly.io",
         link: "https://fly.io/docs/reference/arcjet/",
+        attrs: { target: "_blank", class: "external-link" },
       },
       {
         label: "LangChain",
-        link: "/docs/integrations/langchain",
+        link: "/integrations/langchain",
       },
       {
         label: "Netlify",
         link: "https://www.netlify.com/integrations/arcjet/",
+        attrs: { target: "_blank", class: "external-link" },
       },
       {
         label: "NextAuth",
-        link: "/docs/integrations/nextauth",
+        link: "/integrations/nextauth",
       },
       {
         label: "OpenAI",
-        link: "/docs/integrations/openai",
+        link: "/integrations/openai",
       },
       {
         label: "Vercel",
         link: "https://vercel.com/integrations/arcjet",
+        attrs: { target: "_blank", class: "external-link" },
       },
     ],
   },
@@ -249,18 +252,19 @@ export const main = [
       {
         label: "Changelog",
         link: "https://blog.arcjet.com/tag/changelog/",
+        attrs: { target: "_blank", class: "external-link" },
       },
       {
         label: "Security",
-        link: "/docs/security",
+        link: "/security",
       },
       {
         label: "Privacy",
-        link: "/docs/privacy",
+        link: "/privacy",
       },
       {
         label: "Support",
-        link: "/docs/support",
+        link: "/support",
       },
       {
         label: "Pricing",

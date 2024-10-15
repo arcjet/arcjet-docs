@@ -2,14 +2,11 @@
 import SidebarLinks from "@/components/SidebarLinks.astro";
 import Default from "@astrojs/starlight/components/Sidebar.astro";
 import type { Props } from "@astrojs/starlight/props";
-
-// Custom sidebar style for new docs content structure
-const customStyle = Astro.props.slug.indexOf("docs/") >= 0;
 ---
 
-<div class={"aj-sidebar" + (customStyle ? " aj-custom" : "")}>
+<div class="aj-sidebar aj-custom">
   <Default {...Astro.props}>
     <slot />
   </Default>
-  {customStyle && <SidebarLinks />}
+  <SidebarLinks />
 </div>
