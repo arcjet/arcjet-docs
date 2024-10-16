@@ -1,10 +1,9 @@
 import type { FrameworkKey } from "@/lib/prefs";
-import { defaultSelectedFramework } from "@/lib/prefs";
-import { kebabToCamel } from "@/lib/utils";
+import { extractSlotContent } from "@/lib/utils";
 import { displayedFramework } from "@/store";
 import { useStore } from "@nanostores/react";
 import type { ForwardedRef, PropsWithChildren } from "react";
-import { forwardRef, useEffect, useState } from "react";
+import { forwardRef, useEffect, useMemo, useState } from "react";
 import Skeleton from "./Skeleton";
 
 /**
@@ -17,13 +16,20 @@ const TextByFramework = forwardRef(
     const $displayedFramework = useStore(displayedFramework);
 
     // The selected framework
-    const [selectedFramework, setSelectedFramework] = useState<FrameworkKey>(
-      defaultSelectedFramework,
-    );
+    const [selectedFramework, setSelectedFramework] = useState<FrameworkKey>();
 
     useEffect(() => {
       setSelectedFramework($displayedFramework);
     }, [$displayedFramework]);
+
+    const content = useMemo(() => {
+      return (
+        <>
+          {selectedFramework && extractSlotContent(props, selectedFramework)}
+          {props.children}
+        </>
+      );
+    }, [selectedFramework]);
 
     // Loading handling
     const [loading, setLoading] = useState(true);
@@ -32,16 +38,7 @@ const TextByFramework = forwardRef(
       if (selectedFramework) setLoading(false);
     }, [selectedFramework]);
 
-    return (
-      <>
-        {loading ? (
-          <Skeleton as="span" radius={0.5} inline />
-        ) : (
-          (props as any)[kebabToCamel(selectedFramework)]
-        )}
-        {props.children}
-      </>
-    );
+    return loading ? <Skeleton as="span" radius={0.5} inline /> : content;
   },
 );
 TextByFramework.displayName = "TextByFramework";
