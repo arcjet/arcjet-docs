@@ -37,11 +37,25 @@ body {
   margin: 0 auto;
 }
 
-header.header {
-  border-bottom: none;
+header {
+  &.header {
+    border-bottom: none;
 
-  max-width: min(100vw, var(--content-max-width));
-  left: max(0px, calc((100vw - var(--content-max-width)) / 2));
+    max-width: min(100vw, var(--content-max-width));
+    left: max(0px, calc((100vw - var(--content-max-width)) / 2));
+  }
+
+  .header {
+    grid-template-columns: var(--Sidebar-width) 1fr var(--PageSidebar-width);
+
+    *:nth-child(2) {
+      justify-content: center;
+
+      site-search button {
+        max-width: 10rem;
+      }
+    }
+  }
 }
 
 @media (max-width: 50rem) {
