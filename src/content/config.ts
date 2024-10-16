@@ -15,6 +15,7 @@ export const collections = {
       extend: z.object({
         ajToc: z.custom<TocNode[]>(),
         frameworks: z.custom<FrameworkKey[]>().optional(),
+        pageTitle: z.custom<{ [key in FrameworkKey]: string }>().optional(),
       }),
     }),
   }),
