@@ -5,7 +5,7 @@
 
 .TOC {
   .NavDesktop {
-    padding: calc(var(--sp) * 3) calc(var(--sp) * 4);
+    padding: calc(var(--sp) * 5) calc(var(--sp) * 4);
 
     .Switcher {
       margin-bottom: calc(var(--sp) * 3);
@@ -71,8 +71,9 @@
   .NavMobile {
     position: fixed;
     z-index: var(--sl-z-index-toc);
-    top: calc(var(--sl-nav-height) - 1px);
-    border-top: 1px solid var(--sl-color-gray-5);
+    top: calc(var(--Header-height) + var(--sp) * 3);
+    border-top: 1px solid
+      rgba(var(--aj-palette-input-primary-solid-border) / 0.2);
     background-color: var(--sl-color-bg-nav);
 
     right: 0;
@@ -82,7 +83,8 @@
       gap: 0.5rem;
       align-items: center;
       height: var(--sl-mobile-toc-height);
-      border-bottom: 1px solid var(--sl-color-hairline-shade);
+      border-bottom: 1px solid
+        rgba(var(--aj-palette-input-primary-solid-border) / 0.2);
       padding: 0.5rem 1rem;
       font-size: var(--sl-text-xs);
       outline-offset: var(--sl-outline-offset-inside);
