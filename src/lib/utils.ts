@@ -1,3 +1,5 @@
+import type { FrameworkKey } from "@/lib/prefs";
+
 /**
  * Typed local storage setter/getter
  * --------------------------------------------------------------------------------------------------------------
@@ -51,6 +53,21 @@ export const kebabToCamel = (str: string) => {
       index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1),
     )
     .join("");
+};
+
+/**
+ * In React, slots are occasionally/erratically converted to camelCase when received as props (next-js > nextJs,
+ * see: https://docs.astro.build/en/guides/framework-components/#passing-children-to-framework-components)
+ * so we parse them and retrieve the content with this utility.
+ */
+export const extractSlotContent = (
+  props: any,
+  selectedFramework: FrameworkKey,
+) => {
+  return (
+    (props as any)[selectedFramework] ||
+    (props as any)[kebabToCamel(selectedFramework)]
+  );
 };
 
 /**
