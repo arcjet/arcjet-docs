@@ -1,10 +1,22 @@
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
 import vercelStatic from "@astrojs/vercel/static";
+import { ExpressiveCodeTheme } from "astro-expressive-code";
 import robotsTxt from "astro-robots-txt";
 import { defineConfig } from "astro/config";
 import starlightLinksValidator from "starlight-links-validator";
 import { main as sidebar } from "/src/lib/sidebars";
+
+const jsoncString = fs.readFileSync(
+  new URL(`./src/lib/code-dark.json`, import.meta.url),
+  "utf-8",
+);
+const ajThemeDark = ExpressiveCodeTheme.fromJSONString(jsoncString);
+const jsoncStringLight = fs.readFileSync(
+  new URL(`./src/lib/code-light.json`, import.meta.url),
+  "utf-8",
+);
+const ajThemeLight = ExpressiveCodeTheme.fromJSONString(jsoncStringLight);
 
 // https://astro.build/config
 export default defineConfig({
@@ -67,6 +79,9 @@ export default defineConfig({
         PageTitle: "./src/components/overrides/PageTitle.astro",
       },
       sidebar: sidebar,
+      expressiveCode: {
+        themes: [ajThemeDark, ajThemeLight],
+      },
     }),
     react(),
   ],
