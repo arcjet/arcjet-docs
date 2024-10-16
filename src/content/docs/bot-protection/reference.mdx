@@ -10,10 +10,10 @@ ajToc:
   - text: "Configuration"
     anchor: "configuration"
     children:
-      - text: "Only allowing specific bots"
-        anchor: "only-allowing-specific-bots"
-      - text: "Only denying specific bots"
-        anchor: "only-denying-specific-bots"
+      - text: "Allowing specific bots"
+        anchor: "allowing-specific-bots"
+      - text: "Denying specific bots"
+        anchor: "denying-specific-bots"
   - text: "Per route vs middleware"
     anchor: "per-route-vs-middleware"
     framework: ["next-js"]
@@ -51,7 +51,6 @@ ajToc:
 ---
 
 import SlotByFramework from "@/components/SlotByFramework";
-import TextByFramework from "@/components/TextByFramework";
 import AllowingBotsBun from "@/snippets/bot-protection/reference/bun/AllowingBots.mdx";
 import DecisionLogBun from "@/snippets/bot-protection/reference/bun/DecisionLog.mdx";
 import DenyingBotsBun from "@/snippets/bot-protection/reference/bun/DenyingBots.mdx";
@@ -116,7 +115,7 @@ execution ordering is automatically optimized for performance. See below for
 how to examine the execution results.
 :::
 
-### Only allowing specific bots
+### Allowing specific bots
 
 Most applications want to block almost all bots. However, it is common to allow
 some bots to access your system, such as bots for search indexing or API
@@ -133,7 +132,7 @@ categories](/bot-protection/identifying-bots#bot-categories).
   <AllowingBotsSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
-### Only denying specific bots
+### Denying specific bots
 
 Some applications may only want to block a small subset of bots, while allowing
 the majority continued access. This may be due to many reasons, such as
