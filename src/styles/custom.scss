@@ -15,6 +15,9 @@
   --sl-heading: "Jost Variable", "SF Pro";
   --sl-font: "Figtree Variable", "SF Pro";
   --sl-font-mono: "IBM Plex Mono", "mono";
+
+  --Sidebar-width: 300px;
+  --PageSidebar-width: 300px;
 }
 
 html {
@@ -41,6 +44,12 @@ header.header {
   left: max(0px, calc((100vw - var(--content-max-width)) / 2));
 }
 
+@media (max-width: 50rem) {
+  :root {
+    --Header-height: calc(var(--sp) * 7);
+  }
+}
+
 .sidebar-pane {
   border-right: 1px solid
     rgba(var(--aj-palette-input-primary-solid-border) / 0.2);
@@ -50,6 +59,7 @@ header.header {
 
 @media (min-width: 50rem) {
   .sidebar-pane {
+    width: var(--Sidebar-width);
     top: calc(var(--Header-height) + var(--sp) * 3);
     bottom: calc(var(--sp) * 3);
   }
@@ -77,12 +87,57 @@ header.header {
 @media (min-width: 72rem) {
   .right-sidebar-container,
   .right-sidebar-container .right-sidebar {
-    width: 300px;
+    width: var(--PageSidebar-width);
   }
 
   .right-sidebar-container {
     right: max(0px, calc(0px + ((100vw - var(--content-max-width)) / 2)));
     position: fixed;
+  }
+}
+
+// 72rem
+@media (min-width: 1152px) {
+  [data-has-sidebar][data-has-toc] .main-pane {
+    width: min(
+      calc(100vw - var(--Sidebar-width) - var(--PageSidebar-width)),
+      calc(
+        var(--content-max-width) - var(--Sidebar-width) - var(
+            --PageSidebar-width
+          )
+      )
+    );
+  }
+
+  .sl-container {
+    margin-inline: 0;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 1151px) {
+  [data-has-sidebar][data-has-toc] .main-pane {
+    width: calc(100vw - var(--Sidebar-width));
+  }
+
+  .sl-container {
+    margin-inline: 0;
+    margin: 0 auto;
+  }
+
+  .content-panel:first-child {
+    padding-top: calc(var(--sp) * 12);
+  }
+}
+
+// 50rem
+@media (max-width: 800px) {
+  [data-has-sidebar][data-has-toc] .main-pane {
+    width: 100vw;
+  }
+
+  .content-panel:first-child {
+    padding-top: calc(var(--sp) * 10);
   }
 }
 
@@ -304,6 +359,16 @@ h6 {
   // Readjust default sidebar padding
   .aj-sidebar:not(.aj-custom) {
     padding: 1rem var(--sl-sidebar-pad-x) 0;
+  }
+}
+
+@media (max-width: 1151px) {
+  .sidebar-content {
+    .aj-sidebar.aj-custom {
+      sl-sidebar-state-persist {
+        padding-top: calc(var(--sp) * 0.5);
+      }
+    }
   }
 }
 
