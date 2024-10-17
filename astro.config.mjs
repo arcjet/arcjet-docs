@@ -92,6 +92,10 @@ export default defineConfig({
     "/shield/quick-start/nextjs": "/shield/quick-start?f=next-js",
     "/shield/quick-start/nodejs": "/shield/quick-start?f=node-js",
     "/shield/quick-start/sveltekit": "/shield/quick-start?f=sveltekit",
+    "/shield/reference/bun": "/shield/reference?f=bun",
+    "/shield/reference/nextjs": "/shield/reference?f=next-js",
+    "/shield/reference/nodejs": "/shield/reference?f=node-js",
+    "/shield/reference/sveltekit": "/shield/reference?f=sveltekit",
     "/rate-limiting": "/rate-limiting/quick-start",
     "/bot-protection": "/bot-protection/quick-start",
     "/bot-protection/quick-start/bun": "/bot-protection/quick-start?f=bun",
@@ -101,6 +105,11 @@ export default defineConfig({
       "/bot-protection/quick-start?f=node-js",
     "/bot-protection/quick-start/sveltekit":
       "/bot-protection/quick-start?f=sveltekit",
+    "/bot-protection/reference/bun": "/bot-protection/reference?f=bun",
+    "/bot-protection/reference/nextjs": "/bot-protection/reference?f=next-js",
+    "/bot-protection/reference/nodejs": "/bot-protection/reference?f=node-js",
+    "/bot-protection/reference/sveltekit":
+      "/bot-protection/reference?f=sveltekit",
     "/email-validation": "/email-validation/concepts",
     "/email-validation/quick-start/bun": "/email-validation/quick-start?f=bun",
     "/email-validation/quick-start/nextjs":
@@ -109,6 +118,13 @@ export default defineConfig({
       "/email-validation/quick-start?f=node-js",
     "/email-validation/quick-start/sveltekit":
       "/email-validation/quick-start?f=sveltekit",
+    "/email-validation/reference/bun": "/email-validation/reference?f=bun",
+    "/email-validation/reference/nextjs":
+      "/email-validation/reference?f=next-js",
+    "/email-validation/reference/nodejs":
+      "/email-validation/reference?f=node-js",
+    "/email-validation/reference/sveltekit":
+      "/email-validation/reference?f=sveltekit",
     "/signup-protection": "/signup-protection/quick-start",
     "/signup-protection/quick-start/bun":
       "/signup-protection/quick-start?f=bun",

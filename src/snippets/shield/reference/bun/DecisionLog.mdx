@@ -1,0 +1,13 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import DecisionLogJS from "/src/snippets/shield/reference/bun/DecisionLog.js?raw";
+import DecisionLogTS from "/src/snippets/shield/reference/bun/DecisionLog.ts?raw";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={DecisionLogTS} lang="ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={DecisionLogJS} lang="ts" />
+  </div>
+</SelectableContent>

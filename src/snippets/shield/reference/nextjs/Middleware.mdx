@@ -1,0 +1,40 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import MiddlewareTS from "/src/snippets/shield/reference/nextjs/Middleware.ts?raw";
+import MiddlewareJS from "/src/snippets/shield/reference/nextjs/Middleware.js?raw";
+import MiddlewareMatcher from "/src/snippets/shield/reference/nextjs/MiddlewareMatcher.ts?raw";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  This will run on every request to your Next.js app, except for static assets
+(configured in the `matcher` - see [the Next.js
+docs](https://nextjs.org/docs/pages/building-your-application/routing/middleware#matcher)
+for details).
+
+  <div slot="TS" slotIdx="1">
+    Create a file called `middleware.ts` in your project root (at the same level as
+`pages` or `app` or inside `src`):
+
+<Code code={MiddlewareTS} lang="ts" title="/middleware.ts" />
+
+  </div>
+  <div slot="JS" slotIdx="2">
+    Create a file called `middleware.js` in your project root (at the same level as
+`pages` or `app` or inside `src`):
+
+<Code code={MiddlewareJS} lang="js" title="/middleware.js" />
+
+  </div>
+</SelectableContent>
+
+### Avoiding double protection with middleware
+
+If you use Arcjet in middleware and individual routes, you need to be careful
+that Arcjet is not running multiple times per request. This can be avoided by
+excluding the API route from [the middleware
+matcher](https://nextjs.org/docs/pages/building-your-application/routing/middleware#matcher).
+
+For example, if you already have a shield rule defined in the API route
+at `/api/hello`, you can exclude it from the middleware by specifying a matcher
+in `/middleware.ts`:
+
+<Code code={MiddlewareMatcher} lang="ts" title="/middleware.ts" />
