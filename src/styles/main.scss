@@ -119,6 +119,26 @@ header {
   }
 }
 
+mobile-starlight-toc nav {
+  border: none;
+  background: var(--sl-color-bg-nav);
+  top: var(--Header-height);
+  padding-top: calc(var(--sp) * 3);
+
+  summary {
+    gap: 0.5rem;
+    align-items: center;
+    border-top: 1px solid
+      rgba(var(--aj-palette-input-primary-solid-border) / 0.2);
+    border-bottom: 1px solid
+      rgba(var(--aj-palette-input-primary-solid-border) / 0.2);
+  }
+
+  .dropdown {
+    background: var(--sl-color-bg);
+  }
+}
+
 // 72rem
 @media (min-width: 1152px) {
   [data-has-sidebar][data-has-toc] .main-pane {
@@ -283,6 +303,7 @@ h6 {
     sl-sidebar-state-persist {
       padding: 0 var(--sl-sidebar-pad-x);
       padding-top: calc(var(--sp) * 4.5);
+      padding-bottom: calc(var(--sp) * 4.5);
       display: block;
       flex: 0 1 auto;
       height: 100%;
