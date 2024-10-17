@@ -47,6 +47,10 @@ export const main = [
             link: "/rate-limiting/algorithms",
           },
           {
+            label: "Configuration",
+            link: "/rate-limiting/configuration",
+          },
+          {
             label: "Reference",
             link: "/rate-limiting/reference",
           },

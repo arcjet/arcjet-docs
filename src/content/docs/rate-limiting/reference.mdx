@@ -1,7 +1,431 @@
 ---
 title: "Rate limiting reference"
-description: "How to use Arcjet to add rate limiting to your app."
-next: false
+description: "Reference guide for adding Arcjet rate limiting to your Next.js, Node.js, Bun, or SvelteKit app."
+frameworks:
+  - bun
+  - next-js
+  - node-js
+  - sveltekit
+ajToc:
+  - text: "Configuration"
+    anchor: "configuration"
+    children:
+      - text: "Fixed window"
+        anchor: "fixed-window-rate-limit-options"
+      - text: "Sliding window"
+        anchor: "sliding-window-rate-limit-options"
+      - text: "Token bucket"
+        anchor: "token-bucket-rate-limit-options"
+  - text: "Identifying users"
+    anchor: "identifying-users"
+  - text: "Rules"
+    anchor: "rules"
+    children:
+      - text: "Single rate limit"
+        anchor: "example---single-rate-limit"
+      - text: "Dry run mode"
+        anchor: "example---dry-run-mode-for-new-rules"
+  - text: "Per route vs middleware"
+    anchor: "per-route-vs-middleware"
+    framework: ["next-js"]
+    children:
+      - text: "Per route"
+        anchor: "per-route"
+      - text: "Rate limit only on /api/*"
+        anchor: "rate-limit-only-on-api"
+      - text: "Rate limit on all routes"
+        anchor: "rate-limit-on-all-routes"
+      - text: "Avoiding double protection with middleware"
+        anchor: "avoiding-double-protection-with-middleware"
+  - text: "Per route vs hooks"
+    anchor: "per-route-vs-hooks"
+    framework: ["sveltekit"]
+    children:
+      - text: "Per route"
+        anchor: "per-route"
+      - text: "Rate limit only on /api/*"
+        anchor: "rate-limit-only-on-api"
+      - text: "Rate limit on all routes"
+        anchor: "rate-limit-on-all-routes"
+      - text: "Avoiding double protection with hooks"
+        anchor: "avoiding-double-protection-with-hooks"
+  - text: "Decision"
+    anchor: "decision"
+    children:
+      - text: "Token bucket request"
+        anchor: "token-bucket-request"
+      - text: "Rate limit headers"
+        anchor: "rate-limit-headers"
+  - text: "Error handling"
+    anchor: "error-handling"
+  - text: "Testing"
+    anchor: "testing"
+  - text: "Examples"
+    anchor: "examples"
+    framework: ["next-js"]
+    children:
+      - text: "Rate limit by IP address"
+        anchor: "rate-limit-by-ip-address"
+      - text: "Rate limit by IP address with custom response"
+        anchor: "rate-limit-by-ip-address-with-custom-response"
+      - text: "Rate limit by AI tokens"
+        anchor: "rate-limit-by-ai-tokens"
+      - text: "Rate limit by API key header"
+        anchor: "rate-limit-by-api-key-header"
+      - text: "Global rate limit"
+        anchor: "global-rate-limit"
+      - text: "Response based on the path"
+        anchor: "response-based-on-the-path"
+      - text: "Rewrite or redirect"
+        anchor: "rewrite-or-redirect"
+      - text: "Wrap existing handler"
+        anchor: "wrap-existing-handler"
 ---
 
-TODO
+import SlotByFramework from "@/components/SlotByFramework";
+import ByUserIdBun from "@/snippets/rate-limiting/reference/bun/ByUserId.mdx";
+import DecisionLogBun from "@/snippets/rate-limiting/reference/bun/DecisionLog.mdx";
+import DryRunBun from "@/snippets/rate-limiting/reference/bun/DryRun.mdx";
+import ErrorsBun from "@/snippets/rate-limiting/reference/bun/Errors.mdx";
+import FixedWindowBun from "@/snippets/rate-limiting/reference/bun/FixedWindow.mdx";
+import HeadersBun from "@/snippets/rate-limiting/reference/bun/Headers.mdx";
+import SingleRateLimitBun from "@/snippets/rate-limiting/reference/bun/SingleRateLimit.mdx";
+import SlidingWindowBun from "@/snippets/rate-limiting/reference/bun/SlidingWindow.mdx";
+import TokenBucketBun from "@/snippets/rate-limiting/reference/bun/TokenBucket.mdx";
+import TokenBucketRequestBun from "@/snippets/rate-limiting/reference/bun/TokenBucketRequest.mdx";
+import ByUserIdNextJs from "@/snippets/rate-limiting/reference/nextjs/ByUserId.mdx";
+import DecisionLogNextJs from "@/snippets/rate-limiting/reference/nextjs/DecisionLog.mdx";
+import DryRunNextJs from "@/snippets/rate-limiting/reference/nextjs/DryRun.mdx";
+import ErrorsNextJs from "@/snippets/rate-limiting/reference/nextjs/Errors.mdx";
+import ExamplesNextJs from "@/snippets/rate-limiting/reference/nextjs/Examples.mdx";
+import FixedWindowNextJs from "@/snippets/rate-limiting/reference/nextjs/FixedWindow.mdx";
+import HeadersNextJs from "@/snippets/rate-limiting/reference/nextjs/Headers.mdx";
+import PerRouteVsMiddlewareNextJs from "@/snippets/rate-limiting/reference/nextjs/PerRouteVsMiddleware.mdx";
+import SingleRateLimitNextJs from "@/snippets/rate-limiting/reference/nextjs/SingleRateLimit.mdx";
+import SlidingWindowNextJs from "@/snippets/rate-limiting/reference/nextjs/SlidingWindow.mdx";
+import TokenBucketNextJs from "@/snippets/rate-limiting/reference/nextjs/TokenBucket.mdx";
+import TokenBucketRequestNextJs from "@/snippets/rate-limiting/reference/nextjs/TokenBucketRequest.mdx";
+import ByUserIdNodeJs from "@/snippets/rate-limiting/reference/nodejs/ByUserId.mdx";
+import DecisionLogNodeJs from "@/snippets/rate-limiting/reference/nodejs/DecisionLog.mdx";
+import DryRunNodeJs from "@/snippets/rate-limiting/reference/nodejs/DryRun.mdx";
+import ErrorsNodeJs from "@/snippets/rate-limiting/reference/nodejs/Errors.mdx";
+import FixedWindowNodeJs from "@/snippets/rate-limiting/reference/nodejs/FixedWindow.mdx";
+import HeadersNodeJs from "@/snippets/rate-limiting/reference/nodejs/Headers.mdx";
+import SingleRateLimitNodeJs from "@/snippets/rate-limiting/reference/nodejs/SingleRateLimit.mdx";
+import SlidingWindowNodeJs from "@/snippets/rate-limiting/reference/nodejs/SlidingWindow.mdx";
+import TokenBucketNodeJs from "@/snippets/rate-limiting/reference/nodejs/TokenBucket.mdx";
+import TokenBucketRequestNodeJs from "@/snippets/rate-limiting/reference/nodejs/TokenBucketRequest.mdx";
+import ByUserIdSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/ByUserId.mdx";
+import DecisionLogSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/DecisionLog.mdx";
+import DryRunSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/DryRun.mdx";
+import ErrorsSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/Errors.mdx";
+import FixedWindowSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/FixedWindow.mdx";
+import HeadersSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/Headers.mdx";
+import PerRouteVsHooksSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/PerRouteVsHooks.mdx";
+import SingleRateLimitSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/SingleRateLimit.mdx";
+import SlidingWindowSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/SlidingWindow.mdx";
+import TokenBucketSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/TokenBucket.mdx";
+import TokenBucketRequestSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/TokenBucketRequest.mdx";
+import Comments from "/src/components/Comments.astro";
+
+Arcjet rate limiting allows you to define rules which limit the number of
+requests a client can make over a period of time.
+
+## Configuration
+
+Each rate limit is configured on an exact path with a set of client
+characteristics and algorithm specific options.
+
+### Fixed window rate limit options
+
+Tracks the number of requests made by a client over a fixed time window. Options
+are explained in the [Configuration](/rate-limiting/configuration)
+documentation. See the [fixed window algorithm
+description](/rate-limiting/algorithms#fixed-window) for more details about how
+the algorithm works.
+
+```ts
+// Options for fixed window rate limit
+// See https://docs.arcjet.com/rate-limiting/configuration
+type FixedWindowRateLimitOptions = {
+  // "LIVE" will block requests. "DRY_RUN" will log only
+  mode?: "LIVE" | "DRY_RUN";
+  // How the client is identified. We recommend setting characteristics on the
+  // Arcjet client rather than per rule. Global characteristics default to the
+  // request IP
+  characteristics?: string[];
+  // Time window the rate limit applies to
+  window: string;
+  // Maximum number of requests allowed in the time window
+  max: number;
+};
+```
+
+#### Fixed window example
+
+<SlotByFramework client:load>
+  <FixedWindowBun slot="bun" />
+  <FixedWindowNextJs slot="next-js" />
+  <FixedWindowNodeJs slot="node-js" />
+  <FixedWindowSvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+### Sliding window rate limit options
+
+Tracks the number of requests made by a client over a sliding window so that the
+window moves with time. Options are explained in the
+[Configuration](/rate-limiting/configuration) documentation. See the [sliding
+window algorithm description](/rate-limiting/algorithms#sliding-window) for more
+details about how the algorithm works.
+
+```ts
+// Options for sliding window rate limit
+// See https://docs.arcjet.com/rate-limiting/configuration
+type SlidingWindowRateLimitOptions = {
+  // "LIVE" will block requests. "DRY_RUN" will log only
+  mode?: "LIVE" | "DRY_RUN";
+  // How the client is identified. We recommend setting characteristics on the
+  // Arcjet client rather than per rule. Global characteristics default to the
+  // request IP
+  characteristics?: string[];
+  // The time interval in seconds for the rate limit
+  interval: number;
+  // Maximum number of requests allowed over the time interval
+  max: number;
+};
+```
+
+#### Sliding window example
+
+<SlotByFramework client:load>
+  <SlidingWindowBun slot="bun" />
+  <SlidingWindowNextJs slot="next-js" />
+  <SlidingWindowNodeJs slot="node-js" />
+  <SlidingWindowSvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+### Token bucket rate limit options
+
+Based on a bucket filled with a specific number of tokens. Each request
+withdraws a token from the bucket and the bucket is refilled at a fixed rate.
+Once the bucket is empty, the client is blocked until the bucket refills.
+Options are explained in the [Configuration](/rate-limiting/configuration)
+documentation. See the [token bucket algorithm
+description](/rate-limiting/algorithms#token-bucket) for more details about how
+the algorithm works.
+
+```ts
+// Options for token bucket rate limit
+// See https://docs.arcjet.com/rate-limiting/configuration
+type TokenBucketRateLimitOptions = {
+  // "LIVE" will block requests. "DRY_RUN" will log only
+  mode?: "LIVE" | "DRY_RUN";
+  // How the client is identified. We recommend setting characteristics on the
+  // Arcjet client rather than per rule. Global characteristics default to the
+  // request IP
+  characteristics?: string[];
+  // Number of tokens to add to the bucket at each interval
+  refillRate: number;
+  // The interval in seconds to add tokens to the bucket
+  interval: number;
+  // The maximum number of tokens the bucket can hold
+  capacity: number;
+};
+```
+
+#### Token bucket example
+
+See the [token bucket request example](#token-bucket-request) for how to specify
+the number of tokens to request.
+
+<SlotByFramework client:load>
+  <TokenBucketBun slot="bun" />
+  <TokenBucketNextJs slot="next-js" />
+  <TokenBucketNodeJs slot="node-js" />
+  <TokenBucketSvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+## Identifying users
+
+Rate limit rules use `characteristics` to identify the client and apply the
+limit across requests. The default is to use the client's IP address. However,
+you can specify other
+[characteristics](/rate-limiting/configuration#characteristics) such as a user
+ID or other metadata from your application.
+
+:::caution
+Avoid passing personal information such as an email address as a custom
+characteristic. The value is hashed on Arcjet's servers, but it's still a best
+practice to avoid sending us sensitive information.
+:::
+
+In this example we define a rate limit rule that applies to a specific user ID.
+The custom characteristic is `userId` with the value passed as a prop on the
+`protect` function. You can use any string for the characteristic name and any
+`string`, `number` or `boolean` for the value.
+
+<SlotByFramework client:load>
+  <ByUserIdBun slot="bun" />
+  <ByUserIdNextJs slot="next-js" />
+  <ByUserIdNodeJs slot="node-js" />
+  <ByUserIdSvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+To identify users with different characteristics e.g. IP address for anonymous
+users and a user ID for logged in users, you can create a custom fingerprint.
+See the [example in the custom characteristics
+section](/rate-limiting/configuration#ip-address--user-id).
+
+## Rules
+
+The `arcjet` client is configured with one or more rules which take one or many
+of the above options.
+
+### Example - single rate limit
+
+Set a single rate limit rule on the `/api/hello` API route that applies a 60
+request limit per hour per IP address (the default if no `characteristics` are
+specified).
+
+<SlotByFramework client:load>
+  <SingleRateLimitBun slot="bun" />
+  <SingleRateLimitNextJs slot="next-js" />
+  <SingleRateLimitNodeJs slot="node-js" />
+  <SingleRateLimitSvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+### Example - dry run mode for new rules
+
+Rate limits can be combined in the `arcjet` client which allows you to test new
+configurations in dry run mode first before enabling them in live mode. You can
+inspect the results of each rule by logging them or using the [Arcjet
+Dashboard](https://app.arcjet.com).
+
+<SlotByFramework client:load>
+  <DryRunBun slot="bun" />
+  <DryRunNextJs slot="next-js" />
+  <DryRunNodeJs slot="node-js" />
+  <DryRunSvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+<SlotByFramework client:load>
+  <PerRouteVsMiddlewareNextJs slot="next-js" />
+  <PerRouteVsHooksSvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+## Decision
+
+Arcjet provides a single `protect` function that is used to execute your
+protection rules. This requires a `RequestEvent` property which is the event
+context as passed to the request handler.
+
+This function returns a `Promise` that resolves to an
+`ArcjetDecision` object. This contains the following properties:
+
+- `id` (`string`) - The unique ID for the request. This can be used to look up
+  the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
+  involving the Arcjet cloud API. For decisions taken locally, the prefix is
+  `lreq_`.
+- `conclusion` (`ArcjetConclusion`) - The final conclusion based on evaluating
+  each of the configured rules. If you wish to accept Arcjet's recommended
+  action based on the configured rules then you can use this property.
+- `reason` (`ArcjetReason`) - An object containing more detailed
+  information about the conclusion.
+- `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
+  containing the results of each rule that was executed.
+- `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
+  client IP address. See the SDK reference for more information.
+
+You check if a deny conclusion has been returned by a rate limit rule by using
+`decision.isDenied()` and `decision.reason.isRateLimit()`.
+
+You can iterate through the results and check whether a rate limit was applied:
+
+```ts
+for (const result of decision.results) {
+  console.log("Rule Result", result);
+}
+```
+
+This example will log the full result as well as each rate limit rule:
+
+<SlotByFramework client:load>
+  <DecisionLogBun slot="bun" />
+  <DecisionLogNextJs slot="next-js" />
+  <DecisionLogNodeJs slot="node-js" />
+  <DecisionLogSvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+### Token bucket request
+
+When using a token bucket rule, an additional `requested` prop should be passed
+to the `protect` function. This is the number of tokens the client is requesting
+to withdraw from the bucket.
+
+<SlotByFramework client:load>
+  <TokenBucketRequestBun slot="bun" />
+  <TokenBucketRequestNextJs slot="next-js" />
+  <TokenBucketRequestNodeJs slot="node-js" />
+  <TokenBucketRequestSvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+### Rate limit headers
+
+With a rate limit rule enabled, you can access additional metadata in every
+Arcjet decision result:
+
+- `max` (`number`): The configured maximum number of requests applied to this
+  request.
+- `remaining` (`number`): The number of requests remaining before `max` is
+  reached within the window.
+- `window` (`number`): The total amount of seconds in which requests are
+  counted.
+- `reset` (`number`): The remaining amount of seconds in the window.
+
+These can be used to return `RateLimit` HTTP headers ([draft
+RFC](https://ietf-wg-httpapi.github.io/ratelimit-headers/draft-ietf-httpapi-ratelimit-headers.html)) to
+offer the client more detail.
+
+We provide the [@arcjet/decorate
+package](https://github.com/arcjet/arcjet-js/tree/main/decorate) for decorating
+your responses with appropriate `RateLimit` headers based on a decision.
+
+<SlotByFramework client:load>
+  <HeadersBun slot="bun" />
+  <HeadersNextJs slot="next-js" />
+  <HeadersNodeJs slot="node-js" />
+  <HeadersSvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+## Error handling
+
+Arcjet is designed to fail open so that a service issue or misconfiguration does
+not block all requests. The SDK will also time out and fail open after 1000ms
+when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
+in most cases, the response time will be less than 20-30ms.
+
+If there is an error condition, Arcjet will return an `ERROR` `conclusion`.
+
+<SlotByFramework client:load>
+  <ErrorsBun slot="bun" />
+  <ErrorsNextJs slot="next-js" />
+  <ErrorsNodeJs slot="node-js" />
+  <ErrorsSvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+## Testing
+
+Arcjet runs the same in any environment, including locally and in CI. You can
+use the `mode` set to `DRY_RUN` to log the results of rule execution without
+blocking any requests.
+
+We have an example test framework you can use to automatically test your rules.
+Arcjet can also be triggered based using a sample of your traffic.
+
+See the [Testing](/testing) section of the docs for details.
+
+<SlotByFramework client:load>
+  <ExamplesNextJs slot="next-js" />
+</SlotByFramework>
+
+<Comments />

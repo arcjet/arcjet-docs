@@ -1,0 +1,13 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import TokenBucketRequestTS from "/src/snippets/rate-limiting/reference/bun/TokenBucketRequest.js?raw";
+import TokenBucketRequestJS from "/src/snippets/rate-limiting/reference/bun/TokenBucketRequest.ts?raw";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={TokenBucketRequestTS} lang="ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={TokenBucketRequestJS} lang="ts" />
+  </div>
+</SelectableContent>

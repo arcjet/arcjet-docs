@@ -1,0 +1,13 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import HeadersTS from "/src/snippets/rate-limiting/reference/sveltekit/Headers.ts?raw";
+import HeadersJS from "/src/snippets/rate-limiting/reference/sveltekit/Headers.js?raw";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={HeadersTS} lang="ts" />
+  </div>
+  <div slot="JS" slotIdx="3">
+    <Code code={HeadersJS} lang="js" />
+  </div>
+</SelectableContent>

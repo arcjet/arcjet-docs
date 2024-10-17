@@ -1,0 +1,9 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import SingleRateLimit from "/src/snippets/rate-limiting/reference/bun/SingleRateLimit.ts?raw";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={SingleRateLimit} lang="ts" />
+  </div>
+</SelectableContent>

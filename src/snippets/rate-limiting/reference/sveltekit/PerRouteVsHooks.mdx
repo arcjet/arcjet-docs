@@ -1,0 +1,48 @@
+import SelectableContent from "@/components/SelectableContent";
+import SlotByFramework from "@/components/SlotByFramework";
+import HookMatchingPaths from "@/snippets/rate-limiting/reference/sveltekit/HookMatchingPaths.mdx";
+import HookAllRoutes from "/src/snippets/rate-limiting/reference/sveltekit/HookAllRoutes.mdx";
+import HookMatcher from "/src/snippets/rate-limiting/reference/sveltekit/HookMatcher.mdx";
+
+## Per route vs hooks
+
+Rate limit rules can be configured in two ways:
+
+- **Per route**: The rule is defined in the route handler itself. This allows
+  you to configure the rule alongside the code it is protecting which is useful
+  if you want to use the decision to add context to your own code. However, it
+  means rules are not located in a single place.
+- **Hooks**: The rule is defined as a hook. This allows you to
+  configure rules in a single place or apply them globally to all routes, but
+  it means the rules are not located alongside the code they are protecting.
+
+### Per route
+
+If you define your rate limit within an API route Arcjet assumes that the limit
+applies only to that route. If you define your rate limit in hooks, you should
+use `event.url.pathname.startsWith`.
+
+#### Rate limit only on `/api/*`
+
+<SlotByFramework client:load>
+  <HookMatchingPaths slot="sveltekit" />
+</SlotByFramework>
+
+#### Rate limit on all routes
+
+<SlotByFramework client:load>
+  <HookAllRoutes slot="sveltekit" />
+</SlotByFramework>
+
+### Avoiding double protection with hooks
+
+If you use Arcjet in hooks and individual routes, you need to be careful
+that Arcjet is not running multiple times per request. This can be avoided by
+excluding the individual routes before running Arcjet in the hook.
+
+For example, if you already have a rule defined in the route at `/api`, you can
+exclude it from the hook like this:
+
+<SlotByFramework client:load>
+  <HookMatcher slot="sveltekit" />
+</SlotByFramework>
