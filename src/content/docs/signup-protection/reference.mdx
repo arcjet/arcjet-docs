@@ -1,7 +1,193 @@
 ---
 title: "Signup from protection reference"
-description: "How to protect your signup forms using Arcjet signup form protection."
-next: false
+description: "Reference guide for adding Arcjet email validation to your Next.js, Node.js, Bun, or SvelteKit app."
+frameworks:
+  - bun
+  - next-js
+  - node-js
+  - sveltekit
+ajToc:
+  - text: "Configuration"
+    anchor: "configuration"
+  - text: "Decision"
+    anchor: "decision"
+    children:
+      - text: "Accepting our recommended action"
+        anchor: "accepting-our-recommended-action"
+      - text: "Checking rule results"
+        anchor: "checking-rule-results"
+      - text: "Custom verification logic"
+        anchor: "custom-verification-logic"
+  - text: "Error handling"
+    anchor: "error-handling"
+  - text: "Testing"
+    anchor: "testing"
 ---
 
-TODO
+import TextByFramework from "@/components/TextByFramework";
+import SlotByFramework from "@/components/SlotByFramework";
+import RecommendedBun from "@/snippets/signup-protection/reference/bun/Recommended.mdx";
+import RecommendedNextJs from "@/snippets/signup-protection/reference/nextjs/Recommended.mdx";
+import RecommendedNodeJs from "@/snippets/signup-protection/reference/nodejs/Recommended.mdx";
+import RecommendedSvelteKit from "@/snippets/signup-protection/reference/sveltekit/Recommended.mdx";
+import CustomVerificationBun from "@/snippets/signup-protection/reference/bun/CustomVerification.mdx";
+import CustomVerificationNextJs from "@/snippets/signup-protection/reference/nextjs/CustomVerification.mdx";
+import CustomVerificationNodeJs from "@/snippets/signup-protection/reference/nodejs/CustomVerification.mdx";
+import CustomVerificationSvelteKit from "@/snippets/signup-protection/reference/sveltekit/CustomVerification.mdx";
+import ErrorsBun from "@/snippets/signup-protection/reference/bun/Errors.mdx";
+import ErrorsNextJs from "@/snippets/signup-protection/reference/nextjs/Errors.mdx";
+import ErrorsNodeJs from "@/snippets/signup-protection/reference/nodejs/Errors.mdx";
+import ErrorsSvelteKit from "@/snippets/signup-protection/reference/sveltekit/Errors.mdx";
+import Comments from "/src/components/Comments.astro";
+
+Arcjet signup form protection combines rate limiting, bot protection, and email
+validation to protect your signup forms from abuse.
+
+## Configuration
+
+Signup form protection is a combination of the [rate
+limiting](/rate-limiting/quick-start?f=next-js), [bot
+protection](/bot-protection/quick-start?f=next-js), and [email
+validation](/email-validation/quick-start?f=next-js) primitives. The
+configuration options are the same, but specified in a single rule.
+
+The configuration definition is:
+
+```ts
+type ProtectSignupOptions = {
+  rateLimit?: SlidingWindowRateLimitOptions | SlidingWindowRateLimitOptions[];
+  bots?:
+    | BotOptionsAllow
+    | BotOptionsDeny
+    | BotOptionsAllow[]
+    | BotOptionsDeny[];
+  email?: EmailOptions | EmailOptions[];
+};
+```
+
+The `arcjet` client is configured with one `protectSignup` rule which take
+`ProtectSignupOptions`.
+
+### Recommended configuration
+
+Our recommended configuration for most signup forms is:
+
+- Block emails with invalid syntax, that are from disposable email providers, or
+  do not have valid MX records configured.
+- Block clients that we are sure are automated.
+- Apply a rate limit of 5 submissions per 10 minutes from a single IP address.
+
+This can be configured as follows:
+
+<SlotByFramework client:load>
+  <RecommendedBun slot="bun" />
+  <RecommendedNextJs slot="next-js" />
+  <RecommendedNodeJs slot="node-js" />
+  <RecommendedSvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+### Testing with dry run mode
+
+When you are testing your signup form protection configuration, you can run the
+rules in dry run mode first by setting `mode` to `DRY_RUN`. This will return an
+allow decision for every request, but log what the results would have been if
+they were in live mode. You can view the results in the [Arcjet
+dashboard](https://app.arcjet.com).
+
+Even in dry run mode each rule will still be evaluated, so you can still [check
+the rule results](#checking-rule-results) to see if the email address is valid
+or not, or log them to your database.
+
+## Decision
+
+Arcjet provides a single `protect` function that is used to execute your
+protection rules. This requires a `request` argument which is the request
+context as passed to the request handler. When configured with a `protectSignup`
+rule it also requires an additional `email` prop.
+
+This function returns a `Promise` that resolves to an
+`ArcjetDecision` object. This contains the following properties:
+
+- `id` (`string`) - The unique ID for the request. This can be used to look up
+  the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
+  involving the Arcjet cloud API. For decisions taken locally, the prefix is
+  `lreq_`.
+- `conclusion` (`ArcjetConclusion`) - The final conclusion based on evaluating
+  each of the configured rules. If you wish to accept Arcjet's recommended
+  action based on the configured rules then you can use this property.
+- `reason` (`ArcjetReason`) - An object containing more detailed
+  information about the conclusion.
+- `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
+  containing the results of each rule that was executed.
+- `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
+  client IP address. See the SDK reference for more information.
+
+### Accepting our recommended action
+
+The `conclusion` property contains the final conclusion based on evaluating each
+of the configured rules. The quick start example code above uses this property
+to accept Arcjet's recommended action - display an error to the user if their
+email is rejected, otherwise return a `403` error.
+
+You can check if a deny decision was returned by using `decision.isDenied()`. To
+narrow down the reason to an email validation rule, you can use
+`decision.reason.isEmail()`.
+
+### Checking rule results
+
+You can iterate through the results of each rule:
+
+```ts
+for (const result of decision.results) {
+  console.log("Rule Result", result);
+}
+```
+
+This could be useful metadata to add to a new user's record in your database
+before you redirect them to the next step in your signup flow.
+
+See [the SDK reference](/reference/nextjs#results) for more details about the
+rule results.
+
+### Custom verification logic
+
+Checking the rule results allows you to use the Arcjet decision as part of your
+own verification logic. For example, you could decide to manually verify user
+signups that come from IP addresses associated with proxies or Tor, and any
+users who sign up with a free email address.
+
+<SlotByFramework client:load>
+  <CustomVerificationBun slot="bun" />
+  <CustomVerificationNextJs slot="next-js" />
+  <CustomVerificationNodeJs slot="node-js" />
+  <CustomVerificationSvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+## Error handling
+
+Arcjet is designed to fail open so that a service issue or misconfiguration does
+not block all requests. The SDK will also time out and fail open after 1000ms
+when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
+in most cases, the response time will be less than 20-30ms.
+
+If there is an error condition, Arcjet will return an `ERROR` `conclusion`.
+
+<SlotByFramework client:load>
+  <ErrorsBun slot="bun" />
+  <ErrorsNextJs slot="next-js" />
+  <ErrorsNodeJs slot="node-js" />
+  <ErrorsSvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+## Testing
+
+Arcjet runs the same in any environment, including locally and in CI. You can
+use the `mode` set to `DRY_RUN` to log the results of rule execution without
+blocking any requests.
+
+We have an example test framework you can use to automatically test your rules.
+Arcjet can also be triggered based using a sample of your traffic.
+
+See the [Testing](/testing) section of the docs for details.
+
+<Comments />

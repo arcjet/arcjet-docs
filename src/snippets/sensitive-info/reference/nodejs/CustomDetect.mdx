@@ -1,0 +1,32 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import AccessBodyJS from "/src/snippets/sensitive-info/reference/nodejs/AccessBody.js?raw";
+import AccessBodyTS from "/src/snippets/sensitive-info/reference/nodejs/AccessBody.ts?raw";
+import CustomDetectJS from "/src/snippets/sensitive-info/reference/nodejs/CustomDetect.js?raw";
+import CustomDetectTS from "/src/snippets/sensitive-info/reference/nodejs/CustomDetect.ts?raw";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={CustomDetectTS} lang="ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={CustomDetectJS} lang="ts" />
+  </div>
+</SelectableContent>
+
+## Accessing the body
+
+The Arcjet Sensitive Info rule accesses the request body, so if you also need to
+access the body in your application code, you should parse it before calling
+`protect`. Otherwise, you may see an error `Body already read`.
+
+For example, using Express:
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={AccessBodyTS} lang="ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={AccessBodyJS} lang="js" />
+  </div>
+</SelectableContent>

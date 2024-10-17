@@ -1,0 +1,13 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import CustomDetectTS from "/src/snippets/sensitive-info/reference/bun/CustomDetect.ts?raw";
+import CustomDetectJS from "/src/snippets/sensitive-info/reference/bun/CustomDetect.js?raw";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={CustomDetectTS} lang="ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={CustomDetectJS} lang="ts" />
+  </div>
+</SelectableContent>

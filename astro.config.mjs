@@ -96,6 +96,11 @@ export default defineConfig({
     "/shield/reference/nodejs": "/shield/reference?f=node-js",
     "/shield/reference/sveltekit": "/shield/reference?f=sveltekit",
     "/rate-limiting": "/rate-limiting/quick-start",
+    "/rate-limiting/quick-start/bun": "/rate-limiting/quick-start?f=bun",
+    "/rate-limiting/quick-start/nextjs": "/rate-limiting/quick-start?f=next-js",
+    "/rate-limiting/quick-start/nodejs": "/rate-limiting/quick-start?f=node-js",
+    "/rate-limiting/quick-start/sveltekit":
+      "/rate-limiting/quick-start?f=sveltekit",
     "/bot-protection": "/bot-protection/quick-start",
     "/bot-protection/quick-start/bun": "/bot-protection/quick-start?f=bun",
     "/bot-protection/quick-start/nextjs":
@@ -133,6 +138,13 @@ export default defineConfig({
       "/signup-protection/quick-start?f=node-js",
     "/signup-protection/quick-start/sveltekit":
       "/signup-protection/quick-start?f=sveltekit",
+    "/signup-protection/reference/bun": "/signup-protection/reference?f=bun",
+    "/signup-protection/reference/nextjs":
+      "/signup-protection/reference?f=next-js",
+    "/signup-protection/reference/nodejs":
+      "/signup-protection/reference?f=node-js",
+    "/signup-protection/reference/sveltekit":
+      "/signup-protection/reference?f=sveltekit",
     "/reference/ts-js": "/reference/nodejs",
     "/bot-protection/bot-types": "/bot-protection/identifying-bots",
   },

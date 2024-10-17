@@ -51,8 +51,7 @@ export async function POST(event) {
       return error(400, { message: "Invalid email" });
     } else {
       // This returns an error which is then displayed on the form, but you
-      // could take other actions such as redirecting to an error page. See
-      // https://nextjs.org/docs/app/building-your-application/routing/route-handlers#redirects
+      // could take other actions such as redirecting to an error page
       return error(403, { message: "Forbidden" });
     }
   } else {

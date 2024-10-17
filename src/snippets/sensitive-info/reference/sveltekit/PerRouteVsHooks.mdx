@@ -1,0 +1,46 @@
+import SelectableContent from "@/components/SelectableContent";
+import SlotByFramework from "@/components/SlotByFramework";
+import Hooks from "@/snippets/bot-protection/reference/sveltekit/Hooks.mdx";
+import PerRoute from "@/snippets/bot-protection/reference/sveltekit/PerRoute.mdx";
+import { Code } from "@astrojs/starlight/components";
+import HookMatcher from "/src/snippets/bot-protection/reference/sveltekit/HookMatcher.ts?raw";
+
+## Per route vs hooks
+
+Bot protection rules can be configured in two ways:
+
+- **Per route**: The rule is defined in the route handler itself. This allows
+  you to configure the rule alongside the code it is protecting which is useful
+  if you want to use the decision to add context to your own code. However, it
+  means rules are not located in a single place.
+- **Hooks**: The rule is defined as a hook. This allows you to
+  configure rules in a single place or apply them globally to all routes, but
+  it means the rules are not located alongside the code they are protecting.
+
+### Per route
+
+This configures bot protection on a single route.
+
+<SlotByFramework client:load>
+  <PerRoute slot="sveltekit" />
+</SlotByFramework>
+
+### Hooks
+
+This will run on every request to your SvelteKit app - see [the SvelteKit Hooks
+docs](https://kit.svelte.dev/docs/hooks) for details.
+
+<SlotByFramework client:load>
+  <Hooks slot="sveltekit" />
+</SlotByFramework>
+
+### Avoiding double protection with hooks
+
+If you use Arcjet in hooks and individual routes, you need to be careful
+that Arcjet is not running multiple times per request. This can be avoided by
+excluding the individual routes before running Arcjet in the hook.
+
+For example, if you already have a sensitive info rule defined in the API route
+at `/api/arcjet`, you can exclude it from the hook like this:
+
+<Code code={HookMatcher} lang="ts" title="/src/hooks.server.ts" />

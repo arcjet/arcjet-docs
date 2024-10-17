@@ -1,0 +1,13 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import CustomVerificationTS from "/src/snippets/signup-protection/reference/nodejs/CustomVerification.js?raw";
+import CustomVerificationJS from "/src/snippets/signup-protection/reference/nodejs/CustomVerification.ts?raw";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={CustomVerificationTS} lang="ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={CustomVerificationJS} lang="ts" />
+  </div>
+</SelectableContent>
