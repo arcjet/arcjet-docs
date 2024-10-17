@@ -1,5 +1,5 @@
 import type { ForwardedRef, HTMLProps } from "react";
-import { forwardRef } from "react";
+import { forwardRef, useId } from "react";
 
 export interface Props extends HTMLProps<SVGSVGElement> {}
 
@@ -7,6 +7,9 @@ export const NextJs = forwardRef(
   ({ className, ...props }: Props, ref: ForwardedRef<SVGSVGElement>) => {
     let cls = "aj-Icon aj-Icon-next-js";
     if (className) cls += " " + className;
+
+    const id = useId();
+
     return (
       <svg
         ref={ref}
@@ -26,16 +29,16 @@ export const NextJs = forwardRef(
         <path
           strokeWidth="0"
           d="M106.317 112.014L49.168 38.4H38.4004V89.5787H47.0145V49.3395L99.5552 117.223C101.926 115.637 104.185 113.895 106.317 112.014Z"
-          fill="url(#paint0_linear_213_3286)"
+          fill={`url(#paint0_linear_${id})`}
         />
         <path
           strokeWidth="0"
           d="M90.3107 38.4H81.7773V89.6H90.3107V38.4Z"
-          fill="url(#paint1_linear_213_3286)"
+          fill={`url(#paint1_linear_${id})`}
         />
         <defs>
           <linearGradient
-            id="paint0_linear_213_3286"
+            id={`paint0_linear_${id}`}
             x1="77.5115"
             y1="82.8445"
             x2="102.756"
@@ -46,7 +49,7 @@ export const NextJs = forwardRef(
             <stop offset="1" stopColor="currentColor" stopOpacity="0" />
           </linearGradient>
           <linearGradient
-            id="paint1_linear_213_3286"
+            id={`paint1_linear_${id}`}
             x1="86.044"
             y1="38.4"
             x2="85.9011"
