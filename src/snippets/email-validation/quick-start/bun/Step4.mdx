@@ -1,0 +1,21 @@
+import SelectableContent from "@/components/SelectableContent";
+
+### 4. Start server
+
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+<div slot="TS" slotIdx="1">
+  ```sh
+  bun run --hot index.ts
+  ```
+</div>
+<div slot="JS" slotIdx="2">
+  ```sh
+  bun run --hot index.js
+  ```
+</div>
+</SelectableContent>
+
+Load `http://localhost:3000/api/arcjet`. The email address is from a disposable
+email service, so the decision is to deny. This can be adapted to API routes in
+your application which accept user submissions e.g. a signup form.

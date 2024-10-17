@@ -1,0 +1,142 @@
+---
+title: "Bot protection quick start"
+description: "Quick start guide for adding Arcjet bot protection to your Next.js, Node.js, Bun, or SvelteKit app."
+frameworks:
+  - bun
+  - next-js
+  - node-js
+  - sveltekit
+ajToc:
+  - text: "Quick start"
+    anchor: "quick-start"
+    children:
+      - text: 1. Install Arcjet
+        anchor: "1-install-arcjet"
+      - text: 2. Set your key
+        anchor: "2-set-your-key"
+      - text: 3. Add bot protection
+        anchor: "3-add-bot-protection"
+      - text: 4. Start server
+        anchor: "4-start-server"
+        framework: ["bun", "node-js"]
+      - text: 4. Start app
+        anchor: "4-start-app"
+        framework: ["next-js", "sveltekit"]
+      - text: 5. Choose bots to allow or deny
+        anchor: "5-choose-bots-to-allow-or-deny"
+  - text: "FAQs"
+    anchor: "faqs"
+  - text: "What next?"
+    anchor: "what-next"
+  - text: "Get help"
+    anchor: "get-help"
+---
+
+import { LinkCard, CardGrid } from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import SlotByFramework from "@/components/SlotByFramework";
+import FrameworkName from "@/components/FrameworkName";
+import Step1Bun from "@/snippets/bot-protection/quick-start/bun/Step1.mdx";
+import Step1NextJs from "@/snippets/bot-protection/quick-start/nextjs/Step1.mdx";
+import Step1NodeJs from "@/snippets/bot-protection/quick-start/nodejs/Step1.mdx";
+import Step1SvelteKit from "@/snippets/bot-protection/quick-start/sveltekit/Step1.mdx";
+import Step2 from "@/snippets/bot-protection/quick-start/shared/Step2.mdx";
+import Step2SetEnv from "@/snippets/bot-protection/quick-start/shared/Step2SetEnv.mdx";
+import Step3Bun from "@/snippets/bot-protection/quick-start/bun/Step3.mdx";
+import Step3NextJs from "@/snippets/bot-protection/quick-start/nextjs/Step3.mdx";
+import Step3NodeJs from "@/snippets/bot-protection/quick-start/nodejs/Step3.mdx";
+import Step3SvelteKit from "@/snippets/bot-protection/quick-start/sveltekit/Step3.mdx";
+import Step4 from "@/snippets/bot-protection/quick-start/nextjs/Step4.mdx";
+import Step4SvelteKit from "@/snippets/bot-protection/quick-start/sveltekit/Step4.mdx";
+import Step4Bun from "@/snippets/bot-protection/quick-start/bun/Step4.mdx";
+import Step4NodeJs from "@/snippets/bot-protection/quick-start/nodejs/Step4.mdx";
+import FAQs from "/src/components/FAQs.astro";
+import Comments from "/src/components/Comments.astro";
+
+Arcjet bot detection allows you to manage traffic by automated clients and bots.
+
+<WhatIsArcjet />
+
+## Quick start
+
+This guide will show you how to protect your entire <FrameworkName client:load />
+application from bots and automated clients.
+
+### 1. Install Arcjet
+
+In your project root, run the following command to install the SDK:
+
+<SlotByFramework client:load>
+  <Step1Bun slot="bun" />
+  <Step1NextJs slot="next-js" />
+  <Step1NodeJs slot="node-js" />
+  <Step1SvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key. Add it to a `.env.local` file in your
+project root.
+
+<SlotByFramework client:load>
+  <Step2SetEnv slot="bun" />
+  <Step2 slot="next-js" />
+  <Step2SetEnv slot="node-js" />
+  <Step2 slot="sveltekit" />
+</SlotByFramework>
+
+### 3. Add bot protection
+
+<SlotByFramework client:load>
+  <Step3Bun slot="bun" />
+  <Step3NextJs slot="next-js" />
+  <Step3NodeJs slot="node-js" />
+  <Step3SvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+<SlotByFramework client:load>
+  <Step4Bun slot="bun" />
+  <Step4 slot="next-js" />
+  <Step4NodeJs slot="node-js" />
+  <Step4SvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+### 5. Choose bots to allow or deny
+
+Arcjet maintains a list of known bots so you can choose to either only [allow
+specific bots](/bot-protection/reference) or only [deny specific
+bots](/bot-protection/reference).
+
+Check out our [full list of bots](https://arcjet.com/bot-list).
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can customize bot protection, rate
+limiting for your API and minimize fraudulent registrations with the signup form
+protection.
+
+<CardGrid>
+  <LinkCard
+    title="Bot protection reference"
+    href="/bot-protection/reference"
+    description="Full details about bot protection."
+  ></LinkCard>
+  <LinkCard
+    title="Testing"
+    href="/testing"
+    description="Write tests for your rules."
+  />
+</CardGrid>
+
+## Get help
+
+Need help with anything? Email support@arcjet.com to get support from our
+engineering team.
+
+<Comments />

@@ -1,0 +1,27 @@
+import SelectableContent from "@/components/SelectableContent";
+
+### 4. Start server
+
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+<div slot="TS" slotIdx="1">
+
+```sh
+bun run --hot index.ts
+```
+
+</div>
+<div slot="JS" slotIdx="2">
+
+```sh
+bun run --hot index.js
+```
+
+</div>
+</SelectableContent>
+
+Then make some requests to hit the rate limit:
+
+```sh
+curl http://localhost:3000
+```

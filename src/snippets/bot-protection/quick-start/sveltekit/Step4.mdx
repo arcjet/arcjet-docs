@@ -1,0 +1,37 @@
+import SelectableContent from "@/components/SelectableContent";
+
+### 4. Start app
+
+Start your SvelteKit app:
+
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="packageManager">
+<div slot="npm" slotIdx="1">
+```sh
+npm run dev
+```
+</div>
+<div slot="pnpm" slotIdx="2">
+```sh
+pnpm run dev
+```
+</div>
+<div slot="yarn" slotIdx="3">
+```sh
+yarn run dev
+```
+</div>
+</SelectableContent>
+
+Make a `curl` request from your terminal to your application. You should see a
+`403 Forbidden` response because `curl` is considered an automated client by
+default. See [the reference guide](/bot-protection/reference) to learn about
+configuring this.
+
+```shell
+# Will show just the response headers, which should be 403 forbidden
+curl -I http://localhost:5173
+```
+
+The requests will also show up in the [Arcjet
+dashboard](https://app.arcjet.com).

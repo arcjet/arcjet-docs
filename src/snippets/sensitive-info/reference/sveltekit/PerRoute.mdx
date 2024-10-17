@@ -1,0 +1,21 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import PerRouteTS from "/src/snippets/sensitive-info/reference/sveltekit/PerRoute.ts?raw";
+import PerRouteJS from "/src/snippets/sensitive-info/reference/sveltekit/PerRoute.js?raw";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code
+      code={PerRouteTS}
+      lang="ts"
+      title="/src/routes/api/arcjet/+server.ts"
+    />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code
+      code={PerRouteJS}
+      lang="js"
+      title="/src/routes/api/arcjet/+server.js"
+    />
+  </div>
+</SelectableContent>

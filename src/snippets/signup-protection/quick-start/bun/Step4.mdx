@@ -1,0 +1,27 @@
+import SelectableContent from "@/components/SelectableContent";
+
+### 4. Start server
+
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <Fragment slot="TS">
+    ```sh
+    bun run --hot index.ts
+    ```
+  </Fragment>
+  <Fragment slot="JS">
+  ```sh
+  bun run --hot index.js
+  ```
+  </Fragment>
+</SelectableContent>
+
+Make a `curl` `POST` request from your terminal to your application with various
+emails to test the result.
+
+```shell
+curl -X POST -d 'email=test@arcjet.io' http://localhost:3000/
+```
+
+The requests will also show up in the [Arcjet
+dashboard](https://app.arcjet.com).

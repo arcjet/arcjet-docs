@@ -1,0 +1,13 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import IdentifiedBotsTS from "/src/snippets/bot-protection/reference/bun/IdentifiedBots.ts?raw";
+import IdentifiedBotsJS from "/src/snippets/bot-protection/reference/bun/IdentifiedBots.js?raw";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={IdentifiedBotsTS} lang="ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={IdentifiedBotsJS} lang="ts" />
+  </div>
+</SelectableContent>

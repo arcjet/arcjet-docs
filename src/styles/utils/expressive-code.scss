@@ -1,0 +1,129 @@
+/* 
+  Arcjet's expressive code overrides
+*/
+
+[data-theme="dark"],
+[data-theme="dark"].aj,
+[data-theme="light"],
+[data-theme="light"].aj {
+  // Text and line markers colors
+  .expressive-code {
+    --ec-tm-markBg: var(--aj-palette-source-neutral-02);
+    --ec-tm-markBrdCol: var(--aj-palette-source-neutral-03);
+    --ec-tm-insBg: var(--aj-palette-source-tint-09-02);
+    --ec-tm-insBrdCol: var(--aj-palette-source-tint-09-03);
+    --ec-tm-insDiffIndCol: var(--aj-palette-source-tint-09-05);
+    --ec-tm-delBg: var(--aj-palette-source-tint-14-01);
+    --ec-tm-delBrdCol: var(--aj-palette-source-tint-14-02);
+    --ec-tm-delDiffIndCol: var(--aj-palette-source-tint-14-04);
+    --ec-collapsibleSections-closedBgCol: var(--aj-palette-source-neutral-01);
+    --ec-gtrHlFg: var(--aj-palette-source-neutral-04);
+    --ec-frm-edBg: var(--aj-palette-source-black);
+    --ec-frm-trmBg: var(--aj-palette-source-black);
+    --ec-frm-edActTabBg: var(--aj-palette-source-black);
+    --ec-frm-trmTtbBg: var(--aj-palette-source-black);
+  }
+}
+
+[data-theme="light"],
+[data-theme="light"].aj {
+  // Text and line markers colors
+  .expressive-code {
+    --ec-frm-edBg: var(--aj-palette-source-neutral-00);
+    --ec-frm-trmBg: var(--aj-palette-source-neutral-00);
+    --ec-frm-edActTabBg: var(--aj-palette-source-neutral-00);
+    --ec-frm-trmTtbBg: var(--aj-palette-source-neutral-00);
+  }
+}
+
+:root,
+:root.aj {
+  .expressive-code {
+    --ec-brdRad: var(--sp);
+    --ec-frm-edTabBrdRad: var(--sp);
+    --ec-brdCol: var(--aj-palette-block-level1-border);
+    --ec-frm-edTabBarBrdCol: var(--aj-palette-block-level1-border);
+    --ec-tm-lineDiffIndMargLeft: 0.1rem;
+  }
+
+  .expressive-code .frame {
+    box-shadow: none;
+  }
+
+  .expressive-code .ec-line .gutter {
+    color: var(--ec-gtrHlFg);
+    position: sticky;
+    left: 0;
+    background: var(--ec-frm-edBg);
+    z-index: 10;
+  }
+
+  .expressive-code .gutter .ln {
+    padding-inline: 1.5ch;
+  }
+
+  .expressive-code .ec-line .gutter ~ .code {
+    --ecLineBrdCol: transparent;
+  }
+
+  .expressive-code .ec-line .code {
+    padding-inline-start: calc(var(--sp) * 2);
+    padding-inline-end: calc(var(--sp) * 2);
+  }
+
+  .expressive-code pre > code {
+    font-family: var(--aj-fontFamily-code);
+    padding: calc(var(--sp) * 1) 0;
+    height: max-content;
+  }
+
+  .expressive-code .frame .header {
+    font-size: 12px;
+  }
+
+  .expressive-code .frame.has-title:not(.is-terminal) .header {
+    background: var(--aj-palette-block-level1-bg);
+  }
+
+  .expressive-code .frame.has-title:not(.is-terminal) .title {
+    color: var(--aj-palette-txt-tertiary);
+
+    &:after {
+      content: none;
+    }
+  }
+
+  .expressive-code .ec-section summary .ec-line {
+    font-style: italic;
+    color: var(--aj-palette-txt-secondary);
+  }
+
+  .expressive-code .ec-section summary .ec-line .gutter {
+    background: transparent;
+  }
+
+  .expressive-code .ec-section summary .ec-line .code {
+    position: sticky;
+    left: 5ch;
+    width: min-content;
+  }
+
+  .expressive-code .ec-section summary .ec-line .code svg {
+    position: absolute;
+    top: 50%;
+    transform: translate(-38px, -50%);
+  }
+
+  .expressive-code .copy {
+    margin-top: -4px;
+  }
+
+  .expressive-code .copy button {
+    width: calc(var(--sp) * 3.5);
+    height: calc(var(--sp) * 3.5);
+  }
+
+  .expressive-code .copy button::after {
+    margin: calc(var(--sp) * 0.75);
+  }
+}

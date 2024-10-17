@@ -1,0 +1,21 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import CustomDetectAppTS from "/src/snippets/sensitive-info/reference/nextjs/CustomDetectApp.ts?raw";
+import CustomDetectAppJS from "/src/snippets/sensitive-info/reference/nextjs/CustomDetectApp.js?raw";
+import CustomDetectPagesTS from "/src/snippets/sensitive-info/reference/nextjs/CustomDetectPages.ts?raw";
+import CustomDetectPagesJS from "/src/snippets/sensitive-info/reference/nextjs/CustomDetectPages.js?raw";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS (App)" slotIdx="1">
+    <Code code={CustomDetectAppTS} lang="ts" title="/app/api/arcjet/route.ts" />
+  </div>
+  <div slot="TS (Pages)" slotIdx="2">
+    <Code code={CustomDetectPagesTS} lang="ts" title="/pages/api/hello.ts" />
+  </div>
+  <div slot="JS (App)" slotIdx="3">
+    <Code code={CustomDetectAppJS} lang="js" title="/app/api/arcjet/route.js" />
+  </div>
+  <div slot="JS (Pages)" slotIdx="4">
+    <Code code={CustomDetectPagesJS} lang="js" title="/pages/api/hello.ts" />
+  </div>
+</SelectableContent>

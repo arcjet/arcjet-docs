@@ -24,7 +24,7 @@ export async function handle({
   const decision = await aj.protect(event);
 
   if (decision.isDenied()) {
-    return error(400, "Forbidden");
+    return error(400, "Bad request - sensitive information detected");
   }
 
   return resolve(event);

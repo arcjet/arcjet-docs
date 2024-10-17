@@ -1,0 +1,9 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import HookMatchingPaths from "/src/snippets/rate-limiting/reference/sveltekit/HookMatchingPaths.ts?raw";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={HookMatchingPaths} lang="ts" title="/src/hooks.server.ts" />
+  </div>
+</SelectableContent>

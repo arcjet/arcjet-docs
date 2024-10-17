@@ -1,9 +1,22 @@
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
 import vercelStatic from "@astrojs/vercel/static";
+import { ExpressiveCodeTheme } from "astro-expressive-code";
 import robotsTxt from "astro-robots-txt";
 import { defineConfig } from "astro/config";
 import starlightLinksValidator from "starlight-links-validator";
+import { main as sidebar } from "/src/lib/sidebars";
+
+const jsoncString = fs.readFileSync(
+  new URL(`./src/lib/code-dark.json`, import.meta.url),
+  "utf-8",
+);
+const ajThemeDark = ExpressiveCodeTheme.fromJSONString(jsoncString);
+const jsoncStringLight = fs.readFileSync(
+  new URL(`./src/lib/code-light.json`, import.meta.url),
+  "utf-8",
+);
+const ajThemeLight = ExpressiveCodeTheme.fromJSONString(jsoncStringLight);
 
 // https://astro.build/config
 export default defineConfig({
@@ -32,7 +45,7 @@ export default defineConfig({
         github: "https://github.com/arcjet",
         twitter: "https://twitter.com/arcjethq",
         youtube: "https://www.youtube.com/@arcjethq",
-        discord: "https://discord.gg/TPra6jqZDC",
+        discord: "https://arcjet.com/discord",
         email: "mailto:support@arcjet.com",
       },
       head: [
@@ -52,580 +65,86 @@ export default defineConfig({
         "@fontsource-variable/jost",
         "@fontsource-variable/figtree",
         "@fontsource/ibm-plex-mono",
-        "./src/styles/custom.scss",
-        "./src/styles/vars.scss",
+        "./src/styles/main.scss",
       ],
-      plugins: [starlightLinksValidator()],
-      sidebar: [
-        {
-          label: "Get started",
-          items: [
-            {
-              label: "Bun",
-              link: "/get-started/bun",
-            },
-            {
-              label: "Bun + Hono",
-              link: "/get-started/bun-hono",
-            },
-            {
-              label: "Deno",
-              link: "/get-started/deno",
-            },
-            {
-              label: "NestJS",
-              link: "/get-started/nestjs",
-            },
-            {
-              label: "Next.js",
-              link: "/get-started/nextjs",
-            },
-            {
-              label: "Node.js",
-              link: "/get-started/nodejs",
-            },
-            {
-              label: "Node.js + Express",
-              link: "/get-started/nodejs-express",
-            },
-            {
-              label: "Node.js + Hono",
-              link: "/get-started/nodejs-hono",
-            },
-            {
-              label: "SvelteKit",
-              link: "/get-started/sveltekit",
-            },
-          ],
-        },
-        {
-          label: "Shield",
-          collapsed: true,
-          items: [
-            {
-              label: "Concepts",
-              link: "/shield/concepts",
-            },
-            {
-              label: "Bun",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/shield/quick-start/bun",
-                },
-                {
-                  label: "Reference",
-                  link: "/shield/reference/bun",
-                },
-              ],
-            },
-            {
-              label: "Next.js",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/shield/quick-start/nextjs",
-                },
-                {
-                  label: "Reference",
-                  link: "/shield/reference/nextjs",
-                },
-              ],
-            },
-            {
-              label: "Node.js",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/shield/quick-start/nodejs",
-                },
-                {
-                  label: "Reference",
-                  link: "/shield/reference/nodejs",
-                },
-              ],
-            },
-            {
-              label: "SvelteKit",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/shield/quick-start/sveltekit",
-                },
-                {
-                  label: "Reference",
-                  link: "/shield/reference/sveltekit",
-                },
-              ],
-            },
-          ],
-        },
-        {
-          label: "Rate limiting",
-          collapsed: true,
-          items: [
-            {
-              label: "Concepts",
-              link: "/rate-limiting/concepts",
-            },
-            {
-              label: "Algorithms",
-              link: "/rate-limiting/algorithms",
-            },
-            {
-              label: "Configuration",
-              link: "/rate-limiting/configuration",
-            },
-            {
-              label: "Bun",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/rate-limiting/quick-start/bun",
-                },
-                {
-                  label: "Reference",
-                  link: "/rate-limiting/reference/bun",
-                },
-              ],
-            },
-            {
-              label: "Next.js",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/rate-limiting/quick-start/nextjs",
-                },
-                {
-                  label: "Reference",
-                  link: "/rate-limiting/reference/nextjs",
-                },
-              ],
-            },
-            {
-              label: "Node.js",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/rate-limiting/quick-start/nodejs",
-                },
-                {
-                  label: "Reference",
-                  link: "/rate-limiting/reference/nodejs",
-                },
-              ],
-            },
-            {
-              label: "SvelteKit",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/rate-limiting/quick-start/sveltekit",
-                },
-                {
-                  label: "Reference",
-                  link: "/rate-limiting/reference/sveltekit",
-                },
-              ],
-            },
-          ],
-        },
-        {
-          label: "Bot protection",
-          collapsed: true,
-          items: [
-            {
-              label: "Concepts",
-              link: "/bot-protection/concepts",
-            },
-            {
-              label: "Identifying Bots",
-              link: "/bot-protection/identifying-bots",
-            },
-            {
-              label: "Bun",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/bot-protection/quick-start/bun",
-                },
-                {
-                  label: "Reference",
-                  link: "/bot-protection/reference/bun",
-                },
-              ],
-            },
-            {
-              label: "Next.js",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/bot-protection/quick-start/nextjs",
-                },
-                {
-                  label: "Reference",
-                  link: "/bot-protection/reference/nextjs",
-                },
-              ],
-            },
-            {
-              label: "Node.js",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/bot-protection/quick-start/nodejs",
-                },
-                {
-                  label: "Reference",
-                  link: "/bot-protection/reference/nodejs",
-                },
-              ],
-            },
-            {
-              label: "SvelteKit",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/bot-protection/quick-start/sveltekit",
-                },
-                {
-                  label: "Reference",
-                  link: "/bot-protection/reference/sveltekit",
-                },
-              ],
-            },
-          ],
-        },
-        {
-          label: "Email validation",
-          collapsed: true,
-          items: [
-            {
-              label: "Concepts",
-              link: "/email-validation/concepts",
-            },
-            {
-              label: "Bun",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/email-validation/quick-start/bun",
-                },
-                {
-                  label: "Reference",
-                  link: "/email-validation/reference/bun",
-                },
-              ],
-            },
-            {
-              label: "Next.js",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/email-validation/quick-start/nextjs",
-                },
-                {
-                  label: "Reference",
-                  link: "/email-validation/reference/nextjs",
-                },
-              ],
-            },
-            {
-              label: "Node.js",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/email-validation/quick-start/nodejs",
-                },
-                {
-                  label: "Reference",
-                  link: "/email-validation/reference/nodejs",
-                },
-              ],
-            },
-            {
-              label: "SvelteKit",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/email-validation/quick-start/sveltekit",
-                },
-                {
-                  label: "Reference",
-                  link: "/email-validation/reference/sveltekit",
-                },
-              ],
-            },
-          ],
-        },
-        {
-          label: "Signup form protection",
-          collapsed: true,
-          items: [
-            {
-              label: "Concepts",
-              link: "/signup-protection/concepts",
-            },
-            {
-              label: "Bun",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/signup-protection/quick-start/bun",
-                },
-                {
-                  label: "Reference",
-                  link: "/signup-protection/reference/bun",
-                },
-              ],
-            },
-            {
-              label: "Next.js",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/signup-protection/quick-start/nextjs",
-                },
-                {
-                  label: "Reference",
-                  link: "/signup-protection/reference/nextjs",
-                },
-              ],
-            },
-            {
-              label: "Node.js",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/signup-protection/quick-start/nodejs",
-                },
-                {
-                  label: "Reference",
-                  link: "/signup-protection/reference/nodejs",
-                },
-              ],
-            },
-            {
-              label: "SvelteKit",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/signup-protection/quick-start/sveltekit",
-                },
-              ],
-            },
-          ],
-        },
-        {
-          label: "Sensitive information",
-          collapsed: true,
-          items: [
-            {
-              label: "Concepts",
-              link: "/sensitive-info/concepts",
-            },
-            {
-              label: "Bun",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/sensitive-info/quick-start/bun",
-                },
-                {
-                  label: "Reference",
-                  link: "/sensitive-info/reference/bun",
-                },
-              ],
-            },
-            {
-              label: "Next.js",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/sensitive-info/quick-start/nextjs",
-                },
-                {
-                  label: "Reference",
-                  link: "/sensitive-info/reference/nextjs",
-                },
-              ],
-            },
-            {
-              label: "Node.js",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/sensitive-info/quick-start/nodejs",
-                },
-                {
-                  label: "Reference",
-                  link: "/sensitive-info/reference/nodejs",
-                },
-              ],
-            },
-            {
-              label: "SvelteKit",
-              items: [
-                {
-                  label: "Quick start",
-                  link: "/sensitive-info/quick-start/sveltekit",
-                },
-                {
-                  label: "Reference",
-                  link: "/sensitive-info/reference/sveltekit",
-                },
-              ],
-            },
-          ],
-        },
-        {
-          label: "SDK reference",
-          collapsed: true,
-          items: [
-            {
-              label: "Bun",
-              link: "/reference/bun",
-            },
-            {
-              label: "Next.js",
-              link: "/reference/nextjs",
-            },
-            {
-              label: "Node.js",
-              link: "/reference/nodejs",
-            },
-            {
-              label: "SvelteKit",
-              link: "/reference/sveltekit",
-            },
-          ],
-        },
-        {
-          label: "Redact",
-          collapsed: true,
-          items: [
-            {
-              label: "Quick start",
-              link: "/redact/quick-start",
-            },
-            {
-              label: "Reference",
-              link: "/redact/reference",
-            },
-          ],
-        },
-        {
-          label: "Integrations",
-          collapsed: true,
-          items: [
-            {
-              label: "Auth.js",
-              link: "/integrations/authjs",
-            },
-            {
-              label: "Clerk",
-              link: "/integrations/clerk",
-            },
-            {
-              label: "Fly.io",
-              link: "https://fly.io/docs/reference/arcjet/",
-            },
-            {
-              label: "LangChain",
-              link: "/integrations/langchain",
-            },
-            {
-              label: "NextAuth",
-              link: "/integrations/nextauth",
-            },
-            {
-              label: "OpenAI",
-              link: "/integrations/openai",
-            },
-            {
-              label: "Vercel",
-              link: "https://vercel.com/integrations/arcjet",
-            },
-          ],
-        },
-        {
-          label: "Examples",
-          link: "https://github.com/arcjet/arcjet-js/tree/main/examples",
-        },
-        {
-          label: "Troubleshooting",
-          link: "/troubleshooting",
-        },
-        {
-          label: "Platform",
-          collapsed: true,
-          items: [
-            {
-              label: "Architecture",
-              link: "/architecture",
-            },
-            {
-              label: "Testing",
-              link: "/testing",
-            },
-            {
-              label: "Regions",
-              link: "/regions",
-            },
-            {
-              label: "Limitations",
-              link: "/limitations",
-            },
-            {
-              label: "Security",
-              link: "/security",
-            },
-            {
-              label: "Privacy",
-              link: "/privacy",
-            },
-            {
-              label: "Changelog",
-              link: "https://blog.arcjet.com/tag/changelog/",
-            },
-          ],
-        },
-        {
-          label: "Support",
-          link: "/support",
-        },
-        {
-          label: "Pricing",
-          link: "https://arcjet.com/pricing",
-        },
-        {
-          label: "Arcjet",
-          items: [
-            {
-              label: "Home",
-              link: "https://arcjet.com",
-            },
-            {
-              label: "Blog",
-              link: "https://blog.arcjet.com",
-            },
-            {
-              label: "Login",
-              link: "https://app.arcjet.com",
-            },
-          ],
-        },
+      plugins: [
+        starlightLinksValidator({
+          exclude: ["**/*f=*"], // exclude urls with `f` param from validation
+        }),
       ],
+      components: {
+        Sidebar: "./src/components/overrides/Sidebar.astro",
+        PageSidebar: "./src/components/overrides/PageSidebar.astro",
+        PageTitle: "./src/components/overrides/PageTitle.astro",
+      },
+      sidebar: sidebar,
+      expressiveCode: {
+        themes: [ajThemeDark, ajThemeLight],
+      },
     }),
     react(),
   ],
   // External redirects go in /vercel.json
   redirects: {
-    "/shield": "/shield/concepts",
-    "/rate-limiting": "/rate-limiting/concepts",
-    "/bot-protection": "/bot-protection/concepts",
+    "/shield": "/shield/quick-start",
+    "/shield/quick-start/bun": "/shield/quick-start?f=bun",
+    "/shield/quick-start/nextjs": "/shield/quick-start?f=next-js",
+    "/shield/quick-start/nodejs": "/shield/quick-start?f=node-js",
+    "/shield/quick-start/sveltekit": "/shield/quick-start?f=sveltekit",
+    "/shield/reference/bun": "/shield/reference?f=bun",
+    "/shield/reference/nextjs": "/shield/reference?f=next-js",
+    "/shield/reference/nodejs": "/shield/reference?f=node-js",
+    "/shield/reference/sveltekit": "/shield/reference?f=sveltekit",
+    "/rate-limiting": "/rate-limiting/quick-start",
+    "/rate-limiting/quick-start/bun": "/rate-limiting/quick-start?f=bun",
+    "/rate-limiting/quick-start/nextjs": "/rate-limiting/quick-start?f=next-js",
+    "/rate-limiting/quick-start/nodejs": "/rate-limiting/quick-start?f=node-js",
+    "/rate-limiting/quick-start/sveltekit":
+      "/rate-limiting/quick-start?f=sveltekit",
+    "/bot-protection": "/bot-protection/quick-start",
+    "/bot-protection/quick-start/bun": "/bot-protection/quick-start?f=bun",
+    "/bot-protection/quick-start/nextjs":
+      "/bot-protection/quick-start?f=next-js",
+    "/bot-protection/quick-start/nodejs":
+      "/bot-protection/quick-start?f=node-js",
+    "/bot-protection/quick-start/sveltekit":
+      "/bot-protection/quick-start?f=sveltekit",
+    "/bot-protection/reference/bun": "/bot-protection/reference?f=bun",
+    "/bot-protection/reference/nextjs": "/bot-protection/reference?f=next-js",
+    "/bot-protection/reference/nodejs": "/bot-protection/reference?f=node-js",
+    "/bot-protection/reference/sveltekit":
+      "/bot-protection/reference?f=sveltekit",
     "/email-validation": "/email-validation/concepts",
-    "/signup-protection": "/signup-protection/concepts",
+    "/email-validation/quick-start/bun": "/email-validation/quick-start?f=bun",
+    "/email-validation/quick-start/nextjs":
+      "/email-validation/quick-start?f=next-js",
+    "/email-validation/quick-start/nodejs":
+      "/email-validation/quick-start?f=node-js",
+    "/email-validation/quick-start/sveltekit":
+      "/email-validation/quick-start?f=sveltekit",
+    "/email-validation/reference/bun": "/email-validation/reference?f=bun",
+    "/email-validation/reference/nextjs":
+      "/email-validation/reference?f=next-js",
+    "/email-validation/reference/nodejs":
+      "/email-validation/reference?f=node-js",
+    "/email-validation/reference/sveltekit":
+      "/email-validation/reference?f=sveltekit",
+    "/signup-protection": "/signup-protection/quick-start",
+    "/signup-protection/quick-start/bun":
+      "/signup-protection/quick-start?f=bun",
+    "/signup-protection/quick-start/nextjs":
+      "/signup-protection/quick-start?f=next-js",
+    "/signup-protection/quick-start/nodejs":
+      "/signup-protection/quick-start?f=node-js",
+    "/signup-protection/quick-start/sveltekit":
+      "/signup-protection/quick-start?f=sveltekit",
+    "/signup-protection/reference/bun": "/signup-protection/reference?f=bun",
+    "/signup-protection/reference/nextjs":
+      "/signup-protection/reference?f=next-js",
+    "/signup-protection/reference/nodejs":
+      "/signup-protection/reference?f=node-js",
+    "/signup-protection/reference/sveltekit":
+      "/signup-protection/reference?f=sveltekit",
     "/reference/ts-js": "/reference/nodejs",
     "/bot-protection/bot-types": "/bot-protection/identifying-bots",
   },

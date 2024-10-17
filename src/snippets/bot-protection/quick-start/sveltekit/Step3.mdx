@@ -1,0 +1,19 @@
+import Step3TS from "/src/snippets/bot-protection/quick-start/sveltekit/Step3.ts?raw";
+import Step3JS from "/src/snippets/bot-protection/quick-start/sveltekit/Step3.js?raw";
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+Create a new API route at `/src/routes/api/arcjet/+server.ts`:
+
+<Code code={Step3TS} lang="ts" title="/src/routes/api/arcjet/+server.ts" />
+
+  </div>
+  <div slot="JS" slotIdx="2">
+Create a new API route at `/src/routes/api/arcjet/+server.js`:
+
+<Code code={Step3JS} lang="js" title="/src/routes/api/arcjet/+server.js" />
+
+  </div>
+</SelectableContent>

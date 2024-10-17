@@ -1,0 +1,13 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import AllowingBotsTS from "/src/snippets/bot-protection/reference/bun/AllowingBots.ts?raw";
+import AllowingBotsJS from "/src/snippets/bot-protection/reference/bun/AllowingBots.js?raw";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={AllowingBotsTS} lang="ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={AllowingBotsJS} lang="js" />
+  </div>
+</SelectableContent>

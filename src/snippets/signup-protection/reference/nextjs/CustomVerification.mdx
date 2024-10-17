@@ -1,0 +1,37 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import CustomVerificationAppJS from "/src/snippets/signup-protection/reference/nextjs/CustomVerificationApp.js?raw";
+import CustomVerificationAppTS from "/src/snippets/signup-protection/reference/nextjs/CustomVerificationApp.ts?raw";
+import CustomVerificationPagesJS from "/src/snippets/signup-protection/reference/nextjs/CustomVerificationPages.js?raw";
+import CustomVerificationPagesTS from "/src/snippets/signup-protection/reference/nextjs/CustomVerificationPages.ts?raw";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS (App)" slotIdx="1">
+    <Code
+      code={CustomVerificationAppTS}
+      lang="ts"
+      title="/app/api/submit/route.ts"
+    />
+  </div>
+  <div slot="TS (Pages)" slotIdx="2">
+    <Code
+      code={CustomVerificationPagesTS}
+      lang="ts"
+      title="/pages/api/submit.ts"
+    />
+  </div>
+  <div slot="JS (App)" slotIdx="3">
+    <Code
+      code={CustomVerificationAppJS}
+      lang="js"
+      title="/app/api/submit/route.js"
+    />
+  </div>
+  <div slot="JS (Pages)" slotIdx="4">
+    <Code
+      code={CustomVerificationPagesJS}
+      lang="js"
+      title="/pages/api/submit.js"
+    />
+  </div>
+</SelectableContent>

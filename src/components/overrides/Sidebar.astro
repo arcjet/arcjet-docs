@@ -1,0 +1,12 @@
+---
+import SidebarLinks from "@/components/SidebarLinks.astro";
+import Default from "@astrojs/starlight/components/Sidebar.astro";
+import type { Props } from "@astrojs/starlight/props";
+---
+
+<div class="aj-sidebar aj-custom">
+  <Default {...Astro.props}>
+    <slot />
+  </Default>
+  <SidebarLinks />
+</div>

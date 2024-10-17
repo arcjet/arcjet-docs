@@ -1,0 +1,204 @@
+---
+title: "Get started"
+description: "Getting started with Arcjet. Quick start guide for adding rate limiting, bot protection, and email validation to your app."
+prev: false
+next: false
+pageTitle:
+  bun: "Get started with Bun"
+  bun-hono: "Get started with Bun + Hono"
+  next-js: "Get started with Next.js"
+  node-js: "Get started with Node.js"
+  node-js-express: "Get started with Node.js + Express"
+  node-js-hono: "Get started with Node.js + Hono"
+  sveltekit: "Get started with SvelteKit"
+frameworks:
+  - bun
+  - bun-hono
+  - next-js
+  - node-js
+  - node-js-express
+  - node-js-hono
+  - sveltekit
+ajToc:
+  - text: "Video quick start"
+    anchor: "video-quick-start"
+    framework: "next-js"
+  - text: "SDK installation"
+    anchor: "sdk-installation"
+    children:
+      - text: 1. Install Arcjet
+        anchor: "1-install-arcjet"
+      - text: 2. Set your key
+        anchor: "2-set-your-key"
+      - text: 3. Add a rate limit to a route
+        anchor: "3-add-a-rate-limit-to-a-route"
+      - text: 4. Start app
+        anchor: "4-start-app"
+        framework: ["bun", "bun-hono", "next-js", "sveltekit"]
+      - text: 4. Start server
+        anchor: "4-start-server"
+        framework: ["node-js", "node-js-express", "node-js-hono"]
+  - text: "FAQs"
+    anchor: "faqs"
+  - text: "What next?"
+    anchor: "what-next"
+  - text: "Get help"
+    anchor: "get-help"
+---
+
+{/* TODO: Rename to "get-started" once there is no conflict with the previous page at "/get-started/index.mdx" */}
+
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import Step1Bun from "@/snippets/rate-limiting/quick-start/bun/Step1.mdx";
+import Step1NextJs from "@/snippets/rate-limiting/quick-start/nextjs/Step1.mdx";
+import Step1NodeJs from "@/snippets/rate-limiting/quick-start/nodejs/Step1.mdx";
+import Step1SvelteKit from "@/snippets/rate-limiting/quick-start/sveltekit/Step1.mdx";
+import Step2 from "@/snippets/rate-limiting/quick-start/shared/Step2.mdx";
+import Step2SetEnv from "@/snippets/rate-limiting/quick-start/shared/Step2SetEnv.mdx";
+import Step3Bun from "@/snippets/rate-limiting/quick-start/bun/Step3.mdx";
+import Step3BunHono from "@/snippets/get-started/bun-hono/Step3.mdx";
+import Step3NextJs from "@/snippets/rate-limiting/quick-start/nextjs/Step3.mdx";
+import Step3NodeJs from "@/snippets/rate-limiting/quick-start/nodejs/Step3.mdx";
+import Step3NodeJsExpress from "@/snippets/get-started/node-js-express/Step3.mdx";
+import Step3NodeJsHono from "@/snippets/get-started/node-js-hono/Step3.mdx";
+import Step3SvelteKit from "@/snippets/rate-limiting/quick-start/sveltekit/Step3.mdx";
+import Step4 from "@/snippets/rate-limiting/quick-start/nextjs/Step4.mdx";
+import Step4Bun from "@/snippets/get-started/bun/Step4.mdx";
+import Step4NodeJs from "@/snippets/rate-limiting/quick-start/nodejs/Step4.mdx";
+import Step4NodeJsExpress from "@/snippets/get-started/node-js-express/Step4.mdx";
+import Step4NodeJsHono from "@/snippets/get-started/node-js-hono/Step4.mdx";
+import Step4SvelteKit from "@/snippets/rate-limiting/quick-start/sveltekit/Step4.mdx";
+import BunServe from "@/snippets/get-started/bun/BunServe.mdx";
+import RequirementsBun from "@/snippets/get-started/bun/Requirements.mdx";
+import RequirementsBunHono from "@/snippets/get-started/bun-hono/Requirements.mdx";
+import RequirementsNextJs from "@/snippets/get-started/next-js/Requirements.mdx";
+import RequirementsNodeJs from "@/snippets/get-started/node-js/Requirements.mdx";
+import RequirementsNodeJsExpress from "@/snippets/get-started/node-js-express/Requirements.mdx";
+import RequirementsNodeJsHono from "@/snippets/get-started/node-js-hono/Requirements.mdx";
+import RequirementsSvelteKit from "@/snippets/get-started/sveltekit/Requirements.mdx";
+import SlotByFramework from "@/components/SlotByFramework";
+import FrameworkName from "@/components/FrameworkName";
+import BunHonoNotice from "@/snippets/get-started/bun-hono/Notice.mdx";
+import NodeJsHonoNotice from "@/snippets/get-started/node-js-hono/Notice.mdx";
+import VideoQuickStart from "@/snippets/rate-limiting/quick-start/nextjs/VideoQuickStart.mdx";
+import FAQs from "/src/components/FAQs.astro";
+import Comments from "/src/components/Comments.astro";
+
+This guide will help you protect your <SlotByFramework inline client:load><Fragment slot="bun">Bun</Fragment><Fragment slot="bun-hono">[Bun +
+Hono](https://hono.dev/getting-started/bun)</Fragment><Fragment slot="next-js">Next.js</Fragment><Fragment slot="node-js">Node.js</Fragment><Fragment slot="node-js-express">Node.js + Express</Fragment><Fragment slot="node-js-hono">[Node.js + Hono](https://hono.dev/getting-started/nodejs)</Fragment><Fragment slot="sveltekit">SvelteKit</Fragment></SlotByFramework> app using Arcjet.
+
+<WhatIsArcjet />
+
+<SlotByFramework client:load>
+  <BunHonoNotice slot="bun-hono" />
+  <NodeJsHonoNotice slot="node-js-hono" />
+</SlotByFramework>
+
+<SlotByFramework client:load>
+  <VideoQuickStart slot="next-js" />
+</SlotByFramework>
+
+## SDK installation
+
+Follow these steps to get started. You can also <SlotByFramework client:load inline><Fragment slot="bun">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/bun-rl)</Fragment><Fragment slot="bun-hono">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/bun-rl)</Fragment><Fragment slot="next-js">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nextjs-14-app-dir-rl)</Fragment><Fragment slot="node-js">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nodejs-rl)</Fragment><Fragment slot="node-js-express">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nodejs-express-rl)</Fragment><Fragment slot="node-js-hono">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nodejs-hono-rl)</Fragment><Fragment slot="sveltekit">[find an example app on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/sveltekit)</Fragment></SlotByFramework>.
+
+### 1. Install Arcjet
+
+In your project root, run the following command to install the SDK:
+
+<SlotByFramework client:load>
+  <Step1Bun slot="bun" />
+  <Step1Bun slot="bun-hono" />
+  <Step1NextJs slot="next-js" />
+  <Step1NodeJs slot="node-js" />
+  <Step1NodeJs slot="node-js-express" />
+  <Step1NodeJs slot="node-js-hono" />
+  <Step1SvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+#### Requirements
+
+<SlotByFramework client:load>
+  <RequirementsBun slot="bun" />
+  <RequirementsBunHono slot="bun-hono" />
+  <RequirementsNextJs slot="next-js" />
+  <RequirementsNodeJs slot="node-js" />
+  <RequirementsNodeJsExpress slot="node-js-express" />
+  <RequirementsNodeJsHono slot="node-js-hono" />
+  <RequirementsSvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key. Add it to a `.env.local` file in your <FrameworkName client:load /> project root.
+
+<SlotByFramework client:load>
+  <Step2SetEnv slot="bun" />
+  <Step2SetEnv slot="bun-hono" />
+  <Step2 slot="next-js" />
+  <Step2SetEnv slot="node-js" />
+  <Step2SetEnv slot="node-js-express" />
+  <Step2SetEnv slot="node-js-hono" />
+  <Step2 slot="sveltekit" />
+</SlotByFramework>
+
+### 3. Add a rate limit to a route
+
+The example below applies a token bucket rate limit rule to a route where we
+identify the user based on their ID e.g. if they are logged in. The bucket is
+configured with a maximum capacity of 10 tokens and refills by 5 tokens every 10
+seconds. Each request consumes 5 tokens.
+
+<SlotByFramework client:load>
+  <Fragment slot="bun">
+
+We also configure a Shield rule which adds protection against common attacks,
+such as SQL injection.
+
+    <Step3Bun />
+    <BunServe />
+
+  </Fragment>
+  <Fragment slot="bun-hono">
+
+We also configure a Shield rule which adds protection against common attacks,
+such as SQL injection.
+
+    <Step3BunHono />
+
+  </Fragment>
+  <Step3NextJs slot="next-js" />
+  <Step3NodeJs slot="node-js" />
+  <Step3NodeJsExpress slot="node-js-express" />
+  <Step3NodeJsHono slot="node-js-hono" />
+  <Step3SvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+<SlotByFramework client:load>
+  <Step4Bun slot="bun" />
+  <Step4Bun slot="bun-hono" />
+  <Step4 slot="next-js" />
+  <Step4NodeJs slot="node-js" />
+  <Step4NodeJsExpress slot="node-js-express" />
+  <Step4NodeJsHono slot="node-js-hono" />
+  <Step4SvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can customize bot protection, rate
+limiting for your API and minimize fraudulent registrations with the signup form
+protection.
+
+## Get help
+
+Need help with anything? [Email us](mailto:support@arcjet.com) or [join our
+Discord](https://arcjet.com/discord) to get support from our engineering team.
+
+<Comments />

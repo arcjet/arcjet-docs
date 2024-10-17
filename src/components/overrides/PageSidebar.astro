@@ -1,0 +1,17 @@
+---
+import TOC from "@/components/TOC";
+import Default from "@astrojs/starlight/components/PageSidebar.astro";
+import type { Props } from "@astrojs/starlight/props";
+
+const isAjToc = Astro.props.entry.data.ajToc != undefined;
+---
+
+{
+  isAjToc ? (
+<TOC client:load astroEntry={Astro.props.entry} />
+  ) : (
+<Default {...Astro.props}>
+  <slot />
+</Default>
+  )
+}

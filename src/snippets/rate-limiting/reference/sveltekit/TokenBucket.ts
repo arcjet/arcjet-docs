@@ -1,26 +1,14 @@
-import { env } from "$env/dynamic/private";
 import arcjet, { tokenBucket } from "@arcjet/sveltekit";
-import { error, json, type RequestEvent } from "@sveltejs/kit";
 
 const aj = arcjet({
-  key: env.ARCJET_KEY!,
-  characteristics: ["ip.src"],
+  key: process.env.ARCJET_KEY!,
+  characteristics: ["ip.src"], // track requests by IP address
   rules: [
     tokenBucket({
-      mode: "LIVE",
-      refillRate: 40_000,
-      interval: "1d",
-      capacity: 40_000,
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+      refillRate: 10, // refill 10 tokens per interval
+      interval: 60, // 60 second interval
+      capacity: 100, // bucket maximum capacity of 100 tokens
     }),
   ],
 });
-
-export async function GET(event: RequestEvent) {
-  const decision = await aj.protect(event, { requested: 50 });
-
-  if (decision.isDenied()) {
-    return error(429, { message: "Too many requests" });
-  }
-
-  return json({ message: "Hello world" });
-}

@@ -1,0 +1,43 @@
+/*
+  Reconstruct template vertical rhythm by taking into account astro-island and astro-slot wrapping.
+
+  TODO: Properly refactor page content vertical margins.
+*/
+
+.sl-container > * + * + astro-island > .SlotByFramework > astro-slot > * + * {
+  margin-top: 1.5rem;
+}
+
+.sl-markdown-content
+  :not(a, strong, em, del, span, input, code)
+  + *
+  + *
+  + astro-island
+  > .SlotByFramework
+  > astro-slot
+  > :not(a, strong, em, del, span, input, code, :where(.not-content *)) {
+  margin-top: 1rem;
+}
+
+/* Headings after non-headings have more spacing. */
+.sl-markdown-content
+  :not(h1, h2, h3, h4, h5, h6)
+  + astro-island
+  > .SlotByFramework
+  > astro-slot
+  > :is(h1, h2, h3, h4, h5, h6):not(:where(.not-content *)) {
+  margin-top: 2.5em;
+}
+
+.sl-markdown-content
+  :not(h1, h2, h3, h4, h5, h6)
+  + astro-island
+  > .SlotByFramework
+  > astro-slot
+  > :is(aside):not(:where(.not-content *)) {
+  margin-top: 2rem;
+}
+
+.sl-markdown-content :not(h1, h2, h3, h4, h5, h6) + astro-island > .Skeleton {
+  margin-top: 1rem;
+}

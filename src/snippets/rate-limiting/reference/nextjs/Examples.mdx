@@ -1,0 +1,231 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import ByIPAppTS from "/src/snippets/rate-limiting/reference/nextjs/ByIPApp.ts?raw";
+import ByIPPagesTS from "/src/snippets/rate-limiting/reference/nextjs/ByIPPages.ts?raw";
+import ByIPAppJS from "/src/snippets/rate-limiting/reference/nextjs/ByIPApp.js?raw";
+import ByIPPagesJS from "/src/snippets/rate-limiting/reference/nextjs/ByIPPages.js?raw";
+import ByIPCustomResponseAppTS from "/src/snippets/rate-limiting/reference/nextjs/ByIPCustomResponseApp.ts?raw";
+import ByIPCustomResponsePagesTS from "/src/snippets/rate-limiting/reference/nextjs/ByIPCustomResponsePages.ts?raw";
+import ByIPCustomResponseAppJS from "/src/snippets/rate-limiting/reference/nextjs/ByIPCustomResponseApp.js?raw";
+import ByIPCustomResponsePagesJS from "/src/snippets/rate-limiting/reference/nextjs/ByIPCustomResponsePages.js?raw";
+import AIChatBotAppTS from "/src/snippets/rate-limiting/reference/nextjs/AIChatBotApp.ts?raw";
+import AIChatBotAppJS from "/src/snippets/rate-limiting/reference/nextjs/AIChatBotApp.js?raw";
+import ByAPIKeyHeader from "/src/snippets/rate-limiting/reference/nextjs/ByAPIKeyHeader.ts?raw";
+import MiddlewareGlobal from "/src/snippets/rate-limiting/reference/nextjs/MiddlewareGlobal.ts?raw";
+import MiddlewareResponsePath from "/src/snippets/rate-limiting/reference/nextjs/MiddlewareResponsePath.ts?raw";
+import MiddlewareRewriteRedirect from "/src/snippets/rate-limiting/reference/nextjs/MiddlewareRewriteRedirect.ts?raw";
+import WrapAppTS from "/src/snippets/rate-limiting/reference/nextjs/WrapApp.ts?raw";
+import WrapPagesNodeTS from "/src/snippets/rate-limiting/reference/nextjs/WrapPagesNode.ts?raw";
+import WrapPagesEdgeTS from "/src/snippets/rate-limiting/reference/nextjs/WrapPagesEdge.ts?raw";
+import WrapAppJS from "/src/snippets/rate-limiting/reference/nextjs/WrapApp.js?raw";
+import WrapPagesNodeJS from "/src/snippets/rate-limiting/reference/nextjs/WrapPagesNode.js?raw";
+import WrapPagesEdgeJS from "/src/snippets/rate-limiting/reference/nextjs/WrapPagesEdge.js?raw";
+
+## Examples
+
+### Rate limit by IP address
+
+The example below shows how to configure a rate limit on a single API route. It
+applies a limit of 60 requests per hour per IP address. If the limit is
+exceeded, the client is blocked for 10 minutes before being able to make any
+further requests.
+
+Applying a rate limit by IP address is the default if no
+`characteristics` are specified.
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS (App)" slotIdx="1">
+    <Code code={ByIPAppTS} title="/app/api/hello/route.ts" lang="ts" />
+  </div>
+  <div slot="TS (Pages)" slotIdx="2">
+    <Code code={ByIPPagesTS} title="/pages/api/hello.ts" lang="ts" />
+  </div>
+  <div slot="JS (App)" slotIdx="3">
+    <Code code={ByIPAppJS} title="/app/api/hello/route.js" lang="js" />
+  </div>
+  <div slot="JS (Pages)" slotIdx="4">
+    <Code code={ByIPPagesJS} title="/pages/api/hello.js" lang="js" />
+  </div>
+</SelectableContent>
+
+### Rate limit by IP address with custom response
+
+The example below is the same as the one above. However this example also shows
+a customized response rather than the default.
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS (App)" slotIdx="1">
+    <Code
+      code={ByIPCustomResponseAppTS}
+      title="/app/api/hello/route.ts"
+      lang="ts"
+    />
+  </div>
+  <div slot="TS (Pages)" slotIdx="2">
+    <Code
+      code={ByIPCustomResponsePagesTS}
+      title="/pages/api/hello.ts"
+      lang="ts"
+    />
+  </div>
+  <div slot="JS (App)" slotIdx="3">
+    <Code
+      code={ByIPCustomResponseAppJS}
+      title="/app/api/hello/route.js"
+      lang="js"
+    />
+  </div>
+  <div slot="JS (Pages)" slotIdx="4">
+    <Code
+      code={ByIPCustomResponsePagesJS}
+      title="/pages/api/hello.js"
+      lang="js"
+    />
+  </div>
+</SelectableContent>
+
+### Rate limit by AI tokens
+
+If you are building an AI application you may be more interested in the number
+of AI tokens rather than the number of HTTP requests. Popular AI APIs such as
+OpenAI are billed based on the number of tokens consumed and the number of
+tokens is variable depending on the request e.g. conversation length or image
+size.
+
+The token bucket algorithm is a good fit for this use case because you can vary
+the number of tokens withdrawn from the bucket with every request.
+
+The example below configures a token bucket rate limit using the
+[openai-chat-tokens library](https://github.com/hmarr/openai-chat-tokens) to
+track the number of tokens used by a `gpt-3.5-turbo` AI chatbot. It sets a limit
+of `2,000` tokens per hour with a maximum of `5,000` tokens in the bucket. This
+allows for a reasonable conversation length without consuming too many tokens.
+
+See the [arcjet-js GitHub repo](https://github.com/arcjet/arcjet-js) for [a
+full example using
+Next.js](https://github.com/arcjet/arcjet-js/tree/main/examples/nextjs-14-openai).
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS (App)" slotIdx="1">
+    <Code code={AIChatBotAppTS} title="/app/api/chat/route.ts" lang="ts" />
+  </div>
+  <div slot="TS (Pages)" slotIdx="2">
+    The Next.js pages router does not support streaming responses so you should
+    use the app router for this example. You can still use the `pages/`
+    directory for the rest of your application. See the [Next.js AI docs for
+    details](https://sdk.vercel.ai/docs/guides/frameworks/nextjs-pages).
+  </div>
+  <div slot="JS (App)" slotIdx="3">
+    <Code code={AIChatBotAppJS} title="/app/api/chat/route.ts" lang="js" />
+  </div>
+  <div slot="JS (Pages)" slotIdx="4">
+    The Next.js pages router does not support streaming responses so you should
+    use the app router for this example. You can still use the `pages/`
+    directory for the rest of your application. See the [Next.js AI docs for
+    details](https://sdk.vercel.ai/docs/guides/frameworks/nextjs-pages).
+  </div>
+</SelectableContent>
+
+### Rate limit by API key header
+
+APIs are commonly protected by keys. You may wish to apply a rate limit based on
+the key, regardless of which IPs the requests come from. To achieve this, you
+can specify the characteristics Arcjet will use to track the limit.
+
+The example below shows how to configure a rate limit on a single API route. It
+applies a limit of 60 requests per hour per API key, where the key is provided
+in a custom header called `x-api-key`. If the limit is exceeded, the client is
+blocked for 10 minutes before being able to make any further requests.
+
+:::caution
+If you specify different characteristics and do not include `ip.src`, you may
+inadvertently rate limit everyone. Be sure to include a characteristic which can
+narrowly identify each client, such as an API key as shown here.
+:::
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={ByAPIKeyHeader} lang="ts" />
+  </div>
+</SelectableContent>
+
+### Global rate limit
+
+Using Next.js middleware allows you to set a rate limit that applies to every
+route:
+
+:::note
+Middleware runs on every route so be careful to avoid double
+protection if you are configuring Arcjet directly on other routes.
+:::
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={MiddlewareGlobal} title="/middleware.ts" lang="ts" />
+  </div>
+</SelectableContent>
+
+### Response based on the path
+
+You can also use the `req`
+[`NextRequest`](https://nextjs.org/docs/api-reference/next/server#nextrequest)
+object to customize the response based on the path. In this example, we'll
+return a JSON response for API requests, and a HTML response for other requests.
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={MiddlewareResponsePath} title="/middleware.ts" lang="ts" />
+  </div>
+</SelectableContent>
+
+### Rewrite or redirect
+
+The
+[`NextResponse`](https://nextjs.org/docs/advanced-features/middleware#nextresponse)
+object returned to the client can also be used to rewrite or redirect the
+request. For example, you might want to return a JSON response for API route
+requests, but redirect all page route requests to an error page.
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={MiddlewareRewriteRedirect} title="/middleware.ts" lang="ts" />
+  </div>
+</SelectableContent>
+
+### Wrap existing handler
+
+All the examples on this page show how you can inspect the decision to control
+what to do next. However, if you just wish to send a generic `429 Too Many
+Requests` response you can delegate this to Arcjet by wrapping your handler
+`withArcjet`.
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS (App)" slotIdx="1">
+    For both [the Node or Edge runtime](https://nextjs.org/docs/app/building-your-application/routing/route-handlers#edge-and-nodejs-runtimes):
+
+<Code code={WrapAppTS} title="/app/api/hello/route.ts" lang="ts" />
+  </div>
+  <div slot="TS (Pages)" slotIdx="2">
+    For the Node (default) runtime:
+
+<Code code={WrapPagesNodeTS} title="/pages/api/hello.ts" lang="ts" />
+
+For the Edge runtime:
+
+<Code code={WrapPagesEdgeTS} title="/pages/api/hello.ts" lang="ts" />
+  </div>
+  <div slot="JS (App)" slotIdx="3">
+    or both [the Node or Edge runtime](https://nextjs.org/docs/app/building-your-application/routing/route-handlers#edge-and-nodejs-runtimes):
+
+<Code code={WrapAppJS} title="/app/api/hello/route.js" lang="js" />
+  </div>
+  <div slot="JS (Pages)" slotIdx="4">
+    For the Node (default) runtime:
+
+<Code code={WrapPagesNodeJS} title="/pages/api/hello.js" lang="js" />
+
+For the Edge runtime:
+
+<Code code={WrapPagesEdgeJS} title="/pages/api/hello.js" lang="js" />
+  </div>
+</SelectableContent>

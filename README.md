@@ -48,5 +48,5 @@ the [Apache License, Version 2.0](./LICENSE-CODE).
 [starlight]: https://starlight.astro.build
 [arcjet-security]: https://docs.arcjet.com/security
 [example-url]: https://example.arcjet.com
-[discord-invite]: https://discord.gg/TPra6jqZDC
+[discord-invite]: https://arcjet.com/discord
 [support]: https://docs.arcjet.com/support

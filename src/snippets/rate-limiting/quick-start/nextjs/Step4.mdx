@@ -1,0 +1,34 @@
+import SelectableContent from "@/components/SelectableContent";
+
+### 4. Start app
+
+Start your Next.js app:
+
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="packageManager">
+<div slot="npm" slotIdx="1">
+
+```sh
+npm run dev
+```
+
+</div>
+<div slot="pnpm" slotIdx="2">
+
+```sh
+pnpm run dev
+```
+
+</div>
+<div slot="yarn" slotIdx="3">
+
+```sh
+yarn run dev
+```
+
+</div>
+</SelectableContent>
+
+Then load `http://localhost:3000/api/arcjet`. Refresh the page and you will see
+the rate limit in action. The requests will also show up in the [Arcjet
+dashboard](https://app.arcjet.com).
