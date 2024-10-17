@@ -65,8 +65,7 @@ export default defineConfig({
         "@fontsource-variable/jost",
         "@fontsource-variable/figtree",
         "@fontsource/ibm-plex-mono",
-        "./src/styles/vars.scss",
-        "./src/styles/custom.scss",
+        "./src/styles/main.scss",
       ],
       plugins: [
         starlightLinksValidator({

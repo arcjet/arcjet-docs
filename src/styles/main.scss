@@ -1,6 +1,8 @@
 @use "@/styles/mixins/layout";
 
-@forward "@/styles/expressive-code";
+@import "@/styles/partials/_theme";
+@import "@/styles/partials/_vars";
+@import "@/styles/utils/expressive-code";
 
 :root {
   --ec-brdRad: var(--sp) !important;
@@ -32,6 +34,7 @@ body {
   text-rendering: optimizeLegibility;
 
   color: var(--aj-palette-txt-secondary);
+  background: var(--sl-color-bg);
 }
 
 .page {
@@ -40,6 +43,8 @@ body {
 }
 
 header {
+  background: var(--sl-color-bg-nav);
+
   &.header {
     border-bottom: none;
 
@@ -67,6 +72,8 @@ header {
 }
 
 .sidebar-pane {
+  background: var(--sl-color-bg-sidebar);
+
   border-right: 1px solid
     rgba(var(--aj-palette-input-primary-solid-border) / 0.2);
 
