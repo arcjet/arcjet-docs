@@ -86,6 +86,10 @@ export default defineConfig({
   ],
   // External redirects go in /vercel.json
   redirects: {
+    "/get-started/bun": "/get-started?f=bun",
+    "/get-started/nextjs": "/get-started?f=next-js",
+    "/get-started/nodejs": "/get-started?f=node-js",
+    "/get-started/sveltekit": "/get-started?f=sveltekit",
     "/shield": "/shield/quick-start",
     "/shield/quick-start/bun": "/shield/quick-start?f=bun",
     "/shield/quick-start/nextjs": "/shield/quick-start?f=next-js",
