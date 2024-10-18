@@ -75,7 +75,6 @@ import Step2SetEnv from "@/snippets/rate-limiting/quick-start/shared/Step2SetEnv
 import Step1SvelteKit from "@/snippets/rate-limiting/quick-start/sveltekit/Step1.mdx";
 import { LinkButton, LinkCard } from "@astrojs/starlight/components";
 import FAQs from "/src/components/FAQs.astro";
-import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 
 [Arcjet](https://arcjet.com/) helps developers protect their apps in just a few
 lines of code. Bot detection. Rate limiting. Email validation. Attack
@@ -123,67 +122,9 @@ In your project root, run the following command:
   <Step1SvelteKit slot="sveltekit" />
 </SlotByFramework>
 
-#### Requirements
-
-<SlotByFramework client:load>
-  <RequirementsBun slot="bun" />
-  <RequirementsBunHono slot="bun-hono" />
-  <RequirementsNextJs slot="next-js" />
-  <RequirementsNodeJs slot="node-js" />
-  <RequirementsNodeJsExpress slot="node-js-express" />
-  <RequirementsNodeJsHono slot="node-js-hono" />
-  <RequirementsSvelteKit slot="sveltekit" />
-</SlotByFramework>
-
-### 2. Set your key
-
-[Create a free Arcjet account](https://app.arcjet.com) then follow the
-instructions to add a site and get a key. Add it to a `.env.local` file the
-project root.
-
-<SlotByFramework client:load>
-  <Step2SetEnv slot="bun" />
-  <Step2SetEnv slot="bun-hono" />
-  <Step2 slot="next-js" />
-  <Step2SetEnv slot="node-js" />
-  <Step2SetEnv slot="node-js-express" />
-  <Step2SetEnv slot="node-js-hono" />
-  <Step2 slot="sveltekit" />
-</SlotByFramework>
-
-### 3. Add rules
-
-This configures Arcjet rules to protect your app from attacks, apply a rate
-limit, and prevent bots from accessing your app.
-
-<SlotByFramework client:load>
-  <Fragment slot="bun">
-    <Step3Bun />
-    <BunServe />
-  </Fragment>
-  <Fragment slot="bun-hono">
-    <Step3BunHono />
-  </Fragment>
-  <Step3NextJs slot="next-js" />
-  <Step3NodeJs slot="node-js" />
-  <Step3NodeJsExpress slot="node-js-express" />
-  <Step3NodeJsHono slot="node-js-hono" />
-  <Step3SvelteKit slot="sveltekit" />
-</SlotByFramework>
-
-<SlotByFramework client:load>
-  <Step4Bun slot="bun" />
-  <Step4BunHono slot="bun-hono" />
-  <Step4NextJs slot="next-js" />
-  <Step4NodeJs slot="node-js" />
-  <Step4NodeJsExpress slot="node-js-express" />
-  <Step4NodeJsHono slot="node-js-hono" />
-  <Step4SvelteKit slot="sveltekit" />
-</SlotByFramework>
-
 ## What next?
 
-<SlotByFramework inline client:load>
+<SlotByFramework client:load>
   <Fragment slot="next-js">
     <LinkCard
       title="Protect your entire site from bots with middleware"
