@@ -1,6 +1,6 @@
 ---
 title: "Get started with Arcjet"
-description: "Getting started with Arcjet. Quick start guide to protect your app from attacks, apply a rate limit, and prevent bots from accessing your Next.js, Node.js, Bun, or SvelteKit app."
+description: "Getting started with Arcjet. Quick start guide to protect your app from attacks, apply a rate limit, and prevent bots from accessing your NestJS, Next.js, Node.js, Bun, or SvelteKit app."
 prev: false
 next: false
 #pageTitle:
@@ -14,26 +14,21 @@ next: false
 frameworks:
   - bun
   - bun-hono
+  - nest-js
   - next-js
   - node-js
   - node-js-express
   - node-js-hono
   - sveltekit
 ajToc:
-  - text: "Video quick start"
-    anchor: "video-quick-start"
-    framework: "next-js"
-  - text: "SDK installation"
-    anchor: "sdk-installation"
-    children:
-      - text: 1. Install Arcjet
-        anchor: "1-install-arcjet"
-      - text: 2. Set your key
-        anchor: "2-set-your-key"
-      - text: 3. Add rules
-        anchor: "3-add-rules"
-      - text: 4. Start app
-        anchor: "4-start-app"
+  - text: 1. Install Arcjet
+    anchor: "1-install-arcjet"
+  - text: 2. Set your key
+    anchor: "2-set-your-key"
+  - text: 3. Add rules
+    anchor: "3-add-rules"
+  - text: 4. Start app
+    anchor: "4-start-app"
   - text: "What next?"
     anchor: "what-next"
   - text: "FAQs"
@@ -51,6 +46,10 @@ import BunServe from "@/snippets/get-started/bun/BunServe.mdx";
 import RequirementsBun from "@/snippets/get-started/bun/Requirements.mdx";
 import Step3Bun from "@/snippets/get-started/bun/Step3.mdx";
 import Step4Bun from "@/snippets/get-started/bun/Step4.mdx";
+import RequirementsNestJs from "@/snippets/get-started/nest-js/Requirements.mdx";
+import Step1NestJs from "@/snippets/get-started/nest-js/Step1.mdx";
+import Step3NestJs from "@/snippets/get-started/nest-js/Step3.mdx";
+import Step4NestJs from "@/snippets/get-started/nest-js/Step4.mdx";
 import RequirementsNextJs from "@/snippets/get-started/next-js/Requirements.mdx";
 import Step3NextJs from "@/snippets/get-started/next-js/Step3.mdx";
 import Step4NextJs from "@/snippets/get-started/next-js/Step4.mdx";
@@ -90,6 +89,9 @@ protection. Data redaction. A developer-first approach to security.
 <LinkButton href="/get-started?f=bun-hono" variant="secondary">
   Bun + Hono
 </LinkButton>
+<LinkButton href="/get-started?f=nest-js" variant="secondary">
+  NestJS
+</LinkButton>
 <LinkButton href="/get-started?f=next-js" variant="secondary">
   Next.js
 </LinkButton>
@@ -106,17 +108,16 @@ protection. Data redaction. A developer-first approach to security.
   SvelteKit
 </LinkButton>
 
-## Installation
-
 This guide will set up a simple API server protected by Arcjet.
 
-### 1. Install Arcjet
+## 1. Install Arcjet
 
 In your project root, run the following command:
 
 <SlotByFramework client:load>
   <Step1Bun slot="bun" />
   <Step1Bun slot="bun-hono" />
+  <Step1NestJs slot="nest-js" />
   <Step1NextJs slot="next-js" />
   <Step1NodeJs slot="node-js" />
   <Step1NodeJs slot="node-js-express" />
@@ -124,11 +125,12 @@ In your project root, run the following command:
   <Step1SvelteKit slot="sveltekit" />
 </SlotByFramework>
 
-#### Requirements
+### Requirements
 
 <SlotByFramework client:load>
   <RequirementsBun slot="bun" />
   <RequirementsBunHono slot="bun-hono" />
+  <RequirementsNestJs slot="nest-js" />
   <RequirementsNextJs slot="next-js" />
   <RequirementsNodeJs slot="node-js" />
   <RequirementsNodeJsExpress slot="node-js-express" />
@@ -136,7 +138,7 @@ In your project root, run the following command:
   <RequirementsSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
-### 2. Set your key
+## 2. Set your key
 
 [Create a free Arcjet account](https://app.arcjet.com) then follow the
 instructions to add a site and get a key. Add it to a `.env.local` file the
@@ -145,6 +147,7 @@ project root.
 <SlotByFramework client:load>
   <Step2SetEnv slot="bun" />
   <Step2SetEnv slot="bun-hono" />
+  <Step2SetEnv slot="nest-js" />
   <Step2 slot="next-js" />
   <Step2SetEnv slot="node-js" />
   <Step2SetEnv slot="node-js-express" />
@@ -152,7 +155,7 @@ project root.
   <Step2 slot="sveltekit" />
 </SlotByFramework>
 
-### 3. Add rules
+## 3. Add rules
 
 This configures Arcjet rules to protect your app from attacks, apply a rate
 limit, and prevent bots from accessing your app.
@@ -165,6 +168,7 @@ limit, and prevent bots from accessing your app.
   <Fragment slot="bun-hono">
     <Step3BunHono />
   </Fragment>
+  <Step3NestJs slot="nest-js" />
   <Step3NextJs slot="next-js" />
   <Step3NodeJs slot="node-js" />
   <Step3NodeJsExpress slot="node-js-express" />
@@ -175,6 +179,7 @@ limit, and prevent bots from accessing your app.
 <SlotByFramework client:load>
   <Step4Bun slot="bun" />
   <Step4BunHono slot="bun-hono" />
+  <Step4NestJs slot="nest-js" />
   <Step4NextJs slot="next-js" />
   <Step4NodeJs slot="node-js" />
   <Step4NodeJsExpress slot="node-js-express" />

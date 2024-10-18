@@ -6,17 +6,17 @@ import SelectableContent from "@/components/SelectableContent";
 <SelectableContent client:load syncKey="packageManager">
 <div slot="npm" slotIdx="1">
 ```sh
-npm run dev
+npm run start
 ```
 </div>
 <div slot="pnpm" slotIdx="2">
 ```sh
-pnpm run dev
+pnpm run start
 ```
 </div>
 <div slot="yarn" slotIdx="3">
 ```sh
-yarn run dev
+yarn run start
 ```
 </div>
 </SelectableContent>
@@ -26,9 +26,9 @@ because `curl` is considered a bot by default. This [can be
 customized](/bot-protection/identifying-bots).
 
 ```sh
-curl -v http://localhost:3000/api/arcjet
+curl -v http://localhost:3000
 ```
 
-Then load `http://localhost:3000/api/arcjet` in your browser. Refresh the page a
+Then load `http://localhost:3000` in your browser. Refresh the page a
 few times to trigger the rate limit. The requests will also show up in the
 [Arcjet dashboard](https://app.arcjet.com).

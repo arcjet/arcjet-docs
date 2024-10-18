@@ -13,6 +13,7 @@ import {
 export type FrameworkKey =
   | "bun"
   | "bun-hono"
+  | "nest-js"
   | "next-js"
   | "node-js"
   | "node-js-express"
@@ -25,6 +26,7 @@ export type FrameworkKey =
 export type FrameworkLabel =
   | "Bun"
   | "Bun + Hono"
+  | "NestJS"
   | "Next.js"
   | "Node.js"
   | "Node.js + Express"
@@ -69,6 +71,10 @@ export const frameworks: Array<Framework> = [
     label: "Bun + Hono",
   },
   {
+    key: "nest-js",
+    label: "NestJS",
+  },
+  {
     key: "next-js",
     label: "Next.js",
   },
@@ -88,10 +94,6 @@ export const frameworks: Array<Framework> = [
     key: "sveltekit",
     label: "SvelteKit",
   },
-  // {
-  //   key: "nest-js",
-  //   label: "NestJs",
-  // },
   // {
   //   key: "express",
   //   label: "Express",

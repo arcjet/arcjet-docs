@@ -1,0 +1,13 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import GlobalGuard from "/src/snippets/get-started/nest-js/GlobalGuard.ts?raw";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <Code code={GlobalGuard} lang="ts" title="src/main.ts" />
+
+This creates a global guard that will be applied to all routes. In a real
+application, implementing guards or per-route protections would give you more
+flexibility. See [our example app](https://github.com/arcjet/example-nestjs) for
+how to do this.
+
+</SelectableContent>
