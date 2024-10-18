@@ -1,29 +1,43 @@
 /// <reference types="bun-types/bun.d.ts" />
-import arcjet, { tokenBucket } from "@arcjet/bun";
+import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/bun";
 import { env } from "bun";
 
 const aj = arcjet({
   key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
-  characteristics: ["userId"], // track requests by a custom user ID
+  characteristics: ["ip.src"], // Track requests by IP
   rules: [
+    // Shield protects your app from common attacks e.g. SQL injection
+    shield({ mode: "LIVE" }),
+    // Create a bot detection rule
+    detectBot({
+      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+      // Block all bots except search engine crawlers. See
+      // https://arcjet.com/bot-list
+      allow: ["CATEGORY:SEARCH_ENGINE"],
+    }),
     // Create a token bucket rate limit. Other algorithms are supported.
     tokenBucket({
-      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-      refillRate: 5, // refill 5 tokens per interval
-      interval: 10, // refill every 10 seconds
-      capacity: 10, // bucket maximum capacity of 10 tokens
+      mode: "LIVE",
+      refillRate: 5, // Refill 5 tokens per interval
+      interval: 10, // Refill every 10 seconds
+      capacity: 10, // Bucket capacity of 10 tokens
     }),
   ],
 });
 
 Bun.serve({
   async fetch(req: Request) {
-    const userId = "user123"; // Replace with your authenticated user ID
-    const decision = await aj.protect(req, { userId, requested: 5 }); // Deduct 5 tokens from the bucket
+    const decision = await aj.protect(req, { requested: 5 }); // Deduct 5 tokens from the bucket
     console.log("Arcjet decision", decision.conclusion);
 
     if (decision.isDenied()) {
-      return new Response("Too many requests", { status: 429 });
+      if (decision.reason.isRateLimit()) {
+        return new Response("Too many requests", { status: 429 });
+      } else if (decision.reason.isBot()) {
+        return new Response("No bots allowed", { status: 403 });
+      } else {
+        return new Response("Forbidden", { status: 403 });
+      }
     }
 
     return new Response("Hello world");

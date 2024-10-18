@@ -1,9 +1,8 @@
 import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/node";
-import { serve, type HttpBindings } from "@hono/node-server";
-import { Hono } from "hono";
+import http from "node:http";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!,
+  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
   characteristics: ["ip.src"], // Track requests by IP
   rules: [
     // Shield protects your app from common attacks e.g. SQL injection
@@ -25,29 +24,28 @@ const aj = arcjet({
   ],
 });
 
-const app = new Hono<{ Bindings: HttpBindings }>();
-
-app.get("/", async (c) => {
-  const decision = await aj.protect(c.env.incoming, { requested: 5 }); // Deduct 5 tokens from the bucket
+const server = http.createServer(async function (
+  req: http.IncomingMessage,
+  res: http.ServerResponse,
+) {
+  const decision = await aj.protect(req, { requested: 5 }); // Deduct 5 tokens from the bucket
   console.log("Arcjet decision", decision);
 
   if (decision.isDenied()) {
     if (decision.reason.isRateLimit()) {
-      return c.json({ error: "Too Many Requests" }, 429);
+      res.writeHead(429, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Too many requests" }));
     } else if (decision.reason.isBot()) {
-      return c.json({ error: "No Bots Allowed" }, 403);
+      res.writeHead(403, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "No bots allowed" }));
     } else {
-      return c.json({ error: "Forbidden" }, 403);
+      res.writeHead(403, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Forbidden" }));
     }
+  } else {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ message: "Hello world" }));
   }
-
-  return c.json({ message: "Hello Hono!" });
 });
 
-const port = 3000;
-console.log(`Server is running on port ${port}`);
-
-serve({
-  fetch: app.fetch,
-  port,
-});
+server.listen(8000);

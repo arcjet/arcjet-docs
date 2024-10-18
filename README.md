@@ -10,8 +10,8 @@
 [View the docs](docs).
 
 [Arcjet][arcjet] helps developers protect their apps in just a few lines of
-code. Implement rate limiting, bot protection, email verification, and defense
-against common attacks.
+code. Bot detection. Rate limiting. Email validation. Attack protection. Data
+redaction. A developer-first approach to security.
 
 Try an Arcjet protected app live at [https://example.arcjet.com][example-url].
 

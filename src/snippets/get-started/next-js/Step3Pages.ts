@@ -1,9 +1,8 @@
-import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/bun";
-import { Hono } from "hono";
-import { env } from "bun";
+import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/next";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
   characteristics: ["ip.src"], // Track requests by IP
   rules: [
     // Shield protects your app from common attacks e.g. SQL injection
@@ -25,29 +24,28 @@ const aj = arcjet({
   ],
 });
 
-const app = new Hono();
-
-app.get("/", async (c) => {
-  const decision = await aj.protect(c.req.raw, { requested: 5 }); // Deduct 5 tokens from the bucket
-  console.log("Arcjet decision", decision.conclusion);
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
+  const decision = await aj.protect(req, { requested: 5 }); // Deduct 5 tokens from the bucket
+  console.log("Arcjet decision", decision);
 
   if (decision.isDenied()) {
     if (decision.reason.isRateLimit()) {
-      return c.json({ error: "Too many requests" }, 429);
+      return res
+        .status(429)
+        .json({ error: "Too many requests", reason: decision.reason });
     } else if (decision.reason.isBot()) {
-      return c.json({ error: "No bots allowed" }, 403);
+      return res
+        .status(403)
+        .json({ error: "No bots allowed", reason: decision.reason });
     } else {
-      return c.json({ error: "Forbidden" }, 403);
+      return res
+        .status(403)
+        .json({ error: "Forbidden", reason: decision.reason });
     }
   }
 
-  return c.json({ message: "Hello world" });
-});
-
-const port = 3000;
-console.log(`Server is running on port ${port}`);
-
-export default {
-  fetch: aj.handler(app.fetch),
-  port,
-};
+  res.status(200).json({ name: "Hello world" });
+}

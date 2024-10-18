@@ -1,4 +1,9 @@
-import Express from "/src/snippets/rate-limiting/reference/nodejs/Express.js?raw";
+import SelectableContent from "@/components/SelectableContent";
 import { Code } from "@astrojs/starlight/components";
+import Express from "/src/snippets/get-started/node-js-express/Express.js?raw";
 
-<Code code={Express} lang="js" />
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="JS" slotIdx="1">
+    <Code code={Express} lang="js" title="index.js" />
+  </div>
+</SelectableContent>

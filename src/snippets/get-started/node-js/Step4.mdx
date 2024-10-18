@@ -1,27 +1,38 @@
+import SelectableContent from "@/components/SelectableContent";
 import { Aside } from "@astrojs/starlight/components";
 
 ### 4. Start app
 
-<Aside type="note" title="env files">
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+  ```sh
+  npx tsx --env-file .env.local index.ts
+  ```
+  </div>
+  <div slot="JS" slotIdx="2">
+  <Aside type="note" title="env files">
   Node 20+ supports loading environment variables from a local file with
   `--env-file`. If you're using an older version of Node, you can use a package
   like [`dotenv`](https://www.npmjs.com/package/dotenv) to load the environment
   variables from a `.env.local` file.
 </Aside>
 
-{/* prettier-ignore */}
 ```sh
 node --env-file .env.local index.js
 ```
+
+  </div>
+</SelectableContent>
 
 Make a `curl` request from your terminal. You should see a `403` response
 because `curl` is considered a bot by default. This [can be
 customized](/bot-protection/identifying-bots).
 
 ```sh
-curl -v http://localhost:3000
+curl -v http://localhost:8000
 ```
 
-Then load `http://localhost:3000` in your browser. Refresh the page a few times
+Then load `http://localhost:8000` in your browser. Refresh the page a few times
 to trigger the rate limit. The requests will also show up in the [Arcjet
 dashboard](https://app.arcjet.com).

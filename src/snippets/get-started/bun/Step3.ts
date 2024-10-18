@@ -1,5 +1,4 @@
 import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/bun";
-import { Hono } from "hono";
 import { env } from "bun";
 
 const aj = arcjet({
@@ -25,29 +24,22 @@ const aj = arcjet({
   ],
 });
 
-const app = new Hono();
-
-app.get("/", async (c) => {
-  const decision = await aj.protect(c.req.raw, { requested: 5 }); // Deduct 5 tokens from the bucket
-  console.log("Arcjet decision", decision.conclusion);
-
-  if (decision.isDenied()) {
-    if (decision.reason.isRateLimit()) {
-      return c.json({ error: "Too many requests" }, 429);
-    } else if (decision.reason.isBot()) {
-      return c.json({ error: "No bots allowed" }, 403);
-    } else {
-      return c.json({ error: "Forbidden" }, 403);
-    }
-  }
-
-  return c.json({ message: "Hello world" });
-});
-
-const port = 3000;
-console.log(`Server is running on port ${port}`);
-
 export default {
-  fetch: aj.handler(app.fetch),
-  port,
+  port: 3000,
+  fetch: aj.handler(async (req) => {
+    const decision = await aj.protect(req, { requested: 5 }); // Deduct 5 tokens from the bucket
+    console.log("Arcjet decision", decision);
+
+    if (decision.isDenied()) {
+      if (decision.reason.isRateLimit()) {
+        return new Response("Too many requests", { status: 429 });
+      } else if (decision.reason.isBot()) {
+        return new Response("No bots allowed", { status: 403 });
+      } else {
+        return new Response("Forbidden", { status: 403 });
+      }
+    }
+
+    return new Response("Hello world");
+  }),
 };
