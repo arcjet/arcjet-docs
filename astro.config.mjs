@@ -34,7 +34,7 @@ export default defineConfig({
     starlight({
       title: "Arcjet Docs",
       description:
-        "Arcjet documentation. Arcjet helps developers protect their apps. Rate limiting, bot protection, email validation.",
+        "Arcjet documentation. Bot detection. Rate limiting. Email validation. Attack protection. Data redaction. A developer-first approach to security.",
       logo: {
         light: "./src/assets/logo-lockup-mark-light.svg",
         dark: "./src/assets/logo-lockup-mark-dark.svg",

@@ -5,28 +5,78 @@ export const main = [
   },
   {
     label: "Examples",
-    link: "https://github.com/arcjet/arcjet-js/tree/main/examples",
-    attrs: { target: "_blank", class: "external-link" },
+    collapsed: false,
+    items: [
+      {
+        label: "Apps",
+        collapsed: true,
+        items: [
+          {
+            label: "NestJS",
+            link: "https://github.com/arcjet/example-nestjs",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
+            label: "Next.js",
+            link: "https://github.com/arcjet/example-nextjs",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
+            label: "Next.js + Fly.io",
+            link: "https://github.com/arcjet/example-nextjs-fly",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
+            label: "Next.js + Prisma",
+            link: "https://github.com/arcjet/example-nextjs-prisma",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
+            label: "More",
+            link: "https://github.com/arcjet/arcjet-js/tree/main/examples",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+        ],
+      },
+      {
+        label: "Blueprints",
+        collapsed: true,
+        items: [
+          {
+            label: "IP geolocation",
+            link: "/blueprints/ip-geolocation",
+          },
+          {
+            label: "Sampling traffic",
+            link: "/blueprints/sampling",
+          },
+        ],
+      },
+    ],
   },
   {
     label: "Features",
     collapsed: false,
     items: [
       {
-        label: "Shield",
+        label: "Bot protection",
         collapsed: true,
         items: [
           {
             label: "Quick start",
-            link: "/shield/quick-start",
+            link: "/bot-protection/quick-start",
           },
           {
             label: "Concepts",
-            link: "/shield/concepts",
+            link: "/bot-protection/concepts",
+          },
+          {
+            label: "Identifying Bots",
+            link: "/bot-protection/identifying-bots",
           },
           {
             label: "Reference",
-            link: "/shield/reference",
+            link: "/bot-protection/reference",
           },
         ],
       },
@@ -57,24 +107,20 @@ export const main = [
         ],
       },
       {
-        label: "Bot protection",
+        label: "Shield",
         collapsed: true,
         items: [
           {
             label: "Quick start",
-            link: "/bot-protection/quick-start",
+            link: "/shield/quick-start",
           },
           {
             label: "Concepts",
-            link: "/bot-protection/concepts",
-          },
-          {
-            label: "Identifying Bots",
-            link: "/bot-protection/identifying-bots",
+            link: "/shield/concepts",
           },
           {
             label: "Reference",
-            link: "/bot-protection/reference",
+            link: "/shield/reference",
           },
         ],
       },

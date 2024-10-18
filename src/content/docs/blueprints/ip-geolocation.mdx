@@ -1,0 +1,82 @@
+---
+title: "Arcjet IP geolocation"
+description: "Use Arcjet's IP analysis to customize the response based on the IP location."
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Every decision provided by Arcjet includes IP address analysis. You can use this
+to customize your response based on the IP location.
+
+## Available fields
+
+- Latitude and longitude.
+- Postal code e.g. `94104`.
+- City e.g. `San Francisco`.
+- Region e.g. `California`.
+- Country e.g. `US`.
+- Country name e.g. `United States`.
+- Continent e.g. `NA`.
+- Continent name e.g. `North America`.
+
+<Aside type="caution">
+  IP geolocation can be notoriously inaccurate, especially for mobile devices,
+  satellite internet providers, and even just normal users. Likewise with the
+  specific fields like `city` and `region`, which can be very inaccurate.
+  Country is usually accurate, but there are often cases where IP addresses are
+  mis-located. These fields are provided for convenience e.g. suggesting a user
+  location, but should not be relied upon by themselves.
+</Aside>
+
+## Checking for data
+
+The IP location fields may be `undefined`, but you can use various methods to
+check their availability. See the SDK reference for details.
+
+## Examples
+
+```ts
+// ... imports, client configuration, etc
+const decision = await aj.protect(req);
+
+if (decision.ip.hasCity() && decision.ip.city == "San Francisco") {
+  // Return a custom response for San Francisco
+}
+
+if (decision.ip.hasRegion() && decision.ip.region == "California") {
+  // Return a custom response for California
+}
+
+if (decision.ip.hasCountry() && decision.ip.country == "US") {
+  // Return a custom response for Japan
+}
+
+if (decision.ip.hasContinent() && decision.ip.continent == "NA") {
+  // Return a custom response for North America
+}
+```
+
+### Block all countries except US
+
+```ts
+// ... imports, client configuration, etc
+const decision = await aj.protect(req);
+
+if (decision.ip.hasCountry() && decision.ip.country != "US") {
+  // Return 403 Forbidden
+}
+```
+
+### Block all countries except US, UK, Japan
+
+```ts
+// ... imports, client configuration, etc
+const decision = await aj.protect(req);
+
+if (
+  decision.ip.hasCountry() &&
+  !["US", "UK", "JP"].includes(decision.ip.country)
+) {
+  // Return 403 Forbidden
+}
+```

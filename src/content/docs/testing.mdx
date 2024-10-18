@@ -4,8 +4,6 @@ description: "How to test your Arcjet security rules."
 ---
 
 import { Tabs, TabItem, Code } from "@astrojs/starlight/components";
-import SamplingMiddlewareTS from "/src/snippets/reference/nextjs/SamplingMiddleware.ts?raw";
-import SamplingMiddlewareJS from "/src/snippets/reference/nextjs/SamplingMiddleware.js?raw";
 import Comments from "/src/components/Comments.astro";
 
 Unlike network-based security solutions, Arcjet can run locally, in staging and
@@ -70,34 +68,8 @@ true` to trigger the shield rule on the next request.
 
 ## Sampling
 
-Arcjet is designed to run on every request. When testing your rules, you can use
-`DRY_RUN` mode to see how your rules would behave without actually enforcing
-them. The result will be logged, but all requests will be allowed. This is useful
-for testing your rules without affecting your users.
-
-You can also write a simple sampling function to set the Arcjet rules using
-`withRule` based on a desired sample rate. This allows you to test your rules on
-a subset of your traffic.
-
-This Next.js middleware example shows how to trigger Arcjet Shield and bot
-detection rules in live mode on 10% of your traffic.
-
-{/* prettier-ignore */}
-<Tabs>
-<TabItem label="TS">
-<Code
-  code={SamplingMiddlewareTS}
-  lang="ts"
-  title="/middleware.ts"
-/>
-</TabItem>
-<TabItem label="JS">
-<Code
-  code={SamplingMiddlewareJS}
-  lang="js"
-  title="/middleware.js"
-/>
-</TabItem>
-</Tabs>
+See the [Sampling Blueprint](/blueprints/sampling) to see how to write a
+sampling function to test your Arcjet security rules on a subset of your
+traffic.
 
 <Comments />
