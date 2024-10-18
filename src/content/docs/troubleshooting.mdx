@@ -6,6 +6,9 @@ description: "Debugging common problems and errors with Arcjet."
 import Comments from "/src/components/Comments.astro";
 
 import { Tabs, TabItem, Code } from "@astrojs/starlight/components";
+import RequestFieldsExpressTS from "/src/snippets/reference/nodejs/RequestFieldsExpress.ts?raw";
+import RequestFieldsTS from "/src/snippets/reference/nodejs/RequestFields.ts?raw";
+import RequestFieldsHonoNodeTS from "/src/snippets/reference/nodejs/RequestFieldsHonoNode.ts?raw";
 import HealthzRouteAppJS from "/src/snippets/reference/nextjs/HealthzRouteApp.js?raw";
 import HealthzRouteAppTS from "/src/snippets/reference/nextjs/HealthzRouteApp.ts?raw";
 import HealthzRoutePagesJS from "/src/snippets/reference/nextjs/HealthzRoutePages.js?raw";
@@ -166,6 +169,32 @@ The required fields are:
 - `path` or `url` - The path of the request. In the Node.js SDK this field is
   called `url`. If you are not using an adapter, this is called `path`.
 - `headers` - The headers of the request.
+
+Here are some examples of how to provide these fields:
+
+<Tabs>
+  <TabItem label="Node.js + Express">
+    This example uses a Node.js + Express server using the Arcjet root package
+    without an adapter. We do not recommend this approach as it requires you to
+    manually provide the request. Instead, [use the Node.js
+    adapter](/get-started?f=node-js-express).
+    <Code code={RequestFieldsExpressTS} lang="ts" />
+  </TabItem>
+  <TabItem label="Node.js">
+    This example uses a pure Node.js server using the Arcjet root package
+    without an adapter. We do not recommend this approach as it requires you to
+    manually provide the request. Instead, [use the Node.js
+    adapter](/get-started?f=node-js-express).
+    <Code code={RequestFieldsTS} lang="ts" />
+  </TabItem>
+  <TabItem label="Hono + Node.js">
+    This example uses the [Hono framework with
+    Node.js](https://hono.dev/getting-started/nodejs). It requires a bit more
+    manual setup until we officially support Hono, see
+    [arcjet-js#477](https://github.com/arcjet/arcjet-js/issues/477).
+    <Code code={RequestFieldsHonoNodeTS} lang="ts" />
+  </TabItem>
+</Tabs>
 
 ### Property '[INTERNALS]' is missing in type
 
