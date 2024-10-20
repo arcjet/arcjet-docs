@@ -50,6 +50,10 @@ export const main = [
             label: "Sampling traffic",
             link: "/blueprints/sampling",
           },
+          {
+            label: "VPN & proxy detection",
+            link: "/blueprints/vpn-proxy-detection",
+          },
         ],
       },
     ],

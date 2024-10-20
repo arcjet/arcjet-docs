@@ -1,0 +1,57 @@
+---
+title: "VPN & proxy detection"
+description: "Use Arcjet's IP analysis to detect VPNs and proxies."
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Every decision provided by Arcjet includes IP address analysis. You can use this
+to detect VPNs and proxies.
+
+## Available fields
+
+- **IP AS type.** This is the [Autonomous
+  System](<https://en.wikipedia.org/wiki/Autonomous_system_(Internet)>) associated
+  with the IP, which can be used to identify VPNs and proxies. This can be one
+  of `isp`, `hosting`, `business` or `education`.
+- **IP type.** Arcjet adds one or more categories to the IP address to help you
+  identify VPNs and proxies. The categories are `vpn`, `proxy`, `tor`,
+  `hosting`, `relay`.
+
+## Checking for data
+
+The IP analysis fields may be `undefined`, but you can use various methods to
+check their availability. See the SDK reference for details.
+
+## Example
+
+```ts
+// ... imports, client configuration, etc
+// See https://docs.arcjet.com/get-started
+const decision = await aj.protect(req);
+
+if (decision.ip.hasASN() && decision.ip.asnType == "hosting") {
+  // The network this IP belongs to is a hosting provider, which makes it more
+  // likely to be a VPN, proxy, or other suspicious network.
+}
+
+if (
+  decision.ip.isHosting() ||
+  decision.ip.isVpn() ||
+  decision.ip.isProxy() ||
+  decision.ip.isRelay()
+) {
+  // The IP is from a hosting provider, VPN, or proxy. We can check the name
+  // of the service and customize the response
+  if (decision.ip.hasService()) {
+    if (decision.ip.service == "Apple Private Relay") {
+      // We trust Apple Private Relay because it requires an active iCloud
+      // subscription, so we can allow it
+    } else {
+      // Do something else
+    }
+  } else {
+    // The service name is not available, but we can still do something here
+  }
+}
+```
