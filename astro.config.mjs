@@ -73,6 +73,7 @@ export default defineConfig({
         }),
       ],
       components: {
+        Header: "./src/components/overrides/Header.astro",
         Sidebar: "./src/components/overrides/Sidebar.astro",
         PageSidebar: "./src/components/overrides/PageSidebar.astro",
         PageTitle: "./src/components/overrides/PageTitle.astro",
