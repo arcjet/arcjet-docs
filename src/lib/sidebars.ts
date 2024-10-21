@@ -47,6 +47,10 @@ export const main = [
             link: "/blueprints/ip-geolocation",
           },
           {
+            label: "Payment form protection",
+            link: "/blueprints/payment-form",
+          },
+          {
             label: "Sampling traffic",
             link: "/blueprints/sampling",
           },
