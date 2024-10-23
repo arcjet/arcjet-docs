@@ -42,6 +42,7 @@ import ErrorHandlingPagesTS from "/src/snippets/reference/nextjs/ErrorHandlingPa
 import ErrorHandlingAppJS from "/src/snippets/reference/nextjs/ErrorHandlingApp.js?raw";
 import ErrorHandlingPagesJS from "/src/snippets/reference/nextjs/ErrorHandlingPages.js?raw";
 import Comments from "/src/components/Comments.astro";
+import Requirements from "@/snippets/get-started/next-js/Requirements.mdx";
 
 [<SDKVersionNextjs/>](https://www.npmjs.com/package/@arcjet/next)
 
@@ -76,8 +77,7 @@ yarn add @arcjet/next
 
 ### Requirements
 
-- Next.js 14 or later
-- CommonJS is not supported. Arcjet is ESM only.
+<Requirements />
 
 ## Quick start
 
@@ -259,20 +259,12 @@ made by Arcjet.
 
 ### Server actions
 
-Arcjet currently doesn't support Next.js server actions directly because the
-request context is not passed to the handler. Full support for server actions is
-[on our roadmap](https://github.com/arcjet/arcjet-js/issues/1200). In the
-meantime, the workaround is to create the request object manually.
+Arcjet supports server actions with an additional utility function that requests
+the headers we need to analyze the request. This example is based on [the
+Next.js example form
+handler](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#forms):
 
-This is an example form that calls a server action on submission and uses Arcjet
-to validate it. It uses [the Next.js headers
-function](https://nextjs.org/docs/app/api-reference/functions/headers) to get
-the request context. The client IP address is also parsed out, which can be
-replaced by the [Vercel Functions IP helper
-package](https://vercel.com/docs/functions/vercel-functions-package#ipaddress)
-if you are deploying on Vercel.
-
-<Code code={ServerAction} title="/app/form/page.tsx" lang="ts" />
+<Code code={ServerAction} title="app/invoices/page.tsx" lang="ts" />
 
 ## Decision
 
@@ -681,11 +673,12 @@ previous major SDK versions.
 
 ### Next.js
 
-Arcjet supports the current major version of Next.js for both the app router and
-pages router. When a new major version of Next.js is released, we will bump the
-major version of the Arcjet SDK.
+Arcjet supports the current and previous major versions of Next.js for both the
+app router and pages router. When a new major version of Next.js is released, we
+will bump the major version of the Arcjet SDK.
 
-- Current supported major version: Next.js 14.x
+- Previous supported major version: Next.js 14.x
+- Current supported major version: Next.js 15.x
 
 The pages router will be supported for as long as Next.js supports it.
 
