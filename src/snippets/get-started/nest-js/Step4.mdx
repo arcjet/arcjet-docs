@@ -21,14 +21,20 @@ yarn run start
 </div>
 </SelectableContent>
 
-Make a `curl` request from your terminal. You should see a `403` response
-because `curl` is considered a bot by default. This [can be
-customized](/bot-protection/identifying-bots).
+Visit [`http://localhost:3000`](http://localhost:3000) in your browser and
+refresh a few times to hit the rate limit.
+
+Wait 10 seconds, then run:
 
 ```sh
 curl -v http://localhost:3000
 ```
 
-Then load `http://localhost:3000` in your browser. Refresh the page a
-few times to trigger the rate limit. The requests will also show up in the
-[Arcjet dashboard](https://app.arcjet.com).
+The wait is necessary because the decision is cached for your IP based on the
+`refillRate` configuration.
+
+You should see a `403` response because `curl` is considered a bot by default
+([customizable](/bot-protection/identifying-bots)).
+
+The requests will also show up in the [Arcjet
+dashboard](https://app.arcjet.com).
