@@ -25,6 +25,7 @@ import ProtectPagesTS from "/src/snippets/reference/nextjs/ProtectPages.ts?raw";
 import ProtectAppJS from "/src/snippets/reference/nextjs/ProtectApp.js?raw";
 import ProtectPagesJS from "/src/snippets/reference/nextjs/ProtectPages.js?raw";
 import ServerAction from "/src/snippets/reference/nextjs/ServerAction.tsx?raw";
+import ServerActionProp from "/src/snippets/reference/nextjs/ServerActionProp.tsx?raw";
 import WithRuleAppTS from "/src/snippets/reference/nextjs/WithRuleApp.ts?raw";
 import WithRulePagesTS from "/src/snippets/reference/nextjs/WithRulePages.ts?raw";
 import WithRuleAppJS from "/src/snippets/reference/nextjs/WithRuleApp.js?raw";
@@ -260,9 +261,51 @@ made by Arcjet.
 ### Server actions
 
 Arcjet supports server actions with an additional utility function that requests
-the headers we need to analyze the request. This example is based on [the
+the headers we need to analyze the request.
+
+Server actions are supported in both Next.js 14 and 15.
+
+#### Client component example
+
+In this example the server action is [passed as a prop to a client
+component](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#client-components).
+
+<Code code={ServerActionProp} title="app/actions.ts" lang="ts" />
+
+```tsx title="app/ui/button.tsx"
+"use client";
+
+import { create } from "@/app/actions";
+
+export function Button() {
+  return <button onClick={() => create()}>Create</button>;
+}
+```
+
+```tsx title="app/page.tsx"
+import { Button } from "./ui/button";
+
+export default function Home() {
+  return (
+    <div>
+      <Button />
+    </div>
+  );
+}
+```
+
+#### Form example
+
+In this example the server action is handling a form submission, based on [the
 Next.js example form
-handler](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#forms):
+handler](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#forms).
+
+These examples will `throw` when there is an error
+([docs](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#error-handling)),
+but you can use
+[`useFormState`](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#server-side-form-validation)
+to return errors to the form. If you are using React 19, use
+[`useActionState`](https://react.dev/reference/react/useActionState) instead.
 
 <Code code={ServerAction} title="app/invoices/page.tsx" lang="ts" />
 
