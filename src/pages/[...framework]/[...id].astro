@@ -1,0 +1,46 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { getCollection, getEntry, render } from 'astro:content';
+import { fromStaticPaths } from "@/lib/sidebars";
+
+export async function getStaticPaths() {
+  const docs = await getCollection("docs");
+
+  const staticPaths = [];
+  for (const doc of docs) {
+    if (Array.isArray(doc.data.frameworks)) {
+      for (const framework of doc.data.frameworks) {
+        staticPaths.push({ params: { framework, id: doc.slug }})
+      }
+    }
+  }
+  return staticPaths
+}
+
+const { id, framework } = Astro.params
+
+const entry = await getEntry("docs", id);
+// console.log(entry)
+// console.log(await entry.render())
+
+function title(data: { title: string | Record<string, string> }, framework: string) {
+  if (typeof data.title === "string") {
+    return data.title
+  } else {
+    return data.title[framework];
+  }
+}
+
+const sidebar = fromStaticPaths(await getStaticPaths());
+
+const { Content, remarkPluginFrontmatter } = await render(entry)
+// console.log(remarkPluginFrontmatter.__headings)
+const headings = remarkPluginFrontmatter.__headings.map(({ depth, slug, frameworks }) => {
+  const text = frameworks[framework] || frameworks._;
+  return { depth, slug, text }
+})
+---
+
+<StarlightPage sidebar={sidebar} frontmatter={{ title: title(entry.data, framework), tableOfContents: entry.data.tableOfContents }} headings={headings}>
+  <Content />
+</StarlightPage>

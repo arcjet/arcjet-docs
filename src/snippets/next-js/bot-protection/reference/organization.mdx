@@ -1,0 +1,91 @@
+import { Code, Tabs, TabItem } from "@astrojs/starlight/components";
+
+import PerRouteAppTS from "./per-route-app.ts?raw";
+import PerRoutePagesTS from "./per-route-pages.ts?raw";
+import PerRouteAppJS from "./per-route-app.js?raw";
+import PerRoutePagesJS from "./per-route-pages.js?raw";
+import MiddlewareJS from "./middleware.js?raw";
+import MiddlewareTS from "./middleware.ts?raw";
+import CustomizedMiddlewareJS from "./customized-middleware.js?raw";
+import CustomizedMiddlewareTS from "./customized-middleware.ts?raw";
+import MiddlewareMatcher from "./middleware-matcher.ts?raw";
+
+## Per route vs middleware
+
+Bot protection rules can be configured in two ways:
+
+- **Per API route**: The rule is defined in the API route itself. This allows
+  you to configure the rule alongside the code it is protecting which is useful
+  if you want to use the decision to add context to your own code. However, it
+  means rules are not located in a single place.
+- **Middleware**: The rule is defined in the middleware. This allows you to
+  configure rules in a single place or apply them globally to all routes, but
+  it means the rules are not located alongside the code they are protecting.
+
+### Per route
+
+This configures bot protection on a single route.
+
+<Tabs syncKey="next-js-code">
+  <TabItem label="TS (App)">
+    <Code code={PerRouteAppTS} lang="ts" title="/app/api/arcjet/route.ts" />
+  </TabItem>
+  <TabItem label="TS (Pages)">
+    <Code code={PerRoutePagesTS} lang="ts" title="/pages/api/hello.ts" />
+  </TabItem>
+  <TabItem label="JS (App)">
+    <Code code={PerRouteAppJS} lang="js" title="/app/api/arcjet/route.js" />
+  </TabItem>
+  <TabItem label="JS (Pages)">
+    <Code code={PerRoutePagesJS} lang="js" title="/pages/api/hello.ts" />
+  </TabItem>
+</Tabs>
+
+### Middleware
+
+This will run on every request to your Next.js app, except for static assets
+(configured in the `matcher` - see [the Next.js
+docs](https://nextjs.org/docs/pages/building-your-application/routing/middleware#matcher)
+for details).
+
+<Tabs>
+  <TabItem label="TS">
+    Create a file called `middleware.ts` in your project root (at the same level
+    as `pages` or `app` or inside `src`):
+
+    <Code code={MiddlewareTS} lang="ts" title="/middleware.ts" mark={["ARCJET_KEY"]} />
+
+    You can also customize the response depending on the decision. In this case
+    we will return a 403 Forbidden response only if we detect a hosting provider
+    IP address for the bot detection rule result:
+
+    <Code code={CustomizedMiddlewareTS} lang="ts" title="/middleware.ts" />
+
+  </TabItem>
+  <TabItem label="JS">
+    Create a file called `middleware.js` in your project root (at the same level
+    as `pages` or `app` or inside `src`):
+
+    <Code code={MiddlewareJS} lang="js" title="/middleware.js" mark={["ARCJET_KEY"]} />
+
+    You can also customize the response depending on the decision. In this case
+    we will return a 403 Forbidden response only if we detect a hosting provider
+    IP address for the bot detection rule result:
+
+    <Code code={CustomizedMiddlewareJS} lang="js" title="/middleware.js" />
+
+  </TabItem>
+</Tabs>
+
+### Avoiding double protection with middleware
+
+If you use Arcjet in middleware and individual routes, you need to be careful
+that Arcjet is not running multiple times per request. This can be avoided by
+excluding the API route from [the middleware
+matcher](https://nextjs.org/docs/pages/building-your-application/routing/middleware#matcher).
+
+For example, if you already have a bot detection rule defined in the API route
+at `/api/hello`, you can exclude it from the middleware by specifying a matcher
+in `/middleware.ts`:
+
+<Code code={MiddlewareMatcher} lang="ts" title="/middleware.ts" />

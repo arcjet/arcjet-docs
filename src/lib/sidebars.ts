@@ -332,3 +332,33 @@ export const main = [
     ],
   },
 ];
+
+export function fromStaticPaths(
+  staticPaths: Array<{
+    params: { framework: string; id: string };
+  }>,
+) {
+  const frameworkUrls = new Map(
+    staticPaths.map((entry) => {
+      return [
+        `/${entry.params.id}`,
+        `/${entry.params.framework}/${entry.params.id}`,
+      ];
+    }),
+  );
+
+  return main.flatMap(function translateUrls(item): any {
+    if (Array.isArray(item.items)) {
+      return { ...item, items: item.items.flatMap(translateUrls) };
+    }
+
+    if (typeof item.link === "string") {
+      const newUrl = frameworkUrls.get(item.link);
+      if (newUrl) {
+        return [{ ...item, link: newUrl }];
+      }
+    }
+
+    return item;
+  });
+}

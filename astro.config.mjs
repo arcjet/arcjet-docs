@@ -6,6 +6,8 @@ import robotsTxt from "astro-robots-txt";
 import { defineConfig } from "astro/config";
 import starlightLinksValidator from "starlight-links-validator";
 import { main as sidebar } from "/src/lib/sidebars";
+import { visit } from "unist-util-visit";
+import { toMarkdown } from "mdast-util-to-markdown";
 
 const jsoncString = fs.readFileSync(
   new URL(`./src/lib/code-dark.json`, import.meta.url),
@@ -18,6 +20,48 @@ const jsoncStringLight = fs.readFileSync(
 );
 const ajThemeLight = ExpressiveCodeTheme.fromJSONString(jsoncStringLight);
 
+function remarkPlugin() {
+  return function (tree, file) {
+    const headings = [];
+
+    visit(tree, { type: "mdxJsxFlowElement", name: "Heading" }, (node) => {
+      const idAttr = node.attributes.find((attr) => attr.name === "id");
+      const levelAttr = node.attributes.find((attr) => attr.name === "level");
+
+      const frameworks = [];
+
+      for (const child of node.children) {
+        if (child.type === "list" || child.type === "paragraph") {
+          // TODO: This is a quick workaround and the content should be built directly
+          frameworks.push(["_", toMarkdown(child)]);
+        }
+
+        if (child.type === "mdxJsxFlowElement" && child.name === "Fragment") {
+          const slotAttr = child.attributes?.find(
+            (attr) => attr.name === "slot",
+          );
+
+          visit(child, "text", (textNode) => {
+            if (slotAttr) {
+              frameworks.push([slotAttr.value, textNode.value]);
+            } else {
+              frameworks.push(["_", textNode.value]);
+            }
+          });
+        }
+      }
+
+      headings.push({
+        depth: levelAttr.value,
+        slug: idAttr.value,
+        frameworks: Object.fromEntries(frameworks),
+      });
+    });
+
+    file.data.astro.frontmatter.__headings = headings;
+  };
+}
+
 // https://astro.build/config
 export default defineConfig({
   site: "https://docs.arcjet.com",
@@ -28,6 +72,12 @@ export default defineConfig({
     ssr: {
       noExternal: ["execa", "is-stream", "npm-run-path"],
     },
+  },
+  markdown: {
+    remarkPlugins: [remarkPlugin],
+  },
+  experimental: {
+    contentLayer: true,
   },
   integrations: [
     robotsTxt(),
@@ -73,9 +123,10 @@ export default defineConfig({
         }),
       ],
       components: {
+        // Head: "./src/components/overrides/Head.astro",
         Header: "./src/components/overrides/Header.astro",
         Sidebar: "./src/components/overrides/Sidebar.astro",
-        PageSidebar: "./src/components/overrides/PageSidebar.astro",
+        // PageSidebar: "./src/components/overrides/PageSidebar.astro",
         PageTitle: "./src/components/overrides/PageTitle.astro",
       },
       sidebar: sidebar,

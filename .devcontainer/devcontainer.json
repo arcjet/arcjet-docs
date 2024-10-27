@@ -2,7 +2,7 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node
 {
   "name": "arcjet-docs",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-20-bullseye",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bullseye",
 
   // Features to add to the dev container. More info: https://containers.dev/features.
   "features": {
@@ -19,7 +19,17 @@
 
   // Install npm dependencies within the container
   // Uses array syntax to skip the shell: https://containers.dev/implementors/json_reference/#formatting-string-vs-array-properties
-  "postCreateCommand": ["npm", "ci"]
+  "postCreateCommand": [
+    "npm",
+    "ci"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "astro-build.astro-vscode"
+      ]
+    }
+  }
 
   // Configure tool-specific properties.
   // "customizations": {},

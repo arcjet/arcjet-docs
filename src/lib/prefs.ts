@@ -18,6 +18,7 @@ export type FrameworkKey =
   | "node-js"
   | "node-js-express"
   | "node-js-hono"
+  | "remix"
   | "sveltekit"
   | "nest-js"
   | "express";
@@ -31,6 +32,7 @@ export type FrameworkLabel =
   | "Node.js"
   | "Node.js + Express"
   | "Node.js + Hono"
+  | "Remix"
   | "SvelteKit"
   | "NestJs"
   | "Express";
@@ -89,6 +91,10 @@ export const frameworks: Array<Framework> = [
   {
     key: "node-js-hono",
     label: "Node.js + Hono",
+  },
+  {
+    key: "remix",
+    label: "Remix",
   },
   {
     key: "sveltekit",

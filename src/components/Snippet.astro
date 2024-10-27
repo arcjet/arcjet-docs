@@ -1,0 +1,24 @@
+---
+import { getEntry, render } from 'astro:content';
+
+interface Props {
+  id: string;
+}
+
+type Params = {
+  framework: string | undefined
+}
+
+const { id } = Astro.props
+
+const { framework = "next-js" } = Astro.params as Params;
+
+const entry = await getEntry("snippets", `${framework}/${id}`);
+// console.log(entry)
+// if (typeof entry === "undefined") {
+//   throw new Error(`Missing snippets/${framework}/${id}.mdx file. Did you create it?`)
+// }
+const { Content, headings } = entry ? await render(entry) : { Content: Fragment, headings: [] };
+---
+
+<Content />

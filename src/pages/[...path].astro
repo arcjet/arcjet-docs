@@ -1,0 +1,131 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+
+import type { InferGetStaticParamsType, InferGetStaticPropsType } from "astro"
+import { getCollection, getEntry, render } from 'astro:content';
+
+
+// export async function getStaticPaths() {
+//     const frameworks = ["sveltekit", "next-js"] as const;
+
+//     const staticPaths: { params: { path: string | undefined }, props: { framework: (typeof frameworks)[number] }}[] = [
+//         { params: { path: undefined }, props: { framework: "next-js" } }
+//     ];
+//     for (const framework of frameworks) {
+//         staticPaths.push({ params: { path: framework }, props: { framework }})
+//     }
+//     return staticPaths;
+//     // return [{params: { path: "foobar" }}]
+// }
+
+export async function getStaticPaths() {
+  const docs = await getCollection("docs");
+
+  const staticPaths = [];
+  for (const doc of docs) {
+      staticPaths.push({ params: { path: doc.slug }})
+  }
+//   console.log(staticPaths)
+  return staticPaths
+}
+
+const { path } = Astro.params
+
+const framework = "next-js";
+
+const entry = await getEntry("docs", path);
+
+const { Content } = await render(entry)
+
+function title(data: { title: string | Record<string, string> }, framework: string) {
+  if (typeof data.title === "string") {
+    return data.title
+  } else {
+    return data.title[framework];
+  }
+}
+
+// type Params = InferGetStaticParamsType<typeof getStaticPaths>;
+// type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+// const { framework } = Astro.props;
+
+// const { Content: Step1 } = await render(await getEntry(framework, "get-started/step1"))
+// const { Content: Requirements } = await render(await getEntry(framework, "get-started/requirements"))
+// const { Content: Step2 } = await render(await getEntry(framework, "get-started/step2"))
+// const { Content: Step3 } = await render(await getEntry(framework, "get-started/step3"))
+// const { Content: Step4 } = await render(await getEntry(framework, "get-started/step4"))
+
+---
+
+<!-- sidebar={[{ label: "Get started", link: `/${framework}/get-started`}]} -->
+<StarlightPage frontmatter={{ title: title(entry.data, framework) }}>
+    <Content />
+    <!-- <p>
+        <a href="https://arcjet.com/">Arcjet</a> helps developers protect their
+        apps in just a few lines of code. Bot detection. Rate limiting. Email
+        validation. Attack protection. Data redaction. A developer-first
+        approach to security.
+    </p>
+
+    <p>This guide will show you how to set up a simple API server protected by Arcjet.</p>
+
+    <h2>Choose a framework</h2>
+
+    <br />
+    <LinkButton href="/get-started/bun" variant="secondary">
+    Bun
+    </LinkButton>
+    <LinkButton href="/get-started/bun-hono" variant="secondary">
+    Bun + Hono
+    </LinkButton>
+    <LinkButton href="/get-started/nest-js" variant="secondary">
+    NestJS
+    </LinkButton>
+    <LinkButton href="/next-js/get-started/" variant="secondary">
+    Next.js
+    </LinkButton>
+    <LinkButton href="/get-started/node-js" variant="secondary">
+    Node.js
+    </LinkButton>
+    <LinkButton href="/get-started/node-js-express" variant="secondary">
+    Node.js + Express
+    </LinkButton>
+    <LinkButton href="/get-started/node-js-hono" variant="secondary">
+    Node.js + Hono
+    </LinkButton>
+    <LinkButton href="/get-started/remix" variant="secondary">
+    Remix
+    </LinkButton>
+    <LinkButton href="/sveltekit/get-started" variant="secondary">
+    SvelteKit
+    </LinkButton>
+
+    <h2>1. Install Arcjet</h2>
+
+    <p>In your project root, run the following command:</p>
+
+    <Step1 />
+
+    <h3>Requirements</h3>
+
+    <Requirements />
+
+    <h2>2. Set your key</h2>
+
+    <p>
+        <a href="https://app.arcjet.com">Create a free Arcjet account</a> then follow the
+        instructions to add a site and get a key.
+    </p>
+
+    <Step2 />
+
+    <h2>3. Add rules</h2>
+
+    <p>This configures Arcjet rules to protect your app from attacks, apply a rate
+    limit, and prevent bots from accessing your app.</p>
+
+    <Step3 />
+
+    <Step4 /> -->
+</StarlightPage>

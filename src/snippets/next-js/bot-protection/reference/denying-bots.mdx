@@ -1,0 +1,21 @@
+import { Code, Tabs, TabItem } from "@astrojs/starlight/components";
+
+import DenyingBotsAppTS from "./denying-bots-app.ts?raw";
+import DenyingBotsPagesTS from "./denying-bots-pages.ts?raw";
+import DenyingBotsAppJS from "./denying-bots-app.js?raw";
+import DenyingBotsPagesJS from "./denying-bots-pages.js?raw";
+
+<Tabs syncKey="next-js-code">
+  <TabItem label="TS (App)">
+    <Code code={DenyingBotsAppTS} lang="ts" title="/app/api/arcjet/route.ts" />
+  </TabItem>
+  <TabItem label="TS (Pages)">
+    <Code code={DenyingBotsPagesTS} lang="ts" title="/pages/api/hello.ts" />
+  </TabItem>
+  <TabItem label="JS (App)">
+    <Code code={DenyingBotsAppJS} lang="js" title="/app/api/arcjet/route.js" />
+  </TabItem>
+  <TabItem label="JS (Pages)">
+    <Code code={DenyingBotsPagesJS} lang="js" title="/pages/api/hello.ts" />
+  </TabItem>
+</Tabs>

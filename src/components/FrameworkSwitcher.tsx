@@ -5,6 +5,7 @@ import { Hono as IconHono } from "@/components/icons/tech/Hono";
 import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
 import { NextJs as IconNextJs } from "@/components/icons/tech/NextJs";
 import { NodeJs as IconNodeJs } from "@/components/icons/tech/NodeJs";
+import { Remix as IconRemix } from "@/components/icons/tech/Remix";
 import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
 import type { Props as SelectProps } from "@/components/Select";
 import Select from "@/components/Select";
@@ -32,6 +33,7 @@ const frameworkIcon = {
   "nest-js": <IconNestJs />,
   "next-js": <IconNextJs />,
   "node-js": <IconNodeJs />,
+  remix: <IconRemix />,
   sveltekit: <IconSvelteKit />,
   "node-js-express": <IconNodeJs />,
   "node-js-hono": <IconNodeJs />,
