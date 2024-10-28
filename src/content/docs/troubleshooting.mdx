@@ -280,14 +280,34 @@ The `arcjet` package is a low-level package that is used to build adapters for
 different [frameworks and runtimes we support](/get-started). Unless you are
 doing something custom, we recommend using one of the adapters.
 
-### Body already read
+### Error: Body already read or Body is unusable
 
-This happens when you try to access the request body after it has already been
-processed by an Arcjet Sensitive Info rule. To fix this, you need to parse the
-body before calling `protect`.
+You may see this error if you try to access the request body after it has
+already been read by something else.
 
-See the example in the [Accessing the
-body](/sensitive-info/reference?f=node-js#accessing-the-body) section.
+For example, if Arcjet processes the body to analyze it for sensitive
+information and then you try and access the body later in your handler.
+
+Another example is if you access a field in the body to perform email validation
+and then later try to access the body again in another part of your request
+handler.
+
+To fix this with sensitive information detection, see the [Accessing the
+body](/sensitive-info/reference?f=node-js#accessing-the-body) section of the
+reference.
+
+To fix this with other cases, clone the request before accessing the body:
+
+```ts
+// Clone the request and extract the email
+const { email } = await req.clone().json();
+
+// Call Arcjet with the cloned request
+const decision = await aj.protect(req, { email });
+
+// ...
+// You can now access the body again later
+```
 
 ## Get help
 
@@ -296,3 +316,4 @@ help, [email us](mailto:support@arcjet.com) or [join our
 Discord](https://arcjet.com/discord).
 
 <Comments />
+```
