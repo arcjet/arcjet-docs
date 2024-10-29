@@ -491,3 +491,23 @@ h6,
 .sl-markdown-content code {
   border-radius: 4px;
 }
+
+.sl-markdown-content :not(a, strong, em, del, span, input, code) + img {
+  margin: calc(var(--sp) * 6) 0;
+}
+
+[data-theme="dark"]:root .sl-markdown-content img.dark {
+  display: block;
+}
+
+[data-theme="light"]:root .sl-markdown-content img.dark {
+  display: none;
+}
+
+[data-theme="light"]:root .sl-markdown-content img.light {
+  display: block;
+}
+
+[data-theme="dark"]:root .sl-markdown-content img.light {
+  display: none;
+}

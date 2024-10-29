@@ -4,6 +4,16 @@ description: "Arcjet has been architected around a few key principles: proper se
 ---
 
 import Comments from "/src/components/Comments.astro";
+import ImageExampleLocalAnalysisDark from "src/assets/architecture/2 - Example_ Local analysis - Dark.png";
+import ImageExampleLocalAnalysisLight from "src/assets/architecture/2 - Example_ Local analysis - Light.png";
+import ImageExampleRateLimitRuleAllowDark from "/src/assets/architecture/3 - Example_ Rate limit rule_ ALLOW - Dark.png";
+import ImageExampleRateLimitRuleAllowLight from "/src/assets/architecture/3 - Example_ Rate limit rule_ ALLOW - Light.png";
+import ImageExampleRateLimitRuleDenyDark from "/src/assets/architecture/4 - Example_ Rate limit rule_ DENY - Dark.png";
+import ImageExampleRateLimitRuleDenyLight from "/src/assets/architecture/4 - Example_ Rate limit rule_ DENY - Light.png";
+import ImageExampleRateLimitRuleDenyCachedDark from "/src/assets/architecture/5 - Example_ Rate limit rule_ DENY(CACHED) - Dark.png";
+import ImageExampleRateLimitRuleDenyCachedLight from "/src/assets/architecture/5 - Example_ Rate limit rule_ DENY(CACHED) - Light.png";
+import ImageRequestAnalysisDark from "/src/assets/architecture/6 - Request analysis - Dark.png";
+import ImageRequestAnalysisLight from "/src/assets/architecture/6 - Request analysis - Light.png";
 
 Arcjet has been architected around a few key principles:
 
@@ -63,7 +73,16 @@ you configured, then makes a decision to allow the request. The SDK returns the
 result and your application code continues to execute as normally. An
 asynchronous report is made to the Arcjet API for post-request analysis.
 
-!["Diagram - Local analysis"](../../assets/mermaid/architecture-local-analysis.png)
+<img
+  class="dark"
+  src={ImageExampleLocalAnalysisDark.src}
+  alt="Example: Local analysis"
+/>
+<img
+  class="light"
+  src={ImageExampleLocalAnalysisLight.src}
+  alt="Example: Local analysis"
+/>
 
 ### Arcjet Cloud API
 
@@ -92,7 +111,16 @@ request context through to the Arcjet API which checks the rate limit for that
 client and then returns an allow decision. The SDK returns the details and your
 application code continues to execute as normally.
 
-!["Diagram - Rate limit rule (allow)"](../../assets/mermaid/architecture-rl-allow.png)
+<img
+  class="dark"
+  src={ImageExampleRateLimitRuleAllowDark.src}
+  alt="Example: Rate limit rule ALLOW"
+/>
+<img
+  class="light"
+  src={ImageExampleRateLimitRuleAllowLight.src}
+  alt="Example: Rate limit rule ALLOW"
+/>
 
 #### Example: Rate limit rule (deny)
 
@@ -104,12 +132,30 @@ client. The decision is also cached locally by the SDK so that subsequent
 requests which match the rate limit rule do not need to rely on a call to the
 Arcjet API.
 
-!["Diagram - Rate limit rule (cached)"](../../assets/mermaid/architecture-rl-cached.png)
+<img
+  class="dark"
+  src={ImageExampleRateLimitRuleDenyCachedDark.src}
+  alt="Example: Rate limit rule DENY (CACHED)"
+/>
+<img
+  class="light"
+  src={ImageExampleRateLimitRuleDenyCachedLight.src}
+  alt="Example: Rate limit rule DENY (CACHED)"
+/>
 
 This means that if the same client makes another request, the SDK will read from
 the local cache and return the response immediately:
 
-!["Diagram - Rate limit rule (deny)"](../../assets/mermaid/architecture-rl-deny.png)
+<img
+  class="dark"
+  src={ImageExampleRateLimitRuleDenyDark.src}
+  alt="Example: Rate limit rule DENY"
+/>
+<img
+  class="light"
+  src={ImageExampleRateLimitRuleDenyLight.src}
+  alt="Example: Rate limit rule DENY"
+/>
 
 #### When the API is required
 
@@ -252,7 +298,8 @@ protecting it from attacks.
 In the example below, the results of the post-request analysis from previous
 requests are used to inform the decision for the current request.
 
-!["Diagram - Post request analysis"](../../assets/mermaid/architecture-post-request.png)
+<img class="dark" src={ImageRequestAnalysisDark.src} alt="Request analysis" />
+<img class="light" src={ImageRequestAnalysisLight.src} alt="Request analysis" />
 
 ## Credits
 
