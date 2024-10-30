@@ -32,6 +32,11 @@ export const main = [
             attrs: { target: "_blank", class: "external-link" },
           },
           {
+            label: "Remix",
+            link: "https://github.com/arcjet/example-remix",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
             label: "More",
             link: "https://github.com/arcjet/arcjet-js/tree/main/examples",
             attrs: { target: "_blank", class: "external-link" },
