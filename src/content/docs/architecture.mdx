@@ -1,8 +1,20 @@
 ---
 title: "Architecture"
-description: "Arcjet has been architected around a few key principles: proper security protections need the full context of the application, which is why security rules and protections should be located alongside the code they are protecting; security rules should be easy to test; Arcjet should not interfere with the rest of the application. It should be easy to install, must not add significant latency to requests, and should not require changes to the application's architecture."
+description: "How Arcjet is architected and how it works."
 ---
 
+import ImageExampleLocalAnalysisDark from "src/assets/architecture/2 - Example_ Local analysis - Dark.png";
+import ImageExampleLocalAnalysisLight from "src/assets/architecture/2 - Example_ Local analysis - Light.png";
+import ImageExampleRateLimitRuleAllowDark from "/src/assets/architecture/3 - Example_ Rate limit rule_ ALLOW - Dark.png";
+import ImageExampleRateLimitRuleAllowLight from "/src/assets/architecture/3 - Example_ Rate limit rule_ ALLOW - Light.png";
+import ImageExampleRateLimitRuleDenyDark from "/src/assets/architecture/4 - Example_ Rate limit rule_ DENY - Dark.png";
+import ImageExampleRateLimitRuleDenyLight from "/src/assets/architecture/4 - Example_ Rate limit rule_ DENY - Light.png";
+import ImageExampleRateLimitRuleDenyCachedDark from "/src/assets/architecture/5 - Example_ Rate limit rule_ DENY(CACHED) - Dark.png";
+import ImageExampleRateLimitRuleDenyCachedLight from "/src/assets/architecture/5 - Example_ Rate limit rule_ DENY(CACHED) - Light.png";
+import ImageRequestAnalysisDark from "/src/assets/architecture/6 - Request analysis - Dark.png";
+import ImageRequestAnalysisLight from "/src/assets/architecture/6 - Request analysis - Light.png";
+import ImageCDNDark from "/src/assets/architecture/7 - Security CDN architecture - Dark.png";
+import ImageCDNLight from "/src/assets/architecture/7 - Security CDN architecture - Light.png";
 import Comments from "/src/components/Comments.astro";
 
 Arcjet has been architected around a few key principles:
@@ -56,20 +68,72 @@ Decisions may also be cached in memory.
 
 #### Example: Local analysis
 
-In this example flow, a client makes a request to your application. The Arcjet
-SDK is configured as middleware so it intercepts the request before it reaches
-your application code. The SDK analyzes the request locally based on the rules
-you configured, then makes a decision to allow the request. The SDK returns the
-result and your application code continues to execute as normally. An
-asynchronous report is made to the Arcjet API for post-request analysis.
+In this example flow:
 
-!["Diagram - Local analysis"](../../assets/mermaid/architecture-local-analysis.png)
+1. A client makes an HTTP request to your application.
+2. Your platform applies standard DDoS protection through their network
+   firewall. Most platforms provide DDoS protection transparently and out of the
+   box for no extra cost.
+3. Your server (container, serverless function, VM, etc) receives the request.
+4. The Arcjet SDK is configured as middleware so it intercepts the request
+   before it reaches your application code. Arcjet analyzes the request locally
+   based on the rules you configured, then decides to allow the request.
+5. Arcjet returns the result and your application code continues to execute as
+   normally. You can inspect the decision to understand why Arcjet came to that
+   conclusion. An asynchronous report is made to the Arcjet API for post-request
+   analysis.
+
+<img
+  class="dark"
+  src={ImageExampleLocalAnalysisDark.src}
+  alt="Example: Local analysis"
+/>
+<img
+  class="light"
+  src={ImageExampleLocalAnalysisLight.src}
+  alt="Example: Local analysis"
+/>
+
+#### Contrast with traditional CDN security services
+
+Traditional CDN security services are typically implemented as a reverse proxy
+in front of your application. The security service is a separate entity from
+your application, rules can't be adjusted dynamically because it does not have
+access to the full context of the request, and it can't be tested locally.
+
+This can lead to false positives and false negatives as the service does not
+have the full context of the application.
+
+For example:
+
+1. A client makes an HTTP request to your application.
+2. The request is intercepted by the CDN security service.
+3. The service analyzes the request and decides to block the request.
+4. The request is blocked and the client receives an error message, but your
+   application code never sees the request. This can lead to false positives
+   where legitimate requests are blocked. If your application had seen the
+   request, it may have been able to determine that it was legitimate e.g.
+   because the client was logged in.
+5. Or, the request is allowed and your code runs, but it has no idea that the
+   request was analyzed by the CDN security service and why the request was
+   allowed.
+
+<img
+  class="dark"
+  src={ImageCDNDark.src}
+  alt="Contrast with traditional CDN security services"
+/>
+<img
+  class="light"
+  src={ImageCDNLight.src}
+  alt="Contrast with traditional CDN security services"
+/>
 
 ### Arcjet Cloud API
 
 In many cases, Arcjet can make a decision locally and report that decision
 asynchronously to the Arcjet API. However, there are some cases where Arcjet
-needs to make a decision in the cloud.
+must make a decision in the cloud.
 
 For example, if you are want to enforce a rate limit, the number of requests for
 each client must be tracked. This means you typically need to manage something
@@ -79,37 +143,68 @@ no additional infrastructure. The Arcjet SDK will make a call to the Arcjet API
 to get the current rate limit for the client.
 
 The API has been designed for high performance and low latency, and combines all
-the security functionality into a single request. This means it typically
-outperforms other similar solutions. Arcjet will also attempt to cache decisions
-locally using an in-memory cache. In many cases, the total latency will be less
-than 1ms.
+security functionality in one request. This means it typically outperforms other
+similar solutions. Arcjet will also attempt to cache decisions locally using an
+in-memory cache. In many cases, the total latency will be less than 1ms.
 
 #### Example: Rate limit rule (allow)
 
-In this example flow, a client makes a request to your application. The Arcjet
-SDK is configured with a rate limit rule on an API route. The SDK passes the
-request context through to the Arcjet API which checks the rate limit for that
-client and then returns an allow decision. The SDK returns the details and your
-application code continues to execute as normally.
+1. A client makes an HTTP request to your application. It passes through the
+   network level DDoS protection as described above then reaches your server.
+2. The Arcjet SDK is configured with a rate limit rule on an API route. The SDK
+   passes the request context through to the Arcjet API which checks the rate
+   limit for that client and then returns an allow decision.
+3. The SDK returns the details and your application code continues to execute as
+   normal.
 
-!["Diagram - Rate limit rule (allow)"](../../assets/mermaid/architecture-rl-allow.png)
+<img
+  class="dark"
+  src={ImageExampleRateLimitRuleAllowDark.src}
+  alt="Example: Rate limit rule ALLOW"
+/>
+<img
+  class="light"
+  src={ImageExampleRateLimitRuleAllowLight.src}
+  alt="Example: Rate limit rule ALLOW"
+/>
 
 #### Example: Rate limit rule (deny)
 
-In this example, a client makes another request to your application with a rate
-limit rule configured. As before, the SDK passes the request context through to
-the Arcjet API which determines that the limit has been exceeded. The SDK
-provides the details and your application code returns a 429 response to the
-client. The decision is also cached locally by the SDK so that subsequent
-requests which match the rate limit rule do not need to rely on a call to the
-Arcjet API.
+This time when the request is received, the rate limit has been exceeded.
 
-!["Diagram - Rate limit rule (cached)"](../../assets/mermaid/architecture-rl-cached.png)
+1. A client makes another request to your application with a rate limit rule
+   configured.
+2. As before, the SDK passes the request context through to the Arcjet API which
+   determines the limit has been exceeded.
+3. The SDK provides the details and your application code returns a 429 response
+   to the client.
+4. The decision is also cached locally so that subsequent requests which match
+   the rate limit rule does not need to rely on a call to the Arcjet API.
+
+<img
+  class="dark"
+  src={ImageExampleRateLimitRuleDenyCachedDark.src}
+  alt="Example: Rate limit rule DENY (CACHED)"
+/>
+<img
+  class="light"
+  src={ImageExampleRateLimitRuleDenyCachedLight.src}
+  alt="Example: Rate limit rule DENY (CACHED)"
+/>
 
 This means that if the same client makes another request, the SDK will read from
 the local cache and return the response immediately:
 
-!["Diagram - Rate limit rule (deny)"](../../assets/mermaid/architecture-rl-deny.png)
+<img
+  class="dark"
+  src={ImageExampleRateLimitRuleDenyDark.src}
+  alt="Example: Rate limit rule DENY"
+/>
+<img
+  class="light"
+  src={ImageExampleRateLimitRuleDenyLight.src}
+  alt="Example: Rate limit rule DENY"
+/>
 
 #### When the API is required
 
@@ -170,17 +265,17 @@ uses this to cache decisions locally in your environment and in the Arcjet
 decision API.
 
 The fingerprint is configured based on the characteristics configured on the
-root of the SDK instance. If not specified, the IP address is used by default.
-You can can override this with any of the built-in or custom characteristics.
-The fingerprint can also be [configured on each rate limit
+root of the SDK instance. If unspecified, the IP address is used by default. You
+can override this with any of the built-in or custom characteristics. The
+fingerprint can also be [configured on each rate limit
 rule](/rate-limiting/configuration) to apply a different rule to different
 clients based on their characteristics. If not specified, the root fingerprint
 is used.
 
 ### Built-in characteristics
 
-The built-in options are managed by the SDK and are always available.
-If more than one option is provided, they will be combined.
+Built-in options are managed by the SDK and are always available. If multiple
+options are provided, they will be combined.
 
 :::caution
 If you specify different characteristics and do not include `ip.src`, you may
@@ -225,8 +320,8 @@ documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwa
 
 When choosing the IP address to use, Arcjet uses the first non-private IP that
 is a valid address. However, in non-production environments, we allow
-private/internal addresses so that the SDKs work correctly. See the individual
-SDK references for more details.
+private/internal addresses so the SDKs work correctly. See the individual SDK
+references for more details.
 
 ## Request analysis
 
@@ -252,7 +347,18 @@ protecting it from attacks.
 In the example below, the results of the post-request analysis from previous
 requests are used to inform the decision for the current request.
 
-!["Diagram - Post request analysis"](../../assets/mermaid/architecture-post-request.png)
+1. A client makes an HTTP request to your application.
+2. The request is analyzed by the Arcjet SDK based on the rules you configured.
+3. The SDK returns the result and your application code continues to execute as
+   normal.
+4. The result is also reported to the Arcjet API for post-request analysis. This
+   is used to inform future decisions for that client.
+5. The client makes another request and the result of the post-request analysis
+   is used to inform the decision. This will be applied if you have configured a
+   [Shield](/shield/quick-start) rule.
+
+<img class="dark" src={ImageRequestAnalysisDark.src} alt="Request analysis" />
+<img class="light" src={ImageRequestAnalysisLight.src} alt="Request analysis" />
 
 ## Credits
 
