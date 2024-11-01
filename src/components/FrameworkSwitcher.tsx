@@ -6,6 +6,7 @@ import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
 import { NextJs as IconNextJs } from "@/components/icons/tech/NextJs";
 import { NodeJs as IconNodeJs } from "@/components/icons/tech/NodeJs";
 import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
+import { Remix as IconRemix } from "@/components/icons/tech/Remix";
 import type { Props as SelectProps } from "@/components/Select";
 import Select from "@/components/Select";
 import type { Framework, FrameworkKey } from "@/lib/prefs";
@@ -36,6 +37,7 @@ const frameworkIcon = {
   "node-js-express": <IconNodeJs />,
   "node-js-hono": <IconNodeJs />,
   "bun-hono": <IconBun />,
+  remix: <IconRemix />,
 };
 
 interface Props extends React.HTMLAttributes<HTMLSelectElement> {
