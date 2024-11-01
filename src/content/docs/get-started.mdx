@@ -19,6 +19,7 @@ frameworks:
   - node-js
   - node-js-express
   - node-js-hono
+  - remix
   - sveltekit
 ajToc:
   - text: 1. Install Arcjet
@@ -67,6 +68,10 @@ import Step3SvelteKit from "@/snippets/get-started/sveltekit/Step3.mdx";
 import Step4SvelteKit from "@/snippets/get-started/sveltekit/Step4.mdx";
 import Step1Bun from "@/snippets/rate-limiting/quick-start/bun/Step1.mdx";
 import Step1NextJs from "@/snippets/rate-limiting/quick-start/nextjs/Step1.mdx";
+import Step1Remix from "@/snippets/get-started/remix/Step1.mdx";
+import RequirementsRemix from "@/snippets/get-started/remix/Requirements.mdx";
+import Step3Remix from "@/snippets/get-started/remix/Step3.mdx";
+import Step4Remix from "@/snippets/get-started/remix/Step4.mdx";
 import VideoQuickStart from "@/snippets/rate-limiting/quick-start/nextjs/VideoQuickStart.mdx";
 import Step1NodeJs from "@/snippets/rate-limiting/quick-start/nodejs/Step1.mdx";
 import Step2 from "@/snippets/rate-limiting/quick-start/shared/Step2.mdx";
@@ -106,6 +111,9 @@ This guide will show you how to set up a simple API server protected by Arcjet.
 <LinkButton href="/get-started?f=node-js-hono" variant="secondary">
   Node.js + Hono
 </LinkButton>
+<LinkButton href="/get-started?f=remix" variant="secondary">
+  Remix
+</LinkButton>
 <LinkButton href="/get-started?f=sveltekit" variant="secondary">
   SvelteKit
 </LinkButton>
@@ -122,6 +130,7 @@ In your project root, run the following command:
   <Step1NodeJs slot="node-js" />
   <Step1NodeJs slot="node-js-express" />
   <Step1NodeJs slot="node-js-hono" />
+  <Step1Remix slot="remix" />
   <Step1SvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -135,6 +144,7 @@ In your project root, run the following command:
   <RequirementsNodeJs slot="node-js" />
   <RequirementsNodeJsExpress slot="node-js-express" />
   <RequirementsNodeJsHono slot="node-js-hono" />
+  <RequirementsRemix slot="remix" />
   <RequirementsSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -152,6 +162,7 @@ project root.
   <Step2SetEnv slot="node-js" />
   <Step2SetEnv slot="node-js-express" />
   <Step2SetEnv slot="node-js-hono" />
+  <Step2 slot="remix" />
   <Step2 slot="sveltekit" />
 </SlotByFramework>
 
@@ -174,6 +185,7 @@ limit, and prevent bots from accessing your app.
   <Step3NodeJsExpress slot="node-js-express" />
   <Step3NodeJsHono slot="node-js-hono" />
   <Step3SvelteKit slot="sveltekit" />
+  <Step3Remix slot="remix" />
 </SlotByFramework>
 
 <SlotByFramework client:load>
@@ -184,6 +196,7 @@ limit, and prevent bots from accessing your app.
   <Step4NodeJs slot="node-js" />
   <Step4NodeJsExpress slot="node-js-express" />
   <Step4NodeJsHono slot="node-js-hono" />
+  <Step4Remix slot="remix" />
   <Step4SvelteKit slot="sveltekit" />
 </SlotByFramework>
 

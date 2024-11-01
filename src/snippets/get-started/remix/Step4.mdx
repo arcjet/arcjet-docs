@@ -6,28 +6,28 @@ import SelectableContent from "@/components/SelectableContent";
 <SelectableContent client:load syncKey="packageManager">
 <div slot="npm" slotIdx="1">
 ```sh
-npm run start
+npm run dev
 ```
 </div>
 <div slot="pnpm" slotIdx="2">
 ```sh
-pnpm run start
+pnpm run dev
 ```
 </div>
 <div slot="yarn" slotIdx="3">
 ```sh
-yarn run start
+yarn run dev
 ```
 </div>
 </SelectableContent>
 
-Visit [`http://localhost:3000`](http://localhost:3000) in your browser and
-refresh a few times to hit the rate limit.
+Visit [`http://localhost:5173/arcjet`](http://localhost:5173/arcjet) in your
+browser and refresh a few times to hit the rate limit.
 
 Wait 10 seconds, then run:
 
 ```sh
-curl -v http://localhost:3000
+curl -I http://localhost:5173/arcjet
 ```
 
 The wait is necessary because the decision is cached for your IP based on the
