@@ -1,0 +1,28 @@
+import { Aside } from "@astrojs/starlight/components";
+
+```ini title=".env.local"
+# NODE_ENV is not set automatically, so tell Arcjet we're in dev
+# You can leave this unset in prod
+ARCJET_ENV=development
+# Get your site key from https://app.arcjet.com
+ARCJET_KEY=ajkey_yourkey
+```
+
+Next you need to update the dev command in your `package.json` to use the
+`.env.local` file.
+
+```json
+{
+  "scripts": {
+    "dev": "tsx watch --env-file .env.local src/index.ts"
+  }
+  ...
+}
+```
+
+<Aside type="note" title="env files">
+  Node 20+ supports loading environment variables from a local file with
+  `--env-file`. If you're using an older version of Node, you can use a package
+  like [`dotenv`](https://www.npmjs.com/package/dotenv) to load the environment
+  variables from a `.env.local` file.
+</Aside>

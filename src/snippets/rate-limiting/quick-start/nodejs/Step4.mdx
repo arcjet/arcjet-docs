@@ -3,13 +3,6 @@ import SelectableContent from "@/components/SelectableContent";
 
 ### 4. Start server
 
-<Aside type="note" title="env files">
-  Node 20+ supports loading environment variables from a local file with
-  `--env-file`. If you're using an older version of Node, you can use a package
-  like [`dotenv`](https://www.npmjs.com/package/dotenv) to load the environment
-  variables from a `.env.local` file.
-</Aside>
-
 {/* prettier-ignore */}
 <SelectableContent client:load syncKey="language" frameworkSwitcher>
   <div slot="TS" slotIdx="1">
@@ -27,6 +20,13 @@ node --env-file .env.local index.js
 
   </div>
 </SelectableContent>
+
+<Aside type="note" title="env files">
+  Node 20+ supports loading environment variables from a local file with
+  `--env-file`. If you're using an older version of Node, you can use a package
+  like [`dotenv`](https://www.npmjs.com/package/dotenv) to load the environment
+  variables from a `.env.local` file.
+</Aside>
 
 Then make some requests to hit the rate limit:
 

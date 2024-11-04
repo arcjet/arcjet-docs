@@ -5,13 +5,6 @@ import SelectableContent from "@/components/SelectableContent";
 
 Start your Node.js server:
 
-<Aside type="note" title="env files">
-  Node 20+ supports loading environment variables from a local file with
-  `--env-file`. If you're using an older version of Node, you can use a package
-  like [`dotenv`](https://www.npmjs.com/package/dotenv) to load the environment
-  variables from a `.env.local` file.
-</Aside>
-
 {/* prettier-ignore */}
 <SelectableContent client:load syncKey="language" frameworkSwitcher>
   <div slot="TS" slotIdx="1">
@@ -25,6 +18,13 @@ Start your Node.js server:
   ```
   </div>
 </SelectableContent>
+
+<Aside type="note" title="env files">
+  Node 20+ supports loading environment variables from a local file with
+  `--env-file`. If you're using an older version of Node, you can use a package
+  like [`dotenv`](https://www.npmjs.com/package/dotenv) to load the environment
+  variables from a `.env.local` file.
+</Aside>
 
 Make a `curl` request from your terminal to your application. You should see a
 `403 Forbidden` response because `curl` is considered an automated client by

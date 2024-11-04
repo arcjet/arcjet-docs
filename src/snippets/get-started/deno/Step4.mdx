@@ -1,21 +1,18 @@
-import { Aside } from "@astrojs/starlight/components";
-
 ## 4. Start app
 
-{/* prettier-ignore */}
-```sh
-node --env-file .env.local index.js
+```bash
+deno run --watch index.ts
 ```
 
-<Aside type="note" title="env files">
-  Node 20+ supports loading environment variables from a local file with
-  `--env-file`. If you're using an older version of Node, you can use a package
-  like [`dotenv`](https://www.npmjs.com/package/dotenv) to load the environment
-  variables from a `.env.local` file.
-</Aside>
+:::note
+Deno will prompt you for various permissions. You can also start Deno with the
+appropriate permission flags (`--allow-read --allow-env --allow-net`) to skip
+the prompt.
+:::
 
 Visit [`http://localhost:3000`](http://localhost:3000) in your browser and
-refresh a few times to hit the rate limit.
+refresh a few times to hit the rate limit. You may see 2 requests - one for the
+page and one for a favicon.
 
 Wait 10 seconds, then run:
 
