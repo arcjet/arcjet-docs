@@ -14,6 +14,7 @@ next: false
 frameworks:
   - bun
   - bun-hono
+  - deno
   - nest-js
   - next-js
   - node-js
@@ -38,49 +39,70 @@ ajToc:
     anchor: "get-help"
 ---
 
-import FrameworkName from "@/components/FrameworkName";
 import SlotByFramework from "@/components/SlotByFramework";
-import RequirementsBunHono from "@/snippets/get-started/bun-hono/Requirements.mdx";
-import Step3BunHono from "@/snippets/get-started/bun-hono/Step3.mdx";
-import Step4BunHono from "@/snippets/get-started/bun-hono/Step4.mdx";
-import BunServe from "@/snippets/get-started/bun/BunServe.mdx";
-import RequirementsBun from "@/snippets/get-started/bun/Requirements.mdx";
-import Step3Bun from "@/snippets/get-started/bun/Step3.mdx";
-import Step4Bun from "@/snippets/get-started/bun/Step4.mdx";
-import RequirementsNestJs from "@/snippets/get-started/nest-js/Requirements.mdx";
-import Step1NestJs from "@/snippets/get-started/nest-js/Step1.mdx";
-import Step3NestJs from "@/snippets/get-started/nest-js/Step3.mdx";
-import Step4NestJs from "@/snippets/get-started/nest-js/Step4.mdx";
-import RequirementsNextJs from "@/snippets/get-started/next-js/Requirements.mdx";
-import Step3NextJs from "@/snippets/get-started/next-js/Step3.mdx";
-import Step4NextJs from "@/snippets/get-started/next-js/Step4.mdx";
-import RequirementsNodeJsExpress from "@/snippets/get-started/node-js-express/Requirements.mdx";
-import Step3NodeJsExpress from "@/snippets/get-started/node-js-express/Step3.mdx";
-import Step4NodeJsExpress from "@/snippets/get-started/node-js-express/Step4.mdx";
-import RequirementsNodeJsHono from "@/snippets/get-started/node-js-hono/Requirements.mdx";
-import Step2NodeJsHono from "@/snippets/get-started/node-js-hono/Step2.mdx";
-import Step3NodeJsHono from "@/snippets/get-started/node-js-hono/Step3.mdx";
-import Step4NodeJsHono from "@/snippets/get-started/node-js-hono/Step4.mdx";
-import RequirementsNodeJs from "@/snippets/get-started/node-js/Requirements.mdx";
-import Step3NodeJs from "@/snippets/get-started/node-js/Step3.mdx";
-import Step4NodeJs from "@/snippets/get-started/node-js/Step4.mdx";
-import RequirementsSvelteKit from "@/snippets/get-started/sveltekit/Requirements.mdx";
-import Step3SvelteKit from "@/snippets/get-started/sveltekit/Step3.mdx";
-import Step4SvelteKit from "@/snippets/get-started/sveltekit/Step4.mdx";
-import Step1Bun from "@/snippets/rate-limiting/quick-start/bun/Step1.mdx";
-import Step1NextJs from "@/snippets/rate-limiting/quick-start/nextjs/Step1.mdx";
-import Step1Remix from "@/snippets/get-started/remix/Step1.mdx";
-import RequirementsRemix from "@/snippets/get-started/remix/Requirements.mdx";
-import Step3Remix from "@/snippets/get-started/remix/Step3.mdx";
-import Step4Remix from "@/snippets/get-started/remix/Step4.mdx";
-import VideoQuickStart from "@/snippets/rate-limiting/quick-start/nextjs/VideoQuickStart.mdx";
-import Step1NodeJs from "@/snippets/rate-limiting/quick-start/nodejs/Step1.mdx";
-import Step2 from "@/snippets/rate-limiting/quick-start/shared/Step2.mdx";
-import Step2SetEnv from "@/snippets/rate-limiting/quick-start/shared/Step2SetEnv.mdx";
-import Step1SvelteKit from "@/snippets/rate-limiting/quick-start/sveltekit/Step1.mdx";
 import { LinkButton, LinkCard } from "@astrojs/starlight/components";
 import FAQs from "/src/components/FAQs.astro";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+
+import BunStep1 from "@/snippets/get-started/bun/Step1.mdx";
+import BunRequirements from "@/snippets/get-started/bun/Requirements.mdx";
+import BunStep2 from "@/snippets/get-started/bun/Step2.mdx";
+import BunStep3 from "@/snippets/get-started/bun/Step3.mdx";
+import BunStep4 from "@/snippets/get-started/bun/Step4.mdx";
+
+import BunHonoStep1 from "@/snippets/get-started/bun-hono/Step1.mdx";
+import BunHonoRequirements from "@/snippets/get-started/bun-hono/Requirements.mdx";
+import BunHonoStep2 from "@/snippets/get-started/bun-hono/Step2.mdx";
+import BunHonoStep3 from "@/snippets/get-started/bun-hono/Step3.mdx";
+import BunHonoStep4 from "@/snippets/get-started/bun-hono/Step4.mdx";
+
+import DenoStep1 from "@/snippets/get-started/deno/Step1.mdx";
+import DenoRequirements from "@/snippets/get-started/deno/Requirements.mdx";
+import DenoStep2 from "@/snippets/get-started/deno/Step2.mdx";
+import DenoStep3 from "@/snippets/get-started/deno/Step3.mdx";
+import DenoStep4 from "@/snippets/get-started/deno/Step4.mdx";
+
+import NestJsStep1 from "@/snippets/get-started/nest-js/Step1.mdx";
+import NestJsRequirements from "@/snippets/get-started/nest-js/Requirements.mdx";
+import NestJsStep2 from "@/snippets/get-started/nest-js/Step2.mdx";
+import NestJsStep3 from "@/snippets/get-started/nest-js/Step3.mdx";
+import NestJsStep4 from "@/snippets/get-started/nest-js/Step4.mdx";
+
+import NextJsStep1 from "@/snippets/get-started/next-js/Step1.mdx";
+import NextJsRequirements from "@/snippets/get-started/next-js/Requirements.mdx";
+import NextJsStep2 from "@/snippets/get-started/next-js/Step2.mdx";
+import NextJsStep3 from "@/snippets/get-started/next-js/Step3.mdx";
+import NextJsStep4 from "@/snippets/get-started/next-js/Step4.mdx";
+
+import NodeJsStep1 from "@/snippets/get-started/node-js/Step1.mdx";
+import NodeJsRequirements from "@/snippets/get-started/node-js/Requirements.mdx";
+import NodeJsStep2 from "@/snippets/get-started/node-js/Step2.mdx";
+import NodeJsStep3 from "@/snippets/get-started/node-js/Step3.mdx";
+import NodeJsStep4 from "@/snippets/get-started/node-js/Step4.mdx";
+
+import NodeJsExpressStep1 from "@/snippets/get-started/node-js-express/Step1.mdx";
+import NodeJsExpressRequirements from "@/snippets/get-started/node-js-express/Requirements.mdx";
+import NodeJsExpressStep2 from "@/snippets/get-started/node-js-express/Step2.mdx";
+import NodeJsExpressStep3 from "@/snippets/get-started/node-js-express/Step3.mdx";
+import NodeJsExpressStep4 from "@/snippets/get-started/node-js-express/Step4.mdx";
+
+import NodeJsHonoStep1 from "@/snippets/get-started/node-js-hono/Step1.mdx";
+import NodeJsHonoRequirements from "@/snippets/get-started/node-js-hono/Requirements.mdx";
+import NodeJsHonoStep2 from "@/snippets/get-started/node-js-hono/Step2.mdx";
+import NodeJsHonoStep3 from "@/snippets/get-started/node-js-hono/Step3.mdx";
+import NodeJsHonoStep4 from "@/snippets/get-started/node-js-hono/Step4.mdx";
+
+import RemixStep1 from "@/snippets/get-started/remix/Step1.mdx";
+import RemixRequirements from "@/snippets/get-started/remix/Requirements.mdx";
+import RemixStep2 from "@/snippets/get-started/remix/Step2.mdx";
+import RemixStep3 from "@/snippets/get-started/remix/Step3.mdx";
+import RemixStep4 from "@/snippets/get-started/remix/Step4.mdx";
+
+import SvelteKitStep1 from "@/snippets/get-started/sveltekit/Step1.mdx";
+import SvelteKitRequirements from "@/snippets/get-started/sveltekit/Requirements.mdx";
+import SvelteKitStep2 from "@/snippets/get-started/sveltekit/Step2.mdx";
+import SvelteKitStep3 from "@/snippets/get-started/sveltekit/Step3.mdx";
+import SvelteKitStep4 from "@/snippets/get-started/sveltekit/Step4.mdx";
 
 [Arcjet](https://arcjet.com/) helps developers protect their apps in just a few
 lines of code. Bot detection. Rate limiting. Email validation. Attack
@@ -96,6 +118,9 @@ This guide will show you how to set up a simple API server protected by Arcjet.
 </LinkButton>
 <LinkButton href="/get-started?f=bun-hono" variant="secondary">
   Bun + Hono
+</LinkButton>
+<LinkButton href="/get-started?f=deno" variant="secondary">
+  Deno
 </LinkButton>
 <LinkButton href="/get-started?f=nest-js" variant="secondary">
   NestJS
@@ -124,29 +149,31 @@ This guide will show you how to set up a simple API server protected by Arcjet.
 In your project root, run the following command:
 
 <SlotByFramework client:load>
-  <Step1Bun slot="bun" />
-  <Step1Bun slot="bun-hono" />
-  <Step1NestJs slot="nest-js" />
-  <Step1NextJs slot="next-js" />
-  <Step1NodeJs slot="node-js" />
-  <Step1NodeJs slot="node-js-express" />
-  <Step1NodeJs slot="node-js-hono" />
-  <Step1Remix slot="remix" />
-  <Step1SvelteKit slot="sveltekit" />
+  <BunStep1 slot="bun" />
+  <BunHonoStep1 slot="bun-hono" />
+  <DenoStep1 slot="deno" />
+  <NestJsStep1 slot="nest-js" />
+  <NextJsStep1 slot="next-js" />
+  <NodeJsStep1 slot="node-js" />
+  <NodeJsExpressStep1 slot="node-js-express" />
+  <NodeJsHonoStep1 slot="node-js-hono" />
+  <emixStep1R slot="remix" />
+  <SvelteKitStep1 slot="sveltekit" />
 </SlotByFramework>
 
 ### Requirements
 
 <SlotByFramework client:load>
-  <RequirementsBun slot="bun" />
-  <RequirementsBunHono slot="bun-hono" />
-  <RequirementsNestJs slot="nest-js" />
-  <RequirementsNextJs slot="next-js" />
-  <RequirementsNodeJs slot="node-js" />
-  <RequirementsNodeJsExpress slot="node-js-express" />
-  <RequirementsNodeJsHono slot="node-js-hono" />
-  <RequirementsRemix slot="remix" />
-  <RequirementsSvelteKit slot="sveltekit" />
+  <BunRequirements slot="bun" />
+  <BunHonoRequirements slot="bun-hono" />
+  <DenoRequirements slot="deno" />
+  <NestJsRequirements slot="nest-js" />
+  <NextJsRequirements slot="next-js" />
+  <NodeJsRequirements slot="node-js" />
+  <NodeJsExpressRequirements slot="node-js-express" />
+  <NodeJsHonoRequirements slot="node-js-hono" />
+  <RemixRequirements slot="remix" />
+  <SvelteKitRequirements slot="sveltekit" />
 </SlotByFramework>
 
 ## 2. Set your key
@@ -156,15 +183,16 @@ instructions to add a site and get a key. Add it to a `.env.local` file the
 project root.
 
 <SlotByFramework client:load>
-  <Step2SetEnv slot="bun" />
-  <Step2SetEnv slot="bun-hono" />
-  <Step2SetEnv slot="nest-js" />
-  <Step2 slot="next-js" />
-  <Step2SetEnv slot="node-js" />
-  <Step2SetEnv slot="node-js-express" />
-  <Step2NodeJsHono slot="node-js-hono" />
-  <Step2 slot="remix" />
-  <Step2 slot="sveltekit" />
+  <BunStep2 slot="bun" />
+  <BunHonoStep2 slot="bun-hono" />
+  <DenoStep2 slot="deno" />
+  <NestJsStep2 slot="nest-js" />
+  <NextJsStep2 slot="next-js" />
+  <NodeJsStep2 slot="node-js" />
+  <NodeJsExpressStep2 slot="node-js-express" />
+  <NodeJsHonoStep2 slot="node-js-hono" />
+  <RemixStep2 slot="remix" />
+  <SvelteKitStep2 slot="sveltekit" />
 </SlotByFramework>
 
 ## 3. Add rules
@@ -173,32 +201,29 @@ This configures Arcjet rules to protect your app from attacks, apply a rate
 limit, and prevent bots from accessing your app.
 
 <SlotByFramework client:load>
-  <Fragment slot="bun">
-    <Step3Bun />
-    <BunServe />
-  </Fragment>
-  <Fragment slot="bun-hono">
-    <Step3BunHono />
-  </Fragment>
-  <Step3NestJs slot="nest-js" />
-  <Step3NextJs slot="next-js" />
-  <Step3NodeJs slot="node-js" />
-  <Step3NodeJsExpress slot="node-js-express" />
-  <Step3NodeJsHono slot="node-js-hono" />
-  <Step3SvelteKit slot="sveltekit" />
-  <Step3Remix slot="remix" />
+  <BunStep3 slot="bun" />
+  <BunHonoStep3 slot="bun-hono" />
+  <DenoStep3 slot="deno" />
+  <NestJsStep3 slot="nest-js" />
+  <NextJsStep3 slot="next-js" />
+  <NodeJsStep3 slot="node-js" />
+  <NodeJsExpressStep3 slot="node-js-express" />
+  <NodeJsHonoStep3 slot="node-js-hono" />
+  <RemixStep3 slot="remix" />
+  <SvelteKitStep3 slot="sveltekit" />
 </SlotByFramework>
 
 <SlotByFramework client:load>
-  <Step4Bun slot="bun" />
-  <Step4BunHono slot="bun-hono" />
-  <Step4NestJs slot="nest-js" />
-  <Step4NextJs slot="next-js" />
-  <Step4NodeJs slot="node-js" />
-  <Step4NodeJsExpress slot="node-js-express" />
-  <Step4NodeJsHono slot="node-js-hono" />
-  <Step4Remix slot="remix" />
-  <Step4SvelteKit slot="sveltekit" />
+  <BunStep4 slot="bun" />
+  <BunHonoStep4 slot="bun-hono" />
+  <DenoStep4 slot="deno" />
+  <NestJsStep4 slot="nest-js" />
+  <NextJsStep4 slot="next-js" />
+  <NodeJsStep4 slot="node-js" />
+  <NodeJsExpressStep4 slot="node-js-express" />
+  <NodeJsHonoStep4 slot="node-js-hono" />
+  <RemixStep4 slot="remix" />
+  <SvelteKitStep4 slot="sveltekit" />
 </SlotByFramework>
 
 ## What next?

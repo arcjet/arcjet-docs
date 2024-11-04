@@ -1,0 +1,30 @@
+## 4. Start app
+
+```bash
+deno run --watch index.ts
+```
+
+:::note
+Deno will prompt you for various permissions. You can also start Deno with the
+appropriate permission flags (`--allow-read --allow-env --allow-net`) to skip
+the prompt.
+:::
+
+Visit [`http://localhost:3000`](http://localhost:3000) in your browser and
+refresh a few times to hit the rate limit. You may see 2 requests - one for the
+page and one for a favicon.
+
+Wait 10 seconds, then run:
+
+```sh
+curl -v http://localhost:3000
+```
+
+The wait is necessary because the decision is cached for your IP based on the
+`interval` rate limit configuration.
+
+You should see a `403` response because `curl` is considered a bot by default
+([customizable](/bot-protection/identifying-bots)).
+
+The requests will also show up in the [Arcjet
+dashboard](https://app.arcjet.com).

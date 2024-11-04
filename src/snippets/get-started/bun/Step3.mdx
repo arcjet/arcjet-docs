@@ -1,5 +1,6 @@
 import Step3TS from "/src/snippets/get-started/bun/Step3.ts?raw";
 import Step3JS from "/src/snippets/get-started/bun/Step3.js?raw";
+import Step3ServeTS from "/src/snippets/get-started/bun/BunServe.ts?raw";
 import { Code } from "@astrojs/starlight/components";
 import SelectableContent from "@/components/SelectableContent";
 
@@ -17,3 +18,17 @@ import SelectableContent from "@/components/SelectableContent";
 
   </div>
 </SelectableContent>
+
+<details>
+
+<summary>
+  <strong>`Bun.serve()` support</strong>
+</summary>
+
+While our documentation gives you examples using [Bun's default export Object
+syntax](https://bun.sh/docs/api/http#object-syntax), it will also run if you
+use `Bun.serve()` instead:
+
+<Code code={Step3ServeTS} lang="ts" title="index.ts" />
+
+</details>
