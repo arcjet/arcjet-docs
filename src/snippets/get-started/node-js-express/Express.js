@@ -1,4 +1,4 @@
-import arcjet, { fixedWindow } from "@arcjet/node";
+import arcjet, { shield, detectBot, tokenBucket } from "@arcjet/node";
 import express from "express";
 
 const app = express();
