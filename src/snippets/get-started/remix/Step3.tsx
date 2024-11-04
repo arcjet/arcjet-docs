@@ -1,6 +1,5 @@
 import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/remix";
 import type { LoaderFunctionArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
