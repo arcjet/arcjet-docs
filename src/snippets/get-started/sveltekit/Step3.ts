@@ -1,6 +1,6 @@
 import { env } from "$env/dynamic/private";
 import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/sveltekit";
-import { error, type RequestEvent } from "@sveltejs/kit";
+import { error, json, type RequestEvent } from "@sveltejs/kit";
 
 const aj = arcjet({
   key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
@@ -25,13 +25,7 @@ const aj = arcjet({
   ],
 });
 
-export async function handle({
-  event,
-  resolve,
-}: {
-  event: RequestEvent;
-  resolve: (event: RequestEvent) => Response | Promise<Response>;
-}): Promise<Response> {
+export async function GET(event: RequestEvent) {
   const decision = await aj.protect(event, { requested: 5 }); // Deduct 5 tokens from the bucket
   console.log("Arcjet decision", decision);
 
@@ -45,5 +39,5 @@ export async function handle({
     }
   }
 
-  return resolve(event);
+  return json({ message: "Hello World" });
 }
