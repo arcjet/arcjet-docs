@@ -1,6 +1,6 @@
 import { env } from "$env/dynamic/private";
 import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/sveltekit";
-import { error } from "@sveltejs/kit";
+import { error, json } from "@sveltejs/kit";
 
 const aj = arcjet({
   key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
@@ -39,15 +39,5 @@ export async function GET(event) {
     }
   }
 
-  return new Response(
-    JSON.stringify({
-      event: event,
-    }),
-    {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    },
-  );
+  return json({ message: "Hello World" });
 }
