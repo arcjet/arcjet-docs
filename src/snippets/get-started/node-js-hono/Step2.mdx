@@ -1,0 +1,23 @@
+import Step2SetEnv from "@/snippets/rate-limiting/quick-start/shared/Step2SetEnv.mdx";
+import { Aside } from "@astrojs/starlight/components";
+
+<Step2SetEnv />
+
+Next you need to update the dev command in your `package.json` to use the
+`.env.local` file.
+
+```json
+{
+  "scripts": {
+    "dev": "tsx watch --env-file .env.local src/index.ts"
+  }
+  ...
+}
+```
+
+<Aside type="note" title="env files">
+  Node 20+ supports loading environment variables from a local file with
+  `--env-file`. If you're using an older version of Node, you can use a package
+  like [`dotenv`](https://www.npmjs.com/package/dotenv) to load the environment
+  variables from a `.env.local` file.
+</Aside>
