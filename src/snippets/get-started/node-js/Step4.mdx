@@ -4,24 +4,22 @@ import { Aside } from "@astrojs/starlight/components";
 ## 4. Start app
 
 {/* prettier-ignore */}
-<SelectableContent client:load syncKey="language" frameworkSwitcher>
-  <div slot="TS" slotIdx="1">
-  ```sh
-  npx tsx --env-file .env.local index.ts
-  ```
-  </div>
-  <div slot="JS" slotIdx="2">
-  <Aside type="note" title="env files">
+<Aside type="note" title="env files">
   Node 20+ supports loading environment variables from a local file with
   `--env-file`. If you're using an older version of Node, you can use a package
   like [`dotenv`](https://www.npmjs.com/package/dotenv) to load the environment
   variables from a `.env.local` file.
 </Aside>
-
-```sh
-node --env-file .env.local index.js
-```
-
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    ```sh
+    npx tsx --env-file .env.local index.ts
+    ```
+  </div>
+  <div slot="JS" slotIdx="2">
+    ```sh
+    node --env-file .env.local index.js
+    ```
   </div>
 </SelectableContent>
 
