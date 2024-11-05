@@ -79,21 +79,20 @@ In this example, we define a sliding window rate limit which allows a maximum of
 <Code code={SlidingWindow} lang="ts" />
 
 If the client made 50 requests in the time period `12:00:00` to `12:01:00` and
-then made another 50 requests in the current time period as of `12:01:30` then we
-would calculate the remaining rate limit as follows:
+then made another 50 requests in the current time period as of `12:01:30` then
+we would calculate the remaining rate limit as follows:
 
 ```ts
 // 50 requests in the previous interval
 // 60 seconds per interval
 // 30 seconds elapsed in the current interval
 // 50 requests made in the current interval
-rate = 50 * ((60 - 30) / 60) + 50 = 100
+rate = 50 * ((60 - 30) / 60) + 50 = 75
 limit = 100
-remaining = limit - rate = 0
+remaining = limit - rate = 25
 ```
 
-In this case, the client would be blocked from making any further requests
-because they have reached the limit of 100 requests.
+In this case, the client has 25 requests remaining in the current interval.
 
 ## Token bucket
 
