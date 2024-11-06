@@ -88,69 +88,136 @@ export default defineConfig({
   // External redirects go in /vercel.json
   redirects: {
     "/get-started/bun": "/get-started?f=bun",
+    "/get-started/bun/": "/get-started?f=bun",
     "/get-started/nextjs": "/get-started?f=next-js",
+    "/get-started/nextjs/": "/get-started?f=next-js",
     "/get-started/nodejs": "/get-started?f=node-js",
+    "/get-started/nodejs/": "/get-started?f=node-js",
     "/get-started/sveltekit": "/get-started?f=sveltekit",
+    "/get-started/sveltekit/": "/get-started?f=sveltekit",
     "/shield": "/shield/quick-start",
+    "/shield/": "/shield/quick-start",
     "/shield/quick-start/bun": "/shield/quick-start?f=bun",
+    "/shield/quick-start/bun/": "/shield/quick-start?f=bun",
     "/shield/quick-start/nextjs": "/shield/quick-start?f=next-js",
+    "/shield/quick-start/nextjs/": "/shield/quick-start?f=next-js",
     "/shield/quick-start/nodejs": "/shield/quick-start?f=node-js",
+    "/shield/quick-start/nodejs/": "/shield/quick-start?f=node-js",
     "/shield/quick-start/sveltekit": "/shield/quick-start?f=sveltekit",
+    "/shield/quick-start/sveltekit/": "/shield/quick-start?f=sveltekit",
     "/shield/reference/bun": "/shield/reference?f=bun",
+    "/shield/reference/bun/": "/shield/reference?f=bun",
     "/shield/reference/nextjs": "/shield/reference?f=next-js",
+    "/shield/reference/nextjs/": "/shield/reference?f=next-js",
     "/shield/reference/nodejs": "/shield/reference?f=node-js",
+    "/shield/reference/nodejs/": "/shield/reference?f=node-js",
     "/shield/reference/sveltekit": "/shield/reference?f=sveltekit",
+    "/shield/reference/sveltekit/": "/shield/reference?f=sveltekit",
     "/rate-limiting": "/rate-limiting/quick-start",
+    "/rate-limiting/": "/rate-limiting/quick-start",
     "/rate-limiting/quick-start/bun": "/rate-limiting/quick-start?f=bun",
+    "/rate-limiting/quick-start/bun/": "/rate-limiting/quick-start?f=bun",
     "/rate-limiting/quick-start/nextjs": "/rate-limiting/quick-start?f=next-js",
+    "/rate-limiting/quick-start/nextjs/":
+      "/rate-limiting/quick-start?f=next-js",
     "/rate-limiting/quick-start/nodejs": "/rate-limiting/quick-start?f=node-js",
+    "/rate-limiting/quick-start/nodejs/":
+      "/rate-limiting/quick-start?f=node-js",
     "/rate-limiting/quick-start/sveltekit":
       "/rate-limiting/quick-start?f=sveltekit",
+    "/rate-limiting/quick-start/sveltekit/":
+      "/rate-limiting/quick-start?f=sveltekit",
     "/bot-protection": "/bot-protection/quick-start",
+    "/bot-protection/": "/bot-protection/quick-start",
     "/bot-protection/quick-start/bun": "/bot-protection/quick-start?f=bun",
+    "/bot-protection/quick-start/bun/": "/bot-protection/quick-start?f=bun",
     "/bot-protection/quick-start/nextjs":
+      "/bot-protection/quick-start?f=next-js",
+    "/bot-protection/quick-start/nextjs/":
       "/bot-protection/quick-start?f=next-js",
     "/bot-protection/quick-start/nodejs":
       "/bot-protection/quick-start?f=node-js",
+    "/bot-protection/quick-start/nodejs/":
+      "/bot-protection/quick-start?f=node-js",
     "/bot-protection/quick-start/sveltekit":
       "/bot-protection/quick-start?f=sveltekit",
+    "/bot-protection/quick-start/sveltekit/":
+      "/bot-protection/quick-start?f=sveltekit",
     "/bot-protection/reference/bun": "/bot-protection/reference?f=bun",
+    "/bot-protection/reference/bun/": "/bot-protection/reference?f=bun",
     "/bot-protection/reference/nextjs": "/bot-protection/reference?f=next-js",
+    "/bot-protection/reference/nextjs/": "/bot-protection/reference?f=next-js",
     "/bot-protection/reference/nodejs": "/bot-protection/reference?f=node-js",
+    "/bot-protection/reference/nodejs/": "/bot-protection/reference?f=node-js",
     "/bot-protection/reference/sveltekit":
       "/bot-protection/reference?f=sveltekit",
+    "/bot-protection/reference/sveltekit/":
+      "/bot-protection/reference?f=sveltekit",
     "/email-validation": "/email-validation/concepts",
+    "/email-validation/": "/email-validation/concepts",
     "/email-validation/quick-start/bun": "/email-validation/quick-start?f=bun",
+    "/email-validation/quick-start/bun/": "/email-validation/quick-start?f=bun",
     "/email-validation/quick-start/nextjs":
+      "/email-validation/quick-start?f=next-js",
+    "/email-validation/quick-start/nextjs/":
       "/email-validation/quick-start?f=next-js",
     "/email-validation/quick-start/nodejs":
       "/email-validation/quick-start?f=node-js",
+    "/email-validation/quick-start/nodejs/":
+      "/email-validation/quick-start?f=node-js",
     "/email-validation/quick-start/sveltekit":
       "/email-validation/quick-start?f=sveltekit",
+    "/email-validation/quick-start/sveltekit/":
+      "/email-validation/quick-start?f=sveltekit",
     "/email-validation/reference/bun": "/email-validation/reference?f=bun",
+    "/email-validation/reference/bun/": "/email-validation/reference?f=bun",
     "/email-validation/reference/nextjs":
+      "/email-validation/reference?f=next-js",
+    "/email-validation/reference/nextjs/":
       "/email-validation/reference?f=next-js",
     "/email-validation/reference/nodejs":
       "/email-validation/reference?f=node-js",
+    "/email-validation/reference/nodejs/":
+      "/email-validation/reference?f=node-js",
     "/email-validation/reference/sveltekit":
       "/email-validation/reference?f=sveltekit",
+    "/email-validation/reference/sveltekit/":
+      "/email-validation/reference?f=sveltekit",
     "/signup-protection": "/signup-protection/quick-start",
+    "/signup-protection/": "/signup-protection/quick-start",
     "/signup-protection/quick-start/bun":
+      "/signup-protection/quick-start?f=bun",
+    "/signup-protection/quick-start/bun/":
       "/signup-protection/quick-start?f=bun",
     "/signup-protection/quick-start/nextjs":
       "/signup-protection/quick-start?f=next-js",
+    "/signup-protection/quick-start/nextjs/":
+      "/signup-protection/quick-start?f=next-js",
     "/signup-protection/quick-start/nodejs":
+      "/signup-protection/quick-start?f=node-js",
+    "/signup-protection/quick-start/nodejs/":
       "/signup-protection/quick-start?f=node-js",
     "/signup-protection/quick-start/sveltekit":
       "/signup-protection/quick-start?f=sveltekit",
+    "/signup-protection/quick-start/sveltekit/":
+      "/signup-protection/quick-start?f=sveltekit",
     "/signup-protection/reference/bun": "/signup-protection/reference?f=bun",
+    "/signup-protection/reference/bun/": "/signup-protection/reference?f=bun",
     "/signup-protection/reference/nextjs":
+      "/signup-protection/reference?f=next-js",
+    "/signup-protection/reference/nextjs/":
       "/signup-protection/reference?f=next-js",
     "/signup-protection/reference/nodejs":
       "/signup-protection/reference?f=node-js",
+    "/signup-protection/reference/nodejs/":
+      "/signup-protection/reference?f=node-js",
     "/signup-protection/reference/sveltekit":
       "/signup-protection/reference?f=sveltekit",
+    "/signup-protection/reference/sveltekit/":
+      "/signup-protection/reference?f=sveltekit",
     "/reference/ts-js": "/reference/nodejs",
+    "/reference/ts-js/": "/reference/nodejs",
     "/bot-protection/bot-types": "/bot-protection/identifying-bots",
+    "/bot-protection/bot-types/": "/bot-protection/identifying-bots",
   },
 });
