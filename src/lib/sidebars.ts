@@ -52,6 +52,10 @@ export const main = [
             link: "/blueprints/ip-geolocation",
           },
           {
+            label: "Cookie banner",
+            link: "/blueprints/cookie-banner",
+          },
+          {
             label: "Payment form protection",
             link: "/blueprints/payment-form",
           },

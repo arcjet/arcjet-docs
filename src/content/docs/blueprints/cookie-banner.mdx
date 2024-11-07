@@ -1,0 +1,89 @@
+---
+title: "Cookie Banner with Arcjet"
+description: "Use Arcjet's IP analysis to show a cookie banner in some jurisdictions."
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Cookie banners serve as digital consent notices, informing visitors about data tracking practices. While not universally mandated, they are required in specific jurisdictions, notably the EU under GDPR. Prudent websites implement these notifications selectively, ensuring compliance where necessary while preserving a streamlined user experience in regions without such requirements.
+
+Using Arcjet's IP Geolocation feature it is possible to selectively show the banner's to users resident in jurisdictions that require them, without interfering with the experience of everyone else.
+
+<Aside type="caution">
+  IP geolocation can be notoriously inaccurate, especially for mobile devices,
+  satellite internet providers, and even just normal users. Likewise with the
+  specific fields like `city` and `region`, which can be very inaccurate.
+  Country is usually accurate, but there are often cases where IP addresses are
+  mis-located. These fields are provided for convenience e.g. suggesting a user
+  location, but should not be relied upon by themselves.
+</Aside>
+
+```ts
+const countriesRequiringCookieBanner = [
+  "AT",
+  "BE",
+  "BG",
+  "HR",
+  "CY",
+  "CZ",
+  "DK",
+  "EE",
+  "FI",
+  "FR",
+  "DE",
+  "GR",
+  "HU",
+  "IE",
+  "IT",
+  "LV",
+  "LT",
+  "LU",
+  "MT",
+  "NL",
+  "PL",
+  "PT",
+  "RO",
+  "SK",
+  "SI",
+  "ES",
+  "SE",
+  "UK",
+  "NO",
+  "IS",
+  "LI",
+  "CA",
+  "BR",
+  "MX",
+  "NG",
+  "AR",
+];
+
+const statesRequiringCookieBanner = [
+  "California",
+  "Virginia",
+  "Colorado",
+  "Connecticut",
+  "Utah",
+  "Texas",
+  "Oregon",
+  "Montana",
+];
+
+// ... imports, client configuration, etc
+// See https://docs.arcjet.com/get-started
+const decision = aj.protect(req);
+
+if (
+  decision.ip.hasCountry() &&
+  countriesRequiringCookieBanner.contains(decision.ip.country)
+) {
+  // Show the cookie banner
+}
+
+if (
+  decision.ip.hasRegion() &&
+  statesRequiringCookieBanner.contains(decision.ip.region)
+) {
+  // Show the cookie banner
+}
+```
