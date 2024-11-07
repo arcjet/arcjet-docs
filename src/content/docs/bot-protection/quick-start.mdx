@@ -36,22 +36,28 @@ import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import SlotByFramework from "@/components/SlotByFramework";
 import FrameworkName from "@/components/FrameworkName";
-import Step1Bun from "@/snippets/bot-protection/quick-start/bun/Step1.mdx";
-import Step1NextJs from "@/snippets/bot-protection/quick-start/nextjs/Step1.mdx";
-import Step1NodeJs from "@/snippets/bot-protection/quick-start/nodejs/Step1.mdx";
-import Step1SvelteKit from "@/snippets/bot-protection/quick-start/sveltekit/Step1.mdx";
-import Step2 from "@/snippets/bot-protection/quick-start/shared/Step2.mdx";
-import Step2SetEnv from "@/snippets/bot-protection/quick-start/shared/Step2SetEnv.mdx";
-import Step3Bun from "@/snippets/bot-protection/quick-start/bun/Step3.mdx";
-import Step3NextJs from "@/snippets/bot-protection/quick-start/nextjs/Step3.mdx";
-import Step3NodeJs from "@/snippets/bot-protection/quick-start/nodejs/Step3.mdx";
-import Step3SvelteKit from "@/snippets/bot-protection/quick-start/sveltekit/Step3.mdx";
-import Step4 from "@/snippets/bot-protection/quick-start/nextjs/Step4.mdx";
-import Step4SvelteKit from "@/snippets/bot-protection/quick-start/sveltekit/Step4.mdx";
-import Step4Bun from "@/snippets/bot-protection/quick-start/bun/Step4.mdx";
-import Step4NodeJs from "@/snippets/bot-protection/quick-start/nodejs/Step4.mdx";
 import FAQs from "/src/components/FAQs.astro";
 import Comments from "/src/components/Comments.astro";
+
+import BunStep1 from "@/snippets/bot-protection/quick-start/bun/Step1.mdx";
+import BunStep2 from "@/snippets/bot-protection/quick-start/bun/Step2.mdx";
+import BunStep3 from "@/snippets/bot-protection/quick-start/bun/Step3.mdx";
+import BunStep4 from "@/snippets/bot-protection/quick-start/bun/Step4.mdx";
+
+import NextJsStep1 from "@/snippets/bot-protection/quick-start/nextjs/Step1.mdx";
+import NextJsStep2 from "@/snippets/bot-protection/quick-start/nextjs/Step2.mdx";
+import NextJsStep3 from "@/snippets/bot-protection/quick-start/nextjs/Step3.mdx";
+import NextJsStep4 from "@/snippets/bot-protection/quick-start/nextjs/Step4.mdx";
+
+import NodeJsStep1 from "@/snippets/bot-protection/quick-start/nodejs/Step1.mdx";
+import NodeJsStep2 from "@/snippets/bot-protection/quick-start/nodejs/Step2.mdx";
+import NodeJsStep3 from "@/snippets/bot-protection/quick-start/nodejs/Step3.mdx";
+import NodeJsStep4 from "@/snippets/bot-protection/quick-start/nodejs/Step4.mdx";
+
+import SvelteKitStep1 from "@/snippets/bot-protection/quick-start/sveltekit/Step1.mdx";
+import SvelteKitStep2 from "@/snippets/bot-protection/quick-start/sveltekit/Step2.mdx";
+import SvelteKitStep3 from "@/snippets/bot-protection/quick-start/sveltekit/Step3.mdx";
+import SvelteKitStep4 from "@/snippets/bot-protection/quick-start/sveltekit/Step4.mdx";
 
 Arcjet bot detection allows you to manage traffic by automated clients and bots.
 
@@ -67,39 +73,38 @@ application from bots and automated clients.
 In your project root, run the following command to install the SDK:
 
 <SlotByFramework client:load>
-  <Step1Bun slot="bun" />
-  <Step1NextJs slot="next-js" />
-  <Step1NodeJs slot="node-js" />
-  <Step1SvelteKit slot="sveltekit" />
+  <BunStep1 slot="bun" />
+  <NextJsStep1 slot="next-js" />
+  <NodeJsStep1 slot="node-js" />
+  <SvelteKitStep1 slot="sveltekit" />
 </SlotByFramework>
 
 ### 2. Set your key
 
 [Create a free Arcjet account](https://app.arcjet.com) then follow the
-instructions to add a site and get a key. Add it to a `.env.local` file in your
-project root.
+instructions to add a site and get a key.
 
 <SlotByFramework client:load>
-  <Step2SetEnv slot="bun" />
-  <Step2 slot="next-js" />
-  <Step2SetEnv slot="node-js" />
-  <Step2 slot="sveltekit" />
+  <BunStep2 slot="bun" />
+  <NextJsStep2 slot="next-js" />
+  <NodeJsStep2 slot="node-js" />
+  <SvelteKitStep2 slot="sveltekit" />
 </SlotByFramework>
 
 ### 3. Add bot protection
 
 <SlotByFramework client:load>
-  <Step3Bun slot="bun" />
-  <Step3NextJs slot="next-js" />
-  <Step3NodeJs slot="node-js" />
-  <Step3SvelteKit slot="sveltekit" />
+  <BunStep3 slot="bun" />
+  <NextJsStep3 slot="next-js" />
+  <NodeJsStep3 slot="node-js" />
+  <SvelteKitStep3 slot="sveltekit" />
 </SlotByFramework>
 
 <SlotByFramework client:load>
-  <Step4Bun slot="bun" />
-  <Step4 slot="next-js" />
-  <Step4NodeJs slot="node-js" />
-  <Step4SvelteKit slot="sveltekit" />
+  <BunStep4 slot="bun" />
+  <NextJsStep4 slot="next-js" />
+  <NodeJsStep4 slot="node-js" />
+  <SvelteKitStep4 slot="sveltekit" />
 </SlotByFramework>
 
 ### 5. Choose bots to allow or deny
