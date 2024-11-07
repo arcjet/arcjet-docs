@@ -1,0 +1,88 @@
+---
+title: "AI quota control"
+description: "Control your AI service tokens usage, categorized by user."
+---
+
+import SelectableContent from "@/components/SelectableContent";
+import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
+
+Arcjet can help you control usage quotas on your AI language model backed application. The goal is to limit the amount of requests from specific users, accounts, categories (you define the request characteristics) based on an estimate of token consumption. This will allow you to enforce user allowances and keep your costs under control.
+
+With an AI application you may be more interested in the tokens usage rather than the number of HTTP requests. However this is one of many approaches.
+
+This is one of many possible approaches to track AI service use and is specific to language models. In different scenarios you could use other rate limiting algorithms on a request basis and on other conditions.
+
+### Rules
+
+We recommend using a Token bucket rate limit, this will be configured to match your category quota (eg: tokens/user) with the desired refill rate and interval.
+
+```ts
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  characteristics: ["userId"], // track requests by user ID
+  rules: [
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+    tokenBucket({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+      refillRate: 2_000, // fill the bucket up by 2,000 tokens
+      interval: "1h", // every hour
+      capacity: 5_000, // up to 5,000 tokens
+    }),
+  ],
+});
+```
+
+### Checking the quota
+
+We retrieve the characteristic (eg: `userId`) and the user provided prompt and use it to withdraw the estimated amount of tokens from the bucket.
+
+Once the bucket is empty we issue a `DENY` decision.
+
+```ts
+export async function POST(req: Request) {
+  // This is where you would do a session lookup and get the user ID.
+  const userId = "totoro"
+
+  // The user generated prompt fed to the language model.
+  const { prompt } = await req.json();
+
+  // Estimate the number of tokens required to process the prompt
+  // You can use estimators for the different services:
+  // OpenAI: https://github.com/hmarr/openai-chat-tokens
+  // Replicate: https://github.com/belladoreai/llama-tokenizer-js
+  // Or add your estimate
+  // const estimate = (): number => yourEstimate;
+  const estimate =  promptTokensEstimate({
+    prompt,
+  });
+
+  // Withdraw tokens from the token bucket
+  const decision = await aj.protect(req, { requested: estimate, userId });
+
+  console.log("Arcjet decision", decision.conclusion);
+
+  if (decision.reason.isRateLimit()) {
+    console.log("Requests remaining", decision.reason.remaining);
+  }
+
+  // If the request is denied, return a 429
+  if (decision.isDenied()) {
+    if (decision.reason.isRateLimit()) {
+      return new Response("Too Many Requests", {
+        status: 429,
+      });
+    } else {
+      return new Response("Forbidden", {
+        status: 403,
+      });
+    }
+  }
+
+  // If the request is allowed, continue to use your language model
+  const response = ...
+
+  return ...
+}
+```
