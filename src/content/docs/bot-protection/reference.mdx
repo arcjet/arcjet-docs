@@ -3,6 +3,7 @@ title: "Bot protection reference"
 description: "Reference guide for adding Arcjet bot protection to your Next.js, Node.js, Bun, or SvelteKit app."
 frameworks:
   - bun
+  - deno
   - next-js
   - node-js
   - sveltekit
@@ -59,6 +60,13 @@ import BunDecisionLog from "@/snippets/bot-protection/reference/bun/DecisionLog.
 import BunIdentifiedBots from "@/snippets/bot-protection/reference/bun/IdentifiedBots.mdx";
 import BunErrors from "@/snippets/bot-protection/reference/bun/Errors.mdx";
 import BunFiltering from "@/snippets/bot-protection/reference/bun/Filtering.mdx";
+
+import DenoAllowingBots from "@/snippets/bot-protection/reference/deno/AllowingBots.mdx";
+import DenoDenyingBots from "@/snippets/bot-protection/reference/deno/DenyingBots.mdx";
+import DenoDecisionLog from "@/snippets/bot-protection/reference/deno/DecisionLog.mdx";
+import DenoIdentifiedBots from "@/snippets/bot-protection/reference/deno/IdentifiedBots.mdx";
+import DenoErrors from "@/snippets/bot-protection/reference/deno/Errors.mdx";
+import DenoFiltering from "@/snippets/bot-protection/reference/deno/Filtering.mdx";
 
 import NextJsAllowingBots from "@/snippets/bot-protection/reference/nextjs/AllowingBots.mdx";
 import NextJsDenyingBots from "@/snippets/bot-protection/reference/nextjs/DenyingBots.mdx";
@@ -131,6 +139,7 @@ categories](/bot-protection/identifying-bots#bot-categories).
 
 <SlotByFramework client:load>
   <BunAllowingBots slot="bun" />
+  <DenoAllowingBots slot="deno" />
   <NextJsAllowingBots slot="next-js" />
   <NodeJsAllowingBots slot="node-js" />
   <SvelteKitAllowingBots slot="sveltekit" />
@@ -148,6 +157,7 @@ categories](/bot-protection/identifying-bots#bot-categories).
 
 <SlotByFramework client:load>
   <BunDenyingBots slot="bun" />
+  <DenoDenyingBots slot="deno" />
   <NextJsDenyingBots slot="next-js" />
   <NodeJsDenyingBots slot="node-js" />
   <SvelteKitDenyingBots slot="sveltekit" />
@@ -200,6 +210,7 @@ This example will log the full result as well as the bot protection rule:
 
 <SlotByFramework client:load>
   <BunDecisionLog slot="bun" />
+  <DenoDecisionLog slot="deno" />
   <NextJsDecisionLog slot="next-js" />
   <NodeJsDecisionLog slot="node-js" />
   <SvelteKitDecisionLog slot="sveltekit" />
@@ -215,6 +226,7 @@ properties.
 
 <SlotByFramework client:load>
   <BunIdentifiedBots slot="bun" />
+  <DenoIdentifiedBots slot="deno" />
   <NextJsIdentifiedBots slot="next-js" />
   <NodeJsIdentifiedBots slot="node-js" />
   <SvelteKitIdentifiedBots slot="sveltekit" />
@@ -243,6 +255,7 @@ See [an example of how to do this](/bot-protection/concepts#user-agent-header).
 
 <SlotByFramework client:load>
   <BunErrors slot="bun" />
+  <DenoErrors slot="deno" />
   <NextJsErrors slot="next-js" />
   <NodeJsErrors slot="node-js" />
   <SvelteKitErrors slot="sveltekit" />
@@ -256,6 +269,7 @@ their "advertising quality" bot.
 
 <SlotByFramework client:load>
   <BunFiltering slot="bun" />
+  <DenoFiltering slot="deno" />
   <NextJsFiltering slot="next-js" />
   <NodeJsFiltering slot="node-js" />
   <SvelteKitFiltering slot="sveltekit" />
