@@ -56,6 +56,10 @@ export const main = [
             link: "/blueprints/payment-form",
           },
           {
+            label: "Feedback form protection",
+            link: "/blueprints/feedback-form",
+          },
+          {
             label: "Sampling traffic",
             link: "/blueprints/sampling",
           },

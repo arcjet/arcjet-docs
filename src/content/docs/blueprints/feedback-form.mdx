@@ -1,0 +1,58 @@
+---
+title: "Feedback form protection"
+description: "How to protect your feedback form from spam using Arcjet."
+---
+Feedback forms are often used as tools for gathering valuable insights to improve services, products, or experiences.Spam undermines this integrity and could distract from the original goals of the survey or feedback initiative.
+
+Protecting forms ensures that only genuine, thoughtful feedback is collected and used appropriately.Arcjet can help you protect your feedback forms from spam and invalid contact details.
+
+### Rules
+
+- Shield - Safeguard your forms from SQL injection attacks with automated detection and blocking, ensuring malicious queries never reach your database.
+- Bot Detection– Automatically identify and block bot traffic, keeping automated spammers and malicious scripts from submitting your forms.
+- Email Validation – Ensure form submissions come from genuine users by validating email addresses, preventing fake or disposable email entries.
+- Rate Limiting – Protect your forms from spam and abuse by limiting submissions from a single IP or device, enforcing sensible submission thresholds to stop mass spam attacks.
+- Sensitive Data Redaction – Automatically redact sensitive or personally identifiable information (PII) from form submissions, ensuring compliance with data protection laws and reducing the risk of data breaches.
+
+
+```ts
+// ... imports, etc
+// See https://docs.arcjet.com/get-started
+import {detectBot, slidingWindow,validateEmail} from "@arcjet/next";
+import arcjet, {shield} from "@arcjet/next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  characteristics: ["ip.src"], // Track requests by IP
+  rules: [
+    // Shield protects your app from common attacks e.g. SQL injection:
+    shield({ mode: "LIVE" }),
+    // Block all bots. See https://arcjet.com/bot-list
+    detectBot({
+      mode: "LIVE",
+      allow: [],
+    }),
+    // Strict email validation to block disposable, invalid, and domains
+    // with no valid MX records:
+    validateEmail({
+      mode: "LIVE",
+      block: ["DISPOSABLE", "INVALID", "NO_MX_RECORDS"],
+    }),
+    // Rate limit forms being submitted from the same IP address:
+    slidingWindow({
+      mode: "LIVE",
+      interval: "10m", // counts requests over a 10-minute sliding window
+      max: 5, // allows 5 submissions within the window
+    }),
+  ],
+});
+```
+
+Additionally, you can use the Redact library to ensure no sensitive information is input by the user:
+
+```ts
+const [redacted] = await redact(feedback, {
+  entities: ["credit-card-number"],
+  replace: customRedact,
+});
+```
