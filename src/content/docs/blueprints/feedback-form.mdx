@@ -48,11 +48,13 @@ const aj = arcjet({
 });
 ```
 
-Additionally, you can use the Redact library to ensure no sensitive information is input by the user:
+### Additional checks
+You can use the Redact library to ensure no sensitive information is sent to your server by the user:
 
 ```ts
-const [redacted] = await redact(feedback, {
+const text = "please issue a refund to this card right now!!! 5555 5555 5555 4444";
+
+const [redacted] = await redact(text, {
   entities: ["credit-card-number"],
-  replace: customRedact,
 });
 ```
