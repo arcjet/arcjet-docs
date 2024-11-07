@@ -20,7 +20,7 @@ export async function POST(req: Request) {
         error: "Unexpected sensitive info received",
         // Useful for debugging, but don't return it to the client in
         // production
-        //reason: decision.reason,
+        // reason: decision.reason,
       },
       { status: 400 },
     );
