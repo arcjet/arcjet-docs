@@ -105,7 +105,7 @@ if (decision.isDenied()) {
 // our knowledge of our customers
 
 // Check if the IP address is from a hosting provider
-if (decision.ip.hasASN() && decision.ip.asnType == "hosting") {
+if (decision.ip.hasASN() && decision.ip.asnType === "hosting") {
   // The network this IP belongs to is a hosting provider, which makes it
   // more likely to be a VPN, proxy, or other suspicious network.
   console.error("Hosting provider detected", decision);
@@ -121,7 +121,7 @@ if (
   // The IP is from a hosting provider, VPN, or proxy. We can check the name
   // of the service and customize the response
   if (decision.ip.hasService()) {
-    if (decision.ip.service != "Apple Private Relay") {
+    if (decision.ip.service !== "Apple Private Relay") {
       // We trust Apple Private Relay because it requires an active iCloud
       // subscription, so deny all other VPNs
       console.error("VPN detected", decision);
@@ -347,7 +347,7 @@ export async function POST(request: Request) {
     // our knowledge of our customers
 
     // Check if the IP address is from a hosting provider
-    if (decision.ip.hasASN() && decision.ip.asnType == "hosting") {
+    if (decision.ip.hasASN() && decision.ip.asnType === "hosting") {
       // The network this IP belongs to is a hosting provider, which makes it
       // more likely to be a VPN, proxy, or other suspicious network.
       console.error("Hosting provider detected", decision);
@@ -366,7 +366,7 @@ export async function POST(request: Request) {
       // The IP is from a hosting provider, VPN, or proxy. We can check the name
       // of the service and customize the response
       if (decision.ip.hasService()) {
-        if (decision.ip.service != "Apple Private Relay") {
+        if (decision.ip.service !== "Apple Private Relay") {
           // We trust Apple Private Relay because it requires an active iCloud
           // subscription, so deny all other VPNs
           console.error("VPN detected", decision);

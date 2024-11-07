@@ -40,19 +40,19 @@ check their availability. See the SDK reference for details.
 // See https://docs.arcjet.com/get-started
 const decision = await aj.protect(req);
 
-if (decision.ip.hasCity() && decision.ip.city == "San Francisco") {
+if (decision.ip.hasCity() && decision.ip.city === "San Francisco") {
   // Return a custom response for San Francisco
 }
 
-if (decision.ip.hasRegion() && decision.ip.region == "California") {
+if (decision.ip.hasRegion() && decision.ip.region === "California") {
   // Return a custom response for California
 }
 
-if (decision.ip.hasCountry() && decision.ip.country == "US") {
+if (decision.ip.hasCountry() && decision.ip.country === "US") {
   // Return a custom response for the United States
 }
 
-if (decision.ip.hasContinent() && decision.ip.continent == "NA") {
+if (decision.ip.hasContinent() && decision.ip.continent === "NA") {
   // Return a custom response for North America
 }
 ```
@@ -64,7 +64,7 @@ if (decision.ip.hasContinent() && decision.ip.continent == "NA") {
 // See https://docs.arcjet.com/get-started
 const decision = await aj.protect(req);
 
-if (decision.ip.hasCountry() && decision.ip.country != "US") {
+if (decision.ip.hasCountry() && decision.ip.country !== "US") {
   // Return 403 Forbidden
 }
 ```
