@@ -5,7 +5,7 @@ import SelectableContent from "@/components/SelectableContent";
 Start your Next.js app:
 
 {/* prettier-ignore */}
-<SelectableContent client:load syncKey="packageManager">
+<SelectableContent client:load syncKey="packageManager" frameworkSwitcher>
 <div slot="npm" slotIdx="1">
 ```sh
 npm run dev
@@ -29,8 +29,8 @@ default. See [the reference guide](/bot-protection/reference) to learn about
 configuring this.
 
 ```shell
-# Will show just the response headers, which should be 403 forbidden
-curl -I http://localhost:3000
+# Will show the response headers, which should be 403 forbidden
+curl -i http://localhost:3000
 ```
 
 The requests will also show up in the [Arcjet

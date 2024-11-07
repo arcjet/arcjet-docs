@@ -5,7 +5,7 @@ import SelectableContent from "@/components/SelectableContent";
 Start your Bun server:
 
 {/* prettier-ignore */}
-<SelectableContent client:load syncKey="language" frameworkSwitcher>
+<SelectableContent client:load syncKey="packageManager" frameworkSwitcher>
 <div slot="TS" slotIdx="1">
   ```sh
   bun run --hot index.ts
@@ -22,7 +22,8 @@ Make a `curl` request from your terminal. You should see a `403 Forbidden`
 response because `curl` is considered an automated client by default.
 
 ```sh
-curl http://localhost:3000
+# Will show the response status, which should be 403 forbidden
+curl -i http://localhost:3000
 ```
 
 The requests will also show up in the [Arcjet
