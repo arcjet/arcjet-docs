@@ -5,8 +5,8 @@ import { Hono as IconHono } from "@/components/icons/tech/Hono";
 import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
 import { NextJs as IconNextJs } from "@/components/icons/tech/NextJs";
 import { NodeJs as IconNodeJs } from "@/components/icons/tech/NodeJs";
-import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
 import { Remix as IconRemix } from "@/components/icons/tech/Remix";
+import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
 import type { Props as SelectProps } from "@/components/Select";
 import Select from "@/components/Select";
 import type { Framework, FrameworkKey } from "@/lib/prefs";
@@ -75,6 +75,11 @@ const FrameworkSwitcher = forwardRef(
     const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
       const val = e.target.value;
       if (!storeFramework(val)) return;
+
+      // Update query param for sharing selection
+      const url = new URL(window.location.toString());
+      url.searchParams.set("f", val);
+      history.pushState({}, "", url);
 
       // Update store
       displayedFramework.set(val as FrameworkKey);
