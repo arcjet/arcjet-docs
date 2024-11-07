@@ -1,10 +1,10 @@
 import SelectableContent from "@/components/SelectableContent";
 import { Code } from "@astrojs/starlight/components";
-import Step3JS from "/src/snippets/bot-protection/quick-start/nextjs/Step3.js?raw";
-import Step3TS from "/src/snippets/bot-protection/quick-start/nextjs/Step3.ts?raw";
-import CustomizedMiddlewareJS from "/src/snippets/bot-protection/reference/nextjs/CustomizedMiddleware.js?raw";
-import CustomizedMiddlewareTS from "/src/snippets/bot-protection/reference/nextjs/CustomizedMiddleware.ts?raw";
-import MiddlewareMatcher from "/src/snippets/bot-protection/reference/nextjs/MiddlewareMatcher.ts?raw";
+import MiddlewareJS from "./Middleware.js?raw";
+import MiddlewareTS from "./Middleware.ts?raw";
+import CustomizedMiddlewareJS from "./CustomizedMiddleware.js?raw";
+import CustomizedMiddlewareTS from "./CustomizedMiddleware.ts?raw";
+import MiddlewareMatcher from "./MiddlewareMatcher.ts?raw";
 
 <SelectableContent client:load syncKey="language" frameworkSwitcher>
   This will run on every request to your Next.js app, except for static assets
@@ -16,7 +16,12 @@ for details).
     Create a file called `middleware.ts` in your project root (at the same level as
 `pages` or `app` or inside `src`):
 
-<Code code={Step3TS} lang="ts" title="/middleware.ts" mark={["ARCJET_KEY"]} />
+<Code
+  code={MiddlewareTS}
+  lang="ts"
+  title="/middleware.ts"
+  mark={["ARCJET_KEY"]}
+/>
 
 You can also customize the response depending on the decision. In this case we
 will return a 403 Forbidden response only if we detect a hosting provider IP
@@ -28,7 +33,12 @@ address for the bot detection rule result:
     Create a file called `middleware.js` in your project root (at the same level as
 `pages` or `app` or inside `src`):
 
-<Code code={Step3JS} lang="js" title="/middleware.js" mark={["ARCJET_KEY"]} />
+<Code
+  code={MiddlewareJS}
+  lang="js"
+  title="/middleware.js"
+  mark={["ARCJET_KEY"]}
+/>
 
 You can also customize the response depending on the decision. In this case we
 will return a 403 Forbidden response only if we detect a hosting provider IP
