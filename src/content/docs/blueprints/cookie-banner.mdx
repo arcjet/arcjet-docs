@@ -71,7 +71,7 @@ const statesRequiringCookieBanner = [
 
 // ... imports, client configuration, etc
 // See https://docs.arcjet.com/get-started
-const decision = aj.protect(req);
+const decision = await aj.protect(req);
 
 if (
   decision.ip.hasCountry() &&
