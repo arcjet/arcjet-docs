@@ -1,0 +1,151 @@
+---
+title: "Defining custom rules"
+description: "Define custom local rules for the Arcjet SDK."
+---
+
+The Arcjet SDK can be augmented with custom rules written by users, as long as
+they match the format defined by our [`@arcjet/protocol` package](https://github.com/arcjet/arcjet-js/tree/main/protocol). These rules
+will only be run locally since the Arcjet service doesn't know about them;
+however, they can still be useful for some use cases.
+
+The structure of a local rule is:
+
+```ts
+interface ArcjetLocalRule<Props extends { [key: string]: unknown } = {}> {
+  type: string;
+  mode: "LIVE" | "DRY_RUN";
+  priority: number;
+  validate(
+    context: ArcjetContext,
+    details: Partial<ArcjetRequestDetails & Props>,
+  ): asserts details is ArcjetRequestDetails & Props;
+  protect(
+    context: ArcjetContext,
+    details: ArcjetRequestDetails & Props,
+  ): Promise<ArcjetRuleResult>;
+}
+```
+
+For example, you may want to [validate form
+input](https://blog.arcjet.com/next-js-security-checklist/#2-data-validation-and-sanitization)
+as part of your Arcjet protections before a request reaches your route handler,
+such as via Next.js middleware.
+
+## Local rule: Zod + Body validation
+
+If we want to run [Zod](https://zod.dev/) schema validation against the request body, we need to
+create a new local rule:
+
+```ts
+import {
+  ArcjetRuleResult,
+  ArcjetErrorReason,
+  ArcjetRule,
+  ArcjetReason,
+  ArcjetContext,
+  ArcjetRequestDetails,
+} from "@arcjet/protocol";
+
+import { z } from "zod";
+import { fromError } from "zod-validation-error";
+
+// Create a subclass of ArcjetReason to store extra information
+class LocalDataValidation extends ArcjetReason {
+  error?: string;
+
+  constructor({ error }: { error?: string } = {}) {
+    super();
+    if (error) {
+      this.error = error;
+    }
+  }
+}
+
+// Create a constructor for building multiple instances of the rule
+function validateBody(options: {
+  // Each instance will run in LIVE or DRY_RUN mode
+  mode: "LIVE" | "DRY_RUN";
+  // Each instance will validate using a Zod schema
+  schema: z.Schema;
+}): Primitive {
+  return [
+    <ArcjetRule<{}>>{
+      type: "DATA_VALIDATION",
+      mode: options.mode,
+      priority: 0,
+      validate(
+        context: ArcjetContext,
+        details: ArcjetRequestDetails,
+      ): asserts details is ArcjetRequestDetails {},
+
+      async protect(
+        context: ArcjetContext,
+        details: ArcjetRequestDetails,
+      ): Promise<ArcjetRuleResult> {
+        try {
+          const body = await context.getBody();
+          if (typeof body !== "string") {
+            return new ArcjetRuleResult({
+              ttl: 0,
+              state: "NOT_RUN",
+              conclusion: "ALLOW",
+              reason: new LocalDataValidation({
+                error: "Missing body",
+              }),
+            });
+          }
+
+          const json = JSON.parse(body);
+          const result = options.schema.safeParse(json);
+
+          if (result.success) {
+            return new ArcjetRuleResult({
+              ttl: 0,
+              state: "RUN",
+              conclusion: "ALLOW",
+              reason: new LocalDataValidation(),
+            });
+          } else {
+            return new ArcjetRuleResult({
+              ttl: 0,
+              state: "RUN",
+              conclusion: "DENY",
+              reason: new LocalDataValidation({
+                error: fromError(result.error).toString(),
+              }),
+            });
+          }
+        } catch (err) {
+          return new ArcjetRuleResult({
+            ttl: 0,
+            state: "NOT_RUN",
+            conclusion: "ERROR",
+            reason: new ArcjetErrorReason(err),
+          });
+        }
+      },
+    },
+  ];
+}
+```
+
+As long as it conforms to the local rule interface, this rule can be consumed by
+the Arcjet SDK like any other rule!
+
+```ts
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    validateBody({
+      mode: "LIVE",
+      schema: z.object({
+        email: z.string(),
+      }),
+    }),
+  ],
+});
+```
+
+When `aj.protect()` is called, inside middleware or directly inside a route,
+this custom local rule will be executed and deny the request if the body doesn't
+pass validation.

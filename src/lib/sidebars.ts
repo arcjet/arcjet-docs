@@ -76,6 +76,10 @@ export const main = [
             label: "VPN & proxy detection",
             link: "/blueprints/vpn-proxy-detection",
           },
+          {
+            label: "Defining custom rules",
+            link: "/blueprints/defining-custom-rules",
+          },
         ],
       },
     ],
