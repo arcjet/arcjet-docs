@@ -13,7 +13,6 @@ import { APP_GUARD, NestFactory } from "@nestjs/core";
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ".env.local",
     }),
     ArcjetModule.forRoot({
       isGlobal: true,
