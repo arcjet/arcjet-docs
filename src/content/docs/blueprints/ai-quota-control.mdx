@@ -65,16 +65,12 @@ export async function POST(req: Request) {
     console.log("Requests remaining", decision.reason.remaining);
   }
 
-  // If the request is denied, return a 429
+  // If the request is denied, return
   if (decision.isDenied()) {
     if (decision.reason.isRateLimit()) {
-      return new Response("Too Many Requests", {
-        status: 429,
-      });
+      // Quota exceeded
     } else {
-      return new Response("Forbidden", {
-        status: 403,
-      });
+      // 403
     }
   }
 
