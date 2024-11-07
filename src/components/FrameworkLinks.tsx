@@ -1,3 +1,11 @@
+import { Bun as IconBun } from "@/components/icons/tech/Bun";
+import { Deno as IconDeno } from "@/components/icons/tech/Deno";
+import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
+import { NextJs as IconNextJs } from "@/components/icons/tech/NextJs";
+import { NodeJs as IconNodeJs } from "@/components/icons/tech/NodeJs";
+import { Remix as IconRemix } from "@/components/icons/tech/Remix";
+import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
+
 import Button from "@/components/Button";
 import { queryParamFramework } from "@/store";
 import { useStore } from "@nanostores/react";
@@ -32,34 +40,84 @@ const FrameworkLinks = forwardRef(
         <div ref={ref} className={cls} {...props}>
           <h2 id="choose-a-framework">Choose a framework</h2>
           <div className={styles.Links}>
-            <Button as="link" size="lg" href="/get-started?f=bun">
+            <Button
+              as="link"
+              size="lg"
+              href="/get-started?f=bun"
+              decoratorLeft={<IconBun />}
+            >
               Bun
             </Button>
-            <Button as="link" size="lg" href="/get-started?f=bun-hono">
+            <Button
+              as="link"
+              size="lg"
+              href="/get-started?f=bun-hono"
+              decoratorLeft={<IconBun />}
+            >
               Bun + Hono
             </Button>
-            <Button as="link" size="lg" href="/get-started?f=deno">
+            <Button
+              as="link"
+              size="lg"
+              href="/get-started?f=deno"
+              decoratorLeft={<IconDeno />}
+            >
               Deno
             </Button>
-            <Button as="link" size="lg" href="/get-started?f=nest-js">
+            <Button
+              as="link"
+              size="lg"
+              href="/get-started?f=nest-js"
+              decoratorLeft={<IconNestJs />}
+            >
               NestJS
             </Button>
-            <Button as="link" size="lg" href="/get-started?f=next-js">
+            <Button
+              as="link"
+              size="lg"
+              href="/get-started?f=next-js"
+              decoratorLeft={<IconNextJs />}
+            >
               Next.js
             </Button>
-            <Button as="link" size="lg" href="/get-started?f=node-js">
+            <Button
+              as="link"
+              size="lg"
+              href="/get-started?f=node-js"
+              decoratorLeft={<IconNodeJs />}
+            >
               Node.js
             </Button>
-            <Button as="link" size="lg" href="/get-started?f=node-js-express">
+            <Button
+              as="link"
+              size="lg"
+              href="/get-started?f=node-js-express"
+              decoratorLeft={<IconNodeJs />}
+            >
               Node.js + Express
             </Button>
-            <Button as="link" size="lg" href="/get-started?f=node-js-hono">
+            <Button
+              as="link"
+              size="lg"
+              href="/get-started?f=node-js-hono"
+              decoratorLeft={<IconNodeJs />}
+            >
               Node.js + Hono
             </Button>
-            <Button as="link" size="lg" href="/get-started?f=remix">
+            <Button
+              as="link"
+              size="lg"
+              href="/get-started?f=remix"
+              decoratorLeft={<IconRemix />}
+            >
               Remix
             </Button>
-            <Button as="link" size="lg" href="/get-started?f=sveltekit">
+            <Button
+              as="link"
+              size="lg"
+              href="/get-started?f=sveltekit"
+              decoratorLeft={<IconSvelteKit />}
+            >
               SvelteKit
             </Button>
           </div>
