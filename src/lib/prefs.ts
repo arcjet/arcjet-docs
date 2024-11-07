@@ -135,7 +135,7 @@ export const getFrameworks = (keys: FrameworkKey[]): Array<Framework> => {
  * @param key - The framework key to validate.
  */
 export const isValidFrameworkKey = (key: string) => {
-  return frameworks.find((f) => f.key == key);
+  return frameworks.find((f) => f.key === key);
 };
 
 /**

@@ -19,14 +19,14 @@ to customize your response based on the IP location.
 - Continent e.g. `NA`.
 - Continent name e.g. `North America`.
 
-<Aside type="caution">
-  IP geolocation can be notoriously inaccurate, especially for mobile devices,
-  satellite internet providers, and even just normal users. Likewise with the
+<aside type="caution">
+  ip geolocation can be notoriously inaccurate, especially for mobile devices,
+  satellite internet providers, and even just normal users. likewise with the
   specific fields like `city` and `region`, which can be very inaccurate.
-  Country is usually accurate, but there are often cases where IP addresses are
-  mis-located. These fields are provided for convenience e.g. suggesting a user
+  country is usually accurate, but there are often cases where ip addresses are
+  mis-located. these fields are provided for convenience e.g. suggesting a user
   location, but should not be relied upon by themselves.
-</Aside>
+</aside>
 
 ## Checking for data
 
@@ -40,19 +40,19 @@ check their availability. See the SDK reference for details.
 // See https://docs.arcjet.com/get-started
 const decision = await aj.protect(req);
 
-if (decision.ip.hasCity() && decision.ip.city == "San Francisco") {
+if (decision.ip.hasCity() && decision.ip.city === "San Francisco") {
   // Return a custom response for San Francisco
 }
 
-if (decision.ip.hasRegion() && decision.ip.region == "California") {
+if (decision.ip.hasRegion() && decision.ip.region === "California") {
   // Return a custom response for California
 }
 
-if (decision.ip.hasCountry() && decision.ip.country == "US") {
+if (decision.ip.hasCountry() && decision.ip.country === "US") {
   // Return a custom response for Japan
 }
 
-if (decision.ip.hasContinent() && decision.ip.continent == "NA") {
+if (decision.ip.hasContinent() && decision.ip.continent === "NA") {
   // Return a custom response for North America
 }
 ```
@@ -64,7 +64,7 @@ if (decision.ip.hasContinent() && decision.ip.continent == "NA") {
 // See https://docs.arcjet.com/get-started
 const decision = await aj.protect(req);
 
-if (decision.ip.hasCountry() && decision.ip.country != "US") {
+if (decision.ip.hasCountry() && decision.ip.country !== "US") {
   // Return 403 Forbidden
 }
 ```
