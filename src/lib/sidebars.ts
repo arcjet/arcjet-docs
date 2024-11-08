@@ -67,6 +67,10 @@ export const main = [
             label: "VPN & proxy detection",
             link: "/blueprints/vpn-proxy-detection",
           },
+          {
+            label: "AI quota control",
+            link: "/blueprints/ai-quota-control",
+          },
         ],
       },
     ],
