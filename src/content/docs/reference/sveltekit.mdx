@@ -28,6 +28,7 @@ import WithRuleTS from "/src/snippets/reference/sveltekit/WithRule.ts?raw";
 import WithRuleJS from "/src/snippets/reference/sveltekit/WithRule.js?raw";
 import ClientOverrideTS from "/src/snippets/reference/sveltekit/ClientOverride.ts?raw";
 import ClientOverrideJS from "/src/snippets/reference/sveltekit/ClientOverride.js?raw";
+import NodeVersions from "/src/snippets/reference/node-versions.mdx";
 import Comments from "/src/components/Comments.astro";
 
 [<SDKVersionSvelteKit/>](https://www.npmjs.com/package/@arcjet/sveltekit)
@@ -101,6 +102,17 @@ The optional fields are:
     <Code code={ConfigurationJS} lang="js" />
   </TabItem>
 </Tabs>
+
+### Single instance
+
+We recommend creating a single instance of the `Arcjet` object and reusing it
+throughout your application. This is because the SDK caches decisions and
+configuration to improve performance.
+
+The pattern we use is to create a utility file that exports the `Arcjet` object
+and then import it where you need it. See [our example Next.js
+app](https://github.com/arcjet/example-nextjs/blob/main/lib/arcjet.ts) for how
+this is done.
 
 ### Rule modes
 
@@ -601,17 +613,7 @@ SvelteKit SDK will automatically handle this for you.
 
 ### Node
 
-Arcjet supports the [active and maintenance LTS
-versions](https://github.com/nodejs/release) of Node.js:
-
-- Node.js 18.x LTS
-- Node.js 20.x LTS
-
-When a Node.js version goes end of life, we will bump the major version of the
-Arcjet SDK. [Technical support](/support) is provided for the current major
-version of the Arcjet SDK for all users and for the current and previous major
-versions for paid users. We will provide security fixes for the current and
-previous major SDK versions.
+<NodeVersions />
 
 ### SvelteKit
 
