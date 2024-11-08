@@ -1,5 +1,5 @@
 ---
-title: Arcjet
+title: Welcome to Arcjet
 head:
   # Use a custom <title> tag
   - tag: title
@@ -16,21 +16,38 @@ hero:
       link: /get-started
       icon: right-arrow
       variant: primary
+      attrs:
+        ajIcon: mark
+        ajIconPos: left
+        group: 0
     - text: Next.js
       link: /get-started?f=next-js
       icon: right-arrow
       variant: minimal
+      attrs:
+        ajIcon: next-js
+        ajIconPos: left
+        group: 1
     - text: Node.js
       link: /get-started?f=node-js
       icon: right-arrow
       variant: minimal
+      attrs:
+        ajIcon: node-js
+        ajIconPos: left
+        group: 1
     - text: Bun, Remix, NestJS & more...
       link: /get-started
       icon: right-arrow
       variant: minimal
+      attrs:
+        ajIcon: arrow-right
+        ajIconPos: right
+        group: 1
 ---
 
 import Block from "/src/components/Block";
+import Launch from "@/components/Launch";
 import { Card, CardGrid } from "@astrojs/starlight/components";
 import "/src/styles/docs/index.scss";
 
@@ -89,3 +106,15 @@ import "/src/styles/docs/index.scss";
     See what you can do with Arcjet.
   </Block>
 </CardGrid>
+
+<Launch
+  client:load
+  text="Learn about how Arcjet works."
+  actions={[
+    {
+      text: "Arcjet’s architecture",
+      link: "/architecture/",
+      decoratorRight: "arrow-right",
+    },
+  ]}
+/>
