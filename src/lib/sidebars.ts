@@ -65,6 +65,10 @@ export const main = [
             link: "/blueprints/cookie-banner",
           },
           {
+            label: "Defining custom rules",
+            link: "/blueprints/defining-custom-rules",
+          },
+          {
             label: "Payment form protection",
             link: "/blueprints/payment-form",
           },
