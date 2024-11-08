@@ -85,6 +85,15 @@ The optional fields are:
   </TabItem>
 </Tabs>
 
+### Single instance
+
+We recommend creating a single instance of the `Arcjet` object and reusing it
+throughout your application. This is because the SDK caches decisions and
+configuration to improve performance.
+
+The pattern we use is to create a utility file that exports the `Arcjet` object
+and then import it where you need it.
+
 ### Rule modes
 
 Each rule can be configured in either `LIVE` or `DRY_RUN` mode. When in
