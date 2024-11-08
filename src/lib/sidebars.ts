@@ -65,6 +65,10 @@ export const main = [
             link: "/blueprints/cookie-banner",
           },
           {
+            label: "Defining custom rules",
+            link: "/blueprints/defining-custom-rules",
+          },
+          {
             label: "Payment form protection",
             link: "/blueprints/payment-form",
           },
@@ -75,10 +79,6 @@ export const main = [
           {
             label: "VPN & proxy detection",
             link: "/blueprints/vpn-proxy-detection",
-          },
-          {
-            label: "Defining custom rules",
-            link: "/blueprints/defining-custom-rules",
           },
         ],
       },
