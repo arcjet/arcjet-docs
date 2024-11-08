@@ -32,6 +32,11 @@ export const main = [
             attrs: { target: "_blank", class: "external-link" },
           },
           {
+            label: "Next.js SaaS template",
+            link: "https://www.next-forge.com/",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
             label: "Remix",
             link: "https://github.com/arcjet/example-remix",
             attrs: { target: "_blank", class: "external-link" },
@@ -47,6 +52,10 @@ export const main = [
         label: "Blueprints",
         collapsed: true,
         items: [
+          {
+            label: "AI quota control",
+            link: "/blueprints/ai-quota-control",
+          },
           {
             label: "IP geolocation",
             link: "/blueprints/ip-geolocation",
@@ -66,10 +75,6 @@ export const main = [
           {
             label: "VPN & proxy detection",
             link: "/blueprints/vpn-proxy-detection",
-          },
-          {
-            label: "AI quota control",
-            link: "/blueprints/ai-quota-control",
           },
         ],
       },
