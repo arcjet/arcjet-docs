@@ -21,7 +21,7 @@ import styles from "./FrameworkLinks.module.scss";
  */
 const FrameworkLinks = forwardRef(
   ({ ...props }: PropsWithChildren, ref: ForwardedRef<HTMLDivElement>) => {
-    const [hide, setHide] = useState(false);
+    const [hide, setHide] = useState(true);
 
     const $queryParamFramework = useStore(queryParamFramework);
 
@@ -31,6 +31,7 @@ const FrameworkLinks = forwardRef(
       const f = params.get("f");
 
       if (f) setHide(true);
+      else setHide(false);
     }, [$queryParamFramework]);
 
     let cls = "FrameworkLinks " + styles.FrameworkLinks;
