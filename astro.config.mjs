@@ -77,6 +77,7 @@ export default defineConfig({
         Sidebar: "./src/components/overrides/Sidebar.astro",
         PageSidebar: "./src/components/overrides/PageSidebar.astro",
         PageTitle: "./src/components/overrides/PageTitle.astro",
+        Hero: "./src/components/overrides/Hero.astro",
       },
       sidebar: sidebar,
       expressiveCode: {

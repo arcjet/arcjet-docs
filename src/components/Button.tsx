@@ -14,14 +14,14 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement>;
 type AnchorProps = AnchorHTMLAttributes<HTMLAnchorElement>;
 
 type SharedProps = {
-  appearance?: "text" | "default";
+  appearance?: "text" | "default" | "toolbar" | "subnav" | "tablehead";
   level?: Color;
   size?: Size;
   decoratorLeft?: ReactNode;
   decoratorRight?: ReactNode;
 };
 
-type Props = SharedProps &
+export type Props = SharedProps &
   (
     | ({ as?: "button" } & ButtonProps)
     | ({ as: "link"; href: string } & AnchorProps)

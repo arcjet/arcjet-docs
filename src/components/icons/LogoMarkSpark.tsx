@@ -19,7 +19,7 @@ const icon = ({
     <svg
       viewBox="0 0 128 128"
       fill="currentColor"
-      className="brand brand-logo-mark-spark"
+      className="aj-Icon brand brand-logo-mark-spark"
     >
       <path d={visualData.sparkD} fillRule="evenodd" clipRule="evenodd" />
     </svg>
