@@ -19,8 +19,16 @@ import styles from "./FrameworkLinks.module.scss";
  *
  * Renders a list of buttons that switch to a specific framework.
  */
+
+interface FrameworkLinksProps extends PropsWithChildren {
+  title?: string;
+}
+
 const FrameworkLinks = forwardRef(
-  ({ ...props }: PropsWithChildren, ref: ForwardedRef<HTMLDivElement>) => {
+  (
+    { title = "Choose a framework", ...props }: FrameworkLinksProps,
+    ref: ForwardedRef<HTMLDivElement>,
+  ) => {
     const [hide, setHide] = useState(true);
 
     const $queryParamFramework = useStore(queryParamFramework);
@@ -39,7 +47,7 @@ const FrameworkLinks = forwardRef(
     return (
       !hide && (
         <div ref={ref} className={cls} {...props}>
-          <h2 id="choose-a-framework">Choose a framework</h2>
+          <h2 id="choose-a-framework">{title}</h2>
           <div className={styles.Links}>
             <Button
               as="link"
