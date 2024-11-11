@@ -70,6 +70,7 @@ export default defineConfig({
       plugins: [
         starlightLinksValidator({
           exclude: ["**/*f=*"], // exclude urls with `f` param from validation
+          errorOnLocalLinks: false, // we use localhost in the examples
         }),
       ],
       components: {
