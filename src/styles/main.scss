@@ -90,23 +90,6 @@ body {
 }
 
 /* -------------------------------------------------------
-.sl-container */
-// 72rem
-@media (min-width: 1152px) {
-  .sl-container {
-    margin-inline: 0;
-    margin: 0 auto;
-  }
-}
-
-@media (max-width: 1151px) {
-  .sl-container {
-    margin-inline: 0;
-    margin: 0 auto;
-  }
-}
-
-/* -------------------------------------------------------
 .content-panel */
 @media (max-width: 1151px) {
   .content-panel:first-child {
@@ -124,6 +107,23 @@ body {
 .content-panel {
   border-bottom-width: 0px !important;
   border-top-width: 0px !important;
+}
+
+/* -------------------------------------------------------
+.sl-container */
+// 72rem
+.main-pane .sl-container {
+  margin-inline: 0;
+  margin: 0 auto;
+  max-width: calc(var(--sp) * 128);
+}
+
+// target .sl-container where there is a right-sidebar
+.main-pane:has(+ .main-pane + .right-sidebar-container),
+.right-sidebar-container + .main-pane {
+  .sl-container  {
+    max-width: var(--sl-content-width);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
