@@ -112,7 +112,7 @@ const SelectableContent = ({
   return (
     <div className={cls}>
       <div className={styles.Toolbar}>
-        {slots && (
+        {slots && slots.length > 1 && (
           <Select
             onChange={onChange}
             value={selectedSlot?.key}
