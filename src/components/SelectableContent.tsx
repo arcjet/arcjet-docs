@@ -42,9 +42,6 @@ const SelectableContent = ({
   children,
   ...props
 }: Props) => {
-  let cls = "SelectableContent " + styles.SelectableContent;
-  if (className) cls += " " + className;
-
   const [selectedSlot, setSelectedSlot] = useState<Slot>();
   const [slots, setSlots] = useState<Slot[]>();
 
@@ -107,17 +104,21 @@ const SelectableContent = ({
     }
   }, [storedSyncKeyValue]);
 
+  let cls = "SelectableContent " + styles.SelectableContent;
+  if (className) cls += " " + className;
+
   // TODO: sync sync key with nano store
 
   return (
     <div className={cls}>
       <div className={styles.Toolbar}>
-        {slots && slots.length > 1 && (
+        {slots && (slots.length > 1 || syncKey == "language") && (
           <Select
             onChange={onChange}
             value={selectedSlot?.key}
             trigger={{ size: "sm" }}
             level="secondary"
+            disabled={slots.length <= 1 && syncKey == "language"}
           >
             {slots.map((slot: Slot, idx: number) => {
               return (
