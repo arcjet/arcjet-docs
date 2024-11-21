@@ -120,6 +120,25 @@ body {
   border-top-width: 0px !important;
 }
 
+@media (max-width: 1151px) {
+  .main-pane:has(+ .main-pane + .right-sidebar-container),
+  .right-sidebar-container + .main-pane {
+    .content-panel:first-child {
+      padding-top: calc(var(--sp) * 12);
+    }
+  }
+}
+
+// 50rem
+@media (max-width: 800px) {
+  .main-pane:has(+ .main-pane + .right-sidebar-container),
+  .right-sidebar-container + .main-pane {
+    .content-panel:first-child {
+      padding-top: calc(var(--sp) * 10);
+    }
+  }
+}
+
 /* -------------------------------------------------------
 .sl-container */
 // 72rem
