@@ -1,6 +1,6 @@
 // Adapted from https://sdk.vercel.ai/docs/getting-started/nextjs-app-router
-import arcjet, { shield, tokenBucket } from "@arcjet/next";
 import { openai } from "@ai-sdk/openai";
+import arcjet, { shield, tokenBucket } from "@arcjet/next";
 import { streamText } from "ai";
 import { promptTokensEstimate } from "openai-chat-tokens";
 
