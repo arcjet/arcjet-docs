@@ -6,80 +6,36 @@ next: false
 
 import Comments from "/src/components/Comments.astro";
 
-For basic detection, Arcjet uses the `User-Agent` header to identify specific
-bots. Advanced bot detection supplements this with additional fingerprinting
-techniques such as IP address analysis.
+Arcjet allows you to configure a list of bots to allow or deny. To construct the
+list, you can specify individual bots and/or use categories to allow or deny all
+bots in a category.
 
-Arcjet identifies and maintains a list of known bots, which are available in our
-[bot list](https://arcjet.com/bot-list). If you are using TypeScript, these will
-be shown as autocomplete values to `allow` or `deny` options while writing your
-rules.
+If you are using TypeScript, these will be shown as autocomplete values to
+`allow` or `deny` options while writing your rules.
 
-This list is used to allow developers to choose to allow or deny any or all of
-these bots.
+## Individual bots
 
-:::note
-Requests without `User-Agent` headers can not be identified as any particular
-bot and will be marked as an errored decision. Check `decision.isErrored()` and
-decide if you want to allow or deny the request. Our recommendation is to block
-requests without `User-Agent` headers because most legitimate clients always
-send this header.
+The [bot list](https://arcjet.com/bot-list) contains a list of known bots that
+Arcjet can identify.
 
-See [an example of how to do this](/bot-protection/concepts#user-agent-header).
-:::
+For example:
 
-## Known bots
-
-Arcjet's list of known bots is comprised of two parts:
-
-1. The [bot list](https://arcjet.com/bot-list) shipped with the SDK provides human
-   readable identifiers for known bots.
-2. The identifiers on the bot list are generated from [a collection of known
-   bots](https://github.com/arcjet/well-known-bots) which includes details of
-   their owner and any variations.
-
-We welcome contributions to the
-[arcjet/well-known-bots](https://github.com/arcjet/well-known-bots) repository,
-whether you're adding new bots or updating detection patterns. Once merged, the
-updates will be included in the next SDK release. Since bot detection is handled
-within the Arcjet WebAssembly module bundled with the SDK, new patterns must be
-compiled into the module as part of the release process.
-
-### Known bots structure
-
-Each entry in the known bots JSON represents a specific bot or crawler and includes the following fields:
-
-- id: A unique identifier for the bot
-- categories: An array of categories the bot belongs to (e.g. "search-engine", "advertising")
-- pattern: A regular expression pattern used to identify the bot in user agent strings
-- url: (optional) A URL with more information about the bot
-- verification: A list of supported methods for verifying the bot's identity (if the bot is not verifiable it should be empty).
-- instances: An array of example user agent strings for the bot that are validated against the `pattern`
-
-#### Verification
-
-Each verification entry contains the following fields:
-
-- type: The method of verification (currently only `dns` is supported)
-- masks: An array of mask patterns used for verification
-
-#### Verification mask patterns
-
-The mask patterns use the following special characters:
-
-- *: Represents 0 or 1 of any character
-- @: Acts as a wildcard, matching any number of characters
-
-All other characters in the mask require an exact match.
+```ts
+detectBot({
+   mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+   // Block all bots except specific Google and Bing crawlers, and curl
+   allow: [
+      "GOOGLE_CRAWLER".
+      "GOOGLE_CRAWLER_NEWS",
+      "BING_CRAWLER",
+      "CURL",
+   ],
+}),
+```
 
 ## Bot categories
 
-In addition to identifying individual bots, we also group bots into various
-categories. You can leverage these categories for easier configuration of your
-allow or deny lists.
-
-Currently, we provide the following categories. You can see which bots are in
-each category from the [bot list](https://arcjet.com/bot-list):
+We provide the following categories:
 
 - `CATEGORY:ACADEMIC`: Scrape data for research purposes
 - `CATEGORY:ADVERTISING`: Scrape data for advertising and marketing purposes
@@ -102,14 +58,88 @@ each category from the [bot list](https://arcjet.com/bot-list):
 - `CATEGORY:VERCEL`: Scrape data for Vercel products and services
 - `CATEGORY:YAHOO`: Scrape data for Yahoo products and services
 
+The [bot
+list](https://github.com/arcjet/arcjet-js/blob/24d2ee3139f277499ef3cb65f1f1eab998647819/protocol/well-known-bots.ts#L596)
+contains a list of categories and which bots are in each category.
+
+```ts
+detectBot({
+   mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+   // Block all bots except search engines and curl
+   allow: [
+      "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc
+      "CURL", // You can allow specific bots in addition to categories
+   ],
+}),
+```
+
+Only configured categories are checked for performance reasons. Each detected
+bot must be compared to a category, so the worst case performance is
+`count(detectedBot) * count(configuredCategories)`.
+
 We're continuously evaluating bots to decide if things should be reclassified.
 If we determine enough bots exist for a new category, we'll consider adding new
 ones. Please open an issue on our
 [arcjet/well-known-bots](https://github.com/arcjet/well-known-bots) repository
 if you need a specific category.
 
-Only configured categories are checked for performance reasons. Each detected
-bot must be compared to a category, so the worst case performance is
-`count(detectedBot) * count(configuredCategories)`.
+## Detection
+
+For basic detection, Arcjet uses the `User-Agent` header to identify specific
+bots. Advanced bot detection supplements this with additional fingerprinting
+techniques such as IP address analysis.
+
+:::note
+Requests without `User-Agent` headers can not be identified as any particular
+bot and will be marked as an errored decision. Check `decision.isErrored()` and
+decide if you want to allow or deny the request. Our recommendation is to block
+requests without `User-Agent` headers because most legitimate clients always
+send this header.
+
+See [an example of how to do this](/bot-protection/concepts#user-agent-header).
+:::
+
+### Known bots structure
+
+The identifiers on the bot list are generated from [a collection of known
+bots](https://github.com/arcjet/well-known-bots) which includes details of their
+owner and any variations.
+
+We welcome contributions to the
+[arcjet/well-known-bots](https://github.com/arcjet/well-known-bots) repository,
+whether you're adding new bots or updating detection patterns. Once merged, the
+updates will be included in the next SDK release. Since bot detection is handled
+within the Arcjet WebAssembly module bundled with the SDK, new patterns must be
+compiled into the module as part of the release process.
+
+Each entry in the known bots JSON represents a specific bot or crawler and
+includes the following fields:
+
+- `id`: A unique identifier for the bot
+- `categories`: An array of categories the bot belongs to (e.g. "search-engine",
+  "advertising")
+- `pattern`: A regular expression pattern used to identify the bot in user agent
+  strings
+- `url`: (optional) A URL with more information about the bot
+- `verification`: A list of supported methods for verifying the bot's identity
+  (if the bot is not verifiable it should be empty).
+- `instances`: An array of example user agent strings for the bot that are
+  validated against the `pattern`
+
+#### Verification
+
+Each verification entry contains the following fields:
+
+- `type`: The method of verification (currently only `dns` is supported)
+- `masks`: An array of mask patterns used for verification
+
+#### Verification mask patterns
+
+The mask patterns use the following special characters:
+
+- `\*`: Represents 0 or 1 of any character
+- `@`: Acts as a wildcard, matching any number of characters
+
+All other characters in the mask require an exact match.
 
 <Comments />
