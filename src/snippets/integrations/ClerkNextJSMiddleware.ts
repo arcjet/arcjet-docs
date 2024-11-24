@@ -5,7 +5,7 @@ const isProtectedRoute = createRouteMatcher(["/api/private"]);
 
 export default clerkMiddleware(async (auth, request) => {
   if (isProtectedRoute(request)) {
-    auth.protect();
+    await auth.protect();
   }
 
   return NextResponse.next();
