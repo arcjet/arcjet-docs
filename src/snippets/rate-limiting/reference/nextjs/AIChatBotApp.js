@@ -1,7 +1,7 @@
 // This example is adapted from https://sdk.vercel.ai/docs/guides/frameworks/nextjs-app
-import arcjet, { tokenBucket } from "@arcjet/next";
-import { OpenAIStream, StreamingTextResponse } from "ai";
-import OpenAI from "openai";
+import { openai } from "@ai-sdk/openai";
+import arcjet, { shield, tokenBucket } from "@arcjet/next";
+import { streamText } from "ai";
 import { promptTokensEstimate } from "openai-chat-tokens";
 
 const aj = arcjet({
@@ -20,10 +20,8 @@ const aj = arcjet({
   ],
 });
 
-// OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY ?? "OPENAI_KEY_MISSING",
-});
+// Allow streaming responses up to 30 seconds
+export const maxDuration = 30;
 
 // Edge runtime allows for streaming responses
 export const runtime = "edge";
@@ -60,15 +58,10 @@ export async function POST(req) {
   }
 
   // If the request is allowed, continue to use OpenAI
-  // Ask OpenAI for a streaming chat completion given the prompt
-  const response = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo",
-    stream: true,
+  const result = await streamText({
+    model: openai("gpt-4-turbo"),
     messages,
   });
 
-  // Convert the response into a friendly text-stream
-  const stream = OpenAIStream(response);
-  // Respond with the stream
-  return new StreamingTextResponse(stream);
+  return result.toDataStreamResponse();
 }

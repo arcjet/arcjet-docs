@@ -1,9 +1,9 @@
 // This example is adapted from https://sdk.vercel.ai/docs/guides/frameworks/nextjs-app
 import { env } from "$env/dynamic/private";
+import { openai } from "@ai-sdk/openai";
 import arcjet, { tokenBucket } from "@arcjet/sveltekit";
 import { error } from "@sveltejs/kit";
-import { OpenAIStream, StreamingTextResponse } from "ai";
-import OpenAI from "openai";
+import { streamText } from "ai";
 import { promptTokensEstimate } from "openai-chat-tokens";
 
 const aj = arcjet({
@@ -20,11 +20,6 @@ const aj = arcjet({
       capacity: 5_000,
     }),
   ],
-});
-
-// OpenAI client
-const openai = new OpenAI({
-  apiKey: env.OPENAI_API_KEY ?? "OPENAI_KEY_MISSING",
 });
 
 export async function POST(event) {
@@ -55,15 +50,10 @@ export async function POST(event) {
   }
 
   // If the request is allowed, continue to use OpenAI
-  // Ask OpenAI for a streaming chat completion given the prompt
-  const response = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo",
-    stream: true,
+  const result = await streamText({
+    model: openai("gpt-4-turbo"),
     messages,
   });
 
-  // Convert the response into a friendly text-stream
-  const stream = OpenAIStream(response);
-  // Respond with the stream
-  return new StreamingTextResponse(stream);
+  return result.toDataStreamResponse();
 }
