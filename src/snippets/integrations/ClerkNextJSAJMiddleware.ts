@@ -11,9 +11,9 @@ export const config = {
 
 const isProtectedRoute = createRouteMatcher(["/api/private"]);
 
-const clerk = clerkMiddleware((auth, request) => {
+const clerk = clerkMiddleware(async (auth, request) => {
   if (isProtectedRoute(request)) {
-    auth().protect();
+    auth.protect();
   }
 
   return NextResponse.next();
