@@ -1,0 +1,33 @@
+Using the the curl command, we can inspect the headers:
+
+```sh
+curl -I -X GET localhost:3000
+```
+
+The printed headers should look something like:
+
+```txt
+HTTP/1.1 200 OK
+content-security-policy: base-uri 'none'; child-src 'none'; connect-src 'self'; default-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; img-src 'self' blob: data:; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'nonce-YWUwNGIwMTMtOTgwYi00MWNiLWI3M2QtMjBkYWQwODMxZTNi' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; worker-src 'self'; upgrade-insecure-requests;
+cross-origin-embedder-policy: require-corp
+cross-origin-opener-policy: same-origin
+cross-origin-resource-policy: same-origin
+origin-agent-cluster: ?1
+referrer-policy: no-referrer
+strict-transport-security: max-age=31536000; includeSubDomains
+x-content-type-options: nosniff
+x-dns-prefetch-control: off
+x-download-options: noopen
+x-frame-options: SAMEORIGIN
+x-permitted-cross-domain-policies: none
+x-xss-protection: 0
+Vary: RSC, Next-Router-State-Tree, Next-Router-Prefetch, Next-Router-Segment-Prefetch, Accept-Encoding
+link: </_next/static/media/a34f9d1faa5f3315-s.p.woff2>; rel=preload; as="font"; crossorigin=""; nonce="YWUwNGIwMTMtOTgwYi00MWNiLWI3M2QtMjBkYWQwODMxZTNi"; type="font/woff2", </vercel.svg>; rel=preload; as="image", </next.svg>; rel=preload; as="image", </_next/static/css/app/layout.css?v=1732741292630>; rel=preload; as="style"; nonce="YWUwNGIwMTMtOTgwYi00MWNiLWI3M2QtMjBkYWQwODMxZTNi"
+Cache-Control: no-store, must-revalidate
+X-Powered-By: Next.js
+Content-Type: text/html; charset=utf-8
+Date: Wed, 27 Nov 2024 21:01:32 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+```

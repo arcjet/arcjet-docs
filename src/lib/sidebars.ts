@@ -290,6 +290,16 @@ export const main = [
           },
         ],
       },
+      {
+        label: "Nosecone",
+        collapsed: true,
+        items: [
+          {
+            label: "Quick start",
+            link: "/nosecone/quick-start",
+          },
+        ],
+      },
     ],
   },
   {

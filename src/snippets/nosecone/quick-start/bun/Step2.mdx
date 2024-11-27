@@ -1,0 +1,17 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+
+import Step2TS from "./Step2.ts?raw";
+import Step2JS from "./Step2.js?raw";
+
+Nosecone creates headers that can be used directly as the `Response` headers in
+your Bun server.
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={Step2TS} lang="ts" title="index.ts" ins={7} />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={Step2JS} lang="js" title="index.js" ins={7} />
+  </div>
+</SelectableContent>

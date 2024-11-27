@@ -1,0 +1,65 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+
+import Step2MiddlewareTS from "./Step2Middleware.ts?raw";
+import Step2MiddlewareJS from "./Step2Middleware.js?raw";
+
+import Step2LayoutConnectionTS from "./Step2LayoutConnection.ts?raw";
+import Step2LayoutConnectionJS from "./Step2LayoutConnection.js?raw";
+import Step2LayoutNoCacheTS from "./Step2LayoutNoCache.ts?raw";
+import Step2LayoutNoCacheJS from "./Step2LayoutNoCache.js?raw";
+
+Nosecone applies headers to all your routes via middleware in your Next.js
+application.
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={Step2MiddlewareTS} lang="ts" title="middleware.ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={Step2MiddlewareJS} lang="js" title="middleware.js" />
+  </div>
+</SelectableContent>
+
+:::caution
+We recommend you remove any `export const config = ...` from your middleware so
+Nosecone will run on every route.
+:::
+
+You also need to opt-out of static generation in your application. To do this,
+modify your layout file with the following:
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS (Next.js 15)" slotIdx="1">
+    <Code
+      code={Step2LayoutConnectionTS}
+      lang="ts"
+      title="app/layout.tsx"
+      ins={[1, 5, 6]}
+    />
+  </div>
+  <div slot="JS (Next.js 15)" slotIdx="2">
+    <Code
+      code={Step2LayoutConnectionJS}
+      lang="js"
+      title="app/layout.jsx"
+      ins={[1, 4, 5]}
+    />
+  </div>
+  <div slot="TS (Next.js 14)" slotIdx="3">
+    <Code
+      code={Step2LayoutNoCacheTS}
+      lang="ts"
+      title="app/layout.tsx"
+      ins={[1, 5, 6]}
+    />
+  </div>
+  <div slot="JS (Next.js 14)" slotIdx="4">
+    <Code
+      code={Step2LayoutNoCacheJS}
+      lang="js"
+      title="app/layout.jsx"
+      ins={[1, 4, 5]}
+    />
+  </div>
+</SelectableContent>
