@@ -1,10 +1,11 @@
 ---
 title: "Shield reference"
-description: "Reference guide for adding Arcjet Shield to your Next.js, Node.js, Bun, or SvelteKit app."
+description: "Reference guide for adding Arcjet Shield to your Next.js, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
   - next-js
   - node-js
+  - remix
   - sveltekit
 ajToc:
   - text: "Configuration"
@@ -19,6 +20,12 @@ ajToc:
         anchor: "middleware"
       - text: "Avoiding double protection with middleware"
         anchor: "avoiding-double-protection-with-middleware"
+  - text: "Loader vs action"
+    anchor: "loader-vs-action"
+    framework: ["remix"]
+    children:
+      - text: "Action"
+        anchor: "action"
   - text: "Per route vs hooks"
     anchor: "per-route-vs-hooks"
     framework: ["sveltekit"]
@@ -40,14 +47,17 @@ ajToc:
 import SlotByFramework from "@/components/SlotByFramework";
 import DecisionLogBun from "@/snippets/shield/reference/bun/DecisionLog.mdx";
 import ErrorsBun from "@/snippets/shield/reference/bun/Errors.mdx";
+import DecisionLogRemix from "@/snippets/shield/reference/remix/DecisionLog.mdx";
 import DecisionLogNextJs from "@/snippets/shield/reference/nextjs/DecisionLog.mdx";
 import ErrorsNextJs from "@/snippets/shield/reference/nextjs/Errors.mdx";
 import DecisionLogNodeJs from "@/snippets/shield/reference/nodejs/DecisionLog.mdx";
 import ErrorsNodeJs from "@/snippets/shield/reference/nodejs/Errors.mdx";
 import DecisionLogSvelteKit from "@/snippets/shield/reference/sveltekit/DecisionLog.mdx";
 import ErrorsSvelteKit from "@/snippets/shield/reference/sveltekit/Errors.mdx";
+import ErrorsRemix from "@/snippets/shield/reference/remix/Errors.mdx";
 import PerRouteVsMiddlewareNextJs from "@/snippets/shield/reference/nextjs/PerRouteVsMiddleware.mdx";
 import PerRouteVsHooksSvelteKit from "@/snippets/shield/reference/sveltekit/PerRouteVsHooks.mdx";
+import RemixLoaderVsAction from "@/snippets/shield/reference/remix/LoaderVsAction.mdx";
 
 Arcjet Shield protects your application against common attacks, including the
 [OWASP Top 10](https://owasp.org/www-project-top-ten/).
@@ -75,6 +85,7 @@ execution ordering is automatically optimized for performance. See
 
 <SlotByFramework client:load>
   <PerRouteVsMiddlewareNextJs slot="next-js" />
+  <RemixLoaderVsAction slot="remix" />
   <PerRouteVsHooksSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -105,9 +116,6 @@ This function returns a `Promise` that resolves to an
 - `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
   client IP address. See the SDK reference for more information.
 
-See [the SDK reference](/reference/nextjs#results) for more details about the
-rule results.
-
 You check if a deny conclusion has been returned by a shield rule by using
 `decision.isDenied()` and `decision.reason.isShield()` respectively.
 
@@ -125,6 +133,7 @@ This example will log the full result as well as the shield rule:
   <DecisionLogBun slot="bun" />
   <DecisionLogNextJs slot="next-js" />
   <DecisionLogNodeJs slot="node-js" />
+  <DecisionLogRemix slot="remix" />
   <DecisionLogSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -143,6 +152,7 @@ accessing `decision.reason.message`.
   <ErrorsBun slot="bun" />
   <ErrorsNextJs slot="next-js" />
   <ErrorsNodeJs slot="node-js" />
+  <ErrorsRemix slot="remix" />
   <ErrorsSvelteKit slot="sveltekit" />
 </SlotByFramework>
 

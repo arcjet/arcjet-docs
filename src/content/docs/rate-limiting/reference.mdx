@@ -1,10 +1,11 @@
 ---
 title: "Rate limiting reference"
-description: "Reference guide for adding Arcjet rate limiting to your Next.js, Node.js, Bun, or SvelteKit app."
+description: "Reference guide for adding Arcjet rate limiting to your Next.js, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
   - next-js
   - node-js
+  - remix
   - sveltekit
 ajToc:
   - text: "Configuration"
@@ -37,6 +38,12 @@ ajToc:
         anchor: "rate-limit-on-all-routes"
       - text: "Avoiding double protection with middleware"
         anchor: "avoiding-double-protection-with-middleware"
+  - text: "Loader vs action"
+    anchor: "loader-vs-action"
+    framework: ["remix"]
+    children:
+      - text: "Action"
+        anchor: "action"
   - text: "Per route vs hooks"
     anchor: "per-route-vs-hooks"
     framework: ["sveltekit"]
@@ -115,6 +122,16 @@ import SingleRateLimitNodeJs from "@/snippets/rate-limiting/reference/nodejs/Sin
 import SlidingWindowNodeJs from "@/snippets/rate-limiting/reference/nodejs/SlidingWindow.mdx";
 import TokenBucketNodeJs from "@/snippets/rate-limiting/reference/nodejs/TokenBucket.mdx";
 import TokenBucketRequestNodeJs from "@/snippets/rate-limiting/reference/nodejs/TokenBucketRequest.mdx";
+import ByUserIdRemix from "@/snippets/rate-limiting/reference/remix/ByUserId.mdx";
+import DecisionLogRemix from "@/snippets/rate-limiting/reference/remix/DecisionLog.mdx";
+import DryRunRemix from "@/snippets/rate-limiting/reference/remix/DryRun.mdx";
+import ErrorsRemix from "@/snippets/rate-limiting/reference/remix/Errors.mdx";
+import FixedWindowRemix from "@/snippets/rate-limiting/reference/remix/FixedWindow.mdx";
+import HeadersRemix from "@/snippets/rate-limiting/reference/remix/Headers.mdx";
+import SingleRateLimitRemix from "@/snippets/rate-limiting/reference/remix/SingleRateLimit.mdx";
+import SlidingWindowRemix from "@/snippets/rate-limiting/reference/remix/SlidingWindow.mdx";
+import TokenBucketRemix from "@/snippets/rate-limiting/reference/remix/TokenBucket.mdx";
+import TokenBucketRequestRemix from "@/snippets/rate-limiting/reference/remix/TokenBucketRequest.mdx";
 import ByUserIdSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/ByUserId.mdx";
 import DecisionLogSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/DecisionLog.mdx";
 import DryRunSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/DryRun.mdx";
@@ -126,6 +143,7 @@ import SingleRateLimitSvelteKit from "@/snippets/rate-limiting/reference/sveltek
 import SlidingWindowSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/SlidingWindow.mdx";
 import TokenBucketSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/TokenBucket.mdx";
 import TokenBucketRequestSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/TokenBucketRequest.mdx";
+import RemixLoaderVsAction from "@/snippets/rate-limiting/reference/remix/LoaderVsAction.mdx";
 import Comments from "/src/components/Comments.astro";
 
 Arcjet rate limiting allows you to define rules which limit the number of
@@ -167,6 +185,7 @@ type FixedWindowRateLimitOptions = {
   <FixedWindowBun slot="bun" />
   <FixedWindowNextJs slot="next-js" />
   <FixedWindowNodeJs slot="node-js" />
+  <FixedWindowRemix slot="remix" />
   <FixedWindowSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -201,6 +220,7 @@ type SlidingWindowRateLimitOptions = {
   <SlidingWindowBun slot="bun" />
   <SlidingWindowNextJs slot="next-js" />
   <SlidingWindowNodeJs slot="node-js" />
+  <SlidingWindowRemix slot="remix" />
   <SlidingWindowSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -242,6 +262,7 @@ the number of tokens to request.
   <TokenBucketBun slot="bun" />
   <TokenBucketNextJs slot="next-js" />
   <TokenBucketNodeJs slot="node-js" />
+  <TokenBucketRemix slot="remix" />
   <TokenBucketSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -268,6 +289,7 @@ The custom characteristic is `userId` with the value passed as a prop on the
   <ByUserIdBun slot="bun" />
   <ByUserIdNextJs slot="next-js" />
   <ByUserIdNodeJs slot="node-js" />
+  <ByUserIdRemix slot="remix" />
   <ByUserIdSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -291,6 +313,7 @@ specified).
   <SingleRateLimitBun slot="bun" />
   <SingleRateLimitNextJs slot="next-js" />
   <SingleRateLimitNodeJs slot="node-js" />
+  <SingleRateLimitRemix slot="remix" />
   <SingleRateLimitSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -305,11 +328,13 @@ Dashboard](https://app.arcjet.com).
   <DryRunBun slot="bun" />
   <DryRunNextJs slot="next-js" />
   <DryRunNodeJs slot="node-js" />
+  <DryRunRemix slot="remix" />
   <DryRunSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
 <SlotByFramework client:load>
   <PerRouteVsMiddlewareNextJs slot="next-js" />
+  <RemixLoaderVsAction slot="remix" />
   <PerRouteVsHooksSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -353,6 +378,7 @@ This example will log the full result as well as each rate limit rule:
   <DecisionLogBun slot="bun" />
   <DecisionLogNextJs slot="next-js" />
   <DecisionLogNodeJs slot="node-js" />
+  <DecisionLogRemix slot="remix" />
   <DecisionLogSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -366,6 +392,7 @@ to withdraw from the bucket.
   <TokenBucketRequestBun slot="bun" />
   <TokenBucketRequestNextJs slot="next-js" />
   <TokenBucketRequestNodeJs slot="node-js" />
+  <TokenBucketRequestRemix slot="remix" />
   <TokenBucketRequestSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -394,6 +421,7 @@ your responses with appropriate `RateLimit` headers based on a decision.
   <HeadersBun slot="bun" />
   <HeadersNextJs slot="next-js" />
   <HeadersNodeJs slot="node-js" />
+  <HeadersRemix slot="remix" />
   <HeadersSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -410,6 +438,7 @@ If there is an error condition, Arcjet will return an `ERROR` `conclusion`.
   <ErrorsBun slot="bun" />
   <ErrorsNextJs slot="next-js" />
   <ErrorsNodeJs slot="node-js" />
+  <ErrorsRemix slot="remix" />
   <ErrorsSvelteKit slot="sveltekit" />
 </SlotByFramework>
 

@@ -1,10 +1,11 @@
 ---
 title: "Sensitive information reference"
-description: "Reference guide for detecting sensitive information (PII) with Arcjet in your Next.js, Node.js, Bun, or SvelteKit app."
+description: "Reference guide for detecting sensitive information (PII) with Arcjet in your Next.js, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
   - next-js
   - node-js
+  - remix
   - sveltekit
 ajToc:
   - text: "Configuration"
@@ -48,14 +49,17 @@ import PerRouteVsHooksSvelteKit from "@/snippets/sensitive-info/reference/svelte
 import DecisionLogBun from "@/snippets/sensitive-info/reference/bun/DecisionLog.mdx";
 import DecisionLogNextJs from "@/snippets/sensitive-info/reference/nextjs/DecisionLog.mdx";
 import DecisionLogNodeJs from "@/snippets/sensitive-info/reference/nodejs/DecisionLog.mdx";
+import DecisionLogRemix from "@/snippets/sensitive-info/reference/remix/DecisionLog.mdx";
 import DecisionLogSvelteKit from "@/snippets/sensitive-info/reference/sveltekit/DecisionLog.mdx";
 import ErrorsBun from "@/snippets/sensitive-info/reference/bun/Errors.mdx";
 import ErrorsNextJs from "@/snippets/sensitive-info/reference/nextjs/Errors.mdx";
 import ErrorsNodeJs from "@/snippets/sensitive-info/reference/nodejs/Errors.mdx";
+import ErrorsRemix from "@/snippets/sensitive-info/reference/remix/Errors.mdx";
 import ErrorsSvelteKit from "@/snippets/sensitive-info/reference/sveltekit/Errors.mdx";
 import CustomDetectBun from "@/snippets/sensitive-info/reference/bun/CustomDetect.mdx";
 import CustomDetectNextJs from "@/snippets/sensitive-info/reference/nextjs/CustomDetect.mdx";
 import CustomDetectNodeJs from "@/snippets/sensitive-info/reference/nodejs/CustomDetect.mdx";
+import CustomDetectRemix from "@/snippets/sensitive-info/reference/remix/CustomDetect.mdx";
 import CustomDetectSvelteKit from "@/snippets/sensitive-info/reference/sveltekit/CustomDetect.mdx";
 
 Arcjet Sensitive Information Detection protects against clients sending you
@@ -80,6 +84,16 @@ type SensitiveInfoOptions = {
 The `arcjet` client is configured with one or more `sensitiveInfo` rules which take
 one or many `SensitiveInfoOptions`.
 
+The `SensitiveInfoType` enum allows the following values:
+
+- `EMAIL`
+- `CREDIT_CARD`
+- `IP_ADDRESS`
+- `PHONE_NUMBER`
+
+You can also provide a custom detection function to detect other types of
+sensitive information (see below).
+
 :::note
 When specifying multiple rules, the order of the rules is ignored. Rule
 execution ordering is automatically optimized for performance. See
@@ -93,15 +107,8 @@ execution ordering is automatically optimized for performance. See
 
 ## Decision
 
-The [quick start example](/sensitive-info/quick-start?f=sveltekit) will deny requests
-that are determined to be suspicious, immediately returning a response to the
-client using SvelteKit's server hook.
-
 Arcjet also provides a single `protect` function that is used to execute your
-protection rules. This requires a `RequestEvent` property which is the event
-context as passed to the request handler.
-
-This function returns a `Promise` that resolves to an
+protection rules. This function returns a `Promise` that resolves to an
 `ArcjetDecision` object. This contains the following properties:
 
 - `id` (`string`) - The unique ID for the request. This can be used to look up
@@ -116,11 +123,7 @@ This function returns a `Promise` that resolves to an
 - `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
   containing the results of each rule that was executed.
 - `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
-  client IP address. See [IP analysis](/reference/sveltekit#ip-analysis) in the
-  SDK reference for more information.
-
-See [the SDK reference](/reference/sveltekit#results) for more details about the
-rule results.
+  client IP address. See the SDK reference for more information.
 
 You check if a deny conclusion has been returned by a sensitive info rule by using
 `decision.isDenied()` and `decision.reason.isSensitiveInfo()` respectively.
@@ -139,6 +142,7 @@ This example will log the full result as well as the sensitive info rule:
   <DecisionLogBun slot="bun" />
   <DecisionLogNextJs slot="next-js" />
   <DecisionLogNodeJs slot="node-js" />
+  <DecisionLogRemix slot="remix" />
   <DecisionLogSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -159,6 +163,7 @@ this value.
   <CustomDetectBun slot="bun" />
   <CustomDetectNextJs slot="next-js" />
   <CustomDetectNodeJs slot="node-js" />
+  <CustomDetectRemix slot="remix" />
   <CustomDetectSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -177,6 +182,7 @@ accessing `decision.reason.message`.
   <ErrorsBun slot="bun" />
   <ErrorsNextJs slot="next-js" />
   <ErrorsNodeJs slot="node-js" />
+  <ErrorsRemix slot="remix" />
   <ErrorsSvelteKit slot="sveltekit" />
 </SlotByFramework>
 

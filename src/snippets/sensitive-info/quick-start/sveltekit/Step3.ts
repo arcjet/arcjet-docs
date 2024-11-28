@@ -22,6 +22,7 @@ export async function handle({
   resolve: (event: RequestEvent) => Response | Promise<Response>;
 }): Promise<Response> {
   const decision = await aj.protect(event);
+  console.log("Arcjet decision", decision);
 
   if (decision.isDenied()) {
     return error(400, "Bad request - sensitive information detected");

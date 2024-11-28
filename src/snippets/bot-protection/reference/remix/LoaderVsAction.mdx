@@ -1,0 +1,33 @@
+import SelectableContent from "@/components/SelectableContent";
+import SlotByFramework from "@/components/SlotByFramework";
+import { Code } from "@astrojs/starlight/components";
+import ActionTS from "./Action.ts?raw";
+import ActionJS from "./Action.js?raw";
+
+## Loader vs action
+
+Remix does not support middleware, instead [they
+recommend](https://github.com/remix-run/remix/discussions/1432) calling
+functions directly inside the
+[loader](https://remix.run/docs/en/main/route/loader). Loaders execute before
+the page is loaded.
+
+All our examples use this pattern, but you can also execute Arcjet in an
+[action](https://remix.run/docs/en/main/route/action). This would be appropriate
+to protect a form submission or other non-`GET` request.
+
+For example, you might want to run rate limiting on every `GET` page load, but
+use rate limiting and email validation in an action handling a form `POST`.
+
+### Action
+
+This example shows how to run Arcjet in a Remix action:
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={ActionTS} lang="ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={ActionJS} lang="js" />
+  </div>
+</SelectableContent>

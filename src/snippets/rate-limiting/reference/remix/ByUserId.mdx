@@ -1,0 +1,13 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import ByUserIdTS from "./ByUserId.ts?raw";
+import ByUserIdJS from "./ByUserId.js?raw";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={ByUserIdTS} lang="ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={ByUserIdJS} lang="js" />
+  </div>
+</SelectableContent>

@@ -1,0 +1,19 @@
+```sh
+curl -v -H "x-arcjet-suspicious: true" http://localhost:5173/arcjet
+```
+
+After the 5th request, you will see this in your logs:
+
+```text
+Rule Result ArcjetRuleResult {
+   ttl: 0,
+   state: 'DRY_RUN',
+   conclusion: 'DENY',
+   reason: ArcjetShieldReason { type: 'SHIELD', shieldTriggered: true }
+}
+Conclusion ALLOW
+```
+
+The final conclusion is `ALLOW` even though the rule result conclusion is
+`DENY`. This is because the rule is in dry run mode. Switch it to `LIVE` mode to
+actually block the request.
