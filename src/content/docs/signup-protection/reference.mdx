@@ -1,10 +1,11 @@
 ---
 title: "Signup from protection reference"
-description: "Reference guide for adding Arcjet email validation to your Next.js, Node.js, Bun, or SvelteKit app."
+description: "Reference guide for adding Arcjet email validation to your Next.js, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
   - next-js
   - node-js
+  - remix
   - sveltekit
 ajToc:
   - text: "Configuration"
@@ -28,14 +29,17 @@ import SlotByFramework from "@/components/SlotByFramework";
 import RecommendedBun from "@/snippets/signup-protection/reference/bun/Recommended.mdx";
 import RecommendedNextJs from "@/snippets/signup-protection/reference/nextjs/Recommended.mdx";
 import RecommendedNodeJs from "@/snippets/signup-protection/reference/nodejs/Recommended.mdx";
+import RecommendedRemix from "@/snippets/signup-protection/reference/remix/Recommended.mdx";
 import RecommendedSvelteKit from "@/snippets/signup-protection/reference/sveltekit/Recommended.mdx";
 import CustomVerificationBun from "@/snippets/signup-protection/reference/bun/CustomVerification.mdx";
 import CustomVerificationNextJs from "@/snippets/signup-protection/reference/nextjs/CustomVerification.mdx";
 import CustomVerificationNodeJs from "@/snippets/signup-protection/reference/nodejs/CustomVerification.mdx";
+import CustomVerificationRemix from "@/snippets/signup-protection/reference/remix/CustomVerification.mdx";
 import CustomVerificationSvelteKit from "@/snippets/signup-protection/reference/sveltekit/CustomVerification.mdx";
 import ErrorsBun from "@/snippets/signup-protection/reference/bun/Errors.mdx";
 import ErrorsNextJs from "@/snippets/signup-protection/reference/nextjs/Errors.mdx";
 import ErrorsNodeJs from "@/snippets/signup-protection/reference/nodejs/Errors.mdx";
+import ErrorsRemix from "@/snippets/signup-protection/reference/remix/Errors.mdx";
 import ErrorsSvelteKit from "@/snippets/signup-protection/reference/sveltekit/Errors.mdx";
 import Comments from "/src/components/Comments.astro";
 
@@ -82,6 +86,7 @@ This can be configured as follows:
   <RecommendedBun slot="bun" />
   <RecommendedNextJs slot="next-js" />
   <RecommendedNodeJs slot="node-js" />
+  <RecommendedRemix slot="remix" />
   <RecommendedSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -145,9 +150,6 @@ for (const result of decision.results) {
 This could be useful metadata to add to a new user's record in your database
 before you redirect them to the next step in your signup flow.
 
-See [the SDK reference](/reference/nextjs#results) for more details about the
-rule results.
-
 ### Custom verification logic
 
 Checking the rule results allows you to use the Arcjet decision as part of your
@@ -159,6 +161,7 @@ users who sign up with a free email address.
   <CustomVerificationBun slot="bun" />
   <CustomVerificationNextJs slot="next-js" />
   <CustomVerificationNodeJs slot="node-js" />
+  <CustomVerificationRemix slot="remix" />
   <CustomVerificationSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -175,6 +178,7 @@ If there is an error condition, Arcjet will return an `ERROR` `conclusion`.
   <ErrorsBun slot="bun" />
   <ErrorsNextJs slot="next-js" />
   <ErrorsNodeJs slot="node-js" />
+  <ErrorsRemix slot="remix" />
   <ErrorsSvelteKit slot="sveltekit" />
 </SlotByFramework>
 

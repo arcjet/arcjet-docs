@@ -1,4 +1,4 @@
-import arcjet, { sensitiveInfo } from "@arcjet/node";
+import arcjet, { sensitiveInfo, shield } from "@arcjet/node";
 import http from "node:http";
 
 const aj = arcjet({
@@ -7,6 +7,9 @@ const aj = arcjet({
   rules: [
     sensitiveInfo({
       deny: ["EMAIL"],
+      mode: "LIVE",
+    }),
+    shield({
       mode: "LIVE",
     }),
   ],
@@ -21,8 +24,12 @@ const server = http.createServer(async function (
   for (const result of decision.results) {
     console.log("Rule Result", result);
 
-    if (result.reason.isRateLimit()) {
-      console.log("Rate limit rule", result);
+    if (result.reason.isSensitiveInfo()) {
+      console.log("Sensitive info rule", result);
+    }
+
+    if (result.reason.isShield()) {
+      console.log("Shield protection rule", result);
     }
   }
 

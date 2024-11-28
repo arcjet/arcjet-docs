@@ -231,6 +231,10 @@ export const main = [
             link: "/reference/nodejs",
           },
           {
+            label: "Remix",
+            link: "/reference/remix",
+          },
+          {
             label: "SvelteKit",
             link: "/reference/sveltekit",
           },

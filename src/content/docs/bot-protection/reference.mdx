@@ -1,11 +1,12 @@
 ---
 title: "Bot protection reference"
-description: "Reference guide for adding Arcjet bot protection to your Next.js, Node.js, Bun, or SvelteKit app."
+description: "Reference guide for adding Arcjet bot protection to your Next.js, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
   - deno
   - next-js
   - node-js
+  - remix
   - sveltekit
 ajToc:
   - text: "Configuration"
@@ -25,6 +26,12 @@ ajToc:
         anchor: "middleware"
       - text: "Avoiding double protection with middleware"
         anchor: "avoiding-double-protection-with-middleware"
+  - text: "Loader vs action"
+    anchor: "loader-vs-action"
+    framework: ["remix"]
+    children:
+      - text: "Action"
+        anchor: "action"
   - text: "Per route vs hooks"
     anchor: "per-route-vs-hooks"
     framework: ["sveltekit"]
@@ -84,6 +91,14 @@ import NodeJsIdentifiedBots from "@/snippets/bot-protection/reference/nodejs/Ide
 import NodeJsErrors from "@/snippets/bot-protection/reference/nodejs/Errors.mdx";
 import NodeJsFiltering from "@/snippets/bot-protection/reference/nodejs/Filtering.mdx";
 
+import RemixAllowingBots from "@/snippets/bot-protection/reference/remix/AllowingBots.mdx";
+import RemixDenyingBots from "@/snippets/bot-protection/reference/remix/DenyingBots.mdx";
+import RemixDecisionLog from "@/snippets/bot-protection/reference/remix/DecisionLog.mdx";
+import RemixIdentifiedBots from "@/snippets/bot-protection/reference/remix/IdentifiedBots.mdx";
+import RemixErrors from "@/snippets/bot-protection/reference/remix/Errors.mdx";
+import RemixFiltering from "@/snippets/bot-protection/reference/remix/Filtering.mdx";
+import RemixLoaderVsAction from "@/snippets/bot-protection/reference/remix/LoaderVsAction.mdx";
+
 import SvelteKitAllowingBots from "@/snippets/bot-protection/reference/sveltekit/AllowingBots.mdx";
 import SvelteKitDenyingBots from "@/snippets/bot-protection/reference/sveltekit/DenyingBots.mdx";
 import SvelteKitPerRouteVsHooks from "@/snippets/bot-protection/reference/sveltekit/PerRouteVsHooks.mdx";
@@ -142,6 +157,7 @@ categories](/bot-protection/identifying-bots#bot-categories).
   <DenoAllowingBots slot="deno" />
   <NextJsAllowingBots slot="next-js" />
   <NodeJsAllowingBots slot="node-js" />
+  <RemixAllowingBots slot="remix" />
   <SvelteKitAllowingBots slot="sveltekit" />
 </SlotByFramework>
 
@@ -160,11 +176,13 @@ categories](/bot-protection/identifying-bots#bot-categories).
   <DenoDenyingBots slot="deno" />
   <NextJsDenyingBots slot="next-js" />
   <NodeJsDenyingBots slot="node-js" />
+  <RemixDenyingBots slot="remix" />
   <SvelteKitDenyingBots slot="sveltekit" />
 </SlotByFramework>
 
 <SlotByFramework client:load>
   <NextJsPerRouteVsMiddleware slot="next-js" />
+  <RemixLoaderVsAction slot="remix" />
   <SvelteKitPerRouteVsHooks slot="sveltekit" />
 </SlotByFramework>
 
@@ -213,6 +231,7 @@ This example will log the full result as well as the bot protection rule:
   <DenoDecisionLog slot="deno" />
   <NextJsDecisionLog slot="next-js" />
   <NodeJsDecisionLog slot="node-js" />
+  <RemixDecisionLog slot="remix" />
   <SvelteKitDecisionLog slot="sveltekit" />
 </SlotByFramework>
 
@@ -229,6 +248,7 @@ properties.
   <DenoIdentifiedBots slot="deno" />
   <NextJsIdentifiedBots slot="next-js" />
   <NodeJsIdentifiedBots slot="node-js" />
+  <RemixIdentifiedBots slot="remix" />
   <SvelteKitIdentifiedBots slot="sveltekit" />
 </SlotByFramework>
 
@@ -258,6 +278,7 @@ See [an example of how to do this](/bot-protection/concepts#user-agent-header).
   <DenoErrors slot="deno" />
   <NextJsErrors slot="next-js" />
   <NodeJsErrors slot="node-js" />
+  <RemixErrors slot="remix" />
   <SvelteKitErrors slot="sveltekit" />
 </SlotByFramework>
 
@@ -272,6 +293,7 @@ their "advertising quality" bot.
   <DenoFiltering slot="deno" />
   <NextJsFiltering slot="next-js" />
   <NodeJsFiltering slot="node-js" />
+  <RemixFiltering slot="remix" />
   <SvelteKitFiltering slot="sveltekit" />
 </SlotByFramework>
 

@@ -20,12 +20,7 @@ const server = http.createServer(async function (
   res: http.ServerResponse,
 ) {
   const decision = await aj.protect(req);
-
-  for (const result of decision.results) {
-    console.log("Rule Result", result);
-  }
-
-  console.log("Conclusion", decision.conclusion);
+  console.log("Arcjet decision", decision);
 
   if (decision.isDenied()) {
     res.writeHead(400, { "Content-Type": "application/json" });

@@ -1,10 +1,11 @@
 ---
 title: "Sensitive information quick start"
-description: "Quick start guide for detecting sensitive information with Arcjet in your Next.js, Node.js, Bun, or SvelteKit app."
+description: "Quick start guide for detecting sensitive information with Arcjet in your Next.js, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
   - next-js
   - node-js
+  - remix
   - sveltekit
 ajToc:
   - text: "Video quick start"
@@ -36,17 +37,20 @@ import FrameworkName from "@/components/FrameworkName";
 import Step1Bun from "@/snippets/sensitive-info/quick-start/bun/Step1.mdx";
 import Step1NextJs from "@/snippets/sensitive-info/quick-start/nextjs/Step1.mdx";
 import Step1NodeJs from "@/snippets/sensitive-info/quick-start/nodejs/Step1.mdx";
+import StepRemix from "@/snippets/sensitive-info/quick-start/remix/Step1.mdx";
 import Step1SvelteKit from "@/snippets/sensitive-info/quick-start/sveltekit/Step1.mdx";
 import Step2 from "@/snippets/sensitive-info/quick-start/shared/Step2.mdx";
 import Step2SetEnv from "@/snippets/sensitive-info/quick-start/shared/Step2SetEnv.mdx";
 import Step3Bun from "@/snippets/sensitive-info/quick-start/bun/Step3.mdx";
 import Step3NextJs from "@/snippets/sensitive-info/quick-start/nextjs/Step3.mdx";
 import Step3NodeJs from "@/snippets/sensitive-info/quick-start/nodejs/Step3.mdx";
+import Step3Remix from "@/snippets/sensitive-info/quick-start/remix/Step3.mdx";
 import Step3SvelteKit from "@/snippets/sensitive-info/quick-start/sveltekit/Step3.mdx";
 import Step4 from "@/snippets/sensitive-info/quick-start/nextjs/Step4.mdx";
 import Step4Bun from "@/snippets/sensitive-info/quick-start/bun/Step4.mdx";
 import Step4NextJs from "@/snippets/sensitive-info/quick-start/nextjs/Step4.mdx";
 import Step4NodeJs from "@/snippets/sensitive-info/quick-start/nodejs/Step4.mdx";
+import Step4Remix from "@/snippets/sensitive-info/quick-start/remix/Step4.mdx";
 import Step4SvelteKit from "@/snippets/sensitive-info/quick-start/sveltekit/Step4.mdx";
 import FAQs from "/src/components/FAQs.astro";
 import Comments from "/src/components/Comments.astro";
@@ -70,6 +74,7 @@ In your project root, run the following command to install the SDK:
   <Step1Bun slot="bun" />
   <Step1NextJs slot="next-js" />
   <Step1NodeJs slot="node-js" />
+  <StepRemix slot="remix" />
   <Step1SvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -83,17 +88,22 @@ project root.
   <Step2SetEnv slot="bun" />
   <Step2 slot="next-js" />
   <Step2SetEnv slot="node-js" />
+  <Step2 slot="remix" />
   <Step2 slot="sveltekit" />
 </SlotByFramework>
 
 ### 3. Protect a route
 
-Add Arcjet to detect sensitive data from a specific route in your app.
+Add Arcjet to detect email address from a specific route in your app.
+
+You can also configure Arcjet to detect credit/debit card numbers, IP addresses,
+phone numbers, and/or implement a custom detection function.
 
 <SlotByFramework client:load>
   <Step3Bun slot="bun" />
   <Step3NextJs slot="next-js" />
   <Step3NodeJs slot="node-js" />
+  <Step3Remix slot="remix" />
   <Step3SvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -106,6 +116,7 @@ request:
   <Step4Bun slot="bun" />
   <Step4NextJs slot="next-js" />
   <Step4NodeJs slot="node-js" />
+  <Step4Remix slot="remix" />
   <Step4SvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -136,9 +147,6 @@ is a 400:
 < date: Tue, 09 Jan 2024 13:43:04 GMT
 < vary: Accept-Encoding
 < content-length: 72
-<
-* Connection #0 to host localhost left intact
-{"message":"Forbidden"}%
 ```
 
 ## FAQs

@@ -1,10 +1,11 @@
 ---
 title: "Email validation reference"
-description: "Reference guide for adding Arcjet email validation to your Next.js, Node.js, Bun, or SvelteKit app."
+description: "Reference guide for adding Arcjet email validation to your Next.js, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
   - next-js
   - node-js
+  - remix
   - sveltekit
 ajToc:
   - text: "Configuration"
@@ -22,10 +23,12 @@ import SlotByFramework from "@/components/SlotByFramework";
 import DecisionLogBun from "@/snippets/email-validation/reference/bun/DecisionLog.mdx";
 import DecisionLogNextJs from "@/snippets/email-validation/reference/nextjs/DecisionLog.mdx";
 import DecisionLogNodeJs from "@/snippets/email-validation/reference/nodejs/DecisionLog.mdx";
+import DecisionLogRemix from "@/snippets/email-validation/reference/remix/DecisionLog.mdx";
 import DecisionLogSvelteKit from "@/snippets/email-validation/reference/sveltekit/DecisionLog.mdx";
 import ErrorsBun from "@/snippets/email-validation/reference/bun/Errors.mdx";
 import ErrorsNextJs from "@/snippets/email-validation/reference/nextjs/Errors.mdx";
 import ErrorsNodeJs from "@/snippets/email-validation/reference/nodejs/Errors.mdx";
+import ErrorsRemix from "@/snippets/email-validation/reference/remix/Errors.mdx";
 import ErrorsSvelteKit from "@/snippets/email-validation/reference/sveltekit/Errors.mdx";
 import Comments from "/src/components/Comments.astro";
 
@@ -113,6 +116,7 @@ This example will log the full result as well as the email validation rule:
   <DecisionLogBun slot="bun" />
   <DecisionLogNextJs slot="next-js" />
   <DecisionLogNodeJs slot="node-js" />
+  <DecisionLogRemix slot="remix" />
   <DecisionLogSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -131,6 +135,27 @@ type ArcjetEmailType =
   | "INVALID"; // Email address that is invalid
 ```
 
+You can check the email type using the `decision.reason.emailTypes` array:
+
+```ts
+let message = "";
+// You could return specific messages based on the email type, but this would
+// also reveal the validation to a spammer
+if (decision.reason.emailTypes.includes("DISPOSABLE")) {
+  message = "We do not allow disposable email addresses.";
+} else if (decision.reason.emailTypes.includes("FREE")) {
+  message =
+    "We do not allow free email addresses, please use a business address.";
+} else if (decision.reason.emailTypes.includes("NO_MX_RECORDS")) {
+  message = "Your email domain does not have an MX record. Is there a typo?";
+} else if (decision.reason.emailTypes.includes("NO_GRAVATAR")) {
+  message = "We require a Gravatar profile to sign up.";
+} else {
+  // This is a catch all
+  message = "Invalid email.";
+}
+```
+
 ## Error handling
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
@@ -144,6 +169,7 @@ If there is an error condition, Arcjet will return an `ERROR` `conclusion`.
   <ErrorsBun slot="bun" />
   <ErrorsNextJs slot="next-js" />
   <ErrorsNodeJs slot="node-js" />
+  <ErrorsRemix slot="remix" />
   <ErrorsSvelteKit slot="sveltekit" />
 </SlotByFramework>
 

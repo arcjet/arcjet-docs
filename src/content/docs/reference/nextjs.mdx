@@ -375,12 +375,14 @@ which rule caused the conclusion:
 
 - `isBot()` (`bool`) - Returns `true` if the bot protection rules have been
   applied and the request was considered to have been made by a bot.
+- `isEmail()` (`bool`) - Returns `true` if the email rules have been applied and
+  the email address has a problem.
 - `isRateLimit()` (`bool`) - Returns `true` if the rate limit rules have been
   applied and the request has exceeded the rate limit.
+- `isSensitiveInfo()` (`bool`) - Returns `true` if sensitive info rules have
+  been applied and sensitive info has been detected.
 - `isShield()` (`bool`) - Returns `true` if the shield rules have been applied
   and the request is suspicious based on analysis by Arcjet Shield.
-- `isEmail()` (`bool`) - Returns `true` if the email validation rules have been
-  applied and the email address has a problem.
 - `isError()` (`bool`) - Returns `true` if there was an error processing the
   request.
 
