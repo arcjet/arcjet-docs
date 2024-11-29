@@ -34,7 +34,6 @@ export default async function handler(
         denied: decision.reason.denied,
       });
     } else if (decision.reason.isSpoofed()) {
-
       return res.status(403).json({
         error: "Forbidden",
         // Useful for debugging, but don't return these to the client in
