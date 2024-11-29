@@ -1,0 +1,22 @@
+import Step3TS from "./Step3.ts?raw";
+import Step3JS from "./Step3.js?raw";
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+
+The example below will return a 403 Forbidden response for all requests from
+clients we are sure are automated.
+
+This creates a global guard that will be applied to all routes. In a real
+application, implementing guards or per-route protections would give you more
+flexibility. See the [reference guide](/bot-protection/reference) and the
+[NestJS example app](https://github.com/arcjet/example-nestjs) for how to do
+this.
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={Step3TS} lang="ts" title="src/main.ts" mark={["ARCJET_KEY"]} />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={Step3JS} lang="js" title="src/main.ts" mark={["ARCJET_KEY"]} />
+  </div>
+</SelectableContent>

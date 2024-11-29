@@ -1,9 +1,10 @@
 ---
 title: "Bot protection quick start"
-description: "Quick start guide for adding Arcjet bot protection to your Next.js, Node.js, Bun, Remix, or SvelteKit app."
+description: "Quick start guide for adding Arcjet bot protection to your Next.js, NestJS, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
   - deno
+  - nest-js
   - next-js
   - node-js
   - remix
@@ -23,7 +24,7 @@ ajToc:
         framework: ["bun", "node-js"]
       - text: 4. Start app
         anchor: "4-start-app"
-        framework: ["next-js", "remix", "sveltekit"]
+        framework: ["nest-js", "next-js", "remix", "sveltekit"]
       - text: 5. Choose bots to allow or deny
         anchor: "5-choose-bots-to-allow-or-deny"
   - text: "FAQs"
@@ -50,6 +51,11 @@ import DenoStep1 from "@/snippets/bot-protection/quick-start/deno/Step1.mdx";
 import DenoStep2 from "@/snippets/bot-protection/quick-start/deno/Step2.mdx";
 import DenoStep3 from "@/snippets/bot-protection/quick-start/deno/Step3.mdx";
 import DenoStep4 from "@/snippets/bot-protection/quick-start/deno/Step4.mdx";
+
+import NestJsStep1 from "@/snippets/bot-protection/quick-start/nestjs/Step1.mdx";
+import NestJsStep2 from "@/snippets/bot-protection/quick-start/nestjs/Step2.mdx";
+import NestJsStep3 from "@/snippets/bot-protection/quick-start/nestjs/Step3.mdx";
+import NestJsStep4 from "@/snippets/bot-protection/quick-start/nestjs/Step4.mdx";
 
 import NextJsStep1 from "@/snippets/bot-protection/quick-start/nextjs/Step1.mdx";
 import NextJsStep2 from "@/snippets/bot-protection/quick-start/nextjs/Step2.mdx";
@@ -87,6 +93,7 @@ In your project root, run the following command to install the SDK:
 <SlotByFramework client:load>
   <BunStep1 slot="bun" />
   <DenoStep1 slot="deno" />
+  <NestJsStep1 slot="nest-js" />
   <NextJsStep1 slot="next-js" />
   <NodeJsStep1 slot="node-js" />
   <RemixStep1 slot="remix" />
@@ -101,6 +108,7 @@ instructions to add a site and get a key.
 <SlotByFramework client:load>
   <BunStep2 slot="bun" />
   <DenoStep2 slot="deno" />
+  <NestJsStep2 slot="nest-js" />
   <NextJsStep2 slot="next-js" />
   <NodeJsStep2 slot="node-js" />
   <RemixStep2 slot="remix" />
@@ -112,6 +120,7 @@ instructions to add a site and get a key.
 <SlotByFramework client:load>
   <BunStep3 slot="bun" />
   <DenoStep3 slot="deno" />
+  <NestJsStep3 slot="nest-js" />
   <NextJsStep3 slot="next-js" />
   <NodeJsStep3 slot="node-js" />
   <RemixStep3 slot="remix" />
@@ -121,17 +130,20 @@ instructions to add a site and get a key.
 <SlotByFramework client:load>
   <BunStep4 slot="bun" />
   <DenoStep4 slot="deno" />
+  <NestJsStep4 slot="nest-js" />
   <NextJsStep4 slot="next-js" />
   <NodeJsStep4 slot="node-js" />
   <RemixStep4 slot="remix" />
   <SvelteKitStep4 slot="sveltekit" />
 </SlotByFramework>
 
+The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
+
 ### 5. Choose bots to allow or deny
 
 Arcjet maintains a list of known bots so you can choose to either only [allow
-specific bots](/bot-protection/reference) or only [deny specific
-bots](/bot-protection/reference).
+specific bots](/bot-protection/reference#allowing-specific-bots) or only [deny
+specific bots](/bot-protection/reference#denying-specific-bots).
 
 Check out our [full list of bots](https://arcjet.com/bot-list).
 
