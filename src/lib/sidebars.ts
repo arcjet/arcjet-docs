@@ -298,6 +298,10 @@ export const main = [
             label: "Quick start",
             link: "/nosecone/quick-start",
           },
+          {
+            label: "Reference",
+            link: "/nosecone/reference",
+          },
         ],
       },
     ],

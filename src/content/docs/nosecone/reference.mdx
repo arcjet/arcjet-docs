@@ -1,0 +1,104 @@
+---
+title: "Arcjet Nosecone reference"
+description: "Reference for the Nosecone library"
+---
+
+The Arcjet Nosecone library provides a streamlined way to apply secure headers
+to your application.
+
+## API
+
+### `nosecone(options?: NoseconeOptions): Headers`
+
+The default export is a function that returns a set of `Headers` to apply to a
+request that help you secure your application. The defaults should work for many
+applications, but all can be configured or disabled for specific requirements.
+
+### `NoseconeOptions`
+
+All entries in `NoseconeOptions` can be enabled with defaults by specifying
+`true` or disabled by specifying `false`. Additionally, many allow individual
+configuration via their own configuration objects, which override any defaults.
+
+You can use object spread, e.g. `...defaults`, to combine the default values
+with your overrides.
+
+```ts
+interface NoseconeOptions {
+  /**
+   * Configure the `Content-Security-Policy` header, which helps mitigate a
+   * large number of * attacks, such as cross-site scripting.
+   */
+  contentSecurityPolicy?: ContentSecurityPolicyConfig | boolean;
+  /**
+   * Configure the `Cross-Origin-Embedder-Policy` header, which helps control
+   * what resources can be loaded cross-origin.
+   */
+  crossOriginEmbedderPolicy?: CrossOriginEmbedderPolicyConfig | boolean;
+  /**
+   * Configure the `Cross-Origin-Opener-Policy` header, which helps
+   * process-isolate your page.
+   */
+  crossOriginOpenerPolicy?: CrossOriginOpenerPolicyConfig | boolean;
+  /**
+   * Configure the `Cross-Origin-Resource-Policy` header, which blocks others
+   * from loading your resources cross-origin in some cases.
+   */
+  crossOriginResourcePolicy?: CrossOriginResourcePolicyConfig | boolean;
+  /**
+   * Configure the `Origin-Agent-Cluster` header, which provides a mechanism to
+   * allow web applications to isolate their origins from other processes.
+   */
+  originAgentCluster?: boolean;
+  /**
+   * Configure the `Referrer-Policy` header, which controls what information is
+   * set in the `Referer` request header.
+   */
+  referrerPolicy?: ReferrerPolicyConfig | boolean;
+  /**
+   * Configure the `Strict-Transport-Security` header, which tells browsers to
+   * prefer HTTPS instead of insecure HTTP.
+   */
+  strictTransportSecurity?: StrictTransportSecurityConfig | boolean;
+  /**
+   * Configure the `X-Content-Type-Options` header, which helps mitigate MIME
+   * type sniffing that can cause security issues.
+   */
+  xContentTypeOptions?: boolean;
+  /**
+   * Configure the `X-DNS-Prefetch-Control` header, which helps control DNS
+   * prefetching to improve user privacy at the expense of performance.
+   */
+  xDnsPrefetchControl?: DnsPrefetchControlConfig | boolean;
+  /**
+   * Configure the `X-Download-Options` header, which prevents a user from
+   * opening a file directly in Internet Explorer 8 to avoid prevent script
+   * injection.
+   */
+  xDownloadOptions?: boolean;
+  /**
+   * Configure the `X-Frame-Options` header, which help mitigate clickjacking
+   * attacks in legacy browsers. This header is superceded by a directive in the
+   * `Content-Security-Policy` header.
+   */
+  xFrameOptions?: FrameOptionsConfig | boolean;
+  /**
+   * Configure the `X-Permitted-Cross-Domain-Policies` header, which tells some
+   * clients, like Adobe products, your domain's policy for loading cross-domain
+   * content.
+   */
+  xPermittedCrossDomainPolicies?: PermittedCrossDomainPoliciesConfig | boolean;
+  /**
+   * Disable the `X-XSS-Protection` header, which could introduce a browser
+   * side-channel if enabled.
+   */
+  xXssProtection?: boolean;
+}
+```
+
+## Headers
+
+### `Content-Security-Policy`
+
+The `Content-Security-Policy` header helps mitigate a large number of attacks,
+such as cross-site scripting.
