@@ -22,16 +22,28 @@ const aj = arcjet({
 export async function POST(req) {
   const decision = await aj.protect(req);
 
-  if (decision.isDenied() && decision.reason.isBot()) {
-    return NextResponse.json(
-      {
-        error: "You are a bot!",
-        // Useful for debugging, but don't return these to the client in
-        // production
-        denied: decision.reason.denied,
-      },
-      { status: 403 },
-    );
+  if (decision.reason.isBot()) {
+    if (decision.isDenied()) {
+      return NextResponse.json(
+        {
+          error: "You are a bot!",
+          // Useful for debugging, but don't return these to the client in
+          // production
+          denied: decision.reason.denied,
+        },
+        { status: 403 },
+      );
+    } else if (decision.reason.isSpoofed()) {
+      return NextResponse.json(
+        {
+          error: "You are a bot!",
+          // Useful for debugging, but don't return these to the client in
+          // production
+          denied: decision.reason.denied,
+        },
+        { status: 403 },
+      );
+    }
   }
 
   return NextResponse.json({

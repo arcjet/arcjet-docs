@@ -18,7 +18,7 @@ const aj = arcjet({
   ],
 });
 
-const server = http.createServer(async function (
+const server = http.createServer(async function(
   req: http.IncomingMessage,
   res: http.ServerResponse,
 ) {
@@ -29,6 +29,11 @@ const server = http.createServer(async function (
     res.writeHead(403, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "Forbidden" }));
   } else {
+    if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+      res.writeHead(403, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Forbidden" }));
+    }
+
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ message: "Hello world" }));
   }
