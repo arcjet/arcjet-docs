@@ -1,8 +1,9 @@
 ---
 title: "Rate limiting"
-description: "Quick start guide for adding Arcjet rate limiting to your Next.js, Node.js, Bun, Remix, or SvelteKit app."
+description: "Quick start guide for adding Arcjet rate limiting to your Next.js, NestJS, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
+  - nest-js
   - next-js
   - node-js
   - remix
@@ -25,7 +26,7 @@ ajToc:
         framework: ["bun", "node-js"]
       - text: 4. Start app
         anchor: "4-start-app"
-        framework: ["next-js", "remix", "sveltekit"]
+        framework: ["nest-js", "next-js", "remix", "sveltekit"]
   - text: "FAQs"
     anchor: "faqs"
   - text: "What next?"
@@ -45,6 +46,11 @@ import BunStep1 from "@/snippets/rate-limiting/quick-start/bun/Step1.mdx";
 import BunStep2 from "@/snippets/rate-limiting/quick-start/bun/Step2.mdx";
 import BunStep3 from "@/snippets/rate-limiting/quick-start/bun/Step3.mdx";
 import BunStep4 from "@/snippets/rate-limiting/quick-start/bun/Step4.mdx";
+
+import NestJsStep1 from "@/snippets/rate-limiting/quick-start/nestjs/Step1.mdx";
+import NestJsStep2 from "@/snippets/rate-limiting/quick-start/nestjs/Step2.mdx";
+import NestJsStep3 from "@/snippets/rate-limiting/quick-start/nestjs/Step3.mdx";
+import NestJsStep4 from "@/snippets/rate-limiting/quick-start/nestjs/Step4.mdx";
 
 import NextJsVideoQuickStart from "@/snippets/rate-limiting/quick-start/nextjs/VideoQuickStart.mdx";
 import NextJsStep1 from "@/snippets/rate-limiting/quick-start/nextjs/Step1.mdx";
@@ -86,6 +92,7 @@ In your project root, run the following command to install the SDK:
 
 <SlotByFramework client:load>
   <BunStep1 slot="bun" />
+  <NestJsStep1 slot="nest-js" />
   <NextJsStep1 slot="next-js" />
   <NodeJsStep1 slot="node-js" />
   <RemixStep1 slot="remix" />
@@ -99,6 +106,7 @@ instructions to add a site and get a key.
 
 <SlotByFramework client:load>
   <BunStep2 slot="bun" />
+  <NestJsStep2 slot="nest-js" />
   <NextJsStep2 slot="next-js" />
   <NodeJsStep2 slot="node-js" />
   <RemixStep2 slot="remix" />
@@ -114,6 +122,7 @@ configured with a maximum capacity of 10 tokens and refills by 5 tokens every
 
 <SlotByFramework client:load>
   <BunStep3 slot="bun" />
+  <NestJsStep3 slot="nest-js" />
   <NextJsStep3 slot="next-js" />
   <NodeJsStep3 slot="node-js" />
   <RemixStep3 slot="remix" />
@@ -122,11 +131,14 @@ configured with a maximum capacity of 10 tokens and refills by 5 tokens every
 
 <SlotByFramework client:load>
   <BunStep4 slot="bun" />
+  <NestJsStep4 slot="nest-js" />
   <NextJsStep4 slot="next-js" />
   <NodeJsStep4 slot="node-js" />
   <RemixStep4 slot="remix" />
   <SvelteKitStep4 slot="sveltekit" />
 </SlotByFramework>
+
+The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
 
 ## FAQs
 

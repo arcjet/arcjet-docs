@@ -1,9 +1,10 @@
 ---
 title: "Bot protection reference"
-description: "Reference guide for adding Arcjet bot protection to your Next.js, Node.js, Bun, Remix, or SvelteKit app."
+description: "Reference guide for adding Arcjet bot protection to your Next.js, NestJS, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
   - deno
+  - nest-js
   - next-js
   - node-js
   - remix
@@ -16,6 +17,16 @@ ajToc:
         anchor: "allowing-specific-bots"
       - text: "Denying specific bots"
         anchor: "denying-specific-bots"
+  - text: "Guards and routes"
+    anchor: "guards-and-routes"
+    framework: ["nest-js"]
+    children:
+      - text: "Global guard"
+        anchor: "global-guard"
+      - text: "Per route guard"
+        anchor: "per-route-guard"
+      - text: "Within route"
+        anchor: "within-route"
   - text: "Per route vs middleware"
     anchor: "per-route-vs-middleware"
     framework: ["next-js"]
@@ -58,54 +69,63 @@ ajToc:
     framework: ["next-js"]
 ---
 
-import SlotByFramework from "@/components/SlotByFramework";
 import Comments from "@/components/Comments.astro";
+import SlotByFramework from "@/components/SlotByFramework";
+import TextByFramework from "@/components/TextByFramework";
 
 import BunAllowingBots from "@/snippets/bot-protection/reference/bun/AllowingBots.mdx";
-import BunDenyingBots from "@/snippets/bot-protection/reference/bun/DenyingBots.mdx";
 import BunDecisionLog from "@/snippets/bot-protection/reference/bun/DecisionLog.mdx";
-import BunIdentifiedBots from "@/snippets/bot-protection/reference/bun/IdentifiedBots.mdx";
+import BunDenyingBots from "@/snippets/bot-protection/reference/bun/DenyingBots.mdx";
 import BunErrors from "@/snippets/bot-protection/reference/bun/Errors.mdx";
 import BunFiltering from "@/snippets/bot-protection/reference/bun/Filtering.mdx";
+import BunIdentifiedBots from "@/snippets/bot-protection/reference/bun/IdentifiedBots.mdx";
 
 import DenoAllowingBots from "@/snippets/bot-protection/reference/deno/AllowingBots.mdx";
-import DenoDenyingBots from "@/snippets/bot-protection/reference/deno/DenyingBots.mdx";
 import DenoDecisionLog from "@/snippets/bot-protection/reference/deno/DecisionLog.mdx";
-import DenoIdentifiedBots from "@/snippets/bot-protection/reference/deno/IdentifiedBots.mdx";
+import DenoDenyingBots from "@/snippets/bot-protection/reference/deno/DenyingBots.mdx";
 import DenoErrors from "@/snippets/bot-protection/reference/deno/Errors.mdx";
 import DenoFiltering from "@/snippets/bot-protection/reference/deno/Filtering.mdx";
+import DenoIdentifiedBots from "@/snippets/bot-protection/reference/deno/IdentifiedBots.mdx";
+
+import NestJsAllowingBots from "@/snippets/bot-protection/reference/nestjs/AllowingBots.mdx";
+import NestJsDecisionLog from "@/snippets/bot-protection/reference/nestjs/DecisionLog.mdx";
+import NestJsDecoratorRoutes from "@/snippets/bot-protection/reference/nestjs/DecoratorRoutes.mdx";
+import NestJsDenyingBots from "@/snippets/bot-protection/reference/nestjs/DenyingBots.mdx";
+import NestJsErrors from "@/snippets/bot-protection/reference/nestjs/Errors.mdx";
+import NestJsFiltering from "@/snippets/bot-protection/reference/nestjs/Filtering.mdx";
+import NestJsIdentifiedBots from "@/snippets/bot-protection/reference/nestjs/IdentifiedBots.mdx";
 
 import NextJsAllowingBots from "@/snippets/bot-protection/reference/nextjs/AllowingBots.mdx";
-import NextJsDenyingBots from "@/snippets/bot-protection/reference/nextjs/DenyingBots.mdx";
-import NextJsPerRouteVsMiddleware from "@/snippets/bot-protection/reference/nextjs/PerRouteVsMiddleware.mdx";
 import NextJsDecisionLog from "@/snippets/bot-protection/reference/nextjs/DecisionLog.mdx";
-import NextJsIdentifiedBots from "@/snippets/bot-protection/reference/nextjs/IdentifiedBots.mdx";
+import NextJsDenyingBots from "@/snippets/bot-protection/reference/nextjs/DenyingBots.mdx";
 import NextJsErrors from "@/snippets/bot-protection/reference/nextjs/Errors.mdx";
-import NextJsFiltering from "@/snippets/bot-protection/reference/nextjs/Filtering.mdx";
 import NextJsExamples from "@/snippets/bot-protection/reference/nextjs/Examples.mdx";
+import NextJsFiltering from "@/snippets/bot-protection/reference/nextjs/Filtering.mdx";
+import NextJsIdentifiedBots from "@/snippets/bot-protection/reference/nextjs/IdentifiedBots.mdx";
+import NextJsPerRouteVsMiddleware from "@/snippets/bot-protection/reference/nextjs/PerRouteVsMiddleware.mdx";
 
 import NodeJsAllowingBots from "@/snippets/bot-protection/reference/nodejs/AllowingBots.mdx";
-import NodeJsDenyingBots from "@/snippets/bot-protection/reference/nodejs/DenyingBots.mdx";
 import NodeJsDecisionLog from "@/snippets/bot-protection/reference/nodejs/DecisionLog.mdx";
-import NodeJsIdentifiedBots from "@/snippets/bot-protection/reference/nodejs/IdentifiedBots.mdx";
+import NodeJsDenyingBots from "@/snippets/bot-protection/reference/nodejs/DenyingBots.mdx";
 import NodeJsErrors from "@/snippets/bot-protection/reference/nodejs/Errors.mdx";
 import NodeJsFiltering from "@/snippets/bot-protection/reference/nodejs/Filtering.mdx";
+import NodeJsIdentifiedBots from "@/snippets/bot-protection/reference/nodejs/IdentifiedBots.mdx";
 
 import RemixAllowingBots from "@/snippets/bot-protection/reference/remix/AllowingBots.mdx";
-import RemixDenyingBots from "@/snippets/bot-protection/reference/remix/DenyingBots.mdx";
 import RemixDecisionLog from "@/snippets/bot-protection/reference/remix/DecisionLog.mdx";
-import RemixIdentifiedBots from "@/snippets/bot-protection/reference/remix/IdentifiedBots.mdx";
+import RemixDenyingBots from "@/snippets/bot-protection/reference/remix/DenyingBots.mdx";
 import RemixErrors from "@/snippets/bot-protection/reference/remix/Errors.mdx";
 import RemixFiltering from "@/snippets/bot-protection/reference/remix/Filtering.mdx";
+import RemixIdentifiedBots from "@/snippets/bot-protection/reference/remix/IdentifiedBots.mdx";
 import RemixLoaderVsAction from "@/snippets/bot-protection/reference/remix/LoaderVsAction.mdx";
 
 import SvelteKitAllowingBots from "@/snippets/bot-protection/reference/sveltekit/AllowingBots.mdx";
-import SvelteKitDenyingBots from "@/snippets/bot-protection/reference/sveltekit/DenyingBots.mdx";
-import SvelteKitPerRouteVsHooks from "@/snippets/bot-protection/reference/sveltekit/PerRouteVsHooks.mdx";
 import SvelteKitDecisionLog from "@/snippets/bot-protection/reference/sveltekit/DecisionLog.mdx";
-import SvelteKitIdentifiedBots from "@/snippets/bot-protection/reference/sveltekit/IdentifiedBots.mdx";
+import SvelteKitDenyingBots from "@/snippets/bot-protection/reference/sveltekit/DenyingBots.mdx";
 import SvelteKitErrors from "@/snippets/bot-protection/reference/sveltekit/Errors.mdx";
 import SvelteKitFiltering from "@/snippets/bot-protection/reference/sveltekit/Filtering.mdx";
+import SvelteKitIdentifiedBots from "@/snippets/bot-protection/reference/sveltekit/IdentifiedBots.mdx";
+import SvelteKitPerRouteVsHooks from "@/snippets/bot-protection/reference/sveltekit/PerRouteVsHooks.mdx";
 
 Arcjet bot detection allows you to manage traffic by automated clients and bots.
 
@@ -155,6 +175,7 @@ categories](/bot-protection/identifying-bots#bot-categories).
 <SlotByFramework client:load>
   <BunAllowingBots slot="bun" />
   <DenoAllowingBots slot="deno" />
+  <NestJsAllowingBots slot="nest-js" />
   <NextJsAllowingBots slot="next-js" />
   <NodeJsAllowingBots slot="node-js" />
   <RemixAllowingBots slot="remix" />
@@ -174,6 +195,7 @@ categories](/bot-protection/identifying-bots#bot-categories).
 <SlotByFramework client:load>
   <BunDenyingBots slot="bun" />
   <DenoDenyingBots slot="deno" />
+  <NestJsDenyingBots slot="nest-js" />
   <NextJsDenyingBots slot="next-js" />
   <NodeJsDenyingBots slot="node-js" />
   <RemixDenyingBots slot="remix" />
@@ -181,6 +203,7 @@ categories](/bot-protection/identifying-bots#bot-categories).
 </SlotByFramework>
 
 <SlotByFramework client:load>
+  <NestJsDecoratorRoutes slot="nest-js" />
   <NextJsPerRouteVsMiddleware slot="next-js" />
   <RemixLoaderVsAction slot="remix" />
   <SvelteKitPerRouteVsHooks slot="sveltekit" />
@@ -195,6 +218,13 @@ Arcjet also provides a single `protect` function that is used to execute your
 protection rules. This requires a `request` argument which is the request
 context as passed to the request handler.
 
+<TextByFramework framework="nest-js" client:load>
+<br />
+If you are using a global guard or per route guard then `protect` is called for
+you behind the scenes. If you add Arcjet within a route then you call it
+directly.
+
+</TextByFramework>
 This function returns a `Promise` that resolves to an
 `ArcjetDecision` object. This contains the following properties:
 
@@ -224,11 +254,10 @@ for (const result of decision.results) {
 }
 ```
 
-This example will log the full result as well as the bot protection rule:
-
 <SlotByFramework client:load>
   <BunDecisionLog slot="bun" />
   <DenoDecisionLog slot="deno" />
+  <NestJsDecisionLog slot="nest-js" />
   <NextJsDecisionLog slot="next-js" />
   <NodeJsDecisionLog slot="node-js" />
   <RemixDecisionLog slot="remix" />
@@ -246,6 +275,7 @@ properties.
 <SlotByFramework client:load>
   <BunIdentifiedBots slot="bun" />
   <DenoIdentifiedBots slot="deno" />
+  <NestJsIdentifiedBots slot="nest-js" />
   <NextJsIdentifiedBots slot="next-js" />
   <NodeJsIdentifiedBots slot="node-js" />
   <RemixIdentifiedBots slot="remix" />
@@ -276,6 +306,7 @@ See [an example of how to do this](/bot-protection/concepts#user-agent-header).
 <SlotByFramework client:load>
   <BunErrors slot="bun" />
   <DenoErrors slot="deno" />
+  <NestJsErrors slot="nest-js" />
   <NextJsErrors slot="next-js" />
   <NodeJsErrors slot="node-js" />
   <RemixErrors slot="remix" />
@@ -291,6 +322,7 @@ their "advertising quality" bot.
 <SlotByFramework client:load>
   <BunFiltering slot="bun" />
   <DenoFiltering slot="deno" />
+  <NestJsFiltering slot="nest-js" />
   <NextJsFiltering slot="next-js" />
   <NodeJsFiltering slot="node-js" />
   <RemixFiltering slot="remix" />

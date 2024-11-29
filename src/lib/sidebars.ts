@@ -223,6 +223,10 @@ export const main = [
             link: "/reference/bun",
           },
           {
+            label: "NestJS",
+            link: "/reference/nestjs",
+          },
+          {
             label: "Next.js",
             link: "/reference/nextjs",
           },
