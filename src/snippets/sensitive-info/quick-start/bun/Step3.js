@@ -4,10 +4,11 @@ import { env } from "bun";
 const aj = arcjet({
   key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
   rules: [
-    // Configured to return a deny if an email is detected
+    // This allows all sensitive entities other than email addresses
     sensitiveInfo({
       mode: "LIVE", // Will block requests, use "DRY_RUN" to log only
-      deny: ["EMAIL"],
+      // allow: ["EMAIL"], Will block all sensitive information types other than email.
+      deny: ["EMAIL"], // Will block email addresses
     }),
   ],
 });

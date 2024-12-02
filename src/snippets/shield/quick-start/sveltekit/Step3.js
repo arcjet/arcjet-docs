@@ -5,9 +5,10 @@ import { error } from "@sveltejs/kit";
 const aj = arcjet({
   key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
   rules: [
-    // Protect against common attacks with Arcjet Shield
+    // Shield protects your app from common attacks e.g. SQL injection
+    // DRY_RUN mode logs only. Use "LIVE" to block
     shield({
-      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+      mode: "LIVE",
     }),
   ],
 });

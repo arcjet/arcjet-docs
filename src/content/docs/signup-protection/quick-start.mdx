@@ -3,6 +3,7 @@ title: "Signup form protection quick start"
 description: "Quick start guide to protect your signup forms from abuse to your Next.js, Node.js, Bun, Remix, or SvelteKit app with Arcjet Signup form protection."
 frameworks:
   - bun
+  - nest-js
   - next-js
   - node-js
   - remix
@@ -22,7 +23,7 @@ ajToc:
         framework: ["bun", "node-js"]
       - text: 4. Start app
         anchor: "4-start-app"
-        framework: ["next-js", "remix", "sveltekit"]
+        framework: ["nest-js", "next-js", "remix", "sveltekit"]
   - text: "FAQs"
     anchor: "faqs"
   - text: "What next?"
@@ -35,7 +36,9 @@ import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import SlotByFramework from "@/components/SlotByFramework";
 import FrameworkName from "@/components/FrameworkName";
+
 import Step1Bun from "@/snippets/signup-protection/quick-start/bun/Step1.mdx";
+import Step1NestJs from "@/snippets/signup-protection/quick-start/nestjs/Step1.mdx";
 import Step1NextJs from "@/snippets/signup-protection/quick-start/nextjs/Step1.mdx";
 import Step1NodeJs from "@/snippets/signup-protection/quick-start/nodejs/Step1.mdx";
 import Step1Remix from "@/snippets/signup-protection/quick-start/remix/Step1.mdx";
@@ -43,6 +46,7 @@ import Step1SvelteKit from "@/snippets/signup-protection/quick-start/sveltekit/S
 import Step2 from "@/snippets/signup-protection/quick-start/shared/Step2.mdx";
 import Step2SetEnv from "@/snippets/signup-protection/quick-start/shared/Step2SetEnv.mdx";
 import Step3Bun from "@/snippets/signup-protection/quick-start/bun/Step3.mdx";
+import Step3NestJs from "@/snippets/signup-protection/quick-start/nestjs/Step3.mdx";
 import Step3NextJs from "@/snippets/signup-protection/quick-start/nextjs/Step3.mdx";
 import Step3NodeJs from "@/snippets/signup-protection/quick-start/nodejs/Step3.mdx";
 import Step3Remix from "@/snippets/signup-protection/quick-start/remix/Step3.mdx";
@@ -51,6 +55,7 @@ import Step4 from "@/snippets/signup-protection/quick-start/nextjs/Step4.mdx";
 import Step4SvelteKit from "@/snippets/signup-protection/quick-start/sveltekit/Step4.mdx";
 import Step4Bun from "@/snippets/signup-protection/quick-start/bun/Step4.mdx";
 import Step4NodeJs from "@/snippets/signup-protection/quick-start/nodejs/Step4.mdx";
+import Step4NestJs from "@/snippets/signup-protection/quick-start/nestjs/Step4.mdx";
 import Step4Remix from "@/snippets/signup-protection/quick-start/remix/Step4.mdx";
 import FAQs from "/src/components/FAQs.astro";
 import Comments from "/src/components/Comments.astro";
@@ -69,6 +74,7 @@ In your project root, run the following command to install the SDK:
 
 <SlotByFramework client:load>
   <Step1Bun slot="bun" />
+  <Step1NestJs slot="nest-js" />
   <Step1NextJs slot="next-js" />
   <Step1NodeJs slot="node-js" />
   <Step1Remix slot="remix" />
@@ -82,6 +88,7 @@ instructions to add a site and get a key. Add it to a `.env.local` file in your 
 
 <SlotByFramework client:load>
   <Step2SetEnv slot="bun" />
+  <Step2SetEnv slot="nest-js" />
   <Step2 slot="next-js" />
   <Step2SetEnv slot="node-js" />
   <Step2 slot="remix" />
@@ -101,6 +108,7 @@ signup form.
 
 <SlotByFramework client:load>
   <Step3Bun slot="bun" />
+  <Step3NestJs slot="nest-js" />
   <Step3NextJs slot="next-js" />
   <Step3NodeJs slot="node-js" />
   <Step3Remix slot="remix" />
@@ -109,6 +117,7 @@ signup form.
 
 <SlotByFramework client:load>
   <Step4Bun slot="bun" />
+  <Step4NestJs slot="nest-js" />
   <Step4 slot="next-js" />
   <Step4NodeJs slot="node-js" />
   <Step4Remix slot="remix" />

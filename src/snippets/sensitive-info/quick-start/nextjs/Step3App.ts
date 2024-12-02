@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
   rules: [
-    // This allows all sensitive entities other than email addresses and those containing a dash character.
+    // This allows all sensitive entities other than email addresses
     sensitiveInfo({
       mode: "LIVE", // Will block requests, use "DRY_RUN" to log only
       // allow: ["EMAIL"], Will block all sensitive information types other than email.

@@ -3,6 +3,7 @@ title: "Shield quick start"
 description: "Quick start guide for adding protection to your Next.js, Node.js, Bun, Remix, or SvelteKit app with Arcjet Shield."
 frameworks:
   - bun
+  - nest-js
   - next-js
   - node-js
   - remix
@@ -22,7 +23,7 @@ ajToc:
         framework: ["bun", "node-js"]
       - text: 4. Start app
         anchor: "4-start-app"
-        framework: ["next-js", "remix", "sveltekit"]
+        framework: ["nest-js", "next-js", "remix", "sveltekit"]
       - text: 5. Simulate a suspicious request
         anchor: "5-simulate-a-suspicious-request"
   - text: "FAQs"
@@ -33,34 +34,39 @@ ajToc:
     anchor: "get-help"
 ---
 
-import { LinkCard, CardGrid } from "@astrojs/starlight/components";
-import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
-import SlotByFramework from "@/components/SlotByFramework";
 import FrameworkName from "@/components/FrameworkName";
+import SlotByFramework from "@/components/SlotByFramework";
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+import Comments from "/src/components/Comments.astro";
+import FAQs from "/src/components/FAQs.astro";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+
 import Step1Bun from "@/snippets/shield/quick-start/bun/Step1.mdx";
+import Step3Bun from "@/snippets/shield/quick-start/bun/Step3.mdx";
+import Step4Bun from "@/snippets/shield/quick-start/bun/Step4.mdx";
+import Step5Bun from "@/snippets/shield/quick-start/bun/Step5.mdx";
+import Step1NestJs from "@/snippets/shield/quick-start/nestjs/Step1.mdx";
+import Step3NestJs from "@/snippets/shield/quick-start/nestjs/Step3.mdx";
+import Step4NestJs from "@/snippets/shield/quick-start/nestjs/Step4.mdx";
+import Step5NestJs from "@/snippets/shield/quick-start/nestjs/Step5.mdx";
 import Step1NextJs from "@/snippets/shield/quick-start/nextjs/Step1.mdx";
+import Step3NextJs from "@/snippets/shield/quick-start/nextjs/Step3.mdx";
+import Step4 from "@/snippets/shield/quick-start/nextjs/Step4.mdx";
+import Step5 from "@/snippets/shield/quick-start/nextjs/Step5.mdx";
 import Step1NodeJs from "@/snippets/shield/quick-start/nodejs/Step1.mdx";
+import Step3NodeJs from "@/snippets/shield/quick-start/nodejs/Step3.mdx";
+import Step4NodeJs from "@/snippets/shield/quick-start/nodejs/Step4.mdx";
+import Step5NodeJs from "@/snippets/shield/quick-start/nodejs/Step5.mdx";
 import Step1Remix from "@/snippets/shield/quick-start/remix/Step1.mdx";
-import Step1SvelteKit from "@/snippets/shield/quick-start/sveltekit/Step1.mdx";
+import Step3Remix from "@/snippets/shield/quick-start/remix/Step3.mdx";
+import Step4Remix from "@/snippets/shield/quick-start/remix/Step4.mdx";
+import Step5Remix from "@/snippets/shield/quick-start/remix/Step5.mdx";
 import Step2 from "@/snippets/shield/quick-start/shared/Step2.mdx";
 import Step2SetEnv from "@/snippets/shield/quick-start/shared/Step2SetEnv.mdx";
-import Step3Bun from "@/snippets/shield/quick-start/bun/Step3.mdx";
-import Step3NextJs from "@/snippets/shield/quick-start/nextjs/Step3.mdx";
-import Step3NodeJs from "@/snippets/shield/quick-start/nodejs/Step3.mdx";
-import Step3Remix from "@/snippets/shield/quick-start/remix/Step3.mdx";
+import Step1SvelteKit from "@/snippets/shield/quick-start/sveltekit/Step1.mdx";
 import Step3SvelteKit from "@/snippets/shield/quick-start/sveltekit/Step3.mdx";
-import Step4 from "@/snippets/shield/quick-start/nextjs/Step4.mdx";
-import Step4Remix from "@/snippets/shield/quick-start/remix/Step4.mdx";
 import Step4SvelteKit from "@/snippets/shield/quick-start/sveltekit/Step4.mdx";
-import Step4Bun from "@/snippets/shield/quick-start/bun/Step4.mdx";
-import Step4NodeJs from "@/snippets/shield/quick-start/nodejs/Step4.mdx";
-import Step5 from "@/snippets/shield/quick-start/nextjs/Step5.mdx";
 import Step5SvelteKit from "@/snippets/shield/quick-start/sveltekit/Step5.mdx";
-import Step5Remix from "@/snippets/shield/quick-start/remix/Step5.mdx";
-import Step5Bun from "@/snippets/shield/quick-start/bun/Step5.mdx";
-import Step5NodeJs from "@/snippets/shield/quick-start/nodejs/Step5.mdx";
-import FAQs from "/src/components/FAQs.astro";
-import Comments from "/src/components/Comments.astro";
 
 Arcjet Shield protects your application against common attacks, including the
 [OWASP Top 10](https://owasp.org/www-project-top-ten/).
@@ -78,6 +84,7 @@ In your project root, run the following command to install the SDK:
 
 <SlotByFramework client:load>
   <Step1Bun slot="bun" />
+  <Step1NestJs slot="nest-js" />
   <Step1NextJs slot="next-js" />
   <Step1NodeJs slot="node-js" />
   <Step1Remix slot="remix" />
@@ -92,6 +99,7 @@ project root.
 
 <SlotByFramework client:load>
   <Step2SetEnv slot="bun" />
+  <Step2SetEnv slot="nest-js" />
   <Step2 slot="next-js" />
   <Step2SetEnv slot="node-js" />
   <Step2 slot="remix" />
@@ -102,6 +110,7 @@ project root.
 
 <SlotByFramework client:load>
   <Step3Bun slot="bun" />
+  <Step3NestJs slot="nest-js" />
   <Step3NextJs slot="next-js" />
   <Step3NodeJs slot="node-js" />
   <Step3Remix slot="remix" />
@@ -110,6 +119,7 @@ project root.
 
 <SlotByFramework client:load>
   <Step4Bun slot="bun" />
+  <Step4NestJs slot="nest-js" />
   <Step4 slot="next-js" />
   <Step4NodeJs slot="node-js" />
   <Step4Remix slot="remix" />
@@ -125,6 +135,7 @@ reached and is a constant, so you can use it as part of your tests.
 
 <SlotByFramework client:load>
   <Step5Bun slot="bun" />
+  <Step5NestJs slot="nest-js" />
   <Step5 slot="next-js" />
   <Step5NodeJs slot="node-js" />
   <Step5Remix slot="remix" />
