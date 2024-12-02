@@ -31,6 +31,9 @@ ajToc:
         anchor: "middleware"
       - text: "Avoiding double protection with middleware"
         anchor: "avoiding-double-protection-with-middleware"
+  - text: "Pages & server actions"
+    anchor: "pages--server-actions"
+    framework: ["next-js"]
   - text: "Loader vs action"
     anchor: "loader-vs-action"
     framework: ["remix"]
@@ -105,7 +108,19 @@ execution ordering is automatically optimized for performance. See
   <RemixLoaderVsAction slot="remix" />
   <PerRouteVsHooksSvelteKit slot="sveltekit" />
 </SlotByFramework>
+<TextByFramework framework="next-js" client:load>
 
+## Pages & Server Actions
+
+Arcjet can be used inside Next.js middleware, API routes, pages, server
+components, and server actions. Client components cannot be protected because
+they run on the client only.
+
+See the [Next.js SDK reference](/reference/nextjs) for examples of [pages / page
+components](/reference/nextjs#pages--page-components) and [server
+actions](/reference/nextjs#server-actions).
+
+</TextByFramework>
 ## Decision
 
 Arcjet provides a single `protect` function that is used to execute your
