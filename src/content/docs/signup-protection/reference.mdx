@@ -40,6 +40,9 @@ import RecommendedNodeJs from "@/snippets/signup-protection/reference/nodejs/Rec
 import RecommendedRemix from "@/snippets/signup-protection/reference/remix/Recommended.mdx";
 import RecommendedSvelteKit from "@/snippets/signup-protection/reference/sveltekit/Recommended.mdx";
 
+import NextJsPagesServerActions from "@/snippets/signup-protection/reference/nextjs/PagesServerActions.mdx";
+import NestJsGuardDecision from "@/snippets/signup-protection/reference/nestjs/GuardDecision.mdx";
+
 import CustomVerificationBun from "@/snippets/signup-protection/reference/bun/CustomVerification.mdx";
 import CustomVerificationNestJs from "@/snippets/signup-protection/reference/nestjs/CustomVerification.mdx";
 import CustomVerificationNextJs from "@/snippets/signup-protection/reference/nextjs/CustomVerification.mdx";
@@ -114,19 +117,9 @@ Even in dry run mode each rule will still be evaluated, so you can still [check
 the rule results](#checking-rule-results) to see if the email address is valid
 or not, or log them to your database.
 
-<TextByFramework framework="next-js" client:load>
-
-## Pages & Server Actions
-
-Arcjet can be used inside Next.js middleware, API routes, pages, server
-components, and server actions. Client components cannot be protected because
-they run on the client only.
-
-See the [Next.js SDK reference](/reference/nextjs) for examples of [pages / page
-components](/reference/nextjs#pages--page-components) and [server
-actions](/reference/nextjs#server-actions).
-
-</TextByFramework>
+<SlotByFramework client:load>
+  <NextJsPagesServerActions slot="next-js" />
+</SlotByFramework>
 
 ## Decision
 
@@ -135,16 +128,10 @@ protection rules. This requires a `request` argument which is the request
 context as passed to the request handler. When configured with a `protectSignup`
 rule it also requires an additional `email` prop.
 
-<TextByFramework framework="nest-js" client:load>
-<br />
-Arcjet can be integrated using a global [guard](https://docs.nestjs.com/guards)
-or per route guards. However these can't be used for signup protection rules
-because you can't access the decision to handle the form submission. Instead,
-you call the `protect` function in your route handler. See
-[bot protection](/bot-protection/quick-start) for an example where guards are
-used.
+<SlotByFramework client:load>
+  <NestJsGuardDecision slot="nest-js" />
+</SlotByFramework>
 
-</TextByFramework>
 This function returns a `Promise` that resolves to an
 `ArcjetDecision` object. This contains the following properties:
 
