@@ -5,6 +5,7 @@ const aj = arcjet({
   key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
   rules: [
     // Shield protects your app from common attacks like SQL injection
+    // DRY_RUN mode logs only. Use "LIVE" to block
     shield({ mode: "LIVE" }),
   ],
 });

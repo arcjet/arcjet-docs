@@ -125,7 +125,9 @@ controllers.
 
 ## Decision
 
-Arcjet can be integrated into NestJS in several places:
+Arcjet can be integrated into NestJS in several places using NestJS
+[guards](https://docs.nestjs.com/guards) or directly within the route
+controller:
 
 - **Global guard:** Applies Arcjet rules on every request, but does not allow
   you to configure rules per route. The `protect` function is called for you

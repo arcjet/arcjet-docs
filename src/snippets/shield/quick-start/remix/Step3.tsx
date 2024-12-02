@@ -6,9 +6,10 @@ const aj = arcjet({
   // and set it as an environment variable rather than hard coding.
   key: process.env.ARCJET_KEY!,
   rules: [
-    // Protect against common attacks with Arcjet Shield
+    // Shield protects your app from common attacks e.g. SQL injection
+    // DRY_RUN mode logs only. Use "LIVE" to block
     shield({
-      mode: "DRY_RUN", // will block requests. Use "DRY_RUN" to log only
+      mode: "DRY_RUN",
     }),
   ],
 });
