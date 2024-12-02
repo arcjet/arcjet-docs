@@ -11,6 +11,9 @@ frameworks:
 ajToc:
   - text: "Configuration"
     anchor: "configuration"
+  - text: "Pages & server actions"
+    anchor: "pages--server-actions"
+    framework: ["next-js"]
   - text: "Decision"
     anchor: "decision"
   - text: "Error handling"
@@ -78,6 +81,20 @@ to allow certain types of email addresses, you can modify the options:
 - `allowDomainLiteral`: Whether or not to allow email addresses with domain
   literals. Defaults to `false`. Changing to `true` means that
   `foo@[123.456.789.0]` would be allowed.
+
+<TextByFramework framework="next-js" client:load>
+
+## Pages & Server Actions
+
+Arcjet can be used inside Next.js middleware, API routes, pages, server
+components, and server actions. Client components cannot be protected because
+they run on the client only.
+
+See the [Next.js SDK reference](/reference/nextjs) for examples of [pages / page
+components](/reference/nextjs#pages--page-components) and [server
+actions](/reference/nextjs#server-actions).
+
+</TextByFramework>
 
 ## Decision
 
