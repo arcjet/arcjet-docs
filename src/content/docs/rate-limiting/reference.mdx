@@ -115,6 +115,7 @@ import FixedWindowNestJs from "@/snippets/rate-limiting/reference/nestjs/FixedWi
 import SlidingWindowNestJs from "@/snippets/rate-limiting/reference/nestjs/SlidingWindow.mdx";
 import TokenBucketNestJs from "@/snippets/rate-limiting/reference/nestjs/TokenBucket.mdx";
 import TokenBucketRequestNestJs from "@/snippets/rate-limiting/reference/nestjs/TokenBucketRequest.mdx";
+import NestJsGuardDecision from "@/snippets/rate-limiting/reference/nestjs/GuardDecision.mdx";
 
 import NextJsPerRouteVsMiddleware from "@/snippets/bot-protection/reference/nextjs/PerRouteVsMiddleware.mdx";
 import ByUserIdNextJs from "@/snippets/rate-limiting/reference/nextjs/ByUserId.mdx";
@@ -124,6 +125,7 @@ import ExamplesNextJs from "@/snippets/rate-limiting/reference/nextjs/Examples.m
 import FixedWindowNextJs from "@/snippets/rate-limiting/reference/nextjs/FixedWindow.mdx";
 import HeadersNextJs from "@/snippets/rate-limiting/reference/nextjs/Headers.mdx";
 import PerRouteVsMiddlewareNextJs from "@/snippets/rate-limiting/reference/nextjs/PerRouteVsMiddleware.mdx";
+import NextJsPagesServerActions from "@/snippets/rate-limiting/reference/nextjs/PagesServerActions.mdx";
 import SlidingWindowNextJs from "@/snippets/rate-limiting/reference/nextjs/SlidingWindow.mdx";
 import TokenBucketNextJs from "@/snippets/rate-limiting/reference/nextjs/TokenBucket.mdx";
 import TokenBucketRequestNextJs from "@/snippets/rate-limiting/reference/nextjs/TokenBucketRequest.mdx";
@@ -317,36 +319,21 @@ section](/rate-limiting/configuration#ip-address--user-id).
 <SlotByFramework client:load>
   <NestJsDecoratorRoutes slot="nest-js" />
   <NextJsPerRouteVsMiddleware slot="next-js" />
+  <NextJsPagesServerActions slot="next-js" />
   <RemixLoaderVsAction slot="remix" />
   <SvelteKitPerRouteVsHooks slot="sveltekit" />
 </SlotByFramework>
 
-<TextByFramework framework="next-js" client:load>
-
-## Pages & Server Actions
-
-Arcjet can be used inside Next.js middleware, API routes, pages, server
-components, and server actions. Client components cannot be protected because
-they run on the client only.
-
-See the [Next.js SDK reference](/reference/nextjs) for examples of [pages / page
-components](/reference/nextjs#pages--page-components) and [server
-actions](/reference/nextjs#server-actions).
-
-</TextByFramework>
 ## Decision
 
 Arcjet provides a single `protect` function that is used to execute your
 protection rules. This requires a `RequestEvent` property which is the event
 context as passed to the request handler.
 
-<TextByFramework framework="nest-js" client:load>
-<br />
-If you are using a global [guard](https://docs.nestjs.com/guards) or per route
-guard then `protect` is called for you behind the scenes. If you add Arcjet
-within a route then you call it directly.
+<SlotByFramework client:load>
+  <NestJsGuardDecision slot="nest-js" />
+</SlotByFramework>
 
-</TextByFramework>
 This function returns a `Promise` that resolves to an
 `ArcjetDecision` object. This contains the following properties:
 

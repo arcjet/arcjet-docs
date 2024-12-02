@@ -106,6 +106,8 @@ import NextJsExamples from "@/snippets/bot-protection/reference/nextjs/Examples.
 import NextJsFiltering from "@/snippets/bot-protection/reference/nextjs/Filtering.mdx";
 import NextJsIdentifiedBots from "@/snippets/bot-protection/reference/nextjs/IdentifiedBots.mdx";
 import NextJsPerRouteVsMiddleware from "@/snippets/bot-protection/reference/nextjs/PerRouteVsMiddleware.mdx";
+import NextJsPagesServerActions from "@/snippets/bot-protection/reference/nextjs/PagesServerActions.mdx";
+import NestJsGuardDecision from "@/snippets/bot-protection/reference/nestjs/GuardDecision.mdx";
 
 import NodeJsAllowingBots from "@/snippets/bot-protection/reference/nodejs/AllowingBots.mdx";
 import NodeJsDecisionLog from "@/snippets/bot-protection/reference/nodejs/DecisionLog.mdx";
@@ -208,23 +210,11 @@ categories](/bot-protection/identifying-bots#bot-categories).
 <SlotByFramework client:load>
   <NestJsDecoratorRoutes slot="nest-js" />
   <NextJsPerRouteVsMiddleware slot="next-js" />
+  <NextJsPagesServerActions slot="next-js" />
   <RemixLoaderVsAction slot="remix" />
   <SvelteKitPerRouteVsHooks slot="sveltekit" />
 </SlotByFramework>
 
-<TextByFramework framework="next-js" client:load>
-
-## Pages & Server Actions
-
-Arcjet can be used inside Next.js middleware, API routes, pages, server
-components, and server actions. Client components cannot be protected because
-they run on the client only.
-
-See the [Next.js SDK reference](/reference/nextjs) for examples of [pages / page
-components](/reference/nextjs#pages--page-components) and [server
-actions](/reference/nextjs#server-actions).
-
-</TextByFramework>
 ## Decision
 
 The [quick start example](/bot-protection/quick-start) will deny requests that
@@ -234,13 +224,10 @@ Arcjet also provides a single `protect` function that is used to execute your
 protection rules. This requires a `request` argument which is the request
 context as passed to the request handler.
 
-<TextByFramework framework="nest-js" client:load>
-<br />
-If you are using a global [guard](https://docs.nestjs.com/guards) or per route
-guard then `protect` is called for you behind the scenes. If you add Arcjet
-within a route then you call it directly.
+<SlotByFramework client:load>
+  <NestJsGuardDecision slot="nest-js" />
+</SlotByFramework>
 
-</TextByFramework>
 This function returns a `Promise` that resolves to an
 `ArcjetDecision` object. This contains the following properties:
 
