@@ -2,6 +2,12 @@ import { Code } from "@astrojs/starlight/components";
 import SelectableContent from "@/components/SelectableContent";
 import HeadersTS from "./Headers.ts?raw";
 
+To set the rate limit headers on the NestJS response you need to add the
+`passthrough` option to the `@Res()` decorator in your controller method i.e.
+`@Res({ passthrough: true }`. See [the NestJS docs on the library-specific
+approach](https://docs.nestjs.com/controllers#library-specific-approach) for
+details.
+
 <SelectableContent client:load syncKey="language" frameworkSwitcher>
   <div slot="TS" slotIdx="1">
     <Code code={HeadersTS} lang="ts" />
