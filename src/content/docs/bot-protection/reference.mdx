@@ -287,6 +287,8 @@ properties.
 </SlotByFramework>
 
 ## Error handling
+
+Arcjet is designed to fail open so that a service issue or misconfiguration does
 not block all requests. The SDK will also time out and fail open after 1000ms
 when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
 in most cases, the response time will be less than 20-30ms.
@@ -333,12 +335,13 @@ their "advertising quality" bot.
 
 ## Bot verification
 
-We support verifying the authenticity of requests from identifiable bots by
+We support verifying the authenticity of requests from some bots by
 comparing the request IP to published bot IP ranges or performing a reverse
-DNS query. To check the verification status, use the `.isSpoofed()` or `.isVerified()`
-methods on the reason object. If verification was performed, one of these will be true
-and the other false; both will be false if verification failed or is unsupported
-for the identified bot. 
+DNS query. Verificaiton is performed for supported bots using the appropriate method
+automatically after the bot is identified by Arcjet. To check the verification status,
+use the `.isSpoofed()` or `.isVerified()` methods on the bot reason object. If
+verification was performed, one of these will be true and the other false; both
+will be false if verification failed or if we don't support verifying the identified bot. 
 
 :::note
 It's recommended to check verification status only when using an allow configuration.
