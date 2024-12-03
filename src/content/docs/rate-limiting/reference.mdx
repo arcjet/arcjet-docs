@@ -116,6 +116,7 @@ import SlidingWindowNestJs from "@/snippets/rate-limiting/reference/nestjs/Slidi
 import TokenBucketNestJs from "@/snippets/rate-limiting/reference/nestjs/TokenBucket.mdx";
 import TokenBucketRequestNestJs from "@/snippets/rate-limiting/reference/nestjs/TokenBucketRequest.mdx";
 import NestJsGuardDecision from "@/snippets/rate-limiting/reference/nestjs/GuardDecision.mdx";
+import HeadersNestJs from "@/snippets/rate-limiting/reference/nestjs/Headers.mdx";
 
 import NextJsPerRouteVsMiddleware from "@/snippets/bot-protection/reference/nextjs/PerRouteVsMiddleware.mdx";
 import ByUserIdNextJs from "@/snippets/rate-limiting/reference/nextjs/ByUserId.mdx";
@@ -402,7 +403,7 @@ Arcjet decision result:
 - `reset` (`number`): The remaining amount of seconds in the window.
 
 These can be used to return `RateLimit` HTTP headers ([draft
-RFC](https://ietf-wg-httpapi.github.io/ratelimit-headers/draft-ietf-httpapi-ratelimit-headers.html)) to
+RFC](https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-ratelimit-headers-08)) to
 offer the client more detail.
 
 We provide the [@arcjet/decorate
@@ -411,11 +412,23 @@ your responses with appropriate `RateLimit` headers based on a decision.
 
 <SlotByFramework client:load>
   <HeadersBun slot="bun" />
+  <HeadersNestJs slot="nest-js" />
   <HeadersNextJs slot="next-js" />
   <HeadersNodeJs slot="node-js" />
   <HeadersRemix slot="remix" />
   <HeadersSvelteKit slot="sveltekit" />
 </SlotByFramework>
+
+This would result in [draft
+RFC](https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-ratelimit-headers-08)
+response headers similar to the following:
+
+```http
+...
+< RateLimit: limit=10, remaining=5, reset=9
+< RateLimit-Policy: 10;w=10
+...
+```
 
 ## Error handling
 

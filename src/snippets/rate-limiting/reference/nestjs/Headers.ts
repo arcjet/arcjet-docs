@@ -35,7 +35,10 @@ export class PageController {
   ) {}
 
   @Get()
-  async index(@Req() req: Request, @Res() res: Response) {
+  // The passthrough option allows us to access the response object so we can
+  // set the rate limit headers. See
+  // https://docs.nestjs.com/controllers#library-specific-approach
+  async index(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const decision = await this.arcjet
       .withRule(
         fixedWindow({
@@ -46,6 +49,7 @@ export class PageController {
       )
       .protect(req);
 
+    // Set the rate limit headers on the response object
     setRateLimitHeaders(res, decision);
 
     if (decision.isDenied()) {
