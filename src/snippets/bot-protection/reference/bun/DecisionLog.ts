@@ -38,6 +38,10 @@ export default {
       return new Response("Forbidden", { status: 403 });
     }
 
+    if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+      return new Response("Forbidden", { status: 403 });
+    }
+
     return new Response("Hello world");
   }),
 };

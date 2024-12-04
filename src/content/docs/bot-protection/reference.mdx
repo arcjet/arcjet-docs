@@ -65,6 +65,8 @@ ajToc:
     anchor: "error-handling"
   - text: "Filtering categories"
     anchor: "filtering-categories"
+  - text: "Bot verification"
+    anchor: "bot-verification"
   - text: "Testing"
     anchor: "testing"
   - text: "Examples"
@@ -172,6 +174,10 @@ how to examine the execution results.
 Most applications want to block almost all bots. However, it is common to allow
 some bots to access your system, such as bots for search indexing or API
 access from the command line.
+
+When allowing specific bots we recommend that you also [check the verification
+status](#bot-verification) after an allow decision is returned to ensure that the bots are who they
+say they are.
 
 This behavior is configured with an `allow` list from our [full list of
 bots](https://arcjet.com/bot-list) and/or [bot
@@ -331,6 +337,35 @@ their "advertising quality" bot.
   <RemixFiltering slot="remix" />
   <SvelteKitFiltering slot="sveltekit" />
 </SlotByFramework>
+
+## Bot verification
+
+We support verifying the authenticity of requests from some bots by
+comparing the request IP to published bot IP ranges or performing a reverse
+DNS query. Verification is performed for supported bots using the appropriate method
+automatically after the bot is identified by Arcjet.
+
+To check the verification status,
+use the `.isSpoofed()` or `.isVerified()` methods on the bot reason object. If
+verification was performed, one of these will be true and the other false; both
+will be false if verification failed or if we don't support verifying the identified bot. 
+
+:::note
+It's recommended to check verification status only when using an allow configuration.
+For deny configurations, verification is skipped as you'd want to block listed bots
+regardless of legitimacy.
+:::
+
+Here's a basic usage example:
+```ts
+if (decision.reason.isSpoofed()) {
+  // Show a custom block page for spoofed bots
+} else if (decision.reason.isVerified()) {
+  // You can now trust that the bot is who they say they are and proceed as normal
+} else {
+  // The bot either does not support verification, or verification failed.
+}
+```
 
 ## Testing
 

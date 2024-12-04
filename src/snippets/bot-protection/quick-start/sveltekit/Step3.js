@@ -26,5 +26,9 @@ export async function handle({ event, resolve }) {
     return error(403, "Forbidden");
   }
 
+  if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+    return error(403, "Forbidden");
+  }
+
   return resolve(event);
 }

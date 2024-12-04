@@ -33,5 +33,9 @@ export async function handle({
     return error(403, "You are a bot!");
   }
 
+  if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+    return error(403, "You are a bot!");
+  }
+
   return resolve(event);
 }

@@ -26,5 +26,9 @@ export async function loader(args: LoaderFunctionArgs) {
     throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });
   }
 
+  if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+    throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });
+  }
+
   return null;
 }
