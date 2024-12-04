@@ -1,8 +1,6 @@
 import { ArcjetModule } from "@arcjet/nest";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-//import { AppController } from './app.controller.js';
-//import { AppService } from './app.service.js';
 
 @Module({
   imports: [
@@ -20,7 +18,5 @@ import { ConfigModule } from "@nestjs/config";
     }),
     // ... other modules
   ],
-  //controllers: [AppController],
-  //providers: [AppService],
 })
 export class AppModule {}
