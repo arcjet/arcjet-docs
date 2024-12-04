@@ -62,6 +62,8 @@ ajToc:
     anchor: "error-handling"
   - text: "Filtering categories"
     anchor: "filtering-categories"
+  - text: "Bot verification"
+    anchor: "bot-verification"
   - text: "Testing"
     anchor: "testing"
   - text: "Examples"
@@ -168,8 +170,8 @@ Most applications want to block almost all bots. However, it is common to allow
 some bots to access your system, such as bots for search indexing or API
 access from the command line.
 
-When allowing specific bots we recommend that you also check the verification
-status after an allow decision is returned to ensure that the bots are who they
+When allowing specific bots we recommend that you also [check the verification
+status](#bot-verification) after an allow decision is returned to ensure that the bots are who they
 say they are.
 
 This behavior is configured with an `allow` list from our [full list of
@@ -338,7 +340,9 @@ their "advertising quality" bot.
 We support verifying the authenticity of requests from some bots by
 comparing the request IP to published bot IP ranges or performing a reverse
 DNS query. Verificaiton is performed for supported bots using the appropriate method
-automatically after the bot is identified by Arcjet. To check the verification status,
+automatically after the bot is identified by Arcjet.
+
+To check the verification status,
 use the `.isSpoofed()` or `.isVerified()` methods on the bot reason object. If
 verification was performed, one of these will be true and the other false; both
 will be false if verification failed or if we don't support verifying the identified bot. 
