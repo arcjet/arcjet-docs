@@ -25,6 +25,7 @@ ajToc:
 import { Aside } from "@astrojs/starlight/components";
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
+import DisplayType from "@/components/DisplayType.astro";
 
 import DecisionLogBun from "@/snippets/email-validation/reference/bun/DecisionLog.mdx";
 import DecisionLogNestJs from "@/snippets/email-validation/reference/nestjs/DecisionLog.mdx";
@@ -51,19 +52,13 @@ reduce the amount of spam or fraudulent accounts.
 Email validation is configured by specifying the email types you wish to block
 and whether you wish to modify certain validation options.
 
-The configuration definition is:
+The `arcjet` client can be configured with one or more Email validation rules,
+which are constructed with the `validateEmail(options: EmailOptions)` function
+and configured by `EmailOptions`:
 
-```ts
-type EmailOptions = {
-  mode?: "LIVE" | "DRY_RUN";
-  block?: ArcjetEmailType[];
-  requireTopLevelDomain?: boolean; // default: true
-  allowDomainLiteral?: boolean; // default: false
-};
-```
-
-The `arcjet` client is configured with one or many `validateEmail` rules which
-take `EmailOptions`.
+<DisplayType type="EmailOptions" from="arcjet" />
+<DisplayType type="ArcjetMode" from="arcjet" />
+<DisplayType type="ArcjetEmailType" from="arcjet" />
 
 <Aside type="note">
   When specifying multiple rules, the order of the rules is ignored. Rule

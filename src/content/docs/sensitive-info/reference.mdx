@@ -59,6 +59,7 @@ ajToc:
 
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
+import DisplayType from "@/components/DisplayType.astro";
 
 import NestJsDecoratorRoutes from "@/snippets/sensitive-info/reference/nestjs/DecoratorRoutes.mdx";
 import PerRouteVsMiddlewareNextJs from "@/snippets/sensitive-info/reference/nextjs/PerRouteVsMiddleware.mdx";
@@ -92,32 +93,42 @@ sensitive information such as PII that you do not wish to handle.
 
 ## Configuration
 
-Sensitive Info is configured by specifying which mode you want it to run in.
+Sensitive information detection is configured by allowing or denying a subset of
+sensitive information. The `allow` and `deny` lists are mutually-exclusive, such
+that using `allow` will result in a `DENY` decision for any detected sensitive
+information that is not specified in the `allow` list and using `deny` will
+result in an `ALLOW` decision for any detected sensitive information that is not
+specified in the `deny` list.
 
-The configuration definition is:
+The `arcjet` client can be configured with one or more Sensitive information
+rules, which are constructed with the
+`sensitiveInfo(options: SensitiveInfoOptionsAllow | SensitiveInfoOptionsDeny)`
+function and configured by `SensitiveInfoOptionsAllow` or
+`SensitiveInfoOptionsDeny`:
 
 ```ts
-type SensitiveInfoOptions = {
+type SensitiveInfoOptionsAllow = {
   mode?: "LIVE" | "DRY_RUN";
-  allow?: Array<SensitiveInfoType>; // Cannot be specified if `deny` is present
-  deny?: Array<SensitiveInfoType>;// Cannot be specified if `allow` is present
+  allow?: Array<ArcjetSensitiveInfoType>;
   contextWindowSize?: number;
+  // You can also provide a custom detection function to detect other types
+  // of sensitive information (see below).
   detect?: (tokens: string[]) -> Array<SensitiveInfoType | undefined>;
 };
 ```
 
-The `arcjet` client is configured with one or more `sensitiveInfo` rules which take
-one or many `SensitiveInfoOptions`.
+```ts
+type SensitiveInfoOptionsDeny = {
+  mode?: "LIVE" | "DRY_RUN";
+  deny?: Array<ArcjetSensitiveInfoType>;
+  contextWindowSize?: number;
+  // You can also provide a custom detection function to detect other types
+  // of sensitive information (see below).
+  detect?: (tokens: string[]) -> Array<SensitiveInfoType | undefined>;
+};
+```
 
-The `SensitiveInfoType` enum allows the following values:
-
-- `EMAIL`
-- `CREDIT_CARD`
-- `IP_ADDRESS`
-- `PHONE_NUMBER`
-
-You can also provide a custom detection function to detect other types of
-sensitive information (see below).
+<DisplayType type="ArcjetSensitiveInfoType" from="arcjet" />
 
 :::note
 When specifying multiple rules, the order of the rules is ignored. Rule
