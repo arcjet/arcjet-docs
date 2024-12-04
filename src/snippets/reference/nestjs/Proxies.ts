@@ -1,4 +1,4 @@
-import { ArcjetModule, fixedWindow } from "@arcjet/nest";
+import { ArcjetModule } from "@arcjet/nest";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 
@@ -11,14 +11,10 @@ import { ConfigModule } from "@nestjs/config";
     ArcjetModule.forRoot({
       isGlobal: true,
       key: process.env.ARCJET_KEY!,
-      characteristics: ['http.request.headers["x-api-key"]'],
       rules: [
-        fixedWindow({
-          mode: "LIVE",
-          window: "1h",
-          max: 60,
-        }),
+        // Rules set here will apply to every request
       ],
+      proxies: ["100.100.100.100"],
     }),
     // ... other modules
   ],
