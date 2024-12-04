@@ -4,6 +4,7 @@ description: "Reference for the Nosecone library"
 ---
 
 import WhatAreArcjetUtilities from "@/components/WhatAreArcjetUtilities.astro";
+import DisplayType from "@/components/DisplayType.astro";
 
 The Arcjet Nosecone library provides a streamlined way to apply secure headers
 to your application.
@@ -31,7 +32,7 @@ with your overrides.
 interface NoseconeOptions {
   /**
    * Configure the `Content-Security-Policy` header, which helps mitigate a
-   * large number of * attacks, such as cross-site scripting.
+   * large number of attacks, such as cross-site scripting.
    */
   contentSecurityPolicy?: ContentSecurityPolicyConfig | boolean;
   /**
@@ -81,7 +82,7 @@ interface NoseconeOptions {
    */
   xDownloadOptions?: boolean;
   /**
-   * Configure the `X-Frame-Options` header, which help mitigate clickjacking
+   * Configure the `X-Frame-Options` header, which helps mitigate clickjacking
    * attacks in legacy browsers. This header is superceded by a directive in the
    * `Content-Security-Policy` header.
    */
@@ -104,5 +105,116 @@ interface NoseconeOptions {
 
 ### `Content-Security-Policy`
 
-The `Content-Security-Policy` header helps mitigate a large number of attacks,
-such as cross-site scripting.
+The `Content-Security-Policy` header is a powerful allow-list of what can happen
+on your page which helps mitigate many attacks, such as cross-site scripting.
+
+**Types:**
+
+<DisplayType type="StaticOrDynamic" generics={["S"]} from="nosecone" />
+<DisplayType type="Source" from="nosecone" />
+<DisplayType type="HostSource" from="nosecone" />
+<DisplayType type="SchemeSource" from="nosecone" />
+<DisplayType type="FrameSource" from="nosecone" />
+<DisplayType type="ActionSource" from="nosecone" />
+<DisplayType type="CspDirectives" from="nosecone" />
+<DisplayType type="ContentSecurityPolicyConfig" from="nosecone" />
+
+**Default:**
+
+```ts
+{
+  directives: {
+    baseUri: ["'none'"],
+    childSrc: ["'none'"],
+    connectSrc: ["'self'"],
+    defaultSrc: ["'self'"],
+    fontSrc: ["'self'"],
+    formAction: ["'self'"],
+    frameAncestors: ["'none'"],
+    frameSrc: ["'none'"],
+    imgSrc: ["'self'", "blob:", "data:"],
+    manifestSrc: ["'self'"],
+    mediaSrc: ["'self'"],
+    objectSrc: ["'none'"],
+    scriptSrc: ["'self'"],
+    styleSrc: ["'self'"],
+    workerSrc: ["'self'"],
+  },
+};
+```
+
+The defaults will produce the following header:
+
+```txt
+Content-Security-Policy: base-uri 'none'; child-src 'none'; connect-src 'self'; default-src 'self'; font-src 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; img-src 'self' blob: data:; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self'; style-src 'self'; worker-src 'self';
+```
+
+Additional resources:
+
+- [MDN's Content-Security-Policy guide](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
+- [OWASP Secure Headers Project - Content-Security-Policy](https://owasp.org/www-project-secure-headers/#content-security-policy)
+
+### `Cross-Origin-Embedder-Policy`
+
+The `Cross-Origin-Embedder-Policy` header helps control what resources can be
+loaded cross-origin.
+
+### `Cross-Origin-Opener-Policy`
+
+The `Cross-Origin-Opener-Policy` header helps process-isolate your page.
+
+### `Cross-Origin-Resource-Policy`
+
+The `Cross-Origin-Resource-Policy` header blocks others from loading your
+resources cross-origin in some cases.
+
+### `Origin-Agent-Cluster`
+
+The `Origin-Agent-Cluster` header provides a mechanism to allow web applications
+to isolate their origins from other processes.
+
+### `Referrer-Policy`
+
+The `Referrer-Policy` header controls what information is set in the `Referer`
+request header.
+
+### `Strict-Transport-Security`
+
+The `Strict-Transport-Security` header tells browsers to prefer HTTPS instead of
+insecure HTTP.
+
+### `X-Content-Type-Options`
+
+The `X-Content-Type-Options` header helps mitigate MIME type sniffing that can
+cause security issues.
+
+### `X-DNS-Prefetch-Control`
+
+The `X-DNS-Prefetch-Control` header helps control DNS prefetching to improve
+user privacy at the expense of performance.
+
+### `X-Download-Options` (legacy)
+
+The **legacy** `X-Download-Options` header prevented a user from opening a file
+directly in Internet Explorer to avoid prevent script injection.
+
+### `X-Frame-Options` (legacy)
+
+:::note
+`X-Frame-Options` is superceded by the `frame-ancestors` directive in the
+`Content-Security-Policy` header.
+:::
+
+The **legacy** `X-Frame-Options` header helped mitigate clickjacking attacks in
+older browsers.
+
+### `X-Permitted-Cross-Domain-Policies`
+
+The `X-Permitted-Cross-Domain-Policies` header tells some clients, like Adobe
+products, your domain's policy for loading cross-domain content.
+
+### `X-XSS-Protection` (legacy)
+
+The **legacy** `X-XSS-Protection` header tried to mitigate XSS attacks, but
+accidentally enabled side-channel attacks in older browsers, so Nosecone
+disables it.
