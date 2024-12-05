@@ -1,0 +1,28 @@
+---
+import { createTwoslasher} from "twoslash"
+import { format } from "prettier";
+import { Code } from "@astrojs/starlight/components";
+
+const twoslasher = createTwoslasher();
+
+const generics = Array.isArray(Astro.props.generics) && Astro.props.generics.length > 0
+    ? `<${Astro.props.generics.join(", ")}>`
+    : ''
+
+const snippet = `
+import type { Simplify } from "type-fest";
+import type { ${Astro.props.type} as __Dummy } from "${Astro.props.from}";
+type ${Astro.props.type}${generics} = Simplify<__Dummy${generics}>;
+//   ^?
+`
+
+const result = twoslasher(snippet, "ts");
+
+let types = [];
+for (const query of result.queries) {
+    types.push(query.text);
+}
+let code = await format(types.join("\n"), { parser: "typescript" });
+---
+
+<Code code={code} lang="ts" />

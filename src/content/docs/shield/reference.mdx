@@ -60,6 +60,7 @@ ajToc:
 
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
+import DisplayType from "@/components/DisplayType.astro";
 
 import DecisionLogBun from "@/snippets/shield/reference/bun/DecisionLog.mdx";
 import ErrorsBun from "@/snippets/shield/reference/bun/Errors.mdx";
@@ -87,16 +88,12 @@ Arcjet Shield protects your application against common attacks, including the
 
 Shield is configured by specifying which mode you want it to run in.
 
-The configuration definition is:
+The `arcjet` client can be configured with one or more Shield rules, which are
+constructed with the `shield(options: ShieldOptions)` function and configured by
+`ShieldOptions`:
 
-```ts
-type ShieldOptions = {
-  mode?: "LIVE" | "DRY_RUN";
-};
-```
-
-The `arcjet` client is configured with one or more `shield` rules which take
-one or many `ShieldOptions`.
+<DisplayType type="ShieldOptions" from="arcjet" />
+<DisplayType type="ArcjetMode" from="arcjet" />
 
 :::note
 When specifying multiple rules, the order of the rules is ignored. Rule
