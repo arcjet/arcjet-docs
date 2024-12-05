@@ -1,8 +1,5 @@
-import nosecone, {
-  NoseconeOptions,
-  defaults,
-  withVercelToolbar,
-} from "nosecone";
+import nosecone, { defaults, withVercelToolbar } from "nosecone";
+import type { NoseconeOptions } from "nosecone";
 
 const noseconeConfig: NoseconeOptions = {
   ...defaults,

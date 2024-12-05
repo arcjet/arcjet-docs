@@ -15,8 +15,3 @@ declare module "npm:@arcjet/deno" {
 declare module "npm:nosecone" {
   export { default } from "nosecone";
 }
-
-declare module "next/server" {
-  // Faking this because Next.js 14 doesn't have the `connection` export
-  export const connection: () => Promise<void>;
-}
