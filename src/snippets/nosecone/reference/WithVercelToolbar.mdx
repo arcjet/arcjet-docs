@@ -1,0 +1,14 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+
+import WithVercelToolbarTS from "./WithVercelToolbar.ts?raw";
+import WithVercelToolbarJS from "./WithVercelToolbar.js?raw";
+
+<SelectableContent client:load syncKey="language">
+  <div slot="TS" slotIdx="1">
+    <Code code={WithVercelToolbarTS} lang="ts" title="index.ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={WithVercelToolbarJS} lang="js" title="index.js" />
+  </div>
+</SelectableContent>
