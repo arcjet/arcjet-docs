@@ -119,7 +119,7 @@ on your page which helps mitigate many attacks, such as cross-site scripting.
 <DisplayType type="CspDirectives" from="nosecone" />
 <DisplayType type="ContentSecurityPolicyConfig" from="nosecone" />
 
-**Default:**
+**Defaults:**
 
 ```ts
 {
@@ -159,44 +159,140 @@ Additional resources:
 The `Cross-Origin-Embedder-Policy` header helps control what resources can be
 loaded cross-origin.
 
+**Types:**
+
+<DisplayType type="CrossOriginEmbedderPolicyConfig" from="nosecone" />
+
+**Defaults:**
+
+```ts
+
+```
+
 ### `Cross-Origin-Opener-Policy`
 
 The `Cross-Origin-Opener-Policy` header helps process-isolate your page.
+
+**Types:**
+
+<DisplayType type="CrossOriginOpenerPolicyConfig" from="nosecone" />
+
+**Defaults:**
+
+```ts
+
+```
 
 ### `Cross-Origin-Resource-Policy`
 
 The `Cross-Origin-Resource-Policy` header blocks others from loading your
 resources cross-origin in some cases.
 
+**Types:**
+
+<DisplayType type="CrossOriginResourcePolicyConfig" from="nosecone" />
+
+**Defaults:**
+
+```ts
+
+```
+
 ### `Origin-Agent-Cluster`
 
 The `Origin-Agent-Cluster` header provides a mechanism to allow web applications
 to isolate their origins from other processes.
+
+**Types:**
+
+```ts
+type OriginAgentClusterConfig = boolean;
+```
+
+**Defaults:**
+
+```ts
+
+```
 
 ### `Referrer-Policy`
 
 The `Referrer-Policy` header controls what information is set in the `Referer`
 request header.
 
+**Types:**
+
+<DisplayType type="ReferrerPolicyConfig" from="nosecone" />
+
+**Defaults:**
+
+```ts
+
+```
+
 ### `Strict-Transport-Security`
 
 The `Strict-Transport-Security` header tells browsers to prefer HTTPS instead of
 insecure HTTP.
+
+**Types:**
+
+<DisplayType type="StrictTransportSecurityConfig" from="nosecone" />
+
+**Defaults:**
+
+```ts
+
+```
 
 ### `X-Content-Type-Options`
 
 The `X-Content-Type-Options` header helps mitigate MIME type sniffing that can
 cause security issues.
 
+**Types:**
+
+```ts
+type ContentTypeOptionsConfig = boolean;
+```
+
+**Defaults:**
+
+```ts
+
+```
+
 ### `X-DNS-Prefetch-Control`
 
 The `X-DNS-Prefetch-Control` header helps control DNS prefetching to improve
 user privacy at the expense of performance.
 
+**Types:**
+
+<DisplayType type="DnsPrefetchControlConfig" from="nosecone" />
+
+**Defaults:**
+
+```ts
+
+```
+
 ### `X-Download-Options` (legacy)
 
 The **legacy** `X-Download-Options` header prevented a user from opening a file
 directly in Internet Explorer to avoid prevent script injection.
+
+**Types:**
+
+```ts
+type DownloadOptionsCofig = boolean;
+```
+
+**Defaults:**
+
+```ts
+
+```
 
 ### `X-Frame-Options` (legacy)
 
@@ -208,13 +304,45 @@ directly in Internet Explorer to avoid prevent script injection.
 The **legacy** `X-Frame-Options` header helped mitigate clickjacking attacks in
 older browsers.
 
+**Types:**
+
+<DisplayType type="FrameOptionsConfig" from="nosecone" />
+
+**Defaults:**
+
+```ts
+
+```
+
 ### `X-Permitted-Cross-Domain-Policies`
 
 The `X-Permitted-Cross-Domain-Policies` header tells some clients, like Adobe
 products, your domain's policy for loading cross-domain content.
+
+**Types:**
+
+<DisplayType type="PermittedCrossDomainPoliciesConfig" from="nosecone" />
+
+**Defaults:**
+
+```ts
+
+```
 
 ### `X-XSS-Protection` (legacy)
 
 The **legacy** `X-XSS-Protection` header tried to mitigate XSS attacks, but
 accidentally enabled side-channel attacks in older browsers, so Nosecone
 disables it.
+
+**Types:**
+
+```ts
+type XssProtectionConfig = boolean;
+```
+
+**Defaults:**
+
+```ts
+
+```
