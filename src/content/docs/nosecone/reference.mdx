@@ -531,7 +531,7 @@ defaults to integrate Nosecone smoothly.
 The `@nosecone/next` adapter provides defaults to ensure Next.js applications
 work in production & development environments and the
 `createMiddleware(options?: NoseconeOptions)` API to create a Next.js
-middleware.
+middleware that runs on every request.
 
 import Middleware from "@/snippets/nosecone/reference/next-js/Middleware.mdx";
 
@@ -549,3 +549,23 @@ import StaticOptOut from "@/snippets/nosecone/reference/next-js/StaticOptOut.mdx
 Additional resources:
 
 - [Next.js Content-Security-Policy guide](https://nextjs.org/docs/app/building-your-application/configuring/content-security-policy)
+
+### `@nosecone/sveltekit`
+
+The `@nosecone/sveltekit` adapter provides defaults to ensure SvelteKit is
+configured correctly, the `csp(options?: ContentSecurityPolicyConfig)` function
+to translate Nosecone configuration to SvelteKit configuration in
+`svelte.config.js`, and the `createHook(options?: NoseconeOptions)` function to
+create a SvelteKit hook that runs on every request.
+
+import SvelteKitConfig from "@/snippets/nosecone/reference/sveltekit/Config.mdx";
+
+<SvelteKitConfig />
+
+import SvelteKitHooks from "@/snippets/nosecone/reference/sveltekit/Hooks.mdx";
+
+<SvelteKitHooks />
+
+Additional resources:
+
+- [SvelteKit CSP configuration](https://svelte.dev/docs/kit/configuration#csp)
