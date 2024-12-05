@@ -140,7 +140,7 @@ on your page which helps mitigate many attacks, such as cross-site scripting.
     styleSrc: ["'self'"],
     workerSrc: ["'self'"],
   },
-};
+}
 ```
 
 The defaults will produce the following header:
@@ -166,8 +166,21 @@ loaded cross-origin.
 **Defaults:**
 
 ```ts
-
+{
+  policy: "require-corp",
+}
 ```
+
+The defaults will produce the following header:
+
+```txt
+Cross-Origin-Embedder-Policy: require-corp
+```
+
+Additional resources:
+
+- [MDN's Cross-Origin-Embedder-Policy reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy)
+- [OWASP Secure Headers Project - Cross-Origin-Embedder-Policy](https://owasp.org/www-project-secure-headers/#cross-origin-embedder-policy)
 
 ### `Cross-Origin-Opener-Policy`
 
@@ -180,8 +193,21 @@ The `Cross-Origin-Opener-Policy` header helps process-isolate your page.
 **Defaults:**
 
 ```ts
-
+{
+  policy: "same-origin",
+}
 ```
+
+The defaults will produce the following header:
+
+```txt
+Cross-Origin-Opener-Policy: same-origin
+```
+
+Additional resources:
+
+- [MDN's Cross-Origin-Opener-Policy reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy)
+- [OWASP Secure Headers Project - Cross-Origin-Opener-Policy](https://owasp.org/www-project-secure-headers/#cross-origin-opener-policy)
 
 ### `Cross-Origin-Resource-Policy`
 
@@ -195,8 +221,22 @@ resources cross-origin in some cases.
 **Defaults:**
 
 ```ts
-
+{
+  policy: "same-origin",
+}
 ```
+
+The defaults will produce the following header:
+
+```txt
+Cross-Origin-Resource-Policy: same-origin
+```
+
+Additional resources:
+
+- [Resource Policy FYI](https://resourcepolicy.fyi/)
+- [MDN's Cross-Origin-Resource-Policy reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Resource-Policy)
+- [OWASP Secure Headers Project - Cross-Origin-Resource-Policy](https://owasp.org/www-project-secure-headers/#cross-origin-resource-policy)
 
 ### `Origin-Agent-Cluster`
 
@@ -212,8 +252,18 @@ type OriginAgentClusterConfig = boolean;
 **Defaults:**
 
 ```ts
-
+true;
 ```
+
+The defaults will produce the following header:
+
+```txt
+Origin-Agent-Cluster: ?1
+```
+
+Additional resources:
+
+- [WHATPR Origin-keyed agent clusters specification](https://whatpr.org/html/6214/origin.html#origin-keyed-agent-clusters)
 
 ### `Referrer-Policy`
 
@@ -223,12 +273,27 @@ request header.
 **Types:**
 
 <DisplayType type="ReferrerPolicyConfig" from="nosecone" />
+<DisplayType type="ReferrerPolicyToken" from="nosecone" />
 
 **Defaults:**
 
 ```ts
-
+{
+  policy: ["no-referrer"],
+}
 ```
+
+The defaults will produce the following header:
+
+```txt
+Referrer-Policy: no-referrer
+```
+
+Additional resources:
+
+- [Referer header: Privacy and security concerns](https://developer.mozilla.org/en-US/docs/Web/Security/Referer_header:_privacy_and_security_concerns)
+- [MDN's Referrer-Policy reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy)
+- [OWASP Secure Headers Project - Referrer-Policy](https://owasp.org/www-project-secure-headers/#referrer-policy)
 
 ### `Strict-Transport-Security`
 
@@ -242,8 +307,23 @@ insecure HTTP.
 **Defaults:**
 
 ```ts
-
+{
+  maxAge: 31536000, // 1 year
+  includeSubDomains: true,
+  preload: false,
+}
 ```
+
+The defaults will produce the following header:
+
+```txt
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+```
+
+Additional resources:
+
+- [MDN's Strict-Transport-Security reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security)
+- [OWASP Secure Headers Project - Strict-Transport-Security](https://owasp.org/www-project-secure-headers/#strict-transport-security)
 
 ### `X-Content-Type-Options`
 
@@ -259,8 +339,20 @@ type ContentTypeOptionsConfig = boolean;
 **Defaults:**
 
 ```ts
-
+true;
 ```
+
+The defaults will produce the following header:
+
+```txt
+X-Content-Type-Options: nosniff
+```
+
+Additional resources:
+
+- [MDN's X-Content-Type-Options reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options)
+- [MDN on MIME Sniffing](https://developer.mozilla.org/en-US/docs/Web/HTTP/MIME_types#mime_sniffing)
+- [OWASP Secure Headers Project - X-Content-Type-Options](https://owasp.org/www-project-secure-headers/#x-content-type-options)
 
 ### `X-DNS-Prefetch-Control`
 
@@ -274,8 +366,20 @@ user privacy at the expense of performance.
 **Defaults:**
 
 ```ts
-
+{
+  allow: false,
+}
 ```
+
+The defaults will produce the following header:
+
+```txt
+X-DNS-Prefetch-Control: off
+```
+
+Additional resources:
+
+- [MDN's X-DNS-Prefetch-Control reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-DNS-Prefetch-Control)
 
 ### `X-Download-Options` (legacy)
 
@@ -291,8 +395,18 @@ type DownloadOptionsCofig = boolean;
 **Defaults:**
 
 ```ts
-
+true;
 ```
+
+The defaults will produce the following header:
+
+```txt
+X-Download-Options: noopen
+```
+
+Additional resources:
+
+- [Microsoft's guide to securing IE8](https://learn.microsoft.com/en-us/archive/blogs/ie/ie8-security-part-v-comprehensive-protection#mime-handling-force-save)
 
 ### `X-Frame-Options` (legacy)
 
@@ -311,8 +425,21 @@ older browsers.
 **Defaults:**
 
 ```ts
-
+{
+  action: "sameorigin",
+}
 ```
+
+The defaults will produce the following header:
+
+```txt
+X-Frame-Options: SAMEORIGIN
+```
+
+Additional resources:
+
+- [MDN's X-Frame-Options reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options)
+- [OWASP Secure Headers Project - X-Frame-Options](https://owasp.org/www-project-secure-headers/#x-frame-options)
 
 ### `X-Permitted-Cross-Domain-Policies`
 
@@ -326,8 +453,20 @@ products, your domain's policy for loading cross-domain content.
 **Defaults:**
 
 ```ts
-
+{
+  permittedPolicies: "none",
+}
 ```
+
+The defaults will produce the following header:
+
+```txt
+X-Permitted-Cross-Domain-Policies: none
+```
+
+Additional resources:
+
+- [OWASP Secure Headers Project - X-Permitted-Cross-Domain-Policies](https://owasp.org/www-project-secure-headers/#x-permitted-cross-domain-policies)
 
 ### `X-XSS-Protection` (legacy)
 
@@ -344,5 +483,18 @@ type XssProtectionConfig = boolean;
 **Defaults:**
 
 ```ts
-
+true;
 ```
+
+The defaults will produce the following header:
+
+```txt
+X-XSS-Protection: 0
+```
+
+Additional resources:
+
+- [Helmet team discussing X-XSS-Protection defaults](https://github.com/helmetjs/helmet/issues/230)
+- [MDN's X-XSS-Protection reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection)
+- [OWASP Secure Headers Project - X-XSS-Protection](https://owasp.org/www-project-secure-headers/#x-xss-protection)
+- [Portswigger explanation of side-channel](https://portswigger.net/daily-swig/new-xs-leak-techniques-reveal-fresh-ways-to-expose-user-information)
