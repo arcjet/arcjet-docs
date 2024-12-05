@@ -1,9 +1,7 @@
 ---
-import { createTwoslasher} from "twoslash"
 import { format } from "prettier";
 import { Code } from "@astrojs/starlight/components";
-
-const twoslasher = createTwoslasher();
+import twoslasher from "@/lib/twoslasher";
 
 const generics = Array.isArray(Astro.props.generics) && Astro.props.generics.length > 0
     ? `<${Astro.props.generics.join(", ")}>`
