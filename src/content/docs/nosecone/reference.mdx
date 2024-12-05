@@ -101,6 +101,21 @@ interface NoseconeOptions {
 }
 ```
 
+### `withVercelToolbar(options: NoseconeOptions): NoseconeOptions`
+
+Nosecone provides the `withVercelToolbar` utility function to augment Nosecone
+options so the [Vercel
+Toolbar](https://vercel.com/docs/workflow-collaboration/vercel-toolbar) is
+allowed by the various headers.
+
+This follows the guidelines documented by Vercel under [Using a Content Security
+Policy](https://vercel.com/docs/workflow-collaboration/vercel-toolbar/managing-toolbar#using-a-content-security-policy),
+but we recommend conditionally adding this based on `process.env.VERCEL_ENV`:
+
+import WithVercelToolbar from "@/snippets/nosecone/reference/WithVercelToolbar.mdx";
+
+<WithVercelToolbar />
+
 ## Headers
 
 ### `Content-Security-Policy`
@@ -505,21 +520,6 @@ Additional resources:
 - [MDN's X-XSS-Protection reference](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection)
 - [OWASP Secure Headers Project - X-XSS-Protection](https://owasp.org/www-project-secure-headers/#x-xss-protection)
 - [Portswigger explanation of side-channel](https://portswigger.net/daily-swig/new-xs-leak-techniques-reveal-fresh-ways-to-expose-user-information)
-
-### `withVercelToolbar(options: NoseconeOptions): NoseconeOptions`
-
-Nosecone provides the `withVercelToolbar` utility function to augment Nosecone
-options so the [Vercel
-Toolbar](https://vercel.com/docs/workflow-collaboration/vercel-toolbar) is
-allowed by the various headers.
-
-This follows the guidelines documented by Vercel under [Using a Content Security
-Policy](https://vercel.com/docs/workflow-collaboration/vercel-toolbar/managing-toolbar#using-a-content-security-policy),
-but we recommend conditionally adding this based on `process.env.VERCEL_ENV`:
-
-import WithVercelToolbar from "@/snippets/nosecone/reference/WithVercelToolbar.mdx";
-
-<WithVercelToolbar />
 
 ## Adapters
 
