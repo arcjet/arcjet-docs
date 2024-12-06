@@ -1,0 +1,16 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+
+import HooksTS from "./Hooks.ts?raw";
+import HooksJS from "./Hooks.js?raw";
+
+<SelectableContent client:load syncKey="language">
+  <div slot="TS" slotIdx="1">
+    Create the `src/hooks.server.ts` file in your project with the contents:
+    <Code code={HooksTS} lang="ts" title="src/hooks.server.ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    Create the `src/hooks.server.js` file in your project with the contents:
+    <Code code={HooksJS} lang="js" title="src/hooks.server.js" />
+  </div>
+</SelectableContent>
