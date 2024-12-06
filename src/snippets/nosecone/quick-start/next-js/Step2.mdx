@@ -12,6 +12,12 @@ import Step2LayoutNoCacheJS from "./Step2LayoutNoCache.js?raw";
 Nosecone applies headers to all your routes via middleware in your Next.js
 application.
 
+:::note
+We recommend you remove any `export const config = ...` from your middleware so
+Nosecone will run on every route. This ensures the headers are applied to all
+requests.
+:::
+
 <SelectableContent client:load syncKey="language" frameworkSwitcher>
   <div slot="TS" slotIdx="1">
     <Code code={Step2MiddlewareTS} lang="ts" title="middleware.ts" />
@@ -20,11 +26,6 @@ application.
     <Code code={Step2MiddlewareJS} lang="js" title="middleware.js" />
   </div>
 </SelectableContent>
-
-:::note
-We recommend you remove any `export const config = ...` from your middleware so
-Nosecone will run on every route.
-:::
 
 You also need to opt-out of static generation in your application. See the
 `@nosecone/next` [reference guide](/nosecone/reference#noseconenext) for more

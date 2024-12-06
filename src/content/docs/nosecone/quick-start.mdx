@@ -1,6 +1,6 @@
 ---
-title: "Arcjet Nosecone quick start"
-description: "Quick start guide for applying secure headers with Nosecone."
+title: "Arcjet Nosecone: Security headers for JS frameworks"
+description: "How to use the open source Arcjet Nosecone library to set security headers (CSP, HSTS, and others) in your Bun, Deno, Next.js, Node.js, or SvelteKit app."
 prev: false
 next: false
 frameworks:
@@ -10,18 +10,31 @@ frameworks:
   - node-js
   - sveltekit
 ajToc:
-  - text: 1. Install Nosecone
-    anchor: "1-install-nosecone"
-  - text: 2. Configure your application
-    anchor: "2-configure-your-application"
-  - text: 3. Run your application
-    anchor: "3-run-your-application"
-  - text: 4. Inspect the headers
-    anchor: "4-inspect-the-headers"
+  - text: "Supported headers"
+    anchor: "supported-headers"
+  - text: "Quick start"
+    anchor: "quick-start"
+    children:
+      - text: 1. Install Nosecone
+        anchor: "1-install-nosecone"
+      - text: 2. Configure your application
+        anchor: "2-configure-your-application"
+      - text: 3. Run your application
+        anchor: "3-run-your-application"
+      - text: 4. Inspect the headers
+        anchor: "4-inspect-the-headers"
+  - text: "What next?"
+    anchor: "what-next"
+  - text: "Get help"
+    anchor: "get-help"
 ---
 
 import WhatAreArcjetUtilities from "@/components/WhatAreArcjetUtilities.astro";
+import FrameworkName from "@/components/FrameworkName";
+import SDKVersionNosecone from "@/components/SDKVersionNosecone.astro";
 import SlotByFramework from "@/components/SlotByFramework";
+import { LinkCard, CardGrid } from "@astrojs/starlight/components";
+import Comments from "/src/components/Comments.astro";
 
 import BunStep1 from "@/snippets/nosecone/quick-start/bun/Step1.mdx";
 import BunStep2 from "@/snippets/nosecone/quick-start/bun/Step2.mdx";
@@ -48,14 +61,45 @@ import SvelteKitStep2 from "@/snippets/nosecone/quick-start/sveltekit/Step2.mdx"
 import SvelteKitStep3 from "@/snippets/nosecone/quick-start/sveltekit/Step3.mdx";
 import SvelteKitStep4 from "@/snippets/nosecone/quick-start/sveltekit/Step4.mdx";
 
-The Arcjet Nosecone library provides a streamlined way to apply secure headers
-to your application.
+[<SDKVersionNosecone/>](https://www.npmjs.com/package/nosecone)
+
+Arcjet Nosecone is an [open source library](https://github.com/arcjet/arcjet-js)
+that helps set security headers such as `Content-Security-Policy` (CSP),
+`Strict-Transport-Security` (HSTS), and `X-Content-Type-Options` in JS
+applications built with Bun, Deno, Next.js, Node.js, or SvelteKit.
 
 <WhatAreArcjetUtilities />
 
-## Usage
+## Supported headers
 
-Follow these steps to get started:
+Nosecone makes it easy to add and configure these headers:
+
+- `Content-Security-Policy` (CSP)
+- `Cross-Origin-Embedder-Policy` (COEP)
+- `Cross-Origin-Opener-Policy`
+- `Cross-Origin-Resource-Policy`
+- `Origin-Agent-Cluster`
+- `Referrer-Policy`
+- `Strict-Transport-Security` (HSTS)
+- `X-Content-Type-Options`
+- `X-DNS-Prefetch-Control`
+- `X-Download-Options`
+- `X-Frame-Options`
+- `X-Permitted-Cross-Domain-Policies`
+- `X-XSS-Protection`
+
+See the [reference guide](/nosecone/reference) for full details on each option.
+
+:::note
+If you are using Express, NestJS, or Remix we recommend using the excellent
+[Helmet](https://helmetjs.github.io/) library, which informed much of our work
+on Nosecone.
+:::
+
+## Quick start
+
+This guide will show you how to add our recommended <FrameworkName client:load/>
+default security headers.
 
 ### 1. Install Nosecone
 
@@ -69,12 +113,6 @@ library for your framework:
   <NodeJsStep1 slot="node-js" />
   <SvelteKitStep1 slot="sveltekit" />
 </SlotByFramework>
-
-:::note
-If you are using Express or NestJS, we recommend using the excellent
-[Helmet](https://helmetjs.github.io/) library, which informed much of our work
-on Nosecone.
-:::
 
 ### 2. Configure your application
 
@@ -98,6 +136,12 @@ on Nosecone.
 
 ### 4. Inspect the headers
 
+The default headers apply a pragmatic set of security headers to your
+application, but may break things (particularly the CSP header).
+
+We recommend you test your application thoroughly and tweak the settings to
+ensure it continues to work as expected.
+
 <SlotByFramework client:load>
   <BunStep4 slot="bun" />
   <DenoStep4 slot="deno" />
@@ -105,3 +149,21 @@ on Nosecone.
   <NodeJsStep4 slot="node-js" />
   <SvelteKitStep4 slot="sveltekit" />
 </SlotByFramework>
+
+## What next?
+
+<CardGrid>
+  <LinkCard
+    title="Nosecone reference"
+    href="/nosecone/reference"
+    description="Details about each security header and how to configure them."
+  ></LinkCard>
+</CardGrid>
+
+## Get help
+
+Need help with anything? Email support@arcjet.com to get support from our
+engineering team, [join our Discord](https://arcjet.com/discord), or [open an
+issue on GitHub](https://github.com/arcjet/arcjet-js).
+
+<Comments />
