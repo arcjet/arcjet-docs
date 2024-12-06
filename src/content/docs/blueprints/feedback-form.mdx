@@ -49,9 +49,111 @@ const aj = arcjet({
 You can use the Redact library to ensure no sensitive information is sent to your server by the user:
 
 ```ts
+import {redact} from "@arcjet/redact";
+
 const text = "please issue a refund to this card right now!!! 5555 5555 5555 4444";
 
 const [redacted] = await redact(text, {
   entities: ["credit-card-number"],
 });
+```
+
+The feedback component is shown below. It will validate the email and ensure no credit card numbers are sent to your server. If the checks succeed, then you can display a success message.
+
+```tsx title="/app/components/Form.tsx"
+"use client";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import {redact} from "@arcjet/redact";
+
+export default function FeedbackForm() {
+  const [feedback, setFeedback] = useState("");
+  const [email, setEmail] = useState("user@example.com");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+
+  async function onSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    setIsLoading(true);
+
+    const [redacted: redactedFeedback] = await redact(feedback, {
+          entities: ["credit-card-number"],
+    });
+
+    const response = await fetch("/api/send-feedback", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, redactedFeedback }),
+    });
+
+    setIsLoading(false);
+
+    const responseData = await response.json();
+
+    if (response.ok) {
+      // Show success message
+    } else {
+      toast({
+        title: "Submission Failed",
+        description:
+          "There was an error submitting your feedback: " + responseData.message,
+        variant: "destructive",
+      });
+    }
+  }
+
+  return (
+    <>
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle>Feedback Form</CardTitle>
+          <CardDescription>Enter your details below</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="amount">How was your experience?</Label>
+              <Input
+                id="feedback"
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Submitting..." : "Submit Feedback"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+      <Toaster />
+    </>
+  );
+}
 ```
