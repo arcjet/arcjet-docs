@@ -55,6 +55,7 @@ const Select = forwardRef(
       onChange,
       onFocus,
       onBlur,
+      disabled,
       ...props
     }: Props,
     ref: ForwardedRef<HTMLSelectElement>,
@@ -114,6 +115,7 @@ const Select = forwardRef(
     if (trigger.size)
       clsWrapper +=
         " Size-" + trigger.size + " " + styles["Size-" + trigger.size];
+    if (disabled) clsWrapper += " " + styles.Disabled;
 
     let cls = "Select " + styles.Select;
 
@@ -132,6 +134,7 @@ const Select = forwardRef(
           onFocus={handleFocus}
           onBlur={handleBlur}
           onChange={handleChange}
+          disabled={disabled}
           {...props}
         >
           {props.children}

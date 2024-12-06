@@ -6,7 +6,7 @@ const aj = arcjet({
   // and set it as an environment variable rather than hard coding.
   key: process.env.ARCJET_KEY,
   rules: [
-    // This allows all sensitive entities other than email addresses and those containing a dash character.
+    // This allows all sensitive entities other than email addresses
     sensitiveInfo({
       mode: "LIVE", // Will block requests, use "DRY_RUN" to log only
       // allow: ["EMAIL"], Will block all sensitive information types other than email.
@@ -17,12 +17,7 @@ const aj = arcjet({
 
 const server = http.createServer(async function (req, res) {
   const decision = await aj.protect(req);
-
-  for (const result of decision.results) {
-    console.log("Rule Result", result);
-  }
-
-  console.log("Conclusion", decision.conclusion);
+  console.log("Arcjet decision", decision);
 
   if (decision.isDenied()) {
     res.writeHead(400, { "Content-Type": "application/json" });

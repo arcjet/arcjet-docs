@@ -1,9 +1,15 @@
-import Step3AppJS from "/src/snippets/sensitive-info/quick-start/nextjs/Step3App.js?raw";
-import Step3AppTS from "/src/snippets/sensitive-info/quick-start/nextjs/Step3App.ts?raw";
-import Step3PagesJS from "/src/snippets/sensitive-info/quick-start/nextjs/Step3Pages.js?raw";
-import Step3PagesTS from "/src/snippets/sensitive-info/quick-start/nextjs/Step3Pages.ts?raw";
-import { Code } from "@astrojs/starlight/components";
+import Step3AppJS from "./Step3App.js?raw";
+import Step3AppTS from "./Step3App.ts?raw";
+import Step3PagesJS from "./Step3Pages.js?raw";
+import Step3PagesTS from "./Step3Pages.ts?raw";
+import { Code, Aside } from "@astrojs/starlight/components";
 import SelectableContent from "@/components/SelectableContent";
+
+<Aside type="note">
+  Sensitive information detection is not supported in server actions because
+  Next.js does not provide access to the request body. You can use the [redact
+  utility](/redact/quick-start) instead.
+</Aside>
 
 <SelectableContent client:load syncKey="language" frameworkSwitcher>
 <div slot="TS (App)" slotIdx="1">

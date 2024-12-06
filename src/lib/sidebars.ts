@@ -32,6 +32,11 @@ export const main = [
             attrs: { target: "_blank", class: "external-link" },
           },
           {
+            label: "Next.js SaaS template",
+            link: "https://www.next-forge.com/",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
             label: "Remix",
             link: "https://github.com/arcjet/example-remix",
             attrs: { target: "_blank", class: "external-link" },
@@ -48,8 +53,20 @@ export const main = [
         collapsed: true,
         items: [
           {
+            label: "AI quota control",
+            link: "/blueprints/ai-quota-control",
+          },
+          {
             label: "IP geolocation",
             link: "/blueprints/ip-geolocation",
+          },
+          {
+            label: "Cookie banner",
+            link: "/blueprints/cookie-banner",
+          },
+          {
+            label: "Defining custom rules",
+            link: "/blueprints/defining-custom-rules",
           },
           {
             label: "Payment form protection",
@@ -210,12 +227,20 @@ export const main = [
             link: "/reference/bun",
           },
           {
+            label: "NestJS",
+            link: "/reference/nestjs",
+          },
+          {
             label: "Next.js",
             link: "/reference/nextjs",
           },
           {
             label: "Node.js",
             link: "/reference/nodejs",
+          },
+          {
+            label: "Remix",
+            link: "/reference/remix",
           },
           {
             label: "SvelteKit",

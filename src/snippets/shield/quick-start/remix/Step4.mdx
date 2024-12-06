@@ -1,0 +1,23 @@
+import { Aside } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+
+### 4. Start app
+
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="packageManager">
+<div slot="npm" slotIdx="1">
+```sh
+npm run dev
+```
+</div>
+<div slot="pnpm" slotIdx="2">
+```sh
+pnpm run dev
+```
+</div>
+<div slot="yarn" slotIdx="3">
+```sh
+yarn run dev
+```
+</div>
+</SelectableContent>

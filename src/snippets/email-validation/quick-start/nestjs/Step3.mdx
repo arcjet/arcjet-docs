@@ -1,0 +1,21 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import Step3AppModuleTS from "./Step3AppModule.ts?raw";
+import Step3ControllerTS from "./Step3Controller.ts?raw";
+
+Several files are combined here to demonstrate creating a form handler
+controller. In a real application you should split them as suggested in the
+comments.
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={Step3AppModuleTS} lang="ts" title="src/signup/app.module.ts" />
+  </div>
+  <div slot="TS" slotIdx="1">
+    <Code
+      code={Step3ControllerTS}
+      lang="ts"
+      title="src/signup/signup.controller.ts"
+    />
+  </div>
+</SelectableContent>

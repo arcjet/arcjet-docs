@@ -1,10 +1,13 @@
 ---
 title: "Bot protection reference"
-description: "Reference guide for adding Arcjet bot protection to your Next.js, Node.js, Bun, or SvelteKit app."
+description: "Reference guide for adding Arcjet bot protection to your Next.js, NestJS, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
+  - deno
+  - nest-js
   - next-js
   - node-js
+  - remix
   - sveltekit
 ajToc:
   - text: "Configuration"
@@ -14,6 +17,16 @@ ajToc:
         anchor: "allowing-specific-bots"
       - text: "Denying specific bots"
         anchor: "denying-specific-bots"
+  - text: "Guards and routes"
+    anchor: "guards-and-routes"
+    framework: ["nest-js"]
+    children:
+      - text: "Global guard"
+        anchor: "global-guard"
+      - text: "Per route guard"
+        anchor: "per-route-guard"
+      - text: "Within route"
+        anchor: "within-route"
   - text: "Per route vs middleware"
     anchor: "per-route-vs-middleware"
     framework: ["next-js"]
@@ -24,6 +37,15 @@ ajToc:
         anchor: "middleware"
       - text: "Avoiding double protection with middleware"
         anchor: "avoiding-double-protection-with-middleware"
+  - text: "Pages & server actions"
+    anchor: "pages--server-actions"
+    framework: ["next-js"]
+  - text: "Loader vs action"
+    anchor: "loader-vs-action"
+    framework: ["remix"]
+    children:
+      - text: "Action"
+        anchor: "action"
   - text: "Per route vs hooks"
     anchor: "per-route-vs-hooks"
     framework: ["sveltekit"]
@@ -43,6 +65,8 @@ ajToc:
     anchor: "error-handling"
   - text: "Filtering categories"
     anchor: "filtering-categories"
+  - text: "Bot verification"
+    anchor: "bot-verification"
   - text: "Testing"
     anchor: "testing"
   - text: "Examples"
@@ -50,35 +74,65 @@ ajToc:
     framework: ["next-js"]
 ---
 
+import Comments from "@/components/Comments.astro";
 import SlotByFramework from "@/components/SlotByFramework";
-import AllowingBotsBun from "@/snippets/bot-protection/reference/bun/AllowingBots.mdx";
-import DecisionLogBun from "@/snippets/bot-protection/reference/bun/DecisionLog.mdx";
-import DenyingBotsBun from "@/snippets/bot-protection/reference/bun/DenyingBots.mdx";
-import ErrorsBun from "@/snippets/bot-protection/reference/bun/Errors.mdx";
-import FilteringBun from "@/snippets/bot-protection/reference/bun/Filtering.mdx";
-import IdentifiedBotsBun from "@/snippets/bot-protection/reference/bun/IdentifiedBots.mdx";
-import AllowingBotsNextJs from "@/snippets/bot-protection/reference/nextjs/AllowingBots.mdx";
-import DecisionLogNextJs from "@/snippets/bot-protection/reference/nextjs/DecisionLog.mdx";
-import DenyingBotsNextJs from "@/snippets/bot-protection/reference/nextjs/DenyingBots.mdx";
-import ErrorsNextJs from "@/snippets/bot-protection/reference/nextjs/Errors.mdx";
-import ExamplesNextJs from "@/snippets/bot-protection/reference/nextjs/Examples.mdx";
-import FilteringNextJs from "@/snippets/bot-protection/reference/nextjs/Filtering.mdx";
-import IdentifiedBotsNextJs from "@/snippets/bot-protection/reference/nextjs/IdentifiedBots.mdx";
-import PerRouteVsMiddlewareNextJs from "@/snippets/bot-protection/reference/nextjs/PerRouteVsMiddleware.mdx";
-import AllowingBotsNodeJs from "@/snippets/bot-protection/reference/nodejs/AllowingBots.mdx";
-import DecisionLogNodeJs from "@/snippets/bot-protection/reference/nodejs/DecisionLog.mdx";
-import DenyingBotsNodeJs from "@/snippets/bot-protection/reference/nodejs/DenyingBots.mdx";
-import ErrorsNodeJs from "@/snippets/bot-protection/reference/nodejs/Errors.mdx";
-import FilteringNodeJs from "@/snippets/bot-protection/reference/nodejs/Filtering.mdx";
-import IdentifiedBotsNodeJs from "@/snippets/bot-protection/reference/nodejs/IdentifiedBots.mdx";
-import AllowingBotsSvelteKit from "@/snippets/bot-protection/reference/sveltekit/AllowingBots.mdx";
-import DecisionLogSvelteKit from "@/snippets/bot-protection/reference/sveltekit/DecisionLog.mdx";
-import DenyingBotsSvelteKit from "@/snippets/bot-protection/reference/sveltekit/DenyingBots.mdx";
-import ErrorsSvelteKit from "@/snippets/bot-protection/reference/sveltekit/Errors.mdx";
-import FilteringSvelteKit from "@/snippets/bot-protection/reference/sveltekit/Filtering.mdx";
-import IdentifiedBotsSvelteKit from "@/snippets/bot-protection/reference/sveltekit/IdentifiedBots.mdx";
-import PerRouteVsHooksSvelteKit from "@/snippets/bot-protection/reference/sveltekit/PerRouteVsHooks.mdx";
-import Comments from "/src/components/Comments.astro";
+import TextByFramework from "@/components/TextByFramework";
+
+import BunAllowingBots from "@/snippets/bot-protection/reference/bun/AllowingBots.mdx";
+import BunDecisionLog from "@/snippets/bot-protection/reference/bun/DecisionLog.mdx";
+import BunDenyingBots from "@/snippets/bot-protection/reference/bun/DenyingBots.mdx";
+import BunErrors from "@/snippets/bot-protection/reference/bun/Errors.mdx";
+import BunFiltering from "@/snippets/bot-protection/reference/bun/Filtering.mdx";
+import BunIdentifiedBots from "@/snippets/bot-protection/reference/bun/IdentifiedBots.mdx";
+
+import DenoAllowingBots from "@/snippets/bot-protection/reference/deno/AllowingBots.mdx";
+import DenoDecisionLog from "@/snippets/bot-protection/reference/deno/DecisionLog.mdx";
+import DenoDenyingBots from "@/snippets/bot-protection/reference/deno/DenyingBots.mdx";
+import DenoErrors from "@/snippets/bot-protection/reference/deno/Errors.mdx";
+import DenoFiltering from "@/snippets/bot-protection/reference/deno/Filtering.mdx";
+import DenoIdentifiedBots from "@/snippets/bot-protection/reference/deno/IdentifiedBots.mdx";
+
+import NestJsAllowingBots from "@/snippets/bot-protection/reference/nestjs/AllowingBots.mdx";
+import NestJsDecisionLog from "@/snippets/bot-protection/reference/nestjs/DecisionLog.mdx";
+import NestJsDecoratorRoutes from "@/snippets/bot-protection/reference/nestjs/DecoratorRoutes.mdx";
+import NestJsDenyingBots from "@/snippets/bot-protection/reference/nestjs/DenyingBots.mdx";
+import NestJsErrors from "@/snippets/bot-protection/reference/nestjs/Errors.mdx";
+import NestJsFiltering from "@/snippets/bot-protection/reference/nestjs/Filtering.mdx";
+import NestJsIdentifiedBots from "@/snippets/bot-protection/reference/nestjs/IdentifiedBots.mdx";
+
+import NextJsAllowingBots from "@/snippets/bot-protection/reference/nextjs/AllowingBots.mdx";
+import NextJsDecisionLog from "@/snippets/bot-protection/reference/nextjs/DecisionLog.mdx";
+import NextJsDenyingBots from "@/snippets/bot-protection/reference/nextjs/DenyingBots.mdx";
+import NextJsErrors from "@/snippets/bot-protection/reference/nextjs/Errors.mdx";
+import NextJsExamples from "@/snippets/bot-protection/reference/nextjs/Examples.mdx";
+import NextJsFiltering from "@/snippets/bot-protection/reference/nextjs/Filtering.mdx";
+import NextJsIdentifiedBots from "@/snippets/bot-protection/reference/nextjs/IdentifiedBots.mdx";
+import NextJsPerRouteVsMiddleware from "@/snippets/bot-protection/reference/nextjs/PerRouteVsMiddleware.mdx";
+import NextJsPagesServerActions from "@/snippets/bot-protection/reference/nextjs/PagesServerActions.mdx";
+import NestJsGuardDecision from "@/snippets/bot-protection/reference/nestjs/GuardDecision.mdx";
+
+import NodeJsAllowingBots from "@/snippets/bot-protection/reference/nodejs/AllowingBots.mdx";
+import NodeJsDecisionLog from "@/snippets/bot-protection/reference/nodejs/DecisionLog.mdx";
+import NodeJsDenyingBots from "@/snippets/bot-protection/reference/nodejs/DenyingBots.mdx";
+import NodeJsErrors from "@/snippets/bot-protection/reference/nodejs/Errors.mdx";
+import NodeJsFiltering from "@/snippets/bot-protection/reference/nodejs/Filtering.mdx";
+import NodeJsIdentifiedBots from "@/snippets/bot-protection/reference/nodejs/IdentifiedBots.mdx";
+
+import RemixAllowingBots from "@/snippets/bot-protection/reference/remix/AllowingBots.mdx";
+import RemixDecisionLog from "@/snippets/bot-protection/reference/remix/DecisionLog.mdx";
+import RemixDenyingBots from "@/snippets/bot-protection/reference/remix/DenyingBots.mdx";
+import RemixErrors from "@/snippets/bot-protection/reference/remix/Errors.mdx";
+import RemixFiltering from "@/snippets/bot-protection/reference/remix/Filtering.mdx";
+import RemixIdentifiedBots from "@/snippets/bot-protection/reference/remix/IdentifiedBots.mdx";
+import RemixLoaderVsAction from "@/snippets/bot-protection/reference/remix/LoaderVsAction.mdx";
+
+import SvelteKitAllowingBots from "@/snippets/bot-protection/reference/sveltekit/AllowingBots.mdx";
+import SvelteKitDecisionLog from "@/snippets/bot-protection/reference/sveltekit/DecisionLog.mdx";
+import SvelteKitDenyingBots from "@/snippets/bot-protection/reference/sveltekit/DenyingBots.mdx";
+import SvelteKitErrors from "@/snippets/bot-protection/reference/sveltekit/Errors.mdx";
+import SvelteKitFiltering from "@/snippets/bot-protection/reference/sveltekit/Filtering.mdx";
+import SvelteKitIdentifiedBots from "@/snippets/bot-protection/reference/sveltekit/IdentifiedBots.mdx";
+import SvelteKitPerRouteVsHooks from "@/snippets/bot-protection/reference/sveltekit/PerRouteVsHooks.mdx";
 
 Arcjet bot detection allows you to manage traffic by automated clients and bots.
 
@@ -121,15 +175,22 @@ Most applications want to block almost all bots. However, it is common to allow
 some bots to access your system, such as bots for search indexing or API
 access from the command line.
 
+When allowing specific bots we recommend that you also [check the verification
+status](#bot-verification) after an allow decision is returned to ensure that the bots are who they
+say they are.
+
 This behavior is configured with an `allow` list from our [full list of
 bots](https://arcjet.com/bot-list) and/or [bot
 categories](/bot-protection/identifying-bots#bot-categories).
 
 <SlotByFramework client:load>
-  <AllowingBotsBun slot="bun" />
-  <AllowingBotsNextJs slot="next-js" />
-  <AllowingBotsNodeJs slot="node-js" />
-  <AllowingBotsSvelteKit slot="sveltekit" />
+  <BunAllowingBots slot="bun" />
+  <DenoAllowingBots slot="deno" />
+  <NestJsAllowingBots slot="nest-js" />
+  <NextJsAllowingBots slot="next-js" />
+  <NodeJsAllowingBots slot="node-js" />
+  <RemixAllowingBots slot="remix" />
+  <SvelteKitAllowingBots slot="sveltekit" />
 </SlotByFramework>
 
 ### Denying specific bots
@@ -143,15 +204,21 @@ bots](https://arcjet.com/bot-list) and/or [bot
 categories](/bot-protection/identifying-bots#bot-categories).
 
 <SlotByFramework client:load>
-  <DenyingBotsBun slot="bun" />
-  <DenyingBotsNextJs slot="next-js" />
-  <DenyingBotsNodeJs slot="node-js" />
-  <DenyingBotsSvelteKit slot="sveltekit" />
+  <BunDenyingBots slot="bun" />
+  <DenoDenyingBots slot="deno" />
+  <NestJsDenyingBots slot="nest-js" />
+  <NextJsDenyingBots slot="next-js" />
+  <NodeJsDenyingBots slot="node-js" />
+  <RemixDenyingBots slot="remix" />
+  <SvelteKitDenyingBots slot="sveltekit" />
 </SlotByFramework>
 
 <SlotByFramework client:load>
-  <PerRouteVsMiddlewareNextJs slot="next-js" />
-  <PerRouteVsHooksSvelteKit slot="sveltekit" />
+  <NestJsDecoratorRoutes slot="nest-js" />
+  <NextJsPerRouteVsMiddleware slot="next-js" />
+  <NextJsPagesServerActions slot="next-js" />
+  <RemixLoaderVsAction slot="remix" />
+  <SvelteKitPerRouteVsHooks slot="sveltekit" />
 </SlotByFramework>
 
 ## Decision
@@ -162,6 +229,10 @@ match the bot detection rules, immediately returning a response to the client.
 Arcjet also provides a single `protect` function that is used to execute your
 protection rules. This requires a `request` argument which is the request
 context as passed to the request handler.
+
+<SlotByFramework client:load>
+  <NestJsGuardDecision slot="nest-js" />
+</SlotByFramework>
 
 This function returns a `Promise` that resolves to an
 `ArcjetDecision` object. This contains the following properties:
@@ -192,13 +263,14 @@ for (const result of decision.results) {
 }
 ```
 
-This example will log the full result as well as the bot protection rule:
-
 <SlotByFramework client:load>
-  <DecisionLogBun slot="bun" />
-  <DecisionLogNextJs slot="next-js" />
-  <DecisionLogNodeJs slot="node-js" />
-  <DecisionLogSvelteKit slot="sveltekit" />
+  <BunDecisionLog slot="bun" />
+  <DenoDecisionLog slot="deno" />
+  <NestJsDecisionLog slot="nest-js" />
+  <NextJsDecisionLog slot="next-js" />
+  <NodeJsDecisionLog slot="node-js" />
+  <RemixDecisionLog slot="remix" />
+  <SvelteKitDecisionLog slot="sveltekit" />
 </SlotByFramework>
 
 ### Identified bots
@@ -210,10 +282,13 @@ of which will be available on the `decision.allowed` and `decision.denied`
 properties.
 
 <SlotByFramework client:load>
-  <IdentifiedBotsBun slot="bun" />
-  <IdentifiedBotsNextJs slot="next-js" />
-  <IdentifiedBotsNextJs slot="node-js" />
-  <IdentifiedBotsSvelteKit slot="sveltekit" />
+  <BunIdentifiedBots slot="bun" />
+  <DenoIdentifiedBots slot="deno" />
+  <NestJsIdentifiedBots slot="nest-js" />
+  <NextJsIdentifiedBots slot="next-js" />
+  <NodeJsIdentifiedBots slot="node-js" />
+  <RemixIdentifiedBots slot="remix" />
+  <SvelteKitIdentifiedBots slot="sveltekit" />
 </SlotByFramework>
 
 ## Error handling
@@ -238,10 +313,13 @@ See [an example of how to do this](/bot-protection/concepts#user-agent-header).
 :::
 
 <SlotByFramework client:load>
-  <ErrorsBun slot="bun" />
-  <ErrorsNextJs slot="next-js" />
-  <ErrorsNodeJs slot="node-js" />
-  <ErrorsSvelteKit slot="sveltekit" />
+  <BunErrors slot="bun" />
+  <DenoErrors slot="deno" />
+  <NestJsErrors slot="nest-js" />
+  <NextJsErrors slot="next-js" />
+  <NodeJsErrors slot="node-js" />
+  <RemixErrors slot="remix" />
+  <SvelteKitErrors slot="sveltekit" />
 </SlotByFramework>
 
 ## Filtering categories
@@ -251,11 +329,43 @@ access. For example, you may want to allow most of `CATEGORY:GOOGLE` except
 their "advertising quality" bot.
 
 <SlotByFramework client:load>
-  <FilteringBun slot="bun" />
-  <FilteringNextJs slot="next-js" />
-  <FilteringNodeJs slot="node-js" />
-  <FilteringSvelteKit slot="sveltekit" />
+  <BunFiltering slot="bun" />
+  <DenoFiltering slot="deno" />
+  <NestJsFiltering slot="nest-js" />
+  <NextJsFiltering slot="next-js" />
+  <NodeJsFiltering slot="node-js" />
+  <RemixFiltering slot="remix" />
+  <SvelteKitFiltering slot="sveltekit" />
 </SlotByFramework>
+
+## Bot verification
+
+We support verifying the authenticity of requests from some bots by
+comparing the request IP to published bot IP ranges or performing a reverse
+DNS query. Verification is performed for supported bots using the appropriate method
+automatically after the bot is identified by Arcjet.
+
+To check the verification status,
+use the `.isSpoofed()` or `.isVerified()` methods on the bot reason object. If
+verification was performed, one of these will be true and the other false; both
+will be false if verification failed or if we don't support verifying the identified bot. 
+
+:::note
+It's recommended to check verification status only when using an allow configuration.
+For deny configurations, verification is skipped as you'd want to block listed bots
+regardless of legitimacy.
+:::
+
+Here's a basic usage example:
+```ts
+if (decision.reason.isSpoofed()) {
+  // Show a custom block page for spoofed bots
+} else if (decision.reason.isVerified()) {
+  // You can now trust that the bot is who they say they are and proceed as normal
+} else {
+  // The bot either does not support verification, or verification failed.
+}
+```
 
 ## Testing
 
@@ -269,7 +379,7 @@ Arcjet can also be triggered based using a sample of your traffic.
 See the [Testing](/testing) section of the docs for details.
 
 <SlotByFramework client:load>
-  <ExamplesNextJs slot="next-js" />
+  <NextJsExamples slot="next-js" />
 </SlotByFramework>
 
 <Comments />

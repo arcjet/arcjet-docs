@@ -1,0 +1,27 @@
+import SelectableContent from "@/components/SelectableContent";
+
+### 4. Start server
+
+Start your Deno server:
+
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+<div slot="TS" slotIdx="1">
+  ```sh
+  deno run --watch index.ts
+  ```
+</div>
+</SelectableContent>
+
+:::note[Deno permissions]
+Deno will prompt you for various permissions. You can also start Deno with the
+appropriate permission flags (`--allow-read --allow-env --allow-net`) to skip
+the prompt.
+:::
+
+Make a `curl` request from your terminal. You should see a `403 Forbidden`
+response because `curl` is considered an automated client by default.
+
+```sh
+curl http://localhost:3000
+```

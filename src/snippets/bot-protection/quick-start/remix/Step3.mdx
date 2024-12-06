@@ -1,0 +1,28 @@
+import Step3TS from "./Step3.tsx?raw";
+import Step3JS from "./Step3.jsx?raw";
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+
+The example below will return a 403 Forbidden response for all requests from
+clients we are sure are automated.
+
+Create a new route at `app/routes/arcjet.tsx` with the contents:
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code
+      code={Step3TS}
+      lang="ts"
+      title="app/routes/arcjet.tsx"
+      mark={["ARCJET_KEY"]}
+    />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code
+      code={Step3JS}
+      lang="js"
+      title="app/routes/arcjet.jsx"
+      mark={["ARCJET_KEY"]}
+    />
+  </div>
+</SelectableContent>

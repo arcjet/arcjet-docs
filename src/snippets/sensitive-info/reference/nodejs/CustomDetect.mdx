@@ -1,16 +1,16 @@
 import SelectableContent from "@/components/SelectableContent";
 import { Code } from "@astrojs/starlight/components";
-import AccessBodyJS from "/src/snippets/sensitive-info/reference/nodejs/AccessBody.js?raw";
-import AccessBodyTS from "/src/snippets/sensitive-info/reference/nodejs/AccessBody.ts?raw";
-import CustomDetectJS from "/src/snippets/sensitive-info/reference/nodejs/CustomDetect.js?raw";
-import CustomDetectTS from "/src/snippets/sensitive-info/reference/nodejs/CustomDetect.ts?raw";
+import AccessBodyJS from "./AccessBody.js?raw";
+import AccessBodyTS from "./AccessBody.ts?raw";
+import CustomDetectJS from "./CustomDetect.js?raw";
+import CustomDetectTS from "./CustomDetect.ts?raw";
 
 <SelectableContent client:load syncKey="language" frameworkSwitcher>
   <div slot="TS" slotIdx="1">
     <Code code={CustomDetectTS} lang="ts" />
   </div>
   <div slot="JS" slotIdx="2">
-    <Code code={CustomDetectJS} lang="ts" />
+    <Code code={CustomDetectJS} lang="js" />
   </div>
 </SelectableContent>
 

@@ -1,14 +1,26 @@
 ---
 title: "Shield reference"
-description: "Reference guide for adding Arcjet Shield to your Next.js, Node.js, Bun, or SvelteKit app."
+description: "Reference guide for adding Arcjet Shield to your Next.js, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
+  - nest-js
   - next-js
   - node-js
+  - remix
   - sveltekit
 ajToc:
   - text: "Configuration"
     anchor: "configuration"
+  - text: "Guards and routes"
+    anchor: "guards-and-routes"
+    framework: ["nest-js"]
+    children:
+      - text: "Global guard"
+        anchor: "global-guard"
+      - text: "Per route guard"
+        anchor: "per-route-guard"
+      - text: "Within route"
+        anchor: "within-route"
   - text: "Per route vs middleware"
     anchor: "per-route-vs-middleware"
     framework: ["next-js"]
@@ -19,6 +31,15 @@ ajToc:
         anchor: "middleware"
       - text: "Avoiding double protection with middleware"
         anchor: "avoiding-double-protection-with-middleware"
+  - text: "Pages & server actions"
+    anchor: "pages--server-actions"
+    framework: ["next-js"]
+  - text: "Loader vs action"
+    anchor: "loader-vs-action"
+    framework: ["remix"]
+    children:
+      - text: "Action"
+        anchor: "action"
   - text: "Per route vs hooks"
     anchor: "per-route-vs-hooks"
     framework: ["sveltekit"]
@@ -38,15 +59,26 @@ ajToc:
 ---
 
 import SlotByFramework from "@/components/SlotByFramework";
+import TextByFramework from "@/components/TextByFramework";
+import DisplayType from "@/components/DisplayType.astro";
+
 import DecisionLogBun from "@/snippets/shield/reference/bun/DecisionLog.mdx";
 import ErrorsBun from "@/snippets/shield/reference/bun/Errors.mdx";
+import DecisionLogNestJs from "@/snippets/shield/reference/nestjs/DecisionLog.mdx";
+import NestJsDecoratorRoutes from "@/snippets/shield/reference/nestjs/DecoratorRoutes.mdx";
+import ErrorsNestJs from "@/snippets/shield/reference/nestjs/Errors.mdx";
 import DecisionLogNextJs from "@/snippets/shield/reference/nextjs/DecisionLog.mdx";
 import ErrorsNextJs from "@/snippets/shield/reference/nextjs/Errors.mdx";
+import PerRouteVsMiddlewareNextJs from "@/snippets/shield/reference/nextjs/PerRouteVsMiddleware.mdx";
+import NextJsPagesServerActions from "@/snippets/shield/reference/nextjs/PagesServerActions.mdx";
+import NestJsGuardDecision from "@/snippets/shield/reference/nestjs/GuardDecision.mdx";
 import DecisionLogNodeJs from "@/snippets/shield/reference/nodejs/DecisionLog.mdx";
 import ErrorsNodeJs from "@/snippets/shield/reference/nodejs/Errors.mdx";
+import DecisionLogRemix from "@/snippets/shield/reference/remix/DecisionLog.mdx";
+import ErrorsRemix from "@/snippets/shield/reference/remix/Errors.mdx";
+import RemixLoaderVsAction from "@/snippets/shield/reference/remix/LoaderVsAction.mdx";
 import DecisionLogSvelteKit from "@/snippets/shield/reference/sveltekit/DecisionLog.mdx";
 import ErrorsSvelteKit from "@/snippets/shield/reference/sveltekit/Errors.mdx";
-import PerRouteVsMiddlewareNextJs from "@/snippets/shield/reference/nextjs/PerRouteVsMiddleware.mdx";
 import PerRouteVsHooksSvelteKit from "@/snippets/shield/reference/sveltekit/PerRouteVsHooks.mdx";
 
 Arcjet Shield protects your application against common attacks, including the
@@ -56,16 +88,12 @@ Arcjet Shield protects your application against common attacks, including the
 
 Shield is configured by specifying which mode you want it to run in.
 
-The configuration definition is:
+The `arcjet` client can be configured with one or more Shield rules, which are
+constructed with the `shield(options: ShieldOptions)` function and configured by
+`ShieldOptions`:
 
-```ts
-type ShieldOptions = {
-  mode?: "LIVE" | "DRY_RUN";
-};
-```
-
-The `arcjet` client is configured with one or more `shield` rules which take
-one or many `ShieldOptions`.
+<DisplayType type="ShieldOptions" from="arcjet" />
+<DisplayType type="ArcjetMode" from="arcjet" />
 
 :::note
 When specifying multiple rules, the order of the rules is ignored. Rule
@@ -74,19 +102,22 @@ execution ordering is automatically optimized for performance. See
 :::
 
 <SlotByFramework client:load>
+  <NestJsDecoratorRoutes slot="nest-js" />
   <PerRouteVsMiddlewareNextJs slot="next-js" />
+  <NextJsPagesServerActions slot="next-js" />
+  <RemixLoaderVsAction slot="remix" />
   <PerRouteVsHooksSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
 ## Decision
 
-The [quick start example](/shield/quick-start?f=next-js) will deny requests
-that are determined to be suspicious, immediately returning a response to the
-client using Next.js middleware.
-
-Arcjet also provides a single `protect` function that is used to execute your
-protection rules. This requires a `request` argument which is the request
+Arcjet provides a single `protect` function that is used to execute your
+protection rules. This requires a `RequestEvent` property which is the event
 context as passed to the request handler.
+
+<SlotByFramework client:load>
+  <NestJsGuardDecision slot="nest-js" />
+</SlotByFramework>
 
 This function returns a `Promise` that resolves to an
 `ArcjetDecision` object. This contains the following properties:
@@ -105,9 +136,6 @@ This function returns a `Promise` that resolves to an
 - `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
   client IP address. See the SDK reference for more information.
 
-See [the SDK reference](/reference/nextjs#results) for more details about the
-rule results.
-
 You check if a deny conclusion has been returned by a shield rule by using
 `decision.isDenied()` and `decision.reason.isShield()` respectively.
 
@@ -123,8 +151,10 @@ This example will log the full result as well as the shield rule:
 
 <SlotByFramework client:load>
   <DecisionLogBun slot="bun" />
+  <DecisionLogNestJs slot="nest-js" />
   <DecisionLogNextJs slot="next-js" />
   <DecisionLogNodeJs slot="node-js" />
+  <DecisionLogRemix slot="remix" />
   <DecisionLogSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -141,8 +171,10 @@ accessing `decision.reason.message`.
 
 <SlotByFramework client:load>
   <ErrorsBun slot="bun" />
+  <ErrorsNestJs slot="nest-js" />
   <ErrorsNextJs slot="next-js" />
   <ErrorsNodeJs slot="node-js" />
+  <ErrorsRemix slot="remix" />
   <ErrorsSvelteKit slot="sveltekit" />
 </SlotByFramework>
 

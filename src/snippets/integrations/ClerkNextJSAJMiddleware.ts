@@ -1,26 +1,19 @@
+import arcjet, { shield } from "@arcjet/next";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import arcjet, { createMiddleware, shield } from "@arcjet/next";
 import { NextResponse } from "next/server";
 
 export const config = {
   // Protects all routes, including api/trpc.
   // See https://clerk.com/docs/references/nextjs/clerk-middleware
   // for more information about configuring your Middleware
-  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
 };
 
-const isProtectedRoute = createRouteMatcher(["/api/private"]);
-
-const clerk = clerkMiddleware((auth, request) => {
-  if (isProtectedRoute(request)) {
-    auth().protect();
-  }
-
-  return NextResponse.next();
-});
-
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  // Get your site key from https://app.arcjet.com
+  // and set it as an environment variable rather than hard coding.
+  // See: https://nextjs.org/docs/app/building-your-application/configuring/environment-variables
+  key: process.env.ARCJET_KEY!,
   rules: [
     // Protect against common attacks with Arcjet Shield
     shield({
@@ -29,7 +22,20 @@ const aj = arcjet({
   ],
 });
 
-// Clerk middleware will run after the Arcjet middleware. You could also use
-// Clerk's beforeAuth options to run Arcjet first. See
-// https://clerk.com/docs/references/nextjs/auth-middleware#use-before-auth-to-execute-middleware-before-authentication
-export default createMiddleware(aj, clerk);
+const isProtectedRoute = createRouteMatcher(["/api/private"]);
+
+// Arcjet runs first to protect all routes defined in the matcher config above.
+// Then if the request is allowed, Clerk runs
+export default clerkMiddleware(async (auth, req) => {
+  const decision = await aj.protect(req);
+
+  if (decision.isDenied()) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  }
+
+  if (isProtectedRoute(req)) {
+    await auth.protect();
+  }
+
+  return NextResponse.next();
+});

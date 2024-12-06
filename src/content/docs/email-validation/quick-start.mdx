@@ -1,10 +1,12 @@
 ---
 title: "Email validation"
-description: "Quick start guide for adding Arcjet email validation to your Next.js, Node.js, Bun, or SvelteKit app."
+description: "Quick start guide for adding Arcjet email validation to your Next.js, NestJS, Node.js, Bun, or SvelteKit app."
 frameworks:
   - bun
+  - nest-js
   - next-js
   - node-js
+  - remix
   - sveltekit
 ajToc:
   - text: "Quick start"
@@ -21,7 +23,7 @@ ajToc:
         framework: ["bun", "node-js"]
       - text: 4. Start app
         anchor: "4-start-app"
-        framework: ["next-js", "sveltekit"]
+        framework: ["nest-js", "next-js", "sveltekit"]
   - text: "FAQs"
     anchor: "faqs"
   - text: "What next?"
@@ -35,19 +37,25 @@ import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import SlotByFramework from "@/components/SlotByFramework";
 import FrameworkName from "@/components/FrameworkName";
 import Step1Bun from "@/snippets/email-validation/quick-start/bun/Step1.mdx";
+import Step1NestJs from "@/snippets/email-validation/quick-start/nestjs/Step1.mdx";
 import Step1NextJs from "@/snippets/email-validation/quick-start/nextjs/Step1.mdx";
 import Step1NodeJs from "@/snippets/email-validation/quick-start/nodejs/Step1.mdx";
+import Step1Remix from "@/snippets/email-validation/quick-start/remix/Step1.mdx";
 import Step1SvelteKit from "@/snippets/email-validation/quick-start/sveltekit/Step1.mdx";
 import Step2 from "@/snippets/email-validation/quick-start/shared/Step2.mdx";
 import Step2SetEnv from "@/snippets/email-validation/quick-start/shared/Step2SetEnv.mdx";
 import Step3Bun from "@/snippets/email-validation/quick-start/bun/Step3.mdx";
+import Step3NestJs from "@/snippets/email-validation/quick-start/nestjs/Step3.mdx";
 import Step3NextJs from "@/snippets/email-validation/quick-start/nextjs/Step3.mdx";
 import Step3NodeJs from "@/snippets/email-validation/quick-start/nodejs/Step3.mdx";
+import Step3Remix from "@/snippets/email-validation/quick-start/remix/Step3.mdx";
 import Step3SvelteKit from "@/snippets/email-validation/quick-start/sveltekit/Step3.mdx";
 import Step4 from "@/snippets/email-validation/quick-start/nextjs/Step4.mdx";
 import Step4SvelteKit from "@/snippets/email-validation/quick-start/sveltekit/Step4.mdx";
 import Step4Bun from "@/snippets/email-validation/quick-start/bun/Step4.mdx";
+import Step4Remix from "@/snippets/email-validation/quick-start/remix/Step4.mdx";
 import Step4NodeJs from "@/snippets/email-validation/quick-start/nodejs/Step4.mdx";
+import Step4NestJs from "@/snippets/email-validation/quick-start/nestjs/Step4.mdx";
 import FAQs from "/src/components/FAQs.astro";
 import Comments from "/src/components/Comments.astro";
 
@@ -68,8 +76,10 @@ In your project root, run the following command to install the SDK:
 
 <SlotByFramework client:load>
   <Step1Bun slot="bun" />
+  <Step1NestJs slot="nest-js" />
   <Step1NextJs slot="next-js" />
   <Step1NodeJs slot="node-js" />
+  <Step1Remix slot="remix" />
   <Step1SvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -82,7 +92,9 @@ project root.
 <SlotByFramework client:load>
   <Step2SetEnv slot="bun" />
   <Step2 slot="next-js" />
+  <Step2SetEnv slot="nest-js" />
   <Step2SetEnv slot="node-js" />
+  <Step2 slot="remix" />
   <Step2 slot="sveltekit" />
 </SlotByFramework>
 
@@ -94,17 +106,23 @@ a deny decision.
 
 <SlotByFramework client:load>
   <Step3Bun slot="bun" />
+  <Step3NestJs slot="nest-js" />
   <Step3NextJs slot="next-js" />
   <Step3NodeJs slot="node-js" />
+  <Step3Remix slot="remix" />
   <Step3SvelteKit slot="sveltekit" />
 </SlotByFramework>
 
 <SlotByFramework client:load>
   <Step4Bun slot="bun" />
+  <Step4NestJs slot="nest-js" />
   <Step4 slot="next-js" />
   <Step4NodeJs slot="node-js" />
+  <Step4Remix slot="remix" />
   <Step4SvelteKit slot="sveltekit" />
 </SlotByFramework>
+
+The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
 
 ## FAQs
 

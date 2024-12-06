@@ -18,6 +18,7 @@ import MultipleRulesTS from "/src/snippets/reference/bun/MultipleRules.ts?raw";
 import MultipleRulesJS from "/src/snippets/reference/bun/MultipleRules.js?raw";
 import LoggerTS from "/src/snippets/reference/bun/Logger.ts?raw";
 import LoggerJS from "/src/snippets/reference/bun/Logger.js?raw";
+import ProxiesTS from "/src/snippets/reference/bun/Proxies.ts?raw";
 import ProtectTS from "/src/snippets/reference/bun/Protect.ts?raw";
 import ProtectJS from "/src/snippets/reference/bun/Protect.js?raw";
 import DecisionLogTS from "/src/snippets/reference/bun/DecisionLog.ts?raw";
@@ -29,6 +30,7 @@ import ClientOverrideJS from "/src/snippets/reference/bun/ClientOverride.js?raw"
 import WithRuleTS from "/src/snippets/reference/bun/WithRule.ts?raw";
 import WithRuleJS from "/src/snippets/reference/bun/WithRule.js?raw";
 import Comments from "/src/components/Comments.astro";
+import Requirements from "@/snippets/get-started/bun/Requirements.mdx";
 
 [<SDKVersionBun/>](https://www.npmjs.com/package/@arcjet/bun)
 
@@ -49,7 +51,7 @@ bun add @arcjet/bun
 
 ### Requirements
 
-- Bun 1.1.27 or later
+<Requirements />
 
 ## Quick start
 
@@ -75,6 +77,11 @@ The optional fields are:
 - `characteristics` (`string[]`) - A list of
   [characteristics](/architecture#built-in-characteristics) to be used to
   uniquely identify clients.
+- `proxies` (`string[]`) - A list of one or more trusted proxies. These
+  addresses will be excluded when Arcjet is determining the client IP address.
+  This is useful if you are behind a load balancer or proxy that sets the client
+  IP address in a header. See [Load balancers &
+  proxies](#load-balancers--proxies) below for an example.
 
 <Tabs>
   <TabItem label="TS">
@@ -84,6 +91,15 @@ The optional fields are:
     <Code code={ConfigurationJS} lang="js" />
   </TabItem>
 </Tabs>
+
+### Single instance
+
+We recommend creating a single instance of the `Arcjet` object and reusing it
+throughout your application. This is because the SDK caches decisions and
+configuration to improve performance.
+
+The pattern we use is to create a utility file that exports the `Arcjet` object
+and then import it where you need it.
 
 ### Rule modes
 
@@ -143,7 +159,7 @@ execution ordering is automatically optimized for performance.
   </TabItem>
 </Tabs>
 
-## Environment variables
+### Environment variables
 
 - `ARCJET_BASE_URL` - Will override the decision API which the SDK communicates
   with. This defaults to `https://decide.arcjet.com` and should only be changed
@@ -182,6 +198,40 @@ print in development:
     <Code code={LoggerJS} title="index.js" lang="js" mark={28} />
   </TabItem>
 </Tabs>
+
+### Load balancers & proxies
+
+If your application is behind a load balancer, Arcjet will only see the IP
+address of the load balancer and not the real client IP address.
+
+To fix this, most load balancers will set the `X-Forwarded-For` header with the
+real client IP address plus a list of proxies that the request has passed
+through.
+
+The problem with is that the `X-Forwarded-For` header can be spoofed by the
+client, so you should only trust it if you are sure that the load balancer is
+setting it correctly. See [the MDN
+docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For)
+for more details.
+
+You can configure Arcjet to trust IP addresses in the `X-Forwarded-For` header
+by setting the `proxies` field in the configuration. This should be a list of
+the IP addresses of your load balancers to be removed, so that the last IP
+address in the list is the real client IP address.
+
+#### Example
+
+For example, if the load balancer is at `100.100.100.100` and the client IP
+address is `192.168.1.1`, the `X-Forwarded-For` header will be:
+
+```http
+X-Forwarded-For: 192.168.1.1, 100.100.100.100
+```
+
+You should set the `proxies` field to `["100.100.100.100"]` so Arcjet will use
+`192.168.1.1` as the client IP address.
+
+<Code code={ProxiesTS} lang="ts" />
 
 ## Protect
 
@@ -259,12 +309,14 @@ which rule caused the conclusion:
 
 - `isBot()` (`bool`) - Returns `true` if the bot protection rules have been
   applied and the request was considered to have been made by a bot.
+- `isEmail()` (`bool`) - Returns `true` if the email rules have been applied and
+  the email address has a problem.
 - `isRateLimit()` (`bool`) - Returns `true` if the rate limit rules have been
   applied and the request has exceeded the rate limit.
+- `isSensitiveInfo()` (`bool`) - Returns `true` if sensitive info rules have
+  been applied and sensitive info has been detected.
 - `isShield()` (`bool`) - Returns `true` if the shield rules have been applied
   and the request is suspicious based on analysis by Arcjet Shield.
-- `isEmail()` (`bool`) - Returns `true` if the email validation rules have been
-  applied and the email address has a problem.
 - `isError()` (`bool`) - Returns `true` if there was an error processing the
   request.
 

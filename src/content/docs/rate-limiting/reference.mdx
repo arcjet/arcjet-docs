@@ -1,10 +1,12 @@
 ---
 title: "Rate limiting reference"
-description: "Reference guide for adding Arcjet rate limiting to your Next.js, Node.js, Bun, or SvelteKit app."
+description: "Reference guide for adding Arcjet rate limiting to your Next.js, NestJS, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
+  - nest-js
   - next-js
   - node-js
+  - remix
   - sveltekit
 ajToc:
   - text: "Configuration"
@@ -18,25 +20,35 @@ ajToc:
         anchor: "token-bucket-rate-limit-options"
   - text: "Identifying users"
     anchor: "identifying-users"
-  - text: "Rules"
-    anchor: "rules"
+  - text: "Guards and routes"
+    anchor: "guards-and-routes"
+    framework: ["nest-js"]
     children:
-      - text: "Single rate limit"
-        anchor: "example---single-rate-limit"
-      - text: "Dry run mode"
-        anchor: "example---dry-run-mode-for-new-rules"
+      - text: "Global guard"
+        anchor: "global-guard"
+      - text: "Per route guard"
+        anchor: "per-route-guard"
+      - text: "Within route"
+        anchor: "within-route"
   - text: "Per route vs middleware"
     anchor: "per-route-vs-middleware"
     framework: ["next-js"]
     children:
       - text: "Per route"
         anchor: "per-route"
-      - text: "Rate limit only on /api/*"
-        anchor: "rate-limit-only-on-api"
-      - text: "Rate limit on all routes"
-        anchor: "rate-limit-on-all-routes"
+      - text: "Middleware"
+        anchor: "middleware"
       - text: "Avoiding double protection with middleware"
         anchor: "avoiding-double-protection-with-middleware"
+  - text: "Pages & server actions"
+    anchor: "pages--server-actions"
+    framework: ["next-js"]
+  - text: "Loader vs action"
+    anchor: "loader-vs-action"
+    framework: ["remix"]
+    children:
+      - text: "Action"
+        anchor: "action"
   - text: "Per route vs hooks"
     anchor: "per-route-vs-hooks"
     framework: ["sveltekit"]
@@ -83,50 +95,71 @@ ajToc:
 ---
 
 import SlotByFramework from "@/components/SlotByFramework";
+import TextByFramework from "@/components/TextByFramework";
+import Comments from "/src/components/Comments.astro";
+
 import ByUserIdBun from "@/snippets/rate-limiting/reference/bun/ByUserId.mdx";
 import DecisionLogBun from "@/snippets/rate-limiting/reference/bun/DecisionLog.mdx";
-import DryRunBun from "@/snippets/rate-limiting/reference/bun/DryRun.mdx";
 import ErrorsBun from "@/snippets/rate-limiting/reference/bun/Errors.mdx";
 import FixedWindowBun from "@/snippets/rate-limiting/reference/bun/FixedWindow.mdx";
 import HeadersBun from "@/snippets/rate-limiting/reference/bun/Headers.mdx";
-import SingleRateLimitBun from "@/snippets/rate-limiting/reference/bun/SingleRateLimit.mdx";
 import SlidingWindowBun from "@/snippets/rate-limiting/reference/bun/SlidingWindow.mdx";
 import TokenBucketBun from "@/snippets/rate-limiting/reference/bun/TokenBucket.mdx";
 import TokenBucketRequestBun from "@/snippets/rate-limiting/reference/bun/TokenBucketRequest.mdx";
+
+import ByUserIdNestJs from "@/snippets/rate-limiting/reference/nestjs/ByUserId.mdx";
+import DecisionLogNestJs from "@/snippets/rate-limiting/reference/nestjs/DecisionLog.mdx";
+import NestJsDecoratorRoutes from "@/snippets/rate-limiting/reference/nestjs/DecoratorRoutes.mdx";
+import ErrorsNestJs from "@/snippets/rate-limiting/reference/nestjs/Errors.mdx";
+import FixedWindowNestJs from "@/snippets/rate-limiting/reference/nestjs/FixedWindow.mdx";
+import SlidingWindowNestJs from "@/snippets/rate-limiting/reference/nestjs/SlidingWindow.mdx";
+import TokenBucketNestJs from "@/snippets/rate-limiting/reference/nestjs/TokenBucket.mdx";
+import TokenBucketRequestNestJs from "@/snippets/rate-limiting/reference/nestjs/TokenBucketRequest.mdx";
+import NestJsGuardDecision from "@/snippets/rate-limiting/reference/nestjs/GuardDecision.mdx";
+import HeadersNestJs from "@/snippets/rate-limiting/reference/nestjs/Headers.mdx";
+
+import NextJsPerRouteVsMiddleware from "@/snippets/bot-protection/reference/nextjs/PerRouteVsMiddleware.mdx";
 import ByUserIdNextJs from "@/snippets/rate-limiting/reference/nextjs/ByUserId.mdx";
 import DecisionLogNextJs from "@/snippets/rate-limiting/reference/nextjs/DecisionLog.mdx";
-import DryRunNextJs from "@/snippets/rate-limiting/reference/nextjs/DryRun.mdx";
 import ErrorsNextJs from "@/snippets/rate-limiting/reference/nextjs/Errors.mdx";
 import ExamplesNextJs from "@/snippets/rate-limiting/reference/nextjs/Examples.mdx";
 import FixedWindowNextJs from "@/snippets/rate-limiting/reference/nextjs/FixedWindow.mdx";
 import HeadersNextJs from "@/snippets/rate-limiting/reference/nextjs/Headers.mdx";
 import PerRouteVsMiddlewareNextJs from "@/snippets/rate-limiting/reference/nextjs/PerRouteVsMiddleware.mdx";
-import SingleRateLimitNextJs from "@/snippets/rate-limiting/reference/nextjs/SingleRateLimit.mdx";
+import NextJsPagesServerActions from "@/snippets/rate-limiting/reference/nextjs/PagesServerActions.mdx";
 import SlidingWindowNextJs from "@/snippets/rate-limiting/reference/nextjs/SlidingWindow.mdx";
 import TokenBucketNextJs from "@/snippets/rate-limiting/reference/nextjs/TokenBucket.mdx";
 import TokenBucketRequestNextJs from "@/snippets/rate-limiting/reference/nextjs/TokenBucketRequest.mdx";
+
 import ByUserIdNodeJs from "@/snippets/rate-limiting/reference/nodejs/ByUserId.mdx";
 import DecisionLogNodeJs from "@/snippets/rate-limiting/reference/nodejs/DecisionLog.mdx";
-import DryRunNodeJs from "@/snippets/rate-limiting/reference/nodejs/DryRun.mdx";
 import ErrorsNodeJs from "@/snippets/rate-limiting/reference/nodejs/Errors.mdx";
 import FixedWindowNodeJs from "@/snippets/rate-limiting/reference/nodejs/FixedWindow.mdx";
 import HeadersNodeJs from "@/snippets/rate-limiting/reference/nodejs/Headers.mdx";
-import SingleRateLimitNodeJs from "@/snippets/rate-limiting/reference/nodejs/SingleRateLimit.mdx";
 import SlidingWindowNodeJs from "@/snippets/rate-limiting/reference/nodejs/SlidingWindow.mdx";
 import TokenBucketNodeJs from "@/snippets/rate-limiting/reference/nodejs/TokenBucket.mdx";
 import TokenBucketRequestNodeJs from "@/snippets/rate-limiting/reference/nodejs/TokenBucketRequest.mdx";
+
+import RemixLoaderVsAction from "@/snippets/bot-protection/reference/remix/LoaderVsAction.mdx";
+import ByUserIdRemix from "@/snippets/rate-limiting/reference/remix/ByUserId.mdx";
+import DecisionLogRemix from "@/snippets/rate-limiting/reference/remix/DecisionLog.mdx";
+import ErrorsRemix from "@/snippets/rate-limiting/reference/remix/Errors.mdx";
+import FixedWindowRemix from "@/snippets/rate-limiting/reference/remix/FixedWindow.mdx";
+import HeadersRemix from "@/snippets/rate-limiting/reference/remix/Headers.mdx";
+import SlidingWindowRemix from "@/snippets/rate-limiting/reference/remix/SlidingWindow.mdx";
+import TokenBucketRemix from "@/snippets/rate-limiting/reference/remix/TokenBucket.mdx";
+import TokenBucketRequestRemix from "@/snippets/rate-limiting/reference/remix/TokenBucketRequest.mdx";
+
+import SvelteKitPerRouteVsHooks from "@/snippets/bot-protection/reference/sveltekit/PerRouteVsHooks.mdx";
 import ByUserIdSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/ByUserId.mdx";
 import DecisionLogSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/DecisionLog.mdx";
-import DryRunSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/DryRun.mdx";
 import ErrorsSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/Errors.mdx";
 import FixedWindowSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/FixedWindow.mdx";
 import HeadersSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/Headers.mdx";
 import PerRouteVsHooksSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/PerRouteVsHooks.mdx";
-import SingleRateLimitSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/SingleRateLimit.mdx";
 import SlidingWindowSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/SlidingWindow.mdx";
 import TokenBucketSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/TokenBucket.mdx";
 import TokenBucketRequestSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/TokenBucketRequest.mdx";
-import Comments from "/src/components/Comments.astro";
 
 Arcjet rate limiting allows you to define rules which limit the number of
 requests a client can make over a period of time.
@@ -165,8 +198,10 @@ type FixedWindowRateLimitOptions = {
 
 <SlotByFramework client:load>
   <FixedWindowBun slot="bun" />
+  <FixedWindowNestJs slot="nest-js" />
   <FixedWindowNextJs slot="next-js" />
   <FixedWindowNodeJs slot="node-js" />
+  <FixedWindowRemix slot="remix" />
   <FixedWindowSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -199,8 +234,10 @@ type SlidingWindowRateLimitOptions = {
 
 <SlotByFramework client:load>
   <SlidingWindowBun slot="bun" />
+  <SlidingWindowNestJs slot="nest-js" />
   <SlidingWindowNextJs slot="next-js" />
   <SlidingWindowNodeJs slot="node-js" />
+  <SlidingWindowRemix slot="remix" />
   <SlidingWindowSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -240,8 +277,10 @@ the number of tokens to request.
 
 <SlotByFramework client:load>
   <TokenBucketBun slot="bun" />
+  <TokenBucketNestJs slot="nest-js" />
   <TokenBucketNextJs slot="next-js" />
   <TokenBucketNodeJs slot="node-js" />
+  <TokenBucketRemix slot="remix" />
   <TokenBucketSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -266,8 +305,10 @@ The custom characteristic is `userId` with the value passed as a prop on the
 
 <SlotByFramework client:load>
   <ByUserIdBun slot="bun" />
+  <ByUserIdNestJs slot="nest-js" />
   <ByUserIdNextJs slot="next-js" />
   <ByUserIdNodeJs slot="node-js" />
+  <ByUserIdRemix slot="remix" />
   <ByUserIdSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -276,41 +317,12 @@ users and a user ID for logged in users, you can create a custom fingerprint.
 See the [example in the custom characteristics
 section](/rate-limiting/configuration#ip-address--user-id).
 
-## Rules
-
-The `arcjet` client is configured with one or more rules which take one or many
-of the above options.
-
-### Example - single rate limit
-
-Set a single rate limit rule on the `/api/hello` API route that applies a 60
-request limit per hour per IP address (the default if no `characteristics` are
-specified).
-
 <SlotByFramework client:load>
-  <SingleRateLimitBun slot="bun" />
-  <SingleRateLimitNextJs slot="next-js" />
-  <SingleRateLimitNodeJs slot="node-js" />
-  <SingleRateLimitSvelteKit slot="sveltekit" />
-</SlotByFramework>
-
-### Example - dry run mode for new rules
-
-Rate limits can be combined in the `arcjet` client which allows you to test new
-configurations in dry run mode first before enabling them in live mode. You can
-inspect the results of each rule by logging them or using the [Arcjet
-Dashboard](https://app.arcjet.com).
-
-<SlotByFramework client:load>
-  <DryRunBun slot="bun" />
-  <DryRunNextJs slot="next-js" />
-  <DryRunNodeJs slot="node-js" />
-  <DryRunSvelteKit slot="sveltekit" />
-</SlotByFramework>
-
-<SlotByFramework client:load>
-  <PerRouteVsMiddlewareNextJs slot="next-js" />
-  <PerRouteVsHooksSvelteKit slot="sveltekit" />
+  <NestJsDecoratorRoutes slot="nest-js" />
+  <NextJsPerRouteVsMiddleware slot="next-js" />
+  <NextJsPagesServerActions slot="next-js" />
+  <RemixLoaderVsAction slot="remix" />
+  <SvelteKitPerRouteVsHooks slot="sveltekit" />
 </SlotByFramework>
 
 ## Decision
@@ -318,6 +330,10 @@ Dashboard](https://app.arcjet.com).
 Arcjet provides a single `protect` function that is used to execute your
 protection rules. This requires a `RequestEvent` property which is the event
 context as passed to the request handler.
+
+<SlotByFramework client:load>
+  <NestJsGuardDecision slot="nest-js" />
+</SlotByFramework>
 
 This function returns a `Promise` that resolves to an
 `ArcjetDecision` object. This contains the following properties:
@@ -351,8 +367,10 @@ This example will log the full result as well as each rate limit rule:
 
 <SlotByFramework client:load>
   <DecisionLogBun slot="bun" />
+  <DecisionLogNestJs slot="nest-js" />
   <DecisionLogNextJs slot="next-js" />
   <DecisionLogNodeJs slot="node-js" />
+  <DecisionLogRemix slot="remix" />
   <DecisionLogSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -364,8 +382,10 @@ to withdraw from the bucket.
 
 <SlotByFramework client:load>
   <TokenBucketRequestBun slot="bun" />
+  <TokenBucketRequestNestJs slot="nest-js" />
   <TokenBucketRequestNextJs slot="next-js" />
   <TokenBucketRequestNodeJs slot="node-js" />
+  <TokenBucketRequestRemix slot="remix" />
   <TokenBucketRequestSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -383,7 +403,7 @@ Arcjet decision result:
 - `reset` (`number`): The remaining amount of seconds in the window.
 
 These can be used to return `RateLimit` HTTP headers ([draft
-RFC](https://ietf-wg-httpapi.github.io/ratelimit-headers/draft-ietf-httpapi-ratelimit-headers.html)) to
+RFC](https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-ratelimit-headers-08)) to
 offer the client more detail.
 
 We provide the [@arcjet/decorate
@@ -392,10 +412,23 @@ your responses with appropriate `RateLimit` headers based on a decision.
 
 <SlotByFramework client:load>
   <HeadersBun slot="bun" />
+  <HeadersNestJs slot="nest-js" />
   <HeadersNextJs slot="next-js" />
   <HeadersNodeJs slot="node-js" />
+  <HeadersRemix slot="remix" />
   <HeadersSvelteKit slot="sveltekit" />
 </SlotByFramework>
+
+This would result in [draft
+RFC](https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-ratelimit-headers-08)
+response headers similar to the following:
+
+```http
+...
+< RateLimit: limit=10, remaining=5, reset=9
+< RateLimit-Policy: 10;w=10
+...
+```
 
 ## Error handling
 
@@ -408,8 +441,10 @@ If there is an error condition, Arcjet will return an `ERROR` `conclusion`.
 
 <SlotByFramework client:load>
   <ErrorsBun slot="bun" />
+  <ErrorsNestJs slot="nest-js" />
   <ErrorsNextJs slot="next-js" />
   <ErrorsNodeJs slot="node-js" />
+  <ErrorsRemix slot="remix" />
   <ErrorsSvelteKit slot="sveltekit" />
 </SlotByFramework>
 

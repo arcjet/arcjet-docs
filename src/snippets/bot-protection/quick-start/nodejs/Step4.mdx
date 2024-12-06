@@ -6,7 +6,7 @@ import SelectableContent from "@/components/SelectableContent";
 Start your Node.js server:
 
 {/* prettier-ignore */}
-<SelectableContent client:load syncKey="language" frameworkSwitcher>
+<SelectableContent client:load syncKey="packageManager" frameworkSwitcher>
   <div slot="TS" slotIdx="1">
   ```sh
   npx tsx --env-file .env.local index.ts
@@ -32,8 +32,5 @@ default. See [the reference guide](/bot-protection/reference) to learn about
 configuring this.
 
 ```shell
-curl http://localhost:8000
+curl -I http://localhost:8000
 ```
-
-The requests will also show up in the [Arcjet
-dashboard](https://app.arcjet.com).

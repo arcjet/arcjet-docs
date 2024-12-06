@@ -40,6 +40,7 @@ ajToc:
 ---
 
 import SlotByFramework from "@/components/SlotByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
 import { LinkButton, LinkCard } from "@astrojs/starlight/components";
 import FAQs from "/src/components/FAQs.astro";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
@@ -110,39 +111,7 @@ protection. Data redaction. A developer-first approach to security.
 
 This guide will show you how to set up a simple API server protected by Arcjet.
 
-## Choose a framework
-
-<br />
-<LinkButton href="/get-started?f=bun" variant="secondary">
-  Bun
-</LinkButton>
-<LinkButton href="/get-started?f=bun-hono" variant="secondary">
-  Bun + Hono
-</LinkButton>
-<LinkButton href="/get-started?f=deno" variant="secondary">
-  Deno
-</LinkButton>
-<LinkButton href="/get-started?f=nest-js" variant="secondary">
-  NestJS
-</LinkButton>
-<LinkButton href="/get-started?f=next-js" variant="secondary">
-  Next.js
-</LinkButton>
-<LinkButton href="/get-started?f=node-js" variant="secondary">
-  Node.js
-</LinkButton>
-<LinkButton href="/get-started?f=node-js-express" variant="secondary">
-  Node.js + Express
-</LinkButton>
-<LinkButton href="/get-started?f=node-js-hono" variant="secondary">
-  Node.js + Hono
-</LinkButton>
-<LinkButton href="/get-started?f=remix" variant="secondary">
-  Remix
-</LinkButton>
-<LinkButton href="/get-started?f=sveltekit" variant="secondary">
-  SvelteKit
-</LinkButton>
+<FrameworkLinks title="Choose a framework" client:load />
 
 ## 1. Install Arcjet
 
@@ -157,7 +126,7 @@ In your project root, run the following command:
   <NodeJsStep1 slot="node-js" />
   <NodeJsExpressStep1 slot="node-js-express" />
   <NodeJsHonoStep1 slot="node-js-hono" />
-  <emixStep1R slot="remix" />
+  <RemixStep1 slot="remix" />
   <SvelteKitStep1 slot="sveltekit" />
 </SlotByFramework>
 
@@ -179,8 +148,7 @@ In your project root, run the following command:
 ## 2. Set your key
 
 [Create a free Arcjet account](https://app.arcjet.com) then follow the
-instructions to add a site and get a key. Add it to a `.env.local` file the
-project root.
+instructions to add a site and get a key.
 
 <SlotByFramework client:load>
   <BunStep2 slot="bun" />
@@ -225,6 +193,8 @@ limit, and prevent bots from accessing your app.
   <RemixStep4 slot="remix" />
   <SvelteKitStep4 slot="sveltekit" />
 </SlotByFramework>
+
+The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
 
 ## What next?
 

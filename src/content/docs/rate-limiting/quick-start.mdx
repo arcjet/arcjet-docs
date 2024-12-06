@@ -1,10 +1,12 @@
 ---
 title: "Rate limiting"
-description: "Quick start guide for adding Arcjet rate limiting to your Next.js, Node.js, Bun, or SvelteKit app."
+description: "Quick start guide for adding Arcjet rate limiting to your Next.js, NestJS, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
+  - nest-js
   - next-js
   - node-js
+  - remix
   - sveltekit
 ajToc:
   - text: "Video quick start"
@@ -24,7 +26,7 @@ ajToc:
         framework: ["bun", "node-js"]
       - text: 4. Start app
         anchor: "4-start-app"
-        framework: ["next-js", "sveltekit"]
+        framework: ["nest-js", "next-js", "remix", "sveltekit"]
   - text: "FAQs"
     anchor: "faqs"
   - text: "What next?"
@@ -34,37 +36,50 @@ ajToc:
 ---
 
 import { LinkCard, CardGrid } from "@astrojs/starlight/components";
-import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import WhatIsArcjet from "@/components/WhatIsArcjet.astro";
 import SlotByFramework from "@/components/SlotByFramework";
-import TextByFramework from "@/components/TextByFramework";
 import FrameworkName from "@/components/FrameworkName";
-import VideoQuickStart from "@/snippets/rate-limiting/quick-start/nextjs/VideoQuickStart.mdx";
-import Step1Bun from "@/snippets/rate-limiting/quick-start/bun/Step1.mdx";
-import Step1NextJs from "@/snippets/rate-limiting/quick-start/nextjs/Step1.mdx";
-import Step1NodeJs from "@/snippets/rate-limiting/quick-start/nodejs/Step1.mdx";
-import Step1SvelteKit from "@/snippets/rate-limiting/quick-start/sveltekit/Step1.mdx";
-import Step2 from "@/snippets/rate-limiting/quick-start/shared/Step2.mdx";
-import Step2SetEnv from "@/snippets/rate-limiting/quick-start/shared/Step2SetEnv.mdx";
-import Step3Bun from "@/snippets/rate-limiting/quick-start/bun/Step3.mdx";
-import Step3NextJs from "@/snippets/rate-limiting/quick-start/nextjs/Step3.mdx";
-import Step3NodeJs from "@/snippets/rate-limiting/quick-start/nodejs/Step3.mdx";
-import Step3SvelteKit from "@/snippets/rate-limiting/quick-start/sveltekit/Step3.mdx";
-import Step4 from "@/snippets/rate-limiting/quick-start/nextjs/Step4.mdx";
-import Step4SvelteKit from "@/snippets/rate-limiting/quick-start/sveltekit/Step4.mdx";
-import Step4Bun from "@/snippets/rate-limiting/quick-start/bun/Step4.mdx";
-import Step4NodeJs from "@/snippets/rate-limiting/quick-start/nodejs/Step4.mdx";
-import FAQs from "/src/components/FAQs.astro";
-import Comments from "/src/components/Comments.astro";
+import FAQs from "@/components/FAQs.astro";
+import Comments from "@/components/Comments.astro";
+
+import BunStep1 from "@/snippets/rate-limiting/quick-start/bun/Step1.mdx";
+import BunStep2 from "@/snippets/rate-limiting/quick-start/bun/Step2.mdx";
+import BunStep3 from "@/snippets/rate-limiting/quick-start/bun/Step3.mdx";
+import BunStep4 from "@/snippets/rate-limiting/quick-start/bun/Step4.mdx";
+
+import NestJsStep1 from "@/snippets/rate-limiting/quick-start/nestjs/Step1.mdx";
+import NestJsStep2 from "@/snippets/rate-limiting/quick-start/nestjs/Step2.mdx";
+import NestJsStep3 from "@/snippets/rate-limiting/quick-start/nestjs/Step3.mdx";
+import NestJsStep4 from "@/snippets/rate-limiting/quick-start/nestjs/Step4.mdx";
+
+import NextJsVideoQuickStart from "@/snippets/rate-limiting/quick-start/nextjs/VideoQuickStart.mdx";
+import NextJsStep1 from "@/snippets/rate-limiting/quick-start/nextjs/Step1.mdx";
+import NextJsStep2 from "@/snippets/rate-limiting/quick-start/nextjs/Step2.mdx";
+import NextJsStep3 from "@/snippets/rate-limiting/quick-start/nextjs/Step3.mdx";
+import NextJsStep4 from "@/snippets/rate-limiting/quick-start/nextjs/Step4.mdx";
+
+import NodeJsStep1 from "@/snippets/rate-limiting/quick-start/nodejs/Step1.mdx";
+import NodeJsStep2 from "@/snippets/rate-limiting/quick-start/nodejs/Step2.mdx";
+import NodeJsStep3 from "@/snippets/rate-limiting/quick-start/nodejs/Step3.mdx";
+import NodeJsStep4 from "@/snippets/rate-limiting/quick-start/nodejs/Step4.mdx";
+
+import RemixStep1 from "@/snippets/rate-limiting/quick-start/remix/Step1.mdx";
+import RemixStep2 from "@/snippets/rate-limiting/quick-start/remix/Step2.mdx";
+import RemixStep3 from "@/snippets/rate-limiting/quick-start/remix/Step3.mdx";
+import RemixStep4 from "@/snippets/rate-limiting/quick-start/remix/Step4.mdx";
+
+import SvelteKitStep1 from "@/snippets/rate-limiting/quick-start/sveltekit/Step1.mdx";
+import SvelteKitStep2 from "@/snippets/rate-limiting/quick-start/sveltekit/Step2.mdx";
+import SvelteKitStep3 from "@/snippets/rate-limiting/quick-start/sveltekit/Step3.mdx";
+import SvelteKitStep4 from "@/snippets/rate-limiting/quick-start/sveltekit/Step4.mdx";
 
 Arcjet rate limiting allows you to define rules which limit the number of
 requests a client can make over a period of time.
 
-{/* <TextByFramework client:load nextJs="Next.js" bun="Bun" nodeJs="Node.js" sveltekit="SvelteKit" /> */}
-
 <WhatIsArcjet />
 
 <SlotByFramework client:load>
-  <VideoQuickStart slot="next-js" />
+  <NextJsVideoQuickStart slot="next-js" />
 </SlotByFramework>
 
 ## Quick start
@@ -76,23 +91,26 @@ This guide will show you how to add a simple rate limit to your <FrameworkName c
 In your project root, run the following command to install the SDK:
 
 <SlotByFramework client:load>
-  <Step1Bun slot="bun" />
-  <Step1NextJs slot="next-js" />
-  <Step1NodeJs slot="node-js" />
-  <Step1SvelteKit slot="sveltekit" />
+  <BunStep1 slot="bun" />
+  <NestJsStep1 slot="nest-js" />
+  <NextJsStep1 slot="next-js" />
+  <NodeJsStep1 slot="node-js" />
+  <RemixStep1 slot="remix" />
+  <SvelteKitStep1 slot="sveltekit" />
 </SlotByFramework>
 
 ### 2. Set your key
 
 [Create a free Arcjet account](https://app.arcjet.com) then follow the
-instructions to add a site and get a key. Add it to a `.env.local` file in your
-project root.
+instructions to add a site and get a key.
 
 <SlotByFramework client:load>
-  <Step2SetEnv slot="bun" />
-  <Step2 slot="next-js" />
-  <Step2SetEnv slot="node-js" />
-  <Step2 slot="sveltekit" />
+  <BunStep2 slot="bun" />
+  <NestJsStep2 slot="nest-js" />
+  <NextJsStep2 slot="next-js" />
+  <NodeJsStep2 slot="node-js" />
+  <RemixStep2 slot="remix" />
+  <SvelteKitStep2 slot="sveltekit" />
 </SlotByFramework>
 
 ### 3. Add a rate limit to a route
@@ -103,18 +121,24 @@ configured with a maximum capacity of 10 tokens and refills by 5 tokens every
 10 seconds. Each request consumes 5 tokens.
 
 <SlotByFramework client:load>
-  <Step3Bun slot="bun" />
-  <Step3NextJs slot="next-js" />
-  <Step3NodeJs slot="node-js" />
-  <Step3SvelteKit slot="sveltekit" />
+  <BunStep3 slot="bun" />
+  <NestJsStep3 slot="nest-js" />
+  <NextJsStep3 slot="next-js" />
+  <NodeJsStep3 slot="node-js" />
+  <RemixStep3 slot="remix" />
+  <SvelteKitStep3 slot="sveltekit" />
 </SlotByFramework>
 
 <SlotByFramework client:load>
-  <Step4Bun slot="bun" />
-  <Step4 slot="next-js" />
-  <Step4NodeJs slot="node-js" />
-  <Step4SvelteKit slot="sveltekit" />
+  <BunStep4 slot="bun" />
+  <NestJsStep4 slot="nest-js" />
+  <NextJsStep4 slot="next-js" />
+  <NodeJsStep4 slot="node-js" />
+  <RemixStep4 slot="remix" />
+  <SvelteKitStep4 slot="sveltekit" />
 </SlotByFramework>
+
+The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
 
 ## FAQs
 

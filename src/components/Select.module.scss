@@ -7,6 +7,7 @@
     --primary-plain-activeColor: var(--aj-palette-source-white);
     --primary-plain-activeBorder: 1px solid
       rgba(var(--aj-palette-source-neutralRgb-07) / 0.3);
+    --primary-plain-disabledBg: rgba(var(--aj-palette-source-whiteRgb) / 0.04);
     --primary-plain-disabledColor: var(--aj-palette-source-neutral-03);
 
     --secondary-solid-idleBg: rgba(var(--aj-palette-source-whiteRgb) / 0.06);
@@ -18,6 +19,9 @@
     --secondary-plain-activeColor: var(--aj-palette-source-neutral-15);
     --secondary-plain-activeBorder: 1px solid
       rgba(var(--aj-palette-source-neutralRgb-07) / 0.3);
+    --secondary-plain-disabledBg: rgba(
+      var(--aj-palette-source-whiteRgb) / 0.02
+    );
     --secondary-plain-disabledColor: var(--aj-palette-source-neutral-03);
   }
 }
@@ -31,8 +35,10 @@
     --primary-plain-activeColor: var(--aj-palette-source-black);
     --primary-plain-activeBorder: 1px solid
       rgba(var(--aj-palette-source-neutralRgb-08) / 0.3);
+    --primary-plain-disabledBg: rgba(var(--aj-palette-source-blackRgb) / 0.04);
     --primary-plain-disabledColor: var(--aj-palette-source-neutral-12);
 
+    --secondary-solid-idleBg: rgba(var(--aj-palette-source-whiteRgb) / 0.06);
     --secondary-plain-idleColor: var(--aj-palette-source-neutral-04);
     --secondary-plain-hoverBg: rgba(
       var(--aj-palette-source-neutralRgb-12) / 0.3
@@ -41,6 +47,9 @@
     --secondary-plain-activeColor: var(--aj-palette-source-neutral-00);
     --secondary-plain-activeBorder: 1px solid
       rgba(var(--aj-palette-source-neutralRgb-08) / 0.3);
+    --secondary-plain-disabledBg: rgba(
+      var(--aj-palette-source-whiteRgb) / 0.02
+    );
     --secondary-plain-disabledColor: var(--aj-palette-source-neutral-12);
   }
 }
@@ -96,9 +105,9 @@
       --trigger-border: var(--primary-plain-activeBorder);
     }
 
-    &:disabled {
-      --trigger-color: var(--primary-plainColor);
-      --trigger-bg: transparent;
+    &.Disabled {
+      --trigger-color: var(--primary-plain-disabledColor);
+      --trigger-bg: var(--primary-plain-disabledBg);
       --trigger-border: none;
     }
 
@@ -128,9 +137,9 @@
       --trigger-border: var(--secondary-plain-activeBorder);
     }
 
-    &:disabled {
-      --trigger-color: var(--secondary-plainColor);
-      --trigger-bg: transparent;
+    &.Disabled {
+      --trigger-color: var(--secondary-plain-disabledColor);
+      --trigger-bg: var(--secondary-plain-disabledBg);
       --trigger-border: none;
     }
 
@@ -240,7 +249,9 @@
     line-height: 18px;
   }
 
-  &:disabled {
-    cursor: default;
+  &.Disabled {
+    .Select {
+      cursor: default;
+    }
   }
 }

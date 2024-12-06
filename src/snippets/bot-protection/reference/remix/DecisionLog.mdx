@@ -1,0 +1,15 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import DecisionLogTS from "./DecisionLog.ts?raw";
+import DecisionLogJS from "./DecisionLog.js?raw";
+
+This example will log the results of each rule execution.
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={DecisionLogTS} lang="ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={DecisionLogJS} lang="js" />
+  </div>
+</SelectableContent>

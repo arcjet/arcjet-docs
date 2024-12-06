@@ -70,6 +70,7 @@ export default defineConfig({
       plugins: [
         starlightLinksValidator({
           exclude: ["**/*f=*"], // exclude urls with `f` param from validation
+          errorOnLocalLinks: false, // we use localhost in the examples
         }),
       ],
       components: {
@@ -77,6 +78,7 @@ export default defineConfig({
         Sidebar: "./src/components/overrides/Sidebar.astro",
         PageSidebar: "./src/components/overrides/PageSidebar.astro",
         PageTitle: "./src/components/overrides/PageTitle.astro",
+        Hero: "./src/components/overrides/Hero.astro",
       },
       sidebar: sidebar,
       expressiveCode: {

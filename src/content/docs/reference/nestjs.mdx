@@ -1,0 +1,510 @@
+---
+title: "Arcjet NestJS SDK reference"
+next: false
+---
+
+import Requirements from "@/snippets/get-started/nest-js/Requirements.mdx";
+import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import Comments from "/src/components/Comments.astro";
+import SDKVersionNestjs from "/src/components/SDKVersionNestjs.astro";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+
+import LoggerTS from "/src/snippets/reference/nestjs/ClientLogger.ts?raw";
+import ProxiesTS from "/src/snippets/reference/nestjs/Proxies.ts?raw";
+import ConfigurationTS from "/src/snippets/reference/nestjs/Configuration.ts?raw";
+import IPLocationTS from "/src/snippets/reference/nestjs/IPLocation.ts?raw";
+import NodeVersions from "/src/snippets/reference/node-versions.mdx";
+
+[<SDKVersionNestjs />](https://www.npmjs.com/package/@arcjet/nest)
+
+This is the reference guide for the Arcjet NestJS SDK, [available on
+GitHub](https://github.com/arcjet/arcjet-js) and licensed under the Apache 2.0
+license.
+
+<WhatIsArcjet />
+
+## Installation
+
+In your project root, run the following command to install the SDK:
+
+{/* prettier-ignore */}
+<Tabs>
+<TabItem label="npm">
+```sh
+npm i @arcjet/nest
+```
+</TabItem>
+<TabItem label="pnpm">
+```sh
+pnpm add @arcjet/nest
+```
+</TabItem>
+<TabItem label="yarn">
+```sh
+yarn add @arcjet/nest
+```
+</TabItem>
+</Tabs>
+
+### Requirements
+
+<Requirements />
+
+## Quick start
+
+Check out the [quick start guide](/get-started?f=nest-js).
+
+## Configuration
+
+Create a new root `ArcjetModule.forRoot` object with your API key and any
+default rules you want to apply to every route. This is usually in the `app.module.ts` file.
+
+The required fields are:
+
+- `key` (`string`) - Your Arcjet site key. This can be found in the SDK
+  Installation section for the site in the [Arcjet
+  Dashboard](https://app.arcjet.com).
+- `rules` - The rules to apply to the request. This can be empty in the root
+  object so you can set rules within each controller. See the various sections
+  of the docs for how to configure these e.g.
+  [shield](/shield/reference?f=nest-js), [rate
+  limiting](/rate-limiting/reference?f=nest-js), [bot
+  protection](/bot-protection/reference?f=nest-js), [email
+  validation](/email-validation/reference?f=nest-js).
+
+The optional fields are:
+
+- `characteristics` (`string[]`) - A list of
+  [characteristics](/architecture#built-in-characteristics) to be used to
+  uniquely identify clients.
+- `proxies` (`string[]`) - A list of one or more trusted proxies. These
+  addresses will be excluded when Arcjet is determining the client IP address.
+  This is useful if you are behind a load balancer or proxy that sets the client
+  IP address in a header. See [Load balancers &
+  proxies](#load-balancers--proxies) below for an example.
+
+<Code code={ConfigurationTS} lang="ts" title="src/app.module.ts" />
+
+### Root instance
+
+The `ArcjetModule.forRoot` method creates a root instance of the `Arcjet`
+object. This can be called through a global guard, per route guards for each
+controller, or directly in the controller.
+
+Having a single instance allows the SDK to cache decisions and configuration to
+improve performance.
+
+### Rule modes
+
+Each rule can be configured in either `LIVE` or `DRY_RUN` mode. When in
+`DRY_RUN` mode, each rule will return its decision, but the end conclusion will
+always be `ALLOW`.
+
+This allows you to run Arcjet in passive / demo mode to test rules before
+enabling them. Arcjet will log what it would have done.
+
+### Environment variables
+
+The following environment variables can be used to configure the SDK at runtime:
+
+- `ARCJET_BASE_URL` - Will override the decision API which the SDK communicates
+  with. This defaults to `https://decide.arcjet.com` and should only be changed
+  if directed by Arcjet support.
+- `ARCJET_LOG_LEVEL` - The log level to use, either `debug`, `info`, `warn`, or
+  `error`. Defaults to `warn`. If a rule is in dry run mode, a warning will be
+  output with the decision that would have been applied.
+- `ARCJET_ENV` - Set to `development` to force Arcjet into development mode.
+  This will allow private/internal addresses so that the SDKs work correctly
+  locally. You usually do not need to set this because it uses `NODE_ENV` when
+  set. See
+  [Troubleshooting](/troubleshooting#generatefingerprint-ip-is-empty--failed_precondition-client-ip-not-provided)
+  for when this may be needed.
+
+### Custom logging
+
+The Arcjet SDK can be integrated into the [NestJS
+logger](https://docs.nestjs.com/techniques/logger). You should define an
+interface to extend the built-in logger and then use this within your
+controllers.
+
+<Code code={LoggerTS} lang="ts" title="src/app.module.ts" />
+
+### Load balancers & proxies
+
+If your application is behind a load balancer, Arcjet will only see the IP
+address of the load balancer and not the real client IP address.
+
+To fix this, most load balancers will set the `X-Forwarded-For` header with the
+real client IP address plus a list of proxies that the request has passed
+through.
+
+The problem with is that the `X-Forwarded-For` header can be spoofed by the
+client, so you should only trust it if you are sure that the load balancer is
+setting it correctly. See [the MDN
+docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For)
+for more details.
+
+You can configure Arcjet to trust IP addresses in the `X-Forwarded-For` header
+by setting the `proxies` field in the configuration. This should be a list of
+the IP addresses of your load balancers to be removed, so that the last IP
+address in the list is the real client IP address.
+
+#### Example
+
+For example, if the load balancer is at `100.100.100.100` and the client IP
+address is `192.168.1.1`, the `X-Forwarded-For` header will be:
+
+```http
+X-Forwarded-For: 192.168.1.1, 100.100.100.100
+```
+
+You should set the `proxies` field to `["100.100.100.100"]` so Arcjet will use
+`192.168.1.1` as the client IP address.
+
+<Code code={ProxiesTS} lang="ts" />
+
+## Decision
+
+Arcjet can be integrated into NestJS in several places using NestJS
+[guards](https://docs.nestjs.com/guards) or directly within the route
+controller:
+
+- **Global guard:** Applies Arcjet rules on every request, but does not allow
+  you to configure rules per route. The `protect` function is called for you
+  inside the guard and you can't access the response.
+- **Per route guard:** Allows you to configure rules per route, but requires you
+  to add the guard to every route and has limited flexibility. The `protect`
+  function is called for you inside the guard and you can't access the response.
+- **Within route:** Requires some code duplication, but allows maximum
+  flexibility because you can customize the rules and response. You call the
+  `protect` function directly in the controller and can access the return
+  `Promise` that resolves to an `ArcjetDecision` object.
+
+The decision available when you call `protect` directly contains the following
+properties:
+
+- `id` (`string`) - The unique ID for the request. This can be used to look up
+  the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
+  involving the Arcjet cloud API. For decisions taken locally, the prefix is
+  `lreq_`.
+- `conclusion` (`"ALLOW" | "DENY" | "CHALLENGE" | "ERROR"`) - The final
+  conclusion based on evaluating each of the configured rules. If you wish to
+  accept Arcjet's recommended action based on the configured rules then you can
+  use this property.
+- `reason` (`ArcjetReason`) - An object containing more detailed
+  information about the conclusion.
+- `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
+  containing the results of each rule that was executed.
+- `ttl` (`uint32`) - The time-to-live for the decision in seconds. This is the
+  time that the decision is valid for. After this time, the decision will be
+  re-evaluated. The SDK automatically caches `DENY` decisions for the length of
+  the TTL.
+- `requestAnalysis` (`ArcjetRequestAnalysis`) - An object containing Arcjet's
+  analysis of the request and client. This includes details about the type of IP
+  and country. See below for more information.
+
+### Conclusion
+
+The `ArcjetDecision` object has the following methods that should be used to
+check the conclusion:
+
+- `isAllowed()` (`bool`) - The request should be allowed.
+- `isDenied()` (`bool`) - The request should be denied.
+- `isErrored()` (`bool`) - There was an unrecoverable error.
+
+### Reason
+
+The `reason` property of the `ArcjetDecision` object contains an `ArcjetReason`
+object which provides more detailed information about the conclusion. This is
+the final decision reason and is based on the configured rules.
+
+The `ArcjetReason` object has the following methods that can be used to check
+which rule caused the conclusion:
+
+- `isBot()` (`bool`) - Returns `true` if the bot protection rules have been
+  applied and the request was considered to have been made by a bot.
+- `isEmail()` (`bool`) - Returns `true` if the email rules have been applied and
+  the email address has a problem.
+- `isRateLimit()` (`bool`) - Returns `true` if the rate limit rules have been
+  applied and the request has exceeded the rate limit.
+- `isSensitiveInfo()` (`bool`) - Returns `true` if sensitive info rules have
+  been applied and sensitive info has been detected.
+- `isShield()` (`bool`) - Returns `true` if the shield rules have been applied
+  and the request is suspicious based on analysis by Arcjet Shield.
+- `isError()` (`bool`) - Returns `true` if there was an error processing the
+  request.
+
+### Results
+
+The `results` property of the `ArcjetDecision` object contains an array of
+`ArcjetRuleResult` objects. There will be one for each configured rule so you
+can inspect the individual results:
+
+- `id` (`string`) - The ID of the rule result. Not yet implemented.
+- `state` (`ArcjetRuleState`) - Whether the rule was executed or not.
+- `conclusion` (`ArcjetConclusion`) - The conclusion of the rule. This will be
+  one of the above conclusions: `ALLOW`, `DENY`, `CHALLENGE`, or `ERROR`.
+- `reason` (`ArcjetReason`) - An object containing more detailed information
+  about the conclusion for this rule. Each rule type has its own reason object
+  with different properties.
+
+You can iterate through the results and check the conclusion for each rule.
+
+```ts
+for (const result of decision.results) {
+  this.logger.log("Rule Result", result);
+}
+```
+
+#### Rule state
+
+The `state` property of the `ArcjetRuleResult` object is an `ArcjetRuleState`.
+Each rule is evaluated individually and can be in one of the following states:
+
+- `DRY_RUN` - The rule was executed in dry run mode. This means that the rule
+  was executed but the conclusion was not applied to the request. This is useful
+  for testing rules before enabling them.
+- `RUN` - The rule was executed and the conclusion was applied to the request.
+- `NOT_RUN` - The rule was not executed. This can happen if another rule has
+  already reached a conclusion that applies to the request. For example, if a
+  rate limit rule is configured then these are evaluated before all other rules.
+  If the client has reached the maximum number of requests then other rules will
+  not be evaluated.
+- `CACHED` - The rule was not executed because the previous result was cached.
+  Results are cached when the decision conclusion is `DENY`. Subsequent requests
+  from the same client will not be evaluated against the rule until the cache
+  expires.
+
+#### Rule reason
+
+The `reason` property of the `ArcjetRuleResult` object contains an
+`ArcjetReason` object which provides more detailed information about the
+conclusion for that configured rule.
+
+##### Shield
+
+The `ArcjetReason` object for shield rules has the following properties:
+
+```ts
+shieldTriggered: boolean;
+```
+
+See the [shield documentation](/shield/reference?f=remix) for more information
+about these properties.
+
+##### Bot protection
+
+The `ArcjetReason` object for bot protection rules has the following properties:
+
+```ts
+allowed: string[];
+denied: string[];
+```
+
+Each of the `allowed` and `denied` arrays contains the identifiers of the bots
+allowed or denied from our [full list of bots](https://arcjet.com/bot-list).
+
+##### Rate limiting
+
+The `ArcjetReason` object for rate limiting rules has the following properties:
+
+```ts
+max: number;
+remaining: number;
+window: number;
+reset: number;
+```
+
+See the [rate limiting documentation](/rate-limiting/reference?f=node-js) for more
+information about these properties.
+
+##### Email validation & verification
+
+The `ArcjetReason` object for email rules has the following properties:
+
+```ts
+emailTypes: ArcjetEmailType[];
+```
+
+An `ArcjetEmailType` is one of the following strings:
+
+```ts
+"DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
+```
+
+See the [email validation documentation](/email-validation/reference?f=node-js) for more
+information about these properties.
+
+### IP analysis
+
+As of SDK version `1.0.0-alpha.11`, the `ArcjetDecision` object contains an `ip`
+property. This includes additional data about the client IP address:
+
+#### IP location
+
+The IP location fields may be `undefined`, but you can use various methods to
+check their availability. Using the methods will also refine the type to remove
+the need for null or undefined checks.
+
+- `hasLatitude()` (`bool`): returns whether the `latitude` and `accuracyRadius`
+  fields are available.
+- `hasLongitude()` (`bool`): returns whether the `longitude` and
+  `accuracyRadius` fields are available.
+- `hasAccuracyRadius()` (`bool`): returns whether the `longitude`, `latitude`,
+  and `accuracyRadius` fields are available.
+- `hasTimezone()` (`bool`): returns whether the `timezone` field is available.
+- `hasPostalCode()` (`bool`): returns whether the `postalCode` field is
+  available.
+- `hasCity()` (`bool`): returns whether the `city` field is available.
+- `hasRegion()` (`bool`): returns whether the `region` field is available.
+- `hasCountry()` (`bool`): returns whether the `country` and `countryName`
+  fields are available.
+- `hasContinent()` (`bool`): returns whether the `continent` and `continentName`
+  fields are available.
+- `latitude` (`number | undefined`): the latitude of the client IP address.
+- `longitude` (`number | undefined`): the longitude of the client IP address.
+- `accuracyRadius` (`number | undefined`): how accurate the location is in
+  kilometers.
+- `timezone` (`string | undefined`): the timezone of the client IP address.
+- `postalCode` (`string | undefined`): the postal or zip code of the client IP
+  address.
+- `city` (`string | undefined`): the city of the client IP address.
+- `region` (`string | undefined`): the region of the client IP address.
+- `country` (`string | undefined`): the country code the client IP address.
+- `countryName` (`string | undefined`): the country name of the client IP
+  address.
+- `continent` (`string | undefined`): the continent code of the client IP
+  address.
+- `continentName` (`string | undefined`): the continent name of the client IP
+  address.
+
+##### Location accuracy
+
+IP geolocation can be notoriously inaccurate, especially for mobile devices,
+satellite internet providers, and even just normal users. Likewise with the
+specific fields like `city` and `region`, which can be very inaccurate. Country
+is usually accurate, but there are often cases where IP addresses are
+mis-located. These fields are provided for convenience e.g. suggesting a user
+location, but should not be relied upon by themselves.
+
+#### IP AS
+
+This is useful for identifying the network operator of the client IP address.
+This is useful for understanding whether the client is likely to be automated or
+not, or being stricter with requests from certain networks.
+
+The IP AS fields may be `undefined`, but you can use the `hasASN()` method to
+check their availability. Using this method will also refine the type to remove
+the need for null-ish checks.
+
+- `hasASN()` (`bool`): returns whether all of the ASN fields are available.
+- `asn` (`string | undefined`): the autonomous system (AS) number of the client
+  IP address.
+- `asnName` (`string | undefined`): the name of the AS of the client IP address.
+- `asnDomain` (`string | undefined`): the domain of the AS of the client IP
+  address.
+- `asnType` (`'isp' | 'hosting' | 'business' | 'education'`): the type of the AS
+  of the client IP address. Real users are more likely to be on an ISP or
+  business network rather than a hosting provider. Education networks often have
+  a single or small number of IP addresses even though there are many users. A
+  common mistake is to block a single IP because of too many requests when it is
+  a university or company network using
+  [NAT](https://en.wikipedia.org/wiki/Carrier-grade_NAT) (Network Address
+  Translation) to give many users the same IP.
+- `asnCountry` (`string | undefined`): the country code of the AS of the client
+  IP address. This is the administrative country of the AS, not necessarily the
+  country of the client IP address.
+
+#### IP type
+
+The `service` field may be `undefined`, but you can use the `hasService()`
+method to check the availability. Using this method will also refine the type to
+remove the need for null-ish checks.
+
+- `hasService()` (`bool`): whether the `service` field is available.
+- `service` (`string | undefined`): the name of the service associated with the
+  IP address—e.g. `Apple Private Relay`.
+- `isHosting()` (`bool`): returns whether the IP address of the client is owned
+  by a hosting provider. Requests originating from a hosting provider IP
+  significantly increase the likelihood that this is an automated client.
+- `isVpn()` (`bool`): returns whether the IP address of the client is owned by a
+  VPN provider. Many people use VPNs for privacy or work purposes, so by itself
+  this is not an indicator of the client being automated. However, it does
+  increase the risk score of the client and depending on your use case it may be
+  a characteristic you wish to restrict.
+- `isProxy()` (`bool`): returns whether the IP address of the client is owned by
+  a proxy provider. Similar to `isVpn()`, but proxies are more likely to involve
+  automated traffic.
+- `isTor()` (`bool`): returns whether the IP address of the client is known to
+  be part of the Tor network. As with `isVpn()`, there are legitimate uses for
+  hiding your identity through Tor, however it is also often a way to hide the
+  origin of malicious traffic.
+- `isRelay()` (`bool`): returns whether the IP address of the client is owned by
+  a relay service. The most common example is Apple iCloud Relay, which
+  indicates the client is less likely to be automated because Apple requires a
+  paid subscription linked to an Apple account in good standing.
+
+#### Example
+
+<Code code={IPLocationTS} lang="ts" />
+
+For the IP address `8.8.8.8` you might get the following response. Only the
+fields we have data for will be returned:
+
+```json
+{
+  "name": "Hello United States!",
+  "ip": {
+    "country": "US",
+    "countryName": "United States",
+    "continent": "NA",
+    "continentName": "North America",
+    "asn": "AS15169",
+    "asnName": "Google LLC",
+    "asnDomain": "google.com"
+  }
+}
+```
+
+## Error handling
+
+Arcjet is designed to fail open so that a service issue or misconfiguration does
+not block all requests. The SDK will also time out and fail open after 1000ms
+when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
+in most cases, the response time will be less than 20-30ms.
+
+If there is an error condition, Arcjet will return an `ERROR` `conclusion`.
+
+```ts
+if (decision.isErrored()) {
+  if (decision.reason.message.includes("missing User-Agent header")) {
+    // Requests without User-Agent headers can not be identified as any
+    // particular bot and will be marked as an errored decision. Most
+    // legitimate clients always send this header, so we recommend blocking
+    // requests without it.
+    this.logger.warn("User-Agent header is missing");
+    throw new HttpException("Bad request", HttpStatus.BAD_REQUEST);
+  } else {
+    // Fail open to prevent an Arcjet error from blocking all requests. You
+    // may want to fail closed if this controller is very sensitive
+    this.logger.error(`Arcjet error: ${decision.reason.message}`);
+    //throw new HttpException("Service unavailable", HttpStatus.SERVICE_UNAVAILABLE);
+  }
+}
+```
+
+## IP address detection
+
+Arcjet will automatically detect the IP address of the client making the request
+based on the context provided. The implementation is open source in our
+[@arcjet/ip package](https://github.com/arcjet/arcjet-js/blob/main/ip).
+
+In development environments (`NODE_ENV === "development"` or
+`ARCJET_ENV === "development"`), we allow private/internal addresses so that the
+SDKs work correctly locally.
+
+## Version support
+
+<NodeVersions />
+
+<Comments />

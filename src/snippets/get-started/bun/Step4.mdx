@@ -1,8 +1,20 @@
+import SelectableContent from "@/components/SelectableContent";
+
 ## 4. Start app
 
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+<div slot="TS" slotIdx="1">
 ```bash
 bun run --hot index.ts
 ```
+</div>
+<div slot="JS" slotIdx="2">
+```bash
+bun run --hot index.js
+```
+</div>
+</SelectableContent>
 
 :::note
 Bun's `--hot` flag will reload the runtime when changes are made to your `.ts`
@@ -25,6 +37,3 @@ The wait is necessary because the decision is cached for your IP based on the
 
 You should see a `403` response because `curl` is considered a bot by default
 ([customizable](/bot-protection/identifying-bots)).
-
-The requests will also show up in the [Arcjet
-dashboard](https://app.arcjet.com).

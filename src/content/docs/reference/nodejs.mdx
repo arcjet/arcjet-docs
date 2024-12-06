@@ -12,6 +12,7 @@ import ProtectTS from "/src/snippets/reference/nodejs/Protect.ts?raw";
 import ProtectJS from "/src/snippets/reference/nodejs/Protect.js?raw";
 import LoggerTS from "/src/snippets/reference/nodejs/Logger.ts?raw";
 import LoggerJS from "/src/snippets/reference/nodejs/Logger.js?raw";
+import ProxiesTS from "/src/snippets/reference/nodejs/Proxies.ts?raw";
 import IPLocationTS from "/src/snippets/reference/nodejs/IPLocation.ts?raw";
 import IPLocationJS from "/src/snippets/reference/nodejs/IPLocation.js?raw";
 import WithRuleTS from "/src/snippets/reference/nodejs/WithRule.ts?raw";
@@ -20,7 +21,9 @@ import ConfigurationTS from "/src/snippets/reference/nodejs/Configuration.ts?raw
 import ConfigurationJS from "/src/snippets/reference/nodejs/Configuration.js?raw";
 import ClientOverrideTS from "/src/snippets/reference/nodejs/ClientOverride.ts?raw";
 import ClientOverrideJS from "/src/snippets/reference/nodejs/ClientOverride.js?raw";
+import NodeVersions from "/src/snippets/reference/node-versions.mdx";
 import Comments from "/src/components/Comments.astro";
+import Requirements from "@/snippets/get-started/node-js/Requirements.mdx";
 
 [<SDKVersionNodejs />](https://www.npmjs.com/package/@arcjet/node)
 
@@ -55,8 +58,7 @@ yarn add @arcjet/node
 
 ### Requirements
 
-- Node.js 18 or later
-- CommonJS is not supported. Arcjet is ESM only.
+<Requirements />
 
 ## Quick start
 
@@ -83,6 +85,11 @@ The optional fields are:
 - `characteristics` (`string[]`) - A list of
   [characteristics](/architecture#built-in-characteristics) to be used to
   uniquely identify clients.
+- `proxies` (`string[]`) - A list of one or more trusted proxies. These
+  addresses will be excluded when Arcjet is determining the client IP address.
+  This is useful if you are behind a load balancer or proxy that sets the client
+  IP address in a header. See [Load balancers &
+  proxies](#load-balancers--proxies) below for an example.
 
 <Tabs>
   <TabItem label="TS">
@@ -92,6 +99,15 @@ The optional fields are:
     <Code code={ConfigurationJS} lang="js" />
   </TabItem>
 </Tabs>
+
+### Single instance
+
+We recommend creating a single instance of the `Arcjet` object and reusing it
+throughout your application. This is because the SDK caches decisions and
+configuration to improve performance.
+
+The pattern we use is to create a utility file that exports the `Arcjet` object
+and then import it where you need it.
 
 ### Rule modes
 
@@ -164,6 +180,40 @@ print in development:
   </TabItem>
 </Tabs>
 
+### Load balancers & proxies
+
+If your application is behind a load balancer, Arcjet will only see the IP
+address of the load balancer and not the real client IP address.
+
+To fix this, most load balancers will set the `X-Forwarded-For` header with the
+real client IP address plus a list of proxies that the request has passed
+through.
+
+The problem with is that the `X-Forwarded-For` header can be spoofed by the
+client, so you should only trust it if you are sure that the load balancer is
+setting it correctly. See [the MDN
+docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For)
+for more details.
+
+You can configure Arcjet to trust IP addresses in the `X-Forwarded-For` header
+by setting the `proxies` field in the configuration. This should be a list of
+the IP addresses of your load balancers to be removed, so that the last IP
+address in the list is the real client IP address.
+
+#### Example
+
+For example, if the load balancer is at `100.100.100.100` and the client IP
+address is `192.168.1.1`, the `X-Forwarded-For` header will be:
+
+```http
+X-Forwarded-For: 192.168.1.1, 100.100.100.100
+```
+
+You should set the `proxies` field to `["100.100.100.100"]` so Arcjet will use
+`192.168.1.1` as the client IP address.
+
+<Code code={ProxiesTS} lang="ts" />
+
 ## Protect
 
 Arcjet provides a single `protect` function that is used to execute your
@@ -229,12 +279,14 @@ which rule caused the conclusion:
 
 - `isBot()` (`bool`) - Returns `true` if the bot protection rules have been
   applied and the request was considered to have been made by a bot.
-- `isRateLimit()` (`bool`) - Returns `true` if the rate limit rules have been
-  applied and the request has exceeded the rate limit.
-- `isShield()` (`bool`) - Returns `true` if the shield rules have been applied
-  and the request is suspicious based on analysis by Arcjet Shield.
 - `isEmail()` (`bool`) - Returns `true` if the email rules have been applied and
   the email address has a problem.
+- `isRateLimit()` (`bool`) - Returns `true` if the rate limit rules have been
+  applied and the request has exceeded the rate limit.
+- `isSensitiveInfo()` (`bool`) - Returns `true` if sensitive info rules have
+  been applied and sensitive info has been detected.
+- `isShield()` (`bool`) - Returns `true` if the shield rules have been applied
+  and the request is suspicious based on analysis by Arcjet Shield.
 - `isError()` (`bool`) - Returns `true` if there was an error processing the
   request.
 
@@ -293,7 +345,7 @@ The `ArcjetReason` object for shield rules has the following properties:
 shieldTriggered: boolean;
 ```
 
-See the [shield documentation](/shield/reference?f=next-js) for more information
+See the [shield documentation](/shield/reference?f=remix) for more information
 about these properties.
 
 ##### Bot protection
@@ -543,16 +595,6 @@ will automatically handle this for you.
 
 ## Version support
 
-Arcjet supports the [active and maintenance LTS
-versions](https://github.com/nodejs/release) of Node.js:
-
-- Node.js 18.x LTS
-- Node.js 20.x LTS
-
-When a Node.js version goes end of life, we will bump the major version of the
-Arcjet SDK. [Technical support](/support) is provided for the current major
-version of the Arcjet SDK for all users and for the current and previous major
-versions for paid users. We will provide security fixes for the current and
-previous major versions.
+<NodeVersions />
 
 <Comments />

@@ -1,14 +1,19 @@
 ---
 title: "Email validation reference"
-description: "Reference guide for adding Arcjet email validation to your Next.js, Node.js, Bun, or SvelteKit app."
+description: "Reference guide for adding Arcjet email validation to your Next.js, NestJS, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
+  - nest-js
   - next-js
   - node-js
+  - remix
   - sveltekit
 ajToc:
   - text: "Configuration"
     anchor: "configuration"
+  - text: "Pages & server actions"
+    anchor: "pages--server-actions"
+    framework: ["next-js"]
   - text: "Decision"
     anchor: "decision"
   - text: "Error handling"
@@ -18,16 +23,24 @@ ajToc:
 ---
 
 import { Aside } from "@astrojs/starlight/components";
-import TextByFramework from "@/components/TextByFramework";
 import SlotByFramework from "@/components/SlotByFramework";
+import TextByFramework from "@/components/TextByFramework";
+import DisplayType from "@/components/DisplayType.astro";
+
 import DecisionLogBun from "@/snippets/email-validation/reference/bun/DecisionLog.mdx";
+import DecisionLogNestJs from "@/snippets/email-validation/reference/nestjs/DecisionLog.mdx";
 import DecisionLogNextJs from "@/snippets/email-validation/reference/nextjs/DecisionLog.mdx";
 import DecisionLogNodeJs from "@/snippets/email-validation/reference/nodejs/DecisionLog.mdx";
+import DecisionLogRemix from "@/snippets/email-validation/reference/remix/DecisionLog.mdx";
 import DecisionLogSvelteKit from "@/snippets/email-validation/reference/sveltekit/DecisionLog.mdx";
 import ErrorsBun from "@/snippets/email-validation/reference/bun/Errors.mdx";
+import ErrorsNestJs from "@/snippets/email-validation/reference/nestjs/Errors.mdx";
 import ErrorsNextJs from "@/snippets/email-validation/reference/nextjs/Errors.mdx";
 import ErrorsNodeJs from "@/snippets/email-validation/reference/nodejs/Errors.mdx";
+import ErrorsRemix from "@/snippets/email-validation/reference/remix/Errors.mdx";
 import ErrorsSvelteKit from "@/snippets/email-validation/reference/sveltekit/Errors.mdx";
+import NextJsPagesServerActions from "@/snippets/email-validation/reference/nextjs/PagesServerActions.mdx";
+import NestJsGuardDecision from "@/snippets/email-validation/reference/nestjs/GuardDecision.mdx";
 import Comments from "/src/components/Comments.astro";
 
 Arcjet allows you validate & verify an email address. This is useful for
@@ -39,19 +52,13 @@ reduce the amount of spam or fraudulent accounts.
 Email validation is configured by specifying the email types you wish to block
 and whether you wish to modify certain validation options.
 
-The configuration definition is:
+The `arcjet` client can be configured with one or more Email validation rules,
+which are constructed with the `validateEmail(options: EmailOptions)` function
+and configured by `EmailOptions`:
 
-```ts
-type EmailOptions = {
-  mode?: "LIVE" | "DRY_RUN";
-  block?: ArcjetEmailType[];
-  requireTopLevelDomain?: boolean; // default: true
-  allowDomainLiteral?: boolean; // default: false
-};
-```
-
-The `arcjet` client is configured with one or many `validateEmail` rules which
-take `EmailOptions`.
+<DisplayType type="EmailOptions" from="arcjet" />
+<DisplayType type="ArcjetMode" from="arcjet" />
+<DisplayType type="ArcjetEmailType" from="arcjet" />
 
 <Aside type="note">
   When specifying multiple rules, the order of the rules is ignored. Rule
@@ -72,12 +79,20 @@ to allow certain types of email addresses, you can modify the options:
   literals. Defaults to `false`. Changing to `true` means that
   `foo@[123.456.789.0]` would be allowed.
 
+<SlotByFramework client:load>
+  <NextJsPagesServerActions slot="next-js" />
+</SlotByFramework>
+
 ## Decision
 
 Arcjet provides a single `protect` function that is used to execute your
 protection rules. This requires a `request` argument which is the request
 context as passed to the request handler. When configured with a `validateEmail`
 rule it also requires an additional `email` prop.
+
+<SlotByFramework client:load>
+  <NestJsGuardDecision slot="nest-js" />
+</SlotByFramework>
 
 This function returns a `Promise` that resolves to an
 `ArcjetDecision` object. This contains the following properties:
@@ -112,8 +127,10 @@ This example will log the full result as well as the email validation rule:
 
 <SlotByFramework client:load>
   <DecisionLogBun slot="bun" />
+  <DecisionLogNestJs slot="nest-js" />
   <DecisionLogNextJs slot="next-js" />
   <DecisionLogNodeJs slot="node-js" />
+  <DecisionLogRemix slot="remix" />
   <DecisionLogSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -132,6 +149,27 @@ type ArcjetEmailType =
   | "INVALID"; // Email address that is invalid
 ```
 
+You can check the email type using the `decision.reason.emailTypes` array:
+
+```ts
+let message = "";
+// You could return specific messages based on the email type, but this would
+// also reveal the validation to a spammer
+if (decision.reason.emailTypes.includes("DISPOSABLE")) {
+  message = "We do not allow disposable email addresses.";
+} else if (decision.reason.emailTypes.includes("FREE")) {
+  message =
+    "We do not allow free email addresses, please use a business address.";
+} else if (decision.reason.emailTypes.includes("NO_MX_RECORDS")) {
+  message = "Your email domain does not have an MX record. Is there a typo?";
+} else if (decision.reason.emailTypes.includes("NO_GRAVATAR")) {
+  message = "We require a Gravatar profile to sign up.";
+} else {
+  // This is a catch all
+  message = "Invalid email.";
+}
+```
+
 ## Error handling
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
@@ -143,8 +181,10 @@ If there is an error condition, Arcjet will return an `ERROR` `conclusion`.
 
 <SlotByFramework client:load>
   <ErrorsBun slot="bun" />
+  <ErrorsNestJs slot="nest-js" />
   <ErrorsNextJs slot="next-js" />
   <ErrorsNodeJs slot="node-js" />
+  <ErrorsRemix slot="remix" />
   <ErrorsSvelteKit slot="sveltekit" />
 </SlotByFramework>
 

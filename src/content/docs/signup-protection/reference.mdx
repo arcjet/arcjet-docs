@@ -1,14 +1,19 @@
 ---
 title: "Signup from protection reference"
-description: "Reference guide for adding Arcjet email validation to your Next.js, Node.js, Bun, or SvelteKit app."
+description: "Reference guide for adding Arcjet email validation to your Next.js, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
+  - nest-js
   - next-js
   - node-js
+  - remix
   - sveltekit
 ajToc:
   - text: "Configuration"
     anchor: "configuration"
+  - text: "Pages & server actions"
+    anchor: "pages--server-actions"
+    framework: ["next-js"]
   - text: "Decision"
     anchor: "decision"
     children:
@@ -24,21 +29,33 @@ ajToc:
     anchor: "testing"
 ---
 
-import TextByFramework from "@/components/TextByFramework";
 import SlotByFramework from "@/components/SlotByFramework";
+import TextByFramework from "@/components/TextByFramework";
+import Comments from "/src/components/Comments.astro";
+
 import RecommendedBun from "@/snippets/signup-protection/reference/bun/Recommended.mdx";
+import RecommendedNestJs from "@/snippets/signup-protection/reference/nestjs/Recommended.mdx";
 import RecommendedNextJs from "@/snippets/signup-protection/reference/nextjs/Recommended.mdx";
 import RecommendedNodeJs from "@/snippets/signup-protection/reference/nodejs/Recommended.mdx";
+import RecommendedRemix from "@/snippets/signup-protection/reference/remix/Recommended.mdx";
 import RecommendedSvelteKit from "@/snippets/signup-protection/reference/sveltekit/Recommended.mdx";
+
+import NextJsPagesServerActions from "@/snippets/signup-protection/reference/nextjs/PagesServerActions.mdx";
+import NestJsGuardDecision from "@/snippets/signup-protection/reference/nestjs/GuardDecision.mdx";
+
 import CustomVerificationBun from "@/snippets/signup-protection/reference/bun/CustomVerification.mdx";
+import CustomVerificationNestJs from "@/snippets/signup-protection/reference/nestjs/CustomVerification.mdx";
 import CustomVerificationNextJs from "@/snippets/signup-protection/reference/nextjs/CustomVerification.mdx";
 import CustomVerificationNodeJs from "@/snippets/signup-protection/reference/nodejs/CustomVerification.mdx";
+import CustomVerificationRemix from "@/snippets/signup-protection/reference/remix/CustomVerification.mdx";
 import CustomVerificationSvelteKit from "@/snippets/signup-protection/reference/sveltekit/CustomVerification.mdx";
+
 import ErrorsBun from "@/snippets/signup-protection/reference/bun/Errors.mdx";
+import ErrorsNestJs from "@/snippets/signup-protection/reference/nestjs/Errors.mdx";
 import ErrorsNextJs from "@/snippets/signup-protection/reference/nextjs/Errors.mdx";
 import ErrorsNodeJs from "@/snippets/signup-protection/reference/nodejs/Errors.mdx";
+import ErrorsRemix from "@/snippets/signup-protection/reference/remix/Errors.mdx";
 import ErrorsSvelteKit from "@/snippets/signup-protection/reference/sveltekit/Errors.mdx";
-import Comments from "/src/components/Comments.astro";
 
 Arcjet signup form protection combines rate limiting, bot protection, and email
 validation to protect your signup forms from abuse.
@@ -81,8 +98,10 @@ This can be configured as follows:
 
 <SlotByFramework client:load>
   <RecommendedBun slot="bun" />
+  <RecommendedNestJs slot="nest-js" />
   <RecommendedNextJs slot="next-js" />
   <RecommendedNodeJs slot="node-js" />
+  <RecommendedRemix slot="remix" />
   <RecommendedSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -98,12 +117,20 @@ Even in dry run mode each rule will still be evaluated, so you can still [check
 the rule results](#checking-rule-results) to see if the email address is valid
 or not, or log them to your database.
 
+<SlotByFramework client:load>
+  <NextJsPagesServerActions slot="next-js" />
+</SlotByFramework>
+
 ## Decision
 
 Arcjet provides a single `protect` function that is used to execute your
 protection rules. This requires a `request` argument which is the request
 context as passed to the request handler. When configured with a `protectSignup`
 rule it also requires an additional `email` prop.
+
+<SlotByFramework client:load>
+  <NestJsGuardDecision slot="nest-js" />
+</SlotByFramework>
 
 This function returns a `Promise` that resolves to an
 `ArcjetDecision` object. This contains the following properties:
@@ -146,9 +173,6 @@ for (const result of decision.results) {
 This could be useful metadata to add to a new user's record in your database
 before you redirect them to the next step in your signup flow.
 
-See [the SDK reference](/reference/nextjs#results) for more details about the
-rule results.
-
 ### Custom verification logic
 
 Checking the rule results allows you to use the Arcjet decision as part of your
@@ -158,8 +182,10 @@ users who sign up with a free email address.
 
 <SlotByFramework client:load>
   <CustomVerificationBun slot="bun" />
+  <CustomVerificationNestJs slot="nest-js" />
   <CustomVerificationNextJs slot="next-js" />
   <CustomVerificationNodeJs slot="node-js" />
+  <CustomVerificationRemix slot="remix" />
   <CustomVerificationSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
@@ -174,8 +200,10 @@ If there is an error condition, Arcjet will return an `ERROR` `conclusion`.
 
 <SlotByFramework client:load>
   <ErrorsBun slot="bun" />
+  <ErrorsNestJs slot="nest-js" />
   <ErrorsNextJs slot="next-js" />
   <ErrorsNodeJs slot="node-js" />
+  <ErrorsRemix slot="remix" />
   <ErrorsSvelteKit slot="sveltekit" />
 </SlotByFramework>
 

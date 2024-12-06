@@ -5,7 +5,7 @@ import { error, type RequestEvent } from "@sveltejs/kit";
 const aj = arcjet({
   key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
   rules: [
-    // This allows all sensitive entities other than email addresses and those containing a dash character.
+    // This allows all sensitive entities other than email addresses
     sensitiveInfo({
       mode: "LIVE", // Will block requests, use "DRY_RUN" to log only
       // allow: ["EMAIL"], Will block all sensitive information types other than email.
@@ -22,6 +22,7 @@ export async function handle({
   resolve: (event: RequestEvent) => Response | Promise<Response>;
 }): Promise<Response> {
   const decision = await aj.protect(event);
+  console.log("Arcjet decision", decision);
 
   if (decision.isDenied()) {
     return error(400, "Bad request - sensitive information detected");
