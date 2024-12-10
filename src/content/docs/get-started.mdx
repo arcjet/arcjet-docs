@@ -23,6 +23,8 @@ frameworks:
   - remix
   - sveltekit
 ajToc:
+  - text: 0. Get Started
+    anchor: "0-get-started"
   - text: 1. Install Arcjet
     anchor: "1-install-arcjet"
   - text: 2. Set your key
@@ -45,60 +47,70 @@ import { LinkButton, LinkCard } from "@astrojs/starlight/components";
 import FAQs from "/src/components/FAQs.astro";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 
+import BunStep0 from "@/snippets/get-started/bun/Step0.mdx";
 import BunStep1 from "@/snippets/get-started/bun/Step1.mdx";
 import BunRequirements from "@/snippets/get-started/bun/Requirements.mdx";
 import BunStep2 from "@/snippets/get-started/bun/Step2.mdx";
 import BunStep3 from "@/snippets/get-started/bun/Step3.mdx";
 import BunStep4 from "@/snippets/get-started/bun/Step4.mdx";
 
+import BunHonoStep0 from "@/snippets/get-started/bun-hono/Step0.mdx";
 import BunHonoStep1 from "@/snippets/get-started/bun-hono/Step1.mdx";
 import BunHonoRequirements from "@/snippets/get-started/bun-hono/Requirements.mdx";
 import BunHonoStep2 from "@/snippets/get-started/bun-hono/Step2.mdx";
 import BunHonoStep3 from "@/snippets/get-started/bun-hono/Step3.mdx";
 import BunHonoStep4 from "@/snippets/get-started/bun-hono/Step4.mdx";
 
+import DenoStep0 from "@/snippets/get-started/deno/Step0.mdx";
 import DenoStep1 from "@/snippets/get-started/deno/Step1.mdx";
 import DenoRequirements from "@/snippets/get-started/deno/Requirements.mdx";
 import DenoStep2 from "@/snippets/get-started/deno/Step2.mdx";
 import DenoStep3 from "@/snippets/get-started/deno/Step3.mdx";
 import DenoStep4 from "@/snippets/get-started/deno/Step4.mdx";
 
+import NestJsStep0 from "@/snippets/get-started/nest-js/Step0.mdx";
 import NestJsStep1 from "@/snippets/get-started/nest-js/Step1.mdx";
 import NestJsRequirements from "@/snippets/get-started/nest-js/Requirements.mdx";
 import NestJsStep2 from "@/snippets/get-started/nest-js/Step2.mdx";
 import NestJsStep3 from "@/snippets/get-started/nest-js/Step3.mdx";
 import NestJsStep4 from "@/snippets/get-started/nest-js/Step4.mdx";
 
+import NextJsStep0 from "@/snippets/get-started/next-js/Step0.mdx";
 import NextJsStep1 from "@/snippets/get-started/next-js/Step1.mdx";
 import NextJsRequirements from "@/snippets/get-started/next-js/Requirements.mdx";
 import NextJsStep2 from "@/snippets/get-started/next-js/Step2.mdx";
 import NextJsStep3 from "@/snippets/get-started/next-js/Step3.mdx";
 import NextJsStep4 from "@/snippets/get-started/next-js/Step4.mdx";
 
+import NodeJsStep0 from "@/snippets/get-started/node-js/Step0.mdx";
 import NodeJsStep1 from "@/snippets/get-started/node-js/Step1.mdx";
 import NodeJsRequirements from "@/snippets/get-started/node-js/Requirements.mdx";
 import NodeJsStep2 from "@/snippets/get-started/node-js/Step2.mdx";
 import NodeJsStep3 from "@/snippets/get-started/node-js/Step3.mdx";
 import NodeJsStep4 from "@/snippets/get-started/node-js/Step4.mdx";
 
+import NodeJsExpressStep0 from "@/snippets/get-started/node-js-express/Step0.mdx";
 import NodeJsExpressStep1 from "@/snippets/get-started/node-js-express/Step1.mdx";
 import NodeJsExpressRequirements from "@/snippets/get-started/node-js-express/Requirements.mdx";
 import NodeJsExpressStep2 from "@/snippets/get-started/node-js-express/Step2.mdx";
 import NodeJsExpressStep3 from "@/snippets/get-started/node-js-express/Step3.mdx";
 import NodeJsExpressStep4 from "@/snippets/get-started/node-js-express/Step4.mdx";
 
+import NodeJsHonoStep0 from "@/snippets/get-started/node-js-hono/Step0.mdx";
 import NodeJsHonoStep1 from "@/snippets/get-started/node-js-hono/Step1.mdx";
 import NodeJsHonoRequirements from "@/snippets/get-started/node-js-hono/Requirements.mdx";
 import NodeJsHonoStep2 from "@/snippets/get-started/node-js-hono/Step2.mdx";
 import NodeJsHonoStep3 from "@/snippets/get-started/node-js-hono/Step3.mdx";
 import NodeJsHonoStep4 from "@/snippets/get-started/node-js-hono/Step4.mdx";
 
+import RemixStep0 from "@/snippets/get-started/remix/Step0.mdx";
 import RemixStep1 from "@/snippets/get-started/remix/Step1.mdx";
 import RemixRequirements from "@/snippets/get-started/remix/Requirements.mdx";
 import RemixStep2 from "@/snippets/get-started/remix/Step2.mdx";
 import RemixStep3 from "@/snippets/get-started/remix/Step3.mdx";
 import RemixStep4 from "@/snippets/get-started/remix/Step4.mdx";
 
+import SvelteKitStep0 from "@/snippets/get-started/sveltekit/Step0.mdx";
 import SvelteKitStep1 from "@/snippets/get-started/sveltekit/Step1.mdx";
 import SvelteKitRequirements from "@/snippets/get-started/sveltekit/Requirements.mdx";
 import SvelteKitStep2 from "@/snippets/get-started/sveltekit/Step2.mdx";
@@ -112,6 +124,21 @@ protection. Data redaction. A developer-first approach to security.
 This guide will show you how to set up a simple API server protected by Arcjet.
 
 <FrameworkLinks title="Choose a framework" client:load />
+
+## 0. Get Started
+
+<SlotByFramework client:load>
+  <BunStep0 slot="bun" />
+  <BunHonoStep0 slot="bun-hono" />
+  <DenoStep0 slot="deno" />
+  <NestJsStep0 slot="nest-js" />
+  <NextJsStep0 slot="next-js" />
+  <NodeJsStep0 slot="node-js" />
+  <NodeJsExpressStep0 slot="node-js-express" />
+  <NodeJsHonoStep0 slot="node-js-hono" />
+  <RemixStep0 slot="remix" />
+  <SvelteKitStep0 slot="sveltekit" />
+</SlotByFramework>
 
 ## 1. Install Arcjet
 
