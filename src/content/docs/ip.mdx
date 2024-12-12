@@ -6,6 +6,7 @@ next: false
 ---
 
 import { Code } from "@astrojs/starlight/components";
+import DisplayType from "@/components/DisplayType.astro";
 import WhatAreArcjetUtilities from "@/components/WhatAreArcjetUtilities.astro";
 import Comments from "@/components/Comments.astro";
 
@@ -61,5 +62,18 @@ ignored when detecting a public IP.
 import IpProxies from "@/snippets/ip/proxies.ts?raw";
 
 <Code code={IpProxies} lang="ts" />
+
+## API
+
+### `ip(request: RequestLike, options?: Options)`
+
+Look up an IP address in a Request-like object, such as `Request`, Node's
+`http.IncomingMessage`, or Next.js' `NextRequest`.
+
+**Types:**
+
+<DisplayType type="RequestLike" from="@arcjet/ip" />
+<DisplayType type="Options" from="@arcjet/ip" />
+<DisplayType type="Platform" from="@arcjet/ip" />
 
 <Comments />
