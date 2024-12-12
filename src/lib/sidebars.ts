@@ -277,20 +277,6 @@ export const main = [
     collapsed: false,
     items: [
       {
-        label: "Redact",
-        collapsed: true,
-        items: [
-          {
-            label: "Quick start",
-            link: "/redact/quick-start",
-          },
-          {
-            label: "Reference",
-            link: "/redact/reference",
-          },
-        ],
-      },
-      {
         label: "Nosecone",
         collapsed: true,
         items: [
@@ -301,6 +287,24 @@ export const main = [
           {
             label: "Reference",
             link: "/nosecone/reference",
+          },
+        ],
+      },
+      {
+        label: "@arcjet/ip",
+        link: "/ip",
+      },
+      {
+        label: "@arcjet/redact",
+        collapsed: true,
+        items: [
+          {
+            label: "Quick start",
+            link: "/redact/quick-start",
+          },
+          {
+            label: "Reference",
+            link: "/redact/reference",
           },
         ],
       },

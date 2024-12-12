@@ -1,0 +1,65 @@
+---
+title: "Arcjet IP detection reference"
+description: "Reference for the Arcjet IP detection library"
+prev: false
+next: false
+---
+
+import { Code } from "@astrojs/starlight/components";
+import WhatAreArcjetUtilities from "@/components/WhatAreArcjetUtilities.astro";
+import Comments from "@/components/Comments.astro";
+
+The Arcjet IP detection library provides a utility to find the public IP of a
+Request.
+
+<WhatAreArcjetUtilities />
+
+## Why
+
+The public IP of a Request is difficult to discern, but some platforms provide
+specific mechanisms for accessing it—such as the `X-Real-IP` header added or
+overwritten by Vercel. The `@arcjet/ip` library provides a streamlined API over
+these mechanisms based on the current platform.
+
+:::caution[Considerations]
+The IP should not be trusted as it can be spoofed in most cases, especially when
+loaded via the `Headers` object. We apply additional platform guards if a
+platform is supplied in the `options` argument.
+
+If a private/internal address is encountered, it will be skipped. If only those
+are detected, an empty string is returned.
+:::
+
+## Install
+
+```sh
+npm install -S @arcjet/ip
+```
+
+## Usage
+
+import IpUsage from "@/snippets/ip/usage.ts?raw";
+
+<Code code={IpUsage} lang="ts" />
+
+### Platform protections
+
+Additional guards can be applied with the `platform` option, such as
+`{ platform: "fly-io" }`, `{ platform: "cloudflare" }`, or
+`{ platform: "vercel" }`.
+
+import IpPlatform from "@/snippets/ip/platform.ts?raw";
+
+<Code code={IpPlatform} lang="ts" />
+
+### Proxy filtering
+
+Most proxies will add themselves in the chain of public IP addresses. Trusted
+proxies may be specified with the `proxies` option, and they will be
+ignored when detecting a public IP.
+
+import IpProxies from "@/snippets/ip/proxies.ts?raw";
+
+<Code code={IpProxies} lang="ts" />
+
+<Comments />
