@@ -40,17 +40,39 @@ possible to achieve 100% accuracy.
 
 Requests without `User-Agent` headers can not be identified as any particular
 bot and will be marked as an errored decision. Check `decision.isErrored()` and
-decide if you want to allow or deny the request. Our recommendation is to block
-requests without `User-Agent` headers because most legitimate clients always
-send this header.
+decide if you want to allow or deny the request.
+
+Our recommendation is to block requests without `User-Agent` headers before
+calling Arcjet because most legitimate clients always send this header:
+
+```ts
+if (!request.headers.get("User-Agent")) {
+  log.warn("request missing required user-agent header");
+  // Return a 400 Bad request error here
+  // Next.js example:
+  // return NextResponse.json({ error: "Bad request" }, { status: 400 });
+  // Node.js example:
+  // res.writeHead(400, { "Content-Type": "application/json" });
+  // res.end(JSON.stringify({ error: "Bad request" }));
+}
+```
+
+An alternative approach is to check the error message after the decision is
+made:
 
 ```ts
 if (decision.isErrored()) {
-  if (decision.reason.message.includes("missing User-Agent header")) {
-    log.warn({ error: decision.reason.message }, "Arcjet user-agent warning");
+  if (decision.reason.message.includes("requires user-agent header")) {
+    log.warn(
+      { error: decision.reason.message },
+      "request missing required user-agent header",
+    );
     // You could return a 400 Bad request error here
     // Next.js example:
     // return NextResponse.json({ error: "Bad request" }, { status: 400 });
+    // Node.js example:
+    // res.writeHead(400, { "Content-Type": "application/json" });
+    // res.end(JSON.stringify({ error: "Bad request" }));
   } else {
     // Just log the error and continue
     log.error({ error: decision.reason.message }, "Arcjet error");
