@@ -118,11 +118,12 @@ export class SignupController {
         throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
       }
     } else if (decision.isErrored()) {
-      if (decision.reason.message.includes("missing User-Agent header")) {
+      if (decision.reason.message.includes("requires user-agent header")) {
         // Requests without User-Agent headers can not be identified as any
         // particular bot and will be marked as an errored decision. Most
         // legitimate clients always send this header, so we recommend blocking
         // requests without it.
+        // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
         this.logger.warn("User-Agent header is missing");
         throw new HttpException("Bad request", HttpStatus.BAD_REQUEST);
       } else {
