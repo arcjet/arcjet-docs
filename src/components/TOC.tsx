@@ -1,5 +1,5 @@
 import FrameworkSwitcher from "@/components/FrameworkSwitcher";
-import type { TocNode } from "@/content/config";
+import type { TocNode } from "@/content.config";
 import useElementInView from "@/effects/useElementInView";
 import type { FrameworkKey } from "@/lib/prefs";
 import { displayedFramework } from "@/store";

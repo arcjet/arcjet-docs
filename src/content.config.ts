@@ -1,5 +1,6 @@
 import type { FrameworkKey } from "@/lib/prefs";
 import { docsSchema } from "@astrojs/starlight/schema";
+import { docsLoader } from "@astrojs/starlight/loaders";
 import { defineCollection, z } from "astro:content";
 
 export type TocNode = {
@@ -11,6 +12,7 @@ export type TocNode = {
 
 export const collections = {
   docs: defineCollection({
+    loader: docsLoader(),
     schema: docsSchema({
       extend: z.object({
         ajToc: z.custom<TocNode[]>(),
