@@ -35,6 +35,7 @@ const arcjetRedact = new ArcjetRedact({
   },
 });
 
+// @ts-ignore
 const response = await arcjetRedact.invoke(
   "My email address is test@example.com, here is some-sensitive-info",
 );
