@@ -1,4 +1,4 @@
-import { Code } from "@astrojs/starlight/components";
+import { Aside, Code } from "@astrojs/starlight/components";
 import SelectableContent from "@/components/SelectableContent";
 
 import Step2MiddlewareTS from "./Step2Middleware.ts?raw";
@@ -12,12 +12,6 @@ import Step2LayoutNoCacheJS from "./Step2LayoutNoCache.js?raw";
 Nosecone applies headers to all your routes via middleware in your Next.js
 application.
 
-:::note
-We recommend you remove any `export const config = ...` from your middleware so
-Nosecone will run on every route. This ensures the headers are applied to all
-requests.
-:::
-
 <SelectableContent client:load syncKey="language" frameworkSwitcher>
   <div slot="TS" slotIdx="1">
     <Code code={Step2MiddlewareTS} lang="ts" title="middleware.ts" />
@@ -26,6 +20,10 @@ requests.
     <Code code={Step2MiddlewareJS} lang="js" title="middleware.js" />
   </div>
 </SelectableContent>
+
+We recommend you remove any `export const config = ...` from your middleware so
+Nosecone will run on every route. This ensures the headers are applied to all
+requests.
 
 You also need to opt-out of static generation in your application. See the
 `@nosecone/next` [reference
@@ -68,3 +66,12 @@ To opt-out of static generation, modify your layout file with the following:
     />
   </div>
 </SelectableContent>
+
+We recommend you remove any `export const config = ...` from your middleware so
+Nosecone will run on every route. This ensures the headers are applied to all
+requests.
+
+<Aside type="note" title="Chaining middleware">
+  See the [reference guide](/nosecone/reference#chaining-middleware) if you need
+  to chain multiple middleware functions.
+</Aside>
