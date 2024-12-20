@@ -4,6 +4,7 @@ description: "Arcjet bot protection allows you to manage traffic by automated cl
 prev: false
 ---
 
+import { Badge } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "/src/components/Comments.astro";
 
@@ -26,6 +27,11 @@ It's impossible to create a system that can block all bots. Good bots identify
 themselves in a consistent manner so it is straightforward to identify them, but
 those are often not the bots you wish to block! Bad bots pretend to be real
 clients and use various mechanisms to evade bot detection.
+
+The Arcjet <Badge text="Pro" variant="note" /> plan or above provides additional
+bot verification using IP analysis, which can help if you are under attack from
+bots pretending to be good bots e.g. clients pretending to be Google (who you
+usually want to allow).
 
 Arcjet's bot protect works best when combined with [rate
 limiting](/rate-limiting/concepts). This allows you to block clients that are

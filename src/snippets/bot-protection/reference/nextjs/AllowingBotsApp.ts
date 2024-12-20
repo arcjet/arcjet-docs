@@ -22,8 +22,9 @@ const aj = arcjet({
 export async function POST(req: Request) {
   const decision = await aj.protect(req);
 
-
   if (decision.reason.isBot()) {
+    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+    // https://docs.arcjet.com/bot-protection/reference#bot-verification
     if (decision.isDenied() || decision.reason.isSpoofed()) {
       return NextResponse.json(
         {

@@ -150,6 +150,14 @@ export class SignupController {
       }
     }
 
+    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+    // Verification isn't always possible, so we recommend checking the decision
+    // separately.
+    // https://docs.arcjet.com/bot-protection/reference#bot-verification
+    if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+      throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
+    }
+
     // At this point the signup is allowed, but we may want to take additional
     // verification steps
 

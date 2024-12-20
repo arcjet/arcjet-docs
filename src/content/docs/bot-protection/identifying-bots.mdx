@@ -4,6 +4,7 @@ description: "Arcjet can detect many different bots and automated clients."
 next: false
 ---
 
+import { Badge } from "@astrojs/starlight/components";
 import Comments from "/src/components/Comments.astro";
 
 Arcjet allows you to configure a list of bots to allow or deny. To construct the
@@ -85,9 +86,13 @@ if you need a specific category.
 
 ## Detection
 
-For basic detection, Arcjet uses the `User-Agent` header to identify specific
-bots. Advanced bot detection supplements this with additional fingerprinting
-techniques such as IP address analysis.
+For basic detection on the <Badge text="Free" variant="caution" /> plan, Arcjet
+uses the `User-Agent` header to identify specific bots.
+
+The Arcjet <Badge text="Pro" variant="note" /> plan or above provides additional
+bot verification using IP analysis, which can help if you are under attack from
+bots pretending to be good bots e.g. clients pretending to be Google (who you
+usually want to allow).
 
 :::note
 Requests without `User-Agent` headers can not be identified as any particular
