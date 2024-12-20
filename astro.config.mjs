@@ -1,6 +1,6 @@
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
-import vercelStatic from "@astrojs/vercel";
+import vercelStatic from "@astrojs/vercel/static";
 import { ExpressiveCodeTheme } from "astro-expressive-code";
 import robotsTxt from "astro-robots-txt";
 import { defineConfig } from "astro/config";
