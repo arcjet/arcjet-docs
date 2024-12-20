@@ -52,5 +52,16 @@ export async function GET(req) {
     }
   }
 
+  // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+  // Verification isn't always possible, so we recommend checking the decision
+  // separately.
+  // https://docs.arcjet.com/bot-protection/reference#bot-verification
+  if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+    return NextResponse.json(
+      { error: "Forbidden", reason: decision.reason },
+      { status: 403 },
+    );
+  }
+
   return NextResponse.json({ message: "Hello world" });
 }

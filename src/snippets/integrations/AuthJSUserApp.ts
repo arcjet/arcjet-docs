@@ -66,5 +66,5 @@ export const GET = auth(async (req: any) => {
     return Response.json({ data: "Protected data" });
   }
 
-  return Response.json({ message: "Not authenticated" }, { status: 401 });
+  return Response.json({ message: "Unauthorized" }, { status: 401 });
 }) as any;

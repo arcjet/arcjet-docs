@@ -33,6 +33,10 @@ export async function POST(req) {
         { status: 403 },
       );
     } else if (decision.reason.isSpoofed()) {
+      // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+      // Verification isn't always possible, so we recommend checking the decision
+      // separately.
+      // https://docs.arcjet.com/bot-protection/reference#bot-verification
       return NextResponse.json(
         {
           error: "You are a bot!",

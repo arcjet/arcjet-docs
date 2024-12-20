@@ -47,6 +47,13 @@ const server = http.createServer(async function (
       res.writeHead(403, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Forbidden" }));
     }
+  } else if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+    // Verification isn't always possible, so we recommend checking the decision
+    // separately.
+    // https://docs.arcjet.com/bot-protection/reference#bot-verification
+    res.writeHead(403, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Forbidden" }));
   } else {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ message: "Hello world" }));

@@ -101,6 +101,15 @@ if (decision.isDenied()) {
   }
 }
 
+// Arcjet Pro plan verifies the authenticity of common bots using IP data.
+// Verification isn't always possible, so we recommend checking the decision
+// separately.
+// https://docs.arcjet.com/bot-protection/reference#bot-verification
+if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+  console.error("Spoofed bot detected", decision);
+  // Return 403
+}
+
 // Base Arcjet rules all passed, but we can do further inspection based on
 // our knowledge of our customers
 
@@ -341,6 +350,18 @@ export async function POST(request: Request) {
           { status: 403 },
         );
       }
+    }
+
+    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+    // Verification isn't always possible, so we recommend checking the decision
+    // separately.
+    // https://docs.arcjet.com/bot-protection/reference#bot-verification
+    if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+      console.error("Spoofed bot detected", decision);
+      return NextResponse.json(
+        { success: false, message: "Forbidden" },
+        { status: 403 },
+      );
     }
 
     // Base Arcjet rules all passed, but we can do further inspection based on

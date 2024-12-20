@@ -33,6 +33,10 @@ export default async function handler(
         denied: decision.reason.denied,
       });
     } else if (decision.reason.isSpoofed()) {
+      // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+      // Verification isn't always possible, so we recommend checking the decision
+      // separately.
+      // https://docs.arcjet.com/bot-protection/reference#bot-verification
       return res.status(403).json({
         error: "Forbidden",
         // Useful for debugging, but don't return these to the client in

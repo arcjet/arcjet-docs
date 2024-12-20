@@ -51,6 +51,14 @@ export async function loader(args: LoaderFunctionArgs) {
     }
   }
 
+  // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+  // Verification isn't always possible, so we recommend checking the decision
+  // separately.
+  // https://docs.arcjet.com/bot-protection/reference#bot-verification
+  if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+    throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });
+  }
+
   // We don't need to use the decision elsewhere, but you could return it to
   // the component
   return null;
