@@ -32,6 +32,11 @@ export const main = [
             attrs: { target: "_blank", class: "external-link" },
           },
           {
+            label: "Next.js Starter",
+            link: "https://github.com/ixartz/Next-js-Boilerplate",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
             label: "Next.js SaaS template",
             link: "https://www.next-forge.com/",
             attrs: { target: "_blank", class: "external-link" },
@@ -39,6 +44,11 @@ export const main = [
           {
             label: "Remix",
             link: "https://github.com/arcjet/example-remix",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
+            label: "Remix SaaS template",
+            link: "https://github.com/dev-xo/remix-saas",
             attrs: { target: "_blank", class: "external-link" },
           },
           {
