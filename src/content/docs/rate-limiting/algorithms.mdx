@@ -120,11 +120,21 @@ requests to `/api/hello` and is tracked by the client's IP address.
 
 <Code code={TokenBucket} lang="ts" />
 
-If it is `12:00:00` and a client makes 100 requests, further requests will be
-blocked until `12:01:00` when the bucket refills by 10 tokens. The client could
-then make 10 requests over the following 60 seconds. If they make no requests,
-the bucket will refill to 20 tokens at `12:02:00`. If they make no requests
-between `12:01:00` and `12:10:00` then the bucket will refill to 100 tokens at
-`12:10:00`. No further tokens will be added after it reaches 100 tokens.
+The amount of tokens to deduct from the bucket is specified when calling the
+Arcjet `protect` function. You can request any number of tokens up to the
+capacity of the bucket.
+
+```ts
+// Deduct 1 token from the bucket
+const decision = await aj.protect(req, { requested: 1 });
+```
+
+For example, if it is `12:00:00` and a client makes 100 requests each with 1
+token deducted, further requests will be blocked until `12:01:00` when the
+bucket refills by 10 tokens. The client could then make 10 requests over the
+following 60 seconds. If they make no requests, the bucket will refill to 20
+tokens at `12:02:00`. If they make no requests between `12:01:00` and `12:10:00`
+then the bucket will refill to 100 tokens at `12:10:00`. No further tokens will
+be added after it reaches 100 tokens.
 
 <Comments />
