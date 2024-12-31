@@ -19,7 +19,16 @@
 
   // Install npm dependencies within the container
   // Uses array syntax to skip the shell: https://containers.dev/implementors/json_reference/#formatting-string-vs-array-properties
-  "postCreateCommand": ["npm", "ci"]
+  "postCreateCommand": ["npm", "ci"],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "astro-build.astro-vscode",
+        "unifiedjs.vscode-mdx",
+        "trunk.io"
+      ]
+    }
+  }
 
   // Configure tool-specific properties.
   // "customizations": {},
