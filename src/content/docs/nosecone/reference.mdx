@@ -71,10 +71,115 @@ import StaticOptOut from "@/snippets/nosecone/reference/next-js/StaticOptOut.mdx
 
 <StaticOptOut />
 
+### Example configurations
+
+#### Plausible Analytics + YouTube embed
+
+This configuration applies the default Nosecone headers, but allows scripts from
+and connections to Plausible Analytics and YouTube embeds from the YouTube No
+Cookie domain ([privacy enhanced
+mode](https://support.google.com/youtube/answer/171780)).
+
+It also sets the upgrade insecure requests directive to `true` in production to
+ensure all requests are served with HTTPS.
+
+This configuration also enables the special handler for the Vercel Toolbar when
+deployed to Vercel preview environments.
+
+```ts title="middleware.ts"
+import * as nosecone from "@nosecone/next";
+
+const noseconeConfig: nosecone.NoseconeOptions = {
+  ...nosecone.defaults,
+  contentSecurityPolicy: {
+    ...nosecone.defaults.contentSecurityPolicy,
+    directives: {
+      ...nosecone.defaults.contentSecurityPolicy.directives,
+      scriptSrc: [
+        ...nosecone.defaults.contentSecurityPolicy.directives.scriptSrc,
+        "https://plausible.io", // Analytics
+      ],
+      connectSrc: [
+        ...nosecone.defaults.contentSecurityPolicy.directives.connectSrc,
+        "https://plausible.io", // Analytics
+      ],
+      // Set some URLs as `frameSrc` so don't include the default of `'none'`
+      frameSrc: ["https://www.youtube-nocookie.com"],
+      // We only set this in production because the server may be started
+      // without HTTPS
+      upgradeInsecureRequests: process.env.NODE_ENV === "production",
+    },
+  },
+  crossOriginEmbedderPolicy: {
+    // YouTube embeds are not served with the correct headers to support being
+    // loaded with any COEP other than `unsafe-none`.
+    // See:
+    // * https://issuetracker.google.com/issues/240387105
+    // * https://issuetracker.google.com/issues/351843802
+    policy: "unsafe-none",
+  },
+} as const;
+
+const noseconeMiddleware = nosecone.createMiddleware(
+  process.env.VERCEL_ENV === "preview"
+    ? nosecone.withVercelToolbar(noseconeConfig)
+    : noseconeConfig,
+);
+
+export default noseconeMiddleware;
+```
+
+#### Clerk authentication
+
+This configuration applies the default Nosecone headers, but allows scripts from
+and connections to [Clerk](https://clerk.com) for authentication.
+
+```ts title="middleware.ts"
+import * as nosecone from "@nosecone/next";
+
+const noseconeConfig: nosecone.NoseconeOptions = {
+  ...nosecone.defaults,
+  contentSecurityPolicy: {
+    ...nosecone.defaults.contentSecurityPolicy,
+    directives: {
+      ...nosecone.defaults.contentSecurityPolicy.directives,
+      scriptSrc: [
+        ...nosecone.defaults.contentSecurityPolicy.directives.scriptSrc,
+        "https://*.clerk.accounts.dev",
+      ],
+      connectSrc: [
+        ...nosecone.defaults.contentSecurityPolicy.directives.connectSrc,
+        "https://*.clerk.accounts.dev",
+        "https://clerk-telemetry.com",
+      ],
+      workerSrc: [
+        ...nosecone.defaults.contentSecurityPolicy.directives.workerSrc,
+        "blob:",
+        "https://*.clerk.accounts.dev",
+      ],
+      imgSrc: [
+        ...nosecone.defaults.contentSecurityPolicy.directives.imgSrc,
+        "https://img.clerk.com",
+      ],
+      objectSrc: [
+        ...nosecone.defaults.contentSecurityPolicy.directives.objectSrc,
+      ],
+      // We only set this in production because the server may be started
+      // without HTTPS
+      upgradeInsecureRequests: process.env.NODE_ENV === "production",
+    },
+  },
+} as const;
+
+export default nosecone.createMiddleware(noseconeConfig);
+```
+
 ### Chaining middleware
 
 If you are using multiple Next.js middleware functions, you can chain them
 together to add the security headers.
+
+#### Auth.js example
 
 This example shows how to chain Arcjet with [Auth.js](https://authjs.dev)
 middleware:
@@ -83,9 +188,22 @@ import ChainedMiddleware from "@/snippets/nosecone/reference/next-js/ChainedMidd
 
 <ChainedMiddleware />
 
+#### Multiple middleware functions
+
+If you have multiple middleware functions you will need to chain them together.
+We have written a small utility to help run different middleware for different
+paths.
+
+In [this example
+code](https://github.com/arcjet/arcjet-js/blob/121dc679c91dc6f9a6486fcad3f20013830332aa/examples/nosecone-nextjs-router/middleware.ts),
+the Nosecone middleware is run on every route path. You can add other middleware
+into the array and add more paths to run different middleware.
+
 ### Additional resources
 
 - [Next.js Content-Security-Policy guide](https://nextjs.org/docs/app/building-your-application/configuring/content-security-policy)
+- [Next Forge SaaS template security headers example](https://docs.next-forge.com/features/security/headers)
+- [Arcjet example app with Plausible analytics](https://github.com/arcjet/example-nextjs/blob/main/middleware.ts)
 
 ## SvelteKit security headers configuration
 
@@ -135,6 +253,7 @@ import SvelteKitHooks from "@/snippets/nosecone/reference/sveltekit/Hooks.mdx";
 Additional resources:
 
 - [SvelteKit CSP configuration](https://svelte.dev/docs/kit/configuration#csp)
+- [Arcjet Sveltekit Nosecone hook example](https://github.com/arcjet/arcjet-js/blob/02e4435a86b6b40b97feb369f0402b2199a4bc12/examples/sveltekit/src/hooks.server.ts#L7)
 
 ## API
 
