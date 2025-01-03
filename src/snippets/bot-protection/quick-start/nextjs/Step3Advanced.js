@@ -23,6 +23,10 @@ const aj = arcjet({
   ],
 });
 
+function isVerified(result) {
+  return result.reason.isBot() && result.reason.isVerified()
+}
+
 export default async function middleware(request) {
   const decision = await aj.protect(request);
 
@@ -35,7 +39,7 @@ export default async function middleware(request) {
   // Verification isn't always possible, so we recommend checking the decision
   // separately.
   // https://docs.arcjet.com/bot-protection/reference#bot-verification
-  if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+  if (decision.results.some(isVerified)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

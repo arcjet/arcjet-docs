@@ -5,7 +5,7 @@ const aj = arcjet({
   rules: [
     validateEmail({
       mode: "LIVE",
-      block: ["DISPOSABLE"],
+      deny: ["DISPOSABLE"],
     }),
   ],
 });
