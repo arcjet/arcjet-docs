@@ -9,6 +9,8 @@ frameworks:
   - remix
   - sveltekit
 ajToc:
+  - text: "Plan availability"
+    anchor: "plan-availability"
   - text: "Configuration"
     anchor: "configuration"
     children:
@@ -94,6 +96,7 @@ ajToc:
         anchor: "wrap-existing-handler"
 ---
 
+import { Badge } from "@astrojs/starlight/components";
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
 import Comments from "/src/components/Comments.astro";
@@ -163,6 +166,17 @@ import TokenBucketRequestSvelteKit from "@/snippets/rate-limiting/reference/svel
 
 Arcjet rate limiting allows you to define rules which limit the number of
 requests a client can make over a period of time.
+
+## Plan availability
+
+Arcjet rate limiting is available on all [pricing
+plans](https://arcjet.com/pricing).
+
+| Plan                                      | Rate limiting |
+| ----------------------------------------- | ------------- |
+| <Badge text="Free" variant="caution" />   | Yes           |
+| <Badge text="Pro" variant="note" />       | Yes           |
+| <Badge text="Enterprise" variant="tip" /> | Custom        |
 
 ## Configuration
 
