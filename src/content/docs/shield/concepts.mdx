@@ -4,6 +4,7 @@ description: "Arcjet Shield protects your application against common attacks, in
 prev: false
 ---
 
+import { Badge } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "/src/components/Comments.astro";
 
@@ -20,10 +21,13 @@ from that client are blocked for a period of time.
 
 ## Which attacks will Arcjet Shield block?
 
-Arcjet implements a variety of detection rules based on the [OWASP Core Rule
-Set](https://coreruleset.org/). This includes the [OWASP Top
-10](https://owasp.org/www-project-top-ten/) to protect against common categories
-such as:
+Arcjet implements a variety of detection rules. Basic protection from the most
+common attacks are available for all Arcjet users.
+
+{/* prettier-ignore */}
+Users on the <Badge text="Pro" variant="note" /> and <Badge text="Enterprise" variant="tip" />
+plans also get a fully-managed [OWASP Core Rule Set](https://coreruleset.org/)
+to protect against common categories such as:
 
 - SQL injection (SQLi)
 - Cross-site scripting (XSS)

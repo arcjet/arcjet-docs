@@ -10,6 +10,8 @@ frameworks:
   - remix
   - sveltekit
 ajToc:
+  - text: "Plan availability"
+    anchor: "plan-availability"
   - text: "Configuration"
     anchor: "configuration"
     children:
@@ -136,6 +138,17 @@ import SvelteKitIdentifiedBots from "@/snippets/bot-protection/reference/sveltek
 import SvelteKitPerRouteVsHooks from "@/snippets/bot-protection/reference/sveltekit/PerRouteVsHooks.mdx";
 
 Arcjet bot detection allows you to manage traffic by automated clients and bots.
+
+## Plan availability
+
+Arcjet bot detection functionality depends on your [pricing
+plan](https://arcjet.com/pricing).
+
+| Plan                                      | Bot protection                                                                 |
+| ----------------------------------------- | ------------------------------------------------------------------------------ |
+| <Badge text="Free" variant="caution" />   | Basic - user agent + IP type analysis                                          |
+| <Badge text="Pro" variant="note" />       | Advanced - IP reputation, [verification](#bot-verification), and other signals |
+| <Badge text="Enterprise" variant="tip" /> | Custom                                                                         |
 
 ## Configuration
 
@@ -342,9 +355,9 @@ their "advertising quality" bot.
 ## Bot verification
 
 Requests analyzed by Arcjet for users on the <Badge text="Pro" variant="note" />
-plan or above automatically get additional bot verification. Behind the scenes,
-Arcjet will verify the authenticity of requests from known bots using IP data
-and reverse DNS queries.
+or <Badge text="Enterprise" variant="tip" /> plans automatically get additional
+bot verification. Behind the scenes, Arcjet will verify the authenticity of
+requests from known bots using IP data and reverse DNS queries.
 
 This helps protect against spoofed bots where clients pretend to be someone
 else. For example, we can detect if a client is really Googlebot by checking if

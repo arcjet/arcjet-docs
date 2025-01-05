@@ -9,6 +9,8 @@ frameworks:
   - remix
   - sveltekit
 ajToc:
+  - text: "Plan availability"
+    anchor: "plan-availability"
   - text: "Configuration"
     anchor: "configuration"
   - text: "Pages & server actions"
@@ -29,6 +31,7 @@ ajToc:
     anchor: "testing"
 ---
 
+import { Badge } from "@astrojs/starlight/components";
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
 import Comments from "/src/components/Comments.astro";
@@ -59,6 +62,17 @@ import ErrorsSvelteKit from "@/snippets/signup-protection/reference/sveltekit/Er
 
 Arcjet signup form protection combines rate limiting, bot protection, and email
 validation to protect your signup forms from abuse.
+
+## Plan availability
+
+Arcjet signup form protection availability depends depends on your [pricing
+plan](https://arcjet.com/pricing).
+
+| Plan                                      | Signup form protection |
+| ----------------------------------------- | ---------------------- |
+| <Badge text="Free" variant="caution" />   | No                     |
+| <Badge text="Pro" variant="note" />       | Yes                    |
+| <Badge text="Enterprise" variant="tip" /> | Custom                 |
 
 ## Configuration
 
