@@ -1,19 +1,19 @@
 import SelectableContent from "@/components/SelectableContent";
 import { Code } from "@astrojs/starlight/components";
-import DecisionLogJS from "./DecisionLog.js?raw";
-import DecisionLogTS from "./DecisionLog.ts?raw";
+import DecisionLogDenyJS from "./DecisionLogDeny.js?raw";
+import DecisionLogDenyTS from "./DecisionLogDeny.ts?raw";
 
 <SelectableContent client:load syncKey="language" frameworkSwitcher>
   <div slot="TS" slotIdx="1">
     <Code
-      code={DecisionLogTS}
+      code={DecisionLogDenyTS}
       lang="ts"
       title="/src/routes/api/arcjet/+server.ts"
     />
   </div>
   <div slot="JS" slotIdx="2">
     <Code
-      code={DecisionLogJS}
+      code={DecisionLogDenyJS}
       lang="js"
       title="/src/routes/api/arcjet/+server.js"
     />
