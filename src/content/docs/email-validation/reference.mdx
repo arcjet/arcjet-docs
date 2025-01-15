@@ -27,6 +27,12 @@ import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
 import DisplayType from "@/components/DisplayType.astro";
 
+import DecisionLogAllowBun from "@/snippets/email-validation/reference/bun/DecisionLogAllow.mdx";
+import DecisionLogAllowNestJs from "@/snippets/email-validation/reference/nestjs/DecisionLogAllow.mdx";
+import DecisionLogAllowNextJs from "@/snippets/email-validation/reference/nextjs/DecisionLogAllow.mdx";
+import DecisionLogAllowNodeJs from "@/snippets/email-validation/reference/nodejs/DecisionLogAllow.mdx";
+import DecisionLogAllowRemix from "@/snippets/email-validation/reference/remix/DecisionLogAllow.mdx";
+import DecisionLogAllowSvelteKit from "@/snippets/email-validation/reference/sveltekit/DecisionLogAllow.mdx";
 import DecisionLogDenyBun from "@/snippets/email-validation/reference/bun/DecisionLogDeny.mdx";
 import DecisionLogDenyNestJs from "@/snippets/email-validation/reference/nestjs/DecisionLogDeny.mdx";
 import DecisionLogDenyNextJs from "@/snippets/email-validation/reference/nextjs/DecisionLogDeny.mdx";
@@ -134,6 +140,21 @@ This example will log the full result as well as the email validation rule:
   <DecisionLogDenyNodeJs slot="node-js" />
   <DecisionLogDenyRemix slot="remix" />
   <DecisionLogDenySvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+
+## Allowing specific email types
+
+In addition to being able to deny specific email types, you can also configure 
+Arcjet to only allow specific email types and all other types will be blocked.
+
+<SlotByFramework client:load>
+  <DecisionLogAllowBun slot="bun" />
+  <DecisionLogAllowNestJs slot="nest-js" />
+  <DecisionLogAllowNextJs slot="next-js" />
+  <DecisionLogAllowNodeJs slot="node-js" />
+  <DecisionLogAllowRemix slot="remix" />
+  <DecisionLogAllowSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
 ## Checking the email type
