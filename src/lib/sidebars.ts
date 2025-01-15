@@ -4,6 +4,16 @@ export const main = [
     link: "/get-started",
   },
   {
+    label: "Changelog",
+    collapsed: false,
+    items: [
+      {
+        label: "JavaScript beta migration",
+        link: "/changelog/js-beta-migration",
+      },
+    ],
+  },
+  {
     label: "Examples",
     collapsed: false,
     items: [
