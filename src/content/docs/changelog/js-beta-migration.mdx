@@ -1,0 +1,86 @@
+---
+title: "JavaScript Beta Migration"
+description: "Migration guide for Arcjet users who are upgrading from the alpha releases of the JavaScript SDK to the beta release."
+prev: false
+next: false
+---
+
+import Comments from "/src/components/Comments.astro";
+
+We are delighted to announce that we have made our first beta release of the Arcjet
+JavaScript SDK. With this release we have decided to make a number of deprecations.
+
+We have not made any breaking changes with this release, however we recommend following
+this migration guide to avoid having to make further breaking changes in the future.
+
+## Block is now deny for the `validateEmail` rule
+
+When configuring the validateEmail rule we have renamed the block option to deny.
+
+```
+validateEmail({
+  mode: "LIVE",
+  // replace block with deny as shown
+  // block: ["DISPOSABLE"],
+  deny: ["DISPOSABLE"],
+})
+```
+
+It is now also possible to configure email types to allow. In the below example,
+only email addresses from free email providers will be allowed.
+
+```
+validateEmail({
+  mode: "LIVE",
+  allow: ["FREE"],
+})
+```
+
+## ArcjetEnum objects are now deprecated
+
+In earlier versions of the SDK we provided enum objects for configuring your rules,
+however these have been deprecated in favor of string-type enums.
+
+The table below shows which enums you should replace and their equivalent strings.
+
+| alpha                                      | beta                |
+|--------------------------------------------|---------------------|
+| ArcjetMode.LIVE                            | "LIVE"              |
+| ArcjetMode.DRY_RUN                         | "DRY_RUN"           |
+| ArcjetRateLimitAlgorith.TOKEN_BUCKET       | "TOKEN_BUCKET"      |
+| ArcjetRateLimitAlgorith.FIXED_WINDOW       | "FIXED_WINDOW"      |
+| ArcjetRateLimitAlgorith.SLIDING_WINDOW     | "SLIDING_WINDOW"    |
+| ArcjetEmailType.DISPOSABLE                 | "DISPOSABLE"        |
+| ArcjetEmailType.FREE                       | "FREE"              |
+| ArcjetEmailType.NO_MX_RECORDS              | "NO_MX_RECORDS"     |
+| ArcjetEmailType.NO_GRAVATAR                | "NO_GRAVATAR"       |
+| ArcjetEmailType.INVALID                    | "INVALID"           |
+| ArcjetStack.NODEJS                         | "NODEJS"            |
+| ArcjetStack.NEXTJS                         | "NEXTJS"            |
+| ArcjetStack.BUN                            | "BUN"               |
+| ArcjetStack.SVELTEKIT                      | "SVELTEKIT"         |
+| ArcjetStack.DENO                           | "DENO"              |
+| ArcjetStack.NESTJS                         | "NESTJS"            |
+| ArcjetStack.REMIX                          | "REMIX"             |
+| ArcjetRuleState.RUN                        | "RUN"               |
+| ArcjetRuleState.NOT_RUN                    | "NOT_RUN"           |
+| ArcjetRuleState.CACHED                     | "CACHED"            |
+| ArcjetRuleState.DRY_RUN                    | "DRY_RUN"           |
+| ArcjetConclusion.ALLOW                     | "ALLOW"             |
+| ArcjetConclusion.DENY                      | "DENY"              |
+| ArcjetConclusion.CHALLENGE                 | "CHALLENGE"         |
+| ArcjetConclusion.ERROR                     | "ERROR"             |
+| ArcjetSensitiveInfoType.EMAIL              | "EMAIL"             |
+| ArcjetSensitiveInfoType.PHONE_NUMBER       | "PHONE_NUMBER"      |
+| ArcjetSensitiveInfoType.IP_ADDRESS         | "IP_ADDRESS"        |
+| ArcjetSensitiveInfoType.CREDIT_CARD_NUMBER | "CREDIT_CARD_NUMBER"|
+| ArcjetRuleType.LOCAL                       | "LOCAL"             |
+| ArcjetRuleType.REMOTE                      | "REMOTE"            |
+
+## Wasm loading has moved to `@arcjet/analyze-wasm`
+
+We have moved the responsibility for loading wasm on your target platform from
+`@arcjet/analyze` to `@arcjet/analyze-wasm`. This should not affect users who
+were using the SDK through the high level adapters as documented.
+
+<Comments />
