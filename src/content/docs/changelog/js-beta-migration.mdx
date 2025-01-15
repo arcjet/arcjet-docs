@@ -10,8 +10,9 @@ import Comments from "/src/components/Comments.astro";
 We are delighted to announce that we have made our first beta release of the Arcjet
 JavaScript SDK. With this release we have decided to make a number of deprecations.
 
-We have not made any breaking changes with this release, however we recommend following
-this migration guide to avoid having to make further breaking changes in the future.
+We've made some breaking changes but they would only prevent a tiny subset of users from
+upgrading, however the majority of the changers are deprecations which we recommend following
+to avoid having to make further breaking changes in the future.
 
 ## Block is now deny for the `validateEmail` rule
 
@@ -76,6 +77,32 @@ The table below shows which enums you should replace and their equivalent string
 | ArcjetSensitiveInfoType.CREDIT_CARD_NUMBER | "CREDIT_CARD_NUMBER"|
 | ArcjetRuleType.LOCAL                       | "LOCAL"             |
 | ArcjetRuleType.REMOTE                      | "REMOTE"            |
+
+## Handling of url-encoded data in sensitive info detection
+
+The sensitive information detection and redaction SDK now handles both raw
+and URL-encoded data simultaneously. This dual processing approach ensures
+comprehensive detection, particularly for content containing the + character,
+which serves both as a literal plus sign (common in phone numbers) and as an
+encoded space in URLs.
+
+### Impact on custom detection
+When implementing custom detection functions on data containing + characters,
+you may observe duplicate token matches across different processing windows.
+This occurs because the system analyzes the input in two ways:
+
+- With + interpreted as a literal plus sign
+- With + decoded as a space character
+
+For example:
+
+```
+# Input: "phone+number+123"
+# Processed as both:
+# - "phone+number+123"
+# - "phone number 123"
+```
+
 
 ## Wasm loading has moved to `@arcjet/analyze-wasm`
 
