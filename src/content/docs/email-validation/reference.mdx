@@ -9,6 +9,8 @@ frameworks:
   - remix
   - sveltekit
 ajToc:
+  - text: "Plan availability"
+    anchor: "plan-availability"
   - text: "Configuration"
     anchor: "configuration"
   - text: "Pages & server actions"
@@ -22,7 +24,7 @@ ajToc:
     anchor: "testing"
 ---
 
-import { Aside } from "@astrojs/starlight/components";
+import { Aside, Badge } from "@astrojs/starlight/components";
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
 import DisplayType from "@/components/DisplayType.astro";
@@ -52,6 +54,17 @@ import Comments from "/src/components/Comments.astro";
 Arcjet allows you validate & verify an email address. This is useful for
 preventing users from signing up with fake email addresses and can significantly
 reduce the amount of spam or fraudulent accounts.
+
+## Plan availability
+
+Arcjet email validation availability depends depends on your [pricing
+plan](https://arcjet.com/pricing).
+
+| Plan                                      | Email validation |
+| ----------------------------------------- | ---------------- |
+| <Badge text="Free" variant="caution" />   | No               |
+| <Badge text="Pro" variant="note" />       | Yes              |
+| <Badge text="Enterprise" variant="tip" /> | Custom           |
 
 ## Configuration
 

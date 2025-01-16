@@ -255,6 +255,21 @@ export const main = [
         ],
       },
       {
+        label: "Upgrading",
+        collapsed: true,
+        items: [
+          {
+            label: "SDK migration",
+            link: "/upgrading/sdk-migration",
+          },
+          {
+            label: "Changelog",
+            link: "https://blog.arcjet.com/tag/changelog/",
+            attrs: { target: "_blank", class: "external-link" },
+          }
+        ],
+      },
+      {
         label: "Troubleshooting",
         link: "/troubleshooting",
       },
@@ -365,11 +380,6 @@ export const main = [
     label: "Info",
     collapsed: false,
     items: [
-      {
-        label: "Changelog",
-        link: "https://blog.arcjet.com/tag/changelog/",
-        attrs: { target: "_blank", class: "external-link" },
-      },
       {
         label: "Security",
         link: "/security",
