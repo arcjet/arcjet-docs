@@ -1,6 +1,6 @@
 ---
 title: "Shield quick start"
-description: "Quick start guide for adding protection to your Next.js, Node.js, Bun, Remix, or SvelteKit app with Arcjet Shield."
+description: "Quick start guide for adding protection to your Next.js, Node.js, Bun, Remix, or SvelteKit app with Arcjet Shield WAF."
 frameworks:
   - bun
   - nest-js
@@ -68,8 +68,8 @@ import Step3SvelteKit from "@/snippets/shield/quick-start/sveltekit/Step3.mdx";
 import Step4SvelteKit from "@/snippets/shield/quick-start/sveltekit/Step4.mdx";
 import Step5SvelteKit from "@/snippets/shield/quick-start/sveltekit/Step5.mdx";
 
-Arcjet Shield protects your application against common attacks, including the
-[OWASP Top 10](https://owasp.org/www-project-top-ten/).
+Arcjet Shield WAF protects your application against common attacks, including
+the [OWASP Top 10](https://owasp.org/www-project-top-ten/).
 
 <WhatIsArcjet />
 
@@ -128,10 +128,10 @@ project root.
 
 ### 5. Simulate a suspicious request
 
-To see Arcjet Shield in action, try making a request with the special header
+To see Arcjet Shield WAF in action, try making a request with the special header
 `x-arcjet-suspicious` set to `true`. After 5 requests, Arcjet Shield will be
-triggered and will block the request. This simulates the threshold being
-reached and is a constant, so you can use it as part of your tests.
+triggered and will block the request. This simulates the threshold being reached
+and is a constant, so you can use it as part of your tests.
 
 <SlotByFramework client:load>
   <Step5Bun slot="bun" />
@@ -159,7 +159,7 @@ protection.
   <LinkCard
     title="Bot protection reference"
     href="/shield/reference"
-    description="Full details about Arcjet shield."
+    description="Full details about Arcjet shield WAF."
   ></LinkCard>
   <LinkCard
     title="Testing"
