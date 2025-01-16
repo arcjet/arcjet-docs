@@ -1,13 +1,14 @@
 import arcjet, { shield, validateEmail } from "@arcjet/remix";
+import type { ActionFunctionArgs } from "@remix-run/node";
 
 const aj = arcjet({
   // Get your site key from https://app.arcjet.com and set it as an environment
   // variable rather than hard coding.
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   rules: [
     validateEmail({
       mode: "LIVE",
-      block: ["DISPOSABLE"],
+      allow: ["DISPOSABLE"],
     }),
     shield({
       mode: "LIVE",
@@ -15,7 +16,7 @@ const aj = arcjet({
   ],
 });
 
-export async function action(args) {
+export async function action(args: ActionFunctionArgs) {
   // The request body is a FormData object
   //const formData = await args.request.formData();
   //const email = formData.get("email") as string;

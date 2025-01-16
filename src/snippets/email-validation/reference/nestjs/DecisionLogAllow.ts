@@ -53,7 +53,7 @@ export class SignupController {
   constructor(
     private readonly signupService: SignupService,
     @Inject(ARCJET) private readonly arcjet: ArcjetNest,
-  ) {}
+  ) { }
 
   // Implement a form handler following
   // https://docs.nestjs.com/techniques/file-upload#no-files. Note this isn't
@@ -74,7 +74,7 @@ export class SignupController {
         validateEmail({
           mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
           // block disposable, invalid, and email addresses with no MX records
-          block: ["DISPOSABLE", "INVALID", "NO_MX_RECORDS"],
+          allow: ["DISPOSABLE", "INVALID", "NO_MX_RECORDS"],
         }),
       )
       .protect(req, { email: body.email });

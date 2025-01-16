@@ -1,11 +1,12 @@
 import arcjet, { detectBot, validateEmail } from "@arcjet/next";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY,
+  key: process.env.ARCJET_KEY!,
   rules: [
     validateEmail({
       mode: "LIVE",
-      block: ["DISPOSABLE"],
+      deny: ["DISPOSABLE"],
     }),
     detectBot({
       mode: "LIVE",
@@ -14,9 +15,13 @@ const aj = arcjet({
   ],
 });
 
-export default async function handler(req, res) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   const decision = await aj.protect(req, {
     // The email prop is required when a validateEmail rule is configured.
+    // TypeScript will guide you based on the configured rules
     email: "test@0zc7eznv3rsiswlohu.tk",
   });
 

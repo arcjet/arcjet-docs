@@ -1,13 +1,12 @@
-import { env } from "$env/dynamic/private";
-import arcjet, { detectBot, validateEmail } from "@arcjet/sveltekit";
-import { error, json, type RequestEvent } from "@sveltejs/kit";
+import arcjet, { validateEmail, detectBot } from "@arcjet/next";
+import { NextResponse } from "next/server";
 
 const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY!,
   rules: [
     validateEmail({
       mode: "LIVE",
-      block: ["DISPOSABLE"],
+      allow: ["DISPOSABLE"],
     }),
     detectBot({
       mode: "LIVE",
@@ -16,8 +15,8 @@ const aj = arcjet({
   ],
 });
 
-export async function POST(event: RequestEvent) {
-  const decision = await aj.protect(event, {
+export async function POST(req: Request) {
+  const decision = await aj.protect(req, {
     // The email prop is required when a validateEmail rule is configured.
     // TypeScript will guide you based on the configured rules
     email: "test@0zc7eznv3rsiswlohu.tk",
@@ -32,8 +31,10 @@ export async function POST(event: RequestEvent) {
   }
 
   if (decision.isDenied()) {
-    return error(403, "Forbidden");
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  return json({ message: "Hello world" });
+  return NextResponse.json({
+    message: "Hello world",
+  });
 }

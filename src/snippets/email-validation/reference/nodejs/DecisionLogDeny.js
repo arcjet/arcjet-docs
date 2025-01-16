@@ -1,4 +1,4 @@
-import arcjet, { validateEmail } from "@arcjet/node";
+import arcjet, { detectBot, validateEmail } from "@arcjet/node";
 import express from "express";
 
 const app = express();
@@ -12,26 +12,34 @@ const aj = arcjet({
   key: process.env.ARCJET_KEY,
   rules: [
     validateEmail({
-      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-      deny: ["NO_MX_RECORDS"], // block email addresses with no MX records
+      mode: "LIVE",
+      deny: ["DISPOSABLE"],
+    }),
+    detectBot({
+      mode: "LIVE",
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });
 
 app.post("/", async (req, res) => {
-  console.log("Email received: ", req.body.email);
+  //const email = req.body.email;
+  const email = "test@0zc7eznv3rsiswlohu.tk"; // Disposable email for demo
+  console.log("Email received: ", email);
 
-  const decision = await aj.protect(req, {
-    email: req.body.email,
-  });
+  const decision = await aj.protect(req, { email });
   console.log("Arcjet decision", decision);
 
-  if (decision.isErrored()) {
-    // Fail open by logging the error and continuing
-    console.warn("Arcjet error", decision.reason.message);
-    // You could also fail closed here for very sensitive routes
-    //res.writeHead(503, { "Content-Type": "application/json" });
-    //res.end(JSON.stringify({ error: "Service unavailable" }));
+  for (const result of decision.results) {
+    console.log("Rule Result", result);
+
+    if (result.reason.isEmail()) {
+      console.log("Email rule", result);
+    }
+
+    if (result.reason.isBot()) {
+      console.log("Bot protection rule", result);
+    }
   }
 
   if (decision.isDenied()) {
@@ -39,7 +47,7 @@ app.post("/", async (req, res) => {
     res.end(JSON.stringify({ error: "Forbidden" }));
   } else {
     res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ message: "Hello World", email: req.body.email }));
+    res.end(JSON.stringify({ message: "Hello World", email }));
   }
 });
 

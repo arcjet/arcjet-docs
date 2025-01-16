@@ -1,4 +1,4 @@
-import arcjet, { detectBot } from "@arcjet/node";
+import arcjet, { ArcjetRuleResult, detectBot } from "@arcjet/node";
 import http from "node:http";
 
 const aj = arcjet({
@@ -18,7 +18,11 @@ const aj = arcjet({
   ],
 });
 
-const server = http.createServer(async function (
+function isVerified(result: ArcjetRuleResult) {
+  return result.reason.isBot() && result.reason.isVerified()
+}
+
+const server = http.createServer(async function(
   req: http.IncomingMessage,
   res: http.ServerResponse,
 ) {
@@ -36,7 +40,7 @@ const server = http.createServer(async function (
   // Verification isn't always possible, so we recommend checking the decision
   // separately.
   // https://docs.arcjet.com/bot-protection/reference#bot-verification
-  if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+  if (decision.results.some(isVerified)) {
     res.writeHead(403, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "Forbidden" }));
     return;

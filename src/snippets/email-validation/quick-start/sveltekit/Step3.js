@@ -8,7 +8,7 @@ const aj = arcjet({
     validateEmail({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
       // block disposable, invalid, and email addresses with no MX records
-      block: ["DISPOSABLE", "INVALID", "NO_MX_RECORDS"],
+      deny: ["DISPOSABLE", "INVALID", "NO_MX_RECORDS"],
     }),
   ],
 });

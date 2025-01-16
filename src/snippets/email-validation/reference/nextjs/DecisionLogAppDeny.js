@@ -1,4 +1,4 @@
-import arcjet, { validateEmail } from "@arcjet/next";
+import arcjet, { validateEmail, detectBot } from "@arcjet/next";
 import { NextResponse } from "next/server";
 
 const aj = arcjet({
@@ -7,6 +7,10 @@ const aj = arcjet({
     validateEmail({
       mode: "LIVE",
       deny: ["DISPOSABLE"],
+    }),
+    detectBot({
+      mode: "LIVE",
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });
@@ -17,22 +21,16 @@ export async function POST(req) {
     email: "test@0zc7eznv3rsiswlohu.tk",
   });
 
-  if (decision.isErrored()) {
-    // Fail open by logging the error and continuing
-    console.warn("Arcjet error", decision.reason.message);
-    // You could also fail closed here for very sensitive routes
-    //return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
+  for (const result of decision.results) {
+    console.log("Rule Result", result);
+
+    if (result.reason.isEmail()) {
+      console.log("Email rule", result);
+    }
   }
 
   if (decision.isDenied()) {
-    return NextResponse.json(
-      {
-        error: "Forbidden",
-      },
-      {
-        status: 403,
-      },
-    );
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   return NextResponse.json({

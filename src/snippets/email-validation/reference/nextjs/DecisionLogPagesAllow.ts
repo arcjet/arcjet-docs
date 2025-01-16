@@ -1,13 +1,16 @@
-import arcjet, { validateEmail } from "@arcjet/next";
+import arcjet, { detectBot, validateEmail } from "@arcjet/next";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY!,
   rules: [
     validateEmail({
-      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-      // block disposable, invalid, and email addresses with no MX records
-      deny: ["DISPOSABLE", "INVALID", "NO_MX_RECORDS"],
+      mode: "LIVE",
+      allow: ["DISPOSABLE"],
+    }),
+    detectBot({
+      mode: "LIVE",
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });
@@ -21,6 +24,14 @@ export default async function handler(
     // TypeScript will guide you based on the configured rules
     email: "test@0zc7eznv3rsiswlohu.tk",
   });
+
+  for (const result of decision.results) {
+    console.log("Rule Result", result);
+
+    if (result.reason.isEmail()) {
+      console.log("Email rule", result);
+    }
+  }
 
   if (decision.isDenied()) {
     return res

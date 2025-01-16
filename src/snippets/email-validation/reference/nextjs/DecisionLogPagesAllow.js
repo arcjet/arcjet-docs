@@ -1,11 +1,15 @@
-import arcjet, { validateEmail } from "@arcjet/next";
+import arcjet, { detectBot, validateEmail } from "@arcjet/next";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY,
   rules: [
     validateEmail({
       mode: "LIVE",
-      deny: ["DISPOSABLE"],
+      allow: ["DISPOSABLE"],
+    }),
+    detectBot({
+      mode: "LIVE",
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });
@@ -16,11 +20,12 @@ export default async function handler(req, res) {
     email: "test@0zc7eznv3rsiswlohu.tk",
   });
 
-  if (decision.isErrored()) {
-    // Fail open by logging the error and continuing
-    console.warn("Arcjet error", decision.reason.message);
-    // You could also fail closed here for very sensitive routes
-    //return res.status(503).json({ error: "Service unavailable" });
+  for (const result of decision.results) {
+    console.log("Rule Result", result);
+
+    if (result.reason.isEmail()) {
+      console.log("Email rule", result);
+    }
   }
 
   if (decision.isDenied()) {

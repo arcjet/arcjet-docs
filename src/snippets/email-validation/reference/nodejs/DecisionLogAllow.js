@@ -9,11 +9,11 @@ app.use(express.urlencoded({ extended: false }));
 const aj = arcjet({
   // Get your site key from https://app.arcjet.com and set it as an environment
   // variable rather than hard coding.
-  key: process.env.ARCJET_KEY!,
+  key: process.env.ARCJET_KEY,
   rules: [
     validateEmail({
       mode: "LIVE",
-      block: ["DISPOSABLE"],
+      allow: ["DISPOSABLE"],
     }),
     detectBot({
       mode: "LIVE",

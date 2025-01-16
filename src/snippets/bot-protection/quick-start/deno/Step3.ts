@@ -1,6 +1,6 @@
 import "jsr:@std/dotenv/load";
 
-import arcjet, { detectBot } from "@arcjet/deno";
+import arcjet, { ArcjetRuleResult, detectBot } from "@arcjet/deno";
 
 const aj = arcjet({
   key: Deno.env.get("ARCJET_KEY")!, // Get your site key from https://app.arcjet.com
@@ -19,6 +19,10 @@ const aj = arcjet({
   ],
 });
 
+function isVerified(result: ArcjetRuleResult) {
+  return result.reason.isBot() && result.reason.isVerified()
+}
+
 Deno.serve(
   { port: 3000 },
   aj.handler(async (req) => {
@@ -33,7 +37,7 @@ Deno.serve(
     // Verification isn't always possible, so we recommend checking the decision
     // separately.
     // https://docs.arcjet.com/bot-protection/reference#bot-verification
-    if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+    if (decision.results.some(isVerified)) {
       return new Response("Forbidden", { status: 403 });
     }
 

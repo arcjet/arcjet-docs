@@ -1,14 +1,17 @@
 import { env } from "$env/dynamic/private";
-import arcjet, { validateEmail } from "@arcjet/sveltekit";
+import arcjet, { detectBot, validateEmail } from "@arcjet/sveltekit";
 import { error, json, type RequestEvent } from "@sveltejs/kit";
 
 const aj = arcjet({
   key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
   rules: [
     validateEmail({
-      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-      // block disposable, invalid, and email addresses with no MX records
-      deny: ["DISPOSABLE", "INVALID", "NO_MX_RECORDS"],
+      mode: "LIVE",
+      deny: ["DISPOSABLE"],
+    }),
+    detectBot({
+      mode: "LIVE",
+      allow: [], // "allow none" will block all detected bots
     }),
   ],
 });
@@ -19,6 +22,14 @@ export async function POST(event: RequestEvent) {
     // TypeScript will guide you based on the configured rules
     email: "test@0zc7eznv3rsiswlohu.tk",
   });
+
+  for (const result of decision.results) {
+    console.log("Rule Result", result);
+
+    if (result.reason.isEmail()) {
+      console.log("Email rule", result);
+    }
+  }
 
   if (decision.isDenied()) {
     return error(403, "Forbidden");

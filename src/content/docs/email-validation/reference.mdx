@@ -29,12 +29,18 @@ import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
 import DisplayType from "@/components/DisplayType.astro";
 
-import DecisionLogBun from "@/snippets/email-validation/reference/bun/DecisionLog.mdx";
-import DecisionLogNestJs from "@/snippets/email-validation/reference/nestjs/DecisionLog.mdx";
-import DecisionLogNextJs from "@/snippets/email-validation/reference/nextjs/DecisionLog.mdx";
-import DecisionLogNodeJs from "@/snippets/email-validation/reference/nodejs/DecisionLog.mdx";
-import DecisionLogRemix from "@/snippets/email-validation/reference/remix/DecisionLog.mdx";
-import DecisionLogSvelteKit from "@/snippets/email-validation/reference/sveltekit/DecisionLog.mdx";
+import DecisionLogAllowBun from "@/snippets/email-validation/reference/bun/DecisionLogAllow.mdx";
+import DecisionLogAllowNestJs from "@/snippets/email-validation/reference/nestjs/DecisionLogAllow.mdx";
+import DecisionLogAllowNextJs from "@/snippets/email-validation/reference/nextjs/DecisionLogAllow.mdx";
+import DecisionLogAllowNodeJs from "@/snippets/email-validation/reference/nodejs/DecisionLogAllow.mdx";
+import DecisionLogAllowRemix from "@/snippets/email-validation/reference/remix/DecisionLogAllow.mdx";
+import DecisionLogAllowSvelteKit from "@/snippets/email-validation/reference/sveltekit/DecisionLogAllow.mdx";
+import DecisionLogDenyBun from "@/snippets/email-validation/reference/bun/DecisionLogDeny.mdx";
+import DecisionLogDenyNestJs from "@/snippets/email-validation/reference/nestjs/DecisionLogDeny.mdx";
+import DecisionLogDenyNextJs from "@/snippets/email-validation/reference/nextjs/DecisionLogDeny.mdx";
+import DecisionLogDenyNodeJs from "@/snippets/email-validation/reference/nodejs/DecisionLogDeny.mdx";
+import DecisionLogDenyRemix from "@/snippets/email-validation/reference/remix/DecisionLogDeny.mdx";
+import DecisionLogDenySvelteKit from "@/snippets/email-validation/reference/sveltekit/DecisionLogDeny.mdx";
 import ErrorsBun from "@/snippets/email-validation/reference/bun/Errors.mdx";
 import ErrorsNestJs from "@/snippets/email-validation/reference/nestjs/Errors.mdx";
 import ErrorsNextJs from "@/snippets/email-validation/reference/nextjs/Errors.mdx";
@@ -62,8 +68,8 @@ plan](https://arcjet.com/pricing).
 
 ## Configuration
 
-Email validation is configured by specifying the email types you wish to block
-and whether you wish to modify certain validation options.
+Email validation is configured by specifying the email types you wish to allow
+or deny, and whether you wish to modify certain validation options.
 
 The `arcjet` client can be configured with one or more Email validation rules,
 which are constructed with the `validateEmail(options: EmailOptions)` function
@@ -79,8 +85,10 @@ and configured by `EmailOptions`:
   [decision](#decision) below for details of examining the execution results.
 </Aside>
 
-Which email types to block is configured by listing the types in the
-configuration block.
+The `allow`and `deny` lists are mutually-exclusive, such that using `allow` will
+result in a `DENY` decision for any email type that is not specified in the
+`allow` list and using `deny` will result in an `ALLOW` decision for any email
+type that is not specified in the `deny` list.
 
 The validation options can usually be left as the defaults. However, if you wish
 to allow certain types of email addresses, you can modify the options:
@@ -139,12 +147,27 @@ for (const result of decision.results) {
 This example will log the full result as well as the email validation rule:
 
 <SlotByFramework client:load>
-  <DecisionLogBun slot="bun" />
-  <DecisionLogNestJs slot="nest-js" />
-  <DecisionLogNextJs slot="next-js" />
-  <DecisionLogNodeJs slot="node-js" />
-  <DecisionLogRemix slot="remix" />
-  <DecisionLogSvelteKit slot="sveltekit" />
+  <DecisionLogDenyBun slot="bun" />
+  <DecisionLogDenyNestJs slot="nest-js" />
+  <DecisionLogDenyNextJs slot="next-js" />
+  <DecisionLogDenyNodeJs slot="node-js" />
+  <DecisionLogDenyRemix slot="remix" />
+  <DecisionLogDenySvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+
+## Allowing specific email types
+
+In addition to being able to deny specific email types, you can also configure 
+Arcjet to only allow specific email types and all other types will be blocked.
+
+<SlotByFramework client:load>
+  <DecisionLogAllowBun slot="bun" />
+  <DecisionLogAllowNestJs slot="nest-js" />
+  <DecisionLogAllowNextJs slot="next-js" />
+  <DecisionLogAllowNodeJs slot="node-js" />
+  <DecisionLogAllowRemix slot="remix" />
+  <DecisionLogAllowSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
 ## Checking the email type

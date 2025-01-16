@@ -2,11 +2,11 @@ import arcjet, { detectBot, validateEmail } from "@arcjet/bun";
 import { env } from "bun";
 
 const aj = arcjet({
-  key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
   rules: [
     validateEmail({
       mode: "LIVE",
-      block: ["DISPOSABLE"],
+      allow: ["DISPOSABLE"],
     }),
     detectBot({
       mode: "LIVE",
@@ -20,6 +20,7 @@ export default {
   fetch: aj.handler(async (req) => {
     const decision = await aj.protect(req, {
       // The email prop is required when a validateEmail rule is configured.
+      // TypeScript will guide you based on the configured rules
       email: "test@0zc7eznv3rsiswlohu.tk",
     });
 

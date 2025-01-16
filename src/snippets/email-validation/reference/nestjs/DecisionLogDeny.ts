@@ -1,4 +1,9 @@
-import { ARCJET, type ArcjetNest, validateEmail } from "@arcjet/nest";
+import {
+  ARCJET,
+  type ArcjetNest,
+  detectBot,
+  validateEmail,
+} from "@arcjet/nest";
 import {
   Body,
   Controller,
@@ -58,6 +63,14 @@ export class SignupController {
   async index(@Req() req: Request, @Body() body: SignupDto) {
     const decision = await this.arcjet
       .withRule(
+        detectBot({
+          mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+          // configured with a list of bots to allow from
+          // https://arcjet.com/bot-list
+          allow: [], // blocks all automated clients
+        }),
+      )
+      .withRule(
         validateEmail({
           mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
           // block disposable, invalid, and email addresses with no MX records
@@ -68,6 +81,18 @@ export class SignupController {
 
     this.logger.log(`Arcjet: id = ${decision.id}`);
     this.logger.log(`Arcjet: decision = ${decision.conclusion}`);
+
+    for (const result of decision.results) {
+      this.logger.log("Rule Result", result);
+
+      if (result.reason.isBot()) {
+        this.logger.log("Bot protection rule", result);
+      }
+
+      if (result.reason.isEmail()) {
+        this.logger.log("Email validation rule", result);
+      }
+    }
 
     if (decision.isDenied()) {
       if (decision.reason.isEmail()) {
@@ -93,19 +118,6 @@ export class SignupController {
         throw new HttpException(`Error: ${message}`, HttpStatus.BAD_REQUEST);
       } else {
         throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
-      }
-    } else if (decision.isErrored()) {
-      if (decision.reason.message.includes("missing User-Agent header")) {
-        // Requests without User-Agent headers can not be identified as any
-        // particular bot and will be marked as an errored decision. Most
-        // legitimate clients always send this header, so we recommend blocking
-        // requests without it.
-        this.logger.warn("User-Agent header is missing");
-        throw new HttpException("Bad request", HttpStatus.BAD_REQUEST);
-      } else {
-        // Fail open to prevent an Arcjet error from blocking all requests. You
-        // may want to fail closed if this controller is very sensitive
-        this.logger.error(`Arcjet error: ${decision.reason.message}`);
       }
     }
 
