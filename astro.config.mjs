@@ -1,11 +1,12 @@
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
-import vercelStatic from "@astrojs/vercel/static";
+import vercelStatic from "@astrojs/vercel";
 import { ExpressiveCodeTheme } from "astro-expressive-code";
 import robotsTxt from "astro-robots-txt";
 import { defineConfig } from "astro/config";
 import starlightLinksValidator from "starlight-links-validator";
 import { main as sidebar } from "/src/lib/sidebars";
+import { CopyFilesPlugin } from "./copy-files.ts";
 
 const jsoncString = fs.readFileSync(
   new URL(`./src/lib/code-dark.json`, import.meta.url),
@@ -86,6 +87,7 @@ export default defineConfig({
       },
     }),
     react(),
+    CopyFilesPlugin(),
   ],
   // External redirects go in /vercel.json
   redirects: {
