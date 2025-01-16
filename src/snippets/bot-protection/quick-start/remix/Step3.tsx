@@ -1,4 +1,4 @@
-import arcjet, { detectBot } from "@arcjet/remix";
+import arcjet, { ArcjetRuleResult, detectBot } from "@arcjet/remix";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 
 const aj = arcjet({

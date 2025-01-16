@@ -1,4 +1,4 @@
-import arcjet, { detectBot } from "@arcjet/next";
+import arcjet, { ArcjetRuleResult, detectBot } from "@arcjet/next";
 import { NextRequest, NextResponse } from "next/server";
 
 export const config = {

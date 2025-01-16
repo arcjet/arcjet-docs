@@ -1,4 +1,4 @@
-import arcjet, { detectBot } from "@arcjet/node";
+import arcjet, { ArcjetRuleResult, detectBot } from "@arcjet/node";
 import http from "node:http";
 
 const aj = arcjet({
