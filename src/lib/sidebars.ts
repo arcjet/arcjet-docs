@@ -4,16 +4,6 @@ export const main = [
     link: "/get-started",
   },
   {
-    label: "Changelog",
-    collapsed: false,
-    items: [
-      {
-        label: "JavaScript beta migration",
-        link: "/changelog/js-beta-migration",
-      },
-    ],
-  },
-  {
     label: "Examples",
     collapsed: false,
     items: [
@@ -265,6 +255,21 @@ export const main = [
         ],
       },
       {
+        label: "Upgrading",
+        collapsed: true,
+        items: [
+          {
+            label: "SDK migration",
+            link: "/upgrading/sdk-migration",
+          },
+          {
+            label: "Changelog",
+            link: "https://blog.arcjet.com/tag/changelog/",
+            attrs: { target: "_blank", class: "external-link" },
+          }
+        ],
+      },
+      {
         label: "Troubleshooting",
         link: "/troubleshooting",
       },
@@ -375,11 +380,6 @@ export const main = [
     label: "Info",
     collapsed: false,
     items: [
-      {
-        label: "Changelog",
-        link: "https://blog.arcjet.com/tag/changelog/",
-        attrs: { target: "_blank", class: "external-link" },
-      },
       {
         label: "Security",
         link: "/security",

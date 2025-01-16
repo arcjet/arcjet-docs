@@ -1,0 +1,171 @@
+---
+title: "SDK migration"
+description: "Migration guide for Arcjet users who are upgrading the Arcjet SDK."
+prev: false
+next: false
+---
+
+import Comments from "/src/components/Comments.astro";
+
+Our philosophy around major SDK version upgrades is to avoid breaking changes
+where possible. When they are necessary, we will deprecate rather than break,
+and provide a clear migration path that will remain supported for some time.
+
+This page documents breaking changes and migrations between SDK releases.
+
+## Arcjet JS SDK 1.0.0 beta 1
+
+The
+[`1.0.0-beta-1`](https://github.com/arcjet/arcjet-js/releases/tag/v1.0.0-beta.1)
+version of the Arcjet JS SDK was released on 2025-01-15 and includes the
+following breaking changes.
+
+### `block` is now `deny` for `validateEmail` rules
+
+When configuring the `validateEmail` rule we have renamed the `block` option to
+`deny`. This follows the same API design as the other rules.
+
+```ts
+validateEmail({
+  mode: "LIVE",
+  // replace block with deny as shown
+  // block: ["DISPOSABLE"],
+  deny: ["DISPOSABLE"],
+});
+```
+
+It is now also possible to configure email types to allow. In the example below,
+only email addresses from free email providers will be allowed.
+
+```ts
+validateEmail({
+  mode: "LIVE",
+  allow: ["FREE"],
+});
+```
+
+The old options will continue to work, but have been flagged as deprecated.
+
+### `ArcjetEnum` objects are now deprecated
+
+In earlier versions of the SDK we provided enum objects for configuring your
+rules. These have been deprecated in favor of string-type enums.
+
+The table below shows which enums you should replace and their equivalent
+strings.
+
+| alpha                                        | beta                   |
+| -------------------------------------------- | ---------------------- |
+| `ArcjetMode.LIVE`                            | `"LIVE"`               |
+| `ArcjetMode.DRY_RUN`                         | `"DRY_RUN"`            |
+| `ArcjetRateLimitAlgorith.TOKEN_BUCKET`       | `"TOKEN_BUCKET"`       |
+| `ArcjetRateLimitAlgorith.FIXED_WINDOW`       | `"FIXED_WINDOW"`       |
+| `ArcjetRateLimitAlgorith.SLIDING_WINDOW`     | `"SLIDING_WINDOW"`     |
+| `ArcjetEmailType.DISPOSABLE`                 | `"DISPOSABLE"`         |
+| `ArcjetEmailType.FREE`                       | `"FREE"`               |
+| `ArcjetEmailType.NO_MX_RECORDS`              | `"NO_MX_RECORDS"`      |
+| `ArcjetEmailType.NO_GRAVATAR`                | `"NO_GRAVATAR"`        |
+| `ArcjetEmailType.INVALID`                    | `"INVALID"`            |
+| `ArcjetStack.NODEJS`                         | `"NODEJS"`             |
+| `ArcjetStack.NEXTJS`                         | `"NEXTJS"`             |
+| `ArcjetStack.BUN`                            | `"BUN"`                |
+| `ArcjetStack.SVELTEKIT`                      | `"SVELTEKIT"`          |
+| `ArcjetStack.DENO`                           | `"DENO"`               |
+| `ArcjetStack.NESTJS`                         | `"NESTJS"`             |
+| `ArcjetStack.REMIX`                          | `"REMIX"`              |
+| `ArcjetRuleState.RUN`                        | `"RUN"`                |
+| `ArcjetRuleState.NOT_RUN`                    | `"NOT_RUN"`            |
+| `ArcjetRuleState.CACHED`                     | `"CACHED"`             |
+| `ArcjetRuleState.DRY_RUN`                    | `"DRY_RUN"`            |
+| `ArcjetConclusion.ALLOW`                     | `"ALLOW"`              |
+| `ArcjetConclusion.DENY`                      | `"DENY"`               |
+| `ArcjetConclusion.CHALLENGE`                 | `"CHALLENGE"`          |
+| `ArcjetConclusion.ERROR`                     | `"ERROR"`              |
+| `ArcjetSensitiveInfoType.EMAIL`              | `"EMAIL"`              |
+| `ArcjetSensitiveInfoType.PHONE_NUMBER`       | `"PHONE_NUMBER"`       |
+| `ArcjetSensitiveInfoType.IP_ADDRESS`         | `"IP_ADDRESS"`         |
+| `ArcjetSensitiveInfoType.CREDIT_CARD_NUMBER` | `"CREDIT_CARD_NUMBER"` |
+| `ArcjetRuleType.LOCAL`                       | `"LOCAL"`              |
+| `ArcjetRuleType.REMOTE`                      | `"REMOTE"`             |
+
+### Handling of url-encoded data in sensitive info detection
+
+The [sensitive information detection](/sensitive-info/quick-start) and
+[@arcjet/redact](/redact/quick-start) features now handle both raw and
+URL-encoded data simultaneously. This dual processing approach ensures
+comprehensive detection, particularly for content containing the + character,
+which serves both as a literal plus sign (common in phone numbers) and as an
+encoded space in URLs.
+
+When implementing custom detection functions on data containing + characters,
+you may observe duplicate token matches across different processing windows.
+This occurs because the system analyzes the input in two ways:
+
+- With `+` interpreted as a literal plus sign
+- With `+` decoded as a space character
+
+For example:
+
+```txt
+# Input: "phone+number+123"
+# Processed as both:
+# - "phone+number+123"
+# - "phone number 123"
+```
+
+### Wasm loading has moved to `@arcjet/analyze-wasm`
+
+We have moved the responsibility for loading Wasm on your target platform from
+`@arcjet/analyze` to `@arcjet/analyze-wasm`. This should not affect users who
+were using the SDK through the high level framework adapters e.g.
+`@arcjet/next`.
+
+## Arcjet JS SDK 1.0.0-alpha.24
+
+The
+[`1.0.0-alpha-24`](https://github.com/arcjet/arcjet-js/releases/tag/v1.0.0-alpha.24)
+version of the Arcjet JS SDK was released on 2024-09-05 and includes the
+following breaking changes.
+
+### `add` and `remove` replaced with `allow` and `deny` in `detectBot` rule
+
+Passing user agent patterns to the bot detection rules has been deprecated in
+favor of specifying string-type enums to `allow` or `deny`.
+
+To maintain the previous default behavior of denying all bots, you can configure
+the following rule:
+
+```ts
+detectBot({
+  mode: "LIVE",
+  allow: [],
+});
+```
+
+We now publish [a list of known bots](/bot-protection/identifying-bots) as both
+individual user agents as well as categories of types of bots. You can use these
+to configure your bot detection rules.
+
+For example, a common configuration is to block all bots except search engine
+crawlers:
+
+```ts
+detectBot({
+  mode: "LIVE",
+  // Block all bots except the following
+  allow: [
+    "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc
+    // Uncomment to allow these other common bot categories
+    // See the full list at https://arcjet.com/bot-list
+    //"CATEGORY:MONITOR", // Uptime monitoring services
+    //"CATEGORY:PREVIEW", // Link previews e.g. Slack, Discord
+  ],
+}),
+```
+
+## Get help
+
+Need help with anything? [Email us](mailto:support@arcjet.com) or [join our
+Discord](https://arcjet.com/discord) to get support from our engineering team.
+
+<Comments />
