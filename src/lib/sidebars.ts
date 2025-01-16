@@ -147,7 +147,7 @@ export const main = [
         ],
       },
       {
-        label: "Shield",
+        label: "Shield WAF",
         collapsed: true,
         items: [
           {
