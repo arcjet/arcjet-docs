@@ -17,6 +17,10 @@ const aj = arcjet({
   ],
 });
 
+function isVerified(result) {
+  return result.reason.isBot() && result.reason.isVerified();
+}
+
 export async function loader(args) {
   const decision = await aj.protect(args);
 
@@ -29,7 +33,7 @@ export async function loader(args) {
   // Verification isn't always possible, so we recommend checking the decision
   // separately.
   // https://docs.arcjet.com/bot-protection/reference#bot-verification
-  if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+  if (decision.results.some(isVerified)) {
     throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });
   }
 

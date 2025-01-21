@@ -1,4 +1,4 @@
-import arcjet, { detectBot } from "@arcjet/remix";
+import arcjet, { ArcjetRuleResult, detectBot } from "@arcjet/remix";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 
 const aj = arcjet({
@@ -19,6 +19,10 @@ const aj = arcjet({
   ],
 });
 
+function isVerified(result: ArcjetRuleResult) {
+  return result.reason.isBot() && result.reason.isVerified();
+}
+
 export async function loader(args: LoaderFunctionArgs) {
   const decision = await aj.protect(args);
 
@@ -31,7 +35,7 @@ export async function loader(args: LoaderFunctionArgs) {
   // Verification isn't always possible, so we recommend checking the decision
   // separately.
   // https://docs.arcjet.com/bot-protection/reference#bot-verification
-  if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+  if (decision.results.some(isVerified)) {
     throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });
   }
 

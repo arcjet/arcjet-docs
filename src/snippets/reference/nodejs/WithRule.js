@@ -43,10 +43,15 @@ const server = http.createServer(async function (req, res) {
   const decision = await getClient(userId).protect(req);
 
   if (decision.isDenied()) {
-    res.writeHead(429, { "Content-Type": "application/json" });
-    res.end(
-      JSON.stringify({ error: "Too Many Requests", reason: decision.reason }),
-    );
+    if (decision.reason.isRateLimit()) {
+      res.writeHead(429, { "Content-Type": "application/json" });
+      res.end(
+        JSON.stringify({ error: "Too Many Requests", reason: decision.reason }),
+      );
+    } else if (decision.reason.isBot()) {
+      res.writeHead(403, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Forbidden", reason: decision.reason }));
+    }
   } else {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ message: "Hello world" }));

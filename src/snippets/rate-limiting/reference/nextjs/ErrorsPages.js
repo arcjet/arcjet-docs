@@ -16,19 +16,12 @@ const aj = arcjet({
 export default async function handler(req, res) {
   const decision = await aj.protect(req);
 
-  if (decision.isErrored()) {
-    if (decision.reason.message.includes("missing User-Agent header")) {
-      // Requests without User-Agent headers can not be identified as any
-      // particular bot and will be marked as an errored decision. Most
-      // legitimate clients always send this header, so we recommend blocking
-      // requests without it.
-      console.warn("User-Agent header is missing");
-      return res.status(400).json({ error: "Bad request" });
-    } else {
+  for (const ruleResult of decision.results) {
+    if (ruleResult.reason.isError()) {
       // Fail open by logging the error and continuing
-      console.warn("Arcjet error", decision.reason.message);
+      console.warn("Arcjet error", ruleResult.reason.message);
       // You could also fail closed here for very sensitive routes
-      //return res.status(503).json({ error: "Service unavailable" });
+      //return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
     }
   }
 

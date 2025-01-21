@@ -50,12 +50,16 @@ export class PageController {
       )
       .protect(req);
 
+    for (const ruleResult of decision.results) {
+      if (ruleResult.reason.isError()) {
+        // Fail open to prevent an Arcjet error from blocking all requests. You
+        // may want to fail closed if this controller is very sensitive
+        this.logger.error(`Arcjet error: ${ruleResult.reason.message}`);
+      }
+    }
+
     if (decision.isDenied()) {
       throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
-    } else if (decision.isErrored()) {
-      // Fail open to prevent an Arcjet error from blocking all requests. You
-      // may want to fail closed if this controller is very sensitive
-      this.logger.error(`Arcjet error: ${decision.reason.message}`);
     }
 
     return this.pageService.message();

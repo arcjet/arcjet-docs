@@ -23,10 +23,10 @@ const server = http.createServer(async function (req, res) {
     res.end(
       JSON.stringify({ error: "Too Many Requests", reason: decision.reason }),
     );
-  } else {
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ message: "Hello world" }));
   }
+
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(JSON.stringify({ message: "Hello world" }));
 });
 
 server.listen(8000);

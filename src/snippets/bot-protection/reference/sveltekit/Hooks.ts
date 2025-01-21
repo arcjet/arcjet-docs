@@ -1,5 +1,5 @@
 import { env } from "$env/dynamic/private";
-import arcjet, { detectBot } from "@arcjet/sveltekit";
+import arcjet, { ArcjetRuleResult, detectBot } from "@arcjet/sveltekit";
 import { error, type RequestEvent } from "@sveltejs/kit";
 
 const aj = arcjet({
@@ -19,6 +19,10 @@ const aj = arcjet({
   ],
 });
 
+function isVerified(result: ArcjetRuleResult) {
+  return result.reason.isBot() && result.reason.isVerified();
+}
+
 export async function handle({
   event,
   resolve,
@@ -37,7 +41,7 @@ export async function handle({
   // Verification isn't always possible, so we recommend checking the decision
   // separately.
   // https://docs.arcjet.com/bot-protection/reference#bot-verification
-  if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+  if (decision.results.some(isVerified)) {
     return error(403, "You are a bot!");
   }
 

@@ -1,4 +1,4 @@
-import arcjet, { detectBot } from "@arcjet/next";
+import arcjet, { ArcjetRuleResult, detectBot } from "@arcjet/next";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 const aj = arcjet({
@@ -10,6 +10,10 @@ const aj = arcjet({
     }),
   ],
 });
+
+function isVerified(result: ArcjetRuleResult) {
+  return result.reason.isBot() && result.reason.isVerified();
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -25,7 +29,7 @@ export default async function handler(
   // Verification isn't always possible, so we recommend checking the decision
   // separately.
   // https://docs.arcjet.com/bot-protection/reference#bot-verification
-  if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+  if (decision.results.some(isVerified)) {
     return res.status(403).json({ error: "You are a bot!" });
   }
 

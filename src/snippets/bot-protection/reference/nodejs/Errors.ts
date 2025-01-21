@@ -17,22 +17,24 @@ const server = http.createServer(async function (
 ) {
   const decision = await aj.protect(req);
 
-  if (decision.isErrored()) {
-    if (decision.reason.message.includes("requires user-agent header")) {
-      // Requests without User-Agent headers can not be identified as any
-      // particular bot and will be marked as an errored decision. Most
-      // legitimate clients always send this header, so we recommend blocking
-      // requests without it.
-      // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
-      console.warn("User-Agent header is missing");
-      res.writeHead(400, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "Bad request" }));
-    } else {
-      // Fail open by logging the error and continuing
-      console.warn("Arcjet error", decision.reason.message);
-      // You could also fail closed here for very sensitive routes
-      //res.writeHead(503, { "Content-Type": "application/json" });
-      //res.end(JSON.stringify({ error: "Service unavailable" }));
+  for (const ruleResult of decision.results) {
+    if (ruleResult.reason.isError()) {
+      if (ruleResult.reason.message.includes("requires user-agent header")) {
+        // Requests without User-Agent headers can not be identified as any
+        // particular bot and will be marked as an errored ruleResult. Most
+        // legitimate clients always send this header, so we recommend blocking
+        // requests without it.
+        // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
+        console.warn("User-Agent header is missing");
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Bad request" }));
+      } else {
+        // Fail open by logging the error and continuing
+        console.warn("Arcjet error", ruleResult.reason.message);
+        // You could also fail closed here for very sensitive routes
+        //res.writeHead(503, { "Content-Type": "application/json" });
+        //res.end(JSON.stringify({ error: "Service unavailable" }));
+      }
     }
   }
 

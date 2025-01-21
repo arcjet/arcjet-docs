@@ -18,20 +18,10 @@ export async function loader(args) {
   const userId = "user123"; // Replace with your authenticated user ID
   const decision = await aj.protect(args, { userId, requested: 5 }); // Deduct 5 tokens from the bucket
 
-  if (decision.isErrored()) {
-    if (decision.reason.message.includes("missing User-Agent header")) {
-      // Requests without User-Agent headers can not be identified as any
-      // particular bot and will be marked as an errored decision. Most
-      // legitimate clients always send this header, so we recommend blocking
-      // requests without it.
-      console.warn("User-Agent header is missing");
-      throw new Response("Bad request", {
-        status: 400,
-        statusText: "Bad request",
-      });
-    } else {
+  for (const ruleResult of decision.results) {
+    if (ruleResult.reason.isError()) {
       // Fail open by logging the error and continuing
-      console.warn("Arcjet error", decision.reason.message);
+      console.warn("Arcjet error", ruleResult.reason.message);
       // You could also fail closed here for very sensitive routes
       // throw new Response("Service unavailable", { status: 503, statusText: "Service unavailable" });
     }

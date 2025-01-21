@@ -1,4 +1,9 @@
-import { ARCJET, type ArcjetNest, detectBot } from "@arcjet/nest";
+import {
+  ARCJET,
+  type ArcjetNest,
+  ArcjetRuleResult,
+  detectBot,
+} from "@arcjet/nest";
 import {
   Controller,
   Get,
@@ -9,6 +14,10 @@ import {
   Req,
 } from "@nestjs/common";
 import type { Request } from "express";
+
+function isVerified(result: ArcjetRuleResult) {
+  return result.reason.isBot() && result.reason.isVerified();
+}
 
 // This would normally go in your service file e.g.
 // src/page/page.service.ts
@@ -57,7 +66,7 @@ export class PageAdvancedController {
     // Verification isn't always possible, so we recommend checking the decision
     // separately.
     // https://docs.arcjet.com/bot-protection/reference#bot-verification
-    if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+    if (decision.results.some(isVerified)) {
       throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
     }
 

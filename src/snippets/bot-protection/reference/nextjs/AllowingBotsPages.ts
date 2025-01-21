@@ -25,23 +25,18 @@ export default async function handler(
 ) {
   const decision = await aj.protect(req);
 
-  if (decision.reason.isBot()) {
-    if (decision.isDenied()) {
-      return res.status(403).json({
-        error: "Forbidden",
-        // Useful for debugging, but don't return these to the client in
-        // production
-        denied: decision.reason.denied,
-      });
-    } else if (decision.reason.isSpoofed()) {
+  for (const ruleResult of decision.results) {
+    if (ruleResult.reason.isBot()) {
       // Arcjet Pro plan verifies the authenticity of common bots using IP data.
       // https://docs.arcjet.com/bot-protection/reference#bot-verification
-      return res.status(403).json({
-        error: "Forbidden",
-        // Useful for debugging, but don't return these to the client in
-        // production
-        denied: decision.reason.denied,
-      });
+      if (ruleResult.isDenied() || ruleResult.reason.isSpoofed()) {
+        return res.status(403).json({
+          error: "Forbidden",
+          // Useful for debugging, but don't return these to the client in
+          // production
+          denied: ruleResult.reason.denied,
+        });
+      }
     }
   }
 

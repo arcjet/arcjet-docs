@@ -53,18 +53,20 @@ export class PageController {
       )
       .protect(req);
 
-    if (decision.reason.isBot()) {
-      this.logger.log("detected + allowed bots", decision.reason.allowed);
-      this.logger.log("detected + denied bots", decision.reason.denied);
+    for (const ruleResult of decision.results) {
+      if (ruleResult.reason.isBot()) {
+        this.logger.log("detected + allowed bots", ruleResult.reason.allowed);
+        this.logger.log("detected + denied bots", ruleResult.reason.denied);
 
-      // Arcjet Pro plan verifies the authenticity of common bots using IP data
-      // https://docs.arcjet.com/bot-protection/reference#bot-verification
-      if (decision.reason.isSpoofed()) {
-        console.log("spoofed bot", decision.reason.spoofed);
-      }
+        // Arcjet Pro plan verifies the authenticity of common bots using IP data
+        // https://docs.arcjet.com/bot-protection/reference#bot-verification
+        if (ruleResult.reason.isSpoofed()) {
+          this.logger.log("spoofed bot", ruleResult.reason.spoofed);
+        }
 
-      if (decision.reason.isVerified()) {
-        console.log("verified bot", decision.reason.verified);
+        if (ruleResult.reason.isVerified()) {
+          this.logger.log("verified bot", ruleResult.reason.verified);
+        }
       }
     }
 

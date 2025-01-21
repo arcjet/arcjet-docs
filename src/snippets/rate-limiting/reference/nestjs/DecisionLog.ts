@@ -66,8 +66,8 @@ export class PageController {
     for (const result of decision.results) {
       this.logger.log("Rule Result", result);
 
-      if (result.reason.isRateLimit()) {
-        this.logger.log("Rate limit rule", result);
+      if (result.reason.isBot()) {
+        this.logger.log("Bot protection rule", result);
       }
 
       if (result.reason.isBot()) {

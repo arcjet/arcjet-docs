@@ -1,4 +1,9 @@
-import { ARCJET, type ArcjetNest, protectSignup } from "@arcjet/nest";
+import {
+  ARCJET,
+  type ArcjetNest,
+  ArcjetRuleResult,
+  protectSignup,
+} from "@arcjet/nest";
 import {
   Body,
   Controller,
@@ -37,6 +42,10 @@ export class SignupService {
       message: "Hello world",
     };
   }
+}
+
+function isVerified(result: ArcjetRuleResult) {
+  return result.reason.isBot() && result.reason.isVerified();
 }
 
 // This would normally go in your controller file e.g.
@@ -137,7 +146,7 @@ export class SignupController {
     // Verification isn't always possible, so we recommend checking the decision
     // separately.
     // https://docs.arcjet.com/bot-protection/reference#bot-verification
-    if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+    if (decision.results.some(isVerified)) {
       throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
     }
 

@@ -1,4 +1,4 @@
-import arcjet, { detectBot } from "@arcjet/next";
+import arcjet, { ArcjetRuleResult, detectBot } from "@arcjet/next";
 import { NextResponse } from "next/server";
 
 const aj = arcjet({
@@ -10,6 +10,10 @@ const aj = arcjet({
     }),
   ],
 });
+
+function isVerified(result: ArcjetRuleResult) {
+  return result.reason.isBot() && result.reason.isVerified();
+}
 
 export async function GET(req: Request) {
   const decision = await aj.protect(req);
@@ -27,7 +31,7 @@ export async function GET(req: Request) {
   // Verification isn't always possible, so we recommend checking the decision
   // separately.
   // https://docs.arcjet.com/bot-protection/reference#bot-verification
-  if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+  if (decision.results.some(isVerified)) {
     return NextResponse.json(
       {
         error: "You are a bot!",

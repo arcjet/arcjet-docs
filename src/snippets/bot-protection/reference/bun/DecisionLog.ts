@@ -1,4 +1,4 @@
-import arcjet, { detectBot, fixedWindow } from "@arcjet/bun";
+import arcjet, { ArcjetRuleResult, detectBot, fixedWindow } from "@arcjet/bun";
 import { env } from "bun";
 
 const aj = arcjet({
@@ -15,6 +15,10 @@ const aj = arcjet({
     }),
   ],
 });
+
+function isVerified(result: ArcjetRuleResult) {
+  return result.reason.isBot() && result.reason.isVerified();
+}
 
 export default {
   port: 3000,
@@ -43,7 +47,7 @@ export default {
     // Verification isn't always possible, so we recommend checking the decision
     // separately.
     // https://docs.arcjet.com/bot-protection/reference#bot-verification
-    if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+    if (decision.results.some(isVerified)) {
       return new Response("Forbidden", { status: 403 });
     }
 

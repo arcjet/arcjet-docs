@@ -31,20 +31,22 @@ export async function POST(req: Request) {
     email,
   });
 
-  if (decision.isErrored()) {
-    if (decision.reason.message.includes("requires user-agent header")) {
-      // Requests without User-Agent headers can not be identified as any
-      // particular bot and will be marked as an errored decision. Most
-      // legitimate clients always send this header, so we recommend blocking
-      // requests without it.
-      // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
-      console.warn("User-Agent header is missing");
-      return NextResponse.json({ error: "Bad request" }, { status: 400 });
-    } else {
-      // Fail open by logging the error and continuing
-      console.warn("Arcjet error", decision.reason.message);
-      // You could also fail closed here for very sensitive routes
-      //return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
+  for (const ruleResult of decision.results) {
+    if (ruleResult.reason.isError()) {
+      if (ruleResult.reason.message.includes("requires user-agent header")) {
+        // Requests without User-Agent headers can not be identified as any
+        // particular bot and will be marked as an errored ruleResult. Most
+        // legitimate clients always send this header, so we recommend blocking
+        // requests without it.
+        // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
+        console.warn("User-Agent header is missing");
+        return NextResponse.json({ error: "Bad request" }, { status: 400 });
+      } else {
+        // Fail open by logging the error and continuing
+        console.warn("Arcjet error", ruleResult.reason.message);
+        // You could also fail closed here for very sensitive routes
+        //return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
+      }
     }
   }
 
