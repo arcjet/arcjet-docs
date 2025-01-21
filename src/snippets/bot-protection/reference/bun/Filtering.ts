@@ -1,4 +1,8 @@
-import arcjet, { botCategories, detectBot } from "@arcjet/bun";
+import arcjet, {
+  ArcjetRuleResult,
+  botCategories,
+  detectBot,
+} from "@arcjet/bun";
 import { env } from "bun";
 
 const aj = arcjet({
