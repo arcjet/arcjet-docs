@@ -180,9 +180,12 @@ not block all requests. The SDK will also time out and fail open after 1000ms
 when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
 in most cases, the response time will be less than 20-30ms.
 
-If there is an error condition, Arcjet will return an
-`ERROR` type and you can check the `reason` property for more information, like
-accessing `decision.reason.message`.
+If there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the `message` property on the rule's
+error result for more information.
+
+If all other rules that were run returned an `ALLOW` result, then the final Arcjet
+conclusion will be `ERROR`.
 
 <SlotByFramework client:load>
   <ErrorsBun slot="bun" />

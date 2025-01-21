@@ -155,10 +155,9 @@ This example will log the full result as well as the email validation rule:
   <DecisionLogDenySvelteKit slot="sveltekit" />
 </SlotByFramework>
 
-
 ## Allowing specific email types
 
-In addition to being able to deny specific email types, you can also configure 
+In addition to being able to deny specific email types, you can also configure
 Arcjet to only allow specific email types and all other types will be blocked.
 
 <SlotByFramework client:load>
@@ -213,7 +212,12 @@ not block all requests. The SDK will also time out and fail open after 1000ms
 when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
 in most cases, the response time will be less than 20-30ms.
 
-If there is an error condition, Arcjet will return an `ERROR` `conclusion`.
+If there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the `message` property on the rule's
+error result for more information.
+
+If all other rules that were run returned an `ALLOW` result, then the final Arcjet
+conclusion will be `ERROR`.
 
 <SlotByFramework client:load>
   <ErrorsBun slot="bun" />
