@@ -31,10 +31,10 @@ const server = http.createServer(async function (
       res.writeHead(403, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Forbidden", reason: decision.reason }));
     }
+  } else {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ message: "Hello world" }));
   }
-
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(JSON.stringify({ message: "Hello world" }));
 });
 
 server.listen(8000);
