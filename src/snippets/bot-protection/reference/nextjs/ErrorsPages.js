@@ -27,7 +27,7 @@ export default async function handler(req, res) {
         // Fail open by logging the error and continuing
         console.warn("Arcjet error", reason.message);
         // You could also fail closed here for very sensitive routes
-        //return new Response("Service unavailable", { status: 503 });
+        //return res.status(503).json({ error: "Service unavailable" });
       }
     }
   }
