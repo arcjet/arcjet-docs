@@ -18,11 +18,11 @@ const aj = arcjet({
   ],
 });
 
-function isVerified(result: ArcjetRuleResult) {
-  return result.reason.isBot() && result.reason.isVerified()
+function isSpoofed(result: ArcjetRuleResult) {
+  return result.reason.isBot() && result.reason.isSpoofed();
 }
 
-const server = http.createServer(async function(
+const server = http.createServer(async function (
   req: http.IncomingMessage,
   res: http.ServerResponse,
 ) {
@@ -40,7 +40,7 @@ const server = http.createServer(async function(
   // Verification isn't always possible, so we recommend checking the decision
   // separately.
   // https://docs.arcjet.com/bot-protection/reference#bot-verification
-  if (decision.results.some(isVerified)) {
+  if (decision.results.some(isSpoofed)) {
     res.writeHead(403, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "Forbidden" }));
     return;

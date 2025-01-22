@@ -24,10 +24,10 @@ export async function handle({
 }): Promise<Response> {
   const decision = await aj.protect(event);
 
-  for (const ruleResult of decision.results) {
-    if (ruleResult.reason.isError()) {
+  for (const { reason } of decision.results) {
+    if (reason.isError()) {
       // Fail open by logging the error and continuing
-      console.warn("Arcjet error", ruleResult.reason.message);
+      console.warn("Arcjet error", reason.message);
       // You could also fail closed here for very sensitive routes
       //return error(503, "Service unavailable");
     }

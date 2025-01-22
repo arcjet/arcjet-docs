@@ -15,10 +15,10 @@ const server = http.createServer(async function (req, res) {
   const decision = await aj.protect(req);
   console.log("Arcjet decision", decision);
 
-  for (const ruleResult of decision.results) {
-    if (ruleResult.reason.isError()) {
+  for (const { reason } of decision.results) {
+    if (reason.isError()) {
       // Fail open by logging the error and continuing
-      console.warn("Arcjet error", ruleResult.reason.message);
+      console.warn("Arcjet error", reason.message);
       // You could also fail closed here for very sensitive routes
       //res.writeHead(503, { "Content-Type": "application/json" });
       //res.end(JSON.stringify({ error: "Service unavailable" }));

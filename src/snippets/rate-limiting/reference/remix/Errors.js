@@ -18,10 +18,10 @@ export async function loader(args) {
   const userId = "user123"; // Replace with your authenticated user ID
   const decision = await aj.protect(args, { userId, requested: 5 }); // Deduct 5 tokens from the bucket
 
-  for (const ruleResult of decision.results) {
-    if (ruleResult.reason.isError()) {
+  for (const { reason } of decision.results) {
+    if (reason.isError()) {
       // Fail open by logging the error and continuing
-      console.warn("Arcjet error", ruleResult.reason.message);
+      console.warn("Arcjet error", reason.message);
       // You could also fail closed here for very sensitive routes
       // throw new Response("Service unavailable", { status: 503, statusText: "Service unavailable" });
     }

@@ -11,8 +11,8 @@ const aj = arcjet({
   ],
 });
 
-function isVerified(result: ArcjetRuleResult) {
-  return result.reason.isBot() && result.reason.isVerified();
+function isSpoofed(result: ArcjetRuleResult) {
+  return result.reason.isBot() && result.reason.isSpoofed();
 }
 
 export default async function handler(
@@ -29,7 +29,7 @@ export default async function handler(
   // Verification isn't always possible, so we recommend checking the decision
   // separately.
   // https://docs.arcjet.com/bot-protection/reference#bot-verification
-  if (decision.results.some(isVerified)) {
+  if (decision.results.some(isSpoofed)) {
     return res.status(403).json({ error: "You are a bot!" });
   }
 

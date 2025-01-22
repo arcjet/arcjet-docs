@@ -19,8 +19,8 @@ const aj = arcjet({
   ],
 });
 
-function isVerified(result: ArcjetRuleResult) {
-  return result.reason.isBot() && result.reason.isVerified();
+function isSpoofed(result: ArcjetRuleResult) {
+  return result.reason.isBot() && result.reason.isSpoofed();
 }
 
 export default {
@@ -37,7 +37,7 @@ export default {
     // Verification isn't always possible, so we recommend checking the decision
     // separately.
     // https://docs.arcjet.com/bot-protection/reference#bot-verification
-    if (decision.results.some(isVerified)) {
+    if (decision.results.some(isSpoofed)) {
       return new Response("Forbidden", { status: 403 });
     }
 

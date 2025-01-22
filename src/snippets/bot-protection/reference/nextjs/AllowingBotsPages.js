@@ -21,11 +21,11 @@ const aj = arcjet({
 export default async function handler(req, res) {
   const decision = await aj.protect(req);
 
-  for (const ruleResult of decision.results) {
-    if (ruleResult.reason.isBot()) {
+  for (const result of decision.results) {
+    if (result.reason.isBot()) {
       // Arcjet Pro plan verifies the authenticity of common bots using IP data.
       // https://docs.arcjet.com/bot-protection/reference#bot-verification
-      if (ruleResult.isDenied() || ruleResult.reason.isSpoofed()) {
+      if (result.isDenied() || result.reason.isSpoofed()) {
         return res.status(403).json({
           error: "Forbidden",
           // Useful for debugging, but don't return these to the client in

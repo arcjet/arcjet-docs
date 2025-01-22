@@ -22,9 +22,9 @@ export default {
     const decision = await aj.protect(req, { userId, requested: 5 }); // Deduct 5 tokens from the bucket
     console.log("Arcjet decision", decision);
 
-    for (const ruleResult of decision.results) {
-      if (ruleResult.reason.isError()) {
-        console.warn("Arcjet error", ruleResult.reason.message);
+    for (const { reason } of decision.results) {
+      if (reason.isError()) {
+        console.warn("Arcjet error", reason.message);
         // You could also fail closed here for very sensitive routes
         //return new Response("Service unavailable", { status: 503 });
       }

@@ -44,8 +44,8 @@ export class SignupService {
   }
 }
 
-function isVerified(result: ArcjetRuleResult) {
-  return result.reason.isBot() && result.reason.isVerified();
+function isSpoofed(result: ArcjetRuleResult) {
+  return result.reason.isBot() && result.reason.isSpoofed();
 }
 
 // This would normally go in your controller file e.g.
@@ -146,7 +146,7 @@ export class SignupController {
     // Verification isn't always possible, so we recommend checking the decision
     // separately.
     // https://docs.arcjet.com/bot-protection/reference#bot-verification
-    if (decision.results.some(isVerified)) {
+    if (decision.results.some(isSpoofed)) {
       throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
     }
 

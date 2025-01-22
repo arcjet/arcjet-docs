@@ -16,8 +16,8 @@ import {
 } from "@nestjs/common";
 import type { Request } from "express";
 
-function isVerified(result: ArcjetRuleResult) {
-  return result.reason.isBot() && result.reason.isVerified();
+function isSpoofed(result: ArcjetRuleResult) {
+  return result.reason.isBot() && result.reason.isSpoofed();
 }
 
 // This would normally go in your service file e.g.
@@ -68,7 +68,7 @@ export class PageController {
     // Verification isn't always possible, so we recommend checking the decision
     // separately.
     // https://docs.arcjet.com/bot-protection/reference#bot-verification
-    if (decision.results.some(isVerified)) {
+    if (decision.results.some(isSpoofed)) {
       throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
     }
 

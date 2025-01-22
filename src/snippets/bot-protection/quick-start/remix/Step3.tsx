@@ -20,8 +20,8 @@ const aj = arcjet({
   ],
 });
 
-function isVerified(result: ArcjetRuleResult) {
-  return result.reason.isBot() && result.reason.isVerified()
+function isSpoofed(result: ArcjetRuleResult) {
+  return result.reason.isBot() && result.reason.isSpoofed();
 }
 
 // The loader function is called for every request to the app, but you could
@@ -39,7 +39,7 @@ export async function loader(args: LoaderFunctionArgs) {
   // Verification isn't always possible, so we recommend checking the decision
   // separately.
   // https://docs.arcjet.com/bot-protection/reference#bot-verification
-  if (decision.results.some(isVerified)) {
+  if (decision.results.some(isSpoofed)) {
     throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });
   }
 

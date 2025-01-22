@@ -14,11 +14,11 @@ const aj = arcjet({
 export async function loader(args: LoaderFunctionArgs) {
   const decision = await aj.protect(args);
 
-  for (const ruleResult of decision.results) {
-    if (ruleResult.reason.isError()) {
-      if (ruleResult.reason.message.includes("requires user-agent header")) {
+  for (const { reason } of decision.results) {
+    if (reason.isError()) {
+      if (reason.message.includes("requires user-agent header")) {
         // Requests without User-Agent headers can not be identified as any
-        // particular bot and will be marked as an errored ruleResult. Most
+        // particular bot and will be marked as an errored rule. Most
         // legitimate clients always send this header, so we recommend blocking
         // requests without it.
         // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
@@ -26,7 +26,7 @@ export async function loader(args: LoaderFunctionArgs) {
         throw new Response("Bad request", { status: 400 });
       } else {
         // Fail open by logging the error and continuing
-        console.warn("Arcjet error", ruleResult.reason.message);
+        console.warn("Arcjet error", reason.message);
         // You could also fail closed here for very sensitive routes
         //throw new Response("Service unavailable", { status: 503 });
       }

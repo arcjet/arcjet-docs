@@ -22,17 +22,17 @@ const aj = arcjet({
 export async function POST(req: Request) {
   const decision = await aj.protect(req);
 
-  for (const ruleResult of decision.results) {
-    if (ruleResult.reason.isBot()) {
+  for (const result of decision.results) {
+    if (result.reason.isBot()) {
       // Arcjet Pro plan verifies the authenticity of common bots using IP data.
       // https://docs.arcjet.com/bot-protection/reference#bot-verification
-      if (ruleResult.isDenied() || ruleResult.reason.isSpoofed()) {
+      if (result.isDenied() || result.reason.isSpoofed()) {
         return NextResponse.json(
           {
             error: "You are a bot!",
             // Useful for debugging, but don't return these to the client in
             // production
-            denied: ruleResult.reason.denied,
+            denied: result.reason.denied,
           },
           { status: 403 },
         );

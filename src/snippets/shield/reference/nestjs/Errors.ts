@@ -50,11 +50,11 @@ export class PageController {
       )
       .protect(req);
 
-    for (const ruleResult of decision.results) {
-      if (ruleResult.reason.isError()) {
+    for (const { reason } of decision.results) {
+      if (reason.isError()) {
         // Fail open to prevent an Arcjet error from blocking all requests. You
         // may want to fail closed if this controller is very sensitive
-        this.logger.error(`Arcjet error: ${ruleResult.reason.message}`);
+        this.logger.error(`Arcjet error: ${reason.message}`);
       }
     }
 
