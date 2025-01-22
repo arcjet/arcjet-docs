@@ -406,10 +406,10 @@ check the conclusion:
 - `isErrored()` (`bool`) - There was an unrecoverable error.
 
 The conclusion will be the highest-severity finding when evaluating the configured
-rules. The order of priority is allow, then error, then deny.
+rules. Deny is the highest severity, followed by challenge and allow respectively.
 
-For example, if the bot protection rule returns an error but the validate email
-rule returns a deny then the overall conclusion would be deny. To then access the error
+For example, when a bot protection rule returns an error and a validate email
+rule returns a deny, the overall conclusion would be deny. To access the error
 you would have to use the `results` property on the decision.
 
 ### Reason
