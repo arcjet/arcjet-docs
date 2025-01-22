@@ -62,12 +62,12 @@ export class PageController {
           // requests without it.
           // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
           console.warn("User-Agent header is missing");
-          return new Response("Bad request", { status: 400 });
+          throw new HttpException("Bad request", HttpStatus.BAD_REQUEST);
         } else {
           // Fail open by logging the error and continuing
           console.warn("Arcjet error", reason.message);
           // You could also fail closed here for very sensitive routes
-          //return new Response("Service unavailable", { status: 503 });
+          //throw new HttpException("Service unavailable", HttpStatus.SERVICE_UNAVAILABLE);
         }
       }
     }

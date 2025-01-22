@@ -23,7 +23,7 @@ export async function POST(req) {
   const decision = await aj.protect(req);
 
   for (const result of decision.results) {
-    if (result.reason.isBot()) {
+    if (result.state !== "DRY_RUN" && result.reason.isBot()) {
       // Arcjet Pro plan verifies the authenticity of common bots using IP data.
       // https://docs.arcjet.com/bot-protection/reference#bot-verification
       if (result.isDenied() || result.reason.isSpoofed()) {
