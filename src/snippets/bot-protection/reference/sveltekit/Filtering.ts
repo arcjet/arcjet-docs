@@ -23,10 +23,6 @@ const aj = arcjet({
   ],
 });
 
-function isSpoofed(result: ArcjetRuleResult) {
-  return result.reason.isBot() && result.reason.isSpoofed();
-}
-
 export async function handle({
   event,
   resolve,
@@ -38,14 +34,6 @@ export async function handle({
 
   // Bots not in the allow list will be blocked
   if (decision.isDenied()) {
-    return error(403, "You are a bot!");
-  }
-
-  // Arcjet Pro plan verifies the authenticity of common bots using IP data.
-  // Verification isn't always possible, so we recommend checking the decision
-  // separately.
-  // https://docs.arcjet.com/bot-protection/reference#bot-verification
-  if (decision.results.some(isSpoofed)) {
     return error(403, "You are a bot!");
   }
 
