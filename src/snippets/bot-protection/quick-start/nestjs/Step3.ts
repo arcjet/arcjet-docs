@@ -1,4 +1,10 @@
-import { ArcjetGuard, ArcjetModule, detectBot } from "@arcjet/nest";
+import {
+  ArcjetGuard,
+  ArcjetModule,
+  detectBot,
+  fixedWindow,
+  shield,
+} from "@arcjet/nest";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_GUARD, NestFactory } from "@nestjs/core";
@@ -35,7 +41,7 @@ import { APP_GUARD, NestFactory } from "@nestjs/core";
     },
   ],
 })
-class AppModule {}
+class AppModule { }
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

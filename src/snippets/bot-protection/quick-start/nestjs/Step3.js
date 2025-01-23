@@ -1,4 +1,10 @@
-import { ArcjetGuard, ArcjetModule, detectBot } from "@arcjet/nest";
+import {
+  ArcjetGuard,
+  ArcjetModule,
+  detectBot,
+  fixedWindow,
+  shield,
+} from "@arcjet/nest";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_GUARD, NestFactory } from "@nestjs/core";

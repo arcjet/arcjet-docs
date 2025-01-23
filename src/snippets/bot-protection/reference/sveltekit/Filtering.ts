@@ -1,9 +1,5 @@
 import { env } from "$env/dynamic/private";
-import arcjet, {
-  ArcjetRuleResult,
-  botCategories,
-  detectBot,
-} from "@arcjet/sveltekit";
+import arcjet, { botCategories, detectBot } from "@arcjet/sveltekit";
 import { error, type RequestEvent } from "@sveltejs/kit";
 
 const aj = arcjet({

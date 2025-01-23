@@ -1,8 +1,4 @@
-import arcjet, {
-  ArcjetRuleResult,
-  botCategories,
-  detectBot,
-} from "@arcjet/deno";
+import arcjet, { botCategories, detectBot } from "@arcjet/deno";
 
 const aj = arcjet({
   key: Deno.env.get("ARCJET_KEY")!, // Get your site key from https://app.arcjet.com
