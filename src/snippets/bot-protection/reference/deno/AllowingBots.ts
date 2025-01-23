@@ -1,4 +1,4 @@
-import arcjet, { ArcjetRuleResult, detectBot } from "@arcjet/deno";
+import arcjet, { detectBot } from "@arcjet/deno";
 
 const aj = arcjet({
   key: Deno.env.get("ARCJET_KEY")!, // Get your site key from https://app.arcjet.com
@@ -18,26 +18,29 @@ const aj = arcjet({
   ],
 });
 
-function isSpoofed(result: ArcjetRuleResult) {
-  return result.reason.isBot() && result.reason.isSpoofed();
-}
-
 Deno.serve(
   { port: 3000 },
   aj.handler(async (req) => {
     const decision = await aj.protect(req);
 
-    // Bots not in the allow list will be blocked
     if (decision.isDenied()) {
-      return new Response("Forbidden", { status: 403 });
+      if (decision.reason.isBot()) {
+        return new Response("You are a bot!", { status: 403 });
+      } else {
+        return new Response("Forbidden", { status: 403 });
+      }
     }
 
-    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
-    // Verification isn't always possible, so we recommend checking the decision
-    // separately.
-    // https://docs.arcjet.com/bot-protection/reference#bot-verification
-    if (decision.results.some(isSpoofed)) {
-      return new Response("Forbidden", { status: 403 });
+    for (const { state, reason } of decision.results) {
+      if (state === "DRY_RUN") {
+        continue;
+      }
+
+      if (reason.isBot() && reason.isSpoofed()) {
+        return new Response("You are pretending to be a good bot!", {
+          status: 403,
+        });
+      }
     }
 
     return new Response("Hello world");

@@ -45,7 +45,11 @@ export class SignupService {
 }
 
 function isSpoofed(result: ArcjetRuleResult) {
-  return result.reason.isBot() && result.reason.isSpoofed();
+  return (
+    result.state !== "DRY_RUN" &&
+    result.reason.isBot() &&
+    result.reason.isSpoofed()
+  );
 }
 
 // This would normally go in your controller file e.g.

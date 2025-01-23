@@ -25,18 +25,30 @@ export default async function handler(
 ) {
   const decision = await aj.protect(req);
 
-  for (const result of decision.results) {
-    if (result.reason.isBot()) {
-      // Arcjet Pro plan verifies the authenticity of common bots using IP data.
-      // https://docs.arcjet.com/bot-protection/reference#bot-verification
-      if (result.isDenied() || result.reason.isSpoofed()) {
-        return res.status(403).json({
-          error: "Forbidden",
-          // Useful for debugging, but don't return these to the client in
-          // production
-          denied: result.reason.denied,
-        });
-      }
+  if (decision.isDenied()) {
+    if (decision.reason.isBot()) {
+      return res.status(403).json({
+        error: "You are a bot!",
+        // Useful for debugging, but don't return these to the client in
+        // production
+        denied: decision.reason.denied,
+      });
+    } else {
+      return res.status(403).json({
+        error: "Forbidden",
+      });
+    }
+  }
+
+  for (const { state, reason } of decision.results) {
+    if (state === "DRY_RUN") {
+      continue;
+    }
+
+    if (reason.isBot() && reason.isSpoofed()) {
+      return res.status(403).json({
+        error: "You are pretending to be a good bot!",
+      });
     }
   }
 

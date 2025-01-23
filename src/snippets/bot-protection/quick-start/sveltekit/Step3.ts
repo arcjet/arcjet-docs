@@ -20,7 +20,11 @@ const aj = arcjet({
 });
 
 function isSpoofed(result: ArcjetRuleResult) {
-  return result.reason.isBot() && result.reason.isSpoofed();
+  return (
+    result.state !== "DRY_RUN" &&
+    result.reason.isBot() &&
+    result.reason.isSpoofed()
+  );
 }
 
 export async function handle({
