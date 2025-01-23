@@ -20,9 +20,7 @@ let types = [];
 for (const query of result.queries) {
     types.push(query.text);
 }
-// Breaks in Astro 5
-//let code = await format(types.join("\n"), { parser: "typescript" });
-let code = types.join("\n")
+let code = await format(types.join("\n"), { parser: "typescript" });
 ---
 
 <Code code={code} lang="ts" />
