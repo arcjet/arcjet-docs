@@ -27,7 +27,7 @@ export default {
           console.log("spoofed bot", reason.spoofed);
         }
 
-        if (reason.isSpoofed()) {
+        if (reason.isVerified()) {
           console.log("verified bot", reason.verified);
         }
       }
