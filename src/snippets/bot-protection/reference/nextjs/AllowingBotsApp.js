@@ -19,25 +19,43 @@ const aj = arcjet({
   ],
 });
 
+function isSpoofed(result) {
+  return result.reason.isBot() && result.reason.isSpoofed();
+}
+
 export async function POST(req) {
   const decision = await aj.protect(req);
 
-  for (const result of decision.results) {
-    if (result.state !== "DRY_RUN" && result.reason.isBot()) {
-      // Arcjet Pro plan verifies the authenticity of common bots using IP data.
-      // https://docs.arcjet.com/bot-protection/reference#bot-verification
-      if (result.isDenied() || result.reason.isSpoofed()) {
-        return NextResponse.json(
-          {
-            error: "You are a bot!",
-            // Useful for debugging, but don't return these to the client in
-            // production
-            denied: result.reason.denied,
-          },
-          { status: 403 },
-        );
-      }
+  if (decision.isDenied()) {
+    if (decision.reason.isBot()) {
+      return NextResponse.json(
+        {
+          error: "You are a bot!",
+          // Useful for debugging, but don't return these to the client in
+          // production
+          denied: result.reason.denied,
+        },
+        { status: 403 },
+      );
+    } else {
+      return NextResponse.json(
+        {
+          error: "Forbidden",
+          // Useful for debugging, but don't return this to the client in
+          // production
+          denied: result.reason,
+        },
+        { status: 403 },
+      );
     }
+  }
+
+  // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+  // Verification isn't always possible, so we recommend checking the decision
+  // separately.
+  // https://docs.arcjet.com/bot-protection/reference#bot-verification
+  if (decision.results.some(isSpoofed)) {
+    return new Response("Forbidden", { status: 403 });
   }
 
   return NextResponse.json({
