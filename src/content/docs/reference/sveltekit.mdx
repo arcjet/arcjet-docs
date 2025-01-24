@@ -127,7 +127,7 @@ Each rule can be configured in either `LIVE` or `DRY_RUN` mode. When in
 always be `ALLOW`.
 
 This allows you to run Arcjet in passive / demo mode to test rules before
-enabling them. Arcjet will log what it would have done.
+enabling them.
 
 ```ts
 import arcjet, { fixedWindow } from "@arcjet/sveltekit";
@@ -155,6 +155,17 @@ const aj = arcjet({
     ),
   ],
 });
+```
+
+As the top level conclusion will always be `ALLOW` in `DRY_RUN` mode, you can
+loop through each rule result to check what would have happened:
+
+```ts
+for (const result of decision.results) {
+  if (result.isDenied()) {
+    console.log("Rule returned deny conclusion", result);
+  }
+}
 ```
 
 ### Multiple rules
