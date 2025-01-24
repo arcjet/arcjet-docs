@@ -25,6 +25,7 @@ export default {
     const decision = await aj.protect(req);
 
     if (decision.isDenied()) {
+      // Bots not in the allow list will be blocked
       if (decision.reason.isBot()) {
         return new Response("You are a bot!", { status: 403 });
       } else {
@@ -37,6 +38,8 @@ export default {
         continue;
       }
 
+      // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+      // https://docs.arcjet.com/bot-protection/reference#bot-verification
       if (reason.isBot() && reason.isSpoofed()) {
         return new Response("You are pretending to be a good bot!", {
           status: 403,

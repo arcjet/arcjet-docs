@@ -214,8 +214,8 @@ check the conclusion:
 - `isErrored()` (`bool`) - There was an unrecoverable error.
 
 The conclusion will be the highest-severity finding when evaluating the configured
-rules. Deny is the highest severity, followed by challenge, and allow as the lowest
-severity.
+rules. `"DENY"` is the highest severity, followed by `"CHALLENGE"`, then `"ERROR"` and
+finally `"ALLOW"` as the lowest severity.
 
 For example, when a bot protection rule returns an error and a validate email
 rule returns a deny, the overall conclusion would be deny. To access the error
@@ -228,7 +228,7 @@ object which provides more detailed information about the conclusion. This is
 the final decision reason and is based on the configured rules.
 
 It will always be the highest-priority rule that produced that conclusion,
-to see other rules consider iterating over the `results` property on the decision.
+to inspect other rules consider iterating over the `results` property on the decision.
 
 The `ArcjetReason` object has the following methods that can be used to check
 which rule caused the conclusion:

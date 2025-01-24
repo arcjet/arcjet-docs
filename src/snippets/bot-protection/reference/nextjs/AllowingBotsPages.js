@@ -22,6 +22,7 @@ export default async function handler(req, res) {
   const decision = await aj.protect(req);
 
   if (decision.isDenied()) {
+    // Bots not in the allow list will be blocked
     if (decision.reason.isBot()) {
       return res.status(403).json({
         error: "You are a bot!",
@@ -41,6 +42,8 @@ export default async function handler(req, res) {
       continue;
     }
 
+    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+    // https://docs.arcjet.com/bot-protection/reference#bot-verification
     if (reason.isBot() && reason.isSpoofed()) {
       return res.status(403).json({
         error: "You are pretending to be a good bot!",

@@ -75,6 +75,9 @@ function isFreeEmail(decision: ArcjetDecision): boolean {
 
 function isSpoofed(result: ArcjetRuleResult) {
   return (
+    // You probably don't want DRY_RUN rules resulting in a denial
+    // since they are generally used for evaluation purposes but you
+    // could log here.
     result.state !== "DRY_RUN" &&
     result.reason.isBot() &&
     result.reason.isSpoofed()

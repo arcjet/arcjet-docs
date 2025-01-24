@@ -55,8 +55,7 @@ export class PageController {
 
     for (const { reason } of decision.results) {
       if (reason.isError()) {
-        // Fail open to prevent an Arcjet error from blocking all requests. You
-        // may want to fail closed if this controller is very sensitive
+        // Fail open by logging the error and continuing
         this.logger.error(`Arcjet error: ${reason.message}`);
       }
     }

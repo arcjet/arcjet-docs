@@ -41,7 +41,7 @@ export default async function handler(
     //return res.status(503).json({ error: "Service unavailable" });
   }
 
-  for (const { reason } of decision.results) {
+  for (const { reason, state } of decision.results) {
     if (reason.isError()) {
       if (reason.message.includes("requires user-agent header")) {
         // Requests without User-Agent headers can not be identified as any
@@ -50,7 +50,10 @@ export default async function handler(
         // requests without it.
         // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
         console.warn("User-Agent header is missing");
-        return res.status(400).json({ error: "Bad request" });
+
+        if (state !== "DRY_RUN") {
+          return res.status(400).json({ error: "Bad request" });
+        }
       } else {
         // Fail open by logging the error and continuing
         console.warn("Arcjet error", reason.message);

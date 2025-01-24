@@ -13,6 +13,9 @@ const aj = arcjet({
 
 function isSpoofed(result: ArcjetRuleResult) {
   return (
+    // You probably don't want DRY_RUN rules resulting in a denial
+    // since they are generally used for evaluation purposes but you
+    // could log here.
     result.state !== "DRY_RUN" &&
     result.reason.isBot() &&
     result.reason.isSpoofed()
@@ -24,7 +27,7 @@ export default {
   fetch: aj.handler(async (req) => {
     const decision = await aj.protect(req);
 
-    for (const { reason } of decision.results) {
+    for (const { reason, state } of decision.results) {
       if (reason.isError()) {
         if (reason.message.includes("requires user-agent header")) {
           // Requests without User-Agent headers can not be identified as any
@@ -33,7 +36,10 @@ export default {
           // requests without it.
           // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
           console.warn("User-Agent header is missing");
-          return new Response("Bad request", { status: 400 });
+
+          if (state !== "DRY_RUN") {
+            return new Response("Bad request", { status: 400 });
+          }
         } else {
           // Fail open by logging the error and continuing
           console.warn("Arcjet error", reason.message);

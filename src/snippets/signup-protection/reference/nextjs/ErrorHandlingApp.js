@@ -31,7 +31,7 @@ export async function POST(req) {
     email,
   });
 
-  for (const { reason } of decision.results) {
+  for (const { reason, state } of decision.results) {
     if (reason.isError()) {
       if (reason.message.includes("requires user-agent header")) {
         // Requests without User-Agent headers can not be identified as any
@@ -40,7 +40,10 @@ export async function POST(req) {
         // requests without it.
         // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
         console.warn("User-Agent header is missing");
-        return NextResponse.json({ error: "Bad request" }, { status: 400 });
+
+        if (state !== "DRY_RUN") {
+          return NextResponse.json({ error: "Bad request" }, { status: 400 });
+        }
       } else {
         // Fail open by logging the error and continuing
         console.warn("Arcjet error", reason.message);

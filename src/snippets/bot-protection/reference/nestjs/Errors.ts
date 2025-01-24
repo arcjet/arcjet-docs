@@ -53,7 +53,7 @@ export class PageController {
       )
       .protect(req);
 
-    for (const { reason } of decision.results) {
+    for (const { reason, state } of decision.results) {
       if (reason.isError()) {
         if (reason.message.includes("requires user-agent header")) {
           // Requests without User-Agent headers can not be identified as any
@@ -61,11 +61,14 @@ export class PageController {
           // legitimate clients always send this header, so we recommend blocking
           // requests without it.
           // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
-          console.warn("User-Agent header is missing");
-          throw new HttpException("Bad request", HttpStatus.BAD_REQUEST);
+          this.logger.warn("User-Agent header is missing");
+
+          if (state !== "DRY_RUN") {
+            throw new HttpException("Bad request", HttpStatus.BAD_REQUEST);
+          }
         } else {
           // Fail open by logging the error and continuing
-          console.warn("Arcjet error", reason.message);
+          this.logger.error(`Arcjet error: ${reason.message}`);
           // You could also fail closed here for very sensitive routes
           //throw new HttpException("Service unavailable", HttpStatus.SERVICE_UNAVAILABLE);
         }

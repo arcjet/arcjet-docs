@@ -23,6 +23,7 @@ export async function loader(args: LoaderFunctionArgs) {
   const decision = await aj.protect(args);
 
   if (decision.isDenied()) {
+    // Bots not in the allow list will be blocked
     if (decision.reason.isBot()) {
       return new Response("You are a bot!", {
         status: 403,
@@ -41,6 +42,8 @@ export async function loader(args: LoaderFunctionArgs) {
       continue;
     }
 
+    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+    // https://docs.arcjet.com/bot-protection/reference#bot-verification
     if (reason.isBot() && reason.isSpoofed()) {
       return new Response("You are pretending to be a good bot!", {
         status: 403,
