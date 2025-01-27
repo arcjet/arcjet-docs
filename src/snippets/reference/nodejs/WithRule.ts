@@ -51,7 +51,7 @@ const server = http.createServer(async function (
       res.end(
         JSON.stringify({ error: "Too Many Requests", reason: decision.reason }),
       );
-    } else if (decision.reason.isBot()) {
+    } else {
       res.writeHead(403, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Forbidden", reason: decision.reason }));
     }
