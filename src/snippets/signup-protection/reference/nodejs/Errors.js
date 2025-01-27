@@ -52,10 +52,11 @@ app.post("/", async (req, res) => {
         // requests without it.
         // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
         console.warn("User-Agent header is missing");
-        res.writeHead(400, { "Content-Type": "application/json" });
 
         if (state !== "DRY_RUN") {
+          res.writeHead(400, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ error: "Bad request" }));
+          return;
         }
       } else {
         // Fail open by logging the error and continuing

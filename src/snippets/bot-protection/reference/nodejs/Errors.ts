@@ -30,6 +30,7 @@ const server = http.createServer(async function (
         if (state !== "DRY_RUN") {
           res.writeHead(400, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ error: "Bad request" }));
+          return;
         }
       } else {
         // Fail open by logging the error and continuing
