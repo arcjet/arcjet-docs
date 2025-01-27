@@ -35,6 +35,7 @@ import SDKVersionNosecone from "@/components/SDKVersionNosecone.astro";
 import SlotByFramework from "@/components/SlotByFramework";
 import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 import Comments from "/src/components/Comments.astro";
+import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 
 import BunStep1 from "@/snippets/nosecone/quick-start/bun/Step1.mdx";
 import BunStep2 from "@/snippets/nosecone/quick-start/bun/Step2.mdx";
@@ -152,12 +153,31 @@ ensure it continues to work as expected.
 
 ## What next?
 
+<LinkCard
+  title="Nosecone reference"
+  href="/nosecone/reference"
+  description="Details about each security header and how to configure them."
+/>
+
+### Explore
+
+Arcjet can protect your entire app or individual routes with just
+a few lines of code. Using the main Arcjet SDK you can setup bot protection,
+rate limiting for your API, minimize fraudulent registrations with the
+signup form protection and more.
+
 <CardGrid>
   <LinkCard
-    title="Nosecone reference"
-    href="/nosecone/reference"
-    description="Details about each security header and how to configure them."
-  ></LinkCard>
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  />
+  <LinkCard
+    title="Learn how Arcjet works"
+    href="/architecture"
+    description="Arcjet's architecture."
+  />
+  <SdkReferenceLinkByFramework />
 </CardGrid>
 
 ## Get help
