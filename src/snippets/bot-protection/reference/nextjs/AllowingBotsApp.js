@@ -22,10 +22,9 @@ const aj = arcjet({
 export async function POST(req) {
   const decision = await aj.protect(req);
 
-  if (decision.reason.isBot()) {
-    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
-    // https://docs.arcjet.com/bot-protection/reference#bot-verification
-    if (decision.isDenied() || decision.reason.isSpoofed()) {
+  if (decision.isDenied()) {
+    // Bots not in the allow list will be blocked
+    if (decision.reason.isBot()) {
       return NextResponse.json(
         {
           error: "You are a bot!",
@@ -33,6 +32,23 @@ export async function POST(req) {
           // production
           denied: decision.reason.denied,
         },
+        { status: 403 },
+      );
+    } else {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+  }
+
+  for (const { state, reason } of decision.results) {
+    if (state === "DRY_RUN") {
+      continue;
+    }
+
+    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+    // https://docs.arcjet.com/bot-protection/reference#bot-verification
+    if (reason.isBot() && reason.isSpoofed()) {
+      return NextResponse.json(
+        { error: "You are pretending to be a good bot!" },
         { status: 403 },
       );
     }

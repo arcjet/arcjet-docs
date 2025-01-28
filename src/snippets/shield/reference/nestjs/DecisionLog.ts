@@ -1,4 +1,10 @@
-import { ARCJET, type ArcjetNest, detectBot, shield } from "@arcjet/nest";
+import {
+  ARCJET,
+  type ArcjetNest,
+  ArcjetRuleResult,
+  detectBot,
+  shield,
+} from "@arcjet/nest";
 import {
   Controller,
   Get,
@@ -10,6 +16,17 @@ import {
   Req,
 } from "@nestjs/common";
 import type { Request } from "express";
+
+function isSpoofed(result: ArcjetRuleResult) {
+  return (
+    // You probably don't want DRY_RUN rules resulting in a denial
+    // since they are generally used for evaluation purposes but you
+    // could log here.
+    result.state !== "DRY_RUN" &&
+    result.reason.isBot() &&
+    result.reason.isSpoofed()
+  );
+}
 
 // This would normally go in your service file e.g.
 // src/page/page.service.ts
@@ -82,10 +99,10 @@ export class PageController {
     }
 
     // Arcjet Pro plan verifies the authenticity of common bots using IP data.
-    // Verification isn't always possible, so we recommend checking the decision
+    // Verification isn't always possible, so we recommend checking the results
     // separately.
     // https://docs.arcjet.com/bot-protection/reference#bot-verification
-    if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+    if (decision.results.some(isSpoofed)) {
       throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
     }
 

@@ -310,11 +310,22 @@ check the conclusion:
 - `isDenied()` (`bool`) - The request should be denied.
 - `isErrored()` (`bool`) - There was an unrecoverable error.
 
+The conclusion will be the highest-severity finding when evaluating the configured
+rules. `"DENY"` is the highest severity, followed by `"CHALLENGE"`, then `"ERROR"` and
+finally `"ALLOW"` as the lowest severity.
+
+For example, when a bot protection rule returns an error and a validate email
+rule returns a deny, the overall conclusion would be deny. To access the error
+you would have to use the `results` property on the decision.
+
 ### Reason
 
 The `reason` property of the `ArcjetDecision` object contains an `ArcjetReason`
 object which provides more detailed information about the conclusion. This is
 the final decision reason and is based on the configured rules.
+
+It will always be the highest-priority rule that produced that conclusion,
+to inspect other rules consider iterating over the `results` property on the decision.
 
 The `ArcjetReason` object has the following methods that can be used to check
 which rule caused the conclusion:
@@ -455,7 +466,12 @@ not block all requests. The SDK will also time out and fail open after 1000ms
 when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
 in most cases, the response time will be less than 20-30ms.
 
-If there is an error condition, Arcjet will return an `ERROR` `conclusion`.
+If there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the `message` property on the rule's
+error result for more information.
+
+If all other rules that were run returned an `ALLOW` result, then the final Arcjet
+conclusion will be `ERROR`.
 
 <Tabs>
   <TabItem label="TS">

@@ -1,5 +1,5 @@
 import { env } from "$env/dynamic/private";
-import arcjet, { detectBot } from "@arcjet/sveltekit";
+import arcjet, { ArcjetRuleResult, detectBot } from "@arcjet/sveltekit";
 import { error, type RequestEvent } from "@sveltejs/kit";
 
 const aj = arcjet({
@@ -19,6 +19,17 @@ const aj = arcjet({
   ],
 });
 
+function isSpoofed(result: ArcjetRuleResult) {
+  return (
+    // You probably don't want DRY_RUN rules resulting in a denial
+    // since they are generally used for evaluation purposes but you
+    // could log here.
+    result.state !== "DRY_RUN" &&
+    result.reason.isBot() &&
+    result.reason.isSpoofed()
+  );
+}
+
 export async function handle({
   event,
   resolve,
@@ -34,10 +45,10 @@ export async function handle({
   }
 
   // Arcjet Pro plan verifies the authenticity of common bots using IP data.
-  // Verification isn't always possible, so we recommend checking the decision
+  // Verification isn't always possible, so we recommend checking the results
   // separately.
   // https://docs.arcjet.com/bot-protection/reference#bot-verification
-  if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+  if (decision.results.some(isSpoofed)) {
     return error(403, "You are a bot!");
   }
 

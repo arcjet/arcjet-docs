@@ -29,17 +29,25 @@ export async function handle({
 }): Promise<Response> {
   const decision = await aj.protect(event);
 
-  // Bots not in the allow list will be blocked
   if (decision.isDenied()) {
-    return error(403, "You are a bot!");
+    // Bots not in the allow list will be blocked
+    if (decision.reason.isBot()) {
+      return error(403, "You are a bot!");
+    } else {
+      return error(403, "Forbidden");
+    }
   }
 
-  // Arcjet Pro plan verifies the authenticity of common bots using IP data.
-  // Verification isn't always possible, so we recommend checking the decision
-  // separately.
-  // https://docs.arcjet.com/bot-protection/reference#bot-verification
-  if (decision.reason.isBot() && decision.reason.isSpoofed()) {
-    return error(403, "You are a bot!");
+  for (const { state, reason } of decision.results) {
+    if (state === "DRY_RUN") {
+      continue;
+    }
+
+    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+    // https://docs.arcjet.com/bot-protection/reference#bot-verification
+    if (reason.isBot() && reason.isSpoofed()) {
+      return error(403, "You are pretending to be a good bot!");
+    }
   }
 
   return resolve(event);
