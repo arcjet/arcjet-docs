@@ -36,6 +36,7 @@ import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import SlotByFramework from "@/components/SlotByFramework";
 import FrameworkName from "@/components/FrameworkName";
+import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 
 import Step1Bun from "@/snippets/signup-protection/quick-start/bun/Step1.mdx";
 import Step1NestJs from "@/snippets/signup-protection/quick-start/nestjs/Step1.mdx";
@@ -143,6 +144,27 @@ The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
     href="/testing"
     description="Write tests for your rules."
   />
+</CardGrid>
+
+### Explore
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can setup bot protection, rate
+limiting for your API, minimize fraudulent registrations with the signup form
+protection and more.
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  />
+  <LinkCard
+    title="Learn how Arcjet works"
+    href="/architecture"
+    description="Arcjet's architecture."
+  />
+  <SdkReferenceLinkByFramework />
 </CardGrid>
 
 ## Get help
