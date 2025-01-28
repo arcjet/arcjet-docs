@@ -1,0 +1,38 @@
+.ThemeSwitcherWrapper {
+  position: relative;
+  vertical-align: top;
+  display: inline-block;
+}
+
+.ThemeSwitcher {
+  &:global {
+    &.Size-md {
+      min-width: calc(var(--sp) * 7);
+    }
+  }
+
+  & :global {
+    .Size-md {
+      min-width: 0px;
+    }
+
+    .Select {
+      min-width: 0px;
+    }
+
+    .TriggerText {
+      display: none;
+    }
+  }
+}
+
+.Skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0px;
+
+  z-index: 10;
+}

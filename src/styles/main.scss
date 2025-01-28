@@ -187,6 +187,16 @@ header .header {
   height: calc(var(--sp) * 3.5);
 }
 
+.header .right-group {
+  justify-content: flex-end;
+}
+
+starlight-theme-select {
+  display: inline-flex;
+  vertical-align: top;
+  align-items: center;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // SIDEBAR
 .sidebar-pane {
@@ -576,6 +586,24 @@ h6,
 }
 
 // Selects on Windows, linux, etc.
+:root[data-theme="dark"] {
+  select {
+    --dropdown-bg: var(--aj-palette-source-neutral-01);
+    --dropdown-option-hoverBg: var(--aj-palette-source-neutral-03);
+    --dropdown-option-checkedBg: var(--aj-palette-source-neutral-02);
+    --dropdown-option-color: var(--aj-palette-source-white);
+  }
+}
+
+:root[data-theme="light"] {
+  select {
+    --dropdown-bg: var(--aj-palette-source-neutral-14);
+    --dropdown-option-hoverBg: var(--aj-palette-source-neutral-12);
+    --dropdown-option-checkedBg: var(--aj-palette-source-neutral-13);
+    --dropdown-option-color: var(--aj-palette-source-black);
+  }
+}
+
 select {
   background: var(--dropdown-bg);
 }
