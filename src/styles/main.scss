@@ -52,11 +52,17 @@
 }
 
 [data-theme="dark"]:root {
-  background-color: #070708;
+  body {
+    background: var(--colorBg);
+    background-color: var(--colorBg);
+  }
 }
 
 [data-theme="light"]:root {
-  background-color: #fcfafd;
+  body {
+    background: var(--colorBg);
+    background-color: var(--colorBg);
+  }
 }
 
 html {
@@ -159,10 +165,17 @@ body {
 //////////////////////////////////////////////////////////////////////////////////////////
 // HEADER
 header.header {
-  background: var(--sl-color-bg-nav);
+  background-color: var(--colorBg);
   border-bottom: none;
   max-width: min(100vw, var(--content-max-width));
   left: max(0px, calc((100vw - var(--content-max-width)) / 2));
+}
+
+@media (min-width: 72rem) {
+  header.header {
+    background-color: rgba(var(--colorBgRgb) / 0.3);
+    backdrop-filter: blur(var(--blur1));
+  }
 }
 
 header .header {
@@ -430,7 +443,8 @@ starlight-theme-select {
 // Only for default Starlight right sidebar
 mobile-starlight-toc nav {
   border: none;
-  background: var(--sl-color-bg-nav);
+  background-color: rgba(var(--colorBgRgb) / 0.3);
+  backdrop-filter: blur(var(--blur1));
   top: var(--Header-height);
   padding-top: calc(var(--sp) * 3);
 
