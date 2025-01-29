@@ -179,7 +179,9 @@ header.header {
 }
 
 header .header {
-  grid-template-columns: var(--Sidebar-width) 1fr var(--PageSidebar-width);
+  grid-template-columns:
+    calc(var(--Sidebar-width) - var(--sl-nav-pad-x))
+    1fr calc(var(--PageSidebar-width) - var(--sl-nav-pad-x));
 
   *:nth-child(2) {
     justify-content: center;
