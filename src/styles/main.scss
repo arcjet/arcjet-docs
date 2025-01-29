@@ -257,7 +257,29 @@ starlight-theme-select {
       width: 100%;
     }
 
+    &:before,
+    &:after {
+      content: "";
+      position: absolute;
+      z-index: 10;
+      pointer-events: none;
+      left: 0;
+      width: 100%;
+      height: calc(var(--sp) * 4);
+    }
+
+    &:before {
+      top: 0;
+      background: var(--scrollable-fade-top);
+    }
+
+    &:after {
+      bottom: 93px;
+      background: var(--scrollable-fade-bottom);
+    }
+
     sl-sidebar-state-persist {
+      position: relative;
       padding: 0 var(--sl-sidebar-pad-x);
       padding-top: calc(var(--sp) * 4.5);
       padding-bottom: calc(var(--sp) * 4.5);
@@ -366,8 +388,22 @@ starlight-theme-select {
 @media (max-width: 1151px) {
   .sidebar-content {
     .aj-sidebar.aj-custom {
+      &:before {
+        height: calc(var(--sp) * 2.5);
+      }
+
       sl-sidebar-state-persist {
         padding-top: calc(var(--sp) * 0.5);
+      }
+    }
+  }
+}
+
+@media (min-width: 50rem) {
+  .sidebar-content {
+    .aj-sidebar.aj-custom {
+      &:after {
+        bottom: 44px;
       }
     }
   }
@@ -450,17 +486,39 @@ mobile-starlight-toc nav {
   top: var(--Header-height);
   padding-top: calc(var(--sp) * 3);
 
+  &:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      rgba(var(--colorBgRgb) / 1) 8px,
+      rgba(var(--colorBgRgb) / 0)
+    );
+  }
+
+  & > * {
+    position: relative;
+    z-index: 10;
+  }
+
   summary {
     gap: 0.5rem;
     align-items: center;
-    border-top: 1px solid
-      rgba(var(--aj-palette-input-primary-solid-border) / 0.2);
-    border-bottom: 1px solid
-      rgba(var(--aj-palette-input-primary-solid-border) / 0.2);
+    border: 0px;
+    padding: calc(var(--sp) * 1) var(--sl-content-pad-x) calc(var(--sp) * 3);
+    height: auto;
   }
 
   .dropdown {
-    background: var(--sl-color-bg);
+    background: transparent;
+    border: 0px;
+
+    padding: 0 var(--sl-content-pad-x);
   }
 }
 
