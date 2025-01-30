@@ -521,6 +521,45 @@ starlight-theme-select {
   }
 }
 
+.right-sidebar-panel starlight-toc {
+  a {
+    color: var(--aj-palette-txt-secondary);
+
+    transition: all var(--time-sm) var(--easing-default);
+
+    outline: none;
+
+    padding-inline: var(--pad-inline) var(--pad-inline);
+    margin: calc(var(--sp) * 0.2) 0;
+    margin-left: calc(1rem * var(--depth));
+    border-radius: calc(var(--sp) * 0.5);
+  }
+
+  a:hover,
+  a:focus {
+    background: var(--sidebar-link-hoverBg);
+    color: var(--aj-palette-txt-secondary);
+  }
+
+  a:active {
+    background: var(--sidebar-link-activeBg);
+  }
+
+  a[aria-current="true"] {
+    color: var(--aj-palette-txt-primary);
+    background: var(--sidebar-link-selectedBg);
+  }
+}
+
+.right-sidebar-panel starlight-toc h2,
+.toc-label {
+  font-size: 0.75rem;
+  color: var(--aj-palette-txt-quaternary);
+  text-transform: uppercase;
+  font-family: var(--sl-heading);
+  font-weight: 600;
+}
+
 // Only for default Starlight right sidebar
 .right-sidebar .right-sidebar-panel {
   padding: calc(var(--sp) * 5) calc(var(--sp) * 4);
@@ -586,16 +625,32 @@ mobile-starlight-toc nav {
 
     .isMobile {
       a {
-        padding: calc(var(--sp) * 1) calc(var(--sp) * (var(--depth) + 1));
         border: 0px;
-        color: var(--sl-color-gray-3);
 
-        &:hover {
-          color: var(--sl-color-gray-1);
+        border-radius: calc(var(--sp) * 0.5);
+        color: var(--aj-palette-txt-secondary);
+
+        transition: all var(--time-sm) var(--easing-default);
+
+        outline: none;
+
+        padding: calc(var(--sp) * 1) calc(var(--sp) * 1);
+        margin: calc(var(--sp) * 0.2) 0;
+        margin-left: calc(1rem * var(--depth));
+
+        &:hover,
+        &:focus {
+          background: var(--sidebar-link-hoverBg);
+          color: var(--aj-palette-txt-secondary);
+        }
+
+        &:active {
+          background: var(--sidebar-link-activeBg);
         }
 
         &[aria-current="true"] {
-          color: var(--sl-color-text-accent);
+          color: var(--aj-palette-txt-primary);
+          background: var(--sidebar-link-selectedBg);
         }
       }
     }
@@ -776,13 +831,4 @@ select option:hover,
 select option:focus-visible {
   background: var(--dropdown-option-hoverBg);
   color: var(--dropdown-option-color);
-}
-
-.right-sidebar-panel starlight-toc h2,
-.toc-label {
-  font-size: 0.75rem;
-  color: var(--aj-palette-txt-quaternary);
-  text-transform: uppercase;
-  font-family: var(--sl-heading);
-  font-weight: 600;
 }

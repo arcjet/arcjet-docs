@@ -30,9 +30,13 @@
 
         a {
           --pad-inline: 0.5rem;
-          border-radius: 0.25rem;
+          border-radius: calc(var(--sp) * 0.5);
           padding-block: 0.25rem;
+
           padding-inline: var(--pad-inline) var(--pad-inline);
+          margin: calc(var(--sp) * 0.2) 0;
+          margin-left: calc(1rem * var(--depth));
+
           line-height: 1.25;
           display: block;
           font-size: var(--sl-text-xs);
@@ -40,17 +44,20 @@
           color: var(--sl-color-gray-3);
           overflow-wrap: anywhere;
 
-          &:hover {
-            color: var(--sl-color-gray-1);
+          &:hover,
+          &:focus {
+            background: var(--sidebar-link-hoverBg);
+            color: var(--aj-palette-txt-secondary);
+          }
+
+          &:active {
+            background: var(--sidebar-link-activeBg);
           }
 
           &.Selected {
-            color: var(--sl-color-text-accent);
+            color: var(--aj-palette-txt-primary);
+            background: var(--sidebar-link-selectedBg);
           }
-        }
-
-        ul {
-          padding-left: 1rem;
         }
       }
     }
@@ -178,18 +185,32 @@
 
           line-height: 1.25;
 
-          padding: calc(var(--sp) * 1) calc(var(--sp) * (var(--depth) + 1));
+          padding: calc(var(--sp) * 1) calc(var(--sp) * 1);
+          margin: calc(var(--sp) * 0.2) 0;
+          margin-left: calc(1rem * var(--depth));
+
+          border-radius: calc(var(--sp) * 0.5);
+
+          outline: none;
 
           &:after {
             content: "";
           }
 
-          &:hover {
-            color: var(--sl-color-gray-1);
+          &:hover,
+          &:focus {
+            background: var(--sidebar-link-hoverBg);
+            color: var(--aj-palette-txt-secondary);
+          }
+
+          &:active {
+            background: var(--sidebar-link-activeBg);
           }
 
           &.Selected {
-            color: var(--sl-color-text-accent);
+            color: var(--aj-palette-txt-primary);
+            background: var(--sidebar-link-selectedBg);
+
             &:after {
               width: 1rem;
               background-color: var(--sl-color-text-accent);
