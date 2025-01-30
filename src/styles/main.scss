@@ -938,15 +938,42 @@ h6,
   transition: all var(--time-sm) var(--easing-default);
 }
 
-.link:hover,
-.link:focus,
-.sl-markdown-content a:hover:not(:where(.not-content *)),
-.sl-markdown-content a:focus:not(:where(.not-content *)) {
+.link:hover:not(.Button),
+.link:focus:not(.Button),
+.sl-markdown-content a:hover:not(:where(.not-content *)):not(.Button),
+.sl-markdown-content a:focus:not(:where(.not-content *)):not(.Button) {
   color: var(--aj-palette-txt-secondary);
 }
 
-.link:active,
-.sl-markdown-content a:active:not(:where(.not-content *)) {
+.link:focus:not(:active):not(.Button),
+.sl-markdown-content
+  a:focus:not(:active):not(:where(.not-content *)):not(.Button) {
+  position: relative;
+  outline: none;
+  color: var(--aj-palette-txt-primary);
+
+  &:before {
+    content: "";
+    position: absolute;
+    top: -0.1em;
+    right: -0.25em;
+    bottom: -0.15em;
+    left: -0.25em;
+
+    background: var(--aj-palette-block-level2-bg);
+    border-radius: calc(var(--sp) * 0.5);
+
+    z-index: -1;
+  }
+
+  & > * {
+    position: relative;
+    z-index: 10;
+  }
+}
+
+.link:active:not(.Button),
+.sl-markdown-content a:active:not(:where(.not-content *)):not(.Button) {
   color: var(--aj-palette-txt-tertiary);
 }
 
