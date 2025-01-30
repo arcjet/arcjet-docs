@@ -300,6 +300,8 @@ starlight-theme-select {
     }
     details summary {
       margin-top: calc(var(--sp) * 1.5);
+      pointer-events: none;
+      outline: none;
     }
     summary svg {
       display: none;
@@ -314,6 +316,11 @@ starlight-theme-select {
     summary + ul summary {
       margin-top: 0;
       pointer-events: all;
+
+      border-radius: calc(var(--sp) * 0.5);
+      transition: all var(--time-sm) var(--easing-default);
+
+      outline: none;
     }
     summary + ul details summary {
       margin-top: 0;
@@ -322,15 +329,27 @@ starlight-theme-select {
       display: block;
     }
     summary + ul summary .group-label span {
-      color: var(--aj-palette-txt-primary);
+      color: var(--aj-palette-txt-secondary);
       text-transform: none;
       font-size: 1rem;
+    }
+
+    summary + ul summary:has(+ ul a[aria-current="page"]) .group-label span {
+      color: var(--aj-palette-txt-primary);
     }
 
     // Items spacing
     ul li,
     ul li ul li {
       margin-top: calc(var(--sp) * 0.5);
+    }
+    ul li a {
+      padding: calc(var(--sp) * 0.3) var(--sl-sidebar-item-padding-inline);
+
+      outline: none;
+
+      border-radius: calc(var(--sp) * 0.5);
+      color: var(--aj-palette-txt-secondary);
     }
     summary + ul li {
       padding-left: 0;
@@ -349,19 +368,48 @@ starlight-theme-select {
 
     // Style items
     summary + ul li a {
-      color: var(--aj-palette-txt-primary);
+      padding: calc(var(--sp) * 0.3) var(--sl-sidebar-item-padding-inline);
+      margin: calc(var(--sp) * 0.2) 0;
+      border-radius: calc(var(--sp) * 0.5);
+
+      transition: all var(--time-sm) var(--easing-default);
+
+      outline: none;
+
+      color: var(--sidebar-link-l1-idleColor);
       font-weight: 600;
       font-size: 1rem;
     }
 
-    summary + ul li a[aria-current="page"] {
-      color: var(--aj-palette-background-body);
-    }
-
     // Readjust level 2+ items style
     summary + ul li summary + ul li a {
-      color: var(--aj-palette-txt-secondary);
+      padding: calc(var(--sp) * 0.3) var(--sl-sidebar-item-padding-inline);
+      color: var(--aj-palette-txt-tertiary);
       font-size: 0.875rem;
+    }
+
+    // All selected items style
+    ul li a[aria-current="page"],
+    summary + ul li a[aria-current="page"] {
+      color: var(--aj-palette-txt-primary);
+      background: var(--sidebar-link-selectedBg);
+      cursor: default;
+      pointer-events: none;
+    }
+
+    ul li a:hover,
+    ul li a:focus,
+    summary + ul summary:hover,
+    summary + ul summary:focus,
+    summary + ul li a:hover:not([aria-current="page"]),
+    summary + ul li a:focus:not([aria-current="page"]) {
+      background: var(--sidebar-link-hoverBg);
+    }
+
+    ul li a:active,
+    summary + ul summary:active,
+    summary + ul li a:active:not([aria-current="page"]) {
+      background: var(--sidebar-link-activeBg);
     }
 
     // External linking sidebar items
