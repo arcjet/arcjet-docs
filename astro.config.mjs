@@ -85,6 +85,13 @@ export default defineConfig({
       expressiveCode: {
         themes: [ajThemeDark, ajThemeLight],
       },
+      defaultLocale: "root",
+      locales: {
+        root: {
+          label: "English",
+          lang: "en",
+        },
+      },
     }),
     react(),
   ],
