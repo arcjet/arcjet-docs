@@ -90,9 +90,7 @@ const TOC = forwardRef(
     const switcher = useMemo(() => {
       return (
         <div className={styles.Switcher}>
-          <div className={styles.SwitcherLabel + " sl-hidden lg:sl-block"}>
-            Framework
-          </div>
+          <div className="toc-label sl-hidden lg:sl-block">Framework</div>
           <FrameworkSwitcher frameworks={astroEntry.data.frameworks} />
         </div>
       );
@@ -114,7 +112,13 @@ const TOC = forwardRef(
         <div className={cls} ref={ref} {...props}>
           <div className={styles.NavDesktop + " sl-hidden lg:sl-block"}>
             {switcher}
-            <h2>On this page</h2>
+            <div
+              className={
+                styles.OnThisPageLabel + " toc-label sl-hidden lg:sl-block"
+              }
+            >
+              Contents
+            </div>
             {recursiveRenderTocList(toc)}
           </div>
           <div className={styles.NavMobile + " lg:sl-hidden"}>
@@ -126,7 +130,7 @@ const TOC = forwardRef(
                 }
                 onClick={() => setMobileDropdownVisible(!mobileDropdownVisible)}
               >
-                On this page
+                Contents
                 <svg
                   aria-hidden="true"
                   className="caret"
