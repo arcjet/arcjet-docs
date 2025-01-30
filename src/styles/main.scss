@@ -173,7 +173,7 @@ header.header {
 
 @media (min-width: 72rem) {
   header.header {
-    background-color: rgba(var(--colorBgRgb) / 0.3);
+    background-color: rgba(var(--colorBgRgb) / 0.4);
     backdrop-filter: blur(var(--blur1));
   }
 }
@@ -481,7 +481,7 @@ starlight-theme-select {
 // Only for default Starlight right sidebar
 mobile-starlight-toc nav {
   border: none;
-  background-color: rgba(var(--colorBgRgb) / 0.3);
+  background-color: rgba(var(--colorBgRgb) / 0.4);
   backdrop-filter: blur(var(--blur1));
   top: var(--Header-height);
   padding-top: calc(var(--sp) * 3);
@@ -507,18 +507,50 @@ mobile-starlight-toc nav {
   }
 
   summary {
-    gap: 0.5rem;
+    gap: calc(var(--sp) * 2);
     align-items: center;
     border: 0px;
     padding: calc(var(--sp) * 1) var(--sl-content-pad-x) calc(var(--sp) * 3);
     height: auto;
+
+    .toggle {
+      border: none;
+      background: var(--aj-palette-block-level2-blurBg);
+
+      transition: all var(--time-sm) var(--easing-default);
+
+      &:hover,
+      &:focus {
+        background: var(--aj-palette-block-level3-blurBg);
+      }
+
+      &:active {
+        opacity: 0.8;
+      }
+    }
   }
 
   .dropdown {
     background: transparent;
     border: 0px;
 
-    padding: 0 var(--sl-content-pad-x);
+    padding: 0 var(--sl-content-pad-x) calc(var(--sp) * 3);
+
+    .isMobile {
+      a {
+        padding: calc(var(--sp) * 1) calc(var(--sp) * (var(--depth) + 1));
+        border: 0px;
+        color: var(--sl-color-gray-3);
+
+        &:hover {
+          color: var(--sl-color-gray-1);
+        }
+
+        &[aria-current="true"] {
+          color: var(--sl-color-text-accent);
+        }
+      }
+    }
   }
 }
 
