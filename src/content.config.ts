@@ -1,6 +1,6 @@
 import type { FrameworkKey } from "@/lib/prefs";
 import { docsLoader } from "@astrojs/starlight/loaders";
-import { docsSchema } from "@astrojs/starlight/schema";
+import { docsSchema, i18nSchema } from "@astrojs/starlight/schema";
 import { defineCollection, z } from "astro:content";
 
 export type TocNode = {
@@ -21,4 +21,5 @@ export const collections = {
       }),
     }),
   }),
+  i18n: defineCollection({ type: "data", schema: i18nSchema() }),
 };
