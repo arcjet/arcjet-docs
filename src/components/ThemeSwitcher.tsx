@@ -70,6 +70,7 @@ const ThemeSwitcher = forwardRef(
           onChange={onChange}
           value={selected}
           appearance="discreet"
+          level="secondary"
           decoratorLeft={
             selected == "auto" ? <IconThemeSystem /> : <IconThemeStroke />
           }

@@ -105,6 +105,7 @@ export const main = [
           {
             label: "Quick start",
             link: "/bot-protection/quick-start",
+            attrs: { class: "feature bot-protection" },
           },
           {
             label: "Concepts",
@@ -127,6 +128,7 @@ export const main = [
           {
             label: "Quick start",
             link: "/rate-limiting/quick-start",
+            attrs: { class: "feature rate-limiting" },
           },
           {
             label: "Concepts",
@@ -153,6 +155,7 @@ export const main = [
           {
             label: "Quick start",
             link: "/shield/quick-start",
+            attrs: { class: "feature shield-waf" },
           },
           {
             label: "Concepts",
@@ -171,6 +174,7 @@ export const main = [
           {
             label: "Quick start",
             link: "/email-validation/quick-start",
+            attrs: { class: "feature email-validation" },
           },
           {
             label: "Concepts",
@@ -189,6 +193,7 @@ export const main = [
           {
             label: "Quick start",
             link: "/signup-protection/quick-start",
+            attrs: { class: "feature signup-form-protection" },
           },
           {
             label: "Concepts",
@@ -207,6 +212,7 @@ export const main = [
           {
             label: "Quick start",
             link: "/sensitive-info/quick-start",
+            attrs: { class: "feature sensitive-information" },
           },
           {
             label: "Concepts",
@@ -266,7 +272,7 @@ export const main = [
             label: "Changelog",
             link: "https://blog.arcjet.com/tag/changelog/",
             attrs: { target: "_blank", class: "external-link" },
-          }
+          },
         ],
       },
       {
