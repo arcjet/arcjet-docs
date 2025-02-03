@@ -10,3 +10,42 @@ import type { Props } from "@astrojs/starlight/props";
   </Default>
   <SidebarLinks />
 </div>
+
+<script>
+  /**
+   * Persist sidebar scroll position
+   * Read: https://github.com/withastro/starlight/issues/307#issuecomment-1622619025
+   */
+  (() => {
+    const key = 'toc-position';
+    let timeout = 0;
+    let position = { scrollTop: 0 };
+    const sidebar = document.querySelector('sl-sidebar-state-persist');
+
+    if (sidebar) {
+      const data = sessionStorage.getItem(key);
+      if (data) {
+        try {
+          const obj = JSON.parse(data);
+          position = {
+            ...position, ...obj,
+          };
+          sidebar.scrollTop = position.scrollTop || 0;
+        }
+        catch (err) {
+          // ...
+        }
+      }
+
+      sidebar.addEventListener('scroll', () => {
+        position.scrollTop = sidebar.scrollTop;
+        if (!timeout) {
+          timeout = window.setTimeout(() => {
+            sessionStorage.setItem(key, JSON.stringify(position));
+            timeout = 0;
+          }, 100);
+        }
+      });
+    }
+  })();
+</script>
