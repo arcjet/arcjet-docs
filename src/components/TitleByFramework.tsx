@@ -27,7 +27,7 @@ const TitleByFramework = forwardRef(
 
     useEffect(() => {
       // Store initial title for cleanup
-      setInitialTitle(document.title);
+      if (!initialTitle) setInitialTitle(document.title);
 
       // Set the document title
       if (selectedFramework) {
@@ -38,7 +38,7 @@ const TitleByFramework = forwardRef(
 
       return () => {
         // cleanup
-        if (initialTitle) document.title = initialTitle + documentTitleSuffix;
+        if (initialTitle) document.title = initialTitle;
       };
     }, [selectedFramework, defaultTitle]);
 
