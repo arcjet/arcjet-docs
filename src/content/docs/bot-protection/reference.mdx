@@ -382,9 +382,11 @@ This will check if the bot is spoofed. You would usually return a 403 or similar
 response to block the request.
 
 ```ts
-if (decision.reason.isBot() && decision.reason.isSpoofed()) {
-  console.log("Detected spoofed bot", decision.reason.spoofed);
-  // Return a 403 or similar response
+for (const { reason } of decision.results) {
+  if (reason.isBot() && reason.isSpoofed()) {
+    console.log("Detected spoofed bot", reason.spoofed);
+    // Return a 403 or similar response
+  }
 }
 ```
 
@@ -393,9 +395,11 @@ if (decision.reason.isBot() && decision.reason.isSpoofed()) {
 This will check if the bot is verified.
 
 ```ts
-if (decision.reason.isBot() && decision.reason.isVerified()) {
-  console.log("Verified bot", decision.reason.verified);
-  // Allow the request
+for (const { reason } of decision.results) {
+  if (reason.isBot() && reason.isVerified()) {
+    console.log("Verified bot", reason.verified);
+    // Allow the request
+  }
 }
 ```
 
