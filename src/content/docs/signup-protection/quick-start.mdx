@@ -1,5 +1,13 @@
 ---
 title: "Signup form protection"
+titleByFramework:
+  default: "Signup form protection"
+  bun: "Signup form protection with Bun"
+  nest-js: "Signup form protection with NestJS"
+  next-js: "Signup form protection with Next.js"
+  node-js: "Signup form protection with Node.js"
+  remix: "Signup form protection with Remix"
+  sveltekit: "Signup form protection with SvelteKit"
 description: "Quick start guide to protect your signup forms from abuse to your Next.js, Node.js, Bun, Remix, or SvelteKit app with Arcjet Signup form protection."
 frameworks:
   - bun
@@ -35,6 +43,7 @@ ajToc:
 import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import SlotByFramework from "@/components/SlotByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
 import FrameworkName from "@/components/FrameworkName";
 import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 
@@ -64,6 +73,12 @@ import Comments from "/src/components/Comments.astro";
 Arcjet signup form protection combines rate limiting, bot protection, and email validation to protect your signup forms from abuse.
 
 <WhatIsArcjet />
+
+<FrameworkLinks
+  title="Choose a framework"
+  exclude={["bun-hono", "deno", "node-js-express", "node-js-hono"]}
+  client:load
+/>
 
 ## Quick start
 

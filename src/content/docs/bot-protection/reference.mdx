@@ -80,6 +80,7 @@ import { Badge } from "@astrojs/starlight/components";
 import Comments from "@/components/Comments.astro";
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
 
 import BunAllowingBots from "@/snippets/bot-protection/reference/bun/AllowingBots.mdx";
 import BunDecisionLog from "@/snippets/bot-protection/reference/bun/DecisionLog.mdx";
@@ -149,6 +150,12 @@ plan](https://arcjet.com/pricing).
 | <Badge text="Free" variant="caution" />   | Basic - user agent + IP type analysis                                          |
 | <Badge text="Pro" variant="note" />       | Advanced - IP reputation, [verification](#bot-verification), and other signals |
 | <Badge text="Enterprise" variant="tip" /> | Custom                                                                         |
+
+<FrameworkLinks
+  title="Choose a framework"
+  exclude={["bun-hono", "node-js-express", "node-js-hono"]}
+  client:load
+/>
 
 ## Configuration
 
