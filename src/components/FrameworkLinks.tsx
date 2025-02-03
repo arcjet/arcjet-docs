@@ -1,3 +1,4 @@
+import Button from "@/components/Button";
 import { Bun as IconBun } from "@/components/icons/tech/Bun";
 import { Deno as IconDeno } from "@/components/icons/tech/Deno";
 import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
@@ -5,8 +6,7 @@ import { NextJs as IconNextJs } from "@/components/icons/tech/NextJs";
 import { NodeJs as IconNodeJs } from "@/components/icons/tech/NodeJs";
 import { Remix as IconRemix } from "@/components/icons/tech/Remix";
 import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
-
-import Button from "@/components/Button";
+import { getStoredFramework } from "@/lib/prefs";
 import { queryParamFramework } from "@/store";
 import { useStore } from "@nanostores/react";
 import type { ForwardedRef, PropsWithChildren } from "react";
@@ -36,7 +36,12 @@ const FrameworkLinks = forwardRef(
     useEffect(() => {
       // Get the framework to display from query params
       const params = new URLSearchParams(window.location.search);
-      const f = params.get("f");
+      let f = params.get("f");
+
+      if (!f) {
+        const storedFramework = getStoredFramework();
+        if (storedFramework) f = storedFramework;
+      }
 
       if (f) setHide(true);
       else setHide(false);
@@ -52,7 +57,7 @@ const FrameworkLinks = forwardRef(
             <Button
               as="link"
               size="lg"
-              href="/get-started?f=bun"
+              href="?f=bun"
               decoratorLeft={<IconBun />}
             >
               Bun
@@ -60,7 +65,7 @@ const FrameworkLinks = forwardRef(
             <Button
               as="link"
               size="lg"
-              href="/get-started?f=bun-hono"
+              href="?f=bun-hono"
               decoratorLeft={<IconBun />}
             >
               Bun + Hono
@@ -68,7 +73,7 @@ const FrameworkLinks = forwardRef(
             <Button
               as="link"
               size="lg"
-              href="/get-started?f=deno"
+              href="?f=deno"
               decoratorLeft={<IconDeno />}
             >
               Deno
@@ -76,7 +81,7 @@ const FrameworkLinks = forwardRef(
             <Button
               as="link"
               size="lg"
-              href="/get-started?f=nest-js"
+              href="?f=nest-js"
               decoratorLeft={<IconNestJs />}
             >
               NestJS
@@ -84,7 +89,7 @@ const FrameworkLinks = forwardRef(
             <Button
               as="link"
               size="lg"
-              href="/get-started?f=next-js"
+              href="?f=next-js"
               decoratorLeft={<IconNextJs />}
             >
               Next.js
@@ -92,7 +97,7 @@ const FrameworkLinks = forwardRef(
             <Button
               as="link"
               size="lg"
-              href="/get-started?f=node-js"
+              href="?f=node-js"
               decoratorLeft={<IconNodeJs />}
             >
               Node.js
@@ -100,7 +105,7 @@ const FrameworkLinks = forwardRef(
             <Button
               as="link"
               size="lg"
-              href="/get-started?f=node-js-express"
+              href="?f=node-js-express"
               decoratorLeft={<IconNodeJs />}
             >
               Node.js + Express
@@ -108,7 +113,7 @@ const FrameworkLinks = forwardRef(
             <Button
               as="link"
               size="lg"
-              href="/get-started?f=node-js-hono"
+              href="?f=node-js-hono"
               decoratorLeft={<IconNodeJs />}
             >
               Node.js + Hono
@@ -116,7 +121,7 @@ const FrameworkLinks = forwardRef(
             <Button
               as="link"
               size="lg"
-              href="/get-started?f=remix"
+              href="?f=remix"
               decoratorLeft={<IconRemix />}
             >
               Remix
@@ -124,7 +129,7 @@ const FrameworkLinks = forwardRef(
             <Button
               as="link"
               size="lg"
-              href="/get-started?f=sveltekit"
+              href="?f=sveltekit"
               decoratorLeft={<IconSvelteKit />}
             >
               SvelteKit
