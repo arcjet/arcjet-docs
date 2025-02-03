@@ -1,5 +1,5 @@
 ---
-import TextByFramework from "@/components/TextByFramework";
+import TitleByFramework from "@/components/TitleByFramework";
 import Default from "@astrojs/starlight/components/PageTitle.astro";
 import type { Props } from "@astrojs/starlight/props";
 
@@ -7,7 +7,7 @@ const titleByFramework = Astro.props.entry.data.titleByFramework;
 ---
 
 {titleByFramework && (
-<h1 id="_top"><TextByFramework client:load {...titleByFramework} /></h1>
+<TitleByFramework client:load {...titleByFramework} />
 )}
 
 {! titleByFramework && (

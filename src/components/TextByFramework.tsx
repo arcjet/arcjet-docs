@@ -15,9 +15,10 @@ type PropsWithFrameworks = {
 // The default text
 type PropsWithDefault = {
   default?: string;
+  onChangeFramework?: (framework: FrameworkKey) => void;
 };
 
-type Props = PropsWithDefault & PropsWithFrameworks & PropsWithChildren;
+export type Props = PropsWithDefault & PropsWithFrameworks & PropsWithChildren;
 
 /**
  * Text By Framework
@@ -25,7 +26,10 @@ type Props = PropsWithDefault & PropsWithFrameworks & PropsWithChildren;
  * Renders the appropriate text based on the selected framework.
  */
 const TextByFramework = forwardRef(
-  ({ ...props }: Props, ref: ForwardedRef<HTMLElement>) => {
+  (
+    { onChangeFramework, default: defaultText, ...props }: Props,
+    ref: ForwardedRef<HTMLElement>,
+  ) => {
     const $displayedFramework = useStore(displayedFramework);
     const $availableFrameworks = useStore(availableFrameworks);
 
@@ -36,7 +40,7 @@ const TextByFramework = forwardRef(
     useEffect(() => {
       let framework: FrameworkKey | undefined = undefined;
 
-      if (props.default) {
+      if (defaultText) {
         // When a default is provided, set the framework
         // only if a preference is stored.
         const storedFramework = getStoredFramework();
@@ -55,26 +59,32 @@ const TextByFramework = forwardRef(
         );
 
         setSelectedFramework(match);
+        if (onChangeFramework) onChangeFramework(match);
       }
-    }, [$displayedFramework, $availableFrameworks]);
+    }, [
+      $displayedFramework,
+      $availableFrameworks,
+      onChangeFramework,
+      defaultText,
+    ]);
 
     const content = useMemo(() => {
       return (
         <>
           {selectedFramework
             ? extractSlotContent(props, selectedFramework)
-            : props.default}
+            : defaultText}
           {props.children}
         </>
       );
-    }, [selectedFramework, props]);
+    }, [selectedFramework, defaultText]);
 
     // Loading handling
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-      if (selectedFramework || props.default !== undefined) setLoading(false);
-    }, [selectedFramework, props]);
+      if (selectedFramework || defaultText !== undefined) setLoading(false);
+    }, [selectedFramework, defaultText]);
 
     return loading ? <Skeleton as="span" radius={0.5} inline /> : content;
   },
