@@ -107,6 +107,43 @@ const TOC = forwardRef(
       if (selectedFramework) setLoading(false);
     }, [selectedFramework]);
 
+    /**
+     * Reproduce first load scroll to anchor.
+     * The native behaviour doesn't work due
+     * to the content being rendered after load.
+     */
+    useEffect(() => {
+      if (window.location.hash) {
+        const targetId = window.location.hash.substring(1);
+        let element = document.getElementById(targetId);
+
+        const scroll = () => {
+          if (element) {
+            // Find the element position (with a pad)
+            let elementPosition =
+              element.getBoundingClientRect().top +
+              window.scrollY -
+              window.innerHeight * 0.075;
+
+            // Scroll
+            window.scrollTo({
+              top: elementPosition,
+              behavior: "smooth",
+            });
+          }
+        };
+
+        // Track document changes to find the element.
+        const observer = new MutationObserver(() => {
+          element = document.getElementById(targetId);
+          scroll();
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        scroll();
+      }
+    }, []);
+
     return (
       !loading && (
         <div className={cls} ref={ref} {...props}>
@@ -188,14 +225,12 @@ const TOCLink = forwardRef(
 
     const [target, isInView] = useElementInView({
       id: entry.anchor,
-      options: { root: null, rootMargin: "-10% 0px -75% 0px", threshold: 0 },
+      options: { root: null, rootMargin: "-5% 0px -90% 0px", threshold: 0 },
     });
 
     useEffect(() => {
       if (isInView) click(entry);
     }, [isInView]);
-
-    // TODO: Improve observer threshold
 
     return (
       <a
