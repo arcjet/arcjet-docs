@@ -101,11 +101,22 @@ if (decision.isDenied()) {
   }
 }
 
+function isSpoofed(result) {
+  return (
+    // You probably don't want DRY_RUN rules resulting in a denial
+    // since they are generally used for evaluation purposes but you
+    // could log here.
+    result.state !== "DRY_RUN" &&
+    result.reason.isBot() &&
+    result.reason.isSpoofed()
+  );
+}
+
 // Arcjet Pro plan verifies the authenticity of common bots using IP data.
 // Verification isn't always possible, so we recommend checking the decision
 // separately.
 // https://docs.arcjet.com/bot-protection/reference#bot-verification
-if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+if (decision.results.some(isSpoofed)) {
   console.error("Spoofed bot detected", decision);
   // Return 403
 }
@@ -280,6 +291,7 @@ The form submission is processed by the following API route:
 
 ```tsx title="/app/api/process-payment/route.ts"
 import arcjet, {
+  type ArcjetRuleResult,
   detectBot,
   shield,
   slidingWindow,
@@ -315,6 +327,17 @@ const aj = arcjet({
     }),
   ],
 });
+
+function isSpoofed(result: ArcjetRuleResult) {
+  return (
+    // You probably don't want DRY_RUN rules resulting in a denial
+    // since they are generally used for evaluation purposes but you
+    // could log here.
+    result.state !== "DRY_RUN" &&
+    result.reason.isBot() &&
+    result.reason.isSpoofed()
+  );
+}
 
 export async function POST(request: Request) {
   try {
@@ -356,7 +379,7 @@ export async function POST(request: Request) {
     // Verification isn't always possible, so we recommend checking the decision
     // separately.
     // https://docs.arcjet.com/bot-protection/reference#bot-verification
-    if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+    if (decision.results.some(isSpoofed)) {
       console.error("Spoofed bot detected", decision);
       return NextResponse.json(
         { success: false, message: "Forbidden" },

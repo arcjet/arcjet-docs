@@ -1,4 +1,9 @@
-import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/node";
+import arcjet, {
+  type ArcjetRuleResult,
+  detectBot,
+  shield,
+  tokenBucket,
+} from "@arcjet/node";
 import { serve, type HttpBindings } from "@hono/node-server";
 import { Hono } from "hono";
 
@@ -30,6 +35,17 @@ const aj = arcjet({
   ],
 });
 
+function isSpoofed(result: ArcjetRuleResult) {
+  return (
+    // You probably don't want DRY_RUN rules resulting in a denial
+    // since they are generally used for evaluation purposes but you
+    // could log here.
+    result.state !== "DRY_RUN" &&
+    result.reason.isBot() &&
+    result.reason.isSpoofed()
+  );
+}
+
 const app = new Hono<{ Bindings: HttpBindings }>();
 
 app.get("/", async (c) => {
@@ -50,7 +66,7 @@ app.get("/", async (c) => {
   // Verification isn't always possible, so we recommend checking the decision
   // separately.
   // https://docs.arcjet.com/bot-protection/reference#bot-verification
-  if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+  if (decision.results.some(isSpoofed)) {
     return c.json({ error: "Forbidden" }, 403);
   }
 

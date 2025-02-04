@@ -1,5 +1,10 @@
 /// <reference types="bun-types/bun.d.ts" />
-import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/bun";
+import arcjet, {
+  type ArcjetRuleResult,
+  detectBot,
+  shield,
+  tokenBucket,
+} from "@arcjet/bun";
 import { env } from "bun";
 
 const aj = arcjet({
@@ -30,6 +35,17 @@ const aj = arcjet({
   ],
 });
 
+function isSpoofed(result: ArcjetRuleResult) {
+  return (
+    // You probably don't want DRY_RUN rules resulting in a denial
+    // since they are generally used for evaluation purposes but you
+    // could log here.
+    result.state !== "DRY_RUN" &&
+    result.reason.isBot() &&
+    result.reason.isSpoofed()
+  );
+}
+
 Bun.serve({
   async fetch(req: Request) {
     const decision = await aj.protect(req, { requested: 5 }); // Deduct 5 tokens from the bucket
@@ -49,7 +65,7 @@ Bun.serve({
     // Verification isn't always possible, so we recommend checking the decision
     // separately.
     // https://docs.arcjet.com/bot-protection/reference#bot-verification
-    if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+    if (decision.results.some(isSpoofed)) {
       return new Response("Forbidden", { status: 403 });
     }
 
