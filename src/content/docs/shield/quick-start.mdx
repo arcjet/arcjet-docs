@@ -1,5 +1,13 @@
 ---
-title: "Shield quick start"
+title: "Shield WAF"
+titleByFramework:
+  default: "Shield WAF"
+  bun: "Shield WAF for Bun"
+  nest-js: "Shield WAF for NestJS"
+  next-js: "Shield WAF for Next.js"
+  node-js: "Shield WAF for Node.js"
+  remix: "Shield WAF for Remix"
+  sveltekit: "Shield WAF for SvelteKit"
 description: "Quick start guide for adding protection to your Next.js, Node.js, Bun, Remix, or SvelteKit app with Arcjet Shield WAF."
 frameworks:
   - bun
@@ -36,6 +44,7 @@ ajToc:
 
 import FrameworkName from "@/components/FrameworkName";
 import SlotByFramework from "@/components/SlotByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
 import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 import Comments from "/src/components/Comments.astro";
 import FAQs from "/src/components/FAQs.astro";
@@ -73,6 +82,12 @@ Arcjet Shield WAF protects your application against common attacks, including
 the [OWASP Top 10](https://owasp.org/www-project-top-ten/).
 
 <WhatIsArcjet />
+
+<FrameworkLinks
+  title="Choose a framework"
+  exclude={["bun-hono", "deno", "node-js-express", "node-js-hono"]}
+  client:load
+/>
 
 ## Quick start
 

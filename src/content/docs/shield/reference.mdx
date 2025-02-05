@@ -64,6 +64,7 @@ import { Badge } from "@astrojs/starlight/components";
 
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
 import DisplayType from "@/components/DisplayType.astro";
 
 import DecisionLogBun from "@/snippets/shield/reference/bun/DecisionLog.mdx";
@@ -98,6 +99,12 @@ plan](https://arcjet.com/pricing).
 | <Badge text="Free" variant="caution" />   | Basic                                                   |
 | <Badge text="Pro" variant="note" />       | Managed [OWASP Core Rule Set](https://coreruleset.org/) |
 | <Badge text="Enterprise" variant="tip" /> | Custom                                                  |
+
+<FrameworkLinks
+  title="Choose a framework"
+  exclude={["bun-hono", "deno", "node-js-express", "node-js-hono"]}
+  client:load
+/>
 
 ## Configuration
 

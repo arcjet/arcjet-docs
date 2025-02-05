@@ -1,5 +1,13 @@
 ---
-title: "Sensitive information quick start"
+title: "Sensitive information"
+titleByFramework:
+  default: "Sensitive information detection"
+  bun: "Sensitive information detection for Bun"
+  nest-js: "Sensitive information detection for NestJS"
+  next-js: "Sensitive information detection for Next.js"
+  node-js: "Sensitive information detection for Node.js"
+  remix: "Sensitive information detection for Remix"
+  sveltekit: "Sensitive information detection for SvelteKit"
 description: "Quick start guide for detecting sensitive information with Arcjet in your Next.js, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
@@ -34,6 +42,7 @@ ajToc:
 import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import SlotByFramework from "@/components/SlotByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
 import FrameworkName from "@/components/FrameworkName";
 import FAQs from "/src/components/FAQs.astro";
 import Comments from "/src/components/Comments.astro";
@@ -69,6 +78,12 @@ sensitive information such as personally identifiable information (PII) that
 you do not wish to handle.
 
 <WhatIsArcjet />
+
+<FrameworkLinks
+  title="Choose a framework"
+  exclude={["bun-hono", "deno", "node-js-express", "node-js-hono"]}
+  client:load
+/>
 
 ## Quick start
 
