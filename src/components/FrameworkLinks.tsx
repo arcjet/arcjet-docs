@@ -14,20 +14,32 @@ import { forwardRef, useEffect, useState } from "react";
 
 import styles from "./FrameworkLinks.module.scss";
 
+interface FrameworkLinksProps extends PropsWithChildren {
+  title?: string;
+  exclude?: FrameworkKey[];
+  path?: string;
+  alwaysShow?: boolean;
+}
+
 /**
  * Framework Links
  *
  * Renders a list of buttons that switch to a specific framework.
+ *
+ * @param title - The block title.
+ * @param exclude - A list of framework to exclude from display.
+ * @param path - An optional path to link to, defaults to the same page.
+ * @param alwaysShow - Show the links even if a framework is selected or stored.
  */
-
-interface FrameworkLinksProps extends PropsWithChildren {
-  title?: string;
-  exclude?: FrameworkKey[];
-}
-
 const FrameworkLinks = forwardRef(
   (
-    { title = "Choose a framework", exclude, ...props }: FrameworkLinksProps,
+    {
+      title = "Choose a framework",
+      exclude,
+      path = "",
+      alwaysShow,
+      ...props
+    }: FrameworkLinksProps,
     ref: ForwardedRef<HTMLDivElement>,
   ) => {
     const [hide, setHide] = useState(true);
@@ -44,9 +56,9 @@ const FrameworkLinks = forwardRef(
         if (storedFramework) f = storedFramework;
       }
 
-      if (f) setHide(true);
+      if (f && !alwaysShow) setHide(true);
       else setHide(false);
-    }, [$queryParamFramework]);
+    }, [$queryParamFramework, alwaysShow]);
 
     let cls = "FrameworkLinks " + styles.FrameworkLinks;
 
@@ -59,7 +71,7 @@ const FrameworkLinks = forwardRef(
               <Button
                 as="link"
                 size="lg"
-                href="?f=bun"
+                href={`${path}?f=bun`}
                 decoratorLeft={<IconBun />}
               >
                 Bun
@@ -69,7 +81,7 @@ const FrameworkLinks = forwardRef(
               <Button
                 as="link"
                 size="lg"
-                href="?f=bun-hono"
+                href={`${path}?f=bun-hono`}
                 decoratorLeft={<IconBun />}
               >
                 Bun + Hono
@@ -79,7 +91,7 @@ const FrameworkLinks = forwardRef(
               <Button
                 as="link"
                 size="lg"
-                href="?f=deno"
+                href={`${path}?f=deno`}
                 decoratorLeft={<IconDeno />}
               >
                 Deno
@@ -89,7 +101,7 @@ const FrameworkLinks = forwardRef(
               <Button
                 as="link"
                 size="lg"
-                href="?f=nest-js"
+                href={`${path}?f=nest-js`}
                 decoratorLeft={<IconNestJs />}
               >
                 NestJS
@@ -99,7 +111,7 @@ const FrameworkLinks = forwardRef(
               <Button
                 as="link"
                 size="lg"
-                href="?f=next-js"
+                href={`${path}?f=next-js`}
                 decoratorLeft={<IconNextJs />}
               >
                 Next.js
@@ -109,7 +121,7 @@ const FrameworkLinks = forwardRef(
               <Button
                 as="link"
                 size="lg"
-                href="?f=node-js"
+                href={`${path}?f=node-js`}
                 decoratorLeft={<IconNodeJs />}
               >
                 Node.js
@@ -119,7 +131,7 @@ const FrameworkLinks = forwardRef(
               <Button
                 as="link"
                 size="lg"
-                href="?f=node-js-express"
+                href={`${path}?f=node-js-express`}
                 decoratorLeft={<IconNodeJs />}
               >
                 Node.js + Express
@@ -129,7 +141,7 @@ const FrameworkLinks = forwardRef(
               <Button
                 as="link"
                 size="lg"
-                href="?f=node-js-hono"
+                href={`${path}?f=node-js-hono`}
                 decoratorLeft={<IconNodeJs />}
               >
                 Node.js + Hono
@@ -139,7 +151,7 @@ const FrameworkLinks = forwardRef(
               <Button
                 as="link"
                 size="lg"
-                href="?f=remix"
+                href={`${path}?f=remix`}
                 decoratorLeft={<IconRemix />}
               >
                 Remix
@@ -149,7 +161,7 @@ const FrameworkLinks = forwardRef(
               <Button
                 as="link"
                 size="lg"
-                href="?f=sveltekit"
+                href={`${path}?f=sveltekit`}
                 decoratorLeft={<IconSvelteKit />}
               >
                 SvelteKit
