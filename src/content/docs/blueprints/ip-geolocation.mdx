@@ -3,21 +3,24 @@ title: "Arcjet IP geolocation"
 description: "Use Arcjet's IP analysis to customize the response based on the IP location."
 ---
 
-import { Aside } from "@astrojs/starlight/components";
+import { Aside, Badge } from "@astrojs/starlight/components";
 
 Every decision provided by Arcjet includes IP address analysis. You can use this
 to customize your response based on the IP location.
 
 ## Available fields
 
-- Latitude and longitude.
-- Postal code e.g. `94104`.
-- City e.g. `San Francisco`.
-- Region e.g. `California`.
-- Country e.g. `US`.
-- Country name e.g. `United States`.
-- Continent e.g. `NA`.
-- Continent name e.g. `North America`.
+- Latitude and longitude. <Badge text="Pro" variant="note" />
+- Postal code e.g. `94104`. <Badge text="Pro" variant="note" />
+- City e.g. `San Francisco`. <Badge text="Pro" variant="note" />
+- Region e.g. `California`. <Badge text="Pro" variant="note" />
+- Country e.g. `US`. <Badge text="Free" variant="caution" /> <Badge text="Pro" variant="note" />
+- Country name e.g. `United States`. <Badge text="Free" variant="caution" /> <Badge text="Pro" variant="note" />
+- Continent e.g. `NA`. <Badge text="Pro" variant="note" />
+- Continent name e.g. `North America`. <Badge text="Pro" variant="note" />
+
+Note that the availability of these fields depends on your pricing plan,
+indicated by the badge next to each field.
 
 <Aside type="caution">
   IP geolocation can be notoriously inaccurate, especially for mobile devices,

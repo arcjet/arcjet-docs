@@ -11,7 +11,7 @@ export default function Page() {
 
     try {
       const formData = new FormData(event.currentTarget);
-      const response = await fetch("/api/form_js", {
+      const response = await fetch("/api/form", {
         method: "POST",
         body: JSON.stringify(Object.fromEntries(formData)),
         headers: {

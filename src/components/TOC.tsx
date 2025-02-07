@@ -1,5 +1,5 @@
 import FrameworkSwitcher from "@/components/FrameworkSwitcher";
-import type { TocNode } from "@/content/config";
+import type { TocNode } from "@/content.config";
 import useElementInView from "@/effects/useElementInView";
 import type { FrameworkKey } from "@/lib/prefs";
 import { displayedFramework } from "@/store";
@@ -90,9 +90,7 @@ const TOC = forwardRef(
     const switcher = useMemo(() => {
       return (
         <div className={styles.Switcher}>
-          <div className={styles.SwitcherLabel + " sl-hidden lg:sl-block"}>
-            Framework
-          </div>
+          <div className="toc-label sl-hidden lg:sl-block">Framework</div>
           <FrameworkSwitcher frameworks={astroEntry.data.frameworks} />
         </div>
       );
@@ -109,12 +107,55 @@ const TOC = forwardRef(
       if (selectedFramework) setLoading(false);
     }, [selectedFramework]);
 
+    /**
+     * Reproduce first load scroll to anchor.
+     * The native behaviour doesn't work due
+     * to the content being rendered after load.
+     */
+    useEffect(() => {
+      if (window.location.hash) {
+        const targetId = window.location.hash.substring(1);
+        let element = document.getElementById(targetId);
+
+        const scroll = () => {
+          if (element) {
+            // Find the element position (with a pad)
+            let elementPosition =
+              element.getBoundingClientRect().top +
+              window.scrollY -
+              window.innerHeight * 0.075;
+
+            // Scroll
+            window.scrollTo({
+              top: elementPosition,
+              behavior: "smooth",
+            });
+          }
+        };
+
+        // Track document changes to find the element.
+        const observer = new MutationObserver(() => {
+          element = document.getElementById(targetId);
+          scroll();
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        scroll();
+      }
+    }, []);
+
     return (
       !loading && (
         <div className={cls} ref={ref} {...props}>
           <div className={styles.NavDesktop + " sl-hidden lg:sl-block"}>
             {switcher}
-            <h2>On this page</h2>
+            <div
+              className={
+                styles.OnThisPageLabel + " toc-label sl-hidden lg:sl-block"
+              }
+            >
+              Contents
+            </div>
             {recursiveRenderTocList(toc)}
           </div>
           <div className={styles.NavMobile + " lg:sl-hidden"}>
@@ -126,7 +167,7 @@ const TOC = forwardRef(
                 }
                 onClick={() => setMobileDropdownVisible(!mobileDropdownVisible)}
               >
-                On this page
+                Contents
                 <svg
                   aria-hidden="true"
                   className="caret"
@@ -184,14 +225,12 @@ const TOCLink = forwardRef(
 
     const [target, isInView] = useElementInView({
       id: entry.anchor,
-      options: { root: null, rootMargin: "-10% 0px -75% 0px", threshold: 0 },
+      options: { root: null, rootMargin: "-5% 0px -90% 0px", threshold: 0 },
     });
 
     useEffect(() => {
       if (isInView) click(entry);
     }, [isInView]);
-
-    // TODO: Improve observer threshold
 
     return (
       <a

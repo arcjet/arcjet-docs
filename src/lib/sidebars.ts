@@ -32,6 +32,11 @@ export const main = [
             attrs: { target: "_blank", class: "external-link" },
           },
           {
+            label: "Next.js Starter",
+            link: "https://github.com/ixartz/Next-js-Boilerplate",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
             label: "Next.js SaaS template",
             link: "https://www.next-forge.com/",
             attrs: { target: "_blank", class: "external-link" },
@@ -39,6 +44,11 @@ export const main = [
           {
             label: "Remix",
             link: "https://github.com/arcjet/example-remix",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
+            label: "Remix SaaS template",
+            link: "https://github.com/dev-xo/remix-saas",
             attrs: { target: "_blank", class: "external-link" },
           },
           {
@@ -99,6 +109,7 @@ export const main = [
           {
             label: "Quick start",
             link: "/bot-protection/quick-start",
+            attrs: { class: "feature bot-protection" },
           },
           {
             label: "Concepts",
@@ -121,6 +132,7 @@ export const main = [
           {
             label: "Quick start",
             link: "/rate-limiting/quick-start",
+            attrs: { class: "feature rate-limiting" },
           },
           {
             label: "Concepts",
@@ -141,12 +153,13 @@ export const main = [
         ],
       },
       {
-        label: "Shield",
+        label: "Shield WAF",
         collapsed: true,
         items: [
           {
             label: "Quick start",
             link: "/shield/quick-start",
+            attrs: { class: "feature shield-waf" },
           },
           {
             label: "Concepts",
@@ -165,6 +178,7 @@ export const main = [
           {
             label: "Quick start",
             link: "/email-validation/quick-start",
+            attrs: { class: "feature email-validation" },
           },
           {
             label: "Concepts",
@@ -183,6 +197,7 @@ export const main = [
           {
             label: "Quick start",
             link: "/signup-protection/quick-start",
+            attrs: { class: "feature signup-form-protection" },
           },
           {
             label: "Concepts",
@@ -201,6 +216,7 @@ export const main = [
           {
             label: "Quick start",
             link: "/sensitive-info/quick-start",
+            attrs: { class: "feature sensitive-information" },
           },
           {
             label: "Concepts",
@@ -249,6 +265,21 @@ export const main = [
         ],
       },
       {
+        label: "Upgrading",
+        collapsed: true,
+        items: [
+          {
+            label: "SDK migration",
+            link: "/upgrading/sdk-migration",
+          },
+          {
+            label: "Changelog",
+            link: "https://blog.arcjet.com/tag/changelog/",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+        ],
+      },
+      {
         label: "Troubleshooting",
         link: "/troubleshooting",
       },
@@ -281,7 +312,25 @@ export const main = [
     collapsed: false,
     items: [
       {
-        label: "Redact",
+        label: "Nosecone",
+        collapsed: true,
+        items: [
+          {
+            label: "Quick start",
+            link: "/nosecone/quick-start",
+          },
+          {
+            label: "Reference",
+            link: "/nosecone/reference",
+          },
+        ],
+      },
+      {
+        label: "@arcjet/ip",
+        link: "/ip",
+      },
+      {
+        label: "@arcjet/redact",
         collapsed: true,
         items: [
           {
@@ -303,6 +352,10 @@ export const main = [
       {
         label: "Auth.js",
         link: "/integrations/authjs",
+      },
+      {
+        label: "Better Auth",
+        link: "/integrations/better-auth",
       },
       {
         label: "Clerk",
@@ -341,11 +394,6 @@ export const main = [
     label: "Info",
     collapsed: false,
     items: [
-      {
-        label: "Changelog",
-        link: "https://blog.arcjet.com/tag/changelog/",
-        attrs: { target: "_blank", class: "external-link" },
-      },
       {
         label: "Security",
         link: "/security",

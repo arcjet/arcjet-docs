@@ -1,3 +1,4 @@
+import Button from "@/components/Button";
 import { Bun as IconBun } from "@/components/icons/tech/Bun";
 import { Deno as IconDeno } from "@/components/icons/tech/Deno";
 import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
@@ -5,8 +6,7 @@ import { NextJs as IconNextJs } from "@/components/icons/tech/NextJs";
 import { NodeJs as IconNodeJs } from "@/components/icons/tech/NodeJs";
 import { Remix as IconRemix } from "@/components/icons/tech/Remix";
 import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
-
-import Button from "@/components/Button";
+import { getStoredFramework, type FrameworkKey } from "@/lib/prefs";
 import { queryParamFramework } from "@/store";
 import { useStore } from "@nanostores/react";
 import type { ForwardedRef, PropsWithChildren } from "react";
@@ -14,19 +14,32 @@ import { forwardRef, useEffect, useState } from "react";
 
 import styles from "./FrameworkLinks.module.scss";
 
+interface FrameworkLinksProps extends PropsWithChildren {
+  title?: string;
+  exclude?: FrameworkKey[];
+  path?: string;
+  alwaysShow?: boolean;
+}
+
 /**
  * Framework Links
  *
  * Renders a list of buttons that switch to a specific framework.
+ *
+ * @param title - The block title.
+ * @param exclude - A list of framework to exclude from display.
+ * @param path - An optional path to link to, defaults to the same page.
+ * @param alwaysShow - Show the links even if a framework is selected or stored.
  */
-
-interface FrameworkLinksProps extends PropsWithChildren {
-  title?: string;
-}
-
 const FrameworkLinks = forwardRef(
   (
-    { title = "Choose a framework", ...props }: FrameworkLinksProps,
+    {
+      title = "Choose a framework",
+      exclude,
+      path = "",
+      alwaysShow,
+      ...props
+    }: FrameworkLinksProps,
     ref: ForwardedRef<HTMLDivElement>,
   ) => {
     const [hide, setHide] = useState(true);
@@ -36,11 +49,16 @@ const FrameworkLinks = forwardRef(
     useEffect(() => {
       // Get the framework to display from query params
       const params = new URLSearchParams(window.location.search);
-      const f = params.get("f");
+      let f = params.get("f");
 
-      if (f) setHide(true);
+      if (!f) {
+        const storedFramework = getStoredFramework();
+        if (storedFramework) f = storedFramework;
+      }
+
+      if (f && !alwaysShow) setHide(true);
       else setHide(false);
-    }, [$queryParamFramework]);
+    }, [$queryParamFramework, alwaysShow]);
 
     let cls = "FrameworkLinks " + styles.FrameworkLinks;
 
@@ -49,86 +67,106 @@ const FrameworkLinks = forwardRef(
         <div ref={ref} className={cls} {...props}>
           <h2 id="choose-a-framework">{title}</h2>
           <div className={styles.Links}>
-            <Button
-              as="link"
-              size="lg"
-              href="/get-started?f=bun"
-              decoratorLeft={<IconBun />}
-            >
-              Bun
-            </Button>
-            <Button
-              as="link"
-              size="lg"
-              href="/get-started?f=bun-hono"
-              decoratorLeft={<IconBun />}
-            >
-              Bun + Hono
-            </Button>
-            <Button
-              as="link"
-              size="lg"
-              href="/get-started?f=deno"
-              decoratorLeft={<IconDeno />}
-            >
-              Deno
-            </Button>
-            <Button
-              as="link"
-              size="lg"
-              href="/get-started?f=nest-js"
-              decoratorLeft={<IconNestJs />}
-            >
-              NestJS
-            </Button>
-            <Button
-              as="link"
-              size="lg"
-              href="/get-started?f=next-js"
-              decoratorLeft={<IconNextJs />}
-            >
-              Next.js
-            </Button>
-            <Button
-              as="link"
-              size="lg"
-              href="/get-started?f=node-js"
-              decoratorLeft={<IconNodeJs />}
-            >
-              Node.js
-            </Button>
-            <Button
-              as="link"
-              size="lg"
-              href="/get-started?f=node-js-express"
-              decoratorLeft={<IconNodeJs />}
-            >
-              Node.js + Express
-            </Button>
-            <Button
-              as="link"
-              size="lg"
-              href="/get-started?f=node-js-hono"
-              decoratorLeft={<IconNodeJs />}
-            >
-              Node.js + Hono
-            </Button>
-            <Button
-              as="link"
-              size="lg"
-              href="/get-started?f=remix"
-              decoratorLeft={<IconRemix />}
-            >
-              Remix
-            </Button>
-            <Button
-              as="link"
-              size="lg"
-              href="/get-started?f=sveltekit"
-              decoratorLeft={<IconSvelteKit />}
-            >
-              SvelteKit
-            </Button>
+            {(!exclude || !exclude.includes("bun")) && (
+              <Button
+                as="link"
+                size="lg"
+                href={`${path}?f=bun`}
+                decoratorLeft={<IconBun />}
+              >
+                Bun
+              </Button>
+            )}
+            {(!exclude || !exclude.includes("bun-hono")) && (
+              <Button
+                as="link"
+                size="lg"
+                href={`${path}?f=bun-hono`}
+                decoratorLeft={<IconBun />}
+              >
+                Bun + Hono
+              </Button>
+            )}
+            {(!exclude || !exclude.includes("deno")) && (
+              <Button
+                as="link"
+                size="lg"
+                href={`${path}?f=deno`}
+                decoratorLeft={<IconDeno />}
+              >
+                Deno
+              </Button>
+            )}
+            {(!exclude || !exclude.includes("nest-js")) && (
+              <Button
+                as="link"
+                size="lg"
+                href={`${path}?f=nest-js`}
+                decoratorLeft={<IconNestJs />}
+              >
+                NestJS
+              </Button>
+            )}
+            {(!exclude || !exclude.includes("next-js")) && (
+              <Button
+                as="link"
+                size="lg"
+                href={`${path}?f=next-js`}
+                decoratorLeft={<IconNextJs />}
+              >
+                Next.js
+              </Button>
+            )}
+            {(!exclude || !exclude.includes("node-js")) && (
+              <Button
+                as="link"
+                size="lg"
+                href={`${path}?f=node-js`}
+                decoratorLeft={<IconNodeJs />}
+              >
+                Node.js
+              </Button>
+            )}
+            {(!exclude || !exclude.includes("node-js-express")) && (
+              <Button
+                as="link"
+                size="lg"
+                href={`${path}?f=node-js-express`}
+                decoratorLeft={<IconNodeJs />}
+              >
+                Node.js + Express
+              </Button>
+            )}
+            {(!exclude || !exclude.includes("node-js-hono")) && (
+              <Button
+                as="link"
+                size="lg"
+                href={`${path}?f=node-js-hono`}
+                decoratorLeft={<IconNodeJs />}
+              >
+                Node.js + Hono
+              </Button>
+            )}
+            {(!exclude || !exclude.includes("remix")) && (
+              <Button
+                as="link"
+                size="lg"
+                href={`${path}?f=remix`}
+                decoratorLeft={<IconRemix />}
+              >
+                Remix
+              </Button>
+            )}
+            {(!exclude || !exclude.includes("sveltekit")) && (
+              <Button
+                as="link"
+                size="lg"
+                href={`${path}?f=sveltekit`}
+                decoratorLeft={<IconSvelteKit />}
+              >
+                SvelteKit
+              </Button>
+            )}
           </div>
         </div>
       )

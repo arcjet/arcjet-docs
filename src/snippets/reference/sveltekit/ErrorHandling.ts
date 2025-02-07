@@ -24,17 +24,10 @@ export async function handle({
 }): Promise<Response> {
   const decision = await aj.protect(event);
 
-  if (decision.isErrored()) {
-    if (decision.reason.message.includes("missing User-Agent header")) {
-      // Requests without User-Agent headers can not be identified as any
-      // particular bot and will be marked as an errored decision. Most
-      // legitimate clients always send this header, so we recommend blocking
-      // requests without it.
-      console.warn("User-Agent header is missing");
-      return error(400, "Bad request");
-    } else {
+  for (const { reason } of decision.results) {
+    if (reason.isError()) {
       // Fail open by logging the error and continuing
-      console.warn("Arcjet error", decision.reason.message);
+      console.warn("Arcjet error", reason.message);
       // You could also fail closed here for very sensitive routes
       //return error(503, "Service unavailable");
     }

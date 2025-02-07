@@ -124,7 +124,7 @@ const Select = forwardRef(
         {decoratorLeft && (
           <span className={styles.DecoratorLeft}>{decoratorLeft}</span>
         )}
-        <span className={styles.TriggerText}>
+        <span className={`TriggerText ${styles.TriggerText}`}>
           {selected && triggerTextFromOptions(selected)}
         </span>
         <select

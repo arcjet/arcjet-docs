@@ -24,11 +24,26 @@ Deno.serve(
     const decision = await aj.protect(req);
 
     if (decision.isDenied()) {
-      return new Response("Forbidden", { status: 403 });
+      // Bots not in the allow list will be blocked
+      if (decision.reason.isBot()) {
+        return new Response("You are a bot!", { status: 403 });
+      } else {
+        return new Response("Forbidden", { status: 403 });
+      }
     }
 
-    if (decision.reason.isBot() && decision.reason.isSpoofed()) {
-      return new Response("Forbidden", { status: 403 });
+    for (const { state, reason } of decision.results) {
+      if (state === "DRY_RUN") {
+        continue;
+      }
+
+      // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+      // https://docs.arcjet.com/bot-protection/reference#bot-verification
+      if (reason.isBot() && reason.isSpoofed()) {
+        return new Response("You are pretending to be a good bot!", {
+          status: 403,
+        });
+      }
     }
 
     return new Response("Hello world");

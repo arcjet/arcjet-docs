@@ -40,7 +40,7 @@ const ajProtectedHandler = async (
       if (decision.reason.isRateLimit()) {
         return res.status(429).json({ error: "Too many requests" });
       } else {
-        return res.status(403).json({ error: "Unauthorized" });
+        return res.status(403).json({ error: "Forbidden" });
       }
     }
   }

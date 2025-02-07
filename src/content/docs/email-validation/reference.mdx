@@ -9,6 +9,8 @@ frameworks:
   - remix
   - sveltekit
 ajToc:
+  - text: "Plan availability"
+    anchor: "plan-availability"
   - text: "Configuration"
     anchor: "configuration"
   - text: "Pages & server actions"
@@ -22,17 +24,24 @@ ajToc:
     anchor: "testing"
 ---
 
-import { Aside } from "@astrojs/starlight/components";
+import { Aside, Badge } from "@astrojs/starlight/components";
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
 import DisplayType from "@/components/DisplayType.astro";
 
-import DecisionLogBun from "@/snippets/email-validation/reference/bun/DecisionLog.mdx";
-import DecisionLogNestJs from "@/snippets/email-validation/reference/nestjs/DecisionLog.mdx";
-import DecisionLogNextJs from "@/snippets/email-validation/reference/nextjs/DecisionLog.mdx";
-import DecisionLogNodeJs from "@/snippets/email-validation/reference/nodejs/DecisionLog.mdx";
-import DecisionLogRemix from "@/snippets/email-validation/reference/remix/DecisionLog.mdx";
-import DecisionLogSvelteKit from "@/snippets/email-validation/reference/sveltekit/DecisionLog.mdx";
+import DecisionLogAllowBun from "@/snippets/email-validation/reference/bun/DecisionLogAllow.mdx";
+import DecisionLogAllowNestJs from "@/snippets/email-validation/reference/nestjs/DecisionLogAllow.mdx";
+import DecisionLogAllowNextJs from "@/snippets/email-validation/reference/nextjs/DecisionLogAllow.mdx";
+import DecisionLogAllowNodeJs from "@/snippets/email-validation/reference/nodejs/DecisionLogAllow.mdx";
+import DecisionLogAllowRemix from "@/snippets/email-validation/reference/remix/DecisionLogAllow.mdx";
+import DecisionLogAllowSvelteKit from "@/snippets/email-validation/reference/sveltekit/DecisionLogAllow.mdx";
+import DecisionLogDenyBun from "@/snippets/email-validation/reference/bun/DecisionLogDeny.mdx";
+import DecisionLogDenyNestJs from "@/snippets/email-validation/reference/nestjs/DecisionLogDeny.mdx";
+import DecisionLogDenyNextJs from "@/snippets/email-validation/reference/nextjs/DecisionLogDeny.mdx";
+import DecisionLogDenyNodeJs from "@/snippets/email-validation/reference/nodejs/DecisionLogDeny.mdx";
+import DecisionLogDenyRemix from "@/snippets/email-validation/reference/remix/DecisionLogDeny.mdx";
+import DecisionLogDenySvelteKit from "@/snippets/email-validation/reference/sveltekit/DecisionLogDeny.mdx";
 import ErrorsBun from "@/snippets/email-validation/reference/bun/Errors.mdx";
 import ErrorsNestJs from "@/snippets/email-validation/reference/nestjs/Errors.mdx";
 import ErrorsNextJs from "@/snippets/email-validation/reference/nextjs/Errors.mdx";
@@ -47,10 +56,27 @@ Arcjet allows you validate & verify an email address. This is useful for
 preventing users from signing up with fake email addresses and can significantly
 reduce the amount of spam or fraudulent accounts.
 
+## Plan availability
+
+Arcjet email validation availability depends depends on your [pricing
+plan](https://arcjet.com/pricing).
+
+| Plan                                      | Email validation |
+| ----------------------------------------- | ---------------- |
+| <Badge text="Free" variant="caution" />   | No               |
+| <Badge text="Pro" variant="note" />       | Yes              |
+| <Badge text="Enterprise" variant="tip" /> | Custom           |
+
+<FrameworkLinks
+  title="Choose a framework"
+  exclude={["bun-hono", "deno", "node-js-express", "node-js-hono"]}
+  client:load
+/>
+
 ## Configuration
 
-Email validation is configured by specifying the email types you wish to block
-and whether you wish to modify certain validation options.
+Email validation is configured by specifying the email types you wish to allow
+or deny, and whether you wish to modify certain validation options.
 
 The `arcjet` client can be configured with one or more Email validation rules,
 which are constructed with the `validateEmail(options: EmailOptions)` function
@@ -66,8 +92,10 @@ and configured by `EmailOptions`:
   [decision](#decision) below for details of examining the execution results.
 </Aside>
 
-Which email types to block is configured by listing the types in the
-configuration block.
+The `allow`and `deny` lists are mutually-exclusive, such that using `allow` will
+result in a `DENY` decision for any email type that is not specified in the
+`allow` list and using `deny` will result in an `ALLOW` decision for any email
+type that is not specified in the `deny` list.
 
 The validation options can usually be left as the defaults. However, if you wish
 to allow certain types of email addresses, you can modify the options:
@@ -126,12 +154,26 @@ for (const result of decision.results) {
 This example will log the full result as well as the email validation rule:
 
 <SlotByFramework client:load>
-  <DecisionLogBun slot="bun" />
-  <DecisionLogNestJs slot="nest-js" />
-  <DecisionLogNextJs slot="next-js" />
-  <DecisionLogNodeJs slot="node-js" />
-  <DecisionLogRemix slot="remix" />
-  <DecisionLogSvelteKit slot="sveltekit" />
+  <DecisionLogDenyBun slot="bun" />
+  <DecisionLogDenyNestJs slot="nest-js" />
+  <DecisionLogDenyNextJs slot="next-js" />
+  <DecisionLogDenyNodeJs slot="node-js" />
+  <DecisionLogDenyRemix slot="remix" />
+  <DecisionLogDenySvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+## Allowing specific email types
+
+In addition to being able to deny specific email types, you can also configure
+Arcjet to only allow specific email types and all other types will be blocked.
+
+<SlotByFramework client:load>
+  <DecisionLogAllowBun slot="bun" />
+  <DecisionLogAllowNestJs slot="nest-js" />
+  <DecisionLogAllowNextJs slot="next-js" />
+  <DecisionLogAllowNodeJs slot="node-js" />
+  <DecisionLogAllowRemix slot="remix" />
+  <DecisionLogAllowSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
 ## Checking the email type
@@ -177,7 +219,12 @@ not block all requests. The SDK will also time out and fail open after 1000ms
 when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
 in most cases, the response time will be less than 20-30ms.
 
-If there is an error condition, Arcjet will return an `ERROR` `conclusion`.
+If there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the `message` property on the rule's
+error result for more information.
+
+If all other rules that were run returned an `ALLOW` result, then the final Arcjet
+conclusion will be `ERROR`.
 
 <SlotByFramework client:load>
   <ErrorsBun slot="bun" />

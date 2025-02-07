@@ -1,0 +1,32 @@
+Using the the curl command, we can inspect the headers:
+
+```sh
+curl -I -X GET localhost:5173
+```
+
+The printed headers should look something like:
+
+```txt
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+content-length: 1475
+content-security-policy: child-src 'none'; default-src 'self'; frame-src 'none'; worker-src 'self'; connect-src 'self'; font-src 'self'; img-src 'self' blob: data:; manifest-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' 'nonce-RsMu23BBsCD1PV101d7Prg=='; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+content-type: text/html
+cross-origin-embedder-policy: require-corp
+cross-origin-opener-policy: same-origin
+cross-origin-resource-policy: same-origin
+etag: "bz71zn"
+origin-agent-cluster: ?1
+referrer-policy: no-referrer
+strict-transport-security: max-age=31536000; includeSubDomains
+x-content-type-options: nosniff
+x-dns-prefetch-control: off
+x-download-options: noopen
+x-frame-options: SAMEORIGIN
+x-permitted-cross-domain-policies: none
+x-sveltekit-page: true
+x-xss-protection: 0
+Date: Wed, 27 Nov 2024 15:23:13 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+```

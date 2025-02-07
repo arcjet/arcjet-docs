@@ -1,0 +1,27 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+
+import Step2HooksTS from "./Step2Hooks.ts?raw";
+import Step2HooksJS from "./Step2Hooks.js?raw";
+import Step2Config from "./Step2Config.js?raw";
+
+Nosecone applies headers to all your routes via hooks in your SvelteKit
+application.
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    Create the `src/hooks.server.ts` file in your project with the contents:
+    <Code code={Step2HooksTS} lang="ts" title="src/hooks.server.ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    Create the `src/hooks.server.js` file in your project with the contents:
+    <Code code={Step2HooksJS} lang="js" title="src/hooks.server.js" />
+  </div>
+</SelectableContent>
+
+SvelteKit provides the Content-Security-Policy header via the framework, so
+Nosecone helps you to configure it.
+
+Update your `svelte.config.js` to configure `csp`:
+
+<Code code={Step2Config} lang="js" title="svelte.config.js" ins={[3, 10, 11]} />

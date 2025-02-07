@@ -1,0 +1,13 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import DecisionLogDenyJS from "./DecisionLogDeny.js?raw";
+import DecisionLogDenyTS from "./DecisionLogDeny.ts?raw";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={DecisionLogDenyTS} lang="ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={DecisionLogDenyJS} lang="js" />
+  </div>
+</SelectableContent>

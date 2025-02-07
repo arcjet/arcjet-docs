@@ -11,3 +11,7 @@ declare module "npm:@arcjet/deno" {
   export * from "@arcjet/deno";
   export default arcjet;
 }
+
+declare module "npm:nosecone" {
+  export { default } from "nosecone";
+}

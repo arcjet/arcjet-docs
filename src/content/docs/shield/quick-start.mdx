@@ -1,6 +1,14 @@
 ---
-title: "Shield quick start"
-description: "Quick start guide for adding protection to your Next.js, Node.js, Bun, Remix, or SvelteKit app with Arcjet Shield."
+title: "Shield WAF"
+titleByFramework:
+  default: "Shield WAF"
+  bun: "Shield WAF for Bun"
+  nest-js: "Shield WAF for NestJS"
+  next-js: "Shield WAF for Next.js"
+  node-js: "Shield WAF for Node.js"
+  remix: "Shield WAF for Remix"
+  sveltekit: "Shield WAF for SvelteKit"
+description: "Quick start guide for adding protection to your Next.js, Node.js, Bun, Remix, or SvelteKit app with Arcjet Shield WAF."
 frameworks:
   - bun
   - nest-js
@@ -36,10 +44,12 @@ ajToc:
 
 import FrameworkName from "@/components/FrameworkName";
 import SlotByFramework from "@/components/SlotByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
 import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 import Comments from "/src/components/Comments.astro";
 import FAQs from "/src/components/FAQs.astro";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 
 import Step1Bun from "@/snippets/shield/quick-start/bun/Step1.mdx";
 import Step3Bun from "@/snippets/shield/quick-start/bun/Step3.mdx";
@@ -68,10 +78,16 @@ import Step3SvelteKit from "@/snippets/shield/quick-start/sveltekit/Step3.mdx";
 import Step4SvelteKit from "@/snippets/shield/quick-start/sveltekit/Step4.mdx";
 import Step5SvelteKit from "@/snippets/shield/quick-start/sveltekit/Step5.mdx";
 
-Arcjet Shield protects your application against common attacks, including the
-[OWASP Top 10](https://owasp.org/www-project-top-ten/).
+Arcjet Shield WAF protects your application against common attacks, including
+the [OWASP Top 10](https://owasp.org/www-project-top-ten/).
 
 <WhatIsArcjet />
+
+<FrameworkLinks
+  title="Choose a framework"
+  exclude={["bun-hono", "deno", "node-js-express", "node-js-hono"]}
+  client:load
+/>
 
 ## Quick start
 
@@ -128,10 +144,10 @@ project root.
 
 ### 5. Simulate a suspicious request
 
-To see Arcjet Shield in action, try making a request with the special header
+To see Arcjet Shield WAF in action, try making a request with the special header
 `x-arcjet-suspicious` set to `true`. After 5 requests, Arcjet Shield will be
-triggered and will block the request. This simulates the threshold being
-reached and is a constant, so you can use it as part of your tests.
+triggered and will block the request. This simulates the threshold being reached
+and is a constant, so you can use it as part of your tests.
 
 <SlotByFramework client:load>
   <Step5Bun slot="bun" />
@@ -150,22 +166,38 @@ The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
 
 ## What next?
 
-Arcjet can be used with specific rules on individual routes or as general
-protection on your entire application. You can customize bot protection, rate
-limiting for your API and minimize fraudulent registrations with the signup form
-protection.
-
 <CardGrid>
   <LinkCard
-    title="Bot protection reference"
+    title="Shield WAF reference"
     href="/shield/reference"
-    description="Full details about Arcjet shield."
+    description="Full details about Arcjet shield WAF."
   ></LinkCard>
   <LinkCard
     title="Testing"
     href="/testing"
     description="Write tests for your rules."
   />
+</CardGrid>
+
+### Explore
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can setup bot protection, rate
+limiting for your API, minimize fraudulent registrations with the signup form
+protection and more.
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  />
+  <LinkCard
+    title="Learn how Arcjet works"
+    href="/architecture"
+    description="Arcjet's architecture."
+  />
+  <SdkReferenceLinkByFramework />
 </CardGrid>
 
 ## Get help

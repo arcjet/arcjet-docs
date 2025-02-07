@@ -1,0 +1,30 @@
+---
+title: "Arcjet / Better Auth integration"
+description: "Integrating Better Auth and Arcjet. Add bot protection and spam signup protection to Better Auth endpoints."
+prev: false
+next: false
+---
+
+import { Aside, Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import Comments from "/src/components/Comments.astro";
+
+Arcjet can protect your [Better Auth](https://authjs.dev/) routes from brute
+force attacks, signup spam and other abuse. You can also use the authenticated
+user ID to implement user-specific rate limits.
+
+<WhatIsArcjet />
+
+## Example app
+
+See an [example Next.js + Better Auth implementation on
+GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nextjs-better-auth).
+
+## Better Auth hook
+
+We recommend integrating Arcjet in the [auth route
+handler](https://github.com/arcjet/arcjet-js/blob/main/examples/nextjs-better-auth/app/api/auth/%5B...all%5D/route.ts)
+rather than a Better Auth Hook because hooks do not provide sufficient request
+context in server-only environments.
+
+<Comments />
