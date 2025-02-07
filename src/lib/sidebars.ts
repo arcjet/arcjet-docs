@@ -350,6 +350,10 @@ export const main = [
         link: "/integrations/authjs",
       },
       {
+        label: "Better Auth",
+        link: "/integrations/better-auth",
+      },
+      {
         label: "Clerk",
         link: "/integrations/clerk",
       },
