@@ -15,12 +15,12 @@ const aj = arcjet({
 export async function loader(args: LoaderFunctionArgs) {
   const decision = await aj.protect(args);
 
-  if (decision.isDenied()) {
-    throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });
-  }
-
   if (decision.ip.hasCountry()) {
     console.log("Visitor from", decision.ip.countryName);
+  }
+
+  if (decision.isDenied()) {
+    throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });
   }
 
   // We don't need to use the decision elsewhere, but you could return it to

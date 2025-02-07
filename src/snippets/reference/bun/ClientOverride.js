@@ -31,14 +31,10 @@ export default {
     const decision = await aj.protect(req);
 
     for (const result of decision.results) {
-      console.log("Rule Result", result);
-
       if (result.reason.isRateLimit()) {
-        console.log("Rate limit rule", result);
-      }
-
-      if (result.reason.isBot()) {
-        console.log("Bot protection rule", result);
+        console.log("Rate limit rule result", result);
+      } else {
+        console.log("Rule result", result);
       }
     }
 

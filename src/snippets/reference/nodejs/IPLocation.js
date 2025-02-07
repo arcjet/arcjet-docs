@@ -13,6 +13,12 @@ const aj = arcjet({
 const server = http.createServer(async function (req, res) {
   const decision = await aj.protect(req);
 
+  if (decision.isDenied()) {
+    res.writeHead(403, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Forbidden", reason: decision.reason }));
+    return;
+  }
+
   if (decision.ip.hasCountry()) {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(
@@ -21,11 +27,6 @@ const server = http.createServer(async function (req, res) {
         country: decision.ip,
       }),
     );
-  }
-
-  if (decision.isDenied()) {
-    res.writeHead(403, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: "Forbidden", reason: decision.reason }));
   } else {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ message: "Hello world" }));
