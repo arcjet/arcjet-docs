@@ -1,5 +1,13 @@
 ---
 title: "Rate limiting"
+titleByFramework:
+  default: "Rate limiting"
+  bun: "Rate limiting for Bun"
+  nest-js: "Rate limiting for NestJS"
+  next-js: "Rate limiting for Next.js"
+  node-js: "Rate limiting for Node.js"
+  remix: "Rate limiting for Remix"
+  sveltekit: "Rate limiting for SvelteKit"
 description: "Quick start guide for adding Arcjet rate limiting to your Next.js, NestJS, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
@@ -39,8 +47,10 @@ import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 import WhatIsArcjet from "@/components/WhatIsArcjet.astro";
 import SlotByFramework from "@/components/SlotByFramework";
 import FrameworkName from "@/components/FrameworkName";
+import FrameworkLinks from "@/components/FrameworkLinks";
 import FAQs from "@/components/FAQs.astro";
 import Comments from "@/components/Comments.astro";
+import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 
 import BunStep1 from "@/snippets/rate-limiting/quick-start/bun/Step1.mdx";
 import BunStep2 from "@/snippets/rate-limiting/quick-start/bun/Step2.mdx";
@@ -77,6 +87,12 @@ Arcjet rate limiting allows you to define rules which limit the number of
 requests a client can make over a period of time.
 
 <WhatIsArcjet />
+
+<FrameworkLinks
+  title="Choose a framework"
+  exclude={["bun-hono", "deno", "node-js-express", "node-js-hono"]}
+  client:load
+/>
 
 <SlotByFramework client:load>
   <NextJsVideoQuickStart slot="next-js" />
@@ -146,10 +162,29 @@ The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
 
 ## What next?
 
+<CardGrid>
+  <LinkCard
+    title="Rate limiting reference"
+    href="/rate-limiting/reference"
+    description="Full details about rate limiting."
+  />
+  <LinkCard
+    title="Rate limiting algorithms"
+    href="/rate-limiting/algorithms"
+    description="Learn which algorithm to use."
+  />
+  <LinkCard
+    title="Testing"
+    href="/testing"
+    description="Write tests for your rules."
+  />
+</CardGrid>
+
+### Explore
+
 Arcjet can be used with specific rules on individual routes or as general
-protection on your entire application. You can customize bot protection, rate
-limiting for your API and minimize fraudulent registrations with the signup form
-protection.
+protection on your entire application. You can setup bot protection,
+minimize fraudulent registrations with the signup form protection and more.
 
 <CardGrid>
   <LinkCard
@@ -158,25 +193,11 @@ protection.
     description="Check out the examples."
   />
   <LinkCard
-    title="Rate limit algorithms"
-    href="/rate-limiting/algorithms"
-    description="Learn which algorithm to use."
+    title="Learn how Arcjet works"
+    href="/architecture"
+    description="Arcjet's architecture."
   />
-  <LinkCard
-    title="Rate limiting reference"
-    href="/rate-limiting/reference?f=bun"
-    description="Full details about rate limiting."
-  />
-  <LinkCard
-    title="SDK reference"
-    href="/reference/nodejs"
-    description="Node.js SDK reference guide."
-  />
-  <LinkCard
-    title="Testing"
-    href="/testing"
-    description="Write tests for your rules."
-  />
+  <SdkReferenceLinkByFramework />
 </CardGrid>
 
 ## Get help

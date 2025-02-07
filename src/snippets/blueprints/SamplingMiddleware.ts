@@ -56,7 +56,7 @@ export default async function middleware(request: NextRequest) {
     } else if (decision.reason.isShield()) {
       return NextResponse.json({ error: "Shields up!" }, { status: 403 });
     } else {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
   } else {
     return NextResponse.next();

@@ -23,11 +23,8 @@ export default {
   fetch: aj.handler(async (req) => {
     const decision = await aj.protect(req);
 
+    // Bots not in the allow list will be blocked
     if (decision.isDenied()) {
-      return new Response("Forbidden", { status: 403 });
-    }
-
-    if (decision.reason.isBot() && decision.reason.isSpoofed()) {
       return new Response("Forbidden", { status: 403 });
     }
 

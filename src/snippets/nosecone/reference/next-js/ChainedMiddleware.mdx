@@ -1,0 +1,14 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+
+import ChainedMiddlewareTS from "./ChainedMiddleware.ts?raw";
+import ChainedMiddlewareJS from "./ChainedMiddleware.js?raw";
+
+<SelectableContent client:load syncKey="language">
+  <div slot="TS" slotIdx="1">
+    <Code code={ChainedMiddlewareTS} lang="ts" title="middleware.ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={ChainedMiddlewareJS} lang="js" title="middleware.js" />
+  </div>
+</SelectableContent>

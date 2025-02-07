@@ -14,6 +14,7 @@ import ProxiesTS from "/src/snippets/reference/nestjs/Proxies.ts?raw";
 import ConfigurationTS from "/src/snippets/reference/nestjs/Configuration.ts?raw";
 import IPLocationTS from "/src/snippets/reference/nestjs/IPLocation.ts?raw";
 import NodeVersions from "/src/snippets/reference/node-versions.mdx";
+import IPAnalysis from "/src/snippets/reference/shared/IPAnalysis.mdx";
 
 [<SDKVersionNestjs />](https://www.npmjs.com/package/@arcjet/nest)
 
@@ -101,7 +102,18 @@ Each rule can be configured in either `LIVE` or `DRY_RUN` mode. When in
 always be `ALLOW`.
 
 This allows you to run Arcjet in passive / demo mode to test rules before
-enabling them. Arcjet will log what it would have done.
+enabling them.
+
+As the top level conclusion will always be `ALLOW` in `DRY_RUN` mode, you can
+loop through each rule result to check what would have happened:
+
+```ts
+for (const result of decision.results) {
+  if (result.isDenied()) {
+    console.log("Rule returned deny conclusion", result);
+  }
+}
+```
 
 ### Environment variables
 
@@ -212,11 +224,22 @@ check the conclusion:
 - `isDenied()` (`bool`) - The request should be denied.
 - `isErrored()` (`bool`) - There was an unrecoverable error.
 
+The conclusion will be the highest-severity finding when evaluating the configured
+rules. `"DENY"` is the highest severity, followed by `"CHALLENGE"`, then `"ERROR"` and
+finally `"ALLOW"` as the lowest severity.
+
+For example, when a bot protection rule returns an error and a validate email
+rule returns a deny, the overall conclusion would be deny. To access the error
+you would have to use the `results` property on the decision.
+
 ### Reason
 
 The `reason` property of the `ArcjetDecision` object contains an `ArcjetReason`
 object which provides more detailed information about the conclusion. This is
 the final decision reason and is based on the configured rules.
+
+It will always be the highest-priority rule that produced that conclusion,
+to inspect other rules consider iterating over the `results` property on the decision.
 
 The `ArcjetReason` object has the following methods that can be used to check
 which rule caused the conclusion:
@@ -230,7 +253,7 @@ which rule caused the conclusion:
 - `isSensitiveInfo()` (`bool`) - Returns `true` if sensitive info rules have
   been applied and sensitive info has been detected.
 - `isShield()` (`bool`) - Returns `true` if the shield rules have been applied
-  and the request is suspicious based on analysis by Arcjet Shield.
+  and the request is suspicious based on analysis by Arcjet Shield WAF.
 - `isError()` (`bool`) - Returns `true` if there was an error processing the
   request.
 
@@ -337,112 +360,7 @@ information about these properties.
 
 ### IP analysis
 
-As of SDK version `1.0.0-alpha.11`, the `ArcjetDecision` object contains an `ip`
-property. This includes additional data about the client IP address:
-
-#### IP location
-
-The IP location fields may be `undefined`, but you can use various methods to
-check their availability. Using the methods will also refine the type to remove
-the need for null or undefined checks.
-
-- `hasLatitude()` (`bool`): returns whether the `latitude` and `accuracyRadius`
-  fields are available.
-- `hasLongitude()` (`bool`): returns whether the `longitude` and
-  `accuracyRadius` fields are available.
-- `hasAccuracyRadius()` (`bool`): returns whether the `longitude`, `latitude`,
-  and `accuracyRadius` fields are available.
-- `hasTimezone()` (`bool`): returns whether the `timezone` field is available.
-- `hasPostalCode()` (`bool`): returns whether the `postalCode` field is
-  available.
-- `hasCity()` (`bool`): returns whether the `city` field is available.
-- `hasRegion()` (`bool`): returns whether the `region` field is available.
-- `hasCountry()` (`bool`): returns whether the `country` and `countryName`
-  fields are available.
-- `hasContinent()` (`bool`): returns whether the `continent` and `continentName`
-  fields are available.
-- `latitude` (`number | undefined`): the latitude of the client IP address.
-- `longitude` (`number | undefined`): the longitude of the client IP address.
-- `accuracyRadius` (`number | undefined`): how accurate the location is in
-  kilometers.
-- `timezone` (`string | undefined`): the timezone of the client IP address.
-- `postalCode` (`string | undefined`): the postal or zip code of the client IP
-  address.
-- `city` (`string | undefined`): the city of the client IP address.
-- `region` (`string | undefined`): the region of the client IP address.
-- `country` (`string | undefined`): the country code the client IP address.
-- `countryName` (`string | undefined`): the country name of the client IP
-  address.
-- `continent` (`string | undefined`): the continent code of the client IP
-  address.
-- `continentName` (`string | undefined`): the continent name of the client IP
-  address.
-
-##### Location accuracy
-
-IP geolocation can be notoriously inaccurate, especially for mobile devices,
-satellite internet providers, and even just normal users. Likewise with the
-specific fields like `city` and `region`, which can be very inaccurate. Country
-is usually accurate, but there are often cases where IP addresses are
-mis-located. These fields are provided for convenience e.g. suggesting a user
-location, but should not be relied upon by themselves.
-
-#### IP AS
-
-This is useful for identifying the network operator of the client IP address.
-This is useful for understanding whether the client is likely to be automated or
-not, or being stricter with requests from certain networks.
-
-The IP AS fields may be `undefined`, but you can use the `hasASN()` method to
-check their availability. Using this method will also refine the type to remove
-the need for null-ish checks.
-
-- `hasASN()` (`bool`): returns whether all of the ASN fields are available.
-- `asn` (`string | undefined`): the autonomous system (AS) number of the client
-  IP address.
-- `asnName` (`string | undefined`): the name of the AS of the client IP address.
-- `asnDomain` (`string | undefined`): the domain of the AS of the client IP
-  address.
-- `asnType` (`'isp' | 'hosting' | 'business' | 'education'`): the type of the AS
-  of the client IP address. Real users are more likely to be on an ISP or
-  business network rather than a hosting provider. Education networks often have
-  a single or small number of IP addresses even though there are many users. A
-  common mistake is to block a single IP because of too many requests when it is
-  a university or company network using
-  [NAT](https://en.wikipedia.org/wiki/Carrier-grade_NAT) (Network Address
-  Translation) to give many users the same IP.
-- `asnCountry` (`string | undefined`): the country code of the AS of the client
-  IP address. This is the administrative country of the AS, not necessarily the
-  country of the client IP address.
-
-#### IP type
-
-The `service` field may be `undefined`, but you can use the `hasService()`
-method to check the availability. Using this method will also refine the type to
-remove the need for null-ish checks.
-
-- `hasService()` (`bool`): whether the `service` field is available.
-- `service` (`string | undefined`): the name of the service associated with the
-  IP address—e.g. `Apple Private Relay`.
-- `isHosting()` (`bool`): returns whether the IP address of the client is owned
-  by a hosting provider. Requests originating from a hosting provider IP
-  significantly increase the likelihood that this is an automated client.
-- `isVpn()` (`bool`): returns whether the IP address of the client is owned by a
-  VPN provider. Many people use VPNs for privacy or work purposes, so by itself
-  this is not an indicator of the client being automated. However, it does
-  increase the risk score of the client and depending on your use case it may be
-  a characteristic you wish to restrict.
-- `isProxy()` (`bool`): returns whether the IP address of the client is owned by
-  a proxy provider. Similar to `isVpn()`, but proxies are more likely to involve
-  automated traffic.
-- `isTor()` (`bool`): returns whether the IP address of the client is known to
-  be part of the Tor network. As with `isVpn()`, there are legitimate uses for
-  hiding your identity through Tor, however it is also often a way to hide the
-  origin of malicious traffic.
-- `isRelay()` (`bool`): returns whether the IP address of the client is owned by
-  a relay service. The most common example is Apple iCloud Relay, which
-  indicates the client is less likely to be automated because Apple requires a
-  paid subscription linked to an Apple account in good standing.
+<IPAnalysis />
 
 #### Example
 
@@ -473,15 +391,21 @@ not block all requests. The SDK will also time out and fail open after 1000ms
 when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
 in most cases, the response time will be less than 20-30ms.
 
-If there is an error condition, Arcjet will return an `ERROR` `conclusion`.
+If there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the `message` property on the rule's
+error result for more information.
+
+If all other rules that were run returned an `ALLOW` result, then the final Arcjet
+conclusion will be `ERROR`.
 
 ```ts
 if (decision.isErrored()) {
-  if (decision.reason.message.includes("missing User-Agent header")) {
+  if (decision.reason.message.includes("requires user-agent header")) {
     // Requests without User-Agent headers can not be identified as any
     // particular bot and will be marked as an errored decision. Most
     // legitimate clients always send this header, so we recommend blocking
     // requests without it.
+    // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
     this.logger.warn("User-Agent header is missing");
     throw new HttpException("Bad request", HttpStatus.BAD_REQUEST);
   } else {

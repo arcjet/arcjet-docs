@@ -1,4 +1,9 @@
-import { ARCJET, type ArcjetNest, protectSignup } from "@arcjet/nest";
+import {
+  ARCJET,
+  type ArcjetNest,
+  type ArcjetRuleResult,
+  protectSignup,
+} from "@arcjet/nest";
 import {
   Body,
   Controller,
@@ -14,6 +19,17 @@ import {
 import { NoFilesInterceptor } from "@nestjs/platform-express";
 import { IsNotEmpty } from "class-validator";
 import type { Request } from "express";
+
+function isSpoofed(result: ArcjetRuleResult) {
+  return (
+    // You probably don't want DRY_RUN rules resulting in a denial
+    // since they are generally used for evaluation purposes but you
+    // could log here.
+    result.state !== "DRY_RUN" &&
+    result.reason.isBot() &&
+    result.reason.isSpoofed()
+  );
+}
 
 // Validation class as described at
 // https://docs.nestjs.com/techniques/validation. We're not using the IsEmail
@@ -117,6 +133,14 @@ export class SignupController {
       } else {
         throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
       }
+    }
+
+    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+    // Verification isn't always possible, so we recommend checking the decision
+    // separately.
+    // https://docs.arcjet.com/bot-protection/reference#bot-verification
+    if (decision.results.some(isSpoofed)) {
+      throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
     }
 
     return this.signupService.signup(body.email);

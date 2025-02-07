@@ -16,6 +16,17 @@ const aj = arcjet({
   ],
 });
 
+function isSpoofed(result) {
+  return (
+    // You probably don't want DRY_RUN rules resulting in a denial
+    // since they are generally used for evaluation purposes but you
+    // could log here.
+    result.state !== "DRY_RUN" &&
+    result.reason.isBot() &&
+    result.reason.isSpoofed()
+  );
+}
+
 export default {
   port: 3000,
   fetch: aj.handler(async (req) => {
@@ -34,11 +45,16 @@ export default {
       }
     }
 
+    // Bots not in the allow list will be blocked
     if (decision.isDenied()) {
       return new Response("Forbidden", { status: 403 });
     }
 
-    if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+    // Verification isn't always possible, so we recommend checking the results
+    // separately.
+    // https://docs.arcjet.com/bot-protection/reference#bot-verification
+    if (decision.results.some(isSpoofed)) {
       return new Response("Forbidden", { status: 403 });
     }
 

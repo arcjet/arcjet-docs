@@ -3,7 +3,7 @@ title: "VPN & proxy detection"
 description: "Use Arcjet's IP analysis to detect VPNs and proxies."
 ---
 
-import { Aside } from "@astrojs/starlight/components";
+import { Aside, Badge } from "@astrojs/starlight/components";
 
 Every decision provided by Arcjet includes IP address analysis. You can use this
 to detect VPNs and proxies.
@@ -11,12 +11,13 @@ to detect VPNs and proxies.
 ## Available fields
 
 - **IP AS type.** This is the [Autonomous
-  System](<https://en.wikipedia.org/wiki/Autonomous_system_(Internet)>) associated
-  with the IP, which can be used to identify VPNs and proxies. This can be one
-  of `isp`, `hosting`, `business` or `education`.
+  System](<https://en.wikipedia.org/wiki/Autonomous_system_(Internet)>)
+  associated with the IP, which can be used to identify VPNs and proxies. This
+  can be one of `isp`, `hosting`, `business` or `education`. This field is only
+  available on <Badge text="Pro" variant="note" /> and <Badge text="Enterprise" variant="tip" /> plans.
 - **IP type.** Arcjet adds one or more categories to the IP address to help you
   identify VPNs and proxies. The categories are `vpn`, `proxy`, `tor`,
-  `hosting`, `relay`.
+  `hosting`, `relay`. This field is available on all pricing plans.
 
 ## Checking for data
 

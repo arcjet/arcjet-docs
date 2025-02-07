@@ -28,6 +28,7 @@ export async function handle({
 }): Promise<Response> {
   const decision = await aj.protect(event);
 
+  // Bots not in the allow list will be blocked
   if (decision.isDenied()) {
     return error(403, "You are a bot!");
   }

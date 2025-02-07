@@ -23,18 +23,32 @@ const aj = arcjet({
   ],
 });
 
+function isSpoofed(result) {
+  return (
+    // You probably don't want DRY_RUN rules resulting in a denial
+    // since they are generally used for evaluation purposes but you
+    // could log here.
+    result.state !== "DRY_RUN" &&
+    result.reason.isBot() &&
+    result.reason.isSpoofed()
+  );
+}
+
 export default async function middleware(request) {
   const decision = await aj.protect(request);
 
-  if (
-    // If this deny comes from a bot rule then block the request. You can
-    // customize this logic to fit your needs e.g. checking the IP address type
-    // or changing the status code.
-    decision.isDenied() &&
-    decision.reason.isBot()
-  ) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-  } else {
-    return NextResponse.next();
+  // Bots not in the allow list will be blocked
+  if (decision.isDenied()) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+
+  // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+  // Verification isn't always possible, so we recommend checking the results
+  // separately.
+  // https://docs.arcjet.com/bot-protection/reference#bot-verification
+  if (decision.results.some(isSpoofed)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  return NextResponse.next();
 }

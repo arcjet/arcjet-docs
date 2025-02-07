@@ -40,8 +40,10 @@ export async function POST(req) {
   const decision = await aj.protect(req, { requested: estimate });
   console.log("Arcjet decision", decision.conclusion);
 
-  if (decision.reason.isRateLimit()) {
-    console.log("Requests remaining", decision.reason.remaining);
+  for (const { reason } of decision.results) {
+    if (reason.isRateLimit()) {
+      console.log("Requests remaining", reason.remaining);
+    }
   }
 
   // If the request is denied, return a 429

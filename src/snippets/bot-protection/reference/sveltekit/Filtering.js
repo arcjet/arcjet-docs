@@ -22,11 +22,8 @@ const aj = arcjet({
 export async function handle({ event, resolve }) {
   const decision = await aj.protect(event);
 
+  // Bots not in the allow list will be blocked
   if (decision.isDenied()) {
-    return error(403, "You are a bot!");
-  }
-
-  if (decision.reason.isBot() && decision.reason.isSpoofed()) {
     return error(403, "You are a bot!");
   }
 

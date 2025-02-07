@@ -9,6 +9,8 @@ frameworks:
   - remix
   - sveltekit
 ajToc:
+  - text: "Plan availability"
+    anchor: "plan-availability"
   - text: "Configuration"
     anchor: "configuration"
     children:
@@ -94,8 +96,10 @@ ajToc:
         anchor: "wrap-existing-handler"
 ---
 
+import { Badge } from "@astrojs/starlight/components";
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
 import Comments from "/src/components/Comments.astro";
 
 import ByUserIdBun from "@/snippets/rate-limiting/reference/bun/ByUserId.mdx";
@@ -163,6 +167,23 @@ import TokenBucketRequestSvelteKit from "@/snippets/rate-limiting/reference/svel
 
 Arcjet rate limiting allows you to define rules which limit the number of
 requests a client can make over a period of time.
+
+## Plan availability
+
+Arcjet rate limiting is available on all [pricing
+plans](https://arcjet.com/pricing).
+
+| Plan                                      | Rate limiting |
+| ----------------------------------------- | ------------- |
+| <Badge text="Free" variant="caution" />   | Yes           |
+| <Badge text="Pro" variant="note" />       | Yes           |
+| <Badge text="Enterprise" variant="tip" /> | Custom        |
+
+<FrameworkLinks
+  title="Choose a framework"
+  exclude={["bun-hono", "deno", "node-js-express", "node-js-hono"]}
+  client:load
+/>
 
 ## Configuration
 
@@ -437,7 +458,12 @@ not block all requests. The SDK will also time out and fail open after 1000ms
 when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
 in most cases, the response time will be less than 20-30ms.
 
-If there is an error condition, Arcjet will return an `ERROR` `conclusion`.
+If there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the `message` property on the rule's
+error result for more information.
+
+If all other rules that were run returned an `ALLOW` result, then the final Arcjet
+conclusion will be `ERROR`.
 
 <SlotByFramework client:load>
   <ErrorsBun slot="bun" />

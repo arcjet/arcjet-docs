@@ -1,5 +1,14 @@
 ---
-title: "Bot protection quick start"
+title: "Bot protection"
+titleByFramework:
+  default: "Bot protection"
+  bun: "Bot protection for Bun"
+  deno: "Bot protection for Deno"
+  nest-js: "Bot protection for NestJS"
+  next-js: "Bot protection for Next.js"
+  node-js: "Bot protection for Node.js"
+  remix: "Bot protection for Remix"
+  sveltekit: "Bot protection for SvelteKit"
 description: "Quick start guide for adding Arcjet bot protection to your Next.js, NestJS, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
@@ -40,7 +49,9 @@ import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import SlotByFramework from "@/components/SlotByFramework";
 import FrameworkName from "@/components/FrameworkName";
 import FAQs from "/src/components/FAQs.astro";
+import FrameworkLinks from "@/components/FrameworkLinks";
 import Comments from "/src/components/Comments.astro";
+import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 
 import BunStep1 from "@/snippets/bot-protection/quick-start/bun/Step1.mdx";
 import BunStep2 from "@/snippets/bot-protection/quick-start/bun/Step2.mdx";
@@ -80,6 +91,12 @@ import SvelteKitStep4 from "@/snippets/bot-protection/quick-start/sveltekit/Step
 Arcjet bot detection allows you to manage traffic by automated clients and bots.
 
 <WhatIsArcjet />
+
+<FrameworkLinks
+  title="Choose a framework"
+  exclude={["bun-hono", "node-js-express", "node-js-hono"]}
+  client:load
+/>
 
 ## Quick start
 
@@ -153,22 +170,37 @@ Check out our [full list of bots](https://arcjet.com/bot-list).
 
 ## What next?
 
-Arcjet can be used with specific rules on individual routes or as general
-protection on your entire application. You can customize bot protection, rate
-limiting for your API and minimize fraudulent registrations with the signup form
-protection.
-
 <CardGrid>
   <LinkCard
     title="Bot protection reference"
     href="/bot-protection/reference"
     description="Full details about bot protection."
-  ></LinkCard>
+  />
   <LinkCard
     title="Testing"
     href="/testing"
     description="Write tests for your rules."
   />
+</CardGrid>
+
+### Explore
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can setup rate limiting for your
+API, minimize fraudulent registrations with the signup form protection and more.
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  />
+  <LinkCard
+    title="Learn how Arcjet works"
+    href="/architecture"
+    description="Arcjet's architecture."
+  />
+  <SdkReferenceLinkByFramework />
 </CardGrid>
 
 ## Get help
