@@ -29,14 +29,12 @@ export async function handle({
   const decision = await aj.protect(event);
 
   for (const result of decision.results) {
-    console.log("Rule Result", result);
-
     if (result.reason.isRateLimit()) {
       console.log("Rate limit rule", result);
-    }
-
-    if (result.reason.isBot()) {
+    } else if (result.reason.isBot()) {
       console.log("Bot protection rule", result);
+    } else {
+      console.log("Rule Result", result);
     }
   }
 

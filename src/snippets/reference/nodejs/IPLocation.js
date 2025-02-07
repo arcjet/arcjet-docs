@@ -16,6 +16,7 @@ const server = http.createServer(async function (req, res) {
   if (decision.isDenied()) {
     res.writeHead(403, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "Forbidden", reason: decision.reason }));
+    return;
   }
 
   if (decision.ip.hasCountry()) {
