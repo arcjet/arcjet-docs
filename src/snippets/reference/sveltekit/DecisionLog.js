@@ -24,11 +24,11 @@ export async function handle({ event, resolve }) {
 
   for (const result of decision.results) {
     if (result.reason.isRateLimit()) {
-      console.log("Rate limit rule", result);
+      console.log("Rate limit rule result", result);
     } else if (result.reason.isBot()) {
-      console.log("Bot protection rule", result);
+      console.log("Bot protection rule result", result);
     } else {
-      console.log("Rule Result", result);
+      console.log("Rule result", result);
     }
   }
 
