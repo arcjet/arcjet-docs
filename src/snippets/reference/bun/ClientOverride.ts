@@ -36,10 +36,6 @@ export default {
       if (result.reason.isRateLimit()) {
         console.log("Rate limit rule", result);
       }
-
-      if (result.reason.isBot()) {
-        console.log("Bot protection rule", result);
-      }
     }
 
     return new Response("Hello world");

@@ -44,12 +44,12 @@ export class PageController {
   async index(@Req() req: Request) {
     const decision = await this.arcjet.protect(req);
 
-    if (decision.ip.hasCountry()) {
-      this.logger.log("Visitor from", decision.ip.countryName);
-    }
-
     if (decision.isDenied()) {
       throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
+    }
+
+    if (decision.ip.hasCountry()) {
+      this.logger.log("Visitor from", decision.ip.countryName);
     }
 
     return this.pageService.message();

@@ -13,17 +13,17 @@ const aj = arcjet({
 export default async function handler(req, res) {
   const decision = await aj.protect(req);
 
+  if (decision.isDenied()) {
+    return res
+      .status(403)
+      .json({ error: "Forbidden", reason: decision.reason });
+  }
+
   if (decision.ip.hasCountry()) {
     return res.status(200).json({
       message: `Hello ${decision.ip.countryName}!`,
       country: decision.ip,
     });
-  }
-
-  if (decision.isDenied()) {
-    return res
-      .status(403)
-      .json({ error: "Forbidden", reason: decision.reason });
   }
 
   res.status(200).json({ name: "Hello world" });
