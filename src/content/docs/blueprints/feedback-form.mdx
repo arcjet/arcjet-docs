@@ -3,17 +3,19 @@ title: "Feedback form protection"
 description: "How to protect your feedback form from spam using Arcjet."
 ---
 
-Feedback forms are often used as tools for gathering valuable insights to improve services, products, or experiences. Spam undermines this integrity and could distract from the original goals of the survey or feedback initiative.
+Feedback forms are often used as tools for gathering valuable insights to
+improve services, products, or experiences. Spam undermines this integrity and
+could distract from the original goals of the survey or feedback initiative.
 
-Protecting forms ensures that only genuine, thoughtful feedback is collected and used appropriately. Arcjet can help you protect your feedback forms from spam and invalid contact details.
+Arcjet can help you protect your feedback forms from spam and invalid contact
+details.
 
 ### Rules
 
-- Shield - Safeguard your forms from SQL injection attacks with automated detection and blocking, ensuring malicious queries never reach your database.
-- Bot Detection – Automatically identify and block bot traffic, keeping automated spammers and malicious scripts from submitting your forms.
-- Email Validation – Ensure form submissions come from genuine users by validating email addresses, preventing fake or disposable email entries.
-- Rate Limiting – Protect your forms from spam and abuse by limiting submissions from a single IP or device, enforcing sensible submission thresholds to stop mass spam attacks.
-- Sensitive Data Redaction – Automatically redact sensitive or personally identifiable information (PII) from form submissions, ensuring compliance with data protection laws and reducing the risk of data breaches.
+These are the Arcjet rules we recommend using to protect a feedback form. The
+configured rules block all bots and automated clients, validate the email
+address preventing disposable and invalid addresses, and rate limit submissions
+from the same IP address.
 
 ```ts
 // ... imports, etc
@@ -45,22 +47,30 @@ const aj = arcjet({
 });
 ```
 
-### Additional checks
+## Next.js example
 
-You can use the Redact library to ensure no sensitive information is sent to your server by the user:
+This example shows a form component which implements the above rules. It uses
+the Next.js app router and [shadcn/ui](https://ui.shadcn.com/).
 
-```ts
-import { redact } from "@arcjet/redact";
-
-const text =
-  "please issue a refund to this card right now!!! 5555 5555 5555 4444";
-
-const [redacted] = await redact(text, {
-  entities: ["credit-card-number"],
-});
+```sh
+# Install shadcn components from https://ui.shadcn.com/docs/installation/next
+npx shadcn@latest add button card input label toast use-toast
 ```
 
-The feedback component is shown below. It will validate the email and ensure no credit card numbers are sent to your server. If the checks succeed, then you can display a success message.
+This will install the following components:
+
+```shell
+  - components/ui/button.tsx
+  - components/ui/card.tsx
+  - components/ui/input.tsx
+  - components/ui/label.tsx
+  - components/ui/toast.tsx
+  - components/ui/toaster.tsx
+  - hooks/use-toast.ts
+```
+
+The payment form component is shown below. You will need to create a success
+page for the form to redirect to on submission.
 
 ```tsx title="/app/components/Form.tsx"
 "use client";
@@ -109,7 +119,7 @@ export default function FeedbackForm() {
     const responseData = await response.json();
 
     if (response.ok) {
-      // Show success message
+      router.push("/success");
     } else {
       toast({
         title: "Submission Failed",
@@ -162,7 +172,7 @@ export default function FeedbackForm() {
 
 The form submission is processed by the following API route:
 
-```tsx title="/app/api/process-feedback/route.ts"
+```tsx title="/app/api/send-feedback/route.ts"
 import arcjet, {
   detectBot,
   shield,
