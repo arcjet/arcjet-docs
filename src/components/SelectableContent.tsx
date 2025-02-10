@@ -1,6 +1,8 @@
 import FrameworkSwitcher from "@/components/FrameworkSwitcher";
 import Select from "@/components/Select";
 import { getStoredSyncKey, storeSyncKey } from "@/lib/prefs";
+import { syncKeys as storedSyncKeys } from "@/store";
+import { useStore } from "@nanostores/react";
 import type { HTMLProps, ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -42,6 +44,8 @@ const SelectableContent = ({
   children,
   ...props
 }: Props) => {
+  const $storedSyncKeys = useStore(storedSyncKeys);
+
   const [selectedSlot, setSelectedSlot] = useState<Slot>();
   const [slots, setSlots] = useState<Slot[]>();
 
@@ -50,6 +54,11 @@ const SelectableContent = ({
     const val = e.target.value;
 
     storeSyncKey(syncKey, val);
+
+    // Sync with nano store
+    const stored = { ...storedSyncKeys.get() };
+    stored[syncKey] = val;
+    storedSyncKeys.set(stored);
 
     if (slots && slots.length > 0) {
       setSelectedSlot(slots.find((s) => s.key == val));
@@ -103,6 +112,13 @@ const SelectableContent = ({
       if (slot) setSelectedSlot(slot);
     }
   }, [storedSyncKeyValue]);
+
+  useEffect(() => {
+    if ($storedSyncKeys && $storedSyncKeys[syncKey]) {
+      const slot = slots?.find((slot) => slot.key == $storedSyncKeys[syncKey]);
+      setSelectedSlot(slot);
+    }
+  }, [$storedSyncKeys, syncKey, slots]);
 
   let cls = "SelectableContent " + styles.SelectableContent;
   if (className) cls += " " + className;

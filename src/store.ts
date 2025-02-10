@@ -6,3 +6,4 @@ import { defaultSelectedFramework, frameworks } from "./lib/prefs";
 export const displayedFramework = atom<FrameworkKey>(defaultSelectedFramework);
 export const queryParamFramework = atom<FrameworkKey | undefined>();
 export const availableFrameworks = atom<Array<Framework>>(frameworks);
+export const syncKeys = atom<{ [key: string]: string }>({});
