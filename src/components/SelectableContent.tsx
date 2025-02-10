@@ -15,7 +15,7 @@ type Slot = {
 };
 
 interface Props extends HTMLProps<HTMLDivElement> {
-  syncKey: string;
+  syncKey?: string;
   frameworkSwitcher: boolean;
 }
 
@@ -51,17 +51,19 @@ const SelectableContent = ({
 
   // Select change callback
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
+    if (syncKey) {
+      const val = e.target.value;
 
-    storeSyncKey(syncKey, val);
+      storeSyncKey(syncKey, val);
 
-    // Sync with nano store
-    const stored = { ...storedSyncKeys.get() };
-    stored[syncKey] = val;
-    storedSyncKeys.set(stored);
+      // Sync with nano store
+      const stored = { ...storedSyncKeys.get() };
+      stored[syncKey] = val;
+      storedSyncKeys.set(stored);
 
-    if (slots && slots.length > 0) {
-      setSelectedSlot(slots.find((s) => s.key == val));
+      if (slots && slots.length > 0) {
+        setSelectedSlot(slots.find((s) => s.key == val));
+      }
     }
   };
 
@@ -102,8 +104,10 @@ const SelectableContent = ({
   // Handle stored syncKey value
   const [storedSyncKeyValue, setStoredSyncKeyValue] = useState<string>();
   useEffect(() => {
-    const stored = getStoredSyncKey(syncKey);
-    if (stored) setStoredSyncKeyValue(stored);
+    if (syncKey) {
+      const stored = getStoredSyncKey(syncKey);
+      if (stored) setStoredSyncKeyValue(stored);
+    }
   }, []);
 
   useEffect(() => {
@@ -114,9 +118,13 @@ const SelectableContent = ({
   }, [storedSyncKeyValue]);
 
   useEffect(() => {
-    if ($storedSyncKeys && $storedSyncKeys[syncKey]) {
-      const slot = slots?.find((slot) => slot.key == $storedSyncKeys[syncKey]);
-      setSelectedSlot(slot);
+    if (syncKey) {
+      if ($storedSyncKeys && $storedSyncKeys[syncKey]) {
+        const slot = slots?.find(
+          (slot) => slot.key == $storedSyncKeys[syncKey],
+        );
+        setSelectedSlot(slot);
+      }
     }
   }, [$storedSyncKeys, syncKey, slots]);
 
