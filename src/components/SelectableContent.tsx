@@ -1,6 +1,8 @@
 import FrameworkSwitcher from "@/components/FrameworkSwitcher";
 import Select from "@/components/Select";
 import { getStoredSyncKey, storeSyncKey } from "@/lib/prefs";
+import { syncKeys as storedSyncKeys } from "@/store";
+import { useStore } from "@nanostores/react";
 import type { HTMLProps, ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -13,7 +15,7 @@ type Slot = {
 };
 
 interface Props extends HTMLProps<HTMLDivElement> {
-  syncKey: string;
+  syncKey?: string;
   frameworkSwitcher: boolean;
 }
 
@@ -42,17 +44,26 @@ const SelectableContent = ({
   children,
   ...props
 }: Props) => {
+  const $storedSyncKeys = useStore(storedSyncKeys);
+
   const [selectedSlot, setSelectedSlot] = useState<Slot>();
   const [slots, setSlots] = useState<Slot[]>();
 
   // Select change callback
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
+    if (syncKey) {
+      const val = e.target.value;
 
-    storeSyncKey(syncKey, val);
+      storeSyncKey(syncKey, val);
 
-    if (slots && slots.length > 0) {
-      setSelectedSlot(slots.find((s) => s.key == val));
+      // Sync with nano store
+      const stored = { ...storedSyncKeys.get() };
+      stored[syncKey] = val;
+      storedSyncKeys.set(stored);
+
+      if (slots && slots.length > 0) {
+        setSelectedSlot(slots.find((s) => s.key == val));
+      }
     }
   };
 
@@ -93,8 +104,10 @@ const SelectableContent = ({
   // Handle stored syncKey value
   const [storedSyncKeyValue, setStoredSyncKeyValue] = useState<string>();
   useEffect(() => {
-    const stored = getStoredSyncKey(syncKey);
-    if (stored) setStoredSyncKeyValue(stored);
+    if (syncKey) {
+      const stored = getStoredSyncKey(syncKey);
+      if (stored) setStoredSyncKeyValue(stored);
+    }
   }, []);
 
   useEffect(() => {
@@ -103,6 +116,17 @@ const SelectableContent = ({
       if (slot) setSelectedSlot(slot);
     }
   }, [storedSyncKeyValue]);
+
+  useEffect(() => {
+    if (syncKey) {
+      if ($storedSyncKeys && $storedSyncKeys[syncKey]) {
+        const slot = slots?.find(
+          (slot) => slot.key == $storedSyncKeys[syncKey],
+        );
+        setSelectedSlot(slot);
+      }
+    }
+  }, [$storedSyncKeys, syncKey, slots]);
 
   let cls = "SelectableContent " + styles.SelectableContent;
   if (className) cls += " " + className;
