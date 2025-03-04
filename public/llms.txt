@@ -6,19 +6,6 @@ validation, signup form protection, and sensitive information detection &
 redaction. These can be integrated into applications with just a few lines of
 code.
 
-Important notes:
-
-- Arcjet runs server-side and does not require any client-side integration.
-
-- Arcjet is a paid service, but it offers a free tier with limited features.
-Free tier users do not get access to more advanced bot detection, have limited
-IP analysis data (country only), and cannot use the email validation or
-sensitive information detection features. See https://arcjet.com/pricing for
-details.
-
-- Arcjet currently supports JS with SDKs for Node.js, Next.js, Deno, Bun, Remix,
-SvelteKit, NestJS.
-
 ## Docs
 
 A quick start guide is available to show how to configure Arcjet rules to
@@ -163,6 +150,34 @@ You should see a `403` response because `curl` is considered a bot by default
 ([customizable](https://docs.arcjet.com/bot-protection/identifying-bots)).
 
 The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
+
+## Product philosophy
+
+1. Proper security protections need the full context of the application, which
+is why security rules and protections should be located alongside the code they
+are protecting.
+
+2. Security rules should be easy to test. You should be able to run them in
+development as well as production.
+
+3. Arcjet should not interfere with the rest of the application. It should be
+easy to install, must not add significant latency to requests, and should not
+require changes to the application’s architecture.
+
+Find out more at https://docs.arcjet.com/architecture
+
+## Important notes
+
+- Arcjet runs server-side and does not require any client-side integration.
+
+- Arcjet is a paid service, but it offers a free tier with limited features.
+Free tier users do not get access to more advanced bot detection, have limited
+IP analysis data (country only), and cannot use the email validation or
+sensitive information detection features. See https://arcjet.com/pricing for
+details.
+
+- Arcjet currently supports JS with SDKs for Node.js, Next.js, Deno, Bun, Remix,
+SvelteKit, NestJS.
 
 ## Tips
 
