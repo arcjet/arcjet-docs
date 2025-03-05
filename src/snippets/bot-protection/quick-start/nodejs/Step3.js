@@ -1,4 +1,5 @@
 import arcjet, { detectBot } from "@arcjet/node";
+import { isSpoofedBot } from "@arcjet/inspect";
 import http from "node:http";
 
 const aj = arcjet({
@@ -18,17 +19,6 @@ const aj = arcjet({
   ],
 });
 
-function isSpoofed(result) {
-  return (
-    // You probably don't want DRY_RUN rules resulting in a denial
-    // since they are generally used for evaluation purposes but you
-    // could log here.
-    result.state !== "DRY_RUN" &&
-    result.reason.isBot() &&
-    result.reason.isSpoofed()
-  );
-}
-
 const server = http.createServer(async function (req, res) {
   const decision = await aj.protect(req);
   console.log("Arcjet decision", decision);
@@ -44,7 +34,7 @@ const server = http.createServer(async function (req, res) {
   // Verification isn't always possible, so we recommend checking the results
   // separately.
   // https://docs.arcjet.com/bot-protection/reference#bot-verification
-  if (decision.results.some(isSpoofed)) {
+  if (decision.results.some(isSpoofedBot)) {
     res.writeHead(403, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "Forbidden" }));
     return;

@@ -1,4 +1,5 @@
 import arcjet, { detectBot } from "@arcjet/bun";
+import { isSpoofedBot } from "@arcjet/inspect";
 import { env } from "bun";
 
 const aj = arcjet({
@@ -33,18 +34,12 @@ export default {
       }
     }
 
-    for (const { state, reason } of decision.results) {
-      if (state === "DRY_RUN") {
-        continue;
-      }
-
-      // Arcjet Pro plan verifies the authenticity of common bots using IP data.
-      // https://docs.arcjet.com/bot-protection/reference#bot-verification
-      if (reason.isBot() && reason.isSpoofed()) {
-        return new Response("You are pretending to be a good bot!", {
-          status: 403,
-        });
-      }
+    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+    // https://docs.arcjet.com/bot-protection/reference#bot-verification
+    if (decision.results.some(isSpoofedBot)) {
+      return new Response("You are pretending to be a good bot!", {
+        status: 403,
+      });
     }
 
     return new Response("Hello world");

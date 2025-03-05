@@ -1,4 +1,5 @@
 import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/next";
+import { isSpoofedBot } from "@arcjet/inspect";
 import { NextResponse } from "next/server";
 
 const aj = arcjet({
@@ -29,17 +30,6 @@ const aj = arcjet({
   ],
 });
 
-function isSpoofed(result) {
-  return (
-    // You probably don't want DRY_RUN rules resulting in a denial
-    // since they are generally used for evaluation purposes but you
-    // could log here.
-    result.state !== "DRY_RUN" &&
-    result.reason.isBot() &&
-    result.reason.isSpoofed()
-  );
-}
-
 export async function GET(req) {
   const decision = await aj.protect(req, { requested: 5 }); // Deduct 5 tokens from the bucket
   console.log("Arcjet decision", decision);
@@ -67,7 +57,7 @@ export async function GET(req) {
   // Verification isn't always possible, so we recommend checking the decision
   // separately.
   // https://docs.arcjet.com/bot-protection/reference#bot-verification
-  if (decision.results.some(isSpoofed)) {
+  if (decision.results.some(isSpoofedBot)) {
     return NextResponse.json(
       { error: "Forbidden", reason: decision.reason },
       { status: 403 },

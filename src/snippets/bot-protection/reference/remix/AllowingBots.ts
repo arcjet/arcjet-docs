@@ -1,4 +1,5 @@
 import arcjet, { detectBot } from "@arcjet/remix";
+import { isSpoofedBot } from "@arcjet/inspect";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 
 const aj = arcjet({
@@ -37,19 +38,13 @@ export async function loader(args: LoaderFunctionArgs) {
     }
   }
 
-  for (const { state, reason } of decision.results) {
-    if (state === "DRY_RUN") {
-      continue;
-    }
-
-    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
-    // https://docs.arcjet.com/bot-protection/reference#bot-verification
-    if (reason.isBot() && reason.isSpoofed()) {
-      throw new Response("You are pretending to be a good bot!", {
-        status: 403,
-        statusText: "Forbidden",
-      });
-    }
+  // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+  // https://docs.arcjet.com/bot-protection/reference#bot-verification
+  if (decision.results.some(isSpoofedBot)) {
+    throw new Response("You are pretending to be a good bot!", {
+      status: 403,
+      statusText: "Forbidden",
+    });
   }
 
   return null;

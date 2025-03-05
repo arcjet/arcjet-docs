@@ -1,4 +1,5 @@
 import arcjet, { detectBot } from "@arcjet/deno";
+import { isSpoofedBot } from "@arcjet/inspect";
 
 const aj = arcjet({
   key: Deno.env.get("ARCJET_KEY")!, // Get your site key from https://app.arcjet.com
@@ -32,18 +33,12 @@ Deno.serve(
       }
     }
 
-    for (const { state, reason } of decision.results) {
-      if (state === "DRY_RUN") {
-        continue;
-      }
-
-      // Arcjet Pro plan verifies the authenticity of common bots using IP data.
-      // https://docs.arcjet.com/bot-protection/reference#bot-verification
-      if (reason.isBot() && reason.isSpoofed()) {
-        return new Response("You are pretending to be a good bot!", {
-          status: 403,
-        });
-      }
+    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+    // https://docs.arcjet.com/bot-protection/reference#bot-verification
+    if (decision.results.some(isSpoofedBot)) {
+      return new Response("You are pretending to be a good bot!", {
+        status: 403,
+      });
     }
 
     return new Response("Hello world");

@@ -1,9 +1,5 @@
-import {
-  ARCJET,
-  type ArcjetNest,
-  ArcjetRuleResult,
-  protectSignup,
-} from "@arcjet/nest";
+import { ARCJET, type ArcjetNest, protectSignup } from "@arcjet/nest";
+import { isSpoofedBot } from "@arcjet/inspect";
 import {
   Body,
   Controller,
@@ -42,17 +38,6 @@ export class SignupService {
       message: "Hello world",
     };
   }
-}
-
-function isSpoofed(result: ArcjetRuleResult) {
-  return (
-    // You probably don't want DRY_RUN rules resulting in a denial
-    // since they are generally used for evaluation purposes but you
-    // could log here.
-    result.state !== "DRY_RUN" &&
-    result.reason.isBot() &&
-    result.reason.isSpoofed()
-  );
 }
 
 // This would normally go in your controller file e.g.
@@ -161,7 +146,7 @@ export class SignupController {
     // Verification isn't always possible, so we recommend checking the results
     // separately.
     // https://docs.arcjet.com/bot-protection/reference#bot-verification
-    if (decision.results.some(isSpoofed)) {
+    if (decision.results.some(isSpoofedBot)) {
       throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
     }
 

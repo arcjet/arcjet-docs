@@ -1,9 +1,5 @@
-import arcjet, {
-  type ArcjetRuleResult,
-  detectBot,
-  shield,
-  tokenBucket,
-} from "@arcjet/remix";
+import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/remix";
+import { isSpoofedBot } from "@arcjet/inspect";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 
 const aj = arcjet({
@@ -34,17 +30,6 @@ const aj = arcjet({
   ],
 });
 
-function isSpoofed(result: ArcjetRuleResult) {
-  return (
-    // You probably don't want DRY_RUN rules resulting in a denial
-    // since they are generally used for evaluation purposes but you
-    // could log here.
-    result.state !== "DRY_RUN" &&
-    result.reason.isBot() &&
-    result.reason.isSpoofed()
-  );
-}
-
 // The loader function is called for every request to the app, but you could
 // also protect an action
 export async function loader(args: LoaderFunctionArgs) {
@@ -71,7 +56,7 @@ export async function loader(args: LoaderFunctionArgs) {
   // Verification isn't always possible, so we recommend checking the decision
   // separately.
   // https://docs.arcjet.com/bot-protection/reference#bot-verification
-  if (decision.results.some(isSpoofed)) {
+  if (decision.results.some(isSpoofedBot)) {
     throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });
   }
 

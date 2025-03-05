@@ -1,5 +1,6 @@
 import { env } from "$env/dynamic/private";
 import arcjet, { detectBot } from "@arcjet/sveltekit";
+import { isSpoofedBot } from "@arcjet/inspect";
 import { error } from "@sveltejs/kit";
 
 const aj = arcjet({
@@ -32,16 +33,10 @@ export async function handle({ event, resolve }) {
     }
   }
 
-  for (const { state, reason } of decision.results) {
-    if (state === "DRY_RUN") {
-      continue;
-    }
-
-    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
-    // https://docs.arcjet.com/bot-protection/reference#bot-verification
-    if (reason.isBot() && reason.isSpoofed()) {
-      return error(403, "You are pretending to be a good bot!");
-    }
+  // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+  // https://docs.arcjet.com/bot-protection/reference#bot-verification
+  if (decision.results.some(isSpoofedBot)) {
+    return error(403, "You are pretending to be a good bot!");
   }
 
   return resolve(event);
