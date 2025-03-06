@@ -1,4 +1,5 @@
 import arcjet, { detectBot } from "@arcjet/next";
+import { isMissingUserAgent } from "@arcjet/inspect";
 import { NextResponse } from "next/server";
 
 const aj = arcjet({
@@ -14,35 +15,17 @@ const aj = arcjet({
 export async function GET(req) {
   const decision = await aj.protect(req);
 
-  for (const { reason, state } of decision.results) {
+  for (const { reason } of decision.results) {
     if (reason.isError()) {
-      if (reason.message.includes("requires user-agent header")) {
-        // Requests without User-Agent headers can not be identified as any
-        // particular bot and will be marked as an errored decision. Most
-        // legitimate clients always send this header, so we recommend blocking
-        // requests without it.
-        // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
-        console.warn("User-Agent header is missing");
-
-        if (state !== "DRY_RUN") {
-          return NextResponse.json(
-            {
-              error: "Bad request",
-            },
-            { status: 400 },
-          );
-        }
-      } else {
-        // Fail open by logging the error and continuing
-        console.warn("Arcjet error", reason.message);
-        // You could also fail closed here for very sensitive routes
-        // return NextResponse.json(
-        //   {
-        //     error: "Service unavailable",
-        //   },
-        //   { status: 503 },
-        // );
-      }
+      // Fail open by logging the error and continuing
+      console.warn("Arcjet error", reason.message);
+      // You could also fail closed here for very sensitive routes
+      // return NextResponse.json(
+      //   {
+      //     error: "Service unavailable",
+      //   },
+      //   { status: 503 },
+      // );
     }
   }
 
@@ -52,6 +35,21 @@ export async function GET(req) {
         error: "You are a bot!",
       },
       { status: 403 },
+    );
+  }
+
+  if (decision.results.some(isMissingUserAgent)) {
+    // Requests without User-Agent headers might not be identified as any
+    // particular bot and could be marked as an errored result. Most legitimate
+    // clients send this header, so we recommend blocking requests without it.
+    // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
+    console.warn("User-Agent header is missing");
+
+    return NextResponse.json(
+      {
+        error: "Bad request",
+      },
+      { status: 400 },
     );
   }
 

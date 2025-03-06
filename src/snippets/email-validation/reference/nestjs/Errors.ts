@@ -1,4 +1,5 @@
 import { ARCJET, type ArcjetNest, validateEmail } from "@arcjet/nest";
+import { isMissingUserAgent } from "@arcjet/inspect";
 import {
   Body,
   Controller,
@@ -69,6 +70,16 @@ export class SignupController {
     this.logger.log(`Arcjet: id = ${decision.id}`);
     this.logger.log(`Arcjet: decision = ${decision.conclusion}`);
 
+    for (const { reason } of decision.results) {
+      if (reason.isError()) {
+        // Fail open to prevent an Arcjet error from blocking all requests. You
+        // may want to fail closed if this controller is very sensitive
+        this.logger.error(`Arcjet error: ${reason.message}`);
+        // You could also fail closed here for very sensitive routes
+        // throw new HttpException("Service unavailable", HttpStatus.SERVICE_UNAVAILABLE);
+      }
+    }
+
     if (decision.isDenied()) {
       if (decision.reason.isEmail()) {
         this.logger.log(`Arcjet: email error = ${decision.reason.emailTypes}`);
@@ -94,19 +105,16 @@ export class SignupController {
       } else {
         throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
       }
-    } else if (decision.isErrored()) {
-      if (decision.reason.message.includes("missing User-Agent header")) {
-        // Requests without User-Agent headers can not be identified as any
-        // particular bot and will be marked as an errored decision. Most
-        // legitimate clients always send this header, so we recommend blocking
-        // requests without it.
-        this.logger.warn("User-Agent header is missing");
-        throw new HttpException("Bad request", HttpStatus.BAD_REQUEST);
-      } else {
-        // Fail open to prevent an Arcjet error from blocking all requests. You
-        // may want to fail closed if this controller is very sensitive
-        this.logger.error(`Arcjet error: ${decision.reason.message}`);
-      }
+    }
+
+    if (decision.results.some(isMissingUserAgent)) {
+      // Requests without User-Agent headers might not be identified as any
+      // particular bot and could be marked as an errored result. Most
+      // legitimate clients send this header, so we recommend blocking requests
+      // without it.
+      // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
+      this.logger.warn("User-Agent header is missing");
+      throw new HttpException("Bad request", HttpStatus.BAD_REQUEST);
     }
 
     return this.signupService.signup(body.email);

@@ -1,5 +1,5 @@
 import { ARCJET, type ArcjetNest, protectSignup } from "@arcjet/nest";
-import { isSpoofedBot } from "@arcjet/inspect";
+import { isMissingUserAgent, isSpoofedBot } from "@arcjet/inspect";
 import {
   Body,
   Controller,
@@ -86,25 +86,12 @@ export class SignupController {
     this.logger.log(`Arcjet: id = ${decision.id}`);
     this.logger.log(`Arcjet: decision = ${decision.conclusion}`);
 
-    for (const { reason, state } of decision.results) {
+    for (const { reason } of decision.results) {
       if (reason.isError()) {
-        if (reason.message.includes("requires user-agent header")) {
-          // Requests without User-Agent headers can not be identified as any
-          // particular bot and will be marked as an errored rule. Most
-          // legitimate clients always send this header, so we recommend blocking
-          // requests without it.
-          // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
-          console.warn("User-Agent header is missing");
-
-          if (state !== "DRY_RUN") {
-            throw new HttpException("Bad request", HttpStatus.BAD_REQUEST);
-          }
-        } else {
-          // Fail open by logging the error and continuing
-          console.warn("Arcjet error", reason.message);
-          // You could also fail closed here for very sensitive routes
-          //throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
-        }
+        // Fail open by logging the error and continuing
+        console.warn("Arcjet error", reason.message);
+        // You could also fail closed here for very sensitive routes
+        //throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
       }
     }
 
@@ -140,6 +127,17 @@ export class SignupController {
       } else {
         throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
       }
+    }
+
+    if (decision.results.some(isMissingUserAgent)) {
+      // Requests without User-Agent headers might not be identified as any
+      // particular bot and could be marked as an errored result. Most
+      // legitimate clients send this header, so we recommend blocking requests
+      // without it.
+      // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
+      console.warn("User-Agent header is missing");
+
+      throw new HttpException("Bad request", HttpStatus.BAD_REQUEST);
     }
 
     // Arcjet Pro plan verifies the authenticity of common bots using IP data.
