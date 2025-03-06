@@ -23,8 +23,10 @@ import LoggerJS from "/src/snippets/reference/sveltekit/Logger.js?raw";
 import ProxiesTS from "/src/snippets/reference/sveltekit/Proxies.ts?raw";
 import DecisionLogTS from "/src/snippets/reference/sveltekit/DecisionLog.ts?raw";
 import DecisionLogJS from "/src/snippets/reference/sveltekit/DecisionLog.js?raw";
-import ErrorHandlingTS from "/src/snippets/reference/sveltekit/ErrorHandling.ts?raw";
-import ErrorHandlingJS from "/src/snippets/reference/sveltekit/ErrorHandling.js?raw";
+import ErrorLoggingTS from "/src/snippets/reference/sveltekit/ErrorLogging.ts?raw";
+import ErrorLoggingJS from "/src/snippets/reference/sveltekit/ErrorLogging.js?raw";
+import ErrorUserAgentTS from "/src/snippets/reference/sveltekit/ErrorUserAgent.ts?raw";
+import ErrorUserAgentJS from "/src/snippets/reference/sveltekit/ErrorUserAgent.js?raw";
 import WithRuleTS from "/src/snippets/reference/sveltekit/WithRule.ts?raw";
 import WithRuleJS from "/src/snippets/reference/sveltekit/WithRule.js?raw";
 import ClientOverrideTS from "/src/snippets/reference/sveltekit/ClientOverride.ts?raw";
@@ -496,19 +498,31 @@ conclusion will be `ERROR`.
 <Tabs>
   <TabItem label="TS">
     <Code
-      code={ErrorHandlingTS}
+      code={ErrorLoggingTS}
       title="/src/hooks.server.ts"
       lang="ts"
-      mark={[{ range: "27-32" }]}
+      mark={[{ range: "27-34" }]}
     />
   </TabItem>
   <TabItem label="JS">
     <Code
-      code={ErrorHandlingJS}
+      code={ErrorLoggingJS}
       title="/src/hooks.server.js"
       lang="js"
-      mark={[{ range: "21-26" }]}
+      mark={[{ range: "21-28" }]}
     />
+  </TabItem>
+</Tabs>
+
+The [@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect) package provides
+utilities for dealing with common errors.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={ErrorUserAgentTS} lang="ts" mark={[{ range: "23-31" }]} />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={ErrorUserAgentJS} lang="js" mark={[{ range: "23-31" }]} />
   </TabItem>
 </Tabs>
 

@@ -1,13 +1,15 @@
-import arcjet, { detectBot } from "@arcjet/node";
-import { isMissingUserAgent } from "@arcjet/inspect";
+import arcjet, { slidingWindow } from "@arcjet/node";
 import http from "node:http";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY!,
+  // Tracking by ip.src is the default if not specified
+  //characteristics: ["ip.src"],
   rules: [
-    detectBot({
-      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-      allow: [], // "allow none" will block all detected bots
+    slidingWindow({
+      mode: "LIVE",
+      interval: "1h",
+      max: 60,
     }),
   ],
 });
@@ -32,18 +34,6 @@ const server = http.createServer(async function (
   if (decision.isDenied()) {
     res.writeHead(403, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ error: "Forbidden" }));
-    return;
-  }
-
-  if (decision.results.some(isMissingUserAgent)) {
-    // Requests without User-Agent headers might not be identified as any
-    // particular bot and could be marked as an errored result. Most legitimate
-    // clients send this header, so we recommend blocking requests without it.
-    // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
-    console.warn("User-Agent header is missing");
-
-    res.writeHead(400, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: "Bad request" }));
     return;
   }
 

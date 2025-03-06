@@ -3,28 +3,17 @@ import { isMissingUserAgent } from "@arcjet/inspect";
 import http from "node:http";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY,
   rules: [
     detectBot({
-      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-      allow: [], // "allow none" will block all detected bots
+      mode: "LIVE",
+      allow: [],
     }),
   ],
 });
 
 const server = http.createServer(async function (req, res) {
   const decision = await aj.protect(req);
-
-  for (const { reason } of decision.results) {
-    if (reason.isError()) {
-      // Fail open by logging the error and continuing
-      console.warn("Arcjet error", reason.message);
-      // You could also fail closed here for very sensitive routes
-      //res.writeHead(503, { "Content-Type": "application/json" });
-      //res.end(JSON.stringify({ error: "Service unavailable" }));
-      //return;
-    }
-  }
 
   if (decision.isDenied()) {
     res.writeHead(403, { "Content-Type": "application/json" });
