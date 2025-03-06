@@ -1,4 +1,4 @@
-import arcjet, { slidingWindow } from "@arcjet/next";
+import arcjet, { detectBot } from "@arcjet/next";
 import { isMissingUserAgent } from "@arcjet/inspect";
 
 const aj = arcjet({
@@ -6,10 +6,9 @@ const aj = arcjet({
   // Tracking by ip.src is the default if not specified
   //characteristics: ["ip.src"],
   rules: [
-    slidingWindow({
+    detectBot({
       mode: "LIVE",
-      interval: "1h",
-      max: 60,
+      allow: [],
     }),
   ],
 });
