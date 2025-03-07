@@ -1,0 +1,130 @@
+---
+title: "Arcjet decision inspection reference"
+description: "Reference for the @arcjet/inspect library"
+prev: false
+next: false
+---
+
+import { Code } from "@astrojs/starlight/components";
+import DisplayType from "@/components/DisplayType.astro";
+
+The Arcjet decision inspection library provides a set of utilities to more
+easily interact with the decision returned from an Arcjet SDK.
+
+import WhatAreArcjetUtilities from "@/components/WhatAreArcjetUtilities.astro";
+
+<WhatAreArcjetUtilities />
+
+## Why
+
+In addition to providing an easy-to-consume security recommendation, each Arcjet
+SDK also provides a lot of metadata attached to every decision. Users can use
+all of these signals to inform application logic, but it can be quite verbose to
+extract the information.
+
+As we notice common patterns, we provide optional utilities in the
+`@arcjet/inspect` package to streamline these operations.
+
+## Install
+
+```sh
+npm install -S @arcjet/inspect
+```
+
+## Usage
+
+import InspectUsage from "@/snippets/inspect/usage.ts?raw";
+
+<Code code={InspectUsage} lang="ts" />
+
+## API
+
+import Free from "@/components/badges/Free.astro";
+
+### `isSpoofedBot(result: ArcjetRuleResult)`
+
+Determines if a non-`"DRY_RUN"` bot rule detected a spoofed request. If `true`,
+the request was likely spoofed and you may want to block it.
+
+For `allow` rules, Arcjet verifies the authenticity of detected bots by checking
+IP data and performing reverse DNS lookups. This helps protect against spoofed
+bots where malicious clients pretend to be a well-behaving bot.
+
+Returns `true` if the bot rule result was not `"DRY_RUN"` and a spoofed bot was
+detected, `false` if the bot rule result was not `"DRY_RUN"` and a spoofed bot
+was not detected, or `undefined` if the rule result was from a `"DRY_RUN"` bot
+rule or a non-bot rule.
+
+:::note
+Spoofed bot detection is not available on <Free /> plans.
+:::
+
+**Types:**
+
+<DisplayType type="ArcjetRuleResult" from="@arcjet/protocol" />
+
+### `isVerifiedBot(result: ArcjetRuleResult)`
+
+Determines if a non-`"DRY_RUN"` bot rule detected a request from a verified bot.
+If `true`, the bot was verified as legitimate and you may want to ignore other
+signals.
+
+For `allow` rules, Arcjet verifies the authenticity of detected bots by checking
+IP data and performing reverse DNS lookups. A verified bot is a bot that has
+passed these checks.
+
+Returns `true` if the bot rule result was not `"DRY_RUN"` and a verified bot was
+detected, `false` if the bot rule result was not `"DRY_RUN"` and a verified bot
+was not detected, or `undefined` if the rule result was from a `"DRY_RUN"` bot
+rule or a non-bot rule.
+
+:::note
+Verified bot detection is not available on <Free /> plans.
+:::
+
+**Types:**
+
+<DisplayType type="ArcjetRuleResult" from="@arcjet/protocol" />
+
+### `isMissingUserAgent(result: ArcjetRuleResult)`
+
+Determines if a non-`"DRY_RUN"` bot rule errored due to a missing User-Agent
+header on the request. If `true`, you may want to block the request because a
+missing User-Agent header is a good indicator of a malicious request since it is
+recommended by
+[RFC9110](https://datatracker.ietf.org/doc/html/rfc9110#field.user-agent).
+
+Returns `true` if the rule result was not `"DRY_RUN"` and the request was
+missing a User-Agent header, `false` if the rule result was not `"DRY_RUN"` and
+the request had a User-Agent header, or `undefined` if the rule result was from
+a `"DRY_RUN"` bot rule or a non-bot rule.
+
+**Types:**
+
+<DisplayType type="ArcjetRuleResult" from="@arcjet/protocol" />
+
+## What next?
+
+Arcjet can protect your entire app or individual routes with just
+a few lines of code. Using the main Arcjet SDK you can setup bot protection,
+rate limiting for your API, minimize fraudulent registrations with the
+signup form protection and more.
+
+import { LinkCard, CardGrid } from "@astrojs/starlight/components";
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  />
+  <LinkCard
+    title="Learn how Arcjet works"
+    href="/architecture"
+    description="Arcjet's architecture."
+  />
+</CardGrid>
+
+import Comments from "@/components/Comments.astro";
+
+<Comments />

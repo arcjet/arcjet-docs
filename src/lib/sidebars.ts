@@ -326,6 +326,10 @@ export const main = [
         ],
       },
       {
+        label: "@arcjet/inspect",
+        link: "/inspect",
+      },
+      {
         label: "@arcjet/ip",
         link: "/ip",
       },
