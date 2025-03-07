@@ -70,8 +70,8 @@ ajToc:
   - text: "Bot verification"
     anchor: "bot-verification"
     children:
-      - text: "Example: Allowing Google"
-        anchor: "example-allowing-google"
+      - text: "Example: Allowing verified bots"
+        anchor: "example-allowing-verified-bots"
       - text: "Check for spoofed bots"
         anchor: "check-for-spoofed-bots"
       - text: "Check bot verification"
@@ -401,7 +401,12 @@ import { isVerifiedBot } from "@arcjet/inspect";
 // ...
 const aj = arcjet({
   // ...
-  rules: [detectBot({ mode: "LIVE", allow: ["CATEGORY:SEARCH_ENGINE"] })],
+  rules: [
+    detectBot({
+      mode: "LIVE",
+      allow: ["CATEGORY:SEARCH_ENGINE"],
+    }),
+  ],
 });
 
 // ...
