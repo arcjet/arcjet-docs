@@ -1,4 +1,4 @@
-// Replace with your SDK—every SDK provides a decision that can be inspected
+// Replace with the framework SDK you're using e.g. `@arcjet/node`
 import arcjet, { detectBot } from "@arcjet/next";
 import {
   isVerifiedBot,
