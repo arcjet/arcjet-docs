@@ -1,4 +1,5 @@
-import arcjet, { ArcjetRuleResult, detectBot } from "@arcjet/next";
+import arcjet, { detectBot } from "@arcjet/next";
+import { isSpoofedBot } from "@arcjet/inspect";
 import { NextResponse } from "next/server";
 
 const aj = arcjet({
@@ -10,17 +11,6 @@ const aj = arcjet({
     }),
   ],
 });
-
-function isSpoofed(result: ArcjetRuleResult) {
-  return (
-    // You probably don't want DRY_RUN rules resulting in a denial
-    // since they are generally used for evaluation purposes but you
-    // could log here.
-    result.state !== "DRY_RUN" &&
-    result.reason.isBot() &&
-    result.reason.isSpoofed()
-  );
-}
 
 export async function GET(req: Request) {
   const decision = await aj.protect(req);
@@ -38,7 +28,7 @@ export async function GET(req: Request) {
   // Verification isn't always possible, so we recommend checking the results
   // separately.
   // https://docs.arcjet.com/bot-protection/reference#bot-verification
-  if (decision.results.some(isSpoofed)) {
+  if (decision.results.some(isSpoofedBot)) {
     return NextResponse.json(
       {
         error: "You are a bot!",

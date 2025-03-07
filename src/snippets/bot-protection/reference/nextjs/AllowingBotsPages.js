@@ -1,4 +1,5 @@
 import arcjet, { detectBot } from "@arcjet/next";
+import { isSpoofedBot } from "@arcjet/inspect";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY,
@@ -37,18 +38,12 @@ export default async function handler(req, res) {
     }
   }
 
-  for (const { state, reason } of decision.results) {
-    if (state === "DRY_RUN") {
-      continue;
-    }
-
-    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
-    // https://docs.arcjet.com/bot-protection/reference#bot-verification
-    if (reason.isBot() && reason.isSpoofed()) {
-      return res.status(403).json({
-        error: "You are pretending to be a good bot!",
-      });
-    }
+  // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+  // https://docs.arcjet.com/bot-protection/reference#bot-verification
+  if (decision.results.some(isSpoofedBot)) {
+    return res.status(403).json({
+      error: "You are pretending to be a good bot!",
+    });
   }
 
   res.status(200).json({ name: "Hello world" });

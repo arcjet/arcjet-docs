@@ -96,11 +96,10 @@ IP analysis, which can help if you are under attack from bots pretending to be
 good bots e.g. clients pretending to be Google (who you usually want to allow).
 
 :::note
-Requests without `User-Agent` headers can not be identified as any particular
-bot and will be marked as an errored decision. Check `decision.isErrored()` and
-decide if you want to allow or deny the request. Our recommendation is to block
-requests without `User-Agent` headers because most legitimate clients always
-send this header.
+Requests without `User-Agent` headers might not be identified as any particular
+bot and could be marked as an errored result. Our recommendation is to block
+requests without `User-Agent` headers because most legitimate clients send this
+header.
 
 See [an example of how to do this](/bot-protection/concepts#user-agent-header).
 :::

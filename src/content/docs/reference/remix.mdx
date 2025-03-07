@@ -21,6 +21,10 @@ import ConfigurationTS from "/src/snippets/reference/remix/Configuration.ts?raw"
 import ConfigurationJS from "/src/snippets/reference/remix/Configuration.js?raw";
 import ClientOverrideTS from "/src/snippets/reference/remix/ClientOverride.ts?raw";
 import ClientOverrideJS from "/src/snippets/reference/remix/ClientOverride.js?raw";
+import ErrorLoggingTS from "/src/snippets/reference/remix/ErrorLogging.ts?raw";
+import ErrorLoggingJS from "/src/snippets/reference/remix/ErrorLogging.js?raw";
+import ErrorUserAgentTS from "/src/snippets/reference/remix/ErrorUserAgent.ts?raw";
+import ErrorUserAgentJS from "/src/snippets/reference/remix/ErrorUserAgent.js?raw";
 import NodeVersions from "/src/snippets/reference/node-versions.mdx";
 import Comments from "/src/components/Comments.astro";
 import Requirements from "@/snippets/get-started/remix/Requirements.mdx";
@@ -461,23 +465,26 @@ error result for more information.
 If all other rules that were run returned an `ALLOW` result, then the final Arcjet
 conclusion will be `ERROR`.
 
-```ts
-if (decision.isErrored()) {
-  if (decision.reason.message.includes("requires user-agent header")) {
-    // Requests without User-Agent headers can not be identified as any
-    // particular bot and will be marked as an errored decision. Most
-    // legitimate clients always send this header, so we recommend blocking
-    // requests without it.
-    // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
-    throw new Response("Bad request", { status: 400 });
-  } else {
-    // Fail open by logging the error and continuing
-    console.warn("Arcjet error", decision.reason.message);
-    // You could also fail closed here for very sensitive routes
-    //throw new Response("Service unavailable", { status: 503 });
-  }
-}
-```
+<Tabs>
+  <TabItem label="TS">
+    <Code code={ErrorLoggingTS} lang="ts" mark={[{ range: "20-27" }]} />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={ErrorLoggingJS} lang="js" mark={[{ range: "19-26" }]} />
+  </TabItem>
+</Tabs>
+
+The [@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect) package provides
+utilities for dealing with common errors.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={ErrorUserAgentTS} lang="ts" mark={[{ range: "22-30" }]} />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={ErrorUserAgentJS} lang="js" mark={[{ range: "21-29" }]} />
+  </TabItem>
+</Tabs>
 
 ## Ad hoc rules
 

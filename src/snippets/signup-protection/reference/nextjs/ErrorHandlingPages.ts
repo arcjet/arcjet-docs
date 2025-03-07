@@ -1,4 +1,5 @@
 import arcjet, { protectSignup } from "@arcjet/next";
+import { isMissingUserAgent } from "@arcjet/inspect";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 const aj = arcjet({
@@ -34,32 +35,12 @@ export default async function handler(
     email,
   });
 
-  if (decision.isErrored()) {
-    // Fail open by logging the error and continuing
-    console.warn("Arcjet error", decision.reason.message);
-    // You could also fail closed here for very sensitive routes
-    //return res.status(503).json({ error: "Service unavailable" });
-  }
-
-  for (const { reason, state } of decision.results) {
+  for (const { reason } of decision.results) {
     if (reason.isError()) {
-      if (reason.message.includes("requires user-agent header")) {
-        // Requests without User-Agent headers can not be identified as any
-        // particular bot and will be marked as an errored rule. Most
-        // legitimate clients always send this header, so we recommend blocking
-        // requests without it.
-        // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
-        console.warn("User-Agent header is missing");
-
-        if (state !== "DRY_RUN") {
-          return res.status(400).json({ error: "Bad request" });
-        }
-      } else {
-        // Fail open by logging the error and continuing
-        console.warn("Arcjet error", reason.message);
-        // You could also fail closed here for very sensitive routes
-        //return res.status(503).json({ error: "Service unavailable" });
-      }
+      // Fail open by logging the error and continuing
+      console.warn("Arcjet error", reason.message);
+      // You could also fail closed here for very sensitive routes
+      //return res.status(503).json({ error: "Service unavailable" });
     }
   }
 
@@ -77,9 +58,19 @@ export default async function handler(
         message: "Forbidden",
       });
     }
-  } else {
-    // The form submission is allowed to proceed so do something with it here
-
-    res.status(200).json({ name: "Hello world" });
   }
+
+  if (decision.results.some(isMissingUserAgent)) {
+    // Requests without User-Agent headers might not be identified as any
+    // particular bot and could be marked as an errored result. Most legitimate
+    // clients send this header, so we recommend blocking requests without it.
+    // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
+    console.warn("User-Agent header is missing");
+
+    return res.status(400).json({ error: "Bad request" });
+  }
+
+  // The form submission is allowed to proceed so do something with it here
+
+  res.status(200).json({ name: "Hello world" });
 }

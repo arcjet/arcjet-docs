@@ -1,4 +1,5 @@
 import arcjet, { detectBot } from "@arcjet/next";
+import { isSpoofedBot } from "@arcjet/inspect";
 import { NextResponse } from "next/server";
 
 const aj = arcjet({
@@ -39,19 +40,13 @@ export async function POST(req) {
     }
   }
 
-  for (const { state, reason } of decision.results) {
-    if (state === "DRY_RUN") {
-      continue;
-    }
-
-    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
-    // https://docs.arcjet.com/bot-protection/reference#bot-verification
-    if (reason.isBot() && reason.isSpoofed()) {
-      return NextResponse.json(
-        { error: "You are pretending to be a good bot!" },
-        { status: 403 },
-      );
-    }
+  // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+  // https://docs.arcjet.com/bot-protection/reference#bot-verification
+  if (decision.results.some(isSpoofedBot)) {
+    return NextResponse.json(
+      { error: "You are pretending to be a good bot!" },
+      { status: 403 },
+    );
   }
 
   return NextResponse.json({

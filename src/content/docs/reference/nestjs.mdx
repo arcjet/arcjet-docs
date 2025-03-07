@@ -9,6 +9,8 @@ import Comments from "/src/components/Comments.astro";
 import SDKVersionNestjs from "/src/components/SDKVersionNestjs.astro";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 
+import ErrorLoggingTS from "/src/snippets/reference/nestjs/ErrorLogging.ts?raw";
+import ErrorUserAgentTS from "/src/snippets/reference/nestjs/ErrorUserAgent.ts?raw";
 import LoggerTS from "/src/snippets/reference/nestjs/ClientLogger.ts?raw";
 import ProxiesTS from "/src/snippets/reference/nestjs/Proxies.ts?raw";
 import ConfigurationTS from "/src/snippets/reference/nestjs/Configuration.ts?raw";
@@ -398,24 +400,20 @@ error result for more information.
 If all other rules that were run returned an `ALLOW` result, then the final Arcjet
 conclusion will be `ERROR`.
 
-```ts
-if (decision.isErrored()) {
-  if (decision.reason.message.includes("requires user-agent header")) {
-    // Requests without User-Agent headers can not be identified as any
-    // particular bot and will be marked as an errored decision. Most
-    // legitimate clients always send this header, so we recommend blocking
-    // requests without it.
-    // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
-    this.logger.warn("User-Agent header is missing");
-    throw new HttpException("Bad request", HttpStatus.BAD_REQUEST);
-  } else {
-    // Fail open to prevent an Arcjet error from blocking all requests. You
-    // may want to fail closed if this controller is very sensitive
-    this.logger.error(`Arcjet error: ${decision.reason.message}`);
-    //throw new HttpException("Service unavailable", HttpStatus.SERVICE_UNAVAILABLE);
-  }
-}
-```
+<Tabs>
+  <TabItem label="TS">
+    <Code code={ErrorLoggingTS} lang="ts" mark={[{ range: "47-54" }]} />
+  </TabItem>
+</Tabs>
+
+The [@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect) package provides
+utilities for dealing with common errors.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={ErrorUserAgentTS} lang="ts" mark={[{ range: "65-74" }]} />
+  </TabItem>
+</Tabs>
 
 ## IP address detection
 

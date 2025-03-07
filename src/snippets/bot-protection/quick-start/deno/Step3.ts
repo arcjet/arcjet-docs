@@ -1,6 +1,7 @@
 import "jsr:@std/dotenv/load";
 
-import arcjet, { ArcjetRuleResult, detectBot } from "@arcjet/deno";
+import arcjet, { detectBot } from "@arcjet/deno";
+import { isSpoofedBot } from "@arcjet/inspect";
 
 const aj = arcjet({
   key: Deno.env.get("ARCJET_KEY")!, // Get your site key from https://app.arcjet.com
@@ -19,17 +20,6 @@ const aj = arcjet({
   ],
 });
 
-function isSpoofed(result: ArcjetRuleResult) {
-  return (
-    // You probably don't want DRY_RUN rules resulting in a denial
-    // since they are generally used for evaluation purposes but you
-    // could log here.
-    result.state !== "DRY_RUN" &&
-    result.reason.isBot() &&
-    result.reason.isSpoofed()
-  );
-}
-
 Deno.serve(
   { port: 3000 },
   aj.handler(async (req) => {
@@ -44,7 +34,7 @@ Deno.serve(
     // Verification isn't always possible, so we recommend checking the results
     // separately.
     // https://docs.arcjet.com/bot-protection/reference#bot-verification
-    if (decision.results.some(isSpoofed)) {
+    if (decision.results.some(isSpoofedBot)) {
       return new Response("Forbidden", { status: 403 });
     }
 
