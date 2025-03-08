@@ -70,8 +70,8 @@ ajToc:
   - text: "Bot verification"
     anchor: "bot-verification"
     children:
-      - text: "Example: Allowing Google"
-        anchor: "example-allowing-google"
+      - text: "Example: Allowing verified bots"
+        anchor: "example-allowing-verified-bots"
       - text: "Check for spoofed bots"
         anchor: "check-for-spoofed-bots"
       - text: "Check bot verification"
@@ -84,6 +84,8 @@ ajToc:
 ---
 
 import { Badge } from "@astrojs/starlight/components";
+import Free from "@/components/badges/Free.astro";
+import Enterprise from "@/components/badges/Enterprise.astro";
 import Comments from "@/components/Comments.astro";
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
@@ -370,10 +372,9 @@ their "advertising quality" bot.
 
 ## Bot verification
 
-Requests analyzed by Arcjet on <Badge text="Pro" variant="note" /> or <Badge text="Enterprise" variant="tip" />
-plans include automatic bot verification. For `allow` rules, Arcjet verifies the
-authenticity of detected bots by checking IP data and performing reverse DNS
-lookups.
+Requests analyzed by Arcjet on <Free /> or <Enterprise /> plans include
+automatic bot verification. For `allow` rules, Arcjet verifies the authenticity
+of detected bots by checking IP data and performing reverse DNS lookups.
 
 This helps protect against spoofed bots where clients pretend to be someone
 else.
@@ -384,44 +385,42 @@ certain bots, any `deny` rules bypass verification and simply block bots
 matching the `deny` list.
 :::
 
-### Example: Allowing Google
+### Example: Allowing verified bots
 
-This will allow Google bots and verify their authenticity.
+Well-behaved bots, such as search engine indexers, are often desirable traffic.
+The companies that operate these bots will make them verifiable so application
+developers can choose to avoid additional signals about the request.
+
+For example, when a request claims to be GoogleBot, Arcjet will check if the IP
+truly belongs to Google. You can check the verification status in your code and
+take actions based on the results, such as allowing all verified bots.
 
 ```ts
-detectBot({
-  mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-  // Allow Google, and block all other bots
-  allow: [
-    "GOOGLE_CRAWLER",
+import { isVerifiedBot } from "@arcjet/inspect";
+
+// ...
+const aj = arcjet({
+  // ...
+  rules: [
+    detectBot({
+      mode: "LIVE",
+      allow: ["CATEGORY:SEARCH_ENGINE"],
+    }),
   ],
-}),
-```
-
-When a request claims to be Googlebot, Arcjet will check if the IP truly belongs
-to Google. If it does, the request will be marked as `verified: true`. If not,
-it will be marked as `spoofed: true`.
-
-You can check for this in your code and deny the request if it is spoofed.
-
-```ts
-function isSpoofed(result: ArcjetRuleResult) {
-  return (
-    // You probably don't want DRY_RUN rules resulting in a denial
-    // since they are generally used for evaluation purposes but you
-    // could log here.
-    result.state !== "DRY_RUN" &&
-    result.reason.isBot() &&
-    result.reason.isSpoofed()
-  );
-}
+});
 
 // ...
 const decision = await aj.protect(req);
 // ...
 
-if (decision.results.some(isSpoofed)) {
-  // Return a 403 or similar response
+// Ignore other signals for verified search engine bots
+if (decision.results.some(isVerifiedBot)) {
+  return new Response("Hello Bot!");
+}
+
+// Leverage all Arcjet signals
+if (decision.isDenied()) {
+  return new Response(null, { status: 403 });
 }
 ```
 
