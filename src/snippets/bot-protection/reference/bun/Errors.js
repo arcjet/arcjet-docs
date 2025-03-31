@@ -1,4 +1,5 @@
 import arcjet, { detectBot } from "@arcjet/bun";
+import { isMissingUserAgent, isSpoofedBot } from "@arcjet/inspect";
 import { env } from "bun";
 
 const aj = arcjet({
@@ -16,22 +17,36 @@ export default {
   fetch: aj.handler(async (req) => {
     const decision = await aj.protect(req);
 
-    // If the request is missing a User-Agent header, the decision will be
-    // marked as an error! You should check for this and make a decision about
-    // the request since requests without a User-Agent could indicate a crafted
-    // request from an automated client.
-    if (decision.isErrored()) {
-      // Fail open by logging the error and continuing
-      console.warn("Arcjet error", decision.reason.message);
-      // You could also fail closed here if the request is missing a User-Agent
-      //return new Response("Service unavailable", { status: 503 });
+    for (const { reason } of decision.results) {
+      if (reason.isError()) {
+        // Fail open by logging the error and continuing
+        console.warn("Arcjet error", reason.message);
+        // You could also fail closed here for very sensitive routes
+        //return new Response("Service unavailable", { status: 503 });
+      }
     }
 
+    // Bots not in the allow list will be blocked
     if (decision.isDenied()) {
       return new Response("Forbidden", { status: 403 });
     }
 
-    if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+    if (decision.results.some(isMissingUserAgent)) {
+      // Requests without User-Agent headers might not be identified as any
+      // particular bot and could be marked as an errored result. Most
+      // legitimate clients send this header, so we recommend blocking requests
+      // without it.
+      // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
+      console.warn("User-Agent header is missing");
+
+      return new Response("Bad request", { status: 400 });
+    }
+
+    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+    // Verification isn't always possible, so we recommend checking the results
+    // separately.
+    // https://docs.arcjet.com/bot-protection/reference#bot-verification
+    if (decision.results.some(isSpoofedBot)) {
       return new Response("Forbidden", { status: 403 });
     }
 

@@ -22,10 +22,14 @@ import DecisionLogAppJS from "/src/snippets/reference/nextjs/DecisionLogApp.js?r
 import DecisionLogAppTS from "/src/snippets/reference/nextjs/DecisionLogApp.ts?raw";
 import DecisionLogPagesJS from "/src/snippets/reference/nextjs/DecisionLogPages.js?raw";
 import DecisionLogPagesTS from "/src/snippets/reference/nextjs/DecisionLogPages.ts?raw";
-import ErrorHandlingAppJS from "/src/snippets/reference/nextjs/ErrorHandlingApp.js?raw";
-import ErrorHandlingAppTS from "/src/snippets/reference/nextjs/ErrorHandlingApp.ts?raw";
-import ErrorHandlingPagesJS from "/src/snippets/reference/nextjs/ErrorHandlingPages.js?raw";
-import ErrorHandlingPagesTS from "/src/snippets/reference/nextjs/ErrorHandlingPages.ts?raw";
+import ErrorLoggingAppJS from "/src/snippets/reference/nextjs/ErrorLoggingApp.js?raw";
+import ErrorLoggingAppTS from "/src/snippets/reference/nextjs/ErrorLoggingApp.ts?raw";
+import ErrorLoggingPagesJS from "/src/snippets/reference/nextjs/ErrorLoggingPages.js?raw";
+import ErrorLoggingPagesTS from "/src/snippets/reference/nextjs/ErrorLoggingPages.ts?raw";
+import ErrorUserAgentAppJS from "/src/snippets/reference/nextjs/ErrorUserAgentApp.js?raw";
+import ErrorUserAgentAppTS from "/src/snippets/reference/nextjs/ErrorUserAgentApp.ts?raw";
+import ErrorUserAgentPagesJS from "/src/snippets/reference/nextjs/ErrorUserAgentPages.js?raw";
+import ErrorUserAgentPagesTS from "/src/snippets/reference/nextjs/ErrorUserAgentPages.ts?raw";
 import IPLocationAppJS from "/src/snippets/reference/nextjs/IPLocationApp.js?raw";
 import IPLocationAppTS from "/src/snippets/reference/nextjs/IPLocationApp.ts?raw";
 import IPLocationPagesJS from "/src/snippets/reference/nextjs/IPLocationPages.js?raw";
@@ -142,7 +146,7 @@ Each rule can be configured in either `LIVE` or `DRY_RUN` mode. When in
 always be `ALLOW`.
 
 This allows you to run Arcjet in passive / demo mode to test rules before
-enabling them. Arcjet will log what it would have done.
+enabling them.
 
 ```ts
 import arcjet, { fixedWindow } from "@arcjet/next";
@@ -170,6 +174,17 @@ const aj = arcjet({
     ),
   ],
 });
+```
+
+As the top level conclusion will always be `ALLOW` in `DRY_RUN` mode, you can
+loop through each rule result to check what would have happened:
+
+```ts
+for (const result of decision.results) {
+  if (result.isDenied()) {
+    console.log("Rule returned deny conclusion", result);
+  }
+}
 ```
 
 ### Multiple rules
@@ -405,6 +420,14 @@ check the conclusion:
 - `isDenied()` (`bool`) - The request should be denied.
 - `isErrored()` (`bool`) - There was an unrecoverable error.
 
+The conclusion will be the highest-severity finding when evaluating the configured
+rules. `"DENY"` is the highest severity, followed by `"CHALLENGE"`, then `"ERROR"` and
+finally `"ALLOW"` as the lowest severity.
+
+For example, when a bot protection rule returns an error and a validate email
+rule returns a deny, the overall conclusion would be deny. To access the error
+you would have to use the `results` property on the decision.
+
 ### Reason
 
 The `reason` property of the `ArcjetDecision` object contains an `ArcjetReason`
@@ -413,6 +436,9 @@ the final decision reason and is based on the configured rules.
 
 The `ArcjetReason` object has the following methods that can be used to check
 which rule caused the conclusion:
+
+It will always be the highest-priority rule that produced that conclusion,
+to inspect other rules consider iterating over the `results` property on the decision.
 
 - `isBot()` (`bool`) - Returns `true` if the bot protection rules have been
   applied and the request was considered to have been made by a bot.
@@ -423,7 +449,7 @@ which rule caused the conclusion:
 - `isSensitiveInfo()` (`bool`) - Returns `true` if sensitive info rules have
   been applied and sensitive info has been detected.
 - `isShield()` (`bool`) - Returns `true` if the shield rules have been applied
-  and the request is suspicious based on analysis by Arcjet Shield.
+  and the request is suspicious based on analysis by Arcjet Shield WAF.
 - `isError()` (`bool`) - Returns `true` if there was an error processing the
   request.
 
@@ -591,20 +617,83 @@ not block all requests. The SDK will also time out and fail open after 1000ms
 when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
 in most cases, the response time will be less than 20-30ms.
 
-If there is an error condition, Arcjet will return an `ERROR` `conclusion`.
+If there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the `message` property on the rule's
+error result for more information.
+
+If all other rules that were run returned an `ALLOW` result, then the final Arcjet
+conclusion will be `ERROR`.
 
 <Tabs>
   <TabItem label="TS (App)">
-    <Code code={ErrorHandlingAppTS} title="/app/api/route/hello.ts" lang="ts" />
+    <Code
+      code={ErrorLoggingAppTS}
+      title="/app/api/route/hello.ts"
+      lang="ts"
+      mark={[{ range: "20-27" }]}
+    />
   </TabItem>
   <TabItem label="TS (Pages)">
-    <Code code={ErrorHandlingPagesTS} title="/pages/api/hello.ts" lang="ts" />
+    <Code
+      code={ErrorLoggingPagesTS}
+      title="/pages/api/hello.ts"
+      lang="ts"
+      mark={[{ range: "23-30" }]}
+    />
   </TabItem>
   <TabItem label="JS (App Router)">
-    <Code code={ErrorHandlingAppJS} title="/app/api/route/hello.js" lang="js" />
+    <Code
+      code={ErrorLoggingAppJS}
+      title="/app/api/route/hello.js"
+      lang="js"
+      mark={[{ range: "20-27" }]}
+    />
   </TabItem>
   <TabItem label="JS (Pages Router)">
-    <Code code={ErrorHandlingPagesJS} title="/pages/api/hello.js" lang="js" />
+    <Code
+      code={ErrorLoggingPagesJS}
+      title="/pages/api/hello.js"
+      lang="js"
+      mark={[{ range: "19-26" }]}
+    />
+  </TabItem>
+</Tabs>
+
+The [@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect) package provides
+utilities for dealing with common errors.
+
+<Tabs>
+  <TabItem label="TS (App)">
+    <Code
+      code={ErrorUserAgentAppTS}
+      title="/app/api/route/hello.ts"
+      lang="ts"
+      mark={[{ range: "24-32" }]}
+    />
+  </TabItem>
+  <TabItem label="TS (Pages)">
+    <Code
+      code={ErrorUserAgentPagesTS}
+      title="/pages/api/hello.ts"
+      lang="ts"
+      mark={[{ range: "27-35" }]}
+    />
+  </TabItem>
+  <TabItem label="JS (App Router)">
+    <Code
+      code={ErrorUserAgentAppJS}
+      title="/app/api/route/hello.js"
+      lang="js"
+      mark={[{ range: "24-32" }]}
+    />
+  </TabItem>
+  <TabItem label="JS (Pages Router)">
+    <Code
+      code={ErrorUserAgentPagesJS}
+      title="/pages/api/hello.js"
+      lang="js"
+      mark={[{ range: "23-31" }]}
+    />
   </TabItem>
 </Tabs>
 

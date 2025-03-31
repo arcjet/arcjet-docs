@@ -14,15 +14,15 @@ const aj = arcjet({
 export async function POST(req) {
   const decision = await aj.protect(req);
 
+  if (decision.isDenied()) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   if (decision.ip.hasCountry()) {
     return NextResponse.json({
       message: `Hello ${decision.ip.countryName}!`,
       country: decision.ip,
     });
-  }
-
-  if (decision.isDenied()) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   return NextResponse.json({

@@ -1,0 +1,262 @@
+# Arcjet
+
+Arcjet is an SDK to help developers protect their applications from security
+threats. It provides features like bot protection, rate limiting, WAF, email
+validation, signup form protection, and sensitive information detection &
+redaction. These can be integrated into applications with just a few lines of
+code.
+
+## Docs
+
+A quick start guide is available to show how to configure Arcjet rules to
+protect your app from attacks, apply a rate limit, and prevent bots from
+accessing your app for the following frameworks.
+
+Each link below directs to the quick start guide page with a framework-specific
+view:
+
+- [Bun quick start](https://docs.arcjet.com/get-started?f=bun)
+- [Bun + Hono quick start](https://docs.arcjet.com/get-started?f=bun-hono)
+- [Deno quick start](https://docs.arcjet.com/get-started?f=deno)
+- [NestJS quick start](https://docs.arcjet.com/get-started?f=nest-js)
+- [Next.js quick start](https://docs.arcjet.com/get-started?f=next-js)
+- [Node.js quick start](https://docs.arcjet.com/get-started?f=node-js)
+- [Node.js + Express.js quick start](https://docs.arcjet.com/get-started?f=node-js-express)
+- [Node.js + Hono quick start](https://docs.arcjet.com/get-started?f=node-js-hono)
+- [Remix quick start](https://docs.arcjet.com/get-started?f=remix)
+- [SvelteKit quick start](https://docs.arcjet.com/get-started?f=sveltekit)
+
+The full docs can be found at https://docs.arcjet.com
+
+## Next.js example
+
+This example will protect a Next.js API route with a rate limit, bot detection,
+and Shield WAF.
+
+### 1. Installation
+
+```shell
+npm i @arcjet/next
+```
+
+For production, store the key securely using environment variables provided by
+your hosting platform to avoid exposing it in source control.
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key.
+
+Add your key to a `.env.local` file in your project root.
+
+```ini
+ARCJET_KEY=ajkey_yourkey
+```
+
+### 3. Add rules
+
+Create a new API route at `/app/api/arcjet/route.ts`:
+
+```ts
+import arcjet, {
+  type ArcjetRuleResult,
+  detectBot,
+  shield,
+  tokenBucket,
+} from "@arcjet/next";
+import { NextResponse } from "next/server";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    // Shield protects your app from common attacks e.g. SQL injection
+    shield({ mode: "LIVE" }),
+    // Create a bot detection rule
+    detectBot({
+      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+      // Block all bots except the following
+      allow: [
+        "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc
+        // Uncomment to allow these other common bot categories
+        // See the full list at https://arcjet.com/bot-list
+        //"CATEGORY:MONITOR", // Uptime monitoring services
+        //"CATEGORY:PREVIEW", // Link previews e.g. Slack, Discord
+      ],
+    }),
+    // Create a token bucket rate limit. Other algorithms are supported.
+    tokenBucket({
+      mode: "LIVE",
+      refillRate: 5, // Refill 5 tokens per interval
+      interval: 10, // Refill every 10 seconds
+      capacity: 10, // Bucket capacity of 10 tokens
+    }),
+  ],
+});
+
+export async function GET(req: Request) {
+  // Deduct 5 tokens from the bucket for this request
+  const decision = await aj.protect(req, { requested: 5 });
+  console.log("Arcjet decision", decision);
+
+  if (decision.isDenied()) {
+    if (decision.reason.isRateLimit()) {
+      return NextResponse.json(
+        { error: "Too Many Requests", reason: decision.reason },
+        { status: 429 },
+      );
+    } else if (decision.reason.isBot()) {
+      return NextResponse.json(
+        { error: "No bots allowed", reason: decision.reason },
+        { status: 403 },
+      );
+    } else {
+      return NextResponse.json(
+        { error: "Forbidden", reason: decision.reason },
+        { status: 403 },
+      );
+    }
+  }
+
+  return NextResponse.json({ message: "Hello world" });
+}
+```
+
+The `{ requested: 5 }` option specifies that this request consumes 5 tokens from
+the rate limit bucket. Adjust this value based on the "cost" of each request.
+
+Calls to `protect()` only require additional options when the rule requires
+additional information. For example, the token bucket rate limit rule requires
+the number of tokens to consume.
+
+### 4. Start your app
+
+```shell
+npm run dev
+```
+
+Visit `http://localhost:3000/api/arcjet` in your browser and refresh a few times
+to hit the rate limit.
+
+Wait 10 seconds, then run:
+
+```shell
+curl -v http://localhost:3000/api/arcjet
+```
+
+The wait is necessary because the decision is cached for your IP based on the
+`interval` rate limit configuration.
+
+You should see a `403` response because `curl` is considered a bot by default
+([customizable](https://docs.arcjet.com/bot-protection/identifying-bots)).
+
+The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
+
+## Product philosophy
+
+1. Proper security protections need the full context of the application, which
+is why security rules and protections should be located alongside the code they
+are protecting.
+
+2. Security rules should be easy to test. You should be able to run them in
+development as well as production.
+
+3. Arcjet should not interfere with the rest of the application. It should be
+easy to install, must not add significant latency to requests, and should not
+require changes to the application’s architecture.
+
+Find out more at https://docs.arcjet.com/architecture
+
+## Important notes
+
+- Arcjet runs server-side and does not require any client-side integration.
+
+- Arcjet is a paid service, but it offers a free tier with limited features.
+Free tier users do not get access to more advanced bot detection, have limited
+IP analysis data (country only), and cannot use the email validation or
+sensitive information detection features. See https://arcjet.com/pricing for
+details.
+
+- Arcjet currently supports JS with SDKs for Node.js, Next.js, Deno, Bun, Remix,
+SvelteKit, NestJS.
+
+## Tips
+
+- We recommend creating a single instance of the Arcjet object and reusing it
+throughout your application. This is because the SDK caches decisions and
+configuration to improve performance. The pattern we use is to create a utility
+file that exports the Arcjet object and then import it where you need it, using
+`withRule` to attach rules specific to each route or location in your app. See
+our example Next.js app for how this is done:
+https://github.com/arcjet/example-nextjs/blob/main/lib/arcjet.ts 
+
+- Create the Arcjet object outside of the route handler to avoid creating a new
+instance on every request. `protect()` should be called inside the route handler.
+
+- The Arcjet `protect()` function should be called only once per request. Pay
+attention when implementing Arcjet in middleware and in route handlers to ensure
+that the function is not called multiple times. Use a middleware helper or check
+the matcher config to ensure that Arcjet in middleware does not get called as
+well as in the route handler.
+
+- Each rule can be configured in either `LIVE` or `DRY_RUN` mode. When in
+`DRY_RUN` mode, each rule will return its decision, but the end conclusion will
+always be `ALLOW`. This is useful for testing.
+
+- Rule Evaluation: Arcjet evaluates all rules and combines their decisions. If
+any rule results in a `DENY` (e.g., rate limit exceeded or bot detected), the
+request is denied with the most relevant reason. However, you can inspect the
+results of each rule to determine the reason for the denial. For example:
+
+```ts
+const decision = await aj.protect(req);
+
+if (decision.isDenied()) {
+  if (decision.reason.isRateLimit()) {
+    console.error("Rate limit exceeded", decision.reason);
+  } else if (decision.reason.isBot()) {
+    console.error("Bot detected", decision.reason);
+  }
+}
+```
+
+- Calls to `protect()` will not throw an error. Arcjet is designed to fail open
+so that a service issue or misconfiguration does not block all requests. If
+there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the message property on the
+rule’s error result for more information. For example:
+
+```ts
+const decision = await aj.protect(req);
+
+if (decision.isErrored()) {
+  // Fail open: log the error and allow the request
+  console.error("Arcjet error", decision.reason.message);
+}
+```
+
+## Reference guides
+
+### Features
+
+- [Bot protection](https://docs.arcjet.com/bot-protection/quick-start)
+- [Rate limiting](https://docs.arcjet.com/rate-limiting/quick-start)
+- [Shield WAF](https://docs.arcjet.com/shield/quick-start)
+- [Email validation](https://docs.arcjet.com/email-validation/quick-start)
+- [Sensitive information detection](https://docs.arcjet.com/sensitive-info/quick-start)
+- [Signup form protection](https://docs.arcjet.com/signup-protection/quick-start)
+
+### SDKs
+
+- [Bun](https://docs.arcjet.com/reference/bun)
+- [NestJS](https://docs.arcjet.com/reference/nestjs)
+- [Next.js](https://docs.arcjet.com/reference/nextjs)
+- [Node.js](https://docs.arcjet.com/reference/nodejs)
+- [Remix](https://docs.arcjet.com/reference/remix)
+- [SvelteKit](https://docs.arcjet.com/reference/sveltekit)
+
+## Support
+
+See the troubleshooting guide at https://docs.arcjet.com/troubleshooting.
+
+For help, email <support@arcjet.com> or [join the Discord
+server](https://arcjet.com/discord).

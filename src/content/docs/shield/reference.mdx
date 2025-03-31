@@ -1,6 +1,6 @@
 ---
-title: "Shield reference"
-description: "Reference guide for adding Arcjet Shield to your Next.js, Node.js, Bun, Remix, or SvelteKit app."
+title: "Shield WAF reference"
+description: "Reference guide for adding Arcjet Shield WAF to your Next.js, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
   - nest-js
@@ -9,6 +9,8 @@ frameworks:
   - remix
   - sveltekit
 ajToc:
+  - text: "Plan availability"
+    anchor: "plan-availability"
   - text: "Configuration"
     anchor: "configuration"
   - text: "Guards and routes"
@@ -58,8 +60,11 @@ ajToc:
     anchor: "testing"
 ---
 
+import { Badge } from "@astrojs/starlight/components";
+
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
 import DisplayType from "@/components/DisplayType.astro";
 
 import DecisionLogBun from "@/snippets/shield/reference/bun/DecisionLog.mdx";
@@ -81,8 +86,25 @@ import DecisionLogSvelteKit from "@/snippets/shield/reference/sveltekit/Decision
 import ErrorsSvelteKit from "@/snippets/shield/reference/sveltekit/Errors.mdx";
 import PerRouteVsHooksSvelteKit from "@/snippets/shield/reference/sveltekit/PerRouteVsHooks.mdx";
 
-Arcjet Shield protects your application against common attacks, including the
-[OWASP Top 10](https://owasp.org/www-project-top-ten/).
+Arcjet Shield WAF protects your application against common attacks, including
+the [OWASP Top 10](https://owasp.org/www-project-top-ten/).
+
+## Plan availability
+
+Arcjet Shield WAF functionality depends on your [pricing
+plan](https://arcjet.com/pricing).
+
+| Plan                                      | Shield                                                  |
+| ----------------------------------------- | ------------------------------------------------------- |
+| <Badge text="Free" variant="caution" />   | Basic                                                   |
+| <Badge text="Pro" variant="note" />       | Managed [OWASP Core Rule Set](https://coreruleset.org/) |
+| <Badge text="Enterprise" variant="tip" /> | Custom                                                  |
+
+<FrameworkLinks
+  title="Choose a framework"
+  exclude={["bun-hono", "deno", "node-js-express", "node-js-hono"]}
+  client:load
+/>
 
 ## Configuration
 
@@ -165,9 +187,12 @@ not block all requests. The SDK will also time out and fail open after 1000ms
 when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
 in most cases, the response time will be less than 20-30ms.
 
-If there is an error condition, Arcjet will return an
-`ERROR` type and you can check the `reason` property for more information, like
-accessing `decision.reason.message`.
+If there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the `message` property on the rule's
+error result for more information.
+
+If all other rules that were run returned an `ALLOW` result, then the final Arcjet
+conclusion will be `ERROR`.
 
 <SlotByFramework client:load>
   <ErrorsBun slot="bun" />

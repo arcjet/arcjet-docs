@@ -1,4 +1,5 @@
 import arcjet, { detectBot } from "@arcjet/remix";
+import { isSpoofedBot } from "@arcjet/inspect";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY,
@@ -25,11 +26,16 @@ export async function loader(args) {
   const decision = await aj.protect(args);
   console.log("Arcjet decision", decision);
 
+  // Bots not in the allow list will be blocked
   if (decision.isDenied()) {
     throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });
   }
 
-  if (decision.reason.isBot() && decision.reason.isSpoofed()) {
+  // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+  // Verification isn't always possible, so we recommend checking the results
+  // separately.
+  // https://docs.arcjet.com/bot-protection/reference#bot-verification
+  if (decision.results.some(isSpoofedBot)) {
     throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });
   }
 

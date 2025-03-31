@@ -20,11 +20,8 @@ const aj = arcjet({
 export async function loader(args) {
   const decision = await aj.protect(args);
 
+  // Bots not in the allow list will be blocked
   if (decision.isDenied()) {
-    throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });
-  }
-
-  if (decision.reason.isBot() && decision.reason.isSpoofed()) {
     throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });
   }
 

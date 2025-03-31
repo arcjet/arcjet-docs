@@ -1,6 +1,6 @@
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
-import vercelStatic from "@astrojs/vercel/static";
+import vercelStatic from "@astrojs/vercel";
 import { ExpressiveCodeTheme } from "astro-expressive-code";
 import robotsTxt from "astro-robots-txt";
 import { defineConfig } from "astro/config";
@@ -79,10 +79,18 @@ export default defineConfig({
         PageSidebar: "./src/components/overrides/PageSidebar.astro",
         PageTitle: "./src/components/overrides/PageTitle.astro",
         Hero: "./src/components/overrides/Hero.astro",
+        ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
       },
       sidebar: sidebar,
       expressiveCode: {
         themes: [ajThemeDark, ajThemeLight],
+      },
+      defaultLocale: "root",
+      locales: {
+        root: {
+          label: "English",
+          lang: "en",
+        },
       },
     }),
     react(),

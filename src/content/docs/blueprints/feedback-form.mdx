@@ -1,0 +1,319 @@
+---
+title: "Feedback form protection"
+description: "How to protect your feedback form from spam using Arcjet."
+---
+
+Feedback forms are often used as tools for gathering valuable insights to
+improve services, products, or experiences. Spam undermines this integrity and
+could distract from the original goals of the survey or feedback initiative.
+
+Arcjet can help you protect your feedback forms from spam and invalid contact
+details.
+
+### Rules
+
+These are the Arcjet rules we recommend using to protect a feedback form. The
+configured rules block all bots and automated clients, validate the email
+address preventing disposable and invalid addresses, and rate limit submissions
+from the same IP address.
+
+```ts
+// ... imports, etc
+// See https://docs.arcjet.com/get-started
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  characteristics: ["ip.src"], // Track requests by IP
+  rules: [
+    // Shield protects your app from common attacks e.g. SQL injection:
+    shield({ mode: "LIVE" }),
+    // Block all bots. See https://arcjet.com/bot-list
+    detectBot({
+      mode: "LIVE",
+      allow: [],
+    }),
+    // Strict email validation to block disposable, invalid, and domains
+    // with no valid MX records:
+    validateEmail({
+      mode: "LIVE",
+      block: ["DISPOSABLE", "INVALID", "NO_MX_RECORDS"],
+    }),
+    // Rate limit forms being submitted from the same IP address:
+    slidingWindow({
+      mode: "LIVE",
+      interval: "10m", // counts requests over a 10-minute sliding window
+      max: 5, // allows 5 submissions within the window
+    }),
+  ],
+});
+```
+
+## Next.js example
+
+This example shows a form component which implements the above rules. It uses
+the Next.js app router and [shadcn/ui](https://ui.shadcn.com/).
+
+```sh
+# Install shadcn components from https://ui.shadcn.com/docs/installation/next
+npx shadcn@latest add button card input label toast use-toast
+```
+
+This will install the following components:
+
+```shell
+  - components/ui/button.tsx
+  - components/ui/card.tsx
+  - components/ui/input.tsx
+  - components/ui/label.tsx
+  - components/ui/toast.tsx
+  - components/ui/toaster.tsx
+  - hooks/use-toast.ts
+```
+
+The payment form component is shown below. You will need to create a success
+page for the form to redirect to on submission.
+
+```tsx title="/app/components/Form.tsx"
+"use client";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import {redact} from "@arcjet/redact";
+
+export default function FeedbackForm() {
+  const [feedback, setFeedback] = useState("");
+  const [email, setEmail] = useState("user@example.com");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+
+  async function onSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    setIsLoading(true);
+
+    const [redacted: redactedFeedback] = await redact(feedback, {
+          entities: ["credit-card-number"],
+    });
+
+    const response = await fetch("/api/send-feedback", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, redactedFeedback }),
+    });
+
+    setIsLoading(false);
+
+    const responseData = await response.json();
+
+    if (response.ok) {
+      router.push("/success");
+    } else {
+      toast({
+        title: "Submission Failed",
+        description:
+          "There was an error submitting your feedback: " + responseData.message,
+        variant: "destructive",
+      });
+    }
+  }
+
+  return (
+    <>
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle>Feedback Form</CardTitle>
+          <CardDescription>Enter your details below</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="amount">How was your experience?</Label>
+              <Input
+                id="feedback"
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Submitting..." : "Submit Feedback"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+      <Toaster />
+    </>
+  );
+}
+```
+
+The form submission is processed by the following API route:
+
+```tsx title="/app/api/send-feedback/route.ts"
+import arcjet, {
+  detectBot,
+  shield,
+  slidingWindow,
+  validateEmail,
+} from "@arcjet/next";
+import { NextResponse } from "next/server";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  characteristics: ["ip.src"], // Track requests by IP
+  rules: [
+    // Shield protects your app from common attacks e.g. SQL injection
+    shield({ mode: "LIVE" }),
+    // Create a bot detection rule
+    detectBot({
+      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+      // Block all bots. See https://arcjet.com/bot-list
+      allow: [],
+    }),
+    validateEmail({
+      mode: "LIVE",
+      // Strict email validation to block disposable, invalid, free, and domains
+      // with no valid MX records. Free emails include Gmail, Hotmail, Yahoo,
+      // etc, so you may wish to remove this rule
+      block: ["DISPOSABLE", "INVALID", "NO_MX_RECORDS", "FREE"],
+    }),
+    // It would be unusual for a form to be submitted more than 5 times in 10
+    // minutes from the same IP address
+    slidingWindow({
+      mode: "LIVE",
+      interval: "10m", // counts requests over a 10 minute sliding window
+      max: 5, // allows 5 submissions within the window
+    }),
+  ],
+});
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const { email, amount } = body;
+
+    const decision = await aj.protect(request, { email });
+
+    // Evaluate the various Arcjet checks
+    if (decision.isDenied()) {
+      if (decision.reason.isBot()) {
+        console.error("Bot detected", decision);
+        return NextResponse.json(
+          { success: false, message: "Forbidden" },
+          { status: 403 },
+        );
+      } else if (decision.reason.isRateLimit()) {
+        console.error("Rate limit exceeded", decision);
+        return NextResponse.json(
+          { success: false, message: "Please try again in a few minutes" },
+          { status: 429 },
+        );
+      } else if (decision.reason.isEmail()) {
+        console.error("Invalid email", decision);
+        return NextResponse.json(
+          { success: false, message: "Invalid email address" },
+          { status: 400 },
+        );
+      } else {
+        console.error("Request denied", decision);
+        return NextResponse.json(
+          { success: false, message: "Forbidden" },
+          { status: 403 },
+        );
+      }
+    }
+
+    // Base Arcjet rules all passed, but we can do further inspection based on
+    // our knowledge of our customers
+
+    // Check if the IP address is from a hosting provider
+    if (decision.ip.hasASN() && decision.ip.asnType === "hosting") {
+      // The network this IP belongs to is a hosting provider, which makes it
+      // more likely to be a VPN, proxy, or other suspicious network.
+      console.error("Hosting provider detected", decision);
+      return NextResponse.json(
+        { success: false, message: "Forbidden" },
+        { status: 403 },
+      );
+    }
+
+    if (
+      decision.ip.isHosting() ||
+      decision.ip.isVpn() ||
+      decision.ip.isProxy() ||
+      decision.ip.isRelay()
+    ) {
+      // The IP is from a hosting provider, VPN, or proxy. We can check the name
+      // of the service and customize the response
+      if (decision.ip.hasService()) {
+        if (decision.ip.service !== "Apple Private Relay") {
+          // We trust Apple Private Relay because it requires an active iCloud
+          // subscription, so deny all other VPNs
+          console.error("VPN detected", decision);
+          return NextResponse.json(
+            { success: false, message: "Forbidden" },
+            { status: 403 },
+          );
+        } else {
+          // Apple Private Relay is allowed
+          console.info("Apple Private Relay detected", decision);
+        }
+      } else {
+        // The service name is not available, but we still think it's a VPN
+        console.error("VPN detected", decision);
+        return NextResponse.json(
+          { success: false, message: "Forbidden" },
+          { status: 403 },
+        );
+      }
+    }
+
+    // Only allow users from the US and UK
+    if (
+      decision.ip.hasCountry() &&
+      !["US", "UK"].includes(decision.ip.country)
+    ) {
+      console.error("Country not allowed", decision);
+      return NextResponse.json(
+        { success: false, message: "Forbidden" },
+        { status: 403 },
+      );
+    }
+
+    console.info("Arcjet checks passed", decision.id);
+
+    return NextResponse.json({
+      success: true,
+    });
+  } catch (error) {
+    console.error("Feedback processing error:", error);
+    return NextResponse.json(
+      { success: false, message: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}
+```

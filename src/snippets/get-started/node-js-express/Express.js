@@ -1,4 +1,5 @@
 import arcjet, { shield, detectBot, tokenBucket } from "@arcjet/node";
+import { isSpoofedBot } from "@arcjet/inspect";
 import express from "express";
 
 const app = express();
@@ -34,6 +35,7 @@ const aj = arcjet({
   ],
 });
 
+
 app.get("/", async (req, res) => {
   const decision = await aj.protect(req, { requested: 5 }); // Deduct 5 tokens from the bucket
   console.log("Arcjet decision", decision);
@@ -49,6 +51,13 @@ app.get("/", async (req, res) => {
       res.writeHead(403, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Forbidden" }));
     }
+  } else if (decision.results.some(isSpoofedBot)) {
+    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+    // Verification isn't always possible, so we recommend checking the decision
+    // separately.
+    // https://docs.arcjet.com/bot-protection/reference#bot-verification
+    res.writeHead(403, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Forbidden" }));
   } else {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ message: "Hello World" }));

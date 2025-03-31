@@ -101,6 +101,15 @@ if (decision.isDenied()) {
   }
 }
 
+// Arcjet Pro plan verifies the authenticity of common bots using IP data.
+// Verification isn't always possible, so we recommend checking the decision
+// separately.
+// https://docs.arcjet.com/bot-protection/reference#bot-verification
+if (decision.results.some(isSpoofedBot)) {
+  console.error("Spoofed bot detected", decision);
+  // Return 403
+}
+
 // Base Arcjet rules all passed, but we can do further inspection based on
 // our knowledge of our customers
 
@@ -271,11 +280,13 @@ The form submission is processed by the following API route:
 
 ```tsx title="/app/api/process-payment/route.ts"
 import arcjet, {
+  type ArcjetRuleResult,
   detectBot,
   shield,
   slidingWindow,
   validateEmail,
 } from "@arcjet/next";
+import { isSpoofedBot } from "@arcjet/inspect";
 import { NextResponse } from "next/server";
 
 const aj = arcjet({
@@ -341,6 +352,18 @@ export async function POST(request: Request) {
           { status: 403 },
         );
       }
+    }
+
+    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+    // Verification isn't always possible, so we recommend checking the decision
+    // separately.
+    // https://docs.arcjet.com/bot-protection/reference#bot-verification
+    if (decision.results.some(isSpoofedBot)) {
+      console.error("Spoofed bot detected", decision);
+      return NextResponse.json(
+        { success: false, message: "Forbidden" },
+        { status: 403 },
+      );
     }
 
     // Base Arcjet rules all passed, but we can do further inspection based on

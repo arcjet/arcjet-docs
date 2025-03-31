@@ -1,5 +1,13 @@
 ---
 title: "Email validation"
+titleByFramework:
+  default: "Email validation"
+  bun: "Email validation for Bun"
+  nest-js: "Email validation for NestJS"
+  next-js: "Email validation for Next.js"
+  node-js: "Email validation for Node.js"
+  remix: "Email validation for Remix"
+  sveltekit: "Email validation for SvelteKit"
 description: "Quick start guide for adding Arcjet email validation to your Next.js, NestJS, Node.js, Bun, or SvelteKit app."
 frameworks:
   - bun
@@ -33,7 +41,9 @@ ajToc:
 ---
 
 import { LinkCard, CardGrid } from "@astrojs/starlight/components";
+import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import FrameworkLinks from "@/components/FrameworkLinks";
 import SlotByFramework from "@/components/SlotByFramework";
 import FrameworkName from "@/components/FrameworkName";
 import Step1Bun from "@/snippets/email-validation/quick-start/bun/Step1.mdx";
@@ -59,11 +69,17 @@ import Step4NestJs from "@/snippets/email-validation/quick-start/nestjs/Step4.md
 import FAQs from "/src/components/FAQs.astro";
 import Comments from "/src/components/Comments.astro";
 
-Arcjet allows you validate & verify an email address. This is useful for
+Arcjet allows you to validate & verify an email address. This is useful for
 preventing users from signing up with fake email addresses and can significantly
 reduce the amount of spam or fraudulent accounts.
 
 <WhatIsArcjet />
+
+<FrameworkLinks
+  title="Choose a framework"
+  exclude={["bun-hono", "deno", "node-js-express", "node-js-hono"]}
+  client:load
+/>
 
 ## Quick start
 
@@ -130,11 +146,6 @@ The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
 
 ## What next?
 
-Arcjet can be used with specific rules on individual routes or as general
-protection on your entire application. You can customize bot protection, rate
-limiting for your API and minimize fraudulent registrations with the signup form
-protection.
-
 <CardGrid>
   <LinkCard
     title="Email validation reference"
@@ -146,6 +157,27 @@ protection.
     href="/testing"
     description="Write tests for your rules."
   />
+</CardGrid>
+
+### Explore
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can setup bot protection, rate
+limiting for your API, minimize fraudulent registrations with the signup form
+protection and more.
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  />
+  <LinkCard
+    title="Learn how Arcjet works"
+    href="/architecture"
+    description="Arcjet's architecture."
+  />
+  <SdkReferenceLinkByFramework />
 </CardGrid>
 
 ## Get help

@@ -1,5 +1,13 @@
 ---
-title: "Sensitive information quick start"
+title: "Sensitive information"
+titleByFramework:
+  default: "Sensitive information detection"
+  bun: "Sensitive information detection for Bun"
+  nest-js: "Sensitive information detection for NestJS"
+  next-js: "Sensitive information detection for Next.js"
+  node-js: "Sensitive information detection for Node.js"
+  remix: "Sensitive information detection for Remix"
+  sveltekit: "Sensitive information detection for SvelteKit"
 description: "Quick start guide for detecting sensitive information with Arcjet in your Next.js, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
@@ -34,9 +42,11 @@ ajToc:
 import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import SlotByFramework from "@/components/SlotByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
 import FrameworkName from "@/components/FrameworkName";
 import FAQs from "/src/components/FAQs.astro";
 import Comments from "/src/components/Comments.astro";
+import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 
 import Step1Bun from "@/snippets/sensitive-info/quick-start/bun/Step1.mdx";
 import Step1NestJs from "@/snippets/sensitive-info/quick-start/nestjs/Step1.mdx";
@@ -68,6 +78,12 @@ sensitive information such as personally identifiable information (PII) that
 you do not wish to handle.
 
 <WhatIsArcjet />
+
+<FrameworkLinks
+  title="Choose a framework"
+  exclude={["bun-hono", "deno", "node-js-express", "node-js-hono"]}
+  client:load
+/>
 
 ## Quick start
 
@@ -169,19 +185,9 @@ The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
 
 ## What next?
 
-Arcjet can be used with specific rules on individual routes or as general
-protection on your entire application. You can customize bot protection, rate
-limiting for your API and minimize fraudulent registrations with the signup form
-protection.
-
 <CardGrid>
   <LinkCard
-    title="Example apps"
-    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
-    description="Check out the examples."
-  />
-  <LinkCard
-    title="Arcjet Sensitive Info reference"
+    title="Sensitive Information reference"
     href="/sensitive-info/reference"
     description="Full details about Sensitive Info."
   />
@@ -190,6 +196,27 @@ protection.
     href="/testing"
     description="Write tests for your rules."
   />
+</CardGrid>
+
+### Explore
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can setup bot protection, rate
+limiting for your API, minimize fraudulent registrations with the signup form
+protection and more.
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  />
+  <LinkCard
+    title="Learn how Arcjet works"
+    href="/architecture"
+    description="Arcjet's architecture."
+  />
+  <SdkReferenceLinkByFramework />
 </CardGrid>
 
 ## Get help

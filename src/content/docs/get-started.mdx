@@ -1,16 +1,20 @@
 ---
 title: "Get started with Arcjet"
+titleByFramework:
+  default: "Get started with Arcjet"
+  bun: "Get started with Bun"
+  bun-hono: "Get started with Bun + Hono"
+  deno: "Get started with Deno"
+  nest-js: "Get started with NestJS"
+  next-js: "Get started with Next.js"
+  node-js: "Get started with Node.js"
+  node-js-express: "Get started with Node.js + Express"
+  node-js-hono: "Get started with Node.js + Hono"
+  remix: "Get started with Remix"
+  sveltekit: "Get started with SvelteKit"
 description: "Getting started with Arcjet. Quick start guide to protect your app from attacks, apply a rate limit, and prevent bots from accessing your NestJS, Next.js, Node.js, Bun, or SvelteKit app."
 prev: false
 next: false
-#pageTitle:
-#  bun: "Get started with Bun"
-#  bun-hono: "Get started with Bun + Hono"
-#   next-js: "Get started with Next.js"
-#   node-js: "Get started with Node.js"
-#   node-js-express: "Get started with Node.js + Express"
-#   node-js-hono: "Get started with Node.js + Hono"
-#   sveltekit: "Get started with SvelteKit"
 frameworks:
   - bun
   - bun-hono
@@ -33,19 +37,20 @@ ajToc:
     anchor: "3-add-rules"
   - text: 4. Start app
     anchor: "4-start-app"
-  - text: "What next?"
-    anchor: "what-next"
   - text: "FAQs"
     anchor: "faqs"
+  - text: "What next?"
+    anchor: "what-next"
   - text: "Get help"
     anchor: "get-help"
 ---
 
 import SlotByFramework from "@/components/SlotByFramework";
 import FrameworkLinks from "@/components/FrameworkLinks";
-import { LinkButton, LinkCard } from "@astrojs/starlight/components";
+import { LinkButton, LinkCard, CardGrid } from "@astrojs/starlight/components";
 import FAQs from "/src/components/FAQs.astro";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 
 import BunStep0 from "@/snippets/get-started/bun/Step0.mdx";
 import BunStep1 from "@/snippets/get-started/bun/Step1.mdx";
@@ -223,26 +228,54 @@ limit, and prevent bots from accessing your app.
 
 The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
 
+## FAQs
+
+<FAQs />
+
 ## What next?
 
 <SlotByFramework client:load>
   <Fragment slot="next-js">
     <LinkCard
-      title="Protect your entire site from bots with middleware"
+      title="Site-wide bot protection"
       href="/bot-protection/quick-start#3-add-bot-protection"
+      description="Use middleware to protect your entire app."
     />
   </Fragment>
 </SlotByFramework>
-<LinkCard
-  title="Customize allowed bots"
-  href="/bot-protection/identifying-bots"
-/>
-<LinkCard title="Learn how Arcjet works" href="/architecture" />
-<LinkCard title="Set up tests for your rules" href="/testing" />
+<CardGrid>
+  <LinkCard
+    title="Customize allowed bots"
+    href="/bot-protection/identifying-bots"
+    description="Identify bots and configure allow/deny lists."
+  />
+  <LinkCard
+    title="Testing"
+    href="/testing"
+    description="Write tests for your rules."
+  />
+</CardGrid>
 
-## FAQs
+### Explore
 
-<FAQs />
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can defend from clients sending
+you sensitive information, minimize fraudulent registrations with
+the signup form protection and more.
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  />
+  <LinkCard
+    title="Learn how Arcjet works"
+    href="/architecture"
+    description="Arcjet's architecture."
+  />
+  <SdkReferenceLinkByFramework />
+</CardGrid>
 
 ## Get help
 

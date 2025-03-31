@@ -23,8 +23,10 @@ import LoggerJS from "/src/snippets/reference/sveltekit/Logger.js?raw";
 import ProxiesTS from "/src/snippets/reference/sveltekit/Proxies.ts?raw";
 import DecisionLogTS from "/src/snippets/reference/sveltekit/DecisionLog.ts?raw";
 import DecisionLogJS from "/src/snippets/reference/sveltekit/DecisionLog.js?raw";
-import ErrorHandlingTS from "/src/snippets/reference/sveltekit/ErrorHandling.ts?raw";
-import ErrorHandlingJS from "/src/snippets/reference/sveltekit/ErrorHandling.js?raw";
+import ErrorLoggingTS from "/src/snippets/reference/sveltekit/ErrorLogging.ts?raw";
+import ErrorLoggingJS from "/src/snippets/reference/sveltekit/ErrorLogging.js?raw";
+import ErrorUserAgentTS from "/src/snippets/reference/sveltekit/ErrorUserAgent.ts?raw";
+import ErrorUserAgentJS from "/src/snippets/reference/sveltekit/ErrorUserAgent.js?raw";
 import WithRuleTS from "/src/snippets/reference/sveltekit/WithRule.ts?raw";
 import WithRuleJS from "/src/snippets/reference/sveltekit/WithRule.js?raw";
 import ClientOverrideTS from "/src/snippets/reference/sveltekit/ClientOverride.ts?raw";
@@ -127,7 +129,7 @@ Each rule can be configured in either `LIVE` or `DRY_RUN` mode. When in
 always be `ALLOW`.
 
 This allows you to run Arcjet in passive / demo mode to test rules before
-enabling them. Arcjet will log what it would have done.
+enabling them.
 
 ```ts
 import arcjet, { fixedWindow } from "@arcjet/sveltekit";
@@ -155,6 +157,17 @@ const aj = arcjet({
     ),
   ],
 });
+```
+
+As the top level conclusion will always be `ALLOW` in `DRY_RUN` mode, you can
+loop through each rule result to check what would have happened:
+
+```ts
+for (const result of decision.results) {
+  if (result.isDenied()) {
+    console.log("Rule returned deny conclusion", result);
+  }
+}
 ```
 
 ### Multiple rules
@@ -309,11 +322,22 @@ check the conclusion:
 - `isDenied()` (`bool`) - The request should be denied.
 - `isErrored()` (`bool`) - There was an unrecoverable error.
 
+The conclusion will be the highest-severity finding when evaluating the configured
+rules. `"DENY"` is the highest severity, followed by `"CHALLENGE"`, then `"ERROR"` and
+finally `"ALLOW"` as the lowest severity.
+
+For example, when a bot protection rule returns an error and a validate email
+rule returns a deny, the overall conclusion would be deny. To access the error
+you would have to use the `results` property on the decision.
+
 ### Reason
 
 The `reason` property of the `ArcjetDecision` object contains an `ArcjetReason`
 object which provides more detailed information about the conclusion. This is
 the final decision reason and is based on the configured rules.
+
+It will always be the highest-priority rule that produced that conclusion,
+to inspect other rules consider iterating over the `results` property on the decision.
 
 The `ArcjetReason` object has the following methods that can be used to check
 which rule caused the conclusion:
@@ -327,7 +351,7 @@ which rule caused the conclusion:
 - `isSensitiveInfo()` (`bool`) - Returns `true` if sensitive info rules have
   been applied and sensitive info has been detected.
 - `isShield()` (`bool`) - Returns `true` if the shield rules have been applied
-  and the request is suspicious based on analysis by Arcjet Shield.
+  and the request is suspicious based on analysis by Arcjet Shield WAF.
 - `isError()` (`bool`) - Returns `true` if there was an error processing the
   request.
 
@@ -464,24 +488,41 @@ not block all requests. The SDK will also time out and fail open after 1000ms
 when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
 in most cases, the response time will be less than 20-30ms.
 
-If there is an error condition, Arcjet will return an `ERROR` `conclusion`.
+If there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the `message` property on the rule's
+error result for more information.
+
+If all other rules that were run returned an `ALLOW` result, then the final Arcjet
+conclusion will be `ERROR`.
 
 <Tabs>
   <TabItem label="TS">
     <Code
-      code={ErrorHandlingTS}
+      code={ErrorLoggingTS}
       title="/src/hooks.server.ts"
       lang="ts"
-      mark={[{ range: "27-32" }]}
+      mark={[{ range: "27-34" }]}
     />
   </TabItem>
   <TabItem label="JS">
     <Code
-      code={ErrorHandlingJS}
+      code={ErrorLoggingJS}
       title="/src/hooks.server.js"
       lang="js"
-      mark={[{ range: "21-26" }]}
+      mark={[{ range: "21-28" }]}
     />
+  </TabItem>
+</Tabs>
+
+The [@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect) package provides
+utilities for dealing with common errors.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={ErrorUserAgentTS} lang="ts" mark={[{ range: "23-31" }]} />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={ErrorUserAgentJS} lang="js" mark={[{ range: "23-31" }]} />
   </TabItem>
 </Tabs>
 

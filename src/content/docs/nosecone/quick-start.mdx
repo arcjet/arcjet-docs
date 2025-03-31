@@ -1,5 +1,12 @@
 ---
-title: "Arcjet Nosecone: Security headers for JS frameworks"
+title: "Arcjet Nosecone: security headers for JS frameworks"
+titleByFramework:
+  default: "Arcjet Nosecone: security headers for JS frameworks"
+  bun: "Arcjet Nosecone: security headers for Bun"
+  deno: "Arcjet Nosecone: security headers for Deno"
+  next-js: "Arcjet Nosecone: security headers for Next.js"
+  node-js: "Arcjet Nosecone: security headers for Node.js"
+  sveltekit: "Arcjet Nosecone: security headers for SvelteKit"
 description: "How to use the open source Arcjet Nosecone library to set security headers (CSP, HSTS, and others) in your Bun, Deno, Next.js, Node.js, or SvelteKit app."
 prev: false
 next: false
@@ -32,9 +39,11 @@ ajToc:
 import WhatAreArcjetUtilities from "@/components/WhatAreArcjetUtilities.astro";
 import FrameworkName from "@/components/FrameworkName";
 import SDKVersionNosecone from "@/components/SDKVersionNosecone.astro";
+import FrameworkLinks from "@/components/FrameworkLinks";
 import SlotByFramework from "@/components/SlotByFramework";
 import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 import Comments from "/src/components/Comments.astro";
+import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 
 import BunStep1 from "@/snippets/nosecone/quick-start/bun/Step1.mdx";
 import BunStep2 from "@/snippets/nosecone/quick-start/bun/Step2.mdx";
@@ -89,6 +98,12 @@ Nosecone makes it easy to add and configure these headers:
 - `X-XSS-Protection`
 
 See the [reference guide](/nosecone/reference) for full details on each option.
+
+<FrameworkLinks
+  title="Choose a framework"
+  exclude={["bun-hono", "nest-js", "node-js-express", "node-js-hono", "remix"]}
+  client:load
+/>
 
 :::note
 If you are using Express, NestJS, or Remix we recommend using the excellent
@@ -152,12 +167,31 @@ ensure it continues to work as expected.
 
 ## What next?
 
+<LinkCard
+  title="Nosecone reference"
+  href="/nosecone/reference"
+  description="Details about each security header and how to configure them."
+/>
+
+### Explore
+
+Arcjet can protect your entire app or individual routes with just
+a few lines of code. Using the main Arcjet SDK you can setup bot protection,
+rate limiting for your API, minimize fraudulent registrations with the
+signup form protection and more.
+
 <CardGrid>
   <LinkCard
-    title="Nosecone reference"
-    href="/nosecone/reference"
-    description="Details about each security header and how to configure them."
-  ></LinkCard>
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  />
+  <LinkCard
+    title="Learn how Arcjet works"
+    href="/architecture"
+    description="Arcjet's architecture."
+  />
+  <SdkReferenceLinkByFramework />
 </CardGrid>
 
 ## Get help

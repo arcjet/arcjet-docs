@@ -1,4 +1,5 @@
 import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/next";
+import { isSpoofedBot } from "@arcjet/inspect";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
@@ -46,6 +47,16 @@ export default async function handler(req, res) {
         .status(403)
         .json({ error: "Forbidden", reason: decision.reason });
     }
+  }
+
+  // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+  // Verification isn't always possible, so we recommend checking the decision
+  // separately.
+  // https://docs.arcjet.com/bot-protection/reference#bot-verification
+  if (decision.results.some(isSpoofedBot)) {
+    return res
+      .status(403)
+      .json({ error: "Forbidden", reason: decision.reason });
   }
 
   res.status(200).json({ name: "Hello world" });

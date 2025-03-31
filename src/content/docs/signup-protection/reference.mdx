@@ -9,6 +9,8 @@ frameworks:
   - remix
   - sveltekit
 ajToc:
+  - text: "Plan availability"
+    anchor: "plan-availability"
   - text: "Configuration"
     anchor: "configuration"
   - text: "Pages & server actions"
@@ -29,8 +31,10 @@ ajToc:
     anchor: "testing"
 ---
 
+import { Badge } from "@astrojs/starlight/components";
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
 import Comments from "/src/components/Comments.astro";
 
 import RecommendedBun from "@/snippets/signup-protection/reference/bun/Recommended.mdx";
@@ -59,6 +63,23 @@ import ErrorsSvelteKit from "@/snippets/signup-protection/reference/sveltekit/Er
 
 Arcjet signup form protection combines rate limiting, bot protection, and email
 validation to protect your signup forms from abuse.
+
+## Plan availability
+
+Arcjet signup form protection availability depends depends on your [pricing
+plan](https://arcjet.com/pricing).
+
+| Plan                                      | Signup form protection |
+| ----------------------------------------- | ---------------------- |
+| <Badge text="Free" variant="caution" />   | No                     |
+| <Badge text="Pro" variant="note" />       | Yes                    |
+| <Badge text="Enterprise" variant="tip" /> | Custom                 |
+
+<FrameworkLinks
+  title="Choose a framework"
+  exclude={["bun-hono", "deno", "node-js-express", "node-js-hono"]}
+  client:load
+/>
 
 ## Configuration
 
@@ -196,7 +217,12 @@ not block all requests. The SDK will also time out and fail open after 1000ms
 when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
 in most cases, the response time will be less than 20-30ms.
 
-If there is an error condition, Arcjet will return an `ERROR` `conclusion`.
+If there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the `message` property on the rule's
+error result for more information.
+
+If all other rules that were run returned an `ALLOW` result, then the final Arcjet
+conclusion will be `ERROR`.
 
 <SlotByFramework client:load>
   <ErrorsBun slot="bun" />

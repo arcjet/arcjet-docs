@@ -1,29 +1,33 @@
 ---
-title: "Arcjet Shield"
-description: "Arcjet Shield protects your application against common attacks, including the OWASP Top 10."
+title: "Arcjet Shield WAF"
+description: "Arcjet Shield WAF protects your application against common attacks, including the OWASP Top 10."
 prev: false
 ---
 
+import { Badge } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "/src/components/Comments.astro";
 
-Arcjet Shield protects your application against common attacks, including the
-[OWASP Top 10](https://owasp.org/www-project-top-ten/).
+Arcjet Shield WAF protects your application against common attacks, including
+the [OWASP Top 10](https://owasp.org/www-project-top-ten/).
 
 <WhatIsArcjet />
 
-## What does Arcjet Shield do?
+## What does Arcjet Shield WAF do?
 
-Arcjet Shield analyzes every request to your application to detect suspicious
-activity. Once a certain suspicion threshold is reached, subsequent requests
-from that client are blocked for a period of time.
+Arcjet Shield WAF analyzes every request to your application to detect
+suspicious activity. Once a certain suspicion threshold is reached, subsequent
+requests from that client are blocked for a period of time.
 
 ## Which attacks will Arcjet Shield block?
 
-Arcjet implements a variety of detection rules based on the [OWASP Core Rule
-Set](https://coreruleset.org/). This includes the [OWASP Top
-10](https://owasp.org/www-project-top-ten/) to protect against common categories
-such as:
+Arcjet implements a variety of detection rules. Basic protection from the most
+common attacks are available for all Arcjet users.
+
+{/* prettier-ignore */}
+Users on the <Badge text="Pro" variant="note" /> and <Badge text="Enterprise" variant="tip" />
+plans also get a fully-managed [OWASP Core Rule Set](https://coreruleset.org/)
+to protect against common categories such as:
 
 - SQL injection (SQLi)
 - Cross-site scripting (XSS)
@@ -51,19 +55,20 @@ command injection.
 This process could involve many hundreds of requests. Each one might seem
 innocent by itself, but together they form a suspicious pattern.
 
-Arcjet Shield detects these patterns, but only blocks requests once a certain
-threshold is reached. This significantly reduces the risk of false positives and
-helps to avoid blocking legitimate users.
+Arcjet Shield WAF detects these patterns, but only blocks requests once a
+certain threshold is reached. This significantly reduces the risk of false
+positives and helps to avoid blocking legitimate users.
 
-Although this means Arcjet Shield doesn't block suspicious requests immediately,
-most attacks do not succeed on the first attempt. This allows for a balance of
-security and usability, minimizing the risk of blocking legitimate users.
+Although this means Arcjet Shield WAF doesn't block suspicious requests
+immediately, most attacks do not succeed on the first attempt. This allows for a
+balance of security and usability, minimizing the risk of blocking legitimate
+users.
 
 ### Responding to suspicious requests
 
-When a request is blocked by Arcjet Shield, the Arcjet SDK includes the details
-in the response to your application. You can simply accept the default and block
-the client. However, you can also customize the response to suit your
+When a request is blocked by Arcjet Shield WAF, the Arcjet SDK includes the
+details in the response to your application. You can simply accept the default
+and block the client. However, you can also customize the response to suit your
 application.
 
 For example, on critical user-facing website pages you might want to return an
@@ -76,20 +81,22 @@ Generic, network-level protections are insufficient for modern applications
 where the context and sensitivity changes across the application. Arcjet allows
 developers to build with security in mind without sacrificing usability.
 
-## How does Arcjet Shield work?
+## How does Arcjet Shield WAF work?
 
 The Arcjet SDK communicates with the Arcjet API on every request as part of
 applying your configured rules. The request ([except the
 body](/limitations#shield-analysis-does-not-use-the-request-body)) is included
 as part of this process and rules are executed based on the request content.
+
 Analysis happens on the Arcjet platform so it requires no additional resources
 from your application and adds no overhead to the request processing. See
 [Architecture](/architecture) for details.
 
 ## Is Arcjet Shield a Web Application Firewall (WAF)?
 
-Arcjet Shield is like a Web Application Firewall (WAF) because it analyzes every
-request for possible attacks. However, there are several problems with WAFs:
+Yes, we call Arcjet Shield a Web Application Firewall (WAF) because it analyzes
+every request for possible attacks. However, there are several problems with
+traditional WAFs:
 
 1. They are slow, often adding hundreds of milliseconds to every request.
 2. They sit in front of your production application and are difficult to deploy

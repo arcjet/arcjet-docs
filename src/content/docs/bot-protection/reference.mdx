@@ -10,6 +10,8 @@ frameworks:
   - remix
   - sveltekit
 ajToc:
+  - text: "Plan availability"
+    anchor: "plan-availability"
   - text: "Configuration"
     anchor: "configuration"
     children:
@@ -67,6 +69,13 @@ ajToc:
     anchor: "filtering-categories"
   - text: "Bot verification"
     anchor: "bot-verification"
+    children:
+      - text: "Example: Allowing verified bots"
+        anchor: "example-allowing-verified-bots"
+      - text: "Check for spoofed bots"
+        anchor: "check-for-spoofed-bots"
+      - text: "Check bot verification"
+        anchor: "check-bot-verification"
   - text: "Testing"
     anchor: "testing"
   - text: "Examples"
@@ -74,9 +83,13 @@ ajToc:
     framework: ["next-js"]
 ---
 
+import { Badge } from "@astrojs/starlight/components";
+import Free from "@/components/badges/Free.astro";
+import Enterprise from "@/components/badges/Enterprise.astro";
 import Comments from "@/components/Comments.astro";
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
 
 import BunAllowingBots from "@/snippets/bot-protection/reference/bun/AllowingBots.mdx";
 import BunDecisionLog from "@/snippets/bot-protection/reference/bun/DecisionLog.mdx";
@@ -135,6 +148,23 @@ import SvelteKitIdentifiedBots from "@/snippets/bot-protection/reference/sveltek
 import SvelteKitPerRouteVsHooks from "@/snippets/bot-protection/reference/sveltekit/PerRouteVsHooks.mdx";
 
 Arcjet bot detection allows you to manage traffic by automated clients and bots.
+
+## Plan availability
+
+Arcjet bot detection functionality depends on your [pricing
+plan](https://arcjet.com/pricing).
+
+| Plan                                      | Bot protection                                                                 |
+| ----------------------------------------- | ------------------------------------------------------------------------------ |
+| <Badge text="Free" variant="caution" />   | Basic - user agent + IP type analysis                                          |
+| <Badge text="Pro" variant="note" />       | Advanced - IP reputation, [verification](#bot-verification), and other signals |
+| <Badge text="Enterprise" variant="tip" /> | Custom                                                                         |
+
+<FrameworkLinks
+  title="Choose a framework"
+  exclude={["bun-hono", "node-js-express", "node-js-hono"]}
+  client:load
+/>
 
 ## Configuration
 
@@ -298,16 +328,18 @@ not block all requests. The SDK will also time out and fail open after 1000ms
 when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
 in most cases, the response time will be less than 20-30ms.
 
-If there is an error condition, Arcjet will return an
-`ERROR` type and you can check the `reason` property for more information, like
-accessing `decision.reason.message`.
+If there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the `message` property on the rule's
+error result for more information.
+
+If all other rules that were run returned an `ALLOW` result, then the final Arcjet
+conclusion will be `ERROR`.
 
 :::note
-Requests without `User-Agent` headers can not be identified as any particular
-bot and will be marked as an errored decision. Check `decision.isErrored()` and
-decide if you want to allow or deny the request. Our recommendation is to block
-requests without `User-Agent` headers because most legitimate clients always
-send this header.
+Requests without `User-Agent` headers might not be identified as any particular
+bot and could be marked as an errored result. Our recommendation is to block
+requests without `User-Agent` headers because most legitimate clients send this
+header.
 
 See [an example of how to do this](/bot-protection/concepts#user-agent-header).
 :::
@@ -340,30 +372,82 @@ their "advertising quality" bot.
 
 ## Bot verification
 
-We support verifying the authenticity of requests from some bots by
-comparing the request IP to published bot IP ranges or performing a reverse
-DNS query. Verification is performed for supported bots using the appropriate method
-automatically after the bot is identified by Arcjet.
+Requests analyzed by Arcjet on <Free /> or <Enterprise /> plans include
+automatic bot verification. For `allow` rules, Arcjet verifies the authenticity
+of detected bots by checking IP data and performing reverse DNS lookups.
 
-To check the verification status,
-use the `.isSpoofed()` or `.isVerified()` methods on the bot reason object. If
-verification was performed, one of these will be true and the other false; both
-will be false if verification failed or if we don't support verifying the identified bot. 
+This helps protect against spoofed bots where clients pretend to be someone
+else.
 
 :::note
-It's recommended to check verification status only when using an allow configuration.
-For deny configurations, verification is skipped as you'd want to block listed bots
-regardless of legitimacy.
+Because verification is only helpful when you want to specifically `allow`
+certain bots, any `deny` rules bypass verification and simply block bots
+matching the `deny` list.
 :::
 
-Here's a basic usage example:
+### Example: Allowing verified bots
+
+Well-behaved bots, such as search engine indexers, are often desirable traffic.
+The companies that operate these bots will make them verifiable so application
+developers can choose to avoid additional signals about the request.
+
+For example, when a request claims to be GoogleBot, Arcjet will check if the IP
+truly belongs to Google. You can check the verification status in your code and
+take actions based on the results, such as allowing all verified bots.
+
 ```ts
-if (decision.reason.isSpoofed()) {
-  // Show a custom block page for spoofed bots
-} else if (decision.reason.isVerified()) {
-  // You can now trust that the bot is who they say they are and proceed as normal
-} else {
-  // The bot either does not support verification, or verification failed.
+import { isVerifiedBot } from "@arcjet/inspect";
+
+// ...
+const aj = arcjet({
+  // ...
+  rules: [
+    detectBot({
+      mode: "LIVE",
+      allow: ["CATEGORY:SEARCH_ENGINE"],
+    }),
+  ],
+});
+
+// ...
+const decision = await aj.protect(req);
+// ...
+
+// Ignore other signals for verified search engine bots
+if (decision.results.some(isVerifiedBot)) {
+  return new Response("Hello Bot!");
+}
+
+// Leverage all Arcjet signals
+if (decision.isDenied()) {
+  return new Response(null, { status: 403 });
+}
+```
+
+### Check for spoofed bots
+
+This will check if the bot is spoofed. You would usually return a 403 or similar
+response to block the request.
+
+```ts
+for (const { reason } of decision.results) {
+  if (reason.isBot() && reason.isSpoofed()) {
+    console.log("Detected spoofed bot", reason.spoofed);
+    // Return a 403 or similar response
+  }
+}
+```
+
+### Check bot verification
+
+This will check if the bot is verified.
+
+```ts
+for (const { reason } of decision.results) {
+  if (reason.isBot() && reason.isVerified()) {
+    console.log("Verified bot", reason.verified);
+    // Allow the request
+  }
 }
 ```
 

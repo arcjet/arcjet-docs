@@ -1,4 +1,5 @@
 import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/remix";
+import { isSpoofedBot } from "@arcjet/inspect";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 
 const aj = arcjet({
@@ -49,6 +50,14 @@ export async function loader(args: LoaderFunctionArgs) {
     } else {
       throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });
     }
+  }
+
+  // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+  // Verification isn't always possible, so we recommend checking the decision
+  // separately.
+  // https://docs.arcjet.com/bot-protection/reference#bot-verification
+  if (decision.results.some(isSpoofedBot)) {
+    throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });
   }
 
   // We don't need to use the decision elsewhere, but you could return it to

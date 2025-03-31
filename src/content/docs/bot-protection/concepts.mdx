@@ -4,6 +4,7 @@ description: "Arcjet bot protection allows you to manage traffic by automated cl
 prev: false
 ---
 
+import { Badge } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "/src/components/Comments.astro";
 
@@ -27,6 +28,12 @@ themselves in a consistent manner so it is straightforward to identify them, but
 those are often not the bots you wish to block! Bad bots pretend to be real
 clients and use various mechanisms to evade bot detection.
 
+{/* prettier-ignore */}
+The Arcjet <Badge text="Pro" variant="note" /> or <Badge text="Enterprise" variant="tip" />
+plans provides additional [bot verification](/bot-protection/reference#bot-verification) using
+IP analysis, which can help if you are under attack from bots pretending to be
+good bots e.g. clients pretending to be Google (who you usually want to allow).
+
 Arcjet's bot protect works best when combined with [rate
 limiting](/rate-limiting/concepts). This allows you to block clients that are
 causing problems whilst minimizing the impact on real users. See [an example of
@@ -38,23 +45,43 @@ possible to achieve 100% accuracy.
 
 ### `User-Agent` header
 
-Requests without `User-Agent` headers can not be identified as any particular
-bot and will be marked as an errored decision. Check `decision.isErrored()` and
-decide if you want to allow or deny the request. Our recommendation is to block
-requests without `User-Agent` headers because most legitimate clients always
-send this header.
+Requests without `User-Agent` headers might not be identified as any particular
+bot and could be marked as an errored result.
+
+Our recommendation is to block requests without `User-Agent` headers before
+calling Arcjet because most legitimate clients send this header:
 
 ```ts
-if (decision.isErrored()) {
-  if (decision.reason.message.includes("missing User-Agent header")) {
-    log.warn({ error: decision.reason.message }, "Arcjet user-agent warning");
-    // You could return a 400 Bad request error here
-    // Next.js example:
-    // return NextResponse.json({ error: "Bad request" }, { status: 400 });
-  } else {
-    // Just log the error and continue
-    log.error({ error: decision.reason.message }, "Arcjet error");
-  }
+if (!request.headers.get("User-Agent")) {
+  log.warn("request missing required user-agent header");
+  // Return a 400 Bad request error here
+  // Next.js example:
+  // return NextResponse.json({ error: "Bad request" }, { status: 400 });
+  // Node.js example:
+  // res.writeHead(400, { "Content-Type": "application/json" });
+  // res.end(JSON.stringify({ error: "Bad request" }));
+}
+```
+
+An alternative approach is to check the rule results using the
+`isMissingUserAgent` function in
+[@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect) after the decision is
+made:
+
+```ts
+import { isMissingUserAgent } from "@arcjet/inspect";
+
+if (decision.results.some(isMissingUserAgent)) {
+  log.warn(
+    { error: decision.reason.message },
+    "request missing required user-agent header",
+  );
+  // You could return a 400 Bad request error here
+  // Next.js example:
+  // return NextResponse.json({ error: "Bad request" }, { status: 400 });
+  // Node.js example:
+  // res.writeHead(400, { "Content-Type": "application/json" });
+  // res.end(JSON.stringify({ error: "Bad request" }));
 }
 ```
 

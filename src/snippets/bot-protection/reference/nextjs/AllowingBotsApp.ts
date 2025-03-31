@@ -1,4 +1,5 @@
 import arcjet, { detectBot } from "@arcjet/next";
+import { isSpoofedBot } from "@arcjet/inspect";
 import { NextResponse } from "next/server";
 
 const aj = arcjet({
@@ -22,9 +23,9 @@ const aj = arcjet({
 export async function POST(req: Request) {
   const decision = await aj.protect(req);
 
-
-  if (decision.reason.isBot()) {
-    if (decision.isDenied() || decision.reason.isSpoofed()) {
+  if (decision.isDenied()) {
+    // Bots not in the allow list will be blocked
+    if (decision.reason.isBot()) {
       return NextResponse.json(
         {
           error: "You are a bot!",
@@ -34,7 +35,18 @@ export async function POST(req: Request) {
         },
         { status: 403 },
       );
+    } else {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
+  }
+
+  // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+  // https://docs.arcjet.com/bot-protection/reference#bot-verification
+  if (decision.results.some(isSpoofedBot)) {
+    return NextResponse.json(
+      { error: "You are pretending to be a good bot!" },
+      { status: 403 },
+    );
   }
 
   return NextResponse.json({

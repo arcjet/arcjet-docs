@@ -1,4 +1,5 @@
 import arcjet, { protectSignup } from "@arcjet/next";
+import { isMissingUserAgent } from "@arcjet/inspect";
 import { NextResponse } from "next/server";
 
 const aj = arcjet({
@@ -31,11 +32,13 @@ export async function POST(req) {
     email,
   });
 
-  if (decision.isErrored()) {
-    // Fail open by logging the error and continuing
-    console.warn("Arcjet error", decision.reason.message);
-    // You could also fail closed here for very sensitive routes
-    //return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
+  for (const { reason } of decision.results) {
+    if (reason.isError()) {
+      // Fail open by logging the error and continuing
+      console.warn("Arcjet error", reason.message);
+      // You could also fail closed here for very sensitive routes
+      //return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
+    }
   }
 
   if (decision.isDenied()) {
@@ -53,11 +56,21 @@ export async function POST(req) {
       // https://nextjs.org/docs/pages/building-your-application/data-fetching/forms-and-mutations#redirecting
       return NextResponse.json({ message: "Forbidden" }, { status: 403 });
     }
-  } else {
-    // The form submission is allowed to proceed so do something with it here
-
-    return NextResponse.json({
-      message: "Hello world",
-    });
   }
+
+  if (decision.results.some(isMissingUserAgent)) {
+    // Requests without User-Agent headers might not be identified as any
+    // particular bot and could be marked as an errored result. Most legitimate
+    // clients send this header, so we recommend blocking requests without it.
+    // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
+    console.warn("User-Agent header is missing");
+
+    return NextResponse.json({ error: "Bad request" }, { status: 400 });
+  }
+
+  // The form submission is allowed to proceed so do something with it here
+
+  return NextResponse.json({
+    message: "Hello world",
+  });
 }

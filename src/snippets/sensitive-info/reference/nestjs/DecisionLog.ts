@@ -4,6 +4,7 @@ import {
   detectBot,
   sensitiveInfo,
 } from "@arcjet/nest";
+import { isSpoofedBot } from "@arcjet/inspect";
 import {
   Body,
   Controller,
@@ -94,6 +95,14 @@ export class PageController {
       } else {
         throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
       }
+    }
+
+    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+    // Verification isn't always possible, so we recommend checking the decision
+    // separately.
+    // https://docs.arcjet.com/bot-protection/reference#bot-verification
+    if (decision.results.some(isSpoofedBot)) {
+      return new HttpException("Forbidden", HttpStatus.FORBIDDEN);
     }
 
     return this.pageService.message(body);

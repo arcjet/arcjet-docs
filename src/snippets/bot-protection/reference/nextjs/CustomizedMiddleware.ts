@@ -26,7 +26,7 @@ export default async function middleware(request: NextRequest) {
     decision.reason.isBot() &&
     decision.ip.isHosting()
   ) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   } else {
     return NextResponse.next();
   }

@@ -1,4 +1,5 @@
 import arcjet, { protectSignup } from "@arcjet/remix";
+import { isMissingUserAgent } from "@arcjet/inspect";
 
 const aj = arcjet({
   // Get your site key from https://app.arcjet.com and set it as an environment
@@ -37,12 +38,13 @@ export async function action(args) {
   const decision = await aj.protect(args, { email });
   console.log("Arcjet decision", decision);
 
-  if (decision.isErrored()) {
-    // Fail open by logging the error and continuing
-    console.warn("Arcjet error", decision.reason.message);
-    // You could also fail closed here for very sensitive routes
-    //res.writeHead(503, { "Content-Type": "application/json" });
-    //res.end(JSON.stringify({ error: "Service unavailable" }));
+  for (const { reason } of decision.results) {
+    if (reason.isError()) {
+      // Fail open by logging the error and continuing
+      console.warn("Arcjet error", reason.message);
+      // You could also fail closed here for very sensitive routes
+      //return Response.json({ error: "Service unavailable" }, { status: 503 });
+    }
   }
 
   if (decision.isDenied()) {
@@ -51,6 +53,16 @@ export async function action(args) {
     } else {
       return Response.json({ error: "Forbidden" }, { status: 403 });
     }
+  }
+
+  if (decision.results.some(isMissingUserAgent)) {
+    // Requests without User-Agent headers might not be identified as any
+    // particular bot and could be marked as an errored result. Most legitimate
+    // clients send this header, so we recommend blocking requests without it.
+    // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
+    console.warn("User-Agent header is missing");
+
+    return Response.json({ error: "Bad request" }, { status: 400 });
   }
 
   // We don't need to use the decision elsewhere, but you could return it to

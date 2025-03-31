@@ -1,5 +1,6 @@
 import { env } from "$env/dynamic/private";
 import arcjet, { detectBot } from "@arcjet/sveltekit";
+import { isSpoofedBot } from "@arcjet/inspect";
 import { error } from "@sveltejs/kit";
 
 const aj = arcjet({
@@ -24,11 +25,18 @@ export async function handle({ event, resolve }) {
   const decision = await aj.protect(event);
 
   if (decision.isDenied()) {
-    return error(403, "You are a bot!");
+    // Bots not in the allow list will be blocked
+    if (decision.reason.isBot()) {
+      return error(403, "You are a bot!");
+    } else {
+      return error(403, "Forbidden");
+    }
   }
 
-  if (decision.reason.isBot() && decision.reason.isSpoofed()) {
-    return error(403, "You are a bot!");
+  // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+  // https://docs.arcjet.com/bot-protection/reference#bot-verification
+  if (decision.results.some(isSpoofedBot)) {
+    return error(403, "You are pretending to be a good bot!");
   }
 
   return resolve(event);

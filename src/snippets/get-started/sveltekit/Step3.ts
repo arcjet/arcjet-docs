@@ -1,5 +1,6 @@
 import { env } from "$env/dynamic/private";
 import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/sveltekit";
+import { isSpoofedBot } from "@arcjet/inspect";
 import { error, json, type RequestEvent } from "@sveltejs/kit";
 
 const aj = arcjet({
@@ -42,6 +43,14 @@ export async function GET(event: RequestEvent) {
     } else {
       return error(403, "Forbidden");
     }
+  }
+
+  // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+  // Verification isn't always possible, so we recommend checking the decision
+  // separately.
+  // https://docs.arcjet.com/bot-protection/reference#bot-verification
+  if (decision.results.some(isSpoofedBot)) {
+    return error(403, "Forbidden");
   }
 
   return json({ message: "Hello World" });

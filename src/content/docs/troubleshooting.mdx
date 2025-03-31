@@ -79,6 +79,25 @@ Then create an API route at `/pages/healthz.js`:
 
 When you deploy your app next, Arcjet should not trigger on this route.
 
+### Override development IP
+
+Arcjet's [IP geolocation](/blueprints/ip-geolocation) and [VPN & proxy
+detection](/blueprints/vpn-proxy-detection) features require a real IP address
+to work. In local development, Arcjet defaults to `127.0.0.1` so the IP analysis
+metadata will be empty.
+
+You can set the IP address to a real public IP by overriding the IP address
+field (`ip`) in the `request` object that is passed to the Arcjet `protect`
+function.
+
+```ts
+// Override the IP address in the request object if `ip` is provided. You could
+// set this using an environment variable or some other method to ensure it is
+// only set in development.
+//const ip = "8.8.8.8"; // Google's public DNS server
+const decision = await aj.protect(ip ? { ...req, ip } : req);
+```
+
 ## Common errors
 
 ### [unauthenticated] invalid key
@@ -308,6 +327,13 @@ const decision = await aj.protect(req, { email });
 // ...
 // You can now access the body again later
 ```
+
+### Error: Cannot read properties of undefined (reading 'flags')
+
+If you see this error then you are probably running an older version of Next.js.
+Arcjet supports the current and previous major versions of Next.js [as indicated
+in the SDK reference](/reference/nextjs#requirements). Upgrade your Next.js
+version to the latest version to fix this error.
 
 ## Get help
 
