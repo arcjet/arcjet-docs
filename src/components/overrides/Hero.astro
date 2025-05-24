@@ -1,7 +1,6 @@
 ---
-import type { Props } from "@astrojs/starlight/props";
-
 import CustomHero from "@/components/Hero";
+const props = Astro.locals.starlightRoute;
 ---
 
-<CustomHero client:load astroEntry={Astro.props.entry} />
+<CustomHero client:load astroEntry={props.entry} />
