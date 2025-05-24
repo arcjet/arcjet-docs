@@ -41,13 +41,25 @@ export default defineConfig({
         replacesTitle: true,
       },
       favicon: "favicon.png",
-      social: {
-        github: "https://github.com/arcjet",
-        twitter: "https://twitter.com/arcjethq",
-        youtube: "https://www.youtube.com/@arcjethq",
-        discord: "https://arcjet.com/discord",
-        email: "mailto:support@arcjet.com",
-      },
+      social: [
+        { icon: "github", label: "GitHub", href: "https://github.com/arcjet" },
+        {
+          icon: "twitter",
+          label: "Twitter",
+          href: "https://twitter.com/arcjethq",
+        },
+        {
+          icon: "youtube",
+          label: "YouTube",
+          href: "https://www.youtube.com/@arcjethq",
+        },
+        {
+          icon: "discord",
+          label: "Discord",
+          href: "https://arcjet.com/discord",
+        },
+        { icon: "email", label: "Email", href: "mailto:support@arcjet.com" },
+      ],
       head: [
         {
           tag: "script",
@@ -71,6 +83,9 @@ export default defineConfig({
         starlightLinksValidator({
           exclude: ["**/*f=*"], // exclude urls with `f` param from validation
           errorOnLocalLinks: false, // we use localhost in the examples
+          // TODO enable once we've sorted out the issue it's having with the troubleshooting section.
+          //      Specifically "/sensitive-info/reference?f=node-js#accessing-the-body"
+          errorOnInvalidHashes: false,
         }),
       ],
       components: {

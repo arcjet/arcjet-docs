@@ -1,9 +1,9 @@
 ---
 import TitleByFramework from "@/components/TitleByFramework";
 import Default from "@astrojs/starlight/components/PageTitle.astro";
-import type { Props } from "@astrojs/starlight/props";
 
-const titleByFramework = Astro.props.entry.data.titleByFramework;
+const props = Astro.locals.starlightRoute;
+const titleByFramework = props.entry.data.titleByFramework;
 ---
 
 {titleByFramework && (
@@ -11,7 +11,7 @@ const titleByFramework = Astro.props.entry.data.titleByFramework;
 )}
 
 {! titleByFramework && (
-<Default {...Astro.props}>
+<Default>
   <slot />
 </Default>
 )}
