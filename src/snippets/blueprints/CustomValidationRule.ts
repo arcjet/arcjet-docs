@@ -32,6 +32,7 @@ function validateBody(options: {
 }) {
   return [
     <ArcjetRule<{}>>{
+      version: 1,
       type: "DATA_VALIDATION",
       mode: options.mode,
       priority: 0,
@@ -48,6 +49,7 @@ function validateBody(options: {
           const body = await context.getBody();
           if (typeof body !== "string") {
             return new ArcjetRuleResult({
+              ruleId: "CustomValidationRule",
               ttl: 0,
               state: "NOT_RUN",
               conclusion: "ALLOW",
@@ -62,6 +64,7 @@ function validateBody(options: {
 
           if (result.success) {
             return new ArcjetRuleResult({
+              ruleId: "CustomValidationRule",
               ttl: 0,
               state: "RUN",
               conclusion: "ALLOW",
@@ -69,6 +72,7 @@ function validateBody(options: {
             });
           } else {
             return new ArcjetRuleResult({
+              ruleId: "CustomValidationRule",
               ttl: 0,
               state: "RUN",
               conclusion: "DENY",
@@ -79,6 +83,7 @@ function validateBody(options: {
           }
         } catch (err) {
           return new ArcjetRuleResult({
+            ruleId: "CustomValidationRule",
             ttl: 0,
             state: "NOT_RUN",
             conclusion: "ERROR",

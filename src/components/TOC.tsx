@@ -20,7 +20,7 @@ interface Props extends PropsWithChildren {
  *
  * Renders the page TOC according to custom options like SDK framework, etc. .
  *
- * @param astroEntry - The Astro.props.entry
+ * @param astroEntry - The Astro.locals.starlightRoute.entry
  */
 const TOC = forwardRef(
   ({ astroEntry, ...props }: Props, ref: ForwardedRef<HTMLDivElement>) => {
