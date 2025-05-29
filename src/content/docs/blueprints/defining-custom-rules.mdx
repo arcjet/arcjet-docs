@@ -1,6 +1,6 @@
 ---
 title: "Defining custom rules"
-description: "Define custom local rules for the Arcjet SDK."
+description: "Define custom rules for the Arcjet SDK."
 ---
 
 import { Code } from "@astrojs/starlight/components";
@@ -12,10 +12,10 @@ package](https://github.com/arcjet/arcjet-js/tree/main/protocol). These rules
 will only be run locally since the Arcjet service doesn't know about them;
 however, they can still be useful for some use cases.
 
-The structure of a local rule is:
+The structure of a rule is:
 
 ```ts
-interface ArcjetLocalRule<Props extends { [key: string]: unknown } = {}> {
+interface ArcjetRule<Props extends { [key: string]: unknown } = {}> {
   type: string;
   mode: "LIVE" | "DRY_RUN";
   priority: number;
@@ -35,14 +35,14 @@ input](https://blog.arcjet.com/next-js-security-checklist/#2-data-validation-and
 as part of your Arcjet protections before a request reaches your route handler,
 such as via Next.js middleware.
 
-## Local rule: Zod + Body validation
+## Custom rule: Zod + Body validation
 
 If we want to run [Zod](https://zod.dev/) schema validation against the request
-body, we need to create a new local rule:
+body, we need to create a new custom rule:
 
 <Code code={CustomValidationRule} lang="ts" />
 
-As long as it conforms to the local rule interface, this rule can be consumed by
+As long as it conforms to the rule interface, this rule can be consumed by
 the Arcjet SDK like any other rule!
 
 ```ts
@@ -60,5 +60,5 @@ const aj = arcjet({
 ```
 
 When `aj.protect()` is called, inside middleware or directly inside a route,
-this custom local rule will be executed and deny the request if the body doesn't
+this custom rule will be executed and deny the request if the body doesn't
 pass validation.
