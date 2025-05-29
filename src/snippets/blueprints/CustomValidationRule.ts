@@ -62,7 +62,7 @@ function validateBody(options: {
               reason: new LocalDataValidation({
                 error: "Missing body",
               }),
-              fingerprint: "fingerprint",
+              fingerprint: context.fingerprint,
             });
           }
 
@@ -76,7 +76,7 @@ function validateBody(options: {
               state: "RUN",
               conclusion: "ALLOW",
               reason: new LocalDataValidation(),
-              fingerprint: "fingerprint",
+              fingerprint: context.fingerprint,
             });
           } else {
             return new ArcjetRuleResult({
@@ -87,7 +87,7 @@ function validateBody(options: {
               reason: new LocalDataValidation({
                 error: fromError(result.error).toString(),
               }),
-              fingerprint: "fingerprint",
+              fingerprint: context.fingerprint,
             });
           }
         } catch (err) {
@@ -97,7 +97,7 @@ function validateBody(options: {
             state: "NOT_RUN",
             conclusion: "ERROR",
             reason: new ArcjetErrorReason(err),
-            fingerprint: "fingerprint",
+            fingerprint: context.fingerprint,
           });
         }
       },
