@@ -10,11 +10,12 @@ import { Remix as IconRemix } from "@/components/icons/tech/Remix";
 import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
 import type { ForwardedRef, HTMLProps, ReactNode } from "react";
 import { forwardRef, Fragment, memo, useEffect, useState } from "react";
+import type { StarlightRouteData } from "@astrojs/starlight/route-data";
 
 import styles from "./Hero.module.scss";
 
 export interface Props extends HTMLProps<HTMLDivElement> {
-  astroEntry: any;
+  astroEntry: StarlightRouteData["entry"];
 }
 
 // From: https://starlight.astro.build/reference/frontmatter/#hero
@@ -69,9 +70,15 @@ const Hero = forwardRef(
 
     useEffect(() => {
       setTitle(astroEntry.data.title);
-      setActions(astroEntry.data.hero.actions);
-      setTagline(astroEntry.data.hero.tagline);
-      setImage(astroEntry.data.hero.image);
+
+      const hero = astroEntry.data.hero;
+
+      // NOTE: HeroConfig and StarlightRouteData typing mismatch for actions
+      //       and image. Each array includes a possible `undefined` value.
+
+      setActions(hero?.actions as HeroConfig["actions"]);
+      setTagline(hero?.tagline);
+      setImage(hero?.image as HeroConfig["image"]);
     }, [astroEntry]);
 
     useEffect(() => {

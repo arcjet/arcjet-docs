@@ -8,11 +8,12 @@ import type { CollectionEntry } from "astro:content"; // Import CollectionEntry 
 import { onSet } from "nanostores";
 import type { ForwardedRef, PropsWithChildren } from "react";
 import { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
+import type { StarlightRouteData } from "@astrojs/starlight/route-data";
 
 import styles from "./TOC.module.scss";
 
 interface Props extends PropsWithChildren {
-  astroEntry: any;
+  astroEntry: StarlightRouteData["entry"];
 }
 
 /**

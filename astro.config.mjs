@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
 import vercelStatic from "@astrojs/vercel";
@@ -5,7 +6,7 @@ import { ExpressiveCodeTheme } from "astro-expressive-code";
 import robotsTxt from "astro-robots-txt";
 import { defineConfig } from "astro/config";
 import starlightLinksValidator from "starlight-links-validator";
-import { main as sidebar } from "/src/lib/sidebars";
+import { main as sidebar } from "./src/lib/sidebars";
 
 const jsoncString = fs.readFileSync(
   new URL(`./src/lib/code-dark.json`, import.meta.url),
