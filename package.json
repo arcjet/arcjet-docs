@@ -6,7 +6,7 @@
     "prepare": "patch-package",
     "dev": "astro dev --host",
     "start": "astro dev",
-    "build": "astro check && astro build",
+    "build": "astro check --minimumSeverity warning && astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -82,7 +82,9 @@
   },
   "overrides": {
     "cookie": ">=0.7.2",
-    "path-to-regexp": "^6.3.0 || ^8.0.0",
+    "@vercel/routing-utils": {
+      "path-to-regexp": "^6.3.0"
+    },
     "rollup": "npm:@rollup/wasm-node"
   },
   "devDependencies": {
