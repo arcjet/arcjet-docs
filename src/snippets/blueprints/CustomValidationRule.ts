@@ -31,6 +31,12 @@ function validateBody(options: {
   // Each instance will validate using a Zod schema
   schema: z.Schema;
 }) {
+
+  // Note that `ruleId` is only used for caching purposes. In
+  // this case we want to validate the body on every request,
+  // so we provide a new random UUID for each instance.
+  const ruleId = webcrypto.randomUUID();
+
   return [
     <ArcjetRule<{}>>{
       version: 1,
@@ -46,10 +52,6 @@ function validateBody(options: {
         context: ArcjetContext,
         details: ArcjetRequestDetails,
       ): Promise<ArcjetRuleResult> {
-        // Note that `ruleId` is only used for caching purposes. In
-        // this case we want to validate the body on every request,
-        // so we provide a new random UUID every time.
-        const ruleId = webcrypto.randomUUID();
 
         try {
           const body = await context.getBody();

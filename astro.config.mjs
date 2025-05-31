@@ -84,8 +84,9 @@ export default defineConfig({
         starlightLinksValidator({
           exclude: ["**/*f=*"], // exclude urls with `f` param from validation
           errorOnLocalLinks: false, // we use localhost in the examples
-          // TODO enable once we've sorted out the issue it's having with the troubleshooting section.
-          //      Specifically "/sensitive-info/reference?f=node-js#accessing-the-body"
+          // TODO(#494) enable once we've sorted out the issue it's having with the
+          //            troubleshooting section. Specifically
+          //            "/sensitive-info/reference?f=node-js#accessing-the-body"
           errorOnInvalidHashes: false,
         }),
       ],

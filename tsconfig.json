@@ -12,8 +12,9 @@
   "extends": ["astro/tsconfigs/strict", "@arcjet/tsconfig/base.json"],
   "include": [
     ".astro/types.d.ts",
-    // NOTE: This is necessary (as opposed to just "src/**/*") to starlight types
+    // NOTE: This is necessary (as opposed to just "src/**/*") so starlight types
     //       get picked up and included via interface merging.
     "**/*"
-  ]
+  ],
+  "exclude": ["dist"]
 }
