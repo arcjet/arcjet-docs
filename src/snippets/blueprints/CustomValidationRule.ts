@@ -8,6 +8,7 @@ import type {
   ArcjetContext,
   ArcjetRequestDetails,
 } from "@arcjet/protocol";
+import { webcrypto } from "node:crypto";
 import { z } from "zod";
 import { fromError } from "zod-validation-error";
 
@@ -30,8 +31,15 @@ function validateBody(options: {
   // Each instance will validate using a Zod schema
   schema: z.Schema;
 }) {
+
+  // Note that `ruleId` is only used for caching purposes. In
+  // this case we want to validate the body on every request,
+  // so we provide a new random UUID for each instance.
+  const ruleId = webcrypto.randomUUID();
+
   return [
     <ArcjetRule<{}>>{
+      version: 1,
       type: "DATA_VALIDATION",
       mode: options.mode,
       priority: 0,
@@ -44,16 +52,19 @@ function validateBody(options: {
         context: ArcjetContext,
         details: ArcjetRequestDetails,
       ): Promise<ArcjetRuleResult> {
+
         try {
           const body = await context.getBody();
           if (typeof body !== "string") {
             return new ArcjetRuleResult({
+              ruleId,
               ttl: 0,
               state: "NOT_RUN",
               conclusion: "ALLOW",
               reason: new LocalDataValidation({
                 error: "Missing body",
               }),
+              fingerprint: context.fingerprint,
             });
           }
 
@@ -62,27 +73,33 @@ function validateBody(options: {
 
           if (result.success) {
             return new ArcjetRuleResult({
+              ruleId,
               ttl: 0,
               state: "RUN",
               conclusion: "ALLOW",
               reason: new LocalDataValidation(),
+              fingerprint: context.fingerprint,
             });
           } else {
             return new ArcjetRuleResult({
+              ruleId,
               ttl: 0,
               state: "RUN",
               conclusion: "DENY",
               reason: new LocalDataValidation({
                 error: fromError(result.error).toString(),
               }),
+              fingerprint: context.fingerprint,
             });
           }
         } catch (err) {
           return new ArcjetRuleResult({
+            ruleId,
             ttl: 0,
             state: "NOT_RUN",
             conclusion: "ERROR",
             reason: new ArcjetErrorReason(err),
+            fingerprint: context.fingerprint,
           });
         }
       },

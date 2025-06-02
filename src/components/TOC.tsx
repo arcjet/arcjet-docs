@@ -8,11 +8,12 @@ import type { CollectionEntry } from "astro:content"; // Import CollectionEntry 
 import { onSet } from "nanostores";
 import type { ForwardedRef, PropsWithChildren } from "react";
 import { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
+import type { StarlightRouteData } from "@astrojs/starlight/route-data";
 
 import styles from "./TOC.module.scss";
 
 interface Props extends PropsWithChildren {
-  astroEntry: any;
+  astroEntry: StarlightRouteData["entry"];
 }
 
 /**
@@ -20,7 +21,7 @@ interface Props extends PropsWithChildren {
  *
  * Renders the page TOC according to custom options like SDK framework, etc. .
  *
- * @param astroEntry - The Astro.props.entry
+ * @param astroEntry - The Astro.locals.starlightRoute.entry
  */
 const TOC = forwardRef(
   ({ astroEntry, ...props }: Props, ref: ForwardedRef<HTMLDivElement>) => {
