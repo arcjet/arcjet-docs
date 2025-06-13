@@ -5,6 +5,7 @@ import vercelStatic from "@astrojs/vercel";
 import { ExpressiveCodeTheme } from "astro-expressive-code";
 import robotsTxt from "astro-robots-txt";
 import { defineConfig } from "astro/config";
+import arcjet from "@arcjet/astro";
 import starlightLinksValidator from "starlight-links-validator";
 import { main as sidebar } from "./src/lib/sidebars";
 
@@ -111,6 +112,7 @@ export default defineConfig({
       },
     }),
     react(),
+    arcjet(),
   ],
   // External redirects go in /vercel.json
   redirects: {
