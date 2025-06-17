@@ -1,3 +1,4 @@
+import { Astro as IconAstro } from "@/components/icons/tech/Astro";
 import { Bun as IconBun } from "@/components/icons/tech/Bun";
 import { Deno as IconDeno } from "@/components/icons/tech/Deno";
 import { Express as IconExpress } from "@/components/icons/tech/Express";
@@ -26,6 +27,7 @@ import { useStore } from "@nanostores/react";
 import { forwardRef, useEffect, useState, type ForwardedRef } from "react";
 
 const frameworkIcon = {
+  astro: <IconAstro />,
   deno: <IconDeno />,
   bun: <IconBun />,
   express: <IconExpress />,
