@@ -44,6 +44,8 @@ import ProtectAppTS from "/src/snippets/reference/nextjs/ProtectApp.ts?raw";
 import ProtectPagesJS from "/src/snippets/reference/nextjs/ProtectPages.js?raw";
 import ProtectPagesTS from "/src/snippets/reference/nextjs/ProtectPages.ts?raw";
 import ProxiesTS from "/src/snippets/reference/nextjs/Proxies.ts?raw";
+import RuleModesJS from "/src/snippets/reference/nextjs/RuleModes.js?raw";
+import RuleModesTS from "/src/snippets/reference/nextjs/RuleModes.ts?raw";
 import ServerAction from "/src/snippets/reference/nextjs/ServerAction.tsx?raw";
 import ServerActionProp from "/src/snippets/reference/nextjs/ServerActionProp.tsx?raw";
 import WithRuleAppJS from "/src/snippets/reference/nextjs/WithRuleApp.js?raw";
@@ -148,33 +150,14 @@ always be `ALLOW`.
 This allows you to run Arcjet in passive / demo mode to test rules before
 enabling them.
 
-```ts
-import arcjet, { fixedWindow } from "@arcjet/next";
-
-const aj = arcjet({
-  key: process.env.ARCJET_KEY,
-  characteristics: ["ip.src"],
-  rules: [
-    fixedWindow(
-      // This rule is live
-      {
-        mode: "LIVE",
-        window: "1h",
-        max: 60,
-      },
-      // This rule is in dry run mode, so will log but not block
-      {
-        mode: "DRY_RUN",
-        characteristics: ['http.request.headers["x-api-key"]'],
-        window: "1h",
-        // max could also be a dynamic value applied after looking up a limit
-        // elsewhere e.g. in a database for the authenticated user
-        max: 600,
-      },
-    ),
-  ],
-});
-```
+<Tabs>
+  <TabItem label="TS">
+    <Code code={RuleModesTS} lang="ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={RuleModesJS} lang="js" />
+  </TabItem>
+</Tabs>
 
 As the top level conclusion will always be `ALLOW` in `DRY_RUN` mode, you can
 loop through each rule result to check what would have happened:
