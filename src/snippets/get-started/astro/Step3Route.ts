@@ -1,8 +1,8 @@
-// @ts-nocheck
 import type { APIRoute } from "astro";
 import aj from "arcjet:client";
 
 export const GET: APIRoute = async ({ request }) => {
+  // @ts-expect-error
   const decision = await aj.protect(request, { requested: 5 }); // Deduct 5 tokens from the bucket
   console.log("Arcjet decision", decision);
 

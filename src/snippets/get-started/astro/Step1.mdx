@@ -1,5 +1,6 @@
 import { Code } from "@astrojs/starlight/components";
 import SelectableContent from "@/components/SelectableContent";
+import { removeTSCCommentDirectives } from "@/lib/utils";
 import Step1JS from "./Step1.js?raw";
 
 {/* prettier-ignore */}
@@ -63,6 +64,6 @@ project. Learn more about how this works in the [Astro docs](https://docs.astro.
 
     Update your Astro configuration file:
 
-    <Code code={Step1JS} lang="js" title="astro.config.mjs" />
+    <Code code={removeTSCCommentDirectives(Step1JS)} lang="js" title="astro.config.mjs" />
 
 </details>

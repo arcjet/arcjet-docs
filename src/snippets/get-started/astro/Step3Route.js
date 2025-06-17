@@ -1,3 +1,5 @@
+// @ts-check
+// @ts-expect-error
 import aj from "arcjet:client";
 
 export const GET = async ({ request }) => {

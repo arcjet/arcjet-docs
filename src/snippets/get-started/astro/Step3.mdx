@@ -3,10 +3,15 @@ import SelectableContent from "@/components/SelectableContent";
 import Step3ConfigJS from "./Step3Config.js?raw";
 import Step3RouteTS from "./Step3Route.ts?raw";
 import Step3RouteJS from "./Step3Route.js?raw";
+import { removeTSCCommentDirectives } from "@/lib/utils";
 
 Update your Astro configuration with the contents:
 
-<Code code={Step3ConfigJS} lang="js" title="astro.config.mjs" />
+<Code
+  code={removeTSCCommentDirectives(Step3ConfigJS)}
+  lang="js"
+  title="astro.config.mjs"
+/>
 
 This creates an Arcjet instance that can be used to protect your routes. It can
 be imported from the `arcjet:client` module in your project.
@@ -16,10 +21,8 @@ be imported from the `arcjet:client` module in your project.
 
 Create a new API route at `src/pages/api.json.ts`:
 
-{/* TODO(#): Correctly type the `arcjet:client` module in snippets */}
-
 <Code
-  code={Step3RouteTS.replace("// @ts-nocheck\n", "")}
+  code={removeTSCCommentDirectives(Step3RouteTS)}
   lang="ts"
   title="api.json.ts"
 />
@@ -30,7 +33,11 @@ Create a new API route at `src/pages/api.json.ts`:
 
 Create a new API route at `src/pages/api.json.js`:
 
-<Code code={Step3RouteJS} lang="js" title="api.json.js" />
+<Code
+  code={removeTSCCommentDirectives(Step3RouteJS)}
+  lang="js"
+  title="api.json.js"
+/>
 
 </div>
 </SelectableContent>
