@@ -1,0 +1,43 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import Step3ConfigJS from "./Step3Config.js?raw";
+import Step3RouteTS from "./Step3Route.ts?raw";
+import Step3RouteJS from "./Step3Route.js?raw";
+import { removeTSCCommentDirectives } from "@/lib/utils";
+
+Update your Astro configuration with the contents:
+
+<Code
+  code={removeTSCCommentDirectives(Step3ConfigJS)}
+  lang="js"
+  title="astro.config.mjs"
+/>
+
+This creates an Arcjet instance that can be used to protect your routes. It can
+be imported from the `arcjet:client` module in your project.
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+<div slot="TS" slotIdx="1">
+
+Create a new API route at `src/pages/api.json.ts`:
+
+<Code
+  code={removeTSCCommentDirectives(Step3RouteTS)}
+  lang="ts"
+  title="api.json.ts"
+/>
+
+</div>
+
+<div slot="JS" slotIdx="2">
+
+Create a new API route at `src/pages/api.json.js`:
+
+<Code
+  code={removeTSCCommentDirectives(Step3RouteJS)}
+  lang="js"
+  title="api.json.js"
+/>
+
+</div>
+</SelectableContent>

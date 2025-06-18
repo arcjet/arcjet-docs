@@ -11,6 +11,7 @@ import {
 
 /** The framework keys */
 export type FrameworkKey =
+  | "astro"
   | "bun"
   | "bun-hono"
   | "deno"
@@ -26,6 +27,7 @@ export type FrameworkKey =
 
 /** The framework display labels */
 export type FrameworkLabel =
+  | "Astro"
   | "Bun"
   | "Bun + Hono"
   | "Deno"
@@ -66,6 +68,10 @@ export type Prefs = {
  * The user selectable framework options.
  */
 export const frameworks: Array<Framework> = [
+  {
+    key: "astro",
+    label: "Astro",
+  },
   {
     key: "bun",
     label: "Bun",

@@ -2,6 +2,7 @@
 title: "Get started with Arcjet"
 titleByFramework:
   default: "Get started with Arcjet"
+  astro: "Get started with Astro"
   bun: "Get started with Bun"
   bun-hono: "Get started with Bun + Hono"
   deno: "Get started with Deno"
@@ -12,10 +13,11 @@ titleByFramework:
   node-js-hono: "Get started with Node.js + Hono"
   remix: "Get started with Remix"
   sveltekit: "Get started with SvelteKit"
-description: "Getting started with Arcjet. Quick start guide to protect your app from attacks, apply a rate limit, and prevent bots from accessing your NestJS, Next.js, Node.js, Bun, or SvelteKit app."
+description: "Getting started with Arcjet. Quick start guide to protect your app from attacks, apply a rate limit, and prevent bots from accessing your Astro, Bun, Deno, NestJS, Next.js, Node.js, Remix, or SvelteKit app."
 prev: false
 next: false
 frameworks:
+  - astro
   - bun
   - bun-hono
   - deno
@@ -51,6 +53,13 @@ import { LinkButton, LinkCard, CardGrid } from "@astrojs/starlight/components";
 import FAQs from "/src/components/FAQs.astro";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
+
+import AstroStep0 from "@/snippets/get-started/astro/Step0.mdx";
+import AstroStep1 from "@/snippets/get-started/astro/Step1.mdx";
+import AstroRequirements from "@/snippets/get-started/astro/Requirements.mdx";
+import AstroStep2 from "@/snippets/get-started/astro/Step2.mdx";
+import AstroStep3 from "@/snippets/get-started/astro/Step3.mdx";
+import AstroStep4 from "@/snippets/get-started/astro/Step4.mdx";
 
 import BunStep0 from "@/snippets/get-started/bun/Step0.mdx";
 import BunStep1 from "@/snippets/get-started/bun/Step1.mdx";
@@ -133,6 +142,7 @@ This guide will show you how to set up a simple API server protected by Arcjet.
 ## 0. Get Started
 
 <SlotByFramework client:load>
+  <AstroStep0 slot="astro" />
   <BunStep0 slot="bun" />
   <BunHonoStep0 slot="bun-hono" />
   <DenoStep0 slot="deno" />
@@ -150,6 +160,7 @@ This guide will show you how to set up a simple API server protected by Arcjet.
 In your project root, run the following command:
 
 <SlotByFramework client:load>
+  <AstroStep1 slot="astro" />
   <BunStep1 slot="bun" />
   <BunHonoStep1 slot="bun-hono" />
   <DenoStep1 slot="deno" />
@@ -165,6 +176,7 @@ In your project root, run the following command:
 ### Requirements
 
 <SlotByFramework client:load>
+  <AstroRequirements slot="astro" />
   <BunRequirements slot="bun" />
   <BunHonoRequirements slot="bun-hono" />
   <DenoRequirements slot="deno" />
@@ -183,6 +195,7 @@ In your project root, run the following command:
 instructions to add a site and get a key.
 
 <SlotByFramework client:load>
+  <AstroStep2 slot="astro" />
   <BunStep2 slot="bun" />
   <BunHonoStep2 slot="bun-hono" />
   <DenoStep2 slot="deno" />
@@ -201,6 +214,7 @@ This configures Arcjet rules to protect your app from attacks, apply a rate
 limit, and prevent bots from accessing your app.
 
 <SlotByFramework client:load>
+  <AstroStep3 slot="astro" />
   <BunStep3 slot="bun" />
   <BunHonoStep3 slot="bun-hono" />
   <DenoStep3 slot="deno" />
@@ -214,6 +228,7 @@ limit, and prevent bots from accessing your app.
 </SlotByFramework>
 
 <SlotByFramework client:load>
+  <AstroStep4 slot="astro" />
   <BunStep4 slot="bun" />
   <BunHonoStep4 slot="bun-hono" />
   <DenoStep4 slot="deno" />

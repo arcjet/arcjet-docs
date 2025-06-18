@@ -1,4 +1,5 @@
 import Button from "@/components/Button";
+import { Astro as IconAstro } from "@/components/icons/tech/Astro";
 import { Bun as IconBun } from "@/components/icons/tech/Bun";
 import { Deno as IconDeno } from "@/components/icons/tech/Deno";
 import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
@@ -67,6 +68,16 @@ const FrameworkLinks = forwardRef(
         <div ref={ref} className={cls} {...props}>
           <h2 id="choose-a-framework">{title}</h2>
           <div className={styles.Links}>
+            {(!exclude || !exclude.includes("astro")) && (
+              <Button
+                as="link"
+                size="lg"
+                href={`${path}?f=astro`}
+                decoratorLeft={<IconAstro />}
+              >
+                Astro
+              </Button>
+            )}
             {(!exclude || !exclude.includes("bun")) && (
               <Button
                 as="link"
