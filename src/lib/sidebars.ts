@@ -239,6 +239,10 @@ export const main = [
         collapsed: true,
         items: [
           {
+            label: "Astro",
+            link: "/reference/astro",
+          },
+          {
             label: "Bun",
             link: "/reference/bun",
           },

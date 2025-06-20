@@ -1,0 +1,619 @@
+---
+title: "Arcjet Astro SDK reference"
+prev: false
+---
+
+import Requirements from "@/snippets/get-started/astro/Requirements.mdx";
+import Installation from "@/snippets/get-started/astro/Step1.mdx";
+import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import Comments from "/src/components/Comments.astro";
+import SDKVersionBun from "/src/components/SDKVersionBun.astro";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import { removeTSCCommentDirectives } from "@/lib/utils";
+
+import ConfigurationJS from "src/snippets/reference/astro/Configuration.mjs?raw";
+import RuleModesConfigJS from "/src/snippets/reference/astro/RuleModesConfig.mjs?raw";
+import IPLocationConfigJS from "/src/snippets/reference/astro/IPLocationConfig.mjs?raw";
+import IPLocationJS from "/src/snippets/reference/astro/IPLocation.js?raw";
+import IPLocationTS from "/src/snippets/reference/astro/IPLocation.ts?raw";
+import ErrorHandlingJS from "/src/snippets/reference/astro/ErrorHandling.js?raw";
+import ErrorHandlingTS from "/src/snippets/reference/astro/ErrorHandling.ts?raw";
+import ErrorInspectJS from "/src/snippets/reference/astro/ErrorInspect.js?raw";
+import ErrorInspectTS from "/src/snippets/reference/astro/ErrorInspect.ts?raw";
+import WithRuleJS from "/src/snippets/reference/astro/WithRule.js?raw";
+import WithRuleTS from "/src/snippets/reference/astro/WithRule.ts?raw";
+import ClientOverrideJS from "/src/snippets/reference/astro/ClientOverride.mjs?raw";
+import MultipleRulesJS from "/src/snippets/reference/astro/MultipleRules.mjs?raw";
+import ProtectEndpointJS from "/src/snippets/reference/astro/ProtectEndpoint.js?raw";
+import ProtectEndpointTS from "/src/snippets/reference/astro/ProtectEndpoint.ts?raw";
+import ProtectPageAstro from "/src/snippets/reference/astro/ProtectPage.astro?raw";
+import ProtectMiddlewareJS from "/src/snippets/reference/astro/ProtectMiddleware.js?raw";
+import ProtectMiddlewareTS from "/src/snippets/reference/astro/ProtectMiddleware.ts?raw";
+import ProxiesConfigJS from "/src/snippets/reference/astro/Proxies.mjs?raw";
+import DecisionLogConfigJS from "/src/snippets/reference/astro/DecisionLogConfig.mjs?raw";
+import DecisionLogJS from "/src/snippets/reference/astro/DecisionLog.js?raw";
+import DecisionLogTS from "/src/snippets/reference/astro/DecisionLog.ts?raw";
+import NodeVersions from "/src/snippets/reference/node-versions.mdx";
+import IPAnalysis from "/src/snippets/reference/shared/IPAnalysis.mdx";
+
+{/* TODO(#526): Starlight injects the css & js as siblings of the first codeblock */}
+{/* on the page. This breaks when the first codeblock is in */}
+{/* <SelectableContent> as the css & js are removed from the page. */}
+{/* This is a workaround. */}
+
+<div aria-hidden="true" style={{ display: "none" }}>
+  ```sh ignore-me ```
+</div>
+
+[<SDKVersionBun/>](https://www.npmjs.com/package/@arcjet/astro)
+
+This is the reference guide for the Arcjet Bun SDK, [available on
+GitHub](https://github.com/arcjet/arcjet-js) and licensed under the Apache 2.0
+license.
+
+<WhatIsArcjet />
+
+## Installation
+
+In your project root, run the following command to install the SDK:
+
+<Installation showFrameworkSwitcher={false} />
+
+### Requirements
+
+<Requirements />
+
+## Quick start
+
+Check out the [quick start guide](/get-started?f=astro).
+
+## Configuration
+
+Arcjet is configured as an integration in your `astro.config.mjs` file. You will need to add your Arcjet API key as an environment variable and configure the rules you want to apply.
+
+### API Key
+
+First, get your site key from the [Arcjet dashboard](https://app.arcjet.com). Set it as an environment variable called `ARCJET_KEY` in your `.env` file:
+
+```bash
+ARCJET_KEY=your_site_key_here
+```
+
+### Astro Integration
+
+The Arcjet integration is added to your `astro.config.mjs` file. Here's a basic configuration:
+
+<Code
+  code={removeTSCCommentDirectives(ConfigurationJS)}
+  lang="js"
+  title="astro.config.mjs"
+/>
+
+The required fields are:
+
+{/* #TODO(#395): uncomment once these docs are complete */}
+
+- `rules` - The rules to apply to the request. {/* See the various sections of the */}
+  {/* docs for how to configure these e.g. [shield](/shield/reference?f=next-js), [rate */}
+  {/* limiting](/rate-limiting/reference?f=next-js), [bot */}
+  {/* protection](/bot-protection/reference?f=next-js), [email */}
+  {/* validation](/email-validation/reference?f=next-js). */}
+
+The optional fields are:
+
+- `characteristics` (`string[]`) - A list of
+  [characteristics](/architecture#built-in-characteristics) to be used to
+  uniquely identify clients.
+- `proxies` (`string[]`) - A list of one or more trusted proxies. These
+  addresses will be excluded when Arcjet is determining the client IP address.
+  This is useful if you are behind a load balancer or proxy that sets the client
+  IP address in a header. See [Load balancers &
+  proxies](#load-balancers--proxies) below for an example.
+
+### Single instance
+
+We recommend creating a single instance of the `Arcjet` object and reusing it
+throughout your application. This is because the SDK caches decisions and
+configuration to improve performance.
+
+This is handled for you by the Astro integration. The Arcjet configuration is
+defined once in your `astro.config.mjs` file and then accessed throughout your
+application using the `arcjet:client` virtual module.
+
+After configuring the integration, you import and use Arcjet like this:
+
+```ts
+import aj from "arcjet:client";
+```
+
+### Rule modes
+
+Each rule can be configured in either `LIVE` or `DRY_RUN` mode. When in
+`DRY_RUN` mode, each rule will return its decision, but the end conclusion will
+always be `ALLOW`.
+
+This allows you to run Arcjet in passive / demo mode to test rules before
+enabling them.
+
+<Code
+  code={removeTSCCommentDirectives(RuleModesConfigJS)}
+  lang="js"
+  title="astro.config.mjs"
+/>
+
+As the top level conclusion will always be `ALLOW` in `DRY_RUN` mode, you can
+loop through each rule result to check what would have happened:
+
+```ts
+for (const result of decision.results) {
+  if (result.isDenied()) {
+    console.log("Rule returned deny conclusion", result);
+  }
+}
+```
+
+### Multiple rules
+
+You can combine rules to create a more complex protection strategy. For example,
+you can combine rate limiting and bot protection rules to protect your API from
+automated clients.
+
+:::note
+When specifying multiple rules, the order of the rules is ignored. Rule
+execution ordering is automatically optimized for performance.
+:::
+
+<Code
+  code={removeTSCCommentDirectives(MultipleRulesJS)}
+  lang="js"
+  title="astro.config.mjs"
+/>
+
+### Environment variables
+
+The following environment variables can be used to configure the SDK at runtime:
+
+- `ARCJET_KEY` - Your Arcjet site key. This is required and can be found in the
+  [Arcjet dashboard](https://app.arcjet.com).
+- `ARCJET_BASE_URL` - Will override the decision API which the SDK communicates
+  with. This defaults to `https://decide.arcjet.com` and should only be changed
+  if directed by Arcjet support.
+- `ARCJET_LOG_LEVEL` - The log level to use, either `debug`, `info`, `warn`, or
+  `error`. Defaults to `warn`. If a rule is in dry run mode, a warning will be
+  output with the decision that would have been applied.
+- `ARCJET_ENV` - Set to `development` to force Arcjet into development mode.
+  This will allow private/internal addresses so that the SDKs work correctly
+  locally. You usually do not need to set this because it uses `NODE_ENV` when
+  set. See
+  [Troubleshooting](/troubleshooting#generatefingerprint-ip-is-empty--failed_precondition-client-ip-not-provided)
+  for when this may be needed.
+
+### Load balancers & proxies
+
+If your application is behind a load balancer, Arcjet will only see the IP
+address of the load balancer and not the real client IP address.
+
+To fix this, most load balancers will set the `X-Forwarded-For` header with the
+real client IP address plus a list of proxies that the request has passed
+through.
+
+The problem with is that the `X-Forwarded-For` header can be spoofed by the
+client, so you should only trust it if you are sure that the load balancer is
+setting it correctly. See [the MDN
+docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For)
+for more details.
+
+You can configure Arcjet to trust IP addresses in the `X-Forwarded-For` header
+by setting the `proxies` field in the configuration. This should be a list of
+the IP addresses of your load balancers to be removed, so that the last IP
+address in the list is the real client IP address.
+
+#### Example
+
+For example, if the load balancer is at `100.100.100.100` and the client IP
+address is `192.168.1.1`, the `X-Forwarded-For` header will be:
+
+```http
+X-Forwarded-For: 192.168.1.1, 100.100.100.100
+```
+
+You should set the `proxies` field to `["100.100.100.100"]` so Arcjet will use
+`192.168.1.1` as the client IP address.
+
+<Code
+  code={removeTSCCommentDirectives(ProxiesConfigJS)}
+  lang="js"
+  title="astro.config.mjs"
+/>
+
+## Protect
+
+Arcjet provides a single `protect` function that is used to execute your
+protection rules. This requires a `request` object which is the request
+argument as passed to the Astro request handler. Rules you add to the SDK may
+require additional details, such as the `validateEmail` rule requiring an
+additional `email` prop.
+
+This function returns a `Promise` that resolves to an `ArcjetDecision` object,
+which provides a high-level conclusion and detailed explanations of the decision
+made by Arcjet.
+
+### Pages
+
+Arcjet can protect Astro pages. Keep in mind that Arcjet is designed to protect
+dynamic pages. This can be achieved by using Astro's `server` mode or using a
+per-page override on the page you want to protect. Read more about server mode
+and per-page overrides in the
+[Astro docs](https://docs.astro.build/en/reference/routing-reference/).
+
+<Code
+  code={removeTSCCommentDirectives(ProtectPageAstro)}
+  lang="astro"
+  title="src/pages/protected.astro"
+/>
+
+### Server Endpoints
+
+Arcjet can protect Astro server endpoints (API routes). These run on the server and have access to the request object.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code
+      code={removeTSCCommentDirectives(ProtectEndpointTS)}
+      lang="ts"
+      title="src/pages/api.json.ts"
+    />
+  </TabItem>
+  <TabItem label="JS">
+    <Code
+      code={removeTSCCommentDirectives(ProtectEndpointJS)}
+      lang="js"
+      title="src/pages/api.json.js"
+    />
+  </TabItem>
+</Tabs>
+
+### Middleware
+
+Arcjet can be used in Astro middleware to protect multiple routes at once. This is useful for applying protection rules across your entire application or specific route patterns.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code
+      code={removeTSCCommentDirectives(ProtectMiddlewareTS)}
+      lang="ts"
+      title="src/middleware.ts"
+    />
+  </TabItem>
+  <TabItem label="JS">
+    <Code
+      code={removeTSCCommentDirectives(ProtectMiddlewareJS)}
+      lang="js"
+      title="src/middleware.js"
+    />
+  </TabItem>
+</Tabs>
+
+## Decision
+
+The `protect` function function returns a `Promise` that resolves to an
+`ArcjetDecision` object. This contains the following properties:
+
+- `id` (`string`) - The unique ID for the request. This can be used to look up
+  the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
+  involving the Arcjet cloud API. For decisions taken locally, the prefix is
+  `lreq_`.
+- `conclusion` (`"ALLOW" | "DENY" | "CHALLENGE" | "ERROR"`) - The final
+  conclusion based on evaluating each of the configured rules. If you wish to
+  accept Arcjet's recommended action based on the configured rules then you can
+  use this property.
+- `reason` (`ArcjetReason`) - An object containing more detailed
+  information about the conclusion.
+- `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
+  containing the results of each rule that was executed.
+- `ttl` (`uint32`) - The time-to-live for the decision in seconds. This is the
+  time that the decision is valid for. After this time, the decision will be
+  re-evaluated. The SDK automatically caches `DENY` decisions for the length of
+  the TTL.
+- `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
+  client IP address. See IP analysis below for more information.
+
+### Conclusion
+
+The `ArcjetDecision` object has the following methods that should be used to
+check the conclusion:
+
+- `isAllowed()` (`bool`) - The request should be allowed.
+- `isDenied()` (`bool`) - The request should be denied.
+- `isErrored()` (`bool`) - There was an unrecoverable error.
+
+The conclusion will be the highest-severity finding when evaluating the configured
+rules. `"DENY"` is the highest severity, followed by `"CHALLENGE"`, then `"ERROR"` and
+finally `"ALLOW"` as the lowest severity.
+
+For example, when a bot protection rule returns an error and a validate email
+rule returns a deny, the overall conclusion would be deny. To access the error
+you would have to use the `results` property on the decision.
+
+### Reason
+
+The `reason` property of the `ArcjetDecision` object contains an `ArcjetReason`
+object which provides more detailed information about the conclusion. This is
+the final decision reason and is based on the configured rules.
+
+The `ArcjetReason` object has the following methods that can be used to check
+which rule caused the conclusion:
+
+It will always be the highest-priority rule that produced that conclusion,
+to inspect other rules consider iterating over the `results` property on the decision.
+
+- `isBot()` (`bool`) - Returns `true` if the bot protection rules have been
+  applied and the request was considered to have been made by a bot.
+- `isEmail()` (`bool`) - Returns `true` if the email rules have been applied and
+  the email address has a problem.
+- `isRateLimit()` (`bool`) - Returns `true` if the rate limit rules have been
+  applied and the request has exceeded the rate limit.
+- `isSensitiveInfo()` (`bool`) - Returns `true` if sensitive info rules have
+  been applied and sensitive info has been detected.
+- `isShield()` (`bool`) - Returns `true` if the shield rules have been applied
+  and the request is suspicious based on analysis by Arcjet Shield WAF.
+- `isError()` (`bool`) - Returns `true` if there was an error processing the
+  request.
+
+### Results
+
+The `results` property of the `ArcjetDecision` object contains an array of
+`ArcjetRuleResult` objects. There will be one for each configured rule so you
+can inspect the individual results:
+
+- `id` (`string`) - The ID of the rule result. Not yet implemented.
+- `state` (`ArcjetRuleState`) - Whether the rule was executed or not.
+- `conclusion` (`ArcjetConclusion`) - The conclusion of the rule. This will be
+  one of the above conclusions: `ALLOW`, `DENY`, `CHALLENGE`, or `ERROR`.
+- `reason` (`ArcjetReason`) - An object containing more detailed information
+  about the conclusion for this rule. Each rule type has its own reason object
+  with different properties.
+
+You can iterate through the results and check the conclusion for each rule.
+
+```ts
+for (const result of decision.results) {
+  console.log("Rule Result", result);
+}
+```
+
+This example will log the full result as well as each rate limit rule:
+
+<Code
+  code={removeTSCCommentDirectives(DecisionLogConfigJS)}
+  lang="js"
+  title="astro.config.mjs"
+/>
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={removeTSCCommentDirectives(DecisionLogTS)} lang="ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={removeTSCCommentDirectives(DecisionLogJS)} lang="js" />
+  </TabItem>
+</Tabs>
+
+#### Rule state
+
+The `state` property of the `ArcjetRuleResult` object is an `ArcjetRuleState`.
+Each rule is evaluated individually and can be in one of the following states:
+
+- `DRY_RUN` - The rule was executed in dry run mode. This means that the rule
+  was executed but the conclusion was not applied to the request. This is useful
+  for testing rules before enabling them.
+- `RUN` - The rule was executed and the conclusion was applied to the request.
+- `NOT_RUN` - The rule was not executed. This can happen if another rule has
+  already reached a conclusion that applies to the request. For example, if a
+  rate limit rule is configured then these are evaluated before all other rules.
+  If the client has reached the maximum number of requests then other rules will
+  not be evaluated.
+- `CACHED` - The rule was not executed because the previous result was cached.
+  Results are cached when the decision conclusion is `DENY`. Subsequent requests
+  from the same client will not be evaluated against the rule until the cache
+  expires.
+
+#### Rule reason
+
+The `reason` property of the `ArcjetRuleResult` object contains an
+`ArcjetReason` object which provides more detailed information about the
+conclusion for that configured rule.
+
+##### Shield
+
+The `ArcjetReason` object for shield rules has the following properties:
+
+```ts
+shieldTriggered: boolean;
+```
+
+{/* TODO(#520): Uncomment once astro shield docs are done */}
+{/* See the [shield documentation](/shield/reference?f=astro) for more information */}
+{/* about these properties. */}
+
+##### Bot protection
+
+The `ArcjetReason` object for bot protection rules has the following properties:
+
+```ts
+allowed: string[];
+denied: string[];
+```
+
+Each of the `allowed` and `denied` arrays contains the identifiers of the bots
+allowed or denied from our [full list of bots](https://arcjet.com/bot-list).
+
+##### Rate limiting
+
+The `ArcjetReason` object for rate limiting rules has the following properties:
+
+```ts
+max: number;
+remaining: number;
+window: number;
+reset: number;
+```
+
+{/* TODO(#519): Uncomment once astro rate limit docs are done */}
+{/* See the [rate limiting documentation](/rate-limiting/reference?f=astro) for more */}
+{/* information about these properties. */}
+
+##### Email validation & verification
+
+The `ArcjetReason` object for email rules has the following properties:
+
+```ts
+emailTypes: ArcjetEmailType[];
+```
+
+An `ArcjetEmailType` is one of the following strings:
+
+```ts
+"DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
+```
+
+{/* TODO(#521): Uncomment once astro email validation docs are done */}
+{/* See the [email validation documentation](/email-validation/reference?f=astro) for */}
+{/* more information about these properties. */}
+
+### IP analysis
+
+<IPAnalysis />
+
+#### Example
+
+<Code
+  code={removeTSCCommentDirectives(IPLocationConfigJS)}
+  lang="js"
+  title="astro.config.mjs"
+/>
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={removeTSCCommentDirectives(IPLocationTS)} lang="ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={removeTSCCommentDirectives(IPLocationJS)} lang="js" />
+  </TabItem>
+</Tabs>
+
+For the IP address `8.8.8.8` you might get the following response. Only the
+fields we have data for will be returned:
+
+```json
+{
+  "name": "Hello United States!",
+  "ip": {
+    "country": "US",
+    "countryName": "United States",
+    "continent": "NA",
+    "continentName": "North America",
+    "asn": "AS15169",
+    "asnName": "Google LLC",
+    "asnDomain": "google.com"
+  }
+}
+```
+
+## Error handling
+
+Arcjet is designed to fail open so that a service issue or misconfiguration does
+not block all requests. The SDK will also time out and fail open after 1000ms
+when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
+in most cases, the response time will be less than 20-30ms.
+
+If there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the `message` property on the rule's
+error result for more information.
+
+If all other rules that were run returned an `ALLOW` result, then the final Arcjet
+conclusion will be `ERROR`.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={removeTSCCommentDirectives(ErrorHandlingTS)} lang="ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={removeTSCCommentDirectives(ErrorHandlingJS)} lang="js" />
+  </TabItem>
+</Tabs>
+
+The [@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect) package provides
+utilities for dealing with common errors.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={removeTSCCommentDirectives(ErrorInspectTS)} lang="ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={removeTSCCommentDirectives(ErrorInspectJS)} lang="js" />
+  </TabItem>
+</Tabs>
+
+## Ad hoc rules
+
+Sometimes it is useful to add additional protection via a rule based on the
+logic in your handler; however, you usually want to inherit the rules, cache,
+and other configuration from our primary SDK. This can be achieved using the
+`withRule` function which accepts an ad-hoc rule and can be chained to add
+multiple rules. It returns an augmented client with the specialized `protect`
+function.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={removeTSCCommentDirectives(WithRuleTS)} lang="ts" />
+  </TabItem>
+  <TabItem label="JS">
+    <Code code={removeTSCCommentDirectives(WithRuleJS)} lang="js" />
+  </TabItem>
+</Tabs>
+
+## IP address detection
+
+Arcjet will automatically detect the IP address of the client making the request
+based on the context provided. The implementation is open source in our
+[@arcjet/ip package](https://github.com/arcjet/arcjet-js/blob/main/ip).
+
+In development environments (`NODE_ENV === "development"` or
+`ARCJET_ENV === "development"`), we allow private/internal addresses so that the
+SDKs work correctly locally.
+
+## Client override
+
+The default client can be overridden. If no client is specified, a default one
+will be used. Generally you should not need to provide a client - the Arcjet
+Astro SDK will automatically handle this for you.
+
+<Code
+  code={removeTSCCommentDirectives(ClientOverrideJS)}
+  lang="js"
+  title="astro.config.mjs"
+/>
+
+## Version support
+
+### Node
+
+<NodeVersions />
+
+Arcjet supports the [Node.js versions supported by
+Astro](https://docs.astro.build/en/upgrade-astro/#nodejs-support-and-upgrade-policies).
+
+### Astro
+
+Arcjet supports Astro v5.9.3 and above. We follow [Astro's support
+policy](https://docs.astro.build/en/upgrade-astro/#extended-maintenance) and
+provide support for all versions that are actively maintained by the Astro team.
+
+[Technical support](/support) is provided for the current major
+version of the Arcjet SDK for all users and for the current and previous major
+versions for paid users. We will provide security fixes for the current and
+previous major versions.
+
+<Comments />
