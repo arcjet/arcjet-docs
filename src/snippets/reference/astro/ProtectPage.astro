@@ -1,0 +1,19 @@
+---
+import aj from "arcjet:client";
+
+const decision = await aj.protect(Astro.request);
+
+if (decision.isDenied()) {
+  return Astro.redirect("/blocked", 403);
+}
+---
+
+<html lang="en">
+  <head>
+    <title>Protected Page</title>
+  </head>
+  <body>
+    <h1>Welcome to the protected page!</h1>
+    <p>This page is protected by Arcjet.</p>
+  </body>
+</html>

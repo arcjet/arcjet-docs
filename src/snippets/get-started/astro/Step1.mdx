@@ -4,7 +4,7 @@ import { removeTSCCommentDirectives } from "@/lib/utils";
 import Step1JS from "./Step1.js?raw";
 
 {/* prettier-ignore */}
-<SelectableContent client:load syncKey="packageManager" frameworkSwitcher>
+<SelectableContent client:load syncKey="packageManager" frameworkSwitcher={props.showFrameworkSwitcher ?? true}>
 <div slot="npm" slotIdx="1">
 
 ```sh
@@ -38,7 +38,7 @@ project. Learn more about how this works in the [Astro docs](https://docs.astro.
     In your project root, run the following command:
 
     {/* prettier-ignore */}
-    <SelectableContent client:load syncKey="packageManager" frameworkSwitcher>
+    <SelectableContent client:load syncKey="packageManager" frameworkSwitcher={props.showFrameworkSwitcher ?? true}>
     <div slot="npm" slotIdx="1">
 
     ```sh
