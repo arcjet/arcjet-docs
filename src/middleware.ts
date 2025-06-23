@@ -3,6 +3,14 @@ import aj from "arcjet:client";
 
 export const onRequest = defineMiddleware(
   async ({ isPrerendered, request }, next) => {
+    console.log(
+      "[MIDDLEWARE]",
+      "isPrerendered",
+      isPrerendered,
+      "url",
+      request.url,
+    );
+
     if (!isPrerendered) {
       const decision = await aj.protect(request);
 
