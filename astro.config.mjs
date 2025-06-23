@@ -1,11 +1,11 @@
-import fs from "node:fs";
+import arcjet, { detectBot, shield } from "@arcjet/astro";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
 import vercel from "@astrojs/vercel";
 import { ExpressiveCodeTheme } from "astro-expressive-code";
 import robotsTxt from "astro-robots-txt";
 import { defineConfig } from "astro/config";
-import arcjet from "@arcjet/astro";
+import fs from "node:fs";
 import starlightLinksValidator from "starlight-links-validator";
 import { main as sidebar } from "./src/lib/sidebars";
 
@@ -112,7 +112,24 @@ export default defineConfig({
       },
     }),
     react(),
-    arcjet(),
+    arcjet({
+      rules: [
+        // Shield protects your app from common attacks e.g. SQL injection
+        shield({ mode: "LIVE" }),
+        // Create a bot detection rule
+        detectBot({
+          mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+          // Block all bots except the following
+          allow: [
+            "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc
+            // Uncomment to allow these other common bot categories
+            // See the full list at https://arcjet.com/bot-list
+            "CATEGORY:MONITOR", // Uptime monitoring services
+            "CATEGORY:PREVIEW", // Link previews e.g. Slack, Discord
+          ],
+        }),
+      ],
+    }),
   ],
   // External redirects go in /vercel.json
   redirects: {
