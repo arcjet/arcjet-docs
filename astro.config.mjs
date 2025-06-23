@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
-import vercelStatic from "@astrojs/vercel";
+import vercel from "@astrojs/vercel";
 import { ExpressiveCodeTheme } from "astro-expressive-code";
 import robotsTxt from "astro-robots-txt";
 import { defineConfig } from "astro/config";
@@ -23,8 +23,8 @@ const ajThemeLight = ExpressiveCodeTheme.fromJSONString(jsoncStringLight);
 // https://astro.build/config
 export default defineConfig({
   site: "https://docs.arcjet.com",
-  output: "static",
-  adapter: vercelStatic(),
+  output: "server",
+  adapter: vercel(),
   // This is a fix for https://github.com/withastro/astro/issues/8297
   vite: {
     ssr: {
