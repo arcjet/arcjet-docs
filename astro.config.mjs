@@ -24,7 +24,7 @@ const ajThemeLight = ExpressiveCodeTheme.fromJSONString(jsoncStringLight);
 export default defineConfig({
   site: "https://docs.arcjet.com",
   output: "server",
-  adapter: vercel(),
+  adapter: vercel({ edgeMiddleware: true }),
   // This is a fix for https://github.com/withastro/astro/issues/8297
   vite: {
     ssr: {
