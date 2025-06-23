@@ -110,6 +110,7 @@ export default defineConfig({
           lang: "en",
         },
       },
+      routeMiddleware: "./src/starlight-middleware.ts",
     }),
     react(),
     arcjet({
