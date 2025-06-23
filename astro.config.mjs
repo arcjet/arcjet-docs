@@ -6,7 +6,6 @@ import { ExpressiveCodeTheme } from "astro-expressive-code";
 import robotsTxt from "astro-robots-txt";
 import { defineConfig } from "astro/config";
 import fs from "node:fs";
-import starlightLinksValidator from "starlight-links-validator";
 import { main as sidebar } from "./src/lib/sidebars";
 
 const jsoncString = fs.readFileSync(
@@ -37,6 +36,7 @@ export default defineConfig({
       title: "Arcjet Docs",
       description:
         "Arcjet documentation. Bot detection. Rate limiting. Email validation. Attack protection. Data redaction. A developer-first approach to security.",
+      prerender: false,
       logo: {
         light: "./src/assets/logo-lockup-mark-light.svg",
         dark: "./src/assets/logo-lockup-mark-dark.svg",
@@ -81,16 +81,7 @@ export default defineConfig({
         "@fontsource/ibm-plex-mono",
         "./src/styles/main.scss",
       ],
-      plugins: [
-        starlightLinksValidator({
-          exclude: ["**/*f=*"], // exclude urls with `f` param from validation
-          errorOnLocalLinks: false, // we use localhost in the examples
-          // TODO(#494) enable once we've sorted out the issue it's having with the
-          //            troubleshooting section. Specifically
-          //            "/sensitive-info/reference?f=node-js#accessing-the-body"
-          errorOnInvalidHashes: false,
-        }),
-      ],
+      plugins: [],
       components: {
         Header: "./src/components/overrides/Header.astro",
         Sidebar: "./src/components/overrides/Sidebar.astro",
