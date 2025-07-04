@@ -215,6 +215,9 @@ if (decision.isDenied()) {
     console.error("Rate limit exceeded", decision.reason);
   } else if (decision.reason.isBot()) {
     console.error("Bot detected", decision.reason);
+  } else {
+    // Ensure all cases are handled
+    console.error("Forbidden", decision.reason);
   }
 }
 ```

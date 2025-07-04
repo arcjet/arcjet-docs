@@ -21,8 +21,8 @@ const aj = arcjet({
 export async function POST(req) {
   const decision = await aj.protect(req);
 
-  if (decision.reason.isBot()) {
-    if (decision.isDenied()) {
+  if (decision.isDenied()) {
+    if (decision.reason.isBot()) {
       return NextResponse.json(
         {
           error: "You are a bot!",
@@ -33,6 +33,12 @@ export async function POST(req) {
         { status: 403 },
       );
     }
+    return NextResponse.json(
+      {
+        error: "Forbidden",
+      },
+      { status: 403 },
+    );
   }
 
   return NextResponse.json({
