@@ -1,0 +1,40 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import { removeTSCCommentDirectives } from "@/lib/utils";
+
+import ConfigBaseJS from "@repo/astro/src/config-base.mjs?raw";
+
+import Install from "./Install.mdx";
+
+<Install />
+
+<br />
+
+Next, run the following command to install the [`@arcjet/inspect`](/inspect)
+library, which provides a set of utilities to more easily interact with the
+decision returned from an Arcjet SDK:
+
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="packageManager" frameworkSwitcher={props.showFrameworkSwitcher ?? true}>
+<div slot="npm" slotIdx="1">
+
+```sh
+npm add @arcjet/inspect
+```
+
+</div>
+<div slot="pnpm" slotIdx="2">
+
+```sh
+pnpm add @arcjet/inspect
+```
+
+</div>
+<div slot="yarn" slotIdx="3">
+
+```sh
+yarn add @arcjet/inspect
+```
+
+</div>
+</SelectableContent>

@@ -10,10 +10,5 @@ export default defineConfig({
   env: {
     validateSecrets: true,
   },
-  integrations: [
-    arcjet({
-      rules: [],
-      proxies: ["100.100.100.100"],
-    }),
-  ],
+  integrations: [arcjet()],
 });

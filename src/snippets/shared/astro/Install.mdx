@@ -1,7 +1,8 @@
 import { Code } from "@astrojs/starlight/components";
 import SelectableContent from "@/components/SelectableContent";
 import { removeTSCCommentDirectives } from "@/lib/utils";
-import Step1JS from "./Step1.js?raw";
+
+import ConfigBaseJS from "@repo/astro/src/config-base.mjs?raw";
 
 {/* prettier-ignore */}
 <SelectableContent client:load syncKey="packageManager" frameworkSwitcher={props.showFrameworkSwitcher ?? true}>
@@ -64,6 +65,6 @@ project. Learn more about how this works in the [Astro docs](https://docs.astro.
 
     Update your Astro configuration file:
 
-    <Code code={removeTSCCommentDirectives(Step1JS)} lang="js" title="astro.config.mjs" />
+    <Code code={removeTSCCommentDirectives(ConfigBaseJS)} lang="js" title="astro.config.mjs" />
 
 </details>
