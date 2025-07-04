@@ -1,7 +1,5 @@
 // @ts-check
-// @ts-expect-error
 import { defineConfig } from "astro/config";
-// @ts-expect-error
 import node from "@astrojs/node";
 import arcjet from "@arcjet/astro";
 
