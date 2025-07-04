@@ -2,6 +2,7 @@
 title: "Bot protection"
 titleByFramework:
   default: "Bot protection"
+  astro: "Bot protection for Astro"
   bun: "Bot protection for Bun"
   deno: "Bot protection for Deno"
   nest-js: "Bot protection for NestJS"
@@ -11,6 +12,7 @@ titleByFramework:
   sveltekit: "Bot protection for SvelteKit"
 description: "Quick start guide for adding Arcjet bot protection to your Next.js, NestJS, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
+  - astro
   - bun
   - deno
   - nest-js
@@ -33,7 +35,7 @@ ajToc:
         framework: ["bun", "node-js"]
       - text: 4. Start app
         anchor: "4-start-app"
-        framework: ["nest-js", "next-js", "remix", "sveltekit"]
+        framework: ["astro", "nest-js", "next-js", "remix", "sveltekit"]
       - text: 5. Choose bots to allow or deny
         anchor: "5-choose-bots-to-allow-or-deny"
   - text: "FAQs"
@@ -52,6 +54,11 @@ import FAQs from "/src/components/FAQs.astro";
 import FrameworkLinks from "@/components/FrameworkLinks";
 import Comments from "/src/components/Comments.astro";
 import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
+
+import AstroStep1 from "@/snippets/shared/astro/InstallWithInspect.mdx";
+import AstroStep2 from "@/snippets/get-started/astro/Step2.mdx";
+import AstroStep3 from "@/snippets/bot-protection/quick-start/astro/Step3.mdx";
+import AstroStep4 from "@/snippets/bot-protection/quick-start/astro/Step4.mdx";
 
 import BunStep1 from "@/snippets/bot-protection/quick-start/bun/Step1.mdx";
 import BunStep2 from "@/snippets/bot-protection/quick-start/bun/Step2.mdx";
@@ -108,6 +115,7 @@ application from bots and automated clients.
 In your project root, run the following command to install the SDK:
 
 <SlotByFramework client:load>
+  <AstroStep1 slot="astro" />
   <BunStep1 slot="bun" />
   <DenoStep1 slot="deno" />
   <NestJsStep1 slot="nest-js" />
@@ -123,6 +131,7 @@ In your project root, run the following command to install the SDK:
 instructions to add a site and get a key.
 
 <SlotByFramework client:load>
+  <AstroStep2 slot="astro" />
   <BunStep2 slot="bun" />
   <DenoStep2 slot="deno" />
   <NestJsStep2 slot="nest-js" />
@@ -135,6 +144,7 @@ instructions to add a site and get a key.
 ### 3. Add bot protection
 
 <SlotByFramework client:load>
+  <AstroStep3 slot="astro" />
   <BunStep3 slot="bun" />
   <DenoStep3 slot="deno" />
   <NestJsStep3 slot="nest-js" />
@@ -145,6 +155,7 @@ instructions to add a site and get a key.
 </SlotByFramework>
 
 <SlotByFramework client:load>
+  <AstroStep4 slot="astro" />
   <BunStep4 slot="bun" />
   <DenoStep4 slot="deno" />
   <NestJsStep4 slot="nest-js" />
