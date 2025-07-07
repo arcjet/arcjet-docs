@@ -30,7 +30,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+  // Arcjet paid plans verify the authenticity of common bots using IP data.
   // Verification isn't always possible, so we recommend checking the results
   // separately.
   // https://docs.arcjet.com/bot-protection/reference#bot-verification
