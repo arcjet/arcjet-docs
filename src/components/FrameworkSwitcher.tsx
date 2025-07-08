@@ -31,6 +31,7 @@ const frameworkIcon = {
   deno: <IconDeno />,
   bun: <IconBun />,
   express: <IconExpress />,
+  fastify: <IconNodeJs />,
   hono: <IconHono />,
   "nest-js": <IconNestJs />,
   "next-js": <IconNextJs />,

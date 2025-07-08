@@ -108,6 +108,16 @@ const FrameworkLinks = forwardRef(
                 Deno
               </Button>
             )}
+            {(!exclude || !exclude.includes("fastify")) && (
+              <Button
+                as="link"
+                size="lg"
+                href={`${path}?f=fastify`}
+                decoratorLeft={<IconNodeJs />}
+              >
+                Fastify
+              </Button>
+            )}
             {(!exclude || !exclude.includes("nest-js")) && (
               <Button
                 as="link"

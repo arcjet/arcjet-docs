@@ -1,0 +1,27 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="packageManager" frameworkSwitcher>
+<div slot="npm" slotIdx="1">
+
+```sh
+npm install @arcjet/fastify
+```
+
+</div>
+<div slot="pnpm" slotIdx="2">
+
+```sh
+pnpm add @arcjet/fastify
+```
+
+</div>
+<div slot="yarn" slotIdx="3">
+
+```sh
+yarn add @arcjet/fastify
+```
+
+</div>
+</SelectableContent>

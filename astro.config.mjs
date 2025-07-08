@@ -119,6 +119,7 @@ export default defineConfig({
     "/get-started/bun": "/get-started?f=bun",
     "/get-started/nextjs": "/get-started?f=next-js",
     "/get-started/nodejs": "/get-started?f=node-js",
+    "/get-started/fastify": "/get-started?f=fastify",
     "/get-started/sveltekit": "/get-started?f=sveltekit",
     "/shield": "/shield/quick-start",
     "/shield/quick-start/bun": "/shield/quick-start?f=bun",

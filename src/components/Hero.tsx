@@ -121,6 +121,9 @@ const Hero = forwardRef(
           case "deno":
             icon = <IconDeno />;
             break;
+          case "fastify":
+            icon = <IconNodeJs />;
+            break;
           case "sveltekit":
             icon = <IconSvelteKit />;
             break;

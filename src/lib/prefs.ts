@@ -15,6 +15,7 @@ export type FrameworkKey =
   | "bun"
   | "bun-hono"
   | "deno"
+  | "fastify"
   | "nest-js"
   | "next-js"
   | "node-js"
@@ -31,6 +32,7 @@ export type FrameworkLabel =
   | "Bun"
   | "Bun + Hono"
   | "Deno"
+  | "Fastify"
   | "NestJS"
   | "Next.js"
   | "Node.js"
@@ -83,6 +85,10 @@ export const frameworks: Array<Framework> = [
   {
     key: "deno",
     label: "Deno",
+  },
+  {
+    key: "fastify",
+    label: "Fastify",
   },
   {
     key: "nest-js",
