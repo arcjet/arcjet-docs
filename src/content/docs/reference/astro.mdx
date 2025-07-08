@@ -25,8 +25,8 @@ import WithRuleJS from "/src/snippets/reference/astro/WithRule.js?raw";
 import WithRuleTS from "/src/snippets/reference/astro/WithRule.ts?raw";
 import ClientOverrideJS from "/src/snippets/reference/astro/ClientOverride.mjs?raw";
 import MultipleRulesJS from "/src/snippets/reference/astro/MultipleRules.mjs?raw";
-import ProtectEndpointJS from "/src/snippets/reference/astro/ProtectEndpoint.js?raw";
-import ProtectEndpointTS from "/src/snippets/reference/astro/ProtectEndpoint.ts?raw";
+import ProtectEndpointJS from "@repo/astro/src/reference/ProtectEndpoint.mjs?raw";
+import ProtectEndpointTS from "@repo/astro/src/reference/ProtectEndpoint.ts?raw";
 import ProtectPageAstro from "/src/snippets/reference/astro/ProtectPage.astro?raw";
 import ProtectMiddlewareJS from "/src/snippets/reference/astro/ProtectMiddleware.js?raw";
 import ProtectMiddlewareTS from "/src/snippets/reference/astro/ProtectMiddleware.ts?raw";
@@ -242,10 +242,7 @@ made by Arcjet.
 ### Pages
 
 Arcjet can protect Astro pages. Keep in mind that Arcjet is designed to protect
-dynamic pages. This can be achieved by using Astro's `server` mode or using a
-per-page override on the page you want to protect. Read more about server mode
-and per-page overrides in the
-[Astro docs](https://docs.astro.build/en/reference/routing-reference/).
+dynamic pages, see [Static routes](#static-routes) below for more information.
 
 <Code
   code={removeTSCCommentDirectives(ProtectPageAstro)}
@@ -255,7 +252,9 @@ and per-page overrides in the
 
 ### Server Endpoints
 
-Arcjet can protect Astro server endpoints (API routes). These run on the server and have access to the request object.
+Arcjet can protect Astro server endpoints (API routes). Keep in mind that Arcjet
+is designed to protect dynamic endpoints, see [Static routes](#static-routes)
+below for more information.
 
 <Tabs>
   <TabItem label="TS">
@@ -276,7 +275,16 @@ Arcjet can protect Astro server endpoints (API routes). These run on the server 
 
 ### Middleware
 
-Arcjet can be used in Astro middleware to protect multiple routes at once. This is useful for applying protection rules across your entire application or specific route patterns.
+Arcjet can be used in Astro middleware to protect multiple routes at once. This
+is useful for applying protection rules across your entire application or
+specific route patterns.
+
+:::note
+Depending on your on-demand rendering server adapter, Astro's middleware may
+only run at build time for static routes. It is important to **only call
+`protect` when `context.isPrerendered === false`**. See [Static routes](#static-routes) below and server adapters in the [Astro docs](https://docs.astro.build/en/guides/on-demand-rendering/#server-adapters)
+for more information.
+:::
 
 <Tabs>
   <TabItem label="TS">
@@ -294,6 +302,20 @@ Arcjet can be used in Astro middleware to protect multiple routes at once. This 
     />
   </TabItem>
 </Tabs>
+
+### Static routes
+
+Arcjet can't protect Astro's **static routes** (pages pre-rendered at build
+time) because no HTTP request reaches your Astro server when the file is
+served. Arcjet's protections run **per request**, and without the request
+context (IP address, user-agent, headers) there's nothing to evaluate.
+
+To protect a static route, configure the route for **on-demand rendering**.
+That way every visitor triggers a normal request that Arcjet can inspect.
+
+This can be achieved by using Astro's `server` mode or using an override on the
+route you want to protect. Read more about how to enable on-demand rendering in
+the [Astro docs](https://docs.astro.build/en/guides/on-demand-rendering/).
 
 ## Decision
 
