@@ -1,6 +1,7 @@
 import { Astro as IconAstro } from "@/components/icons/tech/Astro";
 import { Bun as IconBun } from "@/components/icons/tech/Bun";
 import { Deno as IconDeno } from "@/components/icons/tech/Deno";
+import { Fastify as IconFastify } from "@/components/icons/tech/Fastify";
 import { Express as IconExpress } from "@/components/icons/tech/Express";
 import { Hono as IconHono } from "@/components/icons/tech/Hono";
 import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
@@ -31,7 +32,7 @@ const frameworkIcon = {
   deno: <IconDeno />,
   bun: <IconBun />,
   express: <IconExpress />,
-  fastify: <IconNodeJs />,
+  fastify: <IconFastify />,
   hono: <IconHono />,
   "nest-js": <IconNestJs />,
   "next-js": <IconNextJs />,
