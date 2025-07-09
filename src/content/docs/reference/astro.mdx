@@ -241,8 +241,8 @@ made by Arcjet.
 
 ### Pages
 
-Arcjet can protect Astro pages. Keep in mind that Arcjet is designed to protect
-dynamic pages, see [Static routes](#static-routes) below for more information.
+Arcjet protects dynamic Astro pages, not static pages
+([learn more about this](#static-routes)).
 
 <Code
   code={removeTSCCommentDirectives(ProtectPageAstro)}
@@ -252,9 +252,8 @@ dynamic pages, see [Static routes](#static-routes) below for more information.
 
 ### Server Endpoints
 
-Arcjet can protect Astro server endpoints (API routes). Keep in mind that Arcjet
-is designed to protect dynamic endpoints, see [Static routes](#static-routes)
-below for more information.
+Arcjet protects dynamic Astro server endpoints, not static ones
+([learn more about this](#static-routes)).
 
 <Tabs>
   <TabItem label="TS">
@@ -280,10 +279,9 @@ is useful for applying protection rules across your entire application or
 specific route patterns.
 
 :::note
-Depending on your on-demand rendering server adapter, Astro's middleware may
-only run at build time for static routes. It is important to **only call
-`protect` when `context.isPrerendered === false`**. See [Static routes](#static-routes) below and server adapters in the [Astro docs](https://docs.astro.build/en/guides/on-demand-rendering/#server-adapters)
-for more information.
+Some server Adapters, such as Vercel, only run middleware at build time for
+[Static routes](#static-routes). Only call `protect` when
+`context.isPrerendered === false`.
 :::
 
 <Tabs>
