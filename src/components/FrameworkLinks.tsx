@@ -2,6 +2,7 @@ import Button from "@/components/Button";
 import { Astro as IconAstro } from "@/components/icons/tech/Astro";
 import { Bun as IconBun } from "@/components/icons/tech/Bun";
 import { Deno as IconDeno } from "@/components/icons/tech/Deno";
+import { Fastify as IconFastify } from "@/components/icons/tech/Fastify";
 import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
 import { NextJs as IconNextJs } from "@/components/icons/tech/NextJs";
 import { NodeJs as IconNodeJs } from "@/components/icons/tech/NodeJs";
@@ -106,6 +107,16 @@ const FrameworkLinks = forwardRef(
                 decoratorLeft={<IconDeno />}
               >
                 Deno
+              </Button>
+            )}
+            {(!exclude || !exclude.includes("fastify")) && (
+              <Button
+                as="link"
+                size="lg"
+                href={`${path}?f=fastify`}
+                decoratorLeft={<IconFastify />}
+              >
+                Fastify
               </Button>
             )}
             {(!exclude || !exclude.includes("nest-js")) && (

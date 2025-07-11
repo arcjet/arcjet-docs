@@ -1,0 +1,42 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Aside } from "@astrojs/starlight/components";
+
+## 4. Start app
+
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    ```sh
+    node --env-file .env.local server.ts
+    ```
+
+    <Aside type="note" title="TypeScript support">
+    Node.js 24.3.0+ supports running TypeScript files natively. If you're using
+    an older version of Node, you can use a package like [`tsx`](
+    https://tsx.is/getting-started) to run TypeScript files, or you can compile
+    your TypeScript files to JavaScript first. Learn more in the
+    [Fastify docs](https://fastify.dev/docs/latest/Reference/TypeScript/).
+    </Aside>
+
+  </div>
+  <div slot="JS" slotIdx="2">
+    ```sh
+    node --env-file .env.local index.js
+    ```
+  </div>
+</SelectableContent>
+
+Visit [`http://localhost:3000`](http://localhost:3000) in your browser and
+refresh a few times to hit the rate limit.
+
+Wait 10 seconds, then run:
+
+    ```sh
+    curl -v http://localhost:3000
+    ```
+
+The wait is necessary because the decision is cached for your IP based on the
+`interval` configuration.
+
+You should see a `403` response because `curl` is considered a bot by default
+([customizable](/bot-protection/identifying-bots)).
