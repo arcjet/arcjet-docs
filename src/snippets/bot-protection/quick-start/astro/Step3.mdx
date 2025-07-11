@@ -1,0 +1,31 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import Step3TS from "@repo/astro/src/bot-detection/quick-start/Step3.ts?raw";
+import Step3JS from "@repo/astro/src/bot-detection/quick-start/Step3.mjs?raw";
+
+For this quick start we will enable Arcjet Bot Protection across of all the
+[dynamic routes](https://docs.astro.build/en/guides/routing/#dynamic-routes)
+in your Astro application using [Astro middleware
+](https://docs.astro.build/en/guides/middleware/). Learn about how to protect
+static routes in our [Astro SDK reference docs](/reference/astro#static-routes).
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+<div slot="TypeScript" slotIdx="1">
+Create a file called `middleware.ts` in your project's `src` directory.
+
+<Code
+  code={Step3TS}
+  lang="ts"
+  title="src/middleware.ts"
+/>
+</div>
+<div slot="JavaScript" slotIdx="2">
+Create a file called `middleware.ts` in your project's `src` directory.
+
+<Code
+  code={Step3JS}
+  lang="js"
+  title="src/middleware.js"
+/>
+</div>
+</SelectableContent>

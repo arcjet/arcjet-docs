@@ -1,6 +1,5 @@
 // @ts-check
 import { defineConfig } from "astro/config";
-// @ts-expect-error
 import node from "@astrojs/node";
 import arcjet, { createRemoteClient, slidingWindow } from "@arcjet/astro";
 import { baseUrl } from "@arcjet/env";
