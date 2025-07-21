@@ -12,6 +12,11 @@ export const main = [
         collapsed: true,
         items: [
           {
+            label: "Astro",
+            link: "https://github.com/arcjet/example-astro",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
             label: "NestJS",
             link: "https://github.com/arcjet/example-nestjs",
             attrs: { target: "_blank", class: "external-link" },
@@ -22,6 +27,11 @@ export const main = [
             attrs: { target: "_blank", class: "external-link" },
           },
           {
+            label: "Node.js + Express.js",
+            link: "https://github.com/arcjet/example-expressjs",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
             label: "Next.js + Fly.io",
             link: "https://github.com/arcjet/example-nextjs-fly",
             attrs: { target: "_blank", class: "external-link" },
@@ -29,6 +39,16 @@ export const main = [
           {
             label: "Next.js + Prisma",
             link: "https://github.com/arcjet/example-nextjs-prisma",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
+            label: "Next.js Form Protection",
+            link: "https://github.com/arcjet/example-nextjs-form",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
+            label: "Next.js Server Actions",
+            link: "https://github.com/arcjet/example-nextjs-server-action",
             attrs: { target: "_blank", class: "external-link" },
           },
           {

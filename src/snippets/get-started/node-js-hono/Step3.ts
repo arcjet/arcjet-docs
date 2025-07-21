@@ -47,7 +47,15 @@ app.get("/", async (c) => {
     }
   }
 
-  // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+  // Requests from hosting IPs are likely from bots, so they can usually be
+  // blocked. However, consider your use case - if this is an API endpoint
+  // then hosting IPs might be legitimate.
+  // https://docs.arcjet.com/blueprints/vpn-proxy-detection
+  if (decision.ip.isHosting()) {
+    return c.json({ error: "Forbidden" }, 403);
+  }
+
+  // Paid Arcjet accounts include additional verification checks using IP data.
   // Verification isn't always possible, so we recommend checking the decision
   // separately.
   // https://docs.arcjet.com/bot-protection/reference#bot-verification

@@ -33,7 +33,7 @@ export async function handle({ event, resolve }) {
     }
   }
 
-  // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+  // Paid Arcjet accounts include additional verification checks using IP data.
   // https://docs.arcjet.com/bot-protection/reference#bot-verification
   if (decision.results.some(isSpoofedBot)) {
     return error(403, "You are pretending to be a good bot!");
