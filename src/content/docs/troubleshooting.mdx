@@ -148,6 +148,20 @@ outage, requests will be allowed.
 If you are seeing this error frequently, please [contact us](/support) so we can
 investigate.
 
+### Arcjet will use 127.0.0.1 when missing public IP address in development mode
+
+Arcjet expects a valid public IP address to enable features like geolocation and
+VPN/proxy detection. In production, if the IP is invalid (e.g. `127.0.0.1`), the
+request is rejected to prevent spoofing.
+
+In development, private/internal addresses are common. To avoid errors, set the
+environment variable `ARCJET_ENV` to `development`. This will disable the IP
+address validation and allow you to test your application without errors.
+
+This log means Arcjet is falling back to `127.0.0.1` because it's running in
+development mode. If this appears in production, check that `ARCJET_ENV` is not
+incorrectly set to `development`.
+
 ### generateFingerprint: ip is empty / [failed_precondition] client IP not provided
 
 Arcjet normally detects when it is running in a local environment and uses a
