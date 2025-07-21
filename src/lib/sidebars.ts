@@ -27,7 +27,7 @@ export const main = [
             attrs: { target: "_blank", class: "external-link" },
           },
           {
-            label: "Next.js + Express.js",
+            label: "Node.js + Express.js",
             link: "https://github.com/arcjet/example-expressjs",
             attrs: { target: "_blank", class: "external-link" },
           },
