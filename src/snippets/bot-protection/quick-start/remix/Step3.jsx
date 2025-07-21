@@ -31,7 +31,7 @@ export async function loader(args) {
     throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });
   }
 
-  // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+  // Paid Arcjet accounts include additional verification checks using IP data.
   // Verification isn't always possible, so we recommend checking the results
   // separately.
   // https://docs.arcjet.com/bot-protection/reference#bot-verification

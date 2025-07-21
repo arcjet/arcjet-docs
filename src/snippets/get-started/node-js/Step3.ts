@@ -49,7 +49,7 @@ const server = http.createServer(async function (
       res.end(JSON.stringify({ error: "Forbidden" }));
     }
   } else if (decision.results.some(isSpoofedBot)) {
-    // Arcjet Pro plan verifies the authenticity of common bots using IP data.
+    // Paid Arcjet accounts include additional verification checks using IP data.
     // Verification isn't always possible, so we recommend checking the decision
     // separately.
     // https://docs.arcjet.com/bot-protection/reference#bot-verification
