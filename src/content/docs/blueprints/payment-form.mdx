@@ -41,7 +41,6 @@ etc then you may wish to remove `FREE` from the `block` list.
 // See https://docs.arcjet.com/get-started
 const aj = arcjet({
   key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
-  characteristics: ["ip.src"], // Track requests by IP
   rules: [
     // Shield protects your app from common attacks e.g. SQL injection
     shield({ mode: "LIVE" }),
@@ -62,6 +61,9 @@ const aj = arcjet({
     // minutes from the same IP address
     slidingWindow({
       mode: "LIVE",
+      // Tracked by IP address by default, but this can be customized
+      // See https://docs.arcjet.com/fingerprints
+      //characteristics: ["ip.src"],
       interval: "10m", // counts requests over a 10 minute sliding window
       max: 5, // allows 5 submissions within the window
     }),
@@ -291,7 +293,6 @@ import { NextResponse } from "next/server";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
-  characteristics: ["ip.src"], // Track requests by IP
   rules: [
     // Shield protects your app from common attacks e.g. SQL injection
     shield({ mode: "LIVE" }),
@@ -312,6 +313,9 @@ const aj = arcjet({
     // minutes from the same IP address
     slidingWindow({
       mode: "LIVE",
+      // Tracked by IP address by default, but this can be customized
+      // See https://docs.arcjet.com/fingerprints
+      //characteristics: ["ip.src"],
       interval: "10m", // counts requests over a 10 minute sliding window
       max: 5, // allows 5 submissions within the window
     }),

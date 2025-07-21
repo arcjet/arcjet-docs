@@ -3,8 +3,6 @@ import { NextResponse } from "next/server";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY,
-  // Limiting by IP is the default if not specified
-  //characteristics: ["ip.src"],
   rules: [
     protectSignup({
       email: {

@@ -3,10 +3,10 @@ import arcjet, { fixedWindow } from "@arcjet/sveltekit";
 
 const aj = arcjet({
   key: env.ARCJET_KEY!,
-  characteristics: ['http.request.headers["x-api-key"]'],
   rules: [
     fixedWindow({
       mode: "LIVE",
+      characteristics: ['http.request.headers["x-api-key"]'],
       window: "1h",
       max: 60,
     }),

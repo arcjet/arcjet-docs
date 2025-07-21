@@ -14,11 +14,11 @@ const { auth } = NextAuth(config);
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
-  characteristics: ["userId"], // Track based on the Clerk userId
   rules: [
     // Create a token bucket rate limit. Other algorithms are supported.
     tokenBucket({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+      characteristics: ["userId"], // Track based on the Clerk userId
       refillRate: 5, // refill 5 tokens per interval
       interval: 10, // refill every 10 seconds
       capacity: 10, // bucket maximum capacity of 10 tokens

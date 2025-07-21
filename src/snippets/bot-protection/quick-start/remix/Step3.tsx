@@ -4,7 +4,6 @@ import type { LoaderFunctionArgs } from "@remix-run/node";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
-  characteristics: ["ip.src"], // Track requests by IP
   rules: [
     // Create a bot detection rule
     detectBot({

@@ -1,4 +1,4 @@
-import arcjet, { fixedWindow } from "@arcjet/next";
+import arcjet, { fixedWindow, detec } from "@arcjet/next";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,

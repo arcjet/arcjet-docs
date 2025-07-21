@@ -2,7 +2,6 @@ import arcjet, { shield, fixedWindow } from "@arcjet/remix";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
-  characteristics: ["ip.src"],
   rules: [
     fixedWindow({
       mode: "LIVE",

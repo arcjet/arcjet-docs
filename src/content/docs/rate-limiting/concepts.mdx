@@ -40,10 +40,11 @@ configuration options depending on the algorithm used. See the
 ## How it works
 
 Arcjet rate limiting keeps track of the number of requests made by a client
-based on certain characteristics such as a specific HTTP header or an
-authentication token. If no characteristics are provided, clients are tracked by
-IP address by default. When a client exceeds the limit, they are blocked from
-making any further requests until the reset time indicated in the response.
+based on [certain characteristics](/fingerprints) such as a specific HTTP header
+or an authentication token. If no characteristics are provided, clients are
+tracked by IP address by default. When a client exceeds the limit, they are
+blocked from making any further requests until the reset time indicated in the
+response.
 
 Unlike other rate limiting systems, Arcjet does not require any other
 infrastructure to keep track of state. Tracking is handled by Arcjet's API,
@@ -60,9 +61,9 @@ cache. This allows subsequent requests to return a block decision in < 1ms.
 ## Blocking based on fingerprint
 
 If Arcjet detects rate limit excesses, it will block further traffic based on a
-[fingerprint of the client](/architecture#fingerprinting), which includes the IP
-address by default. This decision is cached locally for a period based on the
-rate limit configuration.
+[fingerprint of the client](/fingerprints), which includes the IP address by
+default. This decision is cached locally for a period based on the rate limit
+configuration.
 
 This could temporarily block traffic from legitimate clients using the same IP
 address. To ensure that rate limits are applied correctly we recommend that you

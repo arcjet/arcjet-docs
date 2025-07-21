@@ -17,13 +17,15 @@ We recommend using a Token bucket rate limit. This will be configured to match y
 ```ts
 const aj = arcjet({
   key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
-  characteristics: ["userId"], // track requests by user ID
   rules: [
     shield({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
     }),
     tokenBucket({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+      // Tracked by IP address by default, but this can be customized
+      // See https://docs.arcjet.com/fingerprints
+      //characteristics: ["ip.src"],
       refillRate: 2_000, // fill the bucket up by 2,000 tokens
       interval: "1h", // every hour
       capacity: 5_000, // up to 5,000 tokens

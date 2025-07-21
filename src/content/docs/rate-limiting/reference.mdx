@@ -211,9 +211,7 @@ the algorithm works.
 type FixedWindowRateLimitOptions = {
   // "LIVE" will block requests. "DRY_RUN" will log only
   mode?: "LIVE" | "DRY_RUN";
-  // How the client is identified. We recommend setting characteristics on the
-  // Arcjet client rather than per rule. Global characteristics default to the
-  // request IP
+  // How the client is identified. See https://docs.arcjet.com/fingerprints
   characteristics?: string[];
   // Time window the rate limit applies to
   window: string;
@@ -247,9 +245,7 @@ details about how the algorithm works.
 type SlidingWindowRateLimitOptions = {
   // "LIVE" will block requests. "DRY_RUN" will log only
   mode?: "LIVE" | "DRY_RUN";
-  // How the client is identified. We recommend setting characteristics on the
-  // Arcjet client rather than per rule. Global characteristics default to the
-  // request IP
+  // How the client is identified. See https://docs.arcjet.com/fingerprints
   characteristics?: string[];
   // The time interval in seconds for the rate limit
   interval: number;
@@ -285,9 +281,7 @@ the algorithm works.
 type TokenBucketRateLimitOptions = {
   // "LIVE" will block requests. "DRY_RUN" will log only
   mode?: "LIVE" | "DRY_RUN";
-  // How the client is identified. We recommend setting characteristics on the
-  // Arcjet client rather than per rule. Global characteristics default to the
-  // request IP
+  // How the client is identified. See https://docs.arcjet.com/fingerprints
   characteristics?: string[];
   // Number of tokens to add to the bucket at each interval
   refillRate: number;
@@ -316,9 +310,8 @@ the number of tokens to request.
 
 Rate limit rules use `characteristics` to identify the client and apply the
 limit across requests. The default is to use the client's IP address. However,
-you can specify other
-[characteristics](/rate-limiting/configuration#characteristics) such as a user
-ID or other metadata from your application.
+you can specify other [characteristics](/fingerprints) such as a user ID or
+other metadata from your application.
 
 :::caution
 Avoid passing personal information such as an email address as a custom
