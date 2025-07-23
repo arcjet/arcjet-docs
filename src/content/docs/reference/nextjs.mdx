@@ -266,8 +266,8 @@ for more details.
 
 You can configure Arcjet to trust IP addresses in the `X-Forwarded-For` header
 by setting the `proxies` field in the configuration. This should be a list of
-the IP addresses of your load balancers to be removed, so that the last IP
-address in the list is the real client IP address.
+the IP addresses or the CIDR range of your load balancers to be removed, so that
+the last IP address in the list is the real client IP address.
 
 #### Example
 
@@ -280,6 +280,8 @@ X-Forwarded-For: 192.168.1.1, 100.100.100.100
 
 You should set the `proxies` field to `["100.100.100.100"]` so Arcjet will use
 `192.168.1.1` as the client IP address.
+
+You can also specify CIDR ranges to match multiple IP addresses.
 
 <Code code={ProxiesTS} lang="ts" />
 

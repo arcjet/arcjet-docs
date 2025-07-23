@@ -14,7 +14,10 @@ import { ConfigModule } from "@nestjs/config";
       rules: [
         // Rules set here will apply to every request
       ],
-      proxies: ["100.100.100.100"],
+      proxies: [
+        "100.100.100.100", // A single IP
+        "100.100.100.0/24", // A CIDR for the range
+      ],
     }),
     // ... other modules
   ],
