@@ -13,7 +13,10 @@ export default defineConfig({
   integrations: [
     arcjet({
       rules: [],
-      proxies: ["100.100.100.100"],
+      proxies: [
+        "100.100.100.100", // A single IP
+        "100.100.100.0/24", // A CIDR for the range
+      ],
     }),
   ],
 });
