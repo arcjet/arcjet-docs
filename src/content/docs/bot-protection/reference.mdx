@@ -1,6 +1,8 @@
 ---
 title: "Bot protection reference"
-description: "Reference guide for adding Arcjet bot protection to your Next.js, NestJS, Node.js, Bun, Remix, or SvelteKit app."
+description:
+  "Reference guide for adding Arcjet bot protection to your Next.js, NestJS,
+  Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
   - deno
@@ -153,8 +155,8 @@ Arcjet bot detection allows you to manage traffic by automated clients and bots.
 
 ## Plan availability
 
-Arcjet bot detection functionality depends on your [pricing
-plan](https://arcjet.com/pricing).
+Arcjet bot detection functionality depends on your
+[pricing plan](https://arcjet.com/pricing).
 
 | Plan                                                                             | Bot protection                                                                     |
 | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
@@ -195,25 +197,23 @@ type BotOptionsDeny = {
 The `arcjet` client is configured with one or more `detectBot` rules which take
 one or many `BotOptions`.
 
-:::note
-When specifying multiple rules, the order of the rules is ignored. Rule
-execution ordering is automatically optimized for performance. See below for
-how to examine the execution results.
-:::
+:::note When specifying multiple rules, the order of the rules is ignored. Rule
+execution ordering is automatically optimized for performance. See below for how
+to examine the execution results. :::
 
 ### Allowing specific bots
 
 Most applications want to block almost all bots. However, it is common to allow
-some bots to access your system, such as bots for search indexing or API
-access from the command line.
+some bots to access your system, such as bots for search indexing or API access
+from the command line.
 
-When allowing specific bots we recommend that you also [check the verification
-status](#bot-verification) after an allow decision is returned to ensure that the bots are who they
-say they are.
+When allowing specific bots we recommend that you also
+[check the verification status](#bot-verification) after an allow decision is
+returned to ensure that the bots are who they say they are.
 
-This behavior is configured with an `allow` list from our [full list of
-bots](https://arcjet.com/bot-list) and/or [bot
-categories](/bot-protection/identifying-bots#bot-categories).
+This behavior is configured with an `allow` list from our
+[full list of bots](https://arcjet.com/bot-list) and/or
+[bot categories](/bot-protection/identifying-bots#bot-categories).
 
 <SlotByFramework client:load>
   <BunAllowingBots slot="bun" />
@@ -231,9 +231,9 @@ Some applications may only want to block a small subset of bots, while allowing
 the majority continued access. This may be due to many reasons, such as
 misconfigured or high-traffic bots.
 
-This behavior is configured with a `deny` list from our [full list of
-bots](https://arcjet.com/bot-list) and/or [bot
-categories](/bot-protection/identifying-bots#bot-categories).
+This behavior is configured with a `deny` list from our
+[full list of bots](https://arcjet.com/bot-list) and/or
+[bot categories](/bot-protection/identifying-bots#bot-categories).
 
 <SlotByFramework client:load>
   <BunDenyingBots slot="bun" />
@@ -266,8 +266,8 @@ context as passed to the request handler.
   <NestJsGuardDecision slot="nest-js" />
 </SlotByFramework>
 
-This function returns a `Promise` that resolves to an
-`ArcjetDecision` object. This contains the following properties:
+This function returns a `Promise` that resolves to an `ArcjetDecision` object.
+This contains the following properties:
 
 - `id` (`string`) - The unique ID for the request. This can be used to look up
   the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
@@ -276,8 +276,8 @@ This function returns a `Promise` that resolves to an
 - `conclusion` (`ArcjetConclusion`) - The final conclusion based on evaluating
   each of the configured rules. If you wish to accept Arcjet's recommended
   action based on the configured rules then you can use this property.
-- `reason` (`ArcjetReason`) - An object containing more detailed
-  information about the conclusion.
+- `reason` (`ArcjetReason`) - An object containing more detailed information
+  about the conclusion.
 - `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
   containing the results of each rule that was executed.
 - `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
@@ -307,11 +307,11 @@ for (const result of decision.results) {
 
 ### Identified bots
 
-The decision also contains all of the [identified
-bots and matched categories](/bot-protection/identifying-bots) detected from the
-request. A request may be identified as zero, one, or more bots/categories—all
-of which will be available on the `decision.allowed` and `decision.denied`
-properties.
+The decision also contains all of the
+[identified bots and matched categories](/bot-protection/identifying-bots)
+detected from the request. A request may be identified as zero, one, or more
+bots/categories—all of which will be available on the `decision.allowed` and
+`decision.denied` properties.
 
 <SlotByFramework client:load>
   <BunIdentifiedBots slot="bun" />
@@ -331,17 +331,16 @@ when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
 in most cases, the response time will be less than 20-30ms.
 
 If there is an error condition when processing the rule, Arcjet will return an
-`ERROR` result for that rule and you can check the `message` property on the rule's
-error result for more information.
+`ERROR` result for that rule and you can check the `message` property on the
+rule's error result for more information.
 
-If all other rules that were run returned an `ALLOW` result, then the final Arcjet
-conclusion will be `ERROR`.
+If all other rules that were run returned an `ALLOW` result, then the final
+Arcjet conclusion will be `ERROR`.
 
-:::note
-Requests without `User-Agent` headers might not be identified as any particular
-bot and could be marked as an errored result. Our recommendation is to block
-requests without `User-Agent` headers because most legitimate clients send this
-header.
+:::note Requests without `User-Agent` headers might not be identified as any
+particular bot and could be marked as an errored result. Our recommendation is
+to block requests without `User-Agent` headers because most legitimate clients
+send this header.
 
 See [an example of how to do this](/bot-protection/concepts#user-agent-header).
 :::
@@ -381,11 +380,9 @@ of detected bots by checking IP data and performing reverse DNS lookups.
 This helps protect against spoofed bots where clients pretend to be someone
 else.
 
-:::note
-Because verification is only helpful when you want to specifically `allow`
-certain bots, any `deny` rules bypass verification and simply block bots
-matching the `deny` list.
-:::
+:::note Because verification is only helpful when you want to specifically
+`allow` certain bots, any `deny` rules bypass verification and simply block bots
+matching the `deny` list. :::
 
 ### Example: Allowing verified bots
 

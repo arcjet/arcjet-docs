@@ -13,14 +13,12 @@ Rate limit rules can be configured in two ways:
   if you want to use the decision to add context to your own code. However, it
   means rules are not located in a single place.
 - **Middleware**: The rule is defined in the middleware. This allows you to
-  configure rules in a single place or apply them globally to all routes, but
-  it means the rules are not located alongside the code they are protecting.
+  configure rules in a single place or apply them globally to all routes, but it
+  means the rules are not located alongside the code they are protecting.
 
-:::note
-If you use a platform that performs health checks or liveness probes, ensure
-that Arcjet is not enabled for those routes. These requests will not have all
-of the metadata that Arcjet requires to make security decisions.
-:::
+:::note If you use a platform that performs health checks or liveness probes,
+ensure that Arcjet is not enabled for those routes. These requests will not have
+all of the metadata that Arcjet requires to make security decisions. :::
 
 ### Per route
 
@@ -47,8 +45,8 @@ You can use conditionals in your Next.js middleware to match multiple paths.
 
 If you use Arcjet in middleware and individual routes, you need to be careful
 that Arcjet is not running multiple times per request. This can be avoided by
-excluding the API route from [the middleware
-matcher](https://nextjs.org/docs/pages/building-your-application/routing/middleware#matcher).
+excluding the API route from
+[the middleware matcher](https://nextjs.org/docs/pages/building-your-application/routing/middleware#matcher).
 
 For example, if you already have a rate limit defined in the API route at
 `/api/hello`, you can exclude it from the middleware by specifying a matcher in

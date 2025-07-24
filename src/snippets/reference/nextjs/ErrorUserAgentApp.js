@@ -28,7 +28,7 @@ export async function GET(req) {
     // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
     console.warn("User-Agent header is missing");
 
-    return NextResponse.json({ error: "Bad request", }, { status: 400 });
+    return NextResponse.json({ error: "Bad request" }, { status: 400 });
   }
 
   return NextResponse.json({ message: "Hello world" });

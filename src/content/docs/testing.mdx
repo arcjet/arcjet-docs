@@ -20,8 +20,8 @@ collection runner for [Postman](https://www.postman.com/). It allows you to
 define requests in Postman format and run them from the command line without
 requiring Postman itself.
 
-You can find our full example of how to test Arcjet with Express and Newman [on
-GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/express-newman).
+You can find our full example of how to test Arcjet with Express and Newman
+[on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/express-newman).
 The key files are:
 
 - [`index.js`](https://github.com/arcjet/arcjet-js/blob/main/examples/express-newman/index.js)
@@ -35,8 +35,8 @@ The key files are:
   [`tests/high-rate-limit.json`](https://github.com/arcjet/arcjet-js/blob/main/examples/express-newman/tests/high-rate-limit.json),
   and
   [`tests/low-rate-limit.json`](https://github.com/arcjet/arcjet-js/blob/main/examples/express-newman/tests/low-rate-limit.json)
-  files define the test requests in [Postman Collection
-  format](https://learning.postman.com/collection-format/getting-started/overview/).
+  files define the test requests in
+  [Postman Collection format](https://learning.postman.com/collection-format/getting-started/overview/).
 
 The example
 [`README`](https://github.com/arcjet/arcjet-js/tree/main/examples/express-newman)
@@ -54,14 +54,14 @@ Arcjet runs the same in production as locally. This ensures that the behavior
 you see in development is the same as in production. However, there are ways to
 trigger the different rules.
 
-- **Shield:** Send 5 requests with the special header `x-arcjet-suspicious:
-true` to trigger the shield rule on the next request.
+- **Shield:** Send 5 requests with the special header
+  `x-arcjet-suspicious: true` to trigger the shield rule on the next request.
 - **Rate limiting:** Make more requests than the rate limit allows.
 - **Bot protection:** Bot detection uses multiple heuristics so the quickest way
   to get a bot detection `DENY` response is to make a request that is always
   considered a bot. With a deny rule set to `CURL` you should see a `DENY`
-  response if you make a request using the `curl` command. See [Identifying
-  Bots](/bot-protection/identifying-bots) for more information.
+  response if you make a request using the `curl` command. See
+  [Identifying Bots](/bot-protection/identifying-bots) for more information.
 - **Email validation:** Use an email address that has invalid syntax or does not
   match any other rules you have configured e.g. has no MX records or if from a
   disposable email service.

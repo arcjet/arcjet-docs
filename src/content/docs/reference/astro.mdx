@@ -48,9 +48,9 @@ import IPAnalysis from "/src/snippets/reference/shared/IPAnalysis.mdx";
 
 [<SDKVersionAstro/>](https://www.npmjs.com/package/@arcjet/astro)
 
-This is the reference guide for the Arcjet Astro SDK, [available on
-GitHub](https://github.com/arcjet/arcjet-js) and licensed under the Apache 2.0
-license.
+This is the reference guide for the Arcjet Astro SDK,
+[available on GitHub](https://github.com/arcjet/arcjet-js) and licensed under
+the Apache 2.0 license.
 
 <WhatIsArcjet />
 
@@ -70,11 +70,14 @@ Check out the [quick start guide](/get-started?f=astro).
 
 ## Configuration
 
-Arcjet is configured as an integration in your `astro.config.mjs` file. You will need to add your Arcjet API key as an environment variable and configure the rules you want to apply.
+Arcjet is configured as an integration in your `astro.config.mjs` file. You will
+need to add your Arcjet API key as an environment variable and configure the
+rules you want to apply.
 
 ### API Key
 
-First, get your site key from the [Arcjet dashboard](https://app.arcjet.com). Set it as an environment variable called `ARCJET_KEY` in your `.env` file:
+First, get your site key from the [Arcjet dashboard](https://app.arcjet.com).
+Set it as an environment variable called `ARCJET_KEY` in your `.env` file:
 
 ```bash
 ARCJET_KEY=your_site_key_here
@@ -82,7 +85,8 @@ ARCJET_KEY=your_site_key_here
 
 ### Astro Integration
 
-The Arcjet integration is added to your `astro.config.mjs` file. Here's a basic configuration:
+The Arcjet integration is added to your `astro.config.mjs` file. Here's a basic
+configuration:
 
 <Code
   code={removeTSCCommentDirectives(ConfigurationJS)}
@@ -94,7 +98,8 @@ The required fields are:
 
 {/* #TODO(#395): uncomment once these docs are complete */}
 
-- `rules` - The rules to apply to the request. {/* See the various sections of the */}
+- `rules` - The rules to apply to the request.
+  {/* See the various sections of the */}
   {/* docs for how to configure these e.g. [shield](/shield/reference?f=next-js), [rate */}
   {/* limiting](/rate-limiting/reference?f=next-js), [bot */}
   {/* protection](/bot-protection/reference?f=next-js), [email */}
@@ -108,8 +113,8 @@ The optional fields are:
 - `proxies` (`string[]`) - A list of one or more trusted proxies. These
   addresses will be excluded when Arcjet is determining the client IP address.
   This is useful if you are behind a load balancer or proxy that sets the client
-  IP address in a header. See [Load balancers &
-  proxies](#load-balancers--proxies) below for an example.
+  IP address in a header. See
+  [Load balancers & proxies](#load-balancers--proxies) below for an example.
 
 ### Single instance
 
@@ -159,10 +164,8 @@ You can combine rules to create a more complex protection strategy. For example,
 you can combine rate limiting and bot protection rules to protect your API from
 automated clients.
 
-:::note
-When specifying multiple rules, the order of the rules is ignored. Rule
-execution ordering is automatically optimized for performance.
-:::
+:::note When specifying multiple rules, the order of the rules is ignored. Rule
+execution ordering is automatically optimized for performance. :::
 
 <Code
   code={removeTSCCommentDirectives(MultipleRulesJS)}
@@ -200,8 +203,8 @@ through.
 
 The problem with is that the `X-Forwarded-For` header can be spoofed by the
 client, so you should only trust it if you are sure that the load balancer is
-setting it correctly. See [the MDN
-docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For)
+setting it correctly. See
+[the MDN docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For)
 for more details.
 
 You can configure Arcjet to trust IP addresses in the `X-Forwarded-For` header
@@ -232,10 +235,10 @@ You can also specify CIDR ranges to match multiple IP addresses.
 ## Protect
 
 Arcjet provides a single `protect` function that is used to execute your
-protection rules. This requires a `request` object which is the request
-argument as passed to the Astro request handler. Rules you add to the SDK may
-require additional details, such as the `validateEmail` rule requiring an
-additional `email` prop.
+protection rules. This requires a `request` object which is the request argument
+as passed to the Astro request handler. Rules you add to the SDK may require
+additional details, such as the `validateEmail` rule requiring an additional
+`email` prop.
 
 This function returns a `Promise` that resolves to an `ArcjetDecision` object,
 which provides a high-level conclusion and detailed explanations of the decision
@@ -280,11 +283,9 @@ Arcjet can be used in Astro middleware to protect multiple routes at once. This
 is useful for applying protection rules across your entire application or
 specific route patterns.
 
-:::note
-Some server Adapters, such as Vercel, only run middleware at build time for
-[Static routes](#static-routes). Only call `protect` when
-`context.isPrerendered === false`.
-:::
+:::note Some server Adapters, such as Vercel, only run middleware at build time
+for [Static routes](#static-routes). Only call `protect` when
+`context.isPrerendered === false`. :::
 
 <Tabs>
   <TabItem label="TS">
@@ -306,12 +307,12 @@ Some server Adapters, such as Vercel, only run middleware at build time for
 ### Static routes
 
 Arcjet can't protect Astro's **static routes** (pages pre-rendered at build
-time) because no HTTP request reaches your Astro server when the file is
-served. Arcjet's protections run **per request**, and without the request
-context (IP address, user-agent, headers) there's nothing to evaluate.
+time) because no HTTP request reaches your Astro server when the file is served.
+Arcjet's protections run **per request**, and without the request context (IP
+address, user-agent, headers) there's nothing to evaluate.
 
-To protect a static route, configure the route for **on-demand rendering**.
-That way every visitor triggers a normal request that Arcjet can inspect.
+To protect a static route, configure the route for **on-demand rendering**. That
+way every visitor triggers a normal request that Arcjet can inspect.
 
 This can be achieved by using Astro's `server` mode or using an override on the
 route you want to protect. Read more about how to enable on-demand rendering in
@@ -330,8 +331,8 @@ The `protect` function function returns a `Promise` that resolves to an
   conclusion based on evaluating each of the configured rules. If you wish to
   accept Arcjet's recommended action based on the configured rules then you can
   use this property.
-- `reason` (`ArcjetReason`) - An object containing more detailed
-  information about the conclusion.
+- `reason` (`ArcjetReason`) - An object containing more detailed information
+  about the conclusion.
 - `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
   containing the results of each rule that was executed.
 - `ttl` (`uint32`) - The time-to-live for the decision in seconds. This is the
@@ -350,9 +351,9 @@ check the conclusion:
 - `isDenied()` (`bool`) - The request should be denied.
 - `isErrored()` (`bool`) - There was an unrecoverable error.
 
-The conclusion will be the highest-severity finding when evaluating the configured
-rules. `"DENY"` is the highest severity, followed by `"CHALLENGE"`, then `"ERROR"` and
-finally `"ALLOW"` as the lowest severity.
+The conclusion will be the highest-severity finding when evaluating the
+configured rules. `"DENY"` is the highest severity, followed by `"CHALLENGE"`,
+then `"ERROR"` and finally `"ALLOW"` as the lowest severity.
 
 For example, when a bot protection rule returns an error and a validate email
 rule returns a deny, the overall conclusion would be deny. To access the error
@@ -367,8 +368,9 @@ the final decision reason and is based on the configured rules.
 The `ArcjetReason` object has the following methods that can be used to check
 which rule caused the conclusion:
 
-It will always be the highest-priority rule that produced that conclusion,
-to inspect other rules consider iterating over the `results` property on the decision.
+It will always be the highest-priority rule that produced that conclusion, to
+inspect other rules consider iterating over the `results` property on the
+decision.
 
 - `isBot()` (`bool`) - Returns `true` if the bot protection rules have been
   applied and the request was considered to have been made by a bot.
@@ -551,11 +553,11 @@ when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
 in most cases, the response time will be less than 20-30ms.
 
 If there is an error condition when processing the rule, Arcjet will return an
-`ERROR` result for that rule and you can check the `message` property on the rule's
-error result for more information.
+`ERROR` result for that rule and you can check the `message` property on the
+rule's error result for more information.
 
-If all other rules that were run returned an `ALLOW` result, then the final Arcjet
-conclusion will be `ERROR`.
+If all other rules that were run returned an `ALLOW` result, then the final
+Arcjet conclusion will be `ERROR`.
 
 <Tabs>
   <TabItem label="TS">
@@ -624,18 +626,19 @@ Astro SDK will automatically handle this for you.
 
 <NodeVersions />
 
-Arcjet supports the [Node.js versions supported by
-Astro](https://docs.astro.build/en/upgrade-astro/#nodejs-support-and-upgrade-policies).
+Arcjet supports the
+[Node.js versions supported by Astro](https://docs.astro.build/en/upgrade-astro/#nodejs-support-and-upgrade-policies).
 
 ### Astro
 
-Arcjet supports Astro v5.9.3 and above. We follow [Astro's support
-policy](https://docs.astro.build/en/upgrade-astro/#extended-maintenance) and
-provide support for all versions that are actively maintained by the Astro team.
+Arcjet supports Astro v5.9.3 and above. We follow
+[Astro's support policy](https://docs.astro.build/en/upgrade-astro/#extended-maintenance)
+and provide support for all versions that are actively maintained by the Astro
+team.
 
-[Technical support](/support) is provided for the current major
-version of the Arcjet SDK for all users and for the current and previous major
-versions for paid users. We will provide security fixes for the current and
-previous major versions.
+[Technical support](/support) is provided for the current major version of the
+Arcjet SDK for all users and for the current and previous major versions for
+paid users. We will provide security fixes for the current and previous major
+versions.
 
 <Comments />

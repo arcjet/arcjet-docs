@@ -30,8 +30,8 @@ applies a limit of 60 requests per hour per IP address. If the limit is
 exceeded, the client is blocked for 10 minutes before being able to make any
 further requests.
 
-Applying a rate limit by IP address is the default if no
-`characteristics` are specified.
+Applying a rate limit by IP address is the default if no `characteristics` are
+specified.
 
 <SelectableContent client:load syncKey="language" frameworkSwitcher>
   <div slot="TS (App)" slotIdx="1">
@@ -101,9 +101,8 @@ track the number of tokens used by a `gpt-3.5-turbo` AI chatbot. It sets a limit
 of `2,000` tokens per hour with a maximum of `5,000` tokens in the bucket. This
 allows for a reasonable conversation length without consuming too many tokens.
 
-See the [arcjet-js GitHub repo](https://github.com/arcjet/arcjet-js) for [a
-full example using
-Next.js](https://github.com/arcjet/arcjet-js/tree/main/examples/nextjs-openai).
+See the [arcjet-js GitHub repo](https://github.com/arcjet/arcjet-js) for
+[a full example using Next.js](https://github.com/arcjet/arcjet-js/tree/main/examples/nextjs-openai).
 
 <SelectableContent client:load syncKey="language" frameworkSwitcher>
   <div slot="TS (App)" slotIdx="1">
@@ -137,11 +136,9 @@ applies a limit of 60 requests per hour per API key, where the key is provided
 in a custom header called `x-api-key`. If the limit is exceeded, the client is
 blocked for 10 minutes before being able to make any further requests.
 
-:::caution
-If you specify different characteristics and do not include `ip.src`, you may
-inadvertently rate limit everyone. Be sure to include a characteristic which can
-narrowly identify each client, such as an API key as shown here.
-:::
+:::caution If you specify different characteristics and do not include `ip.src`,
+you may inadvertently rate limit everyone. Be sure to include a characteristic
+which can narrowly identify each client, such as an API key as shown here. :::
 
 <SelectableContent client:load syncKey="language" frameworkSwitcher>
   <div slot="TS" slotIdx="1">
@@ -154,10 +151,8 @@ narrowly identify each client, such as an API key as shown here.
 Using Next.js middleware allows you to set a rate limit that applies to every
 route:
 
-:::note
-Middleware runs on every route so be careful to avoid double
-protection if you are configuring Arcjet directly on other routes.
-:::
+:::note Middleware runs on every route so be careful to avoid double protection
+if you are configuring Arcjet directly on other routes. :::
 
 <SelectableContent client:load syncKey="language" frameworkSwitcher>
   <div slot="TS" slotIdx="1">
@@ -195,9 +190,9 @@ requests, but redirect all page route requests to an error page.
 ### Wrap existing handler
 
 All the examples on this page show how you can inspect the decision to control
-what to do next. However, if you just wish to send a generic `429 Too Many
-Requests` response you can delegate this to Arcjet by wrapping your handler
-`withArcjet`.
+what to do next. However, if you just wish to send a generic
+`429 Too Many Requests` response you can delegate this to Arcjet by wrapping
+your handler `withArcjet`.
 
 <SelectableContent client:load syncKey="language" frameworkSwitcher>
   <div slot="TS (App)" slotIdx="1">

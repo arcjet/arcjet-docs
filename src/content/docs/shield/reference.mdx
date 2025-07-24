@@ -1,6 +1,8 @@
 ---
 title: "Shield WAF reference"
-description: "Reference guide for adding Arcjet Shield WAF to your Next.js, Node.js, Bun, Remix, or SvelteKit app."
+description:
+  "Reference guide for adding Arcjet Shield WAF to your Next.js, Node.js, Bun,
+  Remix, or SvelteKit app."
 frameworks:
   - bun
   - nest-js
@@ -91,8 +93,8 @@ the [OWASP Top 10](https://owasp.org/www-project-top-ten/).
 
 ## Plan availability
 
-Arcjet Shield WAF functionality depends on your [pricing
-plan](https://arcjet.com/pricing).
+Arcjet Shield WAF functionality depends on your
+[pricing plan](https://arcjet.com/pricing).
 
 | Plan                                                                             | Shield                          |
 | -------------------------------------------------------------------------------- | ------------------------------- |
@@ -103,10 +105,10 @@ plan](https://arcjet.com/pricing).
 ### What is Shield Managed?
 
 Shield Managed is a fully-managed service that requires no maintenance, and
-includes the latest rules from the [OWASP Core Rule
-Set](https://coreruleset.org/). It is available as an optional extra on non-free
-plans. See [Concepts](/shield/concepts#what-does-arcjet-shield-waf-do) for more
-details.
+includes the latest rules from the
+[OWASP Core Rule Set](https://coreruleset.org/). It is available as an optional
+extra on non-free plans. See
+[Concepts](/shield/concepts#what-does-arcjet-shield-waf-do) for more details.
 
 <FrameworkLinks
   title="Choose a framework"
@@ -125,11 +127,9 @@ constructed with the `shield(options: ShieldOptions)` function and configured by
 <DisplayType type="ShieldOptions" from="arcjet" />
 <DisplayType type="ArcjetMode" from="arcjet" />
 
-:::note
-When specifying multiple rules, the order of the rules is ignored. Rule
+:::note When specifying multiple rules, the order of the rules is ignored. Rule
 execution ordering is automatically optimized for performance. See
-[decision](#decision) below for details of examining the execution results.
-:::
+[decision](#decision) below for details of examining the execution results. :::
 
 <SlotByFramework client:load>
   <NestJsDecoratorRoutes slot="nest-js" />
@@ -149,8 +149,8 @@ context as passed to the request handler.
   <NestJsGuardDecision slot="nest-js" />
 </SlotByFramework>
 
-This function returns a `Promise` that resolves to an
-`ArcjetDecision` object. This contains the following properties:
+This function returns a `Promise` that resolves to an `ArcjetDecision` object.
+This contains the following properties:
 
 - `id` (`string`) - The unique ID for the request. This can be used to look up
   the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
@@ -159,8 +159,8 @@ This function returns a `Promise` that resolves to an
 - `conclusion` (`ArcjetConclusion`) - The final conclusion based on evaluating
   each of the configured rules. If you wish to accept Arcjet's recommended
   action based on the configured rules then you can use this property.
-- `reason` (`ArcjetReason`) - An object containing more detailed
-  information about the conclusion.
+- `reason` (`ArcjetReason`) - An object containing more detailed information
+  about the conclusion.
 - `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
   containing the results of each rule that was executed.
 - `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
@@ -196,11 +196,11 @@ when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
 in most cases, the response time will be less than 20-30ms.
 
 If there is an error condition when processing the rule, Arcjet will return an
-`ERROR` result for that rule and you can check the `message` property on the rule's
-error result for more information.
+`ERROR` result for that rule and you can check the `message` property on the
+rule's error result for more information.
 
-If all other rules that were run returned an `ALLOW` result, then the final Arcjet
-conclusion will be `ERROR`.
+If all other rules that were run returned an `ALLOW` result, then the final
+Arcjet conclusion will be `ERROR`.
 
 <SlotByFramework client:load>
   <ErrorsBun slot="bun" />

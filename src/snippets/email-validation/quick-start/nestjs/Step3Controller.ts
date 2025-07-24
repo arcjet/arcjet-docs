@@ -48,7 +48,7 @@ export class SignupController {
   constructor(
     private readonly signupService: SignupService,
     @Inject(ARCJET) private readonly arcjet: ArcjetNest,
-  ) { }
+  ) {}
 
   // Implement a form handler following
   // https://docs.nestjs.com/techniques/file-upload#no-files. Note this isn't

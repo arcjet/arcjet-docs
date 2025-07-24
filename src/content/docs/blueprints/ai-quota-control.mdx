@@ -6,13 +6,20 @@ description: "Control your AI service tokens usage, categorized by user."
 import SelectableContent from "@/components/SelectableContent";
 import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
 
-Arcjet can help you control usage quotas on your AI language model backed application. The goal is to limit the amount of requests from specific users, accounts, categories (you define the request characteristics) based on an estimate of token consumption. This will allow you to enforce user allowances and keep your costs under control.
+Arcjet can help you control usage quotas on your AI language model backed
+application. The goal is to limit the amount of requests from specific users,
+accounts, categories (you define the request characteristics) based on an
+estimate of token consumption. This will allow you to enforce user allowances
+and keep your costs under control.
 
-This is one of many possible approaches to track AI service use and is specific to language models. In different scenarios you could use other rate limiting algorithms on a request basis and on other conditions.
+This is one of many possible approaches to track AI service use and is specific
+to language models. In different scenarios you could use other rate limiting
+algorithms on a request basis and on other conditions.
 
 ### Rules
 
-We recommend using a Token bucket rate limit. This will be configured to match your category quota (eg: tokens/user) with the desired refill rate and interval.
+We recommend using a Token bucket rate limit. This will be configured to match
+your category quota (eg: tokens/user) with the desired refill rate and interval.
 
 ```ts
 const aj = arcjet({
@@ -34,7 +41,8 @@ const aj = arcjet({
 
 ### Checking the quota
 
-We retrieve the characteristic (eg: `userId`) and the user provided prompt and use it to withdraw the estimated amount of tokens from the bucket.
+We retrieve the characteristic (eg: `userId`) and the user provided prompt and
+use it to withdraw the estimated amount of tokens from the bucket.
 
 Once the bucket is empty, we issue a `DENY` decision.
 

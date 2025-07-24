@@ -1,6 +1,7 @@
 ---
 title: "Arcjet / Auth.js integration"
-description: "Integrating Auth.js and Arcjet. Add rate limits to Auth.js login endpoints."
+description:
+  "Integrating Auth.js and Arcjet. Add rate limits to Auth.js login endpoints."
 prev: false
 next: false
 ---
@@ -31,13 +32,13 @@ authenticated user ID to implement user-specific rate limits.
 
 ## Example use case
 
-- Protect your Auth.js route handlers by rate limiting requests and
-  blocking bots.
-- Provide a higher rate limit for authenticated clients based on their
-  Auth.js user ID.
+- Protect your Auth.js route handlers by rate limiting requests and blocking
+  bots.
+- Provide a higher rate limit for authenticated clients based on their Auth.js
+  user ID.
 
-See an [example Next.js implementation on
-GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nextjs-authjs-5).
+See an
+[example Next.js implementation on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nextjs-authjs-5).
 
 ## Protect Auth.js route handlers
 
@@ -76,8 +77,8 @@ within a 60 second window and also prevents bots from making requests.
 
 ## Rate limits using Auth.js user ID
 
-Arcjet rate limits allow [custom
-characteristics](/rate-limiting/configuration#custom-characteristics) to
+Arcjet rate limits allow
+[custom characteristics](/rate-limiting/configuration#custom-characteristics) to
 identify the client and apply the limit. Using the Auth.js
 [`auth`](https://authjs.dev/reference/nextjs#auth) helper you can pass through a
 user ID.

@@ -1,6 +1,7 @@
 ---
 title: "Arcjet / NextAuth integration"
-description: "Integrating NextAuth and Arcjet. Add rate limits to NextAuth login endpoints."
+description:
+  "Integrating NextAuth and Arcjet. Add rate limits to NextAuth login endpoints."
 prev: false
 next: false
 ---
@@ -29,14 +30,14 @@ authenticated user ID to implement user-specific rate limits.
 
 ## Example use case
 
-- Protect your NextAuth route handlers by rate limiting requests and
-  blocking bots.
+- Protect your NextAuth route handlers by rate limiting requests and blocking
+  bots.
 - Limit access to a free API endpoint based on the client IP address.
-- Provide a higher rate limit for authenticated clients based on their
-  NextAuth user ID.
+- Provide a higher rate limit for authenticated clients based on their NextAuth
+  user ID.
 
-See an [example Next.js implementation on
-GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nextjs-14-nextauth-4).
+See an
+[example Next.js implementation on GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nextjs-14-nextauth-4).
 
 ## Protect NextAuth route handlers
 
@@ -76,8 +77,8 @@ within a 60 second window and also prevents bots from making requests.
 
 ## Rate limits using NextAuth user ID
 
-Arcjet rate limits allow [custom
-characteristics](/rate-limiting/configuration#custom-characteristics) to
+Arcjet rate limits allow
+[custom characteristics](/rate-limiting/configuration#custom-characteristics) to
 identify the client and apply the limit. Using NextAuth's
 [`getServerSession()`](https://next-auth.js.org/configuration/nextjs#getserversession)
 helpers you can pass through a user ID.

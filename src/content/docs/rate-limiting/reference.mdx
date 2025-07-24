@@ -1,6 +1,8 @@
 ---
 title: "Rate limiting reference"
-description: "Reference guide for adding Arcjet rate limiting to your Next.js, NestJS, Node.js, Bun, Remix, or SvelteKit app."
+description:
+  "Reference guide for adding Arcjet rate limiting to your Next.js, NestJS,
+  Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
   - nest-js
@@ -169,8 +171,8 @@ requests a client can make over a period of time.
 
 ## Plan availability
 
-Arcjet rate limiting is available on all [pricing
-plans](https://arcjet.com/pricing).
+Arcjet rate limiting is available on all
+[pricing plans](https://arcjet.com/pricing).
 
 | Plan                                                                             | Rate limiting |
 | -------------------------------------------------------------------------------- | ------------- |
@@ -201,9 +203,9 @@ characteristics and algorithm specific options.
 
 Tracks the number of requests made by a client over a fixed time window. Options
 are explained in the [Configuration](/rate-limiting/configuration)
-documentation. See the [fixed window algorithm
-description](/rate-limiting/algorithms#fixed-window) for more details about how
-the algorithm works.
+documentation. See the
+[fixed window algorithm description](/rate-limiting/algorithms#fixed-window) for
+more details about how the algorithm works.
 
 ```ts
 // Options for fixed window rate limit
@@ -237,9 +239,9 @@ type FixedWindowRateLimitOptions = {
 
 Tracks the number of requests made by a client over a sliding window so that the
 window moves with time. Options are explained in the
-[Configuration](/rate-limiting/configuration) documentation. See the [sliding
-window algorithm description](/rate-limiting/algorithms#sliding-window) for more
-details about how the algorithm works.
+[Configuration](/rate-limiting/configuration) documentation. See the
+[sliding window algorithm description](/rate-limiting/algorithms#sliding-window)
+for more details about how the algorithm works.
 
 ```ts
 // Options for sliding window rate limit
@@ -275,9 +277,9 @@ Based on a bucket filled with a specific number of tokens. Each request
 withdraws a token from the bucket and the bucket is refilled at a fixed rate.
 Once the bucket is empty, the client is blocked until the bucket refills.
 Options are explained in the [Configuration](/rate-limiting/configuration)
-documentation. See the [token bucket algorithm
-description](/rate-limiting/algorithms#token-bucket) for more details about how
-the algorithm works.
+documentation. See the
+[token bucket algorithm description](/rate-limiting/algorithms#token-bucket) for
+more details about how the algorithm works.
 
 ```ts
 // Options for token bucket rate limit
@@ -320,11 +322,9 @@ you can specify other
 [characteristics](/rate-limiting/configuration#characteristics) such as a user
 ID or other metadata from your application.
 
-:::caution
-Avoid passing personal information such as an email address as a custom
-characteristic. The value is hashed on Arcjet's servers, but it's still a best
-practice to avoid sending us sensitive information.
-:::
+:::caution Avoid passing personal information such as an email address as a
+custom characteristic. The value is hashed on Arcjet's servers, but it's still a
+best practice to avoid sending us sensitive information. :::
 
 In this example we define a rate limit rule that applies to a specific user ID.
 The custom characteristic is `userId` with the value passed as a prop on the
@@ -342,8 +342,8 @@ The custom characteristic is `userId` with the value passed as a prop on the
 
 To identify users with different characteristics e.g. IP address for anonymous
 users and a user ID for logged in users, you can create a custom fingerprint.
-See the [example in the custom characteristics
-section](/rate-limiting/configuration#ip-address--user-id).
+See the
+[example in the custom characteristics section](/rate-limiting/configuration#ip-address--user-id).
 
 <SlotByFramework client:load>
   <NestJsDecoratorRoutes slot="nest-js" />
@@ -363,8 +363,8 @@ context as passed to the request handler.
   <NestJsGuardDecision slot="nest-js" />
 </SlotByFramework>
 
-This function returns a `Promise` that resolves to an
-`ArcjetDecision` object. This contains the following properties:
+This function returns a `Promise` that resolves to an `ArcjetDecision` object.
+This contains the following properties:
 
 - `id` (`string`) - The unique ID for the request. This can be used to look up
   the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
@@ -373,8 +373,8 @@ This function returns a `Promise` that resolves to an
 - `conclusion` (`ArcjetConclusion`) - The final conclusion based on evaluating
   each of the configured rules. If you wish to accept Arcjet's recommended
   action based on the configured rules then you can use this property.
-- `reason` (`ArcjetReason`) - An object containing more detailed
-  information about the conclusion.
+- `reason` (`ArcjetReason`) - An object containing more detailed information
+  about the conclusion.
 - `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
   containing the results of each rule that was executed.
 - `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
@@ -430,13 +430,14 @@ Arcjet decision result:
   counted.
 - `reset` (`number`): The remaining amount of seconds in the window.
 
-These can be used to return `RateLimit` HTTP headers ([draft
-RFC](https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-ratelimit-headers-08)) to
-offer the client more detail.
+These can be used to return `RateLimit` HTTP headers
+([draft RFC](https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-ratelimit-headers-08))
+to offer the client more detail.
 
-We provide the [@arcjet/decorate
-package](https://github.com/arcjet/arcjet-js/tree/main/decorate) for decorating
-your responses with appropriate `RateLimit` headers based on a decision.
+We provide the
+[@arcjet/decorate package](https://github.com/arcjet/arcjet-js/tree/main/decorate)
+for decorating your responses with appropriate `RateLimit` headers based on a
+decision.
 
 <SlotByFramework client:load>
   <HeadersBun slot="bun" />
@@ -447,8 +448,8 @@ your responses with appropriate `RateLimit` headers based on a decision.
   <HeadersSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
-This would result in [draft
-RFC](https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-ratelimit-headers-08)
+This would result in
+[draft RFC](https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-ratelimit-headers-08)
 response headers similar to the following:
 
 ```http
@@ -466,11 +467,11 @@ when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
 in most cases, the response time will be less than 20-30ms.
 
 If there is an error condition when processing the rule, Arcjet will return an
-`ERROR` result for that rule and you can check the `message` property on the rule's
-error result for more information.
+`ERROR` result for that rule and you can check the `message` property on the
+rule's error result for more information.
 
-If all other rules that were run returned an `ALLOW` result, then the final Arcjet
-conclusion will be `ERROR`.
+If all other rules that were run returned an `ALLOW` result, then the final
+Arcjet conclusion will be `ERROR`.
 
 <SlotByFramework client:load>
   <ErrorsBun slot="bun" />

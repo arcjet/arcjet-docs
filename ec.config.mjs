@@ -4,13 +4,7 @@ import { defineEcConfig } from "astro-expressive-code";
 
 function lineNumbers() {
   // Only show line numbers on these languages
-  const lineNumberLanguages = [
-    "js",
-    "jsx",
-    "ts",
-    "tsx",
-    "ini",
-  ];
+  const lineNumberLanguages = ["js", "jsx", "ts", "tsx", "ini"];
 
   let plugin = pluginLineNumbers();
 
@@ -19,25 +13,26 @@ function lineNumbers() {
     name: `Line numbers (${lineNumberLanguages.join(", ")})`,
     hooks: {
       preprocessMetadata: (opt) => {
-        const { codeBlock: { language } } = opt;
+        const {
+          codeBlock: { language },
+        } = opt;
         if (lineNumberLanguages.includes(language)) {
           return plugin.hooks.preprocessMetadata(opt);
         }
       },
 
       postprocessRenderedBlock: (opt) => {
-        const { codeBlock: { language } } = opt;
+        const {
+          codeBlock: { language },
+        } = opt;
         if (lineNumberLanguages.includes(language)) {
           return plugin.hooks.postprocessRenderedBlock(opt);
         }
       },
-    }
+    },
   };
 }
 
 export default defineEcConfig({
-  plugins: [
-    lineNumbers(),
-    pluginCollapsibleSections(),
-  ],
+  plugins: [lineNumbers(), pluginCollapsibleSections()],
 });

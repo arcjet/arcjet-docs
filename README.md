@@ -17,8 +17,8 @@ Try an Arcjet protected app live at [https://example.arcjet.com][example-url].
 
 ## Commands
 
-These docs are built using [Astro][astro] and [Starlight][starlight]. All commands are run from the
-root of the project, from a terminal:
+These docs are built using [Astro][astro] and [Starlight][starlight]. All
+commands are run from the root of the project, from a terminal:
 
 | Command                   | Action                                           |
 | :------------------------ | :----------------------------------------------- |
@@ -39,9 +39,9 @@ This repository follows the [Arcjet Security Policy][arcjet-security].
 
 ## License
 
-All content in this repository is licensed under the [Creative Commons
-Attribution 4.0 International License](./LICENSE) and all code is licensed under
-the [Apache License, Version 2.0](./LICENSE-CODE).
+All content in this repository is licensed under the
+[Creative Commons Attribution 4.0 International License](./LICENSE) and all code
+is licensed under the [Apache License, Version 2.0](./LICENSE-CODE).
 
 [arcjet]: https://arcjet.com
 [astro]: https://astro.build

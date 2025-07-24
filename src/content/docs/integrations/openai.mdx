@@ -1,6 +1,8 @@
 ---
 title: "Protect your OpenAI application with Arcjet"
-description: "Protect your OpenAI chat interface from abuse with Arcjet rate limiting and bot protection."
+description:
+  "Protect your OpenAI chat interface from abuse with Arcjet rate limiting and
+  bot protection."
 prev: false
 next: false
 ---
@@ -28,10 +30,10 @@ developer token budget.
 
 ## How it works
 
-- Arcjet rate limits allow [custom
-  characteristics](/rate-limiting/configuration#custom-characteristics) to
-  identify the client and apply the limit. We provide the user ID to identify the
-  user. This can use any authentication system you have in place, such as
+- Arcjet rate limits allow
+  [custom characteristics](/rate-limiting/configuration#custom-characteristics)
+  to identify the client and apply the limit. We provide the user ID to identify
+  the user. This can use any authentication system you have in place, such as
   [Clerk](/integrations/clerk).
 - Define a rate limit of `2,000` tokens per hour with a maximum of `5,000`
   tokens in the bucket. This allows for a reasonable conversation length without
@@ -43,8 +45,8 @@ developer token budget.
   the user's rate limit.
 
 The example below shows the API route for a Next.js application with a
-`gpt-3.5-turbo` AI chatbot. See the full [example Next.js implementation on
-GitHub](https://github.com/arcjet/arcjet-js/blob/main/examples/nextjs-clerk-rate-limit).
+`gpt-3.5-turbo` AI chatbot. See the full
+[example Next.js implementation on GitHub](https://github.com/arcjet/arcjet-js/blob/main/examples/nextjs-clerk-rate-limit).
 
 <Tabs>
 <TabItem label="TS (App)">
@@ -56,8 +58,8 @@ GitHub](https://github.com/arcjet/arcjet-js/blob/main/examples/nextjs-clerk-rate
 
 The Next.js pages router does not support streaming responses so you should use
 the app router for this example. You can still use the `pages/` directory for
-the rest of your application. See the [Next.js AI docs for
-details](https://sdk.vercel.ai/docs/guides/frameworks/nextjs-pages).
+the rest of your application. See the
+[Next.js AI docs for details](https://sdk.vercel.ai/docs/guides/frameworks/nextjs-pages).
 
 </TabItem>
 </Tabs>

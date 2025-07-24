@@ -1,6 +1,8 @@
 ---
 title: "Email validation reference"
-description: "Reference guide for adding Arcjet email validation to your Next.js, NestJS, Node.js, Bun, Remix, or SvelteKit app."
+description:
+  "Reference guide for adding Arcjet email validation to your Next.js, NestJS,
+  Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
   - nest-js
@@ -58,8 +60,8 @@ reduce the amount of spam or fraudulent accounts.
 
 ## Plan availability
 
-Arcjet email validation availability depends depends on your [pricing
-plan](https://arcjet.com/pricing).
+Arcjet email validation availability depends depends on your
+[pricing plan](https://arcjet.com/pricing).
 
 | Plan                                                                             | Email validation                                       |
 | -------------------------------------------------------------------------------- | ------------------------------------------------------ |
@@ -122,8 +124,8 @@ rule it also requires an additional `email` prop.
   <NestJsGuardDecision slot="nest-js" />
 </SlotByFramework>
 
-This function returns a `Promise` that resolves to an
-`ArcjetDecision` object. This contains the following properties:
+This function returns a `Promise` that resolves to an `ArcjetDecision` object.
+This contains the following properties:
 
 - `id` (`string`) - The unique ID for the request. This can be used to look up
   the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
@@ -132,8 +134,8 @@ This function returns a `Promise` that resolves to an
 - `conclusion` (`ArcjetConclusion`) - The final conclusion based on evaluating
   each of the configured rules. If you wish to accept Arcjet's recommended
   action based on the configured rules then you can use this property.
-- `reason` (`ArcjetReason`) - An object containing more detailed
-  information about the conclusion.
+- `reason` (`ArcjetReason`) - An object containing more detailed information
+  about the conclusion.
 - `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
   containing the results of each rule that was executed.
 - `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
@@ -179,7 +181,8 @@ Arcjet to only allow specific email types and all other types will be blocked.
 ## Checking the email type
 
 Arcjet will return the type of email address that was verified. This will be one
-or several of the [reported email types](/email-validation/concepts#email-types).
+or several of the
+[reported email types](/email-validation/concepts#email-types).
 
 ```ts
 // See https://docs.arcjet.com/email-validation/concepts#email-types
@@ -220,11 +223,11 @@ when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
 in most cases, the response time will be less than 20-30ms.
 
 If there is an error condition when processing the rule, Arcjet will return an
-`ERROR` result for that rule and you can check the `message` property on the rule's
-error result for more information.
+`ERROR` result for that rule and you can check the `message` property on the
+rule's error result for more information.
 
-If all other rules that were run returned an `ALLOW` result, then the final Arcjet
-conclusion will be `ERROR`.
+If all other rules that were run returned an `ALLOW` result, then the final
+Arcjet conclusion will be `ERROR`.
 
 <SlotByFramework client:load>
   <ErrorsBun slot="bun" />

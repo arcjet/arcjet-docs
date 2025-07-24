@@ -1,4 +1,4 @@
-import { createTwoslasher} from "twoslash"
+import { createTwoslasher } from "twoslash";
 
 const twoslasher = createTwoslasher();
 

@@ -1,6 +1,8 @@
 ---
 title: "Signup from protection reference"
-description: "Reference guide for adding Arcjet email validation to your Next.js, Node.js, Bun, Remix, or SvelteKit app."
+description:
+  "Reference guide for adding Arcjet email validation to your Next.js, Node.js,
+  Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
   - nest-js
@@ -66,8 +68,8 @@ validation to protect your signup forms from abuse.
 
 ## Plan availability
 
-Arcjet signup form protection availability depends depends on your [pricing
-plan](https://arcjet.com/pricing).
+Arcjet signup form protection availability depends depends on your
+[pricing plan](https://arcjet.com/pricing).
 
 | Plan                                                                             | Signup form protection                                 |
 | -------------------------------------------------------------------------------- | ------------------------------------------------------ |
@@ -83,10 +85,10 @@ plan](https://arcjet.com/pricing).
 
 ## Configuration
 
-Signup form protection is a combination of the [rate
-limiting](/rate-limiting/quick-start?f=next-js), [bot
-protection](/bot-protection/quick-start?f=next-js), and [email
-validation](/email-validation/quick-start?f=next-js) primitives. The
+Signup form protection is a combination of the
+[rate limiting](/rate-limiting/quick-start?f=next-js),
+[bot protection](/bot-protection/quick-start?f=next-js), and
+[email validation](/email-validation/quick-start?f=next-js) primitives. The
 configuration options are the same, but specified in a single rule.
 
 The configuration definition is:
@@ -131,12 +133,12 @@ This can be configured as follows:
 When you are testing your signup form protection configuration, you can run the
 rules in dry run mode first by setting `mode` to `DRY_RUN`. This will return an
 allow decision for every request, but log what the results would have been if
-they were in live mode. You can view the results in the [Arcjet
-dashboard](https://app.arcjet.com).
+they were in live mode. You can view the results in the
+[Arcjet dashboard](https://app.arcjet.com).
 
-Even in dry run mode each rule will still be evaluated, so you can still [check
-the rule results](#checking-rule-results) to see if the email address is valid
-or not, or log them to your database.
+Even in dry run mode each rule will still be evaluated, so you can still
+[check the rule results](#checking-rule-results) to see if the email address is
+valid or not, or log them to your database.
 
 <SlotByFramework client:load>
   <NextJsPagesServerActions slot="next-js" />
@@ -153,8 +155,8 @@ rule it also requires an additional `email` prop.
   <NestJsGuardDecision slot="nest-js" />
 </SlotByFramework>
 
-This function returns a `Promise` that resolves to an
-`ArcjetDecision` object. This contains the following properties:
+This function returns a `Promise` that resolves to an `ArcjetDecision` object.
+This contains the following properties:
 
 - `id` (`string`) - The unique ID for the request. This can be used to look up
   the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
@@ -163,8 +165,8 @@ This function returns a `Promise` that resolves to an
 - `conclusion` (`ArcjetConclusion`) - The final conclusion based on evaluating
   each of the configured rules. If you wish to accept Arcjet's recommended
   action based on the configured rules then you can use this property.
-- `reason` (`ArcjetReason`) - An object containing more detailed
-  information about the conclusion.
+- `reason` (`ArcjetReason`) - An object containing more detailed information
+  about the conclusion.
 - `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
   containing the results of each rule that was executed.
 - `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
@@ -218,11 +220,11 @@ when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
 in most cases, the response time will be less than 20-30ms.
 
 If there is an error condition when processing the rule, Arcjet will return an
-`ERROR` result for that rule and you can check the `message` property on the rule's
-error result for more information.
+`ERROR` result for that rule and you can check the `message` property on the
+rule's error result for more information.
 
-If all other rules that were run returned an `ALLOW` result, then the final Arcjet
-conclusion will be `ERROR`.
+If all other rules that were run returned an `ALLOW` result, then the final
+Arcjet conclusion will be `ERROR`.
 
 <SlotByFramework client:load>
   <ErrorsBun slot="bun" />

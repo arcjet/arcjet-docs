@@ -7,10 +7,10 @@ import { Code } from "@astrojs/starlight/components";
 import CustomValidationRule from "@/snippets/blueprints/CustomValidationRule.ts?raw";
 
 The Arcjet SDK can be augmented with custom rules written by users, as long as
-they match the format defined by our [`@arcjet/protocol`
-package](https://github.com/arcjet/arcjet-js/tree/main/protocol). These rules
-will only be run locally since the Arcjet service doesn't know about them;
-however, they can still be useful for some use cases.
+they match the format defined by our
+[`@arcjet/protocol` package](https://github.com/arcjet/arcjet-js/tree/main/protocol).
+These rules will only be run locally since the Arcjet service doesn't know about
+them; however, they can still be useful for some use cases.
 
 The structure of a rule is:
 
@@ -30,8 +30,8 @@ interface ArcjetRule<Props extends { [key: string]: unknown } = {}> {
 }
 ```
 
-For example, you may want to [validate form
-input](https://blog.arcjet.com/next-js-security-checklist/#2-data-validation-and-sanitization)
+For example, you may want to
+[validate form input](https://blog.arcjet.com/next-js-security-checklist/#2-data-validation-and-sanitization)
 as part of your Arcjet protections before a request reaches your route handler,
 such as via Next.js middleware.
 
@@ -42,8 +42,8 @@ body, we need to create a new custom rule:
 
 <Code code={CustomValidationRule} lang="ts" />
 
-As long as it conforms to the rule interface, this rule can be consumed by
-the Arcjet SDK like any other rule!
+As long as it conforms to the rule interface, this rule can be consumed by the
+Arcjet SDK like any other rule!
 
 ```ts
 const aj = arcjet({
@@ -60,5 +60,5 @@ const aj = arcjet({
 ```
 
 When `aj.protect()` is called, inside middleware or directly inside a route,
-this custom rule will be executed and deny the request if the body doesn't
-pass validation.
+this custom rule will be executed and deny the request if the body doesn't pass
+validation.

@@ -1,6 +1,7 @@
 ---
 title: "Payment form protection"
-description: "How to protect a payment form from fraudulent transactions using Arcjet."
+description:
+  "How to protect a payment form from fraudulent transactions using Arcjet."
 ---
 
 import SelectableContent from "@/components/SelectableContent";
@@ -17,8 +18,8 @@ to block the most obvious fraud attempts.
 ## Pre-checkout protection
 
 A common approach for handling payments is to generate a unique payment or
-checkout link e.g. [Stripe
-Checkout](https://docs.stripe.com/checkout/quickstart?lang=node&client=next).
+checkout link e.g.
+[Stripe Checkout](https://docs.stripe.com/checkout/quickstart?lang=node&client=next).
 This avoids having to collect credit card details on your own servers.
 
 In this example, Arcjet will analyze the user request before checkout. If the
@@ -71,10 +72,10 @@ const aj = arcjet({
 
 ### Additional checks
 
-If the base rules pass then you can use [IP
-geolocation](/blueprints/ip-geolocation) and [VPN & proxy
-detection](/blueprints/vpn-proxy-detection) checks to further validate the
-transaction.
+If the base rules pass then you can use
+[IP geolocation](/blueprints/ip-geolocation) and
+[VPN & proxy detection](/blueprints/vpn-proxy-detection) checks to further
+validate the transaction.
 
 This example only allows users from the US and UK, and blocks users from hosting
 providers, VPNs, and proxies.

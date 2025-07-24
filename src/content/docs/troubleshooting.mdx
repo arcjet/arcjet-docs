@@ -25,10 +25,10 @@ exclude routes from your middleware.
 
 ### Decision errors from platform liveness or health checks when using Arcjet as a middleware
 
-Platforms like Kubernetes have support for automatic liveness and health
-check probes. These requests do not come from a browser and do not have all
-the same metadata that browsers do (and will not include important headers
-like `X-Real-Ip` or `X-Forwarded-For`). This will cause Arcjet to reject these
+Platforms like Kubernetes have support for automatic liveness and health check
+probes. These requests do not come from a browser and do not have all the same
+metadata that browsers do (and will not include important headers like
+`X-Real-Ip` or `X-Forwarded-For`). This will cause Arcjet to reject these
 probes, which will make the platform think your app is either not alive or
 unhealthy. This can manifest in CrashLoopBackoff errors in Kubernetes or your
 platform of choice restarting your app constantly.
@@ -49,10 +49,9 @@ Assuming you have your Arcjet middleware at `middleware.ts`, adjust the
  };
 ```
 
-:::note
-Do not include the leading slash in the match that you add. That will cause
-the regex to match on `//healthz`, which is almost certainly not what you want.
-:::
+:::note Do not include the leading slash in the match that you add. That will
+cause the regex to match on `//healthz`, which is almost certainly not what you
+want. :::
 
 <Tabs>
 <TabItem label="TS (App)">
@@ -81,10 +80,10 @@ When you deploy your app next, Arcjet should not trigger on this route.
 
 ### Override development IP
 
-Arcjet's [IP geolocation](/blueprints/ip-geolocation) and [VPN & proxy
-detection](/blueprints/vpn-proxy-detection) features require a real IP address
-to work. In local development, Arcjet defaults to `127.0.0.1` so the IP analysis
-metadata will be empty.
+Arcjet's [IP geolocation](/blueprints/ip-geolocation) and
+[VPN & proxy detection](/blueprints/vpn-proxy-detection) features require a real
+IP address to work. In local development, Arcjet defaults to `127.0.0.1` so the
+IP analysis metadata will be empty.
 
 You can set the IP address to a real public IP by overriding the IP address
 field (`ip`) in the `request` object that is passed to the Arcjet `protect`
@@ -191,9 +190,9 @@ fields:
 
 The required fields are:
 
-- `ip` - The client IP address. Internally our SDKs use our [`@arcjet/ip`
-  package](https://github.com/arcjet/arcjet-js/tree/main/ip#example) to detect
-  the correct IP which you can also use directly.
+- `ip` - The client IP address. Internally our SDKs use our
+  [`@arcjet/ip` package](https://github.com/arcjet/arcjet-js/tree/main/ip#example)
+  to detect the correct IP which you can also use directly.
 - `method` - The HTTP method of the request.
 - `host` - The host of the request.
 - `path` or `url` - The path of the request. In the Node.js SDK this field is
@@ -202,7 +201,8 @@ The required fields are:
 
 ### Property '[INTERNALS]' is missing in type
 
-When using the Arcjet Next.js SDK you may see a warning in your editor like this:
+When using the Arcjet Next.js SDK you may see a warning in your editor like
+this:
 
 ```text
 Argument of type x is not assignable to parameter of type 'NextMiddleware'.
@@ -211,14 +211,15 @@ Argument of type x is not assignable to parameter of type 'NextMiddleware'.
 request.d.ts(7, 5): '[INTERNALS]' is declared here.
 ```
 
-This is usually caused by a mismatch between the version of Next.js you are using
-and the version of the Arcjet SDK. You have several options for fixing this:
+This is usually caused by a mismatch between the version of Next.js you are
+using and the version of the Arcjet SDK. You have several options for fixing
+this:
 
 1. Update the Arcjet SDK to the latest version and update your version of
    Next.js to the latest version. We try to keep the SDK up to date with the
    latest Next.js releases so they should generally match.
-2. Add a [resolution
-   override](https://docs.npmjs.com/cli/v10/configuring-npm/package-json#overrides)
+2. Add a
+   [resolution override](https://docs.npmjs.com/cli/v10/configuring-npm/package-json#overrides)
    to your `package.json` to force the SDK to use the same version of Next.js.
    For example, if you are using Next.js 14.1.4 you can add this override to
    your `package.json` to force the Arcjet SDK to use the same version:
@@ -289,9 +290,9 @@ The Arcjet SDK does not support CJS. You can fix this by changing your
 application to use ESM. This is usually done by adding `"type": "module"` to
 your `package.json`.
 
-Alternatively, you can rename the files where you are using the Arcjet SDK to use
-the `.mjs` or `.mts` extension. This will tell Node.js to treat the file as an
-ESM file.
+Alternatively, you can rename the files where you are using the Arcjet SDK to
+use the `.mjs` or `.mts` extension. This will tell Node.js to treat the file as
+an ESM file.
 
 ### Error: Log is required / Error: Client is required
 
@@ -325,9 +326,9 @@ Another example is if you access a field in the body to perform email validation
 and then later try to access the body again in another part of your request
 handler.
 
-To fix this with sensitive information detection, see the [Accessing the
-body](/sensitive-info/reference?f=node-js#accessing-the-body) section of the
-reference.
+To fix this with sensitive information detection, see the
+[Accessing the body](/sensitive-info/reference?f=node-js#accessing-the-body)
+section of the reference.
 
 To fix this with other cases, clone the request before accessing the body:
 
@@ -345,16 +346,16 @@ const decision = await aj.protect(req, { email });
 ### Error: Cannot read properties of undefined (reading 'flags')
 
 If you see this error then you are probably running an older version of Next.js.
-Arcjet supports the [active and maintenance LTS versions of
-Next.js](https://nextjs.org/support-policy) as indicated in [the SDK
-reference](/reference/nextjs#requirements). Upgrade your Next.js version to the
-latest version to fix this error.
+Arcjet supports the
+[active and maintenance LTS versions of Next.js](https://nextjs.org/support-policy)
+as indicated in [the SDK reference](/reference/nextjs#requirements). Upgrade
+your Next.js version to the latest version to fix this error.
 
 ## Get help
 
 We provide [technical support](/support) for all Arcjet users so if you need
-help, [email us](mailto:support@arcjet.com) or [join our
-Discord](https://arcjet.com/discord).
+help, [email us](mailto:support@arcjet.com) or
+[join our Discord](https://arcjet.com/discord).
 
 <Comments />
 ```

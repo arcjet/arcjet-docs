@@ -13,9 +13,9 @@ Bot protection rules can be configured in two ways:
   you to configure the rule alongside the code it is protecting which is useful
   if you want to use the decision to add context to your own code. However, it
   means rules are not located in a single place.
-- **Hooks**: The rule is defined as a hook. This allows you to
-  configure rules in a single place or apply them globally to all routes, but
-  it means the rules are not located alongside the code they are protecting.
+- **Hooks**: The rule is defined as a hook. This allows you to configure rules
+  in a single place or apply them globally to all routes, but it means the rules
+  are not located alongside the code they are protecting.
 
 ### Per route
 
@@ -27,8 +27,8 @@ This configures bot protection on a single route.
 
 ### Hooks
 
-This will run on every request to your SvelteKit app - see [the SvelteKit Hooks
-docs](https://kit.svelte.dev/docs/hooks) for details.
+This will run on every request to your SvelteKit app - see
+[the SvelteKit Hooks docs](https://kit.svelte.dev/docs/hooks) for details.
 
 <SlotByFramework client:load>
   <Hooks slot="sveltekit" />
@@ -36,8 +36,8 @@ docs](https://kit.svelte.dev/docs/hooks) for details.
 
 ### Avoiding double protection with hooks
 
-If you use Arcjet in hooks and individual routes, you need to be careful
-that Arcjet is not running multiple times per request. This can be avoided by
+If you use Arcjet in hooks and individual routes, you need to be careful that
+Arcjet is not running multiple times per request. This can be avoided by
 excluding the individual routes before running Arcjet in the hook.
 
 For example, if you already have a sensitive info rule defined in the API route

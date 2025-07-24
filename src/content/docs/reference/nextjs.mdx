@@ -57,9 +57,9 @@ import IPAnalysis from "/src/snippets/reference/shared/IPAnalysis.mdx";
 
 [<SDKVersionNextjs/>](https://www.npmjs.com/package/@arcjet/next)
 
-This is the reference guide for the Arcjet Next.js SDK, [available on
-GitHub](https://github.com/arcjet/arcjet-js) and licensed under the Apache 2.0
-license.
+This is the reference guide for the Arcjet Next.js SDK,
+[available on GitHub](https://github.com/arcjet/arcjet-js) and licensed under
+the Apache 2.0 license.
 
 <WhatIsArcjet />
 
@@ -102,13 +102,13 @@ of the request handler.
 The required fields are:
 
 - `key` (`string`) - Your Arcjet site key. This can be found in the SDK
-  Installation section for the site in the [Arcjet
-  Dashboard](https://app.arcjet.com).
+  Installation section for the site in the
+  [Arcjet Dashboard](https://app.arcjet.com).
 - `rules` - The rules to apply to the request. See the various sections of the
-  docs for how to configure these e.g. [shield](/shield/reference?f=next-js), [rate
-  limiting](/rate-limiting/reference?f=next-js), [bot
-  protection](/bot-protection/reference?f=next-js), [email
-  validation](/email-validation/reference?f=next-js).
+  docs for how to configure these e.g. [shield](/shield/reference?f=next-js),
+  [rate limiting](/rate-limiting/reference?f=next-js),
+  [bot protection](/bot-protection/reference?f=next-js),
+  [email validation](/email-validation/reference?f=next-js).
 
 The optional fields are:
 
@@ -118,8 +118,8 @@ The optional fields are:
 - `proxies` (`string[]`) - A list of one or more trusted proxies. These
   addresses will be excluded when Arcjet is determining the client IP address.
   This is useful if you are behind a load balancer or proxy that sets the client
-  IP address in a header. See [Load balancers &
-  proxies](#load-balancers--proxies) below for an example.
+  IP address in a header. See
+  [Load balancers & proxies](#load-balancers--proxies) below for an example.
 
 <Tabs>
   <TabItem label="TS">
@@ -137,9 +137,9 @@ throughout your application. This is because the SDK caches decisions and
 configuration to improve performance.
 
 The pattern we use is to create a utility file that exports the `Arcjet` object
-and then import it where you need it. See [our example Next.js
-app](https://github.com/arcjet/example-nextjs/blob/main/lib/arcjet.ts) for how
-this is done.
+and then import it where you need it. See
+[our example Next.js app](https://github.com/arcjet/example-nextjs/blob/main/lib/arcjet.ts)
+for how this is done.
 
 ### Rule modes
 
@@ -176,10 +176,8 @@ You can combine rules to create a more complex protection strategy. For example,
 you can combine rate limiting and bot protection rules to protect your API from
 automated clients.
 
-:::note
-When specifying multiple rules, the order of the rules is ignored. Rule
-execution ordering is automatically optimized for performance.
-:::
+:::note When specifying multiple rules, the order of the rules is ignored. Rule
+execution ordering is automatically optimized for performance. :::
 
 <Tabs>
   <TabItem label="TS">
@@ -210,8 +208,8 @@ The following environment variables can be used to configure the SDK at runtime:
 ### Custom logging
 
 The SDK uses a lightweight logger which mirrors the
-[Pino](https://github.com/pinojs/pino) [structured
-logger](https://github.com/pinojs/pino/blob/8db130eba0439e61c802448d31eb1998cebfbc98/docs/api.md#logger)
+[Pino](https://github.com/pinojs/pino)
+[structured logger](https://github.com/pinojs/pino/blob/8db130eba0439e61c802448d31eb1998cebfbc98/docs/api.md#logger)
 interface. You can use this to customize the logging output.
 
 First, install the required packages:
@@ -260,8 +258,8 @@ through.
 
 The problem with is that the `X-Forwarded-For` header can be spoofed by the
 client, so you should only trust it if you are sure that the load balancer is
-setting it correctly. See [the MDN
-docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For)
+setting it correctly. See
+[the MDN docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For)
 for more details.
 
 You can configure Arcjet to trust IP addresses in the `X-Forwarded-For` header
@@ -288,10 +286,10 @@ You can also specify CIDR ranges to match multiple IP addresses.
 ## Protect
 
 Arcjet provides a single `protect` function that is used to execute your
-protection rules. This requires a `request` object which is the request
-argument as passed to the Next.js request handler. Rules you add to the SDK may
-require additional details, such as the `validateEmail` rule requiring an
-additional `email` prop.
+protection rules. This requires a `request` object which is the request argument
+as passed to the Next.js request handler. Rules you add to the SDK may require
+additional details, such as the `validateEmail` rule requiring an additional
+`email` prop.
 
 This function returns a `Promise` that resolves to an `ArcjetDecision` object,
 which provides a high-level conclusion and detailed explanations of the decision
@@ -330,8 +328,8 @@ For example:
 
 #### Client component example
 
-In this example the server action is [passed as a prop to a client
-component](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#client-components).
+In this example the server action is
+[passed as a prop to a client component](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#client-components).
 
 <Code code={ServerActionProp} title="app/actions.ts" lang="ts" />
 
@@ -359,9 +357,8 @@ export default function Home() {
 
 #### Form example
 
-In this example the server action is handling a form submission, based on [the
-Next.js example form
-handler](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#forms).
+In this example the server action is handling a form submission, based on
+[the Next.js example form handler](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#forms).
 
 These examples will `throw` when there is an error
 ([docs](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#error-handling)),
@@ -385,8 +382,8 @@ The `protect` function function returns a `Promise` that resolves to an
   conclusion based on evaluating each of the configured rules. If you wish to
   accept Arcjet's recommended action based on the configured rules then you can
   use this property.
-- `reason` (`ArcjetReason`) - An object containing more detailed
-  information about the conclusion.
+- `reason` (`ArcjetReason`) - An object containing more detailed information
+  about the conclusion.
 - `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
   containing the results of each rule that was executed.
 - `ttl` (`uint32`) - The time-to-live for the decision in seconds. This is the
@@ -405,9 +402,9 @@ check the conclusion:
 - `isDenied()` (`bool`) - The request should be denied.
 - `isErrored()` (`bool`) - There was an unrecoverable error.
 
-The conclusion will be the highest-severity finding when evaluating the configured
-rules. `"DENY"` is the highest severity, followed by `"CHALLENGE"`, then `"ERROR"` and
-finally `"ALLOW"` as the lowest severity.
+The conclusion will be the highest-severity finding when evaluating the
+configured rules. `"DENY"` is the highest severity, followed by `"CHALLENGE"`,
+then `"ERROR"` and finally `"ALLOW"` as the lowest severity.
 
 For example, when a bot protection rule returns an error and a validate email
 rule returns a deny, the overall conclusion would be deny. To access the error
@@ -422,8 +419,9 @@ the final decision reason and is based on the configured rules.
 The `ArcjetReason` object has the following methods that can be used to check
 which rule caused the conclusion:
 
-It will always be the highest-priority rule that produced that conclusion,
-to inspect other rules consider iterating over the `results` property on the decision.
+It will always be the highest-priority rule that produced that conclusion, to
+inspect other rules consider iterating over the `results` property on the
+decision.
 
 - `isBot()` (`bool`) - Returns `true` if the bot protection rules have been
   applied and the request was considered to have been made by a bot.
@@ -536,8 +534,8 @@ window: number;
 reset: number;
 ```
 
-See the [rate limiting documentation](/rate-limiting/reference?f=next-js) for more
-information about these properties.
+See the [rate limiting documentation](/rate-limiting/reference?f=next-js) for
+more information about these properties.
 
 ##### Email validation & verification
 
@@ -553,8 +551,8 @@ An `ArcjetEmailType` is one of the following strings:
 "DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
 ```
 
-See the [email validation documentation](/email-validation/reference?f=next-js) for
-more information about these properties.
+See the [email validation documentation](/email-validation/reference?f=next-js)
+for more information about these properties.
 
 ### IP analysis
 
@@ -603,11 +601,11 @@ when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
 in most cases, the response time will be less than 20-30ms.
 
 If there is an error condition when processing the rule, Arcjet will return an
-`ERROR` result for that rule and you can check the `message` property on the rule's
-error result for more information.
+`ERROR` result for that rule and you can check the `message` property on the
+rule's error result for more information.
 
-If all other rules that were run returned an `ALLOW` result, then the final Arcjet
-conclusion will be `ERROR`.
+If all other rules that were run returned an `ALLOW` result, then the final
+Arcjet conclusion will be `ERROR`.
 
 <Tabs>
   <TabItem label="TS (App)">
@@ -740,19 +738,18 @@ Next.js SDK will automatically handle this for you, including when using the
 
 ### Next.js
 
-Arcjet supports the [active and maintenance LTS versions of
-Next.js](https://nextjs.org/support-policy) for both the app router and pages
-router. When a new major version of Next.js is released, we will bump the major
-version of the Arcjet SDK.
+Arcjet supports the
+[active and maintenance LTS versions of Next.js](https://nextjs.org/support-policy)
+for both the app router and pages router. When a new major version of Next.js is
+released, we will bump the major version of the Arcjet SDK.
 
-Maintenance LTS: Next.js 14.x
-Active LTS: Next.js 15.x
+Maintenance LTS: Next.js 14.x Active LTS: Next.js 15.x
 
 The pages router will be supported for as long as Next.js supports it.
 
-[Technical support](/support) is provided for the current major
-version of the Arcjet SDK for all users and for the current and previous major
-versions for paid users. We will provide security fixes for the current and
-previous major versions.
+[Technical support](/support) is provided for the current major version of the
+Arcjet SDK for all users and for the current and previous major versions for
+paid users. We will provide security fixes for the current and previous major
+versions.
 
 <Comments />

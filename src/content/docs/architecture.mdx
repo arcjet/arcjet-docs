@@ -46,8 +46,8 @@ pre-configured product.
   from a client over a period of time.
 - **[Bot Protection](/bot-protection/concepts)** - Detect and block automated
   clients.
-- **[Email Validation & Verification](/email-validation/concepts)** - Check
-  that an email address is valid.
+- **[Email Validation & Verification](/email-validation/concepts)** - Check that
+  an email address is valid.
 - **[Sensitive Information](/sensitive-info/concepts)** - Protect against
   clients sending you PII that you do not wish to handle.
 
@@ -254,8 +254,8 @@ network problem or outage and a call to the API is needed, the Arcjet SDK
 defaults to failing open so all requests will be allowed. This is a deliberate
 design decision to ensure that your application continues to function even if
 there is a problem, but you can configure the SDK to fail closed if you prefer.
-See an example of how to handle errors and fail open or closed in the [Node.js
-SDK reference](/reference/nodejs#error-handling).
+See an example of how to handle errors and fail open or closed in the
+[Node.js SDK reference](/reference/nodejs#error-handling).
 
 ## Fingerprinting
 
@@ -272,22 +272,21 @@ decision API.
 The fingerprint is configured based on the characteristics configured on the
 root of the SDK instance. If unspecified, the IP address is used by default. You
 can override this with any of the built-in or custom characteristics. The
-fingerprint can also be [configured on each rate limit
-rule](/rate-limiting/configuration) to apply a different rule to different
-clients based on their characteristics. If not specified, the root fingerprint
-is used.
+fingerprint can also be
+[configured on each rate limit rule](/rate-limiting/configuration) to apply a
+different rule to different clients based on their characteristics. If not
+specified, the root fingerprint is used.
 
 ### Built-in characteristics
 
 Built-in options are managed by the SDK and are always available. If multiple
 options are provided, they will be combined.
 
-:::caution
-If you specify different characteristics and do not include `ip.src`, you may
-inadvertently generate the same fingerprint for multiple users.
-Be sure to include a characteristic which can narrowly identify each client.
-For example, use a header value to limit based on a session token or authentication header.
-:::
+:::caution If you specify different characteristics and do not include `ip.src`,
+you may inadvertently generate the same fingerprint for multiple users. Be sure
+to include a characteristic which can narrowly identify each client. For
+example, use a header value to limit based on a session token or authentication
+header. :::
 
 | Option                                        |     Description      |
 | :-------------------------------------------- | :------------------: |
@@ -306,22 +305,20 @@ This will apply the limit to all requests made by that user regardless of their
 device and IP address.
 
 Custom characteristics are defined with a string key when configuring the sdk.
-The value is then passed as a `string`, `number` or `boolean` when
-calling the `protect` method. You can use any string value for the key.
+The value is then passed as a `string`, `number` or `boolean` when calling the
+`protect` method. You can use any string value for the key.
 
-:::caution
-Avoid passing personal information such as an email address as a custom
-characteristic. The value is hashed on Arcjet's servers, but it's still a best
-practice to avoid sending us sensitive information.
-:::
+:::caution Avoid passing personal information such as an email address as a
+custom characteristic. The value is hashed on Arcjet's servers, but it's still a
+best practice to avoid sending us sensitive information. :::
 
 ### IP address detection
 
 The client IP address is a key part of the fingerprint. The IP should not be
 trusted as it can be spoofed in most cases, especially when loaded via the
 `Headers` object. Each Arcjet SDK uses a native method to detect the IP address
-generally following the guidance provided by the [MDN X-Forwarded-For
-documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For).
+generally following the guidance provided by the
+[MDN X-Forwarded-For documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For).
 
 When choosing the IP address to use, Arcjet uses the first non-private IP that
 is a valid address. However, in non-production environments, we allow
@@ -342,8 +339,8 @@ decision for that client for a period of time.
 
 This threshold is dynamic and regularly updated based on the latest attack
 patterns. This protection is automatic and does not require any configuration.
-You can see the details of all requests, including those that are denied, in
-the [Arcjet dashboard](https://app.arcjet.com).
+You can see the details of all requests, including those that are denied, in the
+[Arcjet dashboard](https://app.arcjet.com).
 
 The results of this analysis are used regardless of the rules configured. This
 means Arcjet is continuously analyzing requests to your application and

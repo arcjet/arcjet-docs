@@ -1,6 +1,8 @@
 ---
 title: "Sensitive information reference"
-description: "Reference guide for detecting sensitive information (PII) with Arcjet in your Next.js, Node.js, Bun, Remix, or SvelteKit app."
+description:
+  "Reference guide for detecting sensitive information (PII) with Arcjet in your
+  Next.js, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
   - nest-js
@@ -152,11 +154,9 @@ type SensitiveInfoOptionsDeny = {
 
 <DisplayType type="ArcjetSensitiveInfoType" from="arcjet" />
 
-:::note
-When specifying multiple rules, the order of the rules is ignored. Rule
+:::note When specifying multiple rules, the order of the rules is ignored. Rule
 execution ordering is automatically optimized for performance. See
-[decision](#decision) below for details of examining the execution results.
-:::
+[decision](#decision) below for details of examining the execution results. :::
 
 <SlotByFramework client:load>
   <NestJsDecoratorRoutes slot="nest-js" />
@@ -174,8 +174,8 @@ protection rules.
   <NestJsGuardDecision slot="nest-js" />
 </SlotByFramework>
 
-This function returns a `Promise` that resolves to an
-`ArcjetDecision` object. This contains the following properties:
+This function returns a `Promise` that resolves to an `ArcjetDecision` object.
+This contains the following properties:
 
 - `id` (`string`) - The unique ID for the request. This can be used to look up
   the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
@@ -184,17 +184,19 @@ This function returns a `Promise` that resolves to an
 - `conclusion` (`ArcjetConclusion`) - The final conclusion based on evaluating
   each of the configured rules. If you wish to accept Arcjet's recommended
   action based on the configured rules then you can use this property.
-- `reason` (`ArcjetReason`) - An object containing more detailed
-  information about the conclusion.
+- `reason` (`ArcjetReason`) - An object containing more detailed information
+  about the conclusion.
 - `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
   containing the results of each rule that was executed.
 - `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
   client IP address. See the SDK reference for more information.
 
-You check if a deny conclusion has been returned by a sensitive info rule by using
-`decision.isDenied()` and `decision.reason.isSensitiveInfo()` respectively.
+You check if a deny conclusion has been returned by a sensitive info rule by
+using `decision.isDenied()` and `decision.reason.isSensitiveInfo()`
+respectively.
 
-You can iterate through the results and check whether a sensitive info rule was applied:
+You can iterate through the results and check whether a sensitive info rule was
+applied:
 
 ```ts
 for (const result of decision.results) {
@@ -243,11 +245,11 @@ when `NODE_ENV` is `production` and 1000ms otherwise. However, in most cases,
 the response time will be less than 20-30ms.
 
 If there is an error condition when processing the rule, Arcjet will return an
-`ERROR` result for that rule and you can check the `message` property on the rule's
-error result for more information.
+`ERROR` result for that rule and you can check the `message` property on the
+rule's error result for more information.
 
-If all other rules that were run returned an `ALLOW` result, then the final Arcjet
-conclusion will be `ERROR`.
+If all other rules that were run returned an `ALLOW` result, then the final
+Arcjet conclusion will be `ERROR`.
 
 <SlotByFramework client:load>
   <ErrorsBun slot="bun" />

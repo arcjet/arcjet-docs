@@ -59,8 +59,8 @@ We provide the following categories:
 - `CATEGORY:VERCEL`: Scrape data for Vercel products and services
 - `CATEGORY:YAHOO`: Scrape data for Yahoo products and services
 
-The [bot
-list](https://github.com/arcjet/arcjet-js/blob/24d2ee3139f277499ef3cb65f1f1eab998647819/protocol/well-known-bots.ts#L596)
+The
+[bot list](https://github.com/arcjet/arcjet-js/blob/24d2ee3139f277499ef3cb65f1f1eab998647819/protocol/well-known-bots.ts#L596)
 contains a list of categories and which bots are in each category.
 
 ```ts
@@ -90,25 +90,26 @@ For basic detection on the <Badge text="Free" variant="caution" /> plan, Arcjet
 uses the `User-Agent` header to identify specific bots.
 
 {/* prettier-ignore */}
-The Arcjet <Badge text="Starter" variant="note" /> or <Badge text="Business" variant="tip" />
-plans provides additional [bot verification](/bot-protection/reference#bot-verification) using
-IP analysis, which can help if you are under attack from bots pretending to be
-good bots e.g. clients pretending to be Google (who you usually want to allow).
+The Arcjet <Badge text="Starter" variant="note" /> or
 
-:::note
-Requests without `User-Agent` headers might not be identified as any particular
-bot and could be marked as an errored result. Our recommendation is to block
-requests without `User-Agent` headers because most legitimate clients send this
-header.
+<Badge text="Business" variant="tip" /> plans provides additional [bot
+verification](/bot-protection/reference#bot-verification) using IP analysis,
+which can help if you are under attack from bots pretending to be good bots e.g.
+clients pretending to be Google (who you usually want to allow).
+
+:::note Requests without `User-Agent` headers might not be identified as any
+particular bot and could be marked as an errored result. Our recommendation is
+to block requests without `User-Agent` headers because most legitimate clients
+send this header.
 
 See [an example of how to do this](/bot-protection/concepts#user-agent-header).
 :::
 
 ### Known bots structure
 
-The identifiers on the bot list are generated from [a collection of known
-bots](https://github.com/arcjet/well-known-bots) which includes details of their
-owner and any variations.
+The identifiers on the bot list are generated from
+[a collection of known bots](https://github.com/arcjet/well-known-bots) which
+includes details of their owner and any variations.
 
 We welcome contributions to the
 [arcjet/well-known-bots](https://github.com/arcjet/well-known-bots) repository,
@@ -117,7 +118,8 @@ updates will be included in the next SDK release. Since bot detection is handled
 within the Arcjet WebAssembly module bundled with the SDK, new patterns must be
 compiled into the module as part of the release process.
 
-Please read the repository's [README.md](https://github.com/arcjet/well-known-bots/blob/main/README.md)
-for specific instructions on how to contribute to our bot detection.
+Please read the repository's
+[README.md](https://github.com/arcjet/well-known-bots/blob/main/README.md) for
+specific instructions on how to contribute to our bot detection.
 
 <Comments />

@@ -23,14 +23,12 @@ specific mechanisms for accessing it—such as the `X-Real-IP` header added or
 overwritten by Vercel. The `@arcjet/ip` library provides a streamlined API over
 these mechanisms based on the current platform.
 
-:::caution[Considerations]
-The IP should not be trusted as it can be spoofed in most cases, especially when
-loaded via the `Headers` object. We apply additional platform guards if a
-platform is supplied in the `options` argument.
+:::caution[Considerations] The IP should not be trusted as it can be spoofed in
+most cases, especially when loaded via the `Headers` object. We apply additional
+platform guards if a platform is supplied in the `options` argument.
 
 If a private/internal address is encountered, it will be skipped. If only those
-are detected, an empty string is returned.
-:::
+are detected, an empty string is returned. :::
 
 ## Install
 
@@ -57,8 +55,8 @@ import IpPlatform from "@/snippets/ip/platform.ts?raw";
 ### Proxy filtering
 
 Most proxies will add themselves in the chain of public IP addresses. Trusted
-proxies may be specified with the `proxies` option, and they will be
-ignored when detecting a public IP.
+proxies may be specified with the `proxies` option, and they will be ignored
+when detecting a public IP.
 
 import IpProxies from "@/snippets/ip/proxies.ts?raw";
 
@@ -79,10 +77,10 @@ Look up an IP address in a Request-like object, such as `Request`, Node's
 
 ## What next?
 
-Arcjet can protect your entire app or individual routes with just
-a few lines of code. Using the main Arcjet SDK you can setup bot protection,
-rate limiting for your API, minimize fraudulent registrations with the
-signup form protection and more.
+Arcjet can protect your entire app or individual routes with just a few lines of
+code. Using the main Arcjet SDK you can setup bot protection, rate limiting for
+your API, minimize fraudulent registrations with the signup form protection and
+more.
 
 <CardGrid>
   <LinkCard

@@ -1,6 +1,8 @@
 ---
 title: "Arcjet Nosecone reference"
-description: "Reference for the Nosecone library showing how to configure security headers (CSP, HSTS, and others) in your Bun, Deno, Next.js, Node.js, or SvelteKit app."
+description:
+  "Reference for the Nosecone library showing how to configure security headers
+  (CSP, HSTS, and others) in your Bun, Deno, Next.js, Node.js, or SvelteKit app."
 ---
 
 import SDKVersionNosecone from "@/components/SDKVersionNosecone.astro";
@@ -77,8 +79,8 @@ import StaticOptOut from "@/snippets/nosecone/reference/next-js/StaticOptOut.mdx
 
 This configuration applies the default Nosecone headers, but allows scripts from
 and connections to Plausible Analytics and YouTube embeds from the YouTube No
-Cookie domain ([privacy enhanced
-mode](https://support.google.com/youtube/answer/171780)).
+Cookie domain
+([privacy enhanced mode](https://support.google.com/youtube/answer/171780)).
 
 It also sets the upgrade insecure requests directive to `true` in production to
 ensure all requests are served with HTTPS.
@@ -194,8 +196,8 @@ If you have multiple middleware functions you will need to chain them together.
 We have written a small utility to help run different middleware for different
 paths.
 
-In [this example
-code](https://github.com/arcjet/arcjet-js/blob/121dc679c91dc6f9a6486fcad3f20013830332aa/examples/nosecone-nextjs-router/middleware.ts),
+In
+[this example code](https://github.com/arcjet/arcjet-js/blob/121dc679c91dc6f9a6486fcad3f20013830332aa/examples/nosecone-nextjs-router/middleware.ts),
 the Nosecone middleware is run on every route path. You can add other middleware
 into the array and add more paths to run different middleware.
 
@@ -237,8 +239,8 @@ yarn add @nosecone/sveltekit
 </div>
 </SelectableContent>
 
-This also provides the `csp(options?: ContentSecurityPolicyConfig)` function
-to translate Nosecone configuration to SvelteKit configuration in
+This also provides the `csp(options?: ContentSecurityPolicyConfig)` function to
+translate Nosecone configuration to SvelteKit configuration in
 `svelte.config.js`, and the `createHook(options?: NoseconeOptions)` function to
 create a SvelteKit hook that runs on every request.
 
@@ -348,12 +350,12 @@ interface NoseconeOptions {
 ### `withVercelToolbar(options: NoseconeOptions): NoseconeOptions`
 
 Nosecone provides the `withVercelToolbar` utility function to augment Nosecone
-options so the [Vercel
-Toolbar](https://vercel.com/docs/workflow-collaboration/vercel-toolbar) is
-allowed by the various headers.
+options so the
+[Vercel Toolbar](https://vercel.com/docs/workflow-collaboration/vercel-toolbar)
+is allowed by the various headers.
 
-This follows the guidelines documented by Vercel under [Using a Content Security
-Policy](https://vercel.com/docs/workflow-collaboration/vercel-toolbar/managing-toolbar#using-a-content-security-policy),
+This follows the guidelines documented by Vercel under
+[Using a Content Security Policy](https://vercel.com/docs/workflow-collaboration/vercel-toolbar/managing-toolbar#using-a-content-security-policy),
 but we recommend conditionally adding this based on `process.env.VERCEL_ENV`:
 
 import WithVercelToolbar from "@/snippets/nosecone/reference/WithVercelToolbar.mdx";
@@ -402,9 +404,8 @@ on your page which helps mitigate many attacks, such as cross-site scripting.
 }
 ```
 
-:::note
-In production environments, we recommend setting `upgradeInsecureRequests: true`
-to ensure all requests are served with HTTPS.
+:::note In production environments, we recommend setting
+`upgradeInsecureRequests: true` to ensure all requests are served with HTTPS.
 :::
 
 The defaults will produce the following header:
@@ -677,10 +678,8 @@ Additional resources:
 
 ### `X-Frame-Options` (legacy)
 
-:::note
-`X-Frame-Options` is superceded by the `frame-ancestors` directive in the
-`Content-Security-Policy` header.
-:::
+:::note `X-Frame-Options` is superceded by the `frame-ancestors` directive in
+the `Content-Security-Policy` header. :::
 
 The **legacy** `X-Frame-Options` header helped mitigate clickjacking attacks in
 older browsers.

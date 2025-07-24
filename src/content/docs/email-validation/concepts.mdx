@@ -1,6 +1,9 @@
 ---
 title: "Arcjet email validation"
-description: "Arcjet allows you to validate & verify an email address. This is useful for preventing users from signing up with fake email addresses and can significantly reduce the amount of spam or fraudulent accounts."
+description:
+  "Arcjet allows you to validate & verify an email address. This is useful for
+  preventing users from signing up with fake email addresses and can
+  significantly reduce the amount of spam or fraudulent accounts."
 prev: false
 next: false
 ---
@@ -16,11 +19,10 @@ reduce the amount of spam or fraudulent accounts.
 
 ## Step 1: Validation
 
-The first step is to validate the email address syntax. This runs locally
-within the SDK and validates the email address is in the correct format.
-Validation is performed against several RFCs with modifications to exclude email
-addresses you wouldn't expect signing up to a real application e.g. local
-domains.
+The first step is to validate the email address syntax. This runs locally within
+the SDK and validates the email address is in the correct format. Validation is
+performed against several RFCs with modifications to exclude email addresses you
+wouldn't expect signing up to a real application e.g. local domains.
 
 Two of the validation options are configurable: whether 2 parts of the domain
 are required (defaults to being required) and whether domain literals in the
@@ -54,8 +56,7 @@ provided:
 - `DomainEmpty`: The domain of the email address must contain at least 1
   character.
 - `DomainTooLong`: The domain has a max-length of 254 characters, as per
-  [RFC3696 errata
-  1690](https://www.rfc-editor.org/errata_search.php?rfc=3696&eid=1690)
+  [RFC3696 errata 1690](https://www.rfc-editor.org/errata_search.php?rfc=3696&eid=1690)
 - `SubDomainEmpty` One or more domain segments, separated by the `.` character,
   are empty.
 - `SubDomainTooLong` One or more domain segments, separated by the `.`
@@ -84,15 +85,15 @@ manually review those from free email providers.
 The Arcjet SDK will provide an analysis of the email type, returning one or
 several of the following:
 
-- **Disposable:** The email address is disposable, which means it's registered to a
-  service that allows throwaway email addresses. Although these are sometimes
-  used for privacy, they are also often used for spam signups or fraudulent
-  activity when combined with a transaction e.g. attempting to use a credit
-  card. We recommend blocking these in higher risk scenarios.
-- **Free:** The email address is registered to a free email service. These are very
-  common, such as GMail or Yahoo Mail, so we do not recommend blocking these.
-  However, you may wish to flag these for review the first time they attempt a
-  transaction.
+- **Disposable:** The email address is disposable, which means it's registered
+  to a service that allows throwaway email addresses. Although these are
+  sometimes used for privacy, they are also often used for spam signups or
+  fraudulent activity when combined with a transaction e.g. attempting to use a
+  credit card. We recommend blocking these in higher risk scenarios.
+- **Free:** The email address is registered to a free email service. These are
+  very common, such as GMail or Yahoo Mail, so we do not recommend blocking
+  these. However, you may wish to flag these for review the first time they
+  attempt a transaction.
 - **No MX records:** This email address is registered to a domain name which has
   no MX records configured. This means it cannot receive email. We recommend
   blocking these.
@@ -104,26 +105,34 @@ several of the following:
 
 The email validation stage considers the following RFCs:
 
-1. RFC 1123: [_Requirements for Internet Hosts -- Application and
-   Support_](https://tools.ietf.org/html/rfc1123), IETF, Oct 1989.
-2. RFC 3629: [_UTF-8, a transformation format of ISO
-   10646_](https://tools.ietf.org/html/rfc3629), IETF, Nov 2003.
-3. RFC 3696: [_Application Techniques for Checking and Transformation of
-   Names_](https://tools.ietf.org/html/rfc3696), IETF, Feb 2004.
-4. RFC 4291: [_IP Version 6 Addressing
-   Architecture_](https://tools.ietf.org/html/rfc4291), IETF, Feb 2006.
-5. RFC 5234: [_Augmented BNF for Syntax Specifications:
-   ABNF_](https://tools.ietf.org/html/rfc5234), IETF, Jan 2008.
-6. RFC 5321: [_Simple Mail Transfer
-   Protocol_](https://tools.ietf.org/html/rfc5321), IETF, Oct 2008.
+1. RFC 1123:
+   [_Requirements for Internet Hosts -- Application and Support_](https://tools.ietf.org/html/rfc1123),
+   IETF, Oct 1989.
+2. RFC 3629:
+   [_UTF-8, a transformation format of ISO 10646_](https://tools.ietf.org/html/rfc3629),
+   IETF, Nov 2003.
+3. RFC 3696:
+   [_Application Techniques for Checking and Transformation of Names_](https://tools.ietf.org/html/rfc3696),
+   IETF, Feb 2004.
+4. RFC 4291:
+   [_IP Version 6 Addressing Architecture_](https://tools.ietf.org/html/rfc4291),
+   IETF, Feb 2006.
+5. RFC 5234:
+   [_Augmented BNF for Syntax Specifications: ABNF_](https://tools.ietf.org/html/rfc5234),
+   IETF, Jan 2008.
+6. RFC 5321:
+   [_Simple Mail Transfer Protocol_](https://tools.ietf.org/html/rfc5321), IETF,
+   Oct 2008.
 7. RFC 5322: [_Internet Message Format_](https://tools.ietf.org/html/rfc5322), I
    ETF, Oct 2008.
-8. RFC 5890: [_Internationalized Domain Names for Applications (IDNA):
-   Definitions and Document Framework_](https://tools.ietf.org/html/rfc5890),
+8. RFC 5890:
+   [_Internationalized Domain Names for Applications (IDNA): Definitions and Document Framework_](https://tools.ietf.org/html/rfc5890),
    IETF, Aug 2010.
-9. RFC 6531: [_SMTP Extension for Internationalized
-   Email_](https://tools.ietf.org/html/rfc6531), IETF, Feb 2012.
-10. RFC 6532: [_Internationalized Email
-    Headers_](https://tools.ietf.org/html/rfc6532), IETF, Feb 2012.
+9. RFC 6531:
+   [_SMTP Extension for Internationalized Email_](https://tools.ietf.org/html/rfc6531),
+   IETF, Feb 2012.
+10. RFC 6532:
+    [_Internationalized Email Headers_](https://tools.ietf.org/html/rfc6532),
+    IETF, Feb 2012.
 
 <Comments />

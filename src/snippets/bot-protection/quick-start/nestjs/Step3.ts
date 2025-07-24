@@ -41,7 +41,7 @@ import { APP_GUARD, NestFactory } from "@nestjs/core";
     },
   ],
 })
-class AppModule { }
+class AppModule {}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

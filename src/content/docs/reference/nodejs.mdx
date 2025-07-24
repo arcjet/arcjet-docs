@@ -32,9 +32,9 @@ import IPAnalysis from "@/snippets/reference/shared/IPAnalysis.mdx";
 
 [<SDKVersionNodejs />](https://www.npmjs.com/package/@arcjet/node)
 
-This is the reference guide for the Arcjet Node.js SDK, [available on
-GitHub](https://github.com/arcjet/arcjet-js) and licensed under the Apache 2.0
-license.
+This is the reference guide for the Arcjet Node.js SDK,
+[available on GitHub](https://github.com/arcjet/arcjet-js) and licensed under
+the Apache 2.0 license.
 
 <WhatIsArcjet />
 
@@ -77,13 +77,13 @@ of the request handler.
 The required fields are:
 
 - `key` (`string`) - Your Arcjet site key. This can be found in the SDK
-  Installation section for the site in the [Arcjet
-  Dashboard](https://app.arcjet.com).
+  Installation section for the site in the
+  [Arcjet Dashboard](https://app.arcjet.com).
 - `rules` - The rules to apply to the request. See the various sections of the
-  docs for how to configure these e.g. [shield](/shield/reference?f=node-js), [rate
-  limiting](/rate-limiting/reference?f=node-js), [bot
-  protection](/bot-protection/reference?f=node-js), [email
-  validation](/email-validation/reference?f=node-js).
+  docs for how to configure these e.g. [shield](/shield/reference?f=node-js),
+  [rate limiting](/rate-limiting/reference?f=node-js),
+  [bot protection](/bot-protection/reference?f=node-js),
+  [email validation](/email-validation/reference?f=node-js).
 
 The optional fields are:
 
@@ -93,8 +93,8 @@ The optional fields are:
 - `proxies` (`string[]`) - A list of one or more trusted proxies. These
   addresses will be excluded when Arcjet is determining the client IP address.
   This is useful if you are behind a load balancer or proxy that sets the client
-  IP address in a header. See [Load balancers &
-  proxies](#load-balancers--proxies) below for an example.
+  IP address in a header. See
+  [Load balancers & proxies](#load-balancers--proxies) below for an example.
 
 <Tabs>
   <TabItem label="TS">
@@ -140,10 +140,8 @@ You can combine rules to create a more complex protection strategy. For example,
 you can combine rate limiting and bot protection rules to protect your API from
 automated clients.
 
-:::note
-When specifying multiple rules, the order of the rules is ignored. Rule
-execution ordering is automatically optimized for performance.
-:::
+:::note When specifying multiple rules, the order of the rules is ignored. Rule
+execution ordering is automatically optimized for performance. :::
 
 <Tabs>
   <TabItem label="TS">
@@ -174,8 +172,8 @@ The following environment variables can be used to configure the SDK at runtime:
 ### Custom logging
 
 The SDK uses a lightweight logger which mirrors the
-[Pino](https://github.com/pinojs/pino) [structured
-logger](https://github.com/pinojs/pino/blob/8db130eba0439e61c802448d31eb1998cebfbc98/docs/api.md#logger)
+[Pino](https://github.com/pinojs/pino)
+[structured logger](https://github.com/pinojs/pino/blob/8db130eba0439e61c802448d31eb1998cebfbc98/docs/api.md#logger)
 interface. You can use this to customize the logging output.
 
 First, install the required packages:
@@ -207,8 +205,8 @@ through.
 
 The problem with is that the `X-Forwarded-For` header can be spoofed by the
 client, so you should only trust it if you are sure that the load balancer is
-setting it correctly. See [the MDN
-docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For)
+setting it correctly. See
+[the MDN docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For)
 for more details.
 
 You can configure Arcjet to trust IP addresses in the `X-Forwarded-For` header
@@ -265,8 +263,8 @@ The `protect` function function returns a `Promise` that resolves to an
   conclusion based on evaluating each of the configured rules. If you wish to
   accept Arcjet's recommended action based on the configured rules then you can
   use this property.
-- `reason` (`ArcjetReason`) - An object containing more detailed
-  information about the conclusion.
+- `reason` (`ArcjetReason`) - An object containing more detailed information
+  about the conclusion.
 - `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
   containing the results of each rule that was executed.
 - `ttl` (`uint32`) - The time-to-live for the decision in seconds. This is the
@@ -286,9 +284,9 @@ check the conclusion:
 - `isDenied()` (`bool`) - The request should be denied.
 - `isErrored()` (`bool`) - There was an unrecoverable error.
 
-The conclusion will be the highest-severity finding when evaluating the configured
-rules. `"DENY"` is the highest severity, followed by `"CHALLENGE"`, then `"ERROR"` and
-finally `"ALLOW"` as the lowest severity.
+The conclusion will be the highest-severity finding when evaluating the
+configured rules. `"DENY"` is the highest severity, followed by `"CHALLENGE"`,
+then `"ERROR"` and finally `"ALLOW"` as the lowest severity.
 
 For example, when a bot protection rule returns an error and a validate email
 rule returns a deny, the overall conclusion would be deny. To access the error
@@ -300,8 +298,9 @@ The `reason` property of the `ArcjetDecision` object contains an `ArcjetReason`
 object which provides more detailed information about the conclusion. This is
 the final decision reason and is based on the configured rules.
 
-It will always be the highest-priority rule that produced that conclusion,
-to inspect other rules consider iterating over the `results` property on the decision.
+It will always be the highest-priority rule that produced that conclusion, to
+inspect other rules consider iterating over the `results` property on the
+decision.
 
 The `ArcjetReason` object has the following methods that can be used to check
 which rule caused the conclusion:
@@ -400,8 +399,8 @@ window: number;
 reset: number;
 ```
 
-See the [rate limiting documentation](/rate-limiting/reference?f=node-js) for more
-information about these properties.
+See the [rate limiting documentation](/rate-limiting/reference?f=node-js) for
+more information about these properties.
 
 ##### Email validation & verification
 
@@ -417,8 +416,8 @@ An `ArcjetEmailType` is one of the following strings:
 "DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
 ```
 
-See the [email validation documentation](/email-validation/reference?f=node-js) for more
-information about these properties.
+See the [email validation documentation](/email-validation/reference?f=node-js)
+for more information about these properties.
 
 ### IP analysis
 
@@ -461,11 +460,11 @@ when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
 in most cases, the response time will be less than 20-30ms.
 
 If there is an error condition when processing the rule, Arcjet will return an
-`ERROR` result for that rule and you can check the `message` property on the rule's
-error result for more information.
+`ERROR` result for that rule and you can check the `message` property on the
+rule's error result for more information.
 
-If all other rules that were run returned an `ALLOW` result, then the final Arcjet
-conclusion will be `ERROR`.
+If all other rules that were run returned an `ALLOW` result, then the final
+Arcjet conclusion will be `ERROR`.
 
 <Tabs>
   <TabItem label="TS">
