@@ -32,7 +32,7 @@ const ajForEmail = aj.withRule(
   // Create a token bucket rate limit. Other algorithms are supported.
   tokenBucket({
     mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-    characteristics: ["email"], // Track based on the email address
+    characteristics: ["emailHash"], // Track based on the email address
     refillRate: 5, // refill 5 tokens per interval
     interval: 10, // refill every 10 seconds
     capacity: 10, // bucket maximum capacity of 10 tokens
@@ -68,7 +68,7 @@ export default async function handler(
       .digest("hex");
 
     decision = await ajForEmail.protect(req, {
-      email: emailHash,
+      emailHash,
       requested: 5, // Deduct 5 tokens from the token bucket
     });
   } else {
