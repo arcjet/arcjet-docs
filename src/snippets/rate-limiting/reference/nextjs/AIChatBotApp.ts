@@ -1,6 +1,6 @@
 // This example is adapted from https://sdk.vercel.ai/docs/guides/frameworks/nextjs-app
 import { openai } from "@ai-sdk/openai";
-import arcjet, { shield, tokenBucket } from "@arcjet/next";
+import arcjet, { tokenBucket } from "@arcjet/next";
 import { streamText } from "ai";
 import { promptTokensEstimate } from "openai-chat-tokens";
 
