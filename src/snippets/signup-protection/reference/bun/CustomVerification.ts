@@ -3,8 +3,6 @@ import { env } from "bun";
 
 const aj = arcjet({
   key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
-  // Limiting by IP is the default if not specified
-  //characteristics: ["ip.src"],
   rules: [
     protectSignup({
       email: {

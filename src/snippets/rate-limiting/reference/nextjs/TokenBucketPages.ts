@@ -3,10 +3,12 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
-  characteristics: ["ip.src"],
   rules: [
     tokenBucket({
       mode: "LIVE",
+      // Tracked by IP address by default, but this can be customized
+      // See https://docs.arcjet.com/fingerprints
+      //characteristics: ["ip.src"],
       refillRate: 40_000,
       interval: "1d",
       capacity: 40_000,

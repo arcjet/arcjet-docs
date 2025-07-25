@@ -4,11 +4,12 @@ import { error, json } from "@sveltejs/kit";
 
 const aj = arcjet({
   key: env.ARCJET_KEY,
-  // Tracking by ip.src is the default if not specified
-  //characteristics: ["ip.src"],
   rules: [
     fixedWindow({
       mode: "LIVE",
+      // Tracked by IP address by default, but this can be customized
+      // See https://docs.arcjet.com/fingerprints
+      //characteristics: ["ip.src"],
       window: "1h",
       max: 60,
     }),

@@ -3,12 +3,10 @@ import { env } from "bun";
 
 const aj = arcjet({
   key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
-  // Define a custom userId characteristic.
-  // See https://docs.arcjet.com/rate-limiting/configuration#characteristics
-  characteristics: ["userId"],
   rules: [
     fixedWindow({
       mode: "LIVE",
+      characteristics: ["userId"],
       window: "1h",
       max: 60,
     }),

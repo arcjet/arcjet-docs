@@ -3,12 +3,10 @@ import { NextResponse } from "next/server";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
-  // Define a custom userId characteristic.
-  // See https://docs.arcjet.com/architecture#custom-characteristics
-  characteristics: ["userId"],
   rules: [
     fixedWindow({
       mode: "LIVE",
+      characteristics: ["userId"],
       window: "1h",
       max: 60,
     }),

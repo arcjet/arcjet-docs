@@ -3,7 +3,6 @@ import { env } from "bun";
 
 const aj = arcjet({
   key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
-  characteristics: ["userId"], // track requests by a custom user ID
   rules: [
     // Create a token bucket rate limit. Other algorithms are supported.
     tokenBucket({

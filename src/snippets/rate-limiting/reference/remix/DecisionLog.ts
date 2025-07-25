@@ -3,10 +3,12 @@ import type { LoaderFunctionArgs } from "@remix-run/node";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
-  characteristics: ["ip.src"],
   rules: [
     fixedWindow({
       mode: "LIVE",
+      // Tracked by IP address by default, but this can be customized
+      // See https://docs.arcjet.com/fingerprints
+      //characteristics: ["ip.src"],
       window: "1h",
       max: 60,
     }),

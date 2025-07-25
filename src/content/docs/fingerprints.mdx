@@ -1,0 +1,127 @@
+---
+title: "Arcjet fingerprints"
+next: false
+---
+
+import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import CharacteristicsGlobalRule from "@/snippets/rate-limiting/reference/nextjs/CharacteristicsGlobalRule.ts?raw";
+import FixedWindowCustomCharacteristicRule from "@/snippets/rate-limiting/reference/nextjs/FixedWindowCustomCharacteristicRule.ts?raw";
+import FixedWindowCustomCharacteristicFingerprintRule from "@/snippets/rate-limiting/reference/nextjs/FixedWindowCustomCharacteristicFingerprintRule.ts?raw";
+
+import Comments from "@/components/Comments.astro";
+
+Arcjet tracks clients across multiple requests so that suspicious activity can
+be detected. This is done by fingerprinting each request within your environment
+through a component within the Arcjet SDK.
+
+The fingerprint is a SHA-256 string generated based on request characteristics.
+The goal is that a single client will always generate the same fingerprint so we
+can detect suspicious requests and block the client. Behind the scenes, Arcjet
+uses this to cache decisions locally in your environment and in the Arcjet
+decision API.
+
+By default, the fingerprint is generated based on the client IP address. This
+can be configured by specifying different characteristics. Different
+configurations can be used for each supported rule and globally on the SDK root
+instance.
+
+### Built-in characteristics
+
+Built-in options are managed by the SDK and are always available. If multiple
+options are provided, they will be combined.
+
+:::caution
+If you specify different characteristics and do not include `ip.src`, you may
+inadvertently generate the same fingerprint for multiple users.
+Be sure to include a characteristic which can narrowly identify each client.
+For example, use a header value to limit based on a session token or authentication header.
+:::
+
+| Option                                        |     Description      |
+| :-------------------------------------------- | :------------------: |
+| `ip.src`                                      |  Client IP address   |
+| `http.host`                                   |     Request host     |
+| `http.request.headers["<header_name>"]`       | Request header value |
+| `http.request.cookie["<cookie_name>"]`        | Request cookie value |
+| `http.request.uri.args["<query_param_name>"]` | Request query value  |
+| `http.request.uri.path`                       |     Request path     |
+
+### IP address detection
+
+The client IP address is a key part of the fingerprint. The IP should not be
+trusted as it can be spoofed in most cases, especially when loaded via the
+`Headers` object. Each Arcjet SDK uses a native method to detect the IP address
+generally following the guidance provided by the [MDN X-Forwarded-For
+documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For).
+
+When choosing the IP address to use, Arcjet uses the first non-private IP that
+is a valid address. However, in non-production environments, we allow
+private/internal addresses so the SDKs work correctly. See the individual SDK
+references for more details.
+
+### Custom characteristics
+
+You can use custom characteristics to track clients based on various attributes.
+For example, you can set up a limit for a logged in user by setting their user
+ID as the identifier. This will apply the limit to all requests made by that
+user regardless of their device and IP address.
+
+Custom characteristics are defined with a string key when configuring the sdk.
+The value is then passed as a `string`, `number` or `boolean` when
+calling the `protect` method. You can use any string value for the key.
+
+:::caution
+Avoid passing personal information such as an email address as a custom
+characteristic. The value is hashed on Arcjet's servers, but we recommend against
+sending us sensitive information.
+:::
+
+#### User ID
+
+In this example we create a custom characteristic called `userId`, but you can call it anything you like:
+
+<Code code={FixedWindowCustomCharacteristicRule} lang="ts" />
+
+Then when calling the `protect` method, you would pass a value for the key:
+
+```ts
+// Pass userId as a string to identify the user. This can be any string,
+// number or boolean value. Multiple values will be combined.
+const decision = await aj.protect(req, { userId: "user123" });
+```
+
+#### IP address + User ID
+
+If you want to be more flexible and use the user IP address for anonymous users
+and a user ID for logged in users, you can can use `withRule` to create
+augmented clients that use different characteristics.
+
+<Code code={FixedWindowCustomCharacteristicFingerprintRule} lang="ts" />
+
+Then when calling the `protect` method, you would pass a value for the key:
+
+```ts
+if (userIsLoggedIn) {
+  // Identify logged in users by their user ID
+  const decision = await ajForUsers.protect(req, { userId: "user123" });
+} else {
+  // Identify guest users by their IP address
+  // Note that you don't need to manually pass the IP address, the Arcjet SDK
+  // will automatically retrieve it for you.
+  const decision = await ajForGuests.protect(req);
+}
+```
+
+## Per rule vs global
+
+You can set the characteristics globally on the SDK root instance and per rule.
+If you set global characteristics, they will apply to all rules unless
+overridden by a specific rule.
+
+In this example, the bot detection rule will track requests by IP address and
+the fixed window rule will track requests by a custom user ID. This means that
+results will be tracked and cached independently.
+
+<Code code={CharacteristicsGlobalRule} lang="ts" />
+
+<Comments />

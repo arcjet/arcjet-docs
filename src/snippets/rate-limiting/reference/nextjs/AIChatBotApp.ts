@@ -1,6 +1,6 @@
 // This example is adapted from https://sdk.vercel.ai/docs/guides/frameworks/nextjs-app
 import { openai } from "@ai-sdk/openai";
-import arcjet, { shield, tokenBucket } from "@arcjet/next";
+import arcjet, { tokenBucket } from "@arcjet/next";
 import { streamText } from "ai";
 import { promptTokensEstimate } from "openai-chat-tokens";
 
@@ -9,10 +9,12 @@ const aj = arcjet({
   // and set it as an environment variable rather than hard coding.
   // See: https://nextjs.org/docs/app/building-your-application/configuring/environment-variables
   key: process.env.AJ_KEY!,
-  characteristics: ["ip.src"], // track requests by IP address
   rules: [
     tokenBucket({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+      // Tracked by IP address by default, but this can be customized
+      // See https://docs.arcjet.com/fingerprints
+      //characteristics: ["ip.src"],
       refillRate: 2_000,
       interval: "1h",
       capacity: 5_000,

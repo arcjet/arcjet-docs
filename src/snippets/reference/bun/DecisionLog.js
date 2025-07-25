@@ -3,8 +3,6 @@ import { env } from "bun";
 
 const aj = arcjet({
   key: env.ARCJET_KEY,
-  // Tracking by ip.src is the default if not specified
-  //characteristics: ["ip.src"],
   rules: [
     fixedWindow({
       mode: "LIVE",

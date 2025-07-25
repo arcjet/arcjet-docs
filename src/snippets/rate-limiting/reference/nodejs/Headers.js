@@ -4,8 +4,6 @@ import http from "node:http";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
-  // Tracking by ip.src is the default if not specified
-  //characteristics: ["ip.src"],
   rules: [
     fixedWindow({
       mode: "LIVE",
