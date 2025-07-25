@@ -4,11 +4,11 @@ next: false
 ---
 
 import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
-import CharacteristicsGlobalRule from "/src/snippets/rate-limiting/reference/nextjs/CharacteristicsGlobalRule.ts?raw";
-import FixedWindowCustomCharacteristicRule from "/src/snippets/rate-limiting/reference/nextjs/FixedWindowCustomCharacteristicRule.ts?raw";
-import FixedWindowCustomCharacteristicFingerprintRule from "/src/snippets/rate-limiting/reference/nextjs/FixedWindowCustomCharacteristicFingerprintRule.ts?raw";
+import CharacteristicsGlobalRule from "@/snippets/rate-limiting/reference/nextjs/CharacteristicsGlobalRule.ts?raw";
+import FixedWindowCustomCharacteristicRule from "@/snippets/rate-limiting/reference/nextjs/FixedWindowCustomCharacteristicRule.ts?raw";
+import FixedWindowCustomCharacteristicFingerprintRule from "@/snippets/rate-limiting/reference/nextjs/FixedWindowCustomCharacteristicFingerprintRule.ts?raw";
 
-import Comments from "/src/components/Comments.astro";
+import Comments from "@/components/Comments.astro";
 
 Arcjet tracks clients across multiple requests so that suspicious activity can
 be detected. This is done by fingerprinting each request within your environment
@@ -22,7 +22,8 @@ decision API.
 
 By default, the fingerprint is generated based on the client IP address. This
 can be configured by specifying different characteristics. Different
-configurations can be used for each rule and globally on the SDK root instance.
+configurations can be used for each supported rule and globally on the SDK root
+instance.
 
 ### Built-in characteristics
 
@@ -92,8 +93,8 @@ const decision = await aj.protect(req, { userId: "user123" });
 #### IP address + User ID
 
 If you want to be more flexible and use the user IP address for anonymous users
-and a user ID for logged in users, you can create a custom fingerprint
-characteristic that is defined separately:
+and a user ID for logged in users, you can can use `withRule` to create
+augmented clients that use different characteristics.
 
 <Code code={FixedWindowCustomCharacteristicFingerprintRule} lang="ts" />
 
@@ -101,14 +102,13 @@ Then when calling the `protect` method, you would pass a value for the key:
 
 ```ts
 if (userIsLoggedIn) {
-  // Set fingerprint to the user ID from the session or database
-  const fingerprint = "userId";
-  const decision = await aj.protect(req, { fingerprint });
+  // Identify logged in users by their user ID
+  const decision = await ajForUsers.protect(req, { userId: "user123" });
 } else {
-  // In Next.js, you can use `req.ip` to get the user's IP address. Other
-  // frameworks may have different methods.
-  const fingerprint = req.ip;
-  const decision = await aj.protect(req, { fingerprint });
+  // Identify guest users by their IP address
+  // Note that you don't need to manually pass the IP address, the Arcjet SDK
+  // will automatically retrieve it for you.
+  const decision = await ajForGuests.protect(req);
 }
 ```
 

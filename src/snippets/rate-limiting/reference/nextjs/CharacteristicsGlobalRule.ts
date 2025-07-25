@@ -5,6 +5,7 @@ const aj = arcjet({
   characteristics: ["ip.src"],
   rules: [
     detectBot({
+      // will inherit the global characteristics (ip.src)
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
       allow: [],
     }),
