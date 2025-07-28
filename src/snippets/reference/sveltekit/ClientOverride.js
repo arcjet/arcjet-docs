@@ -17,7 +17,6 @@ const client = createRemoteClient({
 const aj = arcjet({
   key: env.ARCJET_KEY,
   // Limiting by ip.src is the default if not specified
-  //characteristics: ["ip.src"],
   rules: [
     slidingWindow({
       mode: "LIVE",

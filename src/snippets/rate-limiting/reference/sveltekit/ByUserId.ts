@@ -4,12 +4,10 @@ import { error, json, type RequestEvent } from "@sveltejs/kit";
 
 const aj = arcjet({
   key: env.ARCJET_KEY!,
-  // Define a custom userId characteristic.
-  // See https://docs.arcjet.com/architecture#custom-characteristics
-  characteristics: ["userId"],
   rules: [
     fixedWindow({
       mode: "LIVE",
+      characteristics: ["userId"],
       window: "1h",
       max: 60,
     }),

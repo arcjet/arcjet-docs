@@ -3,7 +3,6 @@ import type { ActionFunctionArgs } from "@remix-run/node";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
-  characteristics: ["ip.src"],
   rules: [
     sensitiveInfo({
       deny: ["EMAIL"],

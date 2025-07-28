@@ -12,8 +12,6 @@ export default defineConfig({
   },
   integrations: [
     arcjet({
-      // Tracking by ip.src is the default if not specified
-      //characteristics: ["ip.src"],
       rules: [
         fixedWindow({
           mode: "LIVE",

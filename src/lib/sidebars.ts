@@ -320,6 +320,10 @@ export const main = [
             link: "/architecture",
           },
           {
+            label: "Fingerprints ",
+            link: "/fingerprints",
+          },
+          {
             label: "Regions",
             link: "/regions",
           },

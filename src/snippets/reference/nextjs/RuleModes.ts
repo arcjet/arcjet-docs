@@ -2,11 +2,13 @@ import arcjet, { fixedWindow } from "@arcjet/next";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
-  characteristics: ["ip.src"],
   rules: [
     // This rule is live
     fixedWindow({
       mode: "LIVE",
+      // Tracked by IP address by default, but this can be customized
+      // See https://docs.arcjet.com/fingerprints
+      //characteristics: ["ip.src"],
       window: "1h",
       max: 60,
     }),
