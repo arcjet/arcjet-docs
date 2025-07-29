@@ -10,6 +10,7 @@ import HealthzRouteAppJS from "/src/snippets/reference/nextjs/HealthzRouteApp.js
 import HealthzRouteAppTS from "/src/snippets/reference/nextjs/HealthzRouteApp.ts?raw";
 import HealthzRoutePagesJS from "/src/snippets/reference/nextjs/HealthzRoutePages.js?raw";
 import HealthzRoutePagesTS from "/src/snippets/reference/nextjs/HealthzRoutePages.ts?raw";
+import DenoRequirements from "@/snippets/get-started/deno/Requirements.mdx";
 
 ## Common problems
 
@@ -349,6 +350,30 @@ Arcjet supports the [active and maintenance LTS versions of
 Next.js](https://nextjs.org/support-policy) as indicated in [the SDK
 reference](/reference/nextjs#requirements). Upgrade your Next.js version to the
 latest version to fix this error.
+
+### http2.connect is not implemented yet!
+
+You may see this error if you are using an old version of Deno, either directly
+or through a platform such as Supabase Edge Functions:
+
+```shell
+http2.connect is not implemented yet!
+```
+
+Arcjet supports the following versions of Deno:
+
+<DenoRequirements />
+
+Follow [the update
+instructions](https://docs.deno.com/runtime/getting_started/installation/#updating)
+to upgrade Deno to the latest version.
+
+If you are self-hosting Supabase, you can [follow the instructions in the
+Supabase
+docs](https://supabase.com/docs/reference/self-hosting-functions/introduction#how-to-update-to-a-newer-deno-version).
+Otherwise, [see this
+discussion](https://github.com/orgs/supabase/discussions/29552) for other
+Supabase instances.
 
 ## Get help
 
