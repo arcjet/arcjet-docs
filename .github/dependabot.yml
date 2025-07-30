@@ -4,8 +4,6 @@ updates:
     directory: /
     schedule:
       interval: daily
-    reviewers:
-      - arcjet/dx-team
     groups:
       arcjet-apps-major:
         update-types:
@@ -27,6 +25,11 @@ updates:
         versions: [">=23"]
       # Ignore Connect RPC updates until merged in arcjet-js
       - dependency-name: "@connectrpc/connect-node"
-        versions: [">1.5.0"]
+        versions: [">=2"]
       - dependency-name: "@connectrpc/connect-web"
-        versions: [">1.5.0"]
+        versions: [">=2"]
+      # Ignore zod@4 until peer dependencies are updated
+      - dependency-name: zod
+        versions: [">=4"]
+      - dependency-name: zod-validation-error
+        versions: [">=4"]
