@@ -16,7 +16,7 @@ const ajForUsers = aj.withRule(
 
 const ajForGuests = aj.withRule(
   fixedWindow({
-    characteristics: ["req.ip"], // track guest requests by IP address
+    characteristics: ["ip.src"], // track guest requests by IP address
     mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
     window: "60s", // 60 second fixed window
     max: 100, // allow a maximum of 100 requests
