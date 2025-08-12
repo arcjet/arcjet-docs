@@ -1,0 +1,118 @@
+---
+title: "Filters reference"
+description: "Reference guide for filtering requests with Arcjet in your Next.js, Node.js, Bun, Remix, or SvelteKit app."
+ajToc:
+  - text: "Plan availability"
+    anchor: "plan-availability"
+  - text: "Configuration"
+    anchor: "configuration"
+  - text: "Decision"
+    anchor: "decision"
+  - text: "Error handling"
+    anchor: "error-handling"
+  - text: "Testing"
+    anchor: "testing"
+---
+
+Arcjet filters lets you write expressions against several fields of the request
+so that you can block certain things within Arcjet itself.
+
+## Plan availability
+
+Arcjet filter rules is available on any
+[pricing plan](https://arcjet.com/pricing).
+
+## Configuration
+
+Filters are configured by allowing or denying a one or more expressions.
+The `allow` and `deny` lists are mutually-exclusive,
+such that using `allow` will result in a `DENY` decision for any request that
+is not matched by a filter in the `allow` list and using `deny` will result in
+an `ALLOW` decision for any request that is not matched by a filter in the
+`deny` list.
+
+The `arcjet` client can be configured with one or more filter rules,
+which are constructed with the `filters(options)` function and configured by
+`FilterOptionsAllow` or `FilterOptionsDeny`:
+
+```ts
+interface FilterOptionsAllow {
+  allow: ReadonlyArray<Filter | string> | Filter | string;
+  mode?: "DRY_RUN" | "LIVE" | null | undefined;
+}
+
+interface FilterOptionsDeny {
+  allow: ReadonlyArray<Filter | string> | Filter | string;
+  mode?: "DRY_RUN" | "LIVE" | null | undefined;
+}
+
+interface Filter {
+  displayName?: string | null | undefined;
+  expression: string;
+}
+```
+
+:::note
+When specifying multiple rules, the order of the rules is ignored. Rule
+execution ordering is automatically optimized for performance.
+See [decision](#decision) below for details of examining the execution results.
+:::
+
+## Decision
+
+Arcjet also provides a single `protect` function that is used to execute your
+protection rules.
+
+This function returns a `Promise` that resolves to an
+`ArcjetDecision` object.
+This contains the following properties:
+
+- `id` (`string`) - The unique ID for the request. This can be used to look up
+  the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
+  involving the Arcjet cloud API. For decisions taken locally, the prefix is
+  `lreq_`.
+- `conclusion` (`ArcjetConclusion`) - The final conclusion based on evaluating
+  each of the configured rules. If you wish to accept Arcjet's recommended
+  action based on the configured rules then you can use this property.
+- `reason` (`ArcjetReason`) - An object containing more detailed
+  information about the conclusion.
+- `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
+  containing the results of each rule that was executed.
+- `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
+  client IP address. See the SDK reference for more information.
+
+You check if a deny conclusion has been returned by a filter rule by using
+`decision.isDenied()` and `decision.reason.isFilterRule()` respectively.
+
+You can iterate through the results and check whether a filter rule was applied:
+
+```ts
+for (const result of decision.results) {
+  console.log("Rule Result", result);
+}
+```
+
+## Error handling
+
+Arcjet is designed to fail open so that a service issue or misconfiguration does
+not block all requests. The SDK will also time out and fail open after 500ms
+when `NODE_ENV` is `production` and 1000ms otherwise. However, in most cases,
+the response time will be less than 20-30ms.
+
+If there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the `message` property on the rule's
+error result for more information.
+
+If all other rules that were run returned an `ALLOW` result, then the final Arcjet
+conclusion will be `ERROR`.
+
+## Testing
+
+Arcjet runs the same in any environment, including locally and in CI. You can
+use the `mode` set to `DRY_RUN` to log the results of rule execution without
+blocking any requests.
+
+We have an example test framework you can use to automatically test your rules.
+Arcjet can also be triggered based using a sample of your traffic.
+
+See the [Testing](/testing) section of the docs for details.
