@@ -20,7 +20,18 @@ let types = [];
 for (const query of result.queries) {
     types.push(query.text);
 }
-let code = await format(types.join("\n"), { parser: "typescript" });
+
+const unformatted = types.join("\n");
+
+let code: string;
+try {
+    code = await format(unformatted, { parser: "typescript" });
+} catch (cause) {
+    throw new Error(
+        `<DisplayType type="${Astro.props.type}" from="${Astro.props.from}">: prettier formatting failed for:\n\n${unformatted}`,
+        { cause },
+    );
+}
 ---
 
 <Code code={code} lang="ts" />
