@@ -17,58 +17,85 @@ export const main = [
             attrs: { target: "_blank", class: "external-link" },
           },
           {
+            label: "Express.js",
+            link: "https://github.com/arcjet/example-expressjs",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
+            label: "Fastify",
+            link: "https://github.com/arcjet/example-fastify",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
             label: "NestJS",
             link: "https://github.com/arcjet/example-nestjs",
             attrs: { target: "_blank", class: "external-link" },
           },
           {
-            label: "Next.js",
-            link: "https://github.com/arcjet/example-nextjs",
+            label: "Next.js apps",
+            collapsed: true,
+            items: [
+              {
+                label: "Next.js",
+                link: "https://github.com/arcjet/example-nextjs",
+                attrs: { target: "_blank", class: "external-link" },
+              },
+              {
+                label: "Next.js + Fly.io",
+                link: "https://github.com/arcjet/example-nextjs-fly",
+                attrs: { target: "_blank", class: "external-link" },
+              },
+              {
+                label: "Next.js + Prisma",
+                link: "https://github.com/arcjet/example-nextjs-prisma",
+                attrs: { target: "_blank", class: "external-link" },
+              },
+              {
+                label: "Next.js Form Protection",
+                link: "https://github.com/arcjet/example-nextjs-form",
+                attrs: { target: "_blank", class: "external-link" },
+              },
+              {
+                label: "Next.js Server Actions",
+                link: "https://github.com/arcjet/example-nextjs-server-action",
+                attrs: { target: "_blank", class: "external-link" },
+              },
+              {
+                label: "Next.js Starter",
+                link: "https://github.com/ixartz/Next-js-Boilerplate",
+                attrs: { target: "_blank", class: "external-link" },
+              },
+              {
+                label: "Next.js SaaS template",
+                link: "https://www.next-forge.com/",
+                attrs: { target: "_blank", class: "external-link" },
+              },
+            ],
+          },
+          {
+            label: "Remix apps",
+            collapsed: true,
+            items: [
+              {
+                label: "Remix",
+                link: "https://github.com/arcjet/example-remix",
+                attrs: { target: "_blank", class: "external-link" },
+              },
+              {
+                label: "Remix SaaS template",
+                link: "https://github.com/dev-xo/remix-saas",
+                attrs: { target: "_blank", class: "external-link" },
+              },
+            ],
+          },
+          {
+            label: "SvelteKit",
+            link: "https://github.com/arcjet/example-sveltekit",
             attrs: { target: "_blank", class: "external-link" },
           },
           {
-            label: "Node.js + Express.js",
-            link: "https://github.com/arcjet/example-expressjs",
-            attrs: { target: "_blank", class: "external-link" },
-          },
-          {
-            label: "Next.js + Fly.io",
-            link: "https://github.com/arcjet/example-nextjs-fly",
-            attrs: { target: "_blank", class: "external-link" },
-          },
-          {
-            label: "Next.js + Prisma",
-            link: "https://github.com/arcjet/example-nextjs-prisma",
-            attrs: { target: "_blank", class: "external-link" },
-          },
-          {
-            label: "Next.js Form Protection",
-            link: "https://github.com/arcjet/example-nextjs-form",
-            attrs: { target: "_blank", class: "external-link" },
-          },
-          {
-            label: "Next.js Server Actions",
-            link: "https://github.com/arcjet/example-nextjs-server-action",
-            attrs: { target: "_blank", class: "external-link" },
-          },
-          {
-            label: "Next.js Starter",
-            link: "https://github.com/ixartz/Next-js-Boilerplate",
-            attrs: { target: "_blank", class: "external-link" },
-          },
-          {
-            label: "Next.js SaaS template",
-            link: "https://www.next-forge.com/",
-            attrs: { target: "_blank", class: "external-link" },
-          },
-          {
-            label: "Remix",
-            link: "https://github.com/arcjet/example-remix",
-            attrs: { target: "_blank", class: "external-link" },
-          },
-          {
-            label: "Remix SaaS template",
-            link: "https://github.com/dev-xo/remix-saas",
+            label: "TanStack Start",
+            link: "https://github.com/arcjet/example-tanstack-start",
             attrs: { target: "_blank", class: "external-link" },
           },
           {
