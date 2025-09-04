@@ -16,7 +16,7 @@ const aj = arcjet({
 export async function loader(args: LoaderFunctionArgs) {
   const decision = await aj.protect(args);
 
-  let headers: Record<string, string> = {};
+  const headers = new Headers();
   setRateLimitHeaders(headers, decision);
 
   if (decision.isDenied()) {
