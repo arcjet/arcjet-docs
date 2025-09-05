@@ -458,6 +458,11 @@ export const main = [
         link: "/security",
       },
       {
+        label: "Trust",
+        link: "https://trust.arcjet.com",
+        attrs: { target: "_blank", class: "external-link" },
+      },
+      {
         label: "Privacy",
         link: "/privacy",
       },
