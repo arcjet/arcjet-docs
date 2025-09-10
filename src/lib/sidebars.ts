@@ -17,6 +17,11 @@ export const main = [
             attrs: { target: "_blank", class: "external-link" },
           },
           {
+            label: "Deno",
+            link: "https://github.com/arcjet/example-deno",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
             label: "Express.js",
             link: "https://github.com/arcjet/example-expressjs",
             attrs: { target: "_blank", class: "external-link" },
@@ -68,11 +73,6 @@ export const main = [
               {
                 label: "Next.js + Fly.io",
                 link: "https://github.com/arcjet/example-nextjs-fly",
-                attrs: { target: "_blank", class: "external-link" },
-              },
-              {
-                label: "Next.js + Prisma",
-                link: "https://github.com/arcjet/example-nextjs-prisma",
                 attrs: { target: "_blank", class: "external-link" },
               },
               {
