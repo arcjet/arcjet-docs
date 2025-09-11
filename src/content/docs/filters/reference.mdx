@@ -14,13 +14,15 @@ ajToc:
     anchor: "testing"
 ---
 
-Arcjet filters lets you write expressions against several fields of the request
-so that you can block certain things within Arcjet itself.
+Arcjet filters let you permit or block requests using
+[Wireshark](https://www.wireshark.org/)-like expressions over HTTP headers, IP
+addresses, and other request attributes - so you can quickly enforce rules like
+allow/deny by country, network, or user-agent pattern.
 
 ## Plan availability
 
-Arcjet filter rules is available on any
-[pricing plan](https://arcjet.com/pricing).
+Arcjet filter rules is available on all [pricing
+plans](https://arcjet.com/pricing).
 
 ## Configuration
 
@@ -60,7 +62,7 @@ See [decision](#decision) below for details of examining the execution results.
 
 ## Decision
 
-Arcjet also provides a single `protect` function that is used to execute your
+Arcjet provides a single `protect` function that is used to execute your
 protection rules.
 
 This function returns a `Promise` that resolves to an
