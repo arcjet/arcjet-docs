@@ -1,0 +1,13 @@
+---
+import Default from '@astrojs/starlight/components/PageFrame.astro';
+---
+
+<script>
+    import { initializePostHog } from "@/lib/posthog.client";
+    initializePostHog();
+</script>
+<Default>
+	<slot name="header" slot="header" />
+	<slot slot="sidebar" name="sidebar"  />
+	<slot />
+</Default>

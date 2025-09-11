@@ -1,10 +1,10 @@
 import fs from "node:fs";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
-import vercelStatic from "@astrojs/vercel";
+import vercelAdapter from "@astrojs/vercel";
 import { ExpressiveCodeTheme } from "astro-expressive-code";
 import robotsTxt from "astro-robots-txt";
-import { defineConfig } from "astro/config";
+import { defineConfig, envField } from "astro/config";
 import arcjet from "@arcjet/astro";
 import starlightLinksValidator from "starlight-links-validator";
 import { main as sidebar } from "./src/lib/sidebars";
@@ -22,9 +22,30 @@ const ajThemeLight = ExpressiveCodeTheme.fromJSONString(jsoncStringLight);
 
 // https://astro.build/config
 export default defineConfig({
+  env: {
+    schema: {
+      PUBLIC_POSTHOG_KEY: envField.string({
+        access: "public",
+        context: "client",
+        optional: true,
+      }),
+      // https://vercel.com/docs/environment-variables/system-environment-variables#VERCEL_TARGET_ENV
+      VERCEL_TARGET_ENV: envField.string({
+        access: "public",
+        context: "client",
+        optional: true,
+      }),
+      // https://vercel.com/docs/environment-variables/system-environment-variables#VERCEL_GIT_COMMIT_SHA
+      VERCEL_GIT_COMMIT_SHA: envField.string({
+        access: "public",
+        context: "client",
+        optional: true,
+      }),
+    },
+  },
   site: "https://docs.arcjet.com",
-  output: "static",
-  adapter: vercelStatic(),
+  adapter: vercelAdapter(),
+  output: "server",
   // This is a fix for https://github.com/withastro/astro/issues/8297
   vite: {
     ssr: {
@@ -95,6 +116,7 @@ export default defineConfig({
         Header: "./src/components/overrides/Header.astro",
         Sidebar: "./src/components/overrides/Sidebar.astro",
         PageSidebar: "./src/components/overrides/PageSidebar.astro",
+        PageFrame: "./src/components/overrides/PageFrame.astro",
         PageTitle: "./src/components/overrides/PageTitle.astro",
         Hero: "./src/components/overrides/Hero.astro",
         ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
