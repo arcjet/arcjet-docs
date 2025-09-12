@@ -28,15 +28,15 @@ plans](https://arcjet.com/pricing).
 
 ## Configuration
 
-Filters are configured by allowing or denying a one or more expressions.
-The `allow` and `deny` lists are mutually-exclusive,
-such that using `allow` will result in a `DENY` decision for any request that
-is not matched by a filter in the `allow` list and using `deny` will result in
-an `ALLOW` decision for any request that is not matched by a filter in the
-`deny` list.
+Allow or deny filters are configured using one or more expressions:
 
-The `arcjet` client can be configured with one or more filter rules,
-which are constructed with the `filters(options)` function and configured by
+- `allow` - A list of expressions that will result in an `ALLOW` decision if the
+  request matches.
+- `deny` - A list of expressions that will result in a `DENY` decision if the
+  request matches.
+- These lists are mutually-exclusive, so you can only use one or the other.
+
+They are constructed with the `filters(options)` function and configured by
 `FilterOptionsAllow` or `FilterOptionsDeny`:
 
 <DisplayType from="arcjet" type="FilterOptions" />
@@ -50,7 +50,14 @@ See [decision](#decision) below for details of examining the execution results.
 
 ## Expression language
 
-The expression language is based on Wireshark display filters and looks for example like this:
+The expression language is based on [Wireshark](https://www.wireshark.org/)-like
+display filters. Like other programming languages, there are fields
+(`ip.src.vpn`), functions (`lower()`), operators (`or`, `matches`), and values
+(`"curl"`).
+
+### Example: Matching VPN, Tor, or Curl requests
+
+This example matches VPN or Tor traffic and basic Curl requests.
 
 ```text
 ip.src.vpn or
@@ -58,19 +65,17 @@ ip.src.vpn or
   lower(http.request.headers["user-agent"]) matches "curl"
 ```
 
-This example matches VPN or Tor traffic and basic Curl requests.
-Like any programming language, there are fields (`ip.src.vpn`),
-functions (`lower()`), operators (`or`, `matches`), and values (`"curl"`).
+### Example: Matching requests from specific countries
 
-Another example, this time to match IP addresses in the European Union:
+This example matches requests from the European Union:
 
 ```text
 ip.src.country in {"AT" "BE" "BG" "CY" "CZ" "DE" "DK" "EE" "ES" "FI" "FR" "GR" "HR" "HU" "IE" "IT" "LT" "LU" "LV" "MT" "NL" "PL" "PT" "RO" "SE" "SI" "SK"}
 ```
 
-### Fields
+## Fields
 
-| Field                    | Type          | Example                                       |
+| Field                    | Type          | Example value                                 |
 | ------------------------ | ------------- | --------------------------------------------- |
 | `http.host`              | `string`      | `"example.com"`                               |
 | `http.request.cookie`    | `Map<string>` | `{NEXT_LOCALE: "en-US", …}`                   |
@@ -105,14 +110,14 @@ ip.src.country in {"AT" "BE" "BG" "CY" "CZ" "DE" "DK" "EE" "ES" "FI" "FR" "GR" "
 | `ip.src.vpn`             | `boolean`     | `false`                                       |
 | `ip.src`                 | `Ip`          | `185.199.108.153`                             |
 
-All `ip.src.*` fields reflect information about `ip.src` which is the client IP
-address.
+All `ip.src.*` fields reflect information about the client IP address (the request source IP).
+
 That information is gathered by our Decide API.
 Other fields are available locally.
 
-### Operators
+## Operators
 
-| Operator          | Example                                                                    |
+| Operator          | Example expression                                                         |
 | ----------------- | -------------------------------------------------------------------------- |
 | `and` (`&&`)      | `http.request.method eq "GET" and http.request.uri.path eq "/quick-start"` |
 | `contains`        | `http.request.uri.path contains "quick-start"`                             |
@@ -130,7 +135,7 @@ Other fields are available locally.
 | `wildcard`        | `http.request.uri.path wildcard "/articles/*"`                             |
 | `xor` (`^^`)      | `ip.src.vpn xor ip.src.relay`                                              |
 
-### Functions
+## Functions
 
 | Function | Example                                                       |
 | -------- | ------------------------------------------------------------- |
@@ -138,18 +143,19 @@ Other fields are available locally.
 | `lower`  | `lower(ip.src.country) contains "be"`                         |
 | `upper`  | `upper(http.request.headers["user-agent"]) contains "CHROME"` |
 
-### Values
+## Values
 
-#### Strings
+### Strings
 
 String values are enclosed in double quotes (`"`).
+
 Double quotes within the string must be escaped with a backslash (`\"`).
 
 ```text
 http.host eq "example.com"
 ```
 
-#### Booleans
+### Booleans
 
 Boolean values are either `true` or `false`.
 You can negate a boolean value with the `not` (`!`) operator.
@@ -162,7 +168,7 @@ ip.src.vpn
 not ip.src.vpn
 ```
 
-#### IP addresses
+### IP addresses
 
 IP addresses are a special type which must not be quoted like strings.
 
@@ -178,10 +184,11 @@ ip.src in { 185.199.108.153 185.199.109.153 185.199.110.153 185.199.111.153 }
 ip.src in { 192.0.2.0/24 }
 ```
 
-#### Maps
+### Maps
 
 Maps (or associative arrays) are a collection of keys to values.
-They cannot be written literally in the expression language but they exist for
+
+They cannot be written literally in the expression language, but they exist for
 the fields `http.request.cookie`, `http.request.headers`, and
 `http.request.uri.args`.
 
@@ -194,8 +201,7 @@ http.request.headers["user-agent"] matches "Chrome"
 Arcjet provides a single `protect` function that is used to execute your
 protection rules.
 
-This function returns a `Promise` that resolves to an
-`ArcjetDecision` object.
+This function returns a `Promise` that resolves to an `ArcjetDecision` object.
 This contains the following properties:
 
 - `id` (`string`) - The unique ID for the request. This can be used to look up
