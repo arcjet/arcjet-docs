@@ -14,6 +14,8 @@ ajToc:
     anchor: "testing"
 ---
 
+import DisplayType from "@/components/DisplayType.astro";
+
 Arcjet filters let you permit or block requests using
 [Wireshark](https://www.wireshark.org/)-like expressions over HTTP headers, IP
 addresses, and other request attributes - so you can quickly enforce rules like
@@ -37,28 +39,155 @@ The `arcjet` client can be configured with one or more filter rules,
 which are constructed with the `filters(options)` function and configured by
 `FilterOptionsAllow` or `FilterOptionsDeny`:
 
-```ts
-interface FilterOptionsAllow {
-  allow: ReadonlyArray<Filter | string> | Filter | string;
-  mode?: "DRY_RUN" | "LIVE" | null | undefined;
-}
-
-interface FilterOptionsDeny {
-  allow: ReadonlyArray<Filter | string> | Filter | string;
-  mode?: "DRY_RUN" | "LIVE" | null | undefined;
-}
-
-interface Filter {
-  displayName?: string | null | undefined;
-  expression: string;
-}
-```
+<DisplayType from="arcjet" type="FilterOptions" />
+<DisplayType from="arcjet" type="ArcjetMode" />
 
 :::note
 When specifying multiple rules, the order of the rules is ignored. Rule
 execution ordering is automatically optimized for performance.
 See [decision](#decision) below for details of examining the execution results.
 :::
+
+## Expression language
+
+The expression language is based on Wireshark display filters and looks for example like this:
+
+```text
+ip.src.vpn or
+  ip.src.tor or
+  lower(http.request.headers["user-agent"]) matches "curl"
+```
+
+This example matches VPN or Tor traffic and basic Curl requests.
+Like any programming language, there are fields (`ip.src.vpn`),
+functions (`lower()`), operators (`or`, `matches`), and values (`"curl"`).
+
+Another example, this time to match IP addresses in the European Union:
+
+```text
+ip.src.country in {"AT" "BE" "BG" "CY" "CZ" "DE" "DK" "EE" "ES" "FI" "FR" "GR" "HR" "HU" "IE" "IT" "LT" "LU" "LV" "MT" "NL" "PL" "PT" "RO" "SE" "SI" "SK"}
+```
+
+### Fields
+
+| Field                    | Type          | Example                                       |
+| ------------------------ | ------------- | --------------------------------------------- |
+| `http.host`              | `string`      | `"example.com"`                               |
+| `http.request.cookie`    | `Map<string>` | `{NEXT_LOCALE: "en-US", …}`                   |
+| `http.request.headers`   | `Map<string>` | `{"user-agent": "Mozilla/5.0 (Macintosh; …"}` |
+| `http.request.method`    | `string`      | `"GET"`                                       |
+| `http.request.uri.args`  | `Map<string>` | `{q: "search"}`                               |
+| `http.request.uri.path`  | `string`      | `"/quick-start"`                              |
+| `ip.src.accuracy_radius` | `string`      | `"2"`                                         |
+| `ip.src.asnum.country`   | `string`      | `"US"`                                        |
+| `ip.src.asnum.domain`    | `string`      | `"fastly.com"`                                |
+| `ip.src.asnum.name`      | `string`      | `"Fastly, Inc."`                              |
+| `ip.src.asnum.type`      | `string`      | `"business"`                                  |
+| `ip.src.asnum`           | `string`      | `"54113"`                                     |
+| `ip.src.city`            | `string`      | `"Uniontown"`                                 |
+| `ip.src.continent.name`  | `string`      | `"North America"`                             |
+| `ip.src.continent`       | `string`      | `"NA"`                                        |
+| `ip.src.country.name`    | `string`      | `"United States"`                             |
+| `ip.src.country`         | `string`      | `"US"`                                        |
+| `ip.src.crawler.name`    | `string`      | `""`                                          |
+| `ip.src.crawler`         | `boolean`     | `false`                                       |
+| `ip.src.hosting`         | `boolean`     | `false`                                       |
+| `ip.src.lat`             | `string`      | `"39.90008"`                                  |
+| `ip.src.lon`             | `string`      | `"-79.71643"`                                 |
+| `ip.src.mobile`          | `boolean`     | `false`                                       |
+| `ip.src.postal_code`     | `string`      | `"15472"`                                     |
+| `ip.src.proxy`           | `boolean`     | `false`                                       |
+| `ip.src.region`          | `string`      | `"Pennsylvania"`                              |
+| `ip.src.relay`           | `boolean`     | `false`                                       |
+| `ip.src.service`         | `string`      | `""`                                          |
+| `ip.src.timezone.name`   | `string`      | `"America/New_York"`                          |
+| `ip.src.tor`             | `boolean`     | `false`                                       |
+| `ip.src.vpn`             | `boolean`     | `false`                                       |
+| `ip.src`                 | `Ip`          | `185.199.108.153`                             |
+
+All `ip.src.*` fields reflect information about `ip.src` which is the client IP
+address.
+That information is gathered by our Decide API.
+Other fields are available locally.
+
+### Operators
+
+| Operator          | Example                                                                    |
+| ----------------- | -------------------------------------------------------------------------- |
+| `and` (`&&`)      | `http.request.method eq "GET" and http.request.uri.path eq "/quick-start"` |
+| `contains`        | `http.request.uri.path contains "quick-start"`                             |
+| `eq` (`==`)       | `http.request.method eq "GET"`                                             |
+| `ge` (`>=`)       | `len(http.request.uri.args["q"]) ge 1`                                     |
+| `gt` (`>`)        | `len(http.request.uri.args["q"]) gt 0`                                     |
+| `in`              | `ip.src in { 185.199.108.153 185.199.109.153 }`                            |
+| `le` (`<=`)       | `len(http.request.uri.args["q"]) le 3`                                     |
+| `lt` (`<`)        | `len(http.request.uri.args["q"]) lt 4`                                     |
+| `matches` (`~`)   | `http.request.headers["user-agent"] matches "Chrome"`                      |
+| `ne` (`!=`)       | `http.request.method ne "GET"`                                             |
+| `not` (`!`)       | `not ip.src.vpn`                                                           |
+| `or` (`\|\|`)     | `ip.src.vpn or ip.src.relay`                                               |
+| `strict wildcard` | `http.request.uri.path strict wildcard "/articles/*"`                      |
+| `wildcard`        | `http.request.uri.path wildcard "/articles/*"`                             |
+| `xor` (`^^`)      | `ip.src.vpn xor ip.src.relay`                                              |
+
+### Functions
+
+| Function | Example                                                       |
+| -------- | ------------------------------------------------------------- |
+| `len`    | `len(http.request.uri.args["q"]) gt 0`                        |
+| `lower`  | `lower(ip.src.country) contains "be"`                         |
+| `upper`  | `upper(http.request.headers["user-agent"]) contains "CHROME"` |
+
+### Values
+
+#### Strings
+
+String values are enclosed in double quotes (`"`).
+Double quotes within the string must be escaped with a backslash (`\"`).
+
+```text
+http.host eq "example.com"
+```
+
+#### Booleans
+
+Boolean values are either `true` or `false`.
+You can negate a boolean value with the `not` (`!`) operator.
+
+```text
+ip.src.vpn
+```
+
+```text
+not ip.src.vpn
+```
+
+#### IP addresses
+
+IP addresses are a special type which must not be quoted like strings.
+
+```text
+ip.src eq 185.199.108.153
+```
+
+```text
+ip.src in { 185.199.108.153 185.199.109.153 185.199.110.153 185.199.111.153 }
+```
+
+```text
+ip.src in { 192.0.2.0/24 }
+```
+
+#### Maps
+
+Maps (or associative arrays) are a collection of keys to values.
+They cannot be written literally in the expression language but they exist for
+the fields `http.request.cookie`, `http.request.headers`, and
+`http.request.uri.args`.
+
+```text
+http.request.headers["user-agent"] matches "Chrome"
+```
 
 ## Decision
 
