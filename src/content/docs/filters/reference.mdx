@@ -1,11 +1,22 @@
 ---
 title: "Filters reference"
 description: "Reference guide for filtering requests with Arcjet in your Next.js, Node.js, Bun, Remix, or SvelteKit app."
+frameworks:
+  - bun
+  - deno
+  - nest-js
+  - next-js
+  - node-js
+  - remix
+  - sveltekit
 ajToc:
   - text: "Plan availability"
     anchor: "plan-availability"
   - text: "Configuration"
     anchor: "configuration"
+    children:
+      - text: "Example: Allow non-VPN, US-based GET requests"
+        anchor: "example-allow-non-vpn-us-based-get-requests"
   - text: "Expression language"
     anchor: "expression-language"
     children:
@@ -26,11 +37,21 @@ ajToc:
 ---
 
 import DisplayType from "@/components/DisplayType.astro";
+import SlotByFramework from "@/components/SlotByFramework";
+import BunAllow from "@/snippets/filters/reference/bun/Allow.mdx";
+import DenoAllow from "@/snippets/filters/reference/deno/Allow.mdx";
+import NestJsAllow from "@/snippets/filters/reference/nestjs/Allow.mdx";
+import NextJsAllow from "@/snippets/filters/reference/nextjs/Allow.mdx";
+import NodeJsAllow from "@/snippets/filters/reference/nodejs/Allow.mdx";
+import RemixAllow from "@/snippets/filters/reference/remix/Allow.mdx";
+import SvelteKitAllow from "@/snippets/filters/reference/sveltekit/Allow.mdx";
 
 Arcjet filters let you permit or block requests using
-[Wireshark](https://www.wireshark.org/)-like expressions over HTTP headers, IP
-addresses, and other request attributes - so you can quickly enforce rules like
-allow/deny by country, network, or user-agent pattern.
+[Wireshark](https://www.wireshark.org/)-like [display
+filter](https://www.wireshark.org/docs/wsug_html_chunked/ChWorkBuildDisplayFilterSection.html)
+expressions over HTTP headers, IP addresses, and other request attributes - so
+you can quickly enforce rules like allow/deny by country, network, or user-agent
+pattern.
 
 ## Plan availability
 
@@ -60,61 +81,28 @@ execution ordering is automatically optimized for performance.
 See [decision](#decision) below for details of examining the execution results.
 :::
 
-## Example
+### Example: Allow non-VPN, US-based GET requests
 
-```ts
-import arcjetFastify, { filter } from "@arcjet/fastify";
-import Fastify from "fastify";
+In this example, the expression matches non-VPN GET requests from the US.
+Requests matching the expression are allowed, and all others are denied.
 
-// Get your Arcjet key at <https://app.arcjet.com>.
-// Set it as an environment variable instead of hard coding it.
-const arcjetKey = process.env.ARCJET_KEY;
-
-if (!arcjetKey) {
-  throw new Error(
-    "Cannot find `ARCJET_KEY` environment variable; please set it to an Arcjet key and make sure to run Node with `--env-file .env.local`",
-  );
-}
-
-const arcjet = arcjetFastify({
-  key: arcjetKey,
-  rules: [
-    filter({
-      deny: [
-        'ip.src.vpn or ip.src.tor or lower(http.request.headers["user-agent"]) matches "curl"',
-      ],
-      mode: "LIVE",
-    }),
-  ],
-});
-
-const fastify = Fastify({ logger: true });
-
-fastify.get("/", async function (request, reply) {
-  const decision = await arcjet.protect(request);
-
-  if (decision.isDenied()) {
-    return reply
-      .status(403)
-      .header("Content-Type", "application/json")
-      .send({ message: "Forbidden" });
-  }
-
-  return reply
-    .status(200)
-    .header("Content-Type", "application/json")
-    .send({ message: "Hello world" });
-});
-
-await fastify.listen({ port: 3000 });
-```
+<SlotByFramework client:load>
+  <BunAllow slot="bun" />
+  <DenoAllow slot="deno" />
+  <NestJsAllow slot="nest-js" />
+  <NextJsAllow slot="next-js" />
+  <NodeJsAllow slot="node-js" />
+  <RemixAllow slot="remix" />
+  <SvelteKitAllow slot="sveltekit" />
+</SlotByFramework>
 
 ## Expression language
 
 The expression language is based on [Wireshark](https://www.wireshark.org/)-like
-display filters. Like other programming languages, there are fields
-(`ip.src.vpn`), functions (`lower()`), operators (`or`, `matches`), and values
-(`"curl"`).
+[display
+filter](https://www.wireshark.org/docs/wsug_html_chunked/ChWorkBuildDisplayFilterSection.html)
+expressions. Like other programming languages, there are fields (`ip.src.vpn`),
+functions (`lower()`), operators (`or`, `matches`), and values (`"curl"`).
 
 ### Example: Matching VPN, Tor, or Curl requests
 
@@ -122,8 +110,20 @@ This example matches VPN or Tor traffic and basic Curl requests.
 
 ```text
 ip.src.vpn or
-  ip.src.tor or
-  lower(http.request.headers["user-agent"]) matches "curl"
+ip.src.tor or
+lower(http.request.headers["user-agent"]) matches "curl"
+```
+
+To use it as a filter deny rule so that any requests matching the expression are
+denied (and all others allowed), you would configure Arcjet like this:
+
+```ts
+filter({
+  deny: [
+    'ip.src.vpn or ip.src.tor or lower(http.request.headers["user-agent"]) matches "curl"',
+  ],
+  mode: "LIVE",
+}),
 ```
 
 ### Example: Matching requests from specific countries
@@ -132,6 +132,18 @@ This example matches requests from the European Union:
 
 ```text
 ip.src.country in {"AT" "BE" "BG" "CY" "CZ" "DE" "DK" "EE" "ES" "FI" "FR" "GR" "HR" "HU" "IE" "IT" "LT" "LU" "LV" "MT" "NL" "PL" "PT" "RO" "SE" "SI" "SK"}
+```
+
+To use it as a filter allow rule so that only requests matching the expression
+are allowed (and all others denied), you would configure Arcjet like this:
+
+```ts
+filter({
+  allow: [
+    'ip.src.country in {"AT" "BE" "BG" "CY" "CZ" "DE" "DK" "EE" "ES" "FI" "FR" "GR" "HR" "HU" "IE" "IT" "LT" "LU" "LV" "MT" "NL" "PL" "PT" "RO" "SE" "SI" "SK"}',
+  ],
+  mode: "LIVE",
+}),
 ```
 
 ## Fields
