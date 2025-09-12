@@ -42,9 +42,10 @@ plans](https://arcjet.com/pricing).
 Allow or deny filters are configured using one or more expressions:
 
 - `allow` - A list of expressions that will result in an `ALLOW` decision if the
-  request matches.
+  request matches. If none of the expressions match, the request will be denied.
 - `deny` - A list of expressions that will result in a `DENY` decision if the
-  request matches.
+  request matches. If none of the expressions match, the request will be
+  allowed.
 - These lists are mutually-exclusive, so you can only use one or the other.
 
 They are constructed with the `filters(options)` function and configured by
