@@ -1,0 +1,13 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import AllowTS from "./Allow.ts?raw";
+import AllowJS from "./Allow.js?raw";
+
+<SelectableContent client:load syncKey="language" frameworkSwitcher>
+  <div slot="TS" slotIdx="1">
+    <Code code={AllowTS} lang="ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={AllowJS} lang="js" />
+  </div>
+</SelectableContent>
