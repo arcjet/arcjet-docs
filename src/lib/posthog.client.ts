@@ -43,7 +43,7 @@ export function initializePostHog() {
   const instance = posthog.init(PUBLIC_POSTHOG_KEY, {
     api_host: POSTHOG_PROXY_PATH,
     cookieless_mode: "always",
-    debug: true,
+    debug: false,
     ui_host: POSTHOG_EVENTS_UPSTREAM.toString(),
 
     // PostHog SDK features
