@@ -7,7 +7,6 @@ filter({
     // Requests matching this expression will be allowed. All other
     // requests will be denied.
     'http.request.method eq "GET" and ip.src.country eq "US" and not ip.src.vpn',
-    ,
   ],
   mode: "LIVE",
 });

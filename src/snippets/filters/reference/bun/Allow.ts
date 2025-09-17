@@ -9,7 +9,6 @@ const aj = arcjet({
         // Requests matching this expression will be allowed. All other
         // requests will be denied.
         'http.request.method eq "GET" and ip.src.country eq "US" and not ip.src.vpn',
-        ,
       ],
       mode: "LIVE",
     }),
@@ -17,7 +16,6 @@ const aj = arcjet({
 });
 
 export default {
-  port: 3000,
   fetch: aj.handler(async (req) => {
     const decision = await aj.protect(req);
 
@@ -27,4 +25,5 @@ export default {
 
     return new Response("Hello world");
   }),
+  port: 3000,
 };

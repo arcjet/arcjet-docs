@@ -8,7 +8,6 @@ const aj = arcjet({
         // Requests matching this expression will be allowed. All other
         // requests will be denied.
         'http.request.method eq "GET" and ip.src.country eq "US" and not ip.src.vpn',
-        ,
       ],
       mode: "LIVE",
     }),
@@ -20,8 +19,8 @@ export async function loader(args) {
 
   if (decision.isDenied()) {
     throw new Response("Forbidden", {
-      status: 403,
       statusText: "Forbidden",
+      status: 403,
     });
   }
 
