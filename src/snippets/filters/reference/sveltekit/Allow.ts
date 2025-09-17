@@ -1,6 +1,6 @@
 import { env } from "$env/dynamic/private";
 import arcjet, { filter } from "@arcjet/sveltekit";
-import { error, type RequestEvent } from "@sveltejs/kit";
+import { type RequestEvent, error } from "@sveltejs/kit";
 
 const aj = arcjet({
   key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com

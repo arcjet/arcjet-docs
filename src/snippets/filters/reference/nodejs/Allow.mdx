@@ -3,11 +3,11 @@ import SelectableContent from "@/components/SelectableContent";
 import AllowTS from "./Allow.ts?raw";
 import AllowJS from "./Allow.js?raw";
 
-<SelectableContent client:load syncKey="language" frameworkSwitcher>
-  <div slot="TS" slotIdx="1">
+<SelectableContent client:load frameworkSwitcher syncKey="language">
+  <div slotIdx="1" slot="TS">
     <Code code={AllowTS} lang="ts" />
   </div>
-  <div slot="JS" slotIdx="2">
+  <div slotIdx="2" slot="JS">
     <Code code={AllowJS} lang="js" />
   </div>
 </SelectableContent>

@@ -1,5 +1,5 @@
-import arcjet, { filter } from "@arcjet/node";
 import http from "node:http";
+import arcjet, { filter } from "@arcjet/node";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
