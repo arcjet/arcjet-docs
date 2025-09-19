@@ -34,6 +34,8 @@ ajToc:
     anchor: "error-handling"
   - text: "Testing"
     anchor: "testing"
+  - text: "Limitations"
+    anchor: "limitations"
 ---
 
 import DisplayType from "@/components/DisplayType.astro";
@@ -183,10 +185,16 @@ filter({
 | `ip.src.vpn`             | `boolean`     | `false`                                       |
 | `ip.src`                 | `Ip`          | `8.8.8.8`                                     |
 
-All `ip.src.*` fields reflect information about the client IP address (the request source IP).
+All `ip.src.*` fields reflect information about the client IP address (the
+request source IP). These fields require data from our IP reputation database so
+a call to the Arcjet API is required. Other fields are analyzed locally.
 
-That information is gathered by our Decide API.
-Other fields are available locally.
+Arcjet only ever makes a single call to our Cloud API regardless of the rule
+configuration. The Arcjet API has been designed for high performance and low
+latency, and is deployed to multiple regions around the world. The SDK will
+automatically use the closest region which means the total overhead is typically
+no more than 20-30ms, often significantly less. See the [Architecture
+reference](/architecture#arcjet-cloud-api) for details.
 
 ## Operators
 
@@ -326,3 +334,8 @@ We have an example test framework you can use to automatically test your rules.
 Arcjet can also be triggered based using a sample of your traffic.
 
 See the [Testing](/testing) section of the docs for details.
+
+## Limitations
+
+- A maximum of 10 expressions can be specified.
+- Each expression can be a maximum of 1024 bytes.
