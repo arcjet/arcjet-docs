@@ -232,6 +232,10 @@ A call to the Arcjet API is required when:
   immediately. If it is valid, the SDK will make a call to the Arcjet API to
   verify the email address e.g. does it have a valid MX record or is it a
   disposable email address.
+- A [filter](/filters/reference) rule is configured that inspects `ip.src.*` IP
+  address fields such as `ip.src.vpn`, `ip.src.asnum.domain`, or
+  `ip.src.country`. These fields require data from our IP reputation database so
+  a call to the Arcjet API is required. Other fields are analyzed locally.
 
 #### API latency
 
