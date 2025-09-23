@@ -1,0 +1,27 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import Step3Js from "./Step3.js?raw";
+
+Arcjet protection runs on HTTP requests.
+NestJS uses _[guards][nest-guard]_ to handle requests.
+That’s where Arcjet can be added.
+In this example a global guard is used.
+
+<SelectableContent client:load frameworkSwitcher syncKey="language">
+  <Fragment slotIdx="1" slot="JS">
+
+    Create a `main.js` file in the `src/` folder with the following code:
+
+    <Code code={Step3Js} lang="js" title="src/main.js" />
+
+  </Fragment>
+  <Fragment slotIdx="2" slot="TS">
+
+    Create a `main.ts` file in the `src/` folder with the following code:
+
+    <Code code={Step3Js} lang="ts" title="src/main.ts" />
+
+  </Fragment>
+</SelectableContent>
+
+[nest-guard]: https://docs.nestjs.com/guards

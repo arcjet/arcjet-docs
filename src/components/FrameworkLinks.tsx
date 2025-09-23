@@ -6,6 +6,7 @@ import { Fastify as IconFastify } from "@/components/icons/tech/Fastify";
 import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
 import { NextJs as IconNextJs } from "@/components/icons/tech/NextJs";
 import { NodeJs as IconNodeJs } from "@/components/icons/tech/NodeJs";
+import { ReactRouter as IconReactRouter } from "@/components/icons/tech/ReactRouter";
 import { Remix as IconRemix } from "@/components/icons/tech/Remix";
 import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
 import { getStoredFramework, type FrameworkKey } from "@/lib/prefs";
@@ -167,6 +168,16 @@ const FrameworkLinks = forwardRef(
                 decoratorLeft={<IconNodeJs />}
               >
                 Node.js + Hono
+              </Button>
+            )}
+            {(!exclude || !exclude.includes("react-router")) && (
+              <Button
+                as="link"
+                decoratorLeft={<IconReactRouter />}
+                href={`${path}?f=react-router`}
+                size="lg"
+              >
+                React Router
               </Button>
             )}
             {(!exclude || !exclude.includes("remix")) && (

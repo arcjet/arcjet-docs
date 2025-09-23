@@ -276,15 +276,20 @@ export const main = [
         ],
       },
       {
-        label: "Filters",
         collapsed: true,
         items: [
           {
+            attrs: { class: "feature filters" },
+            label: "Quick start",
+            link: "/filters/quick-start",
+          },
+          {
+            attrs: { class: "feature filters" },
             label: "Reference",
             link: "/filters/reference",
-            attrs: { class: "feature filters" },
           },
         ],
+        label: "Filters",
       },
     ],
   },

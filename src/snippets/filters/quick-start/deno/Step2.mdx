@@ -1,0 +1,12 @@
+Deno loads environment variables with the [`--env-file` flag][deno-env].
+The Arcjet Deno integration reads your key from the `ARCJET_KEY` variable.
+Create a `.env` file in the root of your project and add your key:
+
+```ini title=".env"
+# Run in development mode; leave this unset in production.
+ARCJET_ENV=development
+# Get your site key at <https://app.arcjet.com>.
+ARCJET_KEY=ajkey_yourkey
+```
+
+[deno-env]: https://docs.deno.com/runtime/reference/env_variables/

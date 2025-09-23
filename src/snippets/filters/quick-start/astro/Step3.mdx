@@ -1,0 +1,41 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import Step3Config from "./Step3Config.js?raw";
+import Step3Index from "./Step3Index.astro?raw";
+import Step3Middleware from "./Step3Middleware.js?raw";
+
+Define filters in your `astro.config.mjs` file:
+
+<Code code={Step3Config} lang="js" title="astro.config.mjs" />
+
+Arcjet protection runs on HTTP requests.
+That is useful for _dynamic routes_ in Astro as those are rendered per request.
+It is not useful for _static routes_ as those are pre-rendered at build time.
+
+Make sure the root route is dynamic.
+This can be done by exporting `prerender` as `false` in the root page
+frontmatter:
+
+<Code code={Step3Index} lang="astro" title="src/pages/index.astro" />
+
+Astro uses _[middleware][astro-middleware]_ to intercept requests and responses.
+That’s where Arcjet can be added.
+
+<SelectableContent client:load frameworkSwitcher syncKey="language">
+  <Fragment slotIdx="1" slot="JavaScript">
+
+    Create a `middleware.js` file in the `src/` folder with the following code:
+
+    <Code code={Step3Middleware} lang="js" title="src/middleware.js" />
+
+  </Fragment>
+  <Fragment slotIdx="2" slot="TypeScript">
+
+    Create a `middleware.ts` file in the `src/` folder with the following code:
+
+    <Code code={Step3Middleware} lang="ts" title="src/middleware.ts" />
+
+  </Fragment>
+</SelectableContent>
+
+[astro-middleware]: https://docs.astro.build/en/guides/middleware/
