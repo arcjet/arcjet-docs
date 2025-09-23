@@ -275,6 +275,17 @@ export const main = [
           },
         ],
       },
+      {
+        label: "Filters",
+        collapsed: true,
+        items: [
+          {
+            label: "Reference",
+            link: "/filters/reference",
+            attrs: { class: "feature filters" },
+          },
+        ],
+      },
     ],
   },
   {
