@@ -10,11 +10,9 @@ export default defineConfig({
       characteristics: ['http.request.headers["user-agent"]', "ip.src"],
       rules: [
         filter({
-          // Use `deny` to deny requests that match expressions and allow others.
-          // Use `allow` to allow requests that match expressions and deny others.
+          // This will deny any traffic using a VPN, Tor, that matches the curl
+          // user agent, or that has no user agent
           deny: [
-            // Match VPN traffic, Tor traffic, basic Curl requests, or requests
-            // without user agent.
             'ip.src.vpn or ip.src.tor or lower(http.request.headers["user-agent"]) matches "curl" or len(http.request.headers["user-agent"]) eq 0',
           ],
           // Block requests with `LIVE`, use `DRY_RUN` to log only.

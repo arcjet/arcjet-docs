@@ -100,10 +100,12 @@ import SvelteKitStep2 from "@/snippets/filters/quick-start/sveltekit/Step2.mdx";
 import SvelteKitStep3 from "@/snippets/filters/quick-start/sveltekit/Step3.mdx";
 import SvelteKitStep4 from "@/snippets/filters/quick-start/sveltekit/Step4.mdx";
 
-With Arcjet filters you can block requests with Wireshark-like expressions
-over HTTP headers, IP addresses, and other request fields.
-So that you can quickly enforce rules to allow or deny by country, network,
-`user-agent`, and more.
+Arcjet filters let you block requests using
+[Wireshark](https://www.wireshark.org/)-like [display
+filter](https://www.wireshark.org/docs/wsug_html_chunked/ChWorkBuildDisplayFilterSection.html)
+expressions over HTTP headers, IP addresses, and other request fields. This
+allows you to quickly enforce rules like allow/deny by country, network, or
+`user-agent`.
 
 <WhatIsArcjet />
 
@@ -262,16 +264,13 @@ The Curl request could result in a `200 OK` if you have a `.curlrc` somewhere
 (probably `~/.curlrc`) that sets a `user-agent` field to something other than
 Curl.
 
-Now visit your app in a browser.
-That should work.
-
 Try changing the filter expression to match `"chrome"` or `"firefox"` and visit
 your app with different browsers.
 
 These requests should also show in the [Arcjet dashboard][arcjet-dashboard].
-Make sure you configured `ARCJET_KEY` correctly if things don’t show up.
+Make sure you configured `ARCJET_KEY` correctly if things don't show up.
 
-See the [_Filters_ reference][arcjet-filters-reference] to learn more about the
+See the [Filters reference][arcjet-filters-reference] to learn more about the
 expression language.
 
 ## FAQs
