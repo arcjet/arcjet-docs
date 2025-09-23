@@ -7,6 +7,7 @@ import { Hono as IconHono } from "@/components/icons/tech/Hono";
 import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
 import { NextJs as IconNextJs } from "@/components/icons/tech/NextJs";
 import { NodeJs as IconNodeJs } from "@/components/icons/tech/NodeJs";
+import { ReactRouter as IconReactRouter } from "@/components/icons/tech/ReactRouter";
 import { Remix as IconRemix } from "@/components/icons/tech/Remix";
 import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
 import type { Props as SelectProps } from "@/components/Select";
@@ -29,19 +30,20 @@ import { forwardRef, useEffect, useState, type ForwardedRef } from "react";
 
 const frameworkIcon = {
   astro: <IconAstro />,
-  deno: <IconDeno />,
+  "bun-hono": <IconBun />,
   bun: <IconBun />,
+  deno: <IconDeno />,
   express: <IconExpress />,
   fastify: <IconFastify />,
   hono: <IconHono />,
   "nest-js": <IconNestJs />,
   "next-js": <IconNextJs />,
-  "node-js": <IconNodeJs />,
-  sveltekit: <IconSvelteKit />,
   "node-js-express": <IconNodeJs />,
   "node-js-hono": <IconNodeJs />,
-  "bun-hono": <IconBun />,
+  "node-js": <IconNodeJs />,
+  "react-router": <IconReactRouter />,
   remix: <IconRemix />,
+  sveltekit: <IconSvelteKit />,
 };
 
 interface Props extends React.HTMLAttributes<HTMLSelectElement> {

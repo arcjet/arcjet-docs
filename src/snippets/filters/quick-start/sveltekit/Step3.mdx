@@ -1,0 +1,33 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import Step3Js from "./Step3.js?raw";
+import Step3Ts from "./Step3.ts?raw";
+
+Arcjet protection runs on HTTP requests.
+That is useful for SvelteKit _[server routes][sveltekit-route-server]_
+(also known as _API routes_)
+and _[server hooks][sveltekit-hooks-server]_ as those have control over
+HTTP responses.
+That’s where Arcjet can be added.
+
+<SelectableContent client:load frameworkSwitcher syncKey="language">
+  <Fragment slotIdx="1" slot="JS">
+
+    Create a file `hooks.server.js` in the `src/` folder with the following
+    code:
+
+    <Code code={Step3Js} lang="js" title="src/hooks.server.js" />
+
+  </Fragment>
+  <Fragment slotIdx="2" slot="TS">
+
+    Create a file `hooks.server.ts` in the `src/` folder with the following
+    code:
+
+    <Code code={Step3Ts} lang="ts" title="src/hooks.server.ts" />
+
+  </Fragment>
+</SelectableContent>
+
+[sveltekit-hooks-server]: https://svelte.dev/docs/kit/hooks#Server-hooks
+[sveltekit-route-server]: https://svelte.dev/docs/kit/routing#server

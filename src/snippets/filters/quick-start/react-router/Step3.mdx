@@ -1,0 +1,30 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import { removeTSCCommentDirectives as removeComments } from "@/lib/utils";
+import Step3Tsx from "./Step3.tsx?raw";
+import Step3Jsx from "./Step3.jsx?raw";
+
+Arcjet protection runs on HTTP requests.
+React Router uses _[actions][react-router-action]_ and
+_[loaders][react-router-loader]_ to handle requests to routes.
+That’s where Arcjet can be added.
+
+<SelectableContent client:load frameworkSwitcher syncKey="language">
+  <Fragment slotIdx="1" slot="JS">
+
+    Create a file such as `home.jsx` in the `routes/` folder with the following code:
+
+    <Code code={Step3Jsx} lang="js" title="routes/home.jsx" />
+
+  </Fragment>
+  <Fragment slotIdx="2" slot="TS">
+
+    Create a file such as `home.tsx` in the `routes/` folder with the following code:
+
+    <Code code={removeComments(Step3Tsx)} lang="ts" title="routes/home.tsx" />
+
+  </Fragment>
+</SelectableContent>
+
+[react-router-action]: https://reactrouter.com/start/framework/actions
+[react-router-loader]: https://reactrouter.com/start/framework/data-loading#server-data-loading

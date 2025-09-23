@@ -1,0 +1,324 @@
+---
+ajToc:
+  - anchor: "quick-start"
+    text: "Quick start"
+    children:
+      - anchor: "1-install-arcjet"
+        text: 1. Install Arcjet
+      - anchor: "2-set-your-key"
+        text: 2. Set your key
+      - anchor: "3-add-filters"
+        text: 3. Add filters
+      - anchor: "4-start-server"
+        framework: ["bun", "deno", "fastify", "node-js"]
+        text: 4. Start server
+      - anchor: "4-start-app"
+        framework:
+          ["astro", "nest-js", "next-js", "react-router", "remix", "sveltekit"]
+        text: 4. Start app
+      - anchor: "5-try-it-out"
+        text: 5. Try it out
+  - anchor: "faqs"
+    text: "FAQs"
+  - anchor: "what-next"
+    text: "What next?"
+  - anchor: "get-help"
+    text: "Get help"
+description: "Quick start guide for adding Arcjet filters to your Astro, Bun, Deno, Fastify, NestJS, Next.js, Node.js, React Router, Remix, or SvelteKit app."
+frameworks:
+  - astro
+  - bun
+  - deno
+  - fastify
+  - nest-js
+  - next-js
+  - node-js
+  - react-router
+  - remix
+  - sveltekit
+titleByFramework:
+  astro: "Filters for Astro"
+  bun: "Filters for Bun"
+  default: "Filters"
+  deno: "Filters for Deno"
+  fastify: "Filters for Fastify"
+  nest-js: "Filters for NestJS"
+  next-js: "Filters for Next.js"
+  node-js: "Filters for Node.js"
+  react-router: "Filters for React Router"
+  remix: "Filters for Remix"
+  sveltekit: "Filters for SvelteKit"
+title: "Filters"
+---
+
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+import Comments from "/src/components/Comments.astro";
+import Faqs from "/src/components/FAQs.astro";
+import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import SlotByFramework from "@/components/SlotByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
+import FrameworkName from "@/components/FrameworkName";
+import AstroStep1 from "@/snippets/shared/astro/Install.mdx";
+import AstroStep2 from "@/snippets/get-started/astro/Step2.mdx";
+import AstroStep3 from "@/snippets/filters/quick-start/astro/Step3.mdx";
+import AstroStep4 from "@/snippets/filters/quick-start/astro/Step4.mdx";
+import BunStep1 from "@/snippets/filters/quick-start/bun/Step1.mdx";
+import BunStep2 from "@/snippets/filters/quick-start/bun/Step2.mdx";
+import BunStep3 from "@/snippets/filters/quick-start/bun/Step3.mdx";
+import BunStep4 from "@/snippets/filters/quick-start/bun/Step4.mdx";
+import DenoStep1 from "@/snippets/filters/quick-start/deno/Step1.mdx";
+import DenoStep2 from "@/snippets/filters/quick-start/deno/Step2.mdx";
+import DenoStep3 from "@/snippets/filters/quick-start/deno/Step3.mdx";
+import DenoStep4 from "@/snippets/filters/quick-start/deno/Step4.mdx";
+import FastifyStep1 from "@/snippets/filters/quick-start/fastify/Step1.mdx";
+import FastifyStep2 from "@/snippets/filters/quick-start/fastify/Step2.mdx";
+import FastifyStep3 from "@/snippets/filters/quick-start/fastify/Step3.mdx";
+import FastifyStep4 from "@/snippets/filters/quick-start/fastify/Step4.mdx";
+import NestJsStep1 from "@/snippets/filters/quick-start/nestjs/Step1.mdx";
+import NestJsStep2 from "@/snippets/filters/quick-start/nestjs/Step2.mdx";
+import NestJsStep3 from "@/snippets/filters/quick-start/nestjs/Step3.mdx";
+import NestJsStep4 from "@/snippets/filters/quick-start/nestjs/Step4.mdx";
+import NextJsStep1 from "@/snippets/filters/quick-start/nextjs/Step1.mdx";
+import NextJsStep2 from "@/snippets/filters/quick-start/nextjs/Step2.mdx";
+import NextJsStep3 from "@/snippets/filters/quick-start/nextjs/Step3.mdx";
+import NextJsStep4 from "@/snippets/filters/quick-start/nextjs/Step4.mdx";
+import NodeJsStep1 from "@/snippets/filters/quick-start/nodejs/Step1.mdx";
+import NodeJsStep2 from "@/snippets/filters/quick-start/nodejs/Step2.mdx";
+import NodeJsStep3 from "@/snippets/filters/quick-start/nodejs/Step3.mdx";
+import NodeJsStep4 from "@/snippets/filters/quick-start/nodejs/Step4.mdx";
+import ReactRouterStep1 from "@/snippets/filters/quick-start/react-router/Step1.mdx";
+import ReactRouterStep2 from "@/snippets/filters/quick-start/react-router/Step2.mdx";
+import ReactRouterStep3 from "@/snippets/filters/quick-start/react-router/Step3.mdx";
+import ReactRouterStep4 from "@/snippets/filters/quick-start/react-router/Step4.mdx";
+import RemixStep1 from "@/snippets/filters/quick-start/remix/Step1.mdx";
+import RemixStep2 from "@/snippets/filters/quick-start/remix/Step2.mdx";
+import RemixStep3 from "@/snippets/filters/quick-start/remix/Step3.mdx";
+import RemixStep4 from "@/snippets/filters/quick-start/remix/Step4.mdx";
+import SvelteKitStep1 from "@/snippets/filters/quick-start/sveltekit/Step1.mdx";
+import SvelteKitStep2 from "@/snippets/filters/quick-start/sveltekit/Step2.mdx";
+import SvelteKitStep3 from "@/snippets/filters/quick-start/sveltekit/Step3.mdx";
+import SvelteKitStep4 from "@/snippets/filters/quick-start/sveltekit/Step4.mdx";
+
+With Arcjet filters you can block requests with Wireshark-like expressions
+over HTTP headers, IP addresses, and other request fields.
+So that you can quickly enforce rules to allow or deny by country, network,
+`user-agent`, and more.
+
+<WhatIsArcjet />
+
+## Quick start
+
+This guide shows how to protect your <FrameworkName client:load /> app with
+filters.
+
+### 1. Install Arcjet
+
+Run the following command to install the SDK in your project:
+
+<SlotByFramework client:load>
+  <AstroStep1 slot="astro" />
+  <BunStep1 slot="bun" />
+  <DenoStep1 slot="deno" />
+  <FastifyStep1 slot="fastify" />
+  <NestJsStep1 slot="nest-js" />
+  <NextJsStep1 slot="next-js" />
+  <NodeJsStep1 slot="node-js" />
+  <ReactRouterStep1 slot="react-router" />
+  <RemixStep1 slot="remix" />
+  <SvelteKitStep1 slot="sveltekit" />
+</SlotByFramework>
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) and follow the
+instructions to add a site and get a key.
+
+<SlotByFramework client:load>
+  <AstroStep2 slot="astro" />
+  <BunStep2 slot="bun" />
+  <DenoStep2 slot="deno" />
+  <FastifyStep2 slot="fastify" />
+  <NestJsStep2 slot="nest-js" />
+  <NextJsStep2 slot="next-js" />
+  <NodeJsStep2 slot="node-js" />
+  <ReactRouterStep2 slot="react-router" />
+  <RemixStep2 slot="remix" />
+  <SvelteKitStep2 slot="sveltekit" />
+</SlotByFramework>
+
+### 3. Add filters
+
+<SlotByFramework client:load>
+  <AstroStep3 slot="astro" />
+  <BunStep3 slot="bun" />
+  <DenoStep3 slot="deno" />
+  <FastifyStep3 slot="fastify" />
+  <NestJsStep3 slot="nest-js" />
+  <NextJsStep3 slot="next-js" />
+  <NodeJsStep3 slot="node-js" />
+  <ReactRouterStep3 slot="react-router" />
+  <RemixStep3 slot="remix" />
+  <SvelteKitStep3 slot="sveltekit" />
+</SlotByFramework>
+
+{/* Note: Step 4 has its heading inside it as it is dynamic. Make sure that the table of contents (in frontmatter) reflects that dynamic heading correctly. */}
+
+<SlotByFramework client:load>
+  <AstroStep4 slot="astro" />
+  <BunStep4 slot="bun" />
+  <DenoStep4 slot="deno" />
+  <FastifyStep4 slot="fastify" />
+  <NestJsStep4 slot="nest-js" />
+  <NextJsStep4 slot="next-js" />
+  <NodeJsStep4 slot="node-js" />
+  <ReactRouterStep4 slot="react-router" />
+  <RemixStep4 slot="remix" />
+  <SvelteKitStep4 slot="sveltekit" />
+</SlotByFramework>
+
+### 5. Try it out
+
+Make a `curl` request from your terminal to your app:
+
+<SlotByFramework client:load>
+  <Fragment slot="bun">
+
+    ```sh
+    curl --head http://localhost:3000
+    ```
+
+  </Fragment>
+  <Fragment slot="deno">
+
+    ```sh
+    curl --head http://localhost:3000
+    ```
+
+  </Fragment>
+  <Fragment slot="fastify">
+
+    ```sh
+    curl --head http://localhost:3000
+    ```
+
+  </Fragment>
+  <Fragment slot="nest-js">
+
+    ```sh
+    curl --head http://localhost:3000
+    ```
+
+  </Fragment>
+  <Fragment slot="next-js">
+
+    ```sh
+    curl --head http://localhost:3000
+    ```
+
+  </Fragment>
+  <Fragment slot="node-js">
+
+    ```sh
+    curl --head http://localhost:3000
+    ```
+
+  </Fragment>
+
+  <Fragment slot="astro">
+
+    ```sh
+    curl --head http://localhost:4321
+    ```
+
+  </Fragment>
+
+  <Fragment slot="react-router">
+
+    ```sh
+    curl --head http://localhost:5173
+    ```
+
+  </Fragment>
+  <Fragment slot="remix">
+
+    ```sh
+    curl --head http://localhost:5173
+    ```
+
+  </Fragment>
+  <Fragment slot="sveltekit">
+
+    ```sh
+    curl --head http://localhost:5173
+    ```
+
+  </Fragment>
+</SlotByFramework>
+
+You should get a `403 Forbidden` response.
+
+The Curl request could result in a `200 OK` if you have a `.curlrc` somewhere
+(probably `~/.curlrc`) that sets a `user-agent` field to something other than
+Curl.
+
+Now visit your app in a browser.
+That should work.
+
+Try changing the filter expression to match `"chrome"` or `"firefox"` and visit
+your app with different browsers.
+
+These requests should also show in the [Arcjet dashboard][arcjet-dashboard].
+Make sure you configured `ARCJET_KEY` correctly if things don’t show up.
+
+See the [_Filters_ reference][arcjet-filters-reference] to learn more about the
+expression language.
+
+## FAQs
+
+<Faqs />
+
+## What next?
+
+<CardGrid>
+  <LinkCard
+    title="Filter reference"
+    href="/filters/reference"
+    description="Full details about filters."
+  />
+  <LinkCard
+    title="Testing"
+    href="/testing"
+    description="Write tests for your rules."
+  />
+</CardGrid>
+
+### Explore
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can setup rate limiting for your
+API, minimize fraudulent registrations with the signup form protection and more.
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  />
+  <LinkCard
+    title="Learn how Arcjet works"
+    href="/architecture"
+    description="Arcjet's architecture."
+  />
+  <SdkReferenceLinkByFramework />
+</CardGrid>
+
+## Get help
+
+Need help with anything? Email support@arcjet.com to get support from our
+engineering team.
+
+<Comments />
+
+[arcjet-dashboard]: https://app.arcjet.com
+[arcjet-filters-reference]: /filters/reference

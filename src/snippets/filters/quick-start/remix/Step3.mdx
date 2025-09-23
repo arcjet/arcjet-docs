@@ -1,0 +1,31 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import Step3Jsx from "./Step3.jsx?raw";
+import Step3Tsx from "./Step3.tsx?raw";
+
+Arcjet protection runs on HTTP requests.
+Remix uses _[actions][remix-action]_ and
+_[loaders][remix-loader]_ to handle requests to routes.
+That’s where Arcjet can be added.
+
+<SelectableContent client:load frameworkSwitcher syncKey="language">
+  <Fragment slotIdx="1" slot="JS">
+
+    Create a file such as `home.jsx` in the `routes/` folder with the following
+    code:
+
+    <Code code={Step3Jsx} lang="js" title="routes/home.jsx" />
+
+  </Fragment>
+  <Fragment slotIdx="2" slot="TS">
+
+    Create a file such as `home.tsx` in the `routes/` folder with the following
+    code:
+
+    <Code code={Step3Tsx} lang="ts" title="routes/home.tsx" />
+
+  </Fragment>
+</SelectableContent>
+
+[remix-action]: https://v2.remix.run/docs/route/action
+[remix-loader]: https://v2.remix.run/docs/route/loader

@@ -1,0 +1,30 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import Step3Js from "./Step3.js?raw";
+
+Arcjet protection runs on HTTP requests.
+Next.js uses _[middleware][next-middleware]_ to handle requests.
+That’s where Arcjet can be added.
+
+<SelectableContent client:load frameworkSwitcher syncKey="language">
+  <Fragment slotIdx="1" slot="JS">
+
+    Create a `middleware.js` file in your project
+    (in `src/` if you have it, next to `app/`)
+    with the following code:
+
+    <Code code={Step3Js} lang="js" title="middleware.js" />
+
+  </Fragment>
+  <Fragment slotIdx="2" slot="TS">
+
+    Create a `middleware.ts` file in your project
+    (in `src/` if you have it, next to `app/`)
+    with the following code:
+
+    <Code code={Step3Js} lang="ts" title="middleware.ts" />
+
+  </Fragment>
+</SelectableContent>
+
+[next-middleware]: https://nextjs.org/docs/app/api-reference/file-conventions/middleware
