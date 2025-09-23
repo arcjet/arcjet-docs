@@ -7,7 +7,7 @@
 
 # Arcjet Docs
 
-[View the docs](docs)
+[View the docs](docs).
 
 [Arcjet][arcjet] helps developers protect their apps in just a few lines of
 code. Bot detection. Rate limiting. Email validation. Attack protection. Data
