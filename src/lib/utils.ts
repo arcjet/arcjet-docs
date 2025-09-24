@@ -115,7 +115,7 @@ export function getStringComparator(
 export function removeTSCCommentDirectives(code: string): string {
   // Remove TypeScript comment directives like `// @ts-ignore` or `// @ts-expect-error`
   return code.replaceAll(
-    /[ 	]*\/\/[ 	]*@ts-(check|nocheck|expect-error)[ 	]*\n/gm,
+    /[ 	]*\/\/[ 	]*@ts-(check|nocheck|expect-error)[^\n]*\n/gm,
     "",
   );
 }
