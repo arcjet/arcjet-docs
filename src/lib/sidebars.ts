@@ -341,7 +341,7 @@ export const main = [
           },
           {
             label: "Changelog",
-            link: "https://blog.arcjet.com/tag/changelog/",
+            link: "https://github.com/arcjet/arcjet-js/releases",
             attrs: { target: "_blank", class: "external-link" },
           },
         ],
