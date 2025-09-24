@@ -1,4 +1,3 @@
-// @ts-expect-error: TODO: publish package, include, and remove this comment.
 import arcjet, { filter } from "@arcjet/react-router";
 import type { ReactNode } from "react";
 // @ts-expect-error: `react-router` generates such type files.
