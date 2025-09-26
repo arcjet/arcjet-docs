@@ -128,6 +128,23 @@ filter({
 }),
 ```
 
+You can also split the expressions within the array for readability. They will
+be combined as an `OR` operation:
+
+```ts
+filter({
+  deny: [
+    // Expressions will be combined with OR
+    'ip.src.vpn',
+    'ip.src.tor',
+    'lower(http.request.headers["user-agent"]) matches "curl"',
+  ],
+  mode: "LIVE",
+}),
+```
+
+To combine multiple conditions e.g. with `and`, use a single expression string.
+
 ### Example: Matching requests from specific countries
 
 This example matches requests from the European Union:
