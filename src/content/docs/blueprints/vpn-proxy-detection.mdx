@@ -5,26 +5,43 @@ description: "Use Arcjet's IP analysis to detect VPNs and proxies."
 
 import { Aside, Badge } from "@astrojs/starlight/components";
 
-Every decision provided by Arcjet includes IP address analysis. You can use this
-to detect VPNs and proxies.
+Arcjet provides IP reputation information in two places:
 
-## Available fields
+- Decisions from Arcjet include IP address analysis.
+  You can use this to customize responses.
+- [Filter rules](/filters/quick-start) have access to IP address analysis.
+  You can use this to block traffic.
+
+## Available data
 
 - **IP AS type.** This is the [Autonomous
   System](<https://en.wikipedia.org/wiki/Autonomous_system_(Internet)>)
   associated with the IP, which can be used to identify VPNs and proxies. This
-  can be one of `isp`, `hosting`, `business` or `education`. This field is only
-  available on <Badge text="Starter" variant="note" /> and <Badge text="Business" variant="tip" /> plans.
+  can be one of `isp`, `hosting`, `business` or `education`.
 - **IP type.** Arcjet adds one or more categories to the IP address to help you
   identify VPNs and proxies. The categories are `vpn`, `proxy`, `tor`,
-  `hosting`, `relay`. This field is available on all pricing plans.
+  `hosting`, `relay`.
+
+## Available fields
+
+| Filters                | Decision         | <Badge text="Free" variant="caution" /> | <Badge text="Starter" variant="note" /> | <Badge text="Business" variant="tip" /> |
+| ---------------------- | ---------------- | --------------------------------------- | --------------------------------------- | --------------------------------------- |
+| `ip.src.asnum.country` | `ip.asnCountry`  | No                                      | Yes                                     | Yes                                     |
+| `ip.src.asnum.domain`  | `ip.asnDomain`   | No                                      | Yes                                     | Yes                                     |
+| `ip.src.asnum.name`    | `ip.asnName`     | No                                      | Yes                                     | Yes                                     |
+| `ip.src.asnum.type`    | `ip.asnType`     | No                                      | Yes                                     | Yes                                     |
+| `ip.src.asnum`         | `ip.asn`         | No                                      | Yes                                     | Yes                                     |
+| `ip.src.hosting`       | `ip.isHosting()` | Yes                                     | Yes                                     | Yes                                     |
+| `ip.src.proxy`         | `ip.isProxy()`   | Yes                                     | Yes                                     | Yes                                     |
+| `ip.src.relay`         | `ip.isRelay()`   | Yes                                     | Yes                                     | Yes                                     |
+| `ip.src.service`       | `ip.service`     | Yes                                     | Yes                                     | Yes                                     |
+| `ip.src.tor`           | `ip.isTor()`     | Yes                                     | Yes                                     | Yes                                     |
+| `ip.src.vpn`           | `ip.isVpn()`     | Yes                                     | Yes                                     | Yes                                     |
 
 ## Checking for data
 
 The IP analysis fields may be `undefined`, but you can use various methods to
 check their availability. See the SDK reference for details.
-
-## Example
 
 ```ts
 // ... imports, client configuration, etc
@@ -38,11 +55,12 @@ if (decision.ip.hasASN() && decision.ip.asnType === "hosting") {
 
 if (
   decision.ip.isHosting() ||
-  decision.ip.isVpn() ||
   decision.ip.isProxy() ||
-  decision.ip.isRelay()
+  decision.ip.isRelay() ||
+  decision.ip.isTor() ||
+  decision.ip.isVpn()
 ) {
-  // The IP is from a hosting provider, VPN, or proxy. We can check the name
+  // The IP is from a hosting provider, proxy, relay, Tor, or VPN. We can check the name
   // of the service and customize the response
   if (decision.ip.hasService()) {
     if (decision.ip.service === "Apple Private Relay") {
@@ -54,5 +72,48 @@ if (
   } else {
     // The service name is not available, but we can still do something here
   }
+}
+```
+
+## Examples
+
+### Block VPN traffic
+
+Filter rules can be used to block traffic based on IP reputation:
+
+```ts
+// …
+rules: [
+  filter({
+    deny: ['ip.src.vpn'],
+    mode: "LIVE",
+  })
+],
+
+// …
+
+const decision = await aj.protect(req);
+
+if (decision.isDenied()) {
+  // Return 403 Forbidden
+}
+```
+
+### Customize response for Apple Private Relay
+
+The `ip` field on a `decision` can be used to customize the response based on IP
+reputation:
+
+```ts
+// …
+const decision = await aj.protect(req);
+
+if (decision.isDenied()) {
+  // Handle your other configured rules here.
+}
+
+// Otherwise, customize for Apple Private Relay:
+if (decision.ip.service === "Apple Private Relay") {
+  return new Response("Hello, Apple Private Relay user!");
 }
 ```

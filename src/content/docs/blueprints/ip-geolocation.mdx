@@ -1,27 +1,34 @@
 ---
-title: "Arcjet IP geolocation"
+title: "IP geolocation"
 description: "Use Arcjet's IP analysis to customize the response based on the IP location."
 ---
 
 import { Aside, Badge } from "@astrojs/starlight/components";
 
-Every decision provided by Arcjet includes IP address analysis. You can use this
-to customize your response based on the IP location.
+Arcjet provides IP geolocation information in two places:
+
+- Decisions from Arcjet include IP address analysis.
+  You can use this to customize responses.
+- [Filter rules](/filters/quick-start) have access to IP address analysis.
+  You can use this to block traffic.
 
 ## Available fields
 
-Availability of these fields depends on your pricing plan:
+| Filters                  | Decision            | <Badge text="Free" variant="caution" /> | <Badge text="Starter" variant="note" /> | <Badge text="Business" variant="tip" /> |
+| ------------------------ | ------------------- | --------------------------------------- | --------------------------------------- | --------------------------------------- |
+| `ip.src.accuracy_radius` | `ip.accuracyRadius` | No                                      | Yes                                     | Yes                                     |
+| `ip.src.city`            | `ip.city`           | No                                      | Yes                                     | Yes                                     |
+| `ip.src.continent.name`  | `ip.continentName`  | No                                      | Yes                                     | Yes                                     |
+| `ip.src.continent`       | `ip.continent`      | No                                      | Yes                                     | Yes                                     |
+| `ip.src.country.name`    | `ip.countryName`    | Yes                                     | Yes                                     | Yes                                     |
+| `ip.src.country`         | `ip.country`        | Yes                                     | Yes                                     | Yes                                     |
+| `ip.src.lat`             | `ip.latitude`       | No                                      | Yes                                     | Yes                                     |
+| `ip.src.lon`             | `ip.longitude`      | No                                      | Yes                                     | Yes                                     |
+| `ip.src.postal_code`     | `ip.postalCode`     | No                                      | Yes                                     | Yes                                     |
+| `ip.src.region`          | `ip.region`         | No                                      | Yes                                     | Yes                                     |
+| `ip.src.timezone.name`   | `ip.timezone`       | ??                                      | ???                                     | ???                                     |
 
-| Data Type              | Example                  | Plan availability                                                                                                       |
-| ---------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| Latitude and longitude | `37.36883`, `-122.03635` | <Badge text="Starter" variant="note" /> <Badge text="Business" variant="tip" />                                         |
-| Postal code            | `94104`                  | <Badge text="Starter" variant="note" /> <Badge text="Business" variant="tip" />                                         |
-| City                   | `San Francisco`          | <Badge text="Starter" variant="note" /> <Badge text="Business" variant="tip" />                                         |
-| Region                 | `California`             | <Badge text="Starter" variant="note" /> <Badge text="Business" variant="tip" />                                         |
-| Country                | `US`                     | <Badge text="Free" variant="caution" /> <Badge text="Starter" variant="note" /> <Badge text="Business" variant="tip" /> |
-| Country name           | `United States`          | <Badge text="Free" variant="caution" /> <Badge text="Starter" variant="note" /> <Badge text="Business" variant="tip" /> |
-| Continent              | `NA`                     | <Badge text="Starter" variant="note" /> <Badge text="Business" variant="tip" />                                         |
-| Continent name         | `North America`          | <Badge text="Starter" variant="note" /> <Badge text="Business" variant="tip" />                                         |
+TODO: where is `timezone` available?
 
 <Aside type="caution">
   IP geolocation can be notoriously inaccurate, especially for mobile devices,
@@ -35,9 +42,7 @@ Availability of these fields depends on your pricing plan:
 ## Checking for data
 
 The IP location fields may be `undefined`, but you can use various methods to
-check their availability. See the SDK reference for details.
-
-## Examples
+check their availability:
 
 ```ts
 // ... imports, client configuration, etc
@@ -61,29 +66,86 @@ if (decision.ip.hasContinent() && decision.ip.continent === "NA") {
 }
 ```
 
+## Examples
+
 ### Block all countries except US
 
+Filter rules can be used to block traffic based on IP geolocation:
+
 ```ts
-// ... imports, client configuration, etc
-// See https://docs.arcjet.com/get-started
+// …
+rules: [
+  filter({
+    allow: ['ip.src.country eq "US"'],
+    mode: "LIVE",
+  })
+],
+
+// …
+
 const decision = await aj.protect(req);
 
-if (decision.ip.hasCountry() && decision.ip.country !== "US") {
+if (decision.isDenied()) {
   // Return 403 Forbidden
 }
 ```
 
-### Block all countries except US, UK, Japan
+### Customize response for US
+
+The `ip` field on a `decision` can be used to customize the response based on IP
+geolocation:
 
 ```ts
-// ... imports, client configuration, etc
-// See https://docs.arcjet.com/get-started
+// …
 const decision = await aj.protect(req);
 
-if (
-  decision.ip.hasCountry() &&
-  !["US", "UK", "JP"].includes(decision.ip.country)
-) {
+if (decision.isDenied()) {
+  // Handle your other configured rules here.
+}
+
+// Otherwise, customize for US:
+if (decision.ip.country === "US") {
+  return new Response("Hello, US visitor!");
+}
+```
+
+### Block all regions except California
+
+Filter rules can be used to block traffic based on IP geolocation:
+
+```ts
+// …
+rules: [
+  filter({
+    allow: ['ip.src.country eq "US" and ip.src.region eq "California"'],
+    mode: "LIVE",
+  })
+],
+
+// …
+
+const decision = await aj.protect(req);
+
+if (decision.isDenied()) {
   // Return 403 Forbidden
+}
+```
+
+### Customize response for California
+
+The `ip` field on a `decision` can be used to customize the response based on IP
+geolocation:
+
+```ts
+// …
+const decision = await aj.protect(req);
+
+if (decision.isDenied()) {
+  // Handle your other configured rules here.
+}
+
+// Otherwise, customize for California:
+if (decision.ip.country === "US" && decision.ip.region === "California") {
+  return new Response("Go California!");
 }
 ```
