@@ -42,6 +42,11 @@ export const main = [
             attrs: { target: "_blank", class: "external-link" },
           },
           {
+            label: "React Router",
+            link: "https://github.com/arcjet/example-react-router",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
             label: "Remix",
             link: "https://github.com/arcjet/example-remix",
             attrs: { target: "_blank", class: "external-link" },
