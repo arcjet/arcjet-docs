@@ -7,10 +7,11 @@ import { Aside, Badge } from "@astrojs/starlight/components";
 
 Arcjet provides IP reputation information in two places:
 
-- Decisions from Arcjet include IP address analysis.
-  You can use this to customize responses.
-- [Filter rules](/filters/quick-start) have access to IP address analysis.
-  You can use this to block traffic.
+- Decisions after calling `protect()` include IP address analysis fields
+  depending on your pricing plan. You can use this to customize responses. See
+  the SDK reference for details e.g. [Next.js](/reference/nextjs#ip-analysis).
+- [Filter rules](/filters/quick-start) have access to IP address analysis. You
+  can use this to block traffic.
 
 ## Available data
 
@@ -26,17 +27,17 @@ Arcjet provides IP reputation information in two places:
 
 | Filters                | Decision         | <Badge text="Free" variant="caution" /> | <Badge text="Starter" variant="note" /> | <Badge text="Business" variant="tip" /> |
 | ---------------------- | ---------------- | --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| `ip.src.asnum.country` | `ip.asnCountry`  | No                                      | Yes                                     | Yes                                     |
-| `ip.src.asnum.domain`  | `ip.asnDomain`   | No                                      | Yes                                     | Yes                                     |
-| `ip.src.asnum.name`    | `ip.asnName`     | No                                      | Yes                                     | Yes                                     |
-| `ip.src.asnum.type`    | `ip.asnType`     | No                                      | Yes                                     | Yes                                     |
-| `ip.src.asnum`         | `ip.asn`         | No                                      | Yes                                     | Yes                                     |
-| `ip.src.hosting`       | `ip.isHosting()` | Yes                                     | Yes                                     | Yes                                     |
-| `ip.src.proxy`         | `ip.isProxy()`   | Yes                                     | Yes                                     | Yes                                     |
-| `ip.src.relay`         | `ip.isRelay()`   | Yes                                     | Yes                                     | Yes                                     |
-| `ip.src.service`       | `ip.service`     | Yes                                     | Yes                                     | Yes                                     |
-| `ip.src.tor`           | `ip.isTor()`     | Yes                                     | Yes                                     | Yes                                     |
-| `ip.src.vpn`           | `ip.isVpn()`     | Yes                                     | Yes                                     | Yes                                     |
+| `ip.src.asnum.country` | `ip.asnCountry`  | 🚫                                      | ✅                                      | ✅                                      |
+| `ip.src.asnum.domain`  | `ip.asnDomain`   | 🚫                                      | ✅                                      | ✅                                      |
+| `ip.src.asnum.name`    | `ip.asnName`     | 🚫                                      | ✅                                      | ✅                                      |
+| `ip.src.asnum.type`    | `ip.asnType`     | 🚫                                      | ✅                                      | ✅                                      |
+| `ip.src.asnum`         | `ip.asn`         | 🚫                                      | ✅                                      | ✅                                      |
+| `ip.src.service`       | `ip.service`     | ✅                                      | ✅                                      | ✅                                      |
+| `ip.src.hosting`       | `ip.isHosting()` | ✅                                      | ✅                                      | ✅                                      |
+| `ip.src.proxy`         | `ip.isProxy()`   | ✅                                      | ✅                                      | ✅                                      |
+| `ip.src.relay`         | `ip.isRelay()`   | ✅                                      | ✅                                      | ✅                                      |
+| `ip.src.tor`           | `ip.isTor()`     | ✅                                      | ✅                                      | ✅                                      |
+| `ip.src.vpn`           | `ip.isVpn()`     | ✅                                      | ✅                                      | ✅                                      |
 
 ## Checking for data
 
