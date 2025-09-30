@@ -26,7 +26,10 @@ import ClientOverrideJS from "/src/snippets/reference/nuxt/ClientOverride.mjs?ra
 import MultipleRulesJS from "/src/snippets/reference/nuxt/MultipleRules.mjs?raw";
 import ProtectEndpointJS from "@repo/astro/src/reference/ProtectEndpoint.mjs?raw";
 import ProtectEndpointTS from "@repo/astro/src/reference/ProtectEndpoint.ts?raw";
-import ProtectPageAstro from "/src/snippets/reference/nuxt/ProtectPage.astro?raw";
+import ProtectAppJS from "/src/snippets/reference/nextjs/ProtectApp.js?raw";
+import ProtectAppTS from "/src/snippets/reference/nextjs/ProtectApp.ts?raw";
+import ProtectPagesJS from "/src/snippets/reference/nextjs/ProtectPages.js?raw";
+import ProtectPagesTS from "/src/snippets/reference/nextjs/ProtectPages.ts?raw";
 import ProtectMiddlewareJS from "/src/snippets/reference/nuxt/ProtectMiddleware.js?raw";
 import ProtectMiddlewareTS from "/src/snippets/reference/nuxt/ProtectMiddleware.ts?raw";
 import ProxiesConfigJS from "/src/snippets/reference/nuxt/Proxies.mjs?raw";
@@ -256,6 +259,21 @@ additional `email` prop.
 This function returns a `Promise` that resolves to an `ArcjetDecision` object,
 which provides a high-level conclusion and detailed explanations of the decision
 made by Arcjet.
+
+<Tabs>
+  <TabItem label="TS (App)">
+    <Code code={ProtectAppTS} title="/app/api/route/hello.ts" lang="ts" />
+  </TabItem>
+  <TabItem label="TS (Pages)">
+    <Code code={ProtectPagesTS} title="/pages/api/hello.ts" lang="ts" />
+  </TabItem>
+  <TabItem label="JS (App Router)">
+    <Code code={ProtectAppJS} title="/app/api/route/hello.js" lang="js" />
+  </TabItem>
+  <TabItem label="JS (Pages Router)">
+    <Code code={ProtectPagesJS} title="/pages/api/hello.js" lang="js" />
+  </TabItem>
+</Tabs>
 
 ### Pages
 
@@ -619,12 +637,12 @@ SDKs work correctly locally.
 
 The default client can be overridden. If no client is specified, a default one
 will be used. Generally you should not need to provide a client - the Arcjet
-Astro SDK will automatically handle this for you.
+Nuxt SDK will automatically handle this for you.
 
 <Code
   code={removeTSCCommentDirectives(ClientOverrideJS)}
   lang="js"
-  title="astro.config.mjs"
+  title="nuxt.config.ts"
 />
 
 ## Version support
