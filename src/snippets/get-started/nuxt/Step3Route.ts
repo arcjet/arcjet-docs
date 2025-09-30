@@ -1,7 +1,9 @@
-import type { APIRoute } from "astro";
+import { createRouter, defineEventHandler, useBase } from "h3";
 import aj from "arcjet:client";
 
-export const GET: APIRoute = async ({ request }) => {
+const router = createRouter();
+
+router.get("/", defineEventHandler(async (event) => {
   // @ts-expect-error
   const decision = await aj.protect(request, { requested: 5 }); // Deduct 5 tokens from the bucket
   console.log("Arcjet decision", decision);
@@ -26,4 +28,4 @@ export const GET: APIRoute = async ({ request }) => {
   }
 
   return Response.json({ message: "Hello world" });
-};
+}));
