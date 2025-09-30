@@ -2,7 +2,7 @@ import { Code } from "@astrojs/starlight/components";
 import SelectableContent from "@/components/SelectableContent";
 import { removeTSCCommentDirectives } from "@/lib/utils";
 
-import ConfigBaseJS from "./config-base.mjs?raw";
+import ConfigBaseJS from "./nuxt-config.ts?raw";
 
 {/* prettier-ignore */}
 <SelectableContent client:load syncKey="packageManager" frameworkSwitcher={props.showFrameworkSwitcher ?? true}>
@@ -29,8 +29,8 @@ yarn nuxt add @arcjet/nuxt
 </div>
 </SelectableContent>
 
-This automatically installs and configures the Arcjet Astro integration in your
-project. Learn more about how this works in the [Astro docs](https://docs.astro.build/en/guides/integrations-guide/)
+This automatically installs and configures the Arcjet Nuxt integration in your
+project. Learn more about how this works in the [Nuxt docs](https://nuxt.com/docs/4.x/api/commands/add)
 . Alternatively, you can follow the manual installation instructions.
 
 <details>
@@ -63,8 +63,8 @@ project. Learn more about how this works in the [Astro docs](https://docs.astro.
     </div>
     </SelectableContent>
 
-    Update your Astro configuration file:
+    Update your Nuxt configuration file:
 
-    <Code code={removeTSCCommentDirectives(ConfigBaseJS)} lang="js" title="astro.config.mjs" />
+    <Code code={removeTSCCommentDirectives(ConfigBaseJS)} lang="js" title="nuxt.config.ts" />
 
 </details>
