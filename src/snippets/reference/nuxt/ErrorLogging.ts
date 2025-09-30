@@ -1,0 +1,33 @@
+import arcjet, { slidingWindow } from "@arcjet/nuxt";
+// TODO: how do we do this in Nuxt?
+import type { LoaderFunctionArgs } from "@remix-run/node";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    slidingWindow({
+      mode: "LIVE",
+      interval: "1h",
+      max: 60,
+    }),
+  ],
+});
+
+export async function loader(args: LoaderFunctionArgs) {
+  const decision = await aj.protect(args);
+
+  for (const { reason } of decision.results) {
+    if (reason.isError()) {
+      // Fail open by logging the error and continuing
+      console.warn("Arcjet error", reason.message);
+      // You could also fail closed here for very sensitive routes
+      //throw new Response("Service unavailable", { status: 503 });
+    }
+  }
+
+  if (decision.isDenied()) {
+    throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });
+  }
+
+  return null;
+}
