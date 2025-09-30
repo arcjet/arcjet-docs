@@ -1,0 +1,37 @@
+import SelectableContent from "@/components/SelectableContent";
+
+## 4. Start app
+
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="packageManager">
+<div slot="npm" slotIdx="1">
+```sh
+npm run dev
+```
+</div>
+<div slot="pnpm" slotIdx="2">
+```sh
+pnpm run dev
+```
+</div>
+<div slot="yarn" slotIdx="3">
+```sh
+yarn run dev
+```
+</div>
+</SelectableContent>
+
+Visit [`http://localhost:4321/api`](http://localhost:4321/api) in
+your browser and refresh a few times to hit the rate limit.
+
+Wait 10 seconds, then run:
+
+```sh
+curl -v http://localhost:4321/api
+```
+
+The wait is necessary because the decision is cached for your IP based on the
+`interval` rate limit configuration.
+
+You should see a `403` response because `curl` is considered a bot by default
+([customizable](/bot-protection/identifying-bots)).

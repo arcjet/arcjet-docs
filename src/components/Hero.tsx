@@ -7,6 +7,7 @@ import { Fastify as IconFastify } from "@/components/icons/tech/Fastify";
 import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
 import { NextJs as IconNextJs } from "@/components/icons/tech/NextJs";
 import { NodeJs as IconNodeJs } from "@/components/icons/tech/NodeJs";
+import { Nuxt as IconNuxt } from "@/components/icons/tech/Nuxt";
 import { ReactRouter as IconReactRouter } from "@/components/icons/tech/ReactRouter";
 import { Remix as IconRemix } from "@/components/icons/tech/Remix";
 import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
@@ -116,6 +117,9 @@ const Hero = forwardRef(
             break;
           case "node-js":
             icon = <IconNodeJs />;
+            break;
+          case "nuxt":
+            icon = <IconNuxt />;
             break;
           case "bun":
             icon = <IconBun />;
