@@ -35,6 +35,7 @@ root of the project, from a terminal:
 
 - In `lib/prefs.ts` add the new framework to the `FrameworkKey` and `FrameworkLabel` types, and to the exported frameworks list.
 - Add framework icon in `src/components/icons/tech/FrameworkName.tsx`.
+- Add framework to `frameworkIcon` in `src/compoenents/FrameworkSwitcher.tsx`.
 
 If you want the framework to be an available option in the docs index:
 
