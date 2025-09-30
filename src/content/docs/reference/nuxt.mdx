@@ -155,7 +155,7 @@ enabling them.
 <Code
   code={removeTSCCommentDirectives(RuleModesConfigJS)}
   lang="js"
-  title="astro.config.mjs"
+  title="nuxt.config.ts"
 />
 
 As the top level conclusion will always be `ALLOW` in `DRY_RUN` mode, you can
@@ -249,7 +249,7 @@ You can also specify CIDR ranges to match multiple IP addresses.
 
 Arcjet provides a single `protect` function that is used to execute your
 protection rules. This requires a `request` object which is the request
-argument as passed to the Astro request handler. Rules you add to the SDK may
+argument as passed to the Nuxt request handler. Rules you add to the SDK may
 require additional details, such as the `validateEmail` rule requiring an
 additional `email` prop.
 
@@ -263,8 +263,8 @@ Arcjet protects dynamic Nuxt pages, not static pages
 ([learn more about this](#static-routes)).
 
 <Code
-  code={removeTSCCommentDirectives(ProtectPageAstro)}
-  lang="astro"
+  code={removeTSCCommentDirectives(ProtectPageNuxt)}
+  lang="nuxt"
   title="src/pages/protected.astro"
 />
 
@@ -292,7 +292,7 @@ Arcjet protects dynamic Nuxt server endpoints, not static ones
 
 ### Middleware
 
-Arcjet can be used in Astro middleware to protect multiple routes at once. This
+Arcjet can be used in Nuxt middleware to protect multiple routes at once. This
 is useful for applying protection rules across your entire application or
 specific route patterns.
 
@@ -321,17 +321,10 @@ Some server Adapters, such as Vercel, only run middleware at build time for
 
 ### Static routes
 
-Arcjet can't protect Astro's **static routes** (pages pre-rendered at build
-time) because no HTTP request reaches your Astro server when the file is
+Arcjet can't protect Nuxt's **static routes** (pages pre-rendered at build
+time) because no HTTP request reaches your Nuxt / Nitro server when the file is
 served. Arcjet's protections run **per request**, and without the request
 context (IP address, user-agent, headers) there's nothing to evaluate.
-
-To protect a static route, configure the route for **on-demand rendering**.
-That way every visitor triggers a normal request that Arcjet can inspect.
-
-This can be achieved by using Astro's `server` mode or using an override on the
-route you want to protect. Read more about how to enable on-demand rendering in
-the [Astro docs](https://docs.astro.build/en/guides/on-demand-rendering/).
 
 ## Decision
 
@@ -426,7 +419,7 @@ This example will log the full result as well as each rate limit rule:
 <Code
   code={removeTSCCommentDirectives(DecisionLogConfigJS)}
   lang="js"
-  title="astro.config.mjs"
+  title="nuxt.config.ts"
 />
 
 <Tabs>
@@ -471,8 +464,8 @@ The `ArcjetReason` object for shield rules has the following properties:
 shieldTriggered: boolean;
 ```
 
-{/* TODO(#520): Uncomment once astro shield docs are done */}
-{/* See the [shield documentation](/shield/reference?f=astro) for more information */}
+{/* TODO(#520): Uncomment once Nuxt shield docs are done */}
+{/* See the [shield documentation](/shield/reference?f=nuxt) for more information */}
 {/* about these properties. */}
 
 ##### Bot protection
@@ -498,8 +491,8 @@ window: number;
 reset: number;
 ```
 
-{/* TODO(#519): Uncomment once astro rate limit docs are done */}
-{/* See the [rate limiting documentation](/rate-limiting/reference?f=astro) for more */}
+{/* TODO(#519): Uncomment once nuxt rate limit docs are done */}
+{/* See the [rate limiting documentation](/rate-limiting/reference?f=nuxt) for more */}
 {/* information about these properties. */}
 
 ##### Email validation & verification
@@ -516,8 +509,8 @@ An `ArcjetEmailType` is one of the following strings:
 "DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
 ```
 
-{/* TODO(#521): Uncomment once astro email validation docs are done */}
-{/* See the [email validation documentation](/email-validation/reference?f=astro) for */}
+{/* TODO(#521): Uncomment once nuxt email validation docs are done */}
+{/* See the [email validation documentation](/email-validation/reference?f=nuxt) for */}
 {/* more information about these properties. */}
 
 ### IP analysis
@@ -529,7 +522,7 @@ An `ArcjetEmailType` is one of the following strings:
 <Code
   code={removeTSCCommentDirectives(IPLocationConfigJS)}
   lang="js"
-  title="astro.config.mjs"
+  title="nuxt.config.ts"
 />
 
 <Tabs>
@@ -640,14 +633,9 @@ Astro SDK will automatically handle this for you.
 
 <NodeVersions />
 
-Arcjet supports the [Node.js versions supported by
-Astro](https://docs.astro.build/en/upgrade-astro/#nodejs-support-and-upgrade-policies).
+### Nuxt 
 
-### Astro
-
-Arcjet supports Astro v5.9.3 and above. We follow [Astro's support
-policy](https://docs.astro.build/en/upgrade-astro/#extended-maintenance) and
-provide support for all versions that are actively maintained by the Astro team.
+Arcjet supports Nuxt 4. 
 
 [Technical support](/support) is provided for the current major
 version of the Arcjet SDK for all users and for the current and previous major
