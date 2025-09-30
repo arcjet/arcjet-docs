@@ -42,6 +42,11 @@ export const main = [
             attrs: { target: "_blank", class: "external-link" },
           },
           {
+            label: "Nuxt",
+            link: "https://github.com/arcjet/example-nuxt",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
             label: "React Router",
             link: "https://github.com/arcjet/example-react-router",
             attrs: { target: "_blank", class: "external-link" },
@@ -325,6 +330,10 @@ export const main = [
           {
             label: "Node.js",
             link: "/reference/nodejs",
+          },
+          {
+            label: "Nuxt",
+            link: "/reference/nuxt",
           },
           {
             label: "Remix",
