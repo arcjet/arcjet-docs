@@ -1,12 +1,13 @@
 import { Astro as IconAstro } from "@/components/icons/tech/Astro";
 import { Bun as IconBun } from "@/components/icons/tech/Bun";
 import { Deno as IconDeno } from "@/components/icons/tech/Deno";
-import { Fastify as IconFastify } from "@/components/icons/tech/Fastify";
 import { Express as IconExpress } from "@/components/icons/tech/Express";
+import { Fastify as IconFastify } from "@/components/icons/tech/Fastify";
 import { Hono as IconHono } from "@/components/icons/tech/Hono";
 import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
 import { NextJs as IconNextJs } from "@/components/icons/tech/NextJs";
 import { NodeJs as IconNodeJs } from "@/components/icons/tech/NodeJs";
+import { Nuxt as IconNuxt } from "@/components/icons/tech/Nuxt";
 import { ReactRouter as IconReactRouter } from "@/components/icons/tech/ReactRouter";
 import { Remix as IconRemix } from "@/components/icons/tech/Remix";
 import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
@@ -41,6 +42,7 @@ const frameworkIcon = {
   "node-js-express": <IconNodeJs />,
   "node-js-hono": <IconNodeJs />,
   "node-js": <IconNodeJs />,
+  nuxt: <IconNuxt />,
   "react-router": <IconReactRouter />,
   remix: <IconRemix />,
   sveltekit: <IconSvelteKit />,

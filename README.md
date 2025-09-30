@@ -29,6 +29,37 @@ root of the project, from a terminal:
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
 
+## Adding content
+
+### Adding support for a framework
+
+- In `lib/prefs.ts` add the new framework to the `FrameworkKey` and `FrameworkLabel` types, and to the exported frameworks list.
+- Add framework icon in `src/components/icons/tech/FrameworkName.tsx`.
+- Add framework to `frameworkIcon` in `src/compoenents/FrameworkSwitcher.tsx`.
+
+If you want the framework to be an available option in the docs index:
+
+- Add a framework button in `src/components/FrameworkLinks.tsx`.
+
+### Adding a framework option to a page
+
+To add a framework option to a page, eg. the "Get Started" page at `/get-started`:
+
+- Add your framework to the frontmatter `frameworks` in `src/content/docs/get-started.mdx`.
+- Add the page title to the frontmatter `titleByFramework` in `src/content/docs/get-started.mdx`.
+
+Use one of
+`<SlotByFramework />` or `<TextByFramework />` components to display content for the currently selected framework:
+
+```mdx
+<SlotByFramework client:load>
+  ...
+  <SomeContent slot="new-framework-key" />
+</SlotByFramework>
+```
+
+This will make `<SomeContent />` only visible when the new framework is selected.
+
 ## Support
 
 [Join our Discord server][discord-invite] or [reach out for support][support].
