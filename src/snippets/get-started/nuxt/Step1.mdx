@@ -1,0 +1,70 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import { removeTSCCommentDirectives } from "@/lib/utils";
+
+import ConfigBaseJS from "./config-base.mjs?raw";
+
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="packageManager" frameworkSwitcher={props.showFrameworkSwitcher ?? true}>
+<div slot="npm" slotIdx="1">
+
+```sh
+npx nuxt add @arcjet/nuxt
+```
+
+</div>
+<div slot="pnpm" slotIdx="2">
+
+```sh
+pnpm nuxt add @arcjet/nuxt
+```
+
+</div>
+<div slot="yarn" slotIdx="3">
+
+```sh
+yarn nuxt add @arcjet/nuxt
+```
+
+</div>
+</SelectableContent>
+
+This automatically installs and configures the Arcjet Astro integration in your
+project. Learn more about how this works in the [Astro docs](https://docs.astro.build/en/guides/integrations-guide/)
+. Alternatively, you can follow the manual installation instructions.
+
+<details>
+    <summary>Manual installation instruction</summary>
+    
+    In your project root, run the following command:
+
+    {/* prettier-ignore */}
+    <SelectableContent client:load syncKey="packageManager" frameworkSwitcher={props.showFrameworkSwitcher ?? true}>
+    <div slot="npm" slotIdx="1">
+
+    ```sh
+    npm add @arcjet/nuxt
+    ```
+
+    </div>
+    <div slot="pnpm" slotIdx="2">
+
+    ```sh
+    pnpm add @arcjet/nuxt
+    ```
+
+    </div>
+    <div slot="yarn" slotIdx="3">
+
+    ```sh
+    yarn add @arcjet/nuxt
+    ```
+
+    </div>
+    </SelectableContent>
+
+    Update your Astro configuration file:
+
+    <Code code={removeTSCCommentDirectives(ConfigBaseJS)} lang="js" title="astro.config.mjs" />
+
+</details>

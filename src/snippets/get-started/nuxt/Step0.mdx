@@ -1,0 +1,36 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+
+Create an Nuxt project:
+
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="packageManager" frameworkSwitcher>
+<div slot="npm" slotIdx="1">
+
+```sh
+npm create nuxt@latest
+```
+
+</div>
+<div slot="yarn" slotIdx="2">
+
+```sh
+yarn create nuxt@latest
+```
+
+</div>
+<div slot="pnpm" slotIdx="3">
+
+```sh
+pnpm create nuxt@latest
+```
+
+</div>
+
+</SelectableContent>
+
+Next enable universal rendering. This is important because Arcjet only protects
+dynamic routes. Learn why in our [Nuxt SDK reference docs](/reference/nuxt#universal-rendering).
+
+For detailed instructions refer to the [Nuxt installation docs](https://nuxt.com/docs/4.x/getting-started/installation)
+and the [Nuxt universal rendering docs](https://nuxt.com/docs/4.x/guide/concepts/rendering#universal-rendering).
