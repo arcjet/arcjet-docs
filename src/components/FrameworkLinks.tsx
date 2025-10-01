@@ -13,8 +13,8 @@ import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
 import { frameworks, getStoredFramework, type FrameworkKey } from "@/lib/prefs";
 import { queryParamFramework } from "@/store";
 import { useStore } from "@nanostores/react";
-import type { ForwardedRef, PropsWithChildren, ReactNode } from "react";
-import { forwardRef, useEffect, useState } from "react";
+import type { PropsWithChildren, ReactNode } from "react";
+import { useEffect, useState } from "react";
 
 import styles from "./FrameworkLinks.module.scss";
 
@@ -33,114 +33,108 @@ interface FrameworkLinksProps extends PropsWithChildren {
  * @param title - The block title.
  * @param exclude - A list of framework to exclude from display.
  * @param path - An optional path to link to, defaults to the same page.
- * @param alwaysShow - Show the links even if a framework is selected or stored.
+ * @param alwaysShow - Show the links even if a framework is selected or stored, defaults to false.
  */
-const FrameworkLinks = forwardRef(
-  (
-    {
-      title = "Choose a framework",
-      exclude,
-      path = "",
-      alwaysShow,
-      ...props
-    }: FrameworkLinksProps,
-    ref: ForwardedRef<HTMLDivElement>,
-  ) => {
-    const [hide, setHide] = useState(true);
+export function FrameworkLinks({
+  title = "Choose a framework",
+  exclude,
+  path = "",
+  alwaysShow,
+  ...props
+}: FrameworkLinksProps) {
+  const [hide, setHide] = useState(true);
 
-    const $queryParamFramework = useStore(queryParamFramework);
+  const $queryParamFramework = useStore(queryParamFramework);
 
-    useEffect(() => {
-      // Get the framework to display from query params
-      const params = new URLSearchParams(window.location.search);
-      let f = params.get("f");
+  useEffect(() => {
+    // Check if a framework is set in query params
+    const params = new URLSearchParams(window.location.search);
+    let f = params.get("f");
 
-      if (!f) {
-        const storedFramework = getStoredFramework();
-        if (storedFramework) f = storedFramework;
-      }
+    // Else check for a stored framework selection
+    if (!f) {
+      const storedFramework = getStoredFramework();
+      if (storedFramework) f = storedFramework;
+    }
 
-      if (f && !alwaysShow) setHide(true);
-      else setHide(false);
-    }, [$queryParamFramework, alwaysShow]);
+    // Hide if a framework is selected
+    if (f && !alwaysShow) setHide(true);
+    else setHide(false);
+  }, [$queryParamFramework, alwaysShow]);
 
-    let cls = "FrameworkLinks " + styles.FrameworkLinks;
+  let cls = "FrameworkLinks " + styles.FrameworkLinks;
 
-    return (
-      !hide && (
-        <div ref={ref} className={cls} {...props}>
-          <h2 id="choose-a-framework">{title}</h2>
-          <div className={styles.Links}>
-            {frameworks.map((f) => {
-              let icon: ReactNode;
+  return (
+    !hide && (
+      <div className={cls} {...props}>
+        <h2 id="choose-a-framework">{title}</h2>
+        <div className={styles.Links}>
+          {frameworks.map((f) => {
+            let icon: ReactNode;
 
-              switch (f.key) {
-                case "astro":
-                  icon = <IconAstro />;
-                  break;
-                case "bun":
-                  icon = <IconBun />;
-                  break;
-                case "bun-hono":
-                  icon = <IconBun />;
-                  break;
-                case "deno":
-                  icon = <IconDeno />;
-                  break;
-                case "fastify":
-                  icon = <IconFastify />;
-                  break;
-                case "nest-js":
-                  icon = <IconNestJs />;
-                  break;
-                case "next-js":
-                  icon = <IconNextJs />;
-                  break;
-                case "node-js":
-                  icon = <IconNodeJs />;
-                  break;
-                case "node-js-express":
-                  icon = <IconNodeJs />;
-                  break;
-                case "node-js-hono":
-                  icon = <IconNodeJs />;
-                  break;
-                case "nuxt":
-                  icon = <IconNuxt />;
-                  break;
-                case "react-router":
-                  icon = <IconReactRouter />;
-                  break;
-                case "remix":
-                  icon = <IconRemix />;
-                  break;
-                case "sveltekit":
-                  icon = <IconSvelteKit />;
-                  break;
-                default:
-                  icon = "";
-                  break;
-              }
+            switch (f.key) {
+              case "astro":
+                icon = <IconAstro />;
+                break;
+              case "bun":
+                icon = <IconBun />;
+                break;
+              case "bun-hono":
+                icon = <IconBun />;
+                break;
+              case "deno":
+                icon = <IconDeno />;
+                break;
+              case "fastify":
+                icon = <IconFastify />;
+                break;
+              case "nest-js":
+                icon = <IconNestJs />;
+                break;
+              case "next-js":
+                icon = <IconNextJs />;
+                break;
+              case "node-js":
+                icon = <IconNodeJs />;
+                break;
+              case "node-js-express":
+                icon = <IconNodeJs />;
+                break;
+              case "node-js-hono":
+                icon = <IconNodeJs />;
+                break;
+              case "nuxt":
+                icon = <IconNuxt />;
+                break;
+              case "react-router":
+                icon = <IconReactRouter />;
+                break;
+              case "remix":
+                icon = <IconRemix />;
+                break;
+              case "sveltekit":
+                icon = <IconSvelteKit />;
+                break;
+              default:
+                icon = "";
+                break;
+            }
 
-              if (exclude?.includes(f.key)) return null;
+            if (exclude?.includes(f.key)) return null;
 
-              return (
-                <Button
-                  as="link"
-                  size="lg"
-                  href={`${path}?f=${f.key}`}
-                  decoratorLeft={icon}
-                >
-                  {f.label}
-                </Button>
-              );
-            })}
-          </div>
+            return (
+              <Button
+                as="link"
+                size="lg"
+                href={`${path}?f=${f.key}`}
+                decoratorLeft={icon}
+              >
+                {f.label}
+              </Button>
+            );
+          })}
         </div>
-      )
-    );
-  },
-);
-FrameworkLinks.displayName = "FrameworkLinks";
-
-export default FrameworkLinks;
+      </div>
+    )
+  );
+}

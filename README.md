@@ -60,6 +60,39 @@ Use one of
 
 This will make `<SomeContent />` only visible when the new framework is selected.
 
+### In-page framework links
+
+We provide a framework selection component for each page including the docs home. However the docs home is the only page that always display the links. The other pages will hide the component if a framework is already selected.
+
+In home:
+
+```mdx
+<FrameworkLinks
+  title="Get started"
+  path="/get-started"
+  alwaysShow
+  client:load
+/>
+```
+
+In other pages – notice the `exclude` prop, make sure the available framework pages match the rendered links.
+
+```mdx
+<FrameworkLinks
+  title="Choose a framework"
+  exclude={[
+    "astro",
+    "fastify",
+    "bun-hono",
+    "deno",
+    "node-js-express",
+    "node-js-hono",
+    "react-router",
+  ]}
+  client:load
+/>
+```
+
 ## Support
 
 [Join our Discord server][discord-invite] or [reach out for support][support].
