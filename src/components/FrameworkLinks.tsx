@@ -10,10 +10,10 @@ import { Nuxt as IconNuxt } from "@/components/icons/tech/Nuxt";
 import { ReactRouter as IconReactRouter } from "@/components/icons/tech/ReactRouter";
 import { Remix as IconRemix } from "@/components/icons/tech/Remix";
 import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
-import { getStoredFramework, type FrameworkKey } from "@/lib/prefs";
+import { frameworks, getStoredFramework, type FrameworkKey } from "@/lib/prefs";
 import { queryParamFramework } from "@/store";
 import { useStore } from "@nanostores/react";
-import type { ForwardedRef, PropsWithChildren } from "react";
+import type { ForwardedRef, PropsWithChildren, ReactNode } from "react";
 import { forwardRef, useEffect, useState } from "react";
 
 import styles from "./FrameworkLinks.module.scss";
@@ -71,146 +71,70 @@ const FrameworkLinks = forwardRef(
         <div ref={ref} className={cls} {...props}>
           <h2 id="choose-a-framework">{title}</h2>
           <div className={styles.Links}>
-            {(!exclude || !exclude.includes("astro")) && (
-              <Button
-                as="link"
-                size="lg"
-                href={`${path}?f=astro`}
-                decoratorLeft={<IconAstro />}
-              >
-                Astro
-              </Button>
-            )}
-            {(!exclude || !exclude.includes("bun")) && (
-              <Button
-                as="link"
-                size="lg"
-                href={`${path}?f=bun`}
-                decoratorLeft={<IconBun />}
-              >
-                Bun
-              </Button>
-            )}
-            {(!exclude || !exclude.includes("bun-hono")) && (
-              <Button
-                as="link"
-                size="lg"
-                href={`${path}?f=bun-hono`}
-                decoratorLeft={<IconBun />}
-              >
-                Bun + Hono
-              </Button>
-            )}
-            {(!exclude || !exclude.includes("deno")) && (
-              <Button
-                as="link"
-                size="lg"
-                href={`${path}?f=deno`}
-                decoratorLeft={<IconDeno />}
-              >
-                Deno
-              </Button>
-            )}
-            {(!exclude || !exclude.includes("fastify")) && (
-              <Button
-                as="link"
-                size="lg"
-                href={`${path}?f=fastify`}
-                decoratorLeft={<IconFastify />}
-              >
-                Fastify
-              </Button>
-            )}
-            {(!exclude || !exclude.includes("nest-js")) && (
-              <Button
-                as="link"
-                size="lg"
-                href={`${path}?f=nest-js`}
-                decoratorLeft={<IconNestJs />}
-              >
-                NestJS
-              </Button>
-            )}
-            {(!exclude || !exclude.includes("next-js")) && (
-              <Button
-                as="link"
-                size="lg"
-                href={`${path}?f=next-js`}
-                decoratorLeft={<IconNextJs />}
-              >
-                Next.js
-              </Button>
-            )}
-            {(!exclude || !exclude.includes("node-js")) && (
-              <Button
-                as="link"
-                size="lg"
-                href={`${path}?f=node-js`}
-                decoratorLeft={<IconNodeJs />}
-              >
-                Node.js
-              </Button>
-            )}
-            {(!exclude || !exclude.includes("node-js-express")) && (
-              <Button
-                as="link"
-                size="lg"
-                href={`${path}?f=node-js-express`}
-                decoratorLeft={<IconNodeJs />}
-              >
-                Node.js + Express
-              </Button>
-            )}
-            {(!exclude || !exclude.includes("node-js-hono")) && (
-              <Button
-                as="link"
-                size="lg"
-                href={`${path}?f=node-js-hono`}
-                decoratorLeft={<IconNodeJs />}
-              >
-                Node.js + Hono
-              </Button>
-            )}
-            {(!exclude || !exclude.includes("nuxt")) && (
-              <Button
-                as="link"
-                size="lg"
-                href={`${path}?f=nuxt`}
-                decoratorLeft={<IconNuxt />}
-              >
-                Nuxt
-              </Button>
-            )}
-            {(!exclude || !exclude.includes("react-router")) && (
-              <Button
-                as="link"
-                decoratorLeft={<IconReactRouter />}
-                href={`${path}?f=react-router`}
-                size="lg"
-              >
-                React Router
-              </Button>
-            )}
-            {(!exclude || !exclude.includes("remix")) && (
-              <Button
-                as="link"
-                size="lg"
-                href={`${path}?f=remix`}
-                decoratorLeft={<IconRemix />}
-              >
-                Remix
-              </Button>
-            )}
-            {(!exclude || !exclude.includes("sveltekit")) && (
-              <Button
-                as="link"
-                size="lg"
-                href={`${path}?f=sveltekit`}
-                decoratorLeft={<IconSvelteKit />}
-              >
-                SvelteKit
-              </Button>
-            )}
+            {frameworks.map((f) => {
+              let icon: ReactNode;
+
+              switch (f.key) {
+                case "astro":
+                  icon = <IconAstro />;
+                  break;
+                case "bun":
+                  icon = <IconBun />;
+                  break;
+                case "bun-hono":
+                  icon = <IconBun />;
+                  break;
+                case "deno":
+                  icon = <IconDeno />;
+                  break;
+                case "fastify":
+                  icon = <IconFastify />;
+                  break;
+                case "nest-js":
+                  icon = <IconNestJs />;
+                  break;
+                case "next-js":
+                  icon = <IconNextJs />;
+                  break;
+                case "node-js":
+                  icon = <IconNodeJs />;
+                  break;
+                case "node-js-express":
+                  icon = <IconNodeJs />;
+                  break;
+                case "node-js-hono":
+                  icon = <IconNodeJs />;
+                  break;
+                case "nuxt":
+                  icon = <IconNuxt />;
+                  break;
+                case "react-router":
+                  icon = <IconReactRouter />;
+                  break;
+                case "remix":
+                  icon = <IconRemix />;
+                  break;
+                case "sveltekit":
+                  icon = <IconSvelteKit />;
+                  break;
+                default:
+                  icon = "";
+                  break;
+              }
+
+              if (exclude?.includes(f.key)) return null;
+
+              return (
+                <Button
+                  as="link"
+                  size="lg"
+                  href={`${path}?f=${f.key}`}
+                  decoratorLeft={icon}
+                >
+                  {f.label}
+                </Button>
+              );
+            })}
           </div>
         </div>
       )

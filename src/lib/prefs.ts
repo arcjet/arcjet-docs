@@ -15,6 +15,7 @@ export type FrameworkKey =
   | "bun"
   | "bun-hono"
   | "deno"
+  | "express"
   | "fastify"
   | "nest-js"
   | "next-js"
@@ -22,11 +23,9 @@ export type FrameworkKey =
   | "node-js-express"
   | "node-js-hono"
   | "nuxt"
-  | "sveltekit"
   | "react-router"
   | "remix"
-  | "nest-js"
-  | "express";
+  | "sveltekit";
 
 /** The framework display labels */
 export type FrameworkLabel =
@@ -34,6 +33,7 @@ export type FrameworkLabel =
   | "Bun"
   | "Bun + Hono"
   | "Deno"
+  | "Express"
   | "Fastify"
   | "NestJS"
   | "Next.js"
@@ -41,11 +41,9 @@ export type FrameworkLabel =
   | "Node.js + Express"
   | "Node.js + Hono"
   | "Nuxt"
-  | "SvelteKit"
   | "React Router"
   | "Remix"
-  | "NestJs"
-  | "Express";
+  | "SvelteKit";
 
 /** The full framework type */
 export type Framework = {
@@ -90,6 +88,10 @@ export const frameworks: Array<Framework> = [
     key: "deno",
     label: "Deno",
   },
+  // {
+  //   key: "express",
+  //   label: "Express",
+  // },
   {
     key: "fastify",
     label: "Fastify",
@@ -130,10 +132,6 @@ export const frameworks: Array<Framework> = [
     key: "sveltekit",
     label: "SvelteKit",
   },
-  // {
-  //   key: "express",
-  //   label: "Express",
-  // },
 ];
 
 /**
