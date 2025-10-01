@@ -1,6 +1,5 @@
-import arcjet, { detectBot } from "@arcjet/nuxt";
+import arcjet, { detectBot } from "#arcjet";
 import { isMissingUserAgent } from "@arcjet/inspect";
-import type { LoaderFunctionArgs } from "@remix-run/node";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,

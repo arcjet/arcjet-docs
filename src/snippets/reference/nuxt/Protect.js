@@ -1,4 +1,4 @@
-import arcjet, { tokenBucket } from "@arcjet/nuxt";
+import arcjet, { tokenBucket } from "#arcjet";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com

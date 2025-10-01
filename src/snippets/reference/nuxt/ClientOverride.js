@@ -1,4 +1,4 @@
-import arcjet, { createRemoteClient, slidingWindow } from "@arcjet/nuxt";
+import arcjet, { createRemoteClient, slidingWindow } from "#arcjet";
 import { baseUrl } from "@arcjet/env";
 
 const client = createRemoteClient({

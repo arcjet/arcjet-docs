@@ -1,4 +1,4 @@
-import arcjet, { slidingWindow } from "@arcjet/nuxt";
+import arcjet, { slidingWindow } from "#arcjet";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY,

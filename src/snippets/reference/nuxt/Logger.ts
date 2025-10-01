@@ -1,4 +1,4 @@
-import arcjet, { shield } from "@arcjet/nuxt";
+import arcjet, { shield } from "#arcjet";
 import pino, { type Logger } from "pino";
 
 const logger: Logger =

@@ -1,5 +1,4 @@
-import arcjet, { shield } from "@arcjet/next";
-import type { NextApiRequest, NextApiResponse } from "next";
+import arcjet, { shield } from "#arcjet";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,

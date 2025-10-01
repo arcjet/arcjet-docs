@@ -1,4 +1,4 @@
-import arcjet, { detectBot } from "@arcjet/nuxt";
+import arcjet, { detectBot } from "#arcjet";
 import { isMissingUserAgent } from "@arcjet/inspect";
 
 const aj = arcjet({

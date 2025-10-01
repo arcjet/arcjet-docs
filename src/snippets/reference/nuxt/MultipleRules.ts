@@ -1,4 +1,4 @@
-import arcjet, { detectBot, tokenBucket } from "@arcjet/nuxt";
+import arcjet, { detectBot, tokenBucket } from "#arcjet";
 
 // Create an Arcjet instance with multiple rules
 const aj = arcjet({

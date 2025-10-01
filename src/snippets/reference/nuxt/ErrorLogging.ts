@@ -1,6 +1,4 @@
-import arcjet, { slidingWindow } from "@arcjet/nuxt";
-// TODO: how do we do this in Nuxt?
-import type { LoaderFunctionArgs } from "@remix-run/node";
+import arcjet, { slidingWindow } from "#arcjet";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,

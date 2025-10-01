@@ -1,4 +1,4 @@
-import arcjet, { shield } from "@arcjet/nuxt";
+import arcjet, { shield } from "#arcjet";
 
 const aj = arcjet({
   // Get your site key from https://app.arcjet.com
