@@ -44,7 +44,7 @@ ajToc:
 
 import FrameworkName from "@/components/FrameworkName";
 import SlotByFramework from "@/components/SlotByFramework";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import { FrameworkLinks } from "@/components/FrameworkLinks";
 import { CardGrid, LinkCard } from "@astrojs/starlight/components";
 import Comments from "/src/components/Comments.astro";
 import FAQs from "/src/components/FAQs.astro";
@@ -85,7 +85,15 @@ the [OWASP Top 10](https://owasp.org/www-project-top-ten/).
 
 <FrameworkLinks
   title="Choose a framework"
-  exclude={["bun-hono", "deno", "node-js-express", "node-js-hono"]}
+  exclude={[
+    "astro",
+    "fastify",
+    "bun-hono",
+    "deno",
+    "node-js-express",
+    "node-js-hono",
+    "react-router",
+  ]}
   client:load
 />
 

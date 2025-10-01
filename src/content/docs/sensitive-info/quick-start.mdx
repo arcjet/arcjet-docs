@@ -42,7 +42,7 @@ ajToc:
 import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import SlotByFramework from "@/components/SlotByFramework";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import { FrameworkLinks } from "@/components/FrameworkLinks";
 import FrameworkName from "@/components/FrameworkName";
 import FAQs from "/src/components/FAQs.astro";
 import Comments from "/src/components/Comments.astro";
@@ -81,7 +81,15 @@ you do not wish to handle.
 
 <FrameworkLinks
   title="Choose a framework"
-  exclude={["bun-hono", "deno", "node-js-express", "node-js-hono"]}
+  exclude={[
+    "astro",
+    "fastify",
+    "bun-hono",
+    "deno",
+    "node-js-express",
+    "node-js-hono",
+    "react-router",
+  ]}
   client:load
 />
 

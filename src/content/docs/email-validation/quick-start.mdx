@@ -43,7 +43,7 @@ ajToc:
 import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import { FrameworkLinks } from "@/components/FrameworkLinks";
 import SlotByFramework from "@/components/SlotByFramework";
 import FrameworkName from "@/components/FrameworkName";
 import Step1Bun from "@/snippets/email-validation/quick-start/bun/Step1.mdx";
@@ -77,7 +77,15 @@ reduce the amount of spam or fraudulent accounts.
 
 <FrameworkLinks
   title="Choose a framework"
-  exclude={["bun-hono", "deno", "node-js-express", "node-js-hono"]}
+  exclude={[
+    "astro",
+    "fastify",
+    "bun-hono",
+    "deno",
+    "node-js-express",
+    "node-js-hono",
+    "react-router",
+  ]}
   client:load
 />
 

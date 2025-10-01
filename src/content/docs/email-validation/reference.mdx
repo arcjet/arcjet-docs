@@ -27,7 +27,7 @@ ajToc:
 import { Aside, Badge } from "@astrojs/starlight/components";
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import { FrameworkLinks } from "@/components/FrameworkLinks";
 import DisplayType from "@/components/DisplayType.astro";
 
 import DecisionLogAllowBun from "@/snippets/email-validation/reference/bun/DecisionLogAllow.mdx";
@@ -69,7 +69,15 @@ plan](https://arcjet.com/pricing).
 
 <FrameworkLinks
   title="Choose a framework"
-  exclude={["bun-hono", "deno", "node-js-express", "node-js-hono"]}
+  exclude={[
+    "astro",
+    "fastify",
+    "bun-hono",
+    "deno",
+    "node-js-express",
+    "node-js-hono",
+    "react-router",
+  ]}
   client:load
 />
 

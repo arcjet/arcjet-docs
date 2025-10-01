@@ -43,7 +43,7 @@ ajToc:
 import { LinkCard, CardGrid } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import SlotByFramework from "@/components/SlotByFramework";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import { FrameworkLinks } from "@/components/FrameworkLinks";
 import FrameworkName from "@/components/FrameworkName";
 import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 
@@ -76,7 +76,15 @@ Arcjet signup form protection combines rate limiting, bot protection, and email 
 
 <FrameworkLinks
   title="Choose a framework"
-  exclude={["bun-hono", "deno", "node-js-express", "node-js-hono"]}
+  exclude={[
+    "astro",
+    "fastify",
+    "bun-hono",
+    "deno",
+    "node-js-express",
+    "node-js-hono",
+    "react-router",
+  ]}
   client:load
 />
 
