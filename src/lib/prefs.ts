@@ -116,10 +116,11 @@ export const frameworks: Array<Framework> = [
     key: "node-js-hono",
     label: "Node.js + Hono",
   },
-  {
-    key: "nuxt",
-    label: "Nuxt",
-  },
+  // TODO(Nuxt): uncomment once documentation is ready
+  // {
+  //   key: "nuxt",
+  //   label: "Nuxt",
+  // },
   {
     key: "react-router",
     label: "React Router",

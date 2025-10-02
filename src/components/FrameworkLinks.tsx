@@ -33,7 +33,7 @@ interface FrameworkLinksProps extends PropsWithChildren {
  * @param title - The block title.
  * @param exclude - A list of framework to exclude from display.
  * @param path - An optional path to link to, defaults to the same page.
- * @param alwaysShow - Show the links even if a framework is selected or stored.
+ * @param alwaysShow - Show the links even if a framework is selected or stored, defaults to false.
  */
 const FrameworkLinks = forwardRef(
   (
@@ -51,15 +51,17 @@ const FrameworkLinks = forwardRef(
     const $queryParamFramework = useStore(queryParamFramework);
 
     useEffect(() => {
-      // Get the framework to display from query params
+      // Check if a framework is set in query params
       const params = new URLSearchParams(window.location.search);
       let f = params.get("f");
 
+      // Else check for a stored framework selection
       if (!f) {
         const storedFramework = getStoredFramework();
         if (storedFramework) f = storedFramework;
       }
 
+      // Hide if a framework is selected
       if (f && !alwaysShow) setHide(true);
       else setHide(false);
     }, [$queryParamFramework, alwaysShow]);
@@ -71,7 +73,7 @@ const FrameworkLinks = forwardRef(
         <div ref={ref} className={cls} {...props}>
           <h2 id="choose-a-framework">{title}</h2>
           <div className={styles.Links}>
-            {frameworks.map((f) => {
+            {frameworks.map((f, idx) => {
               let icon: ReactNode;
 
               switch (f.key) {
@@ -126,6 +128,7 @@ const FrameworkLinks = forwardRef(
 
               return (
                 <Button
+                  key={f.key + idx}
                   as="link"
                   size="lg"
                   href={`${path}?f=${f.key}`}

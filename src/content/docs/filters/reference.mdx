@@ -38,6 +38,7 @@ ajToc:
     anchor: "limitations"
 ---
 
+import FrameworkLinks from "@/components/FrameworkLinks";
 import DisplayType from "@/components/DisplayType.astro";
 import SlotByFramework from "@/components/SlotByFramework";
 import BunAllow from "@/snippets/filters/reference/bun/Allow.mdx";
@@ -59,6 +60,19 @@ allows you to quickly enforce rules like allow/deny by country, network, or
 
 Arcjet filter rules is available on all [pricing
 plans](https://arcjet.com/pricing).
+
+<FrameworkLinks
+  title="Choose a framework"
+  exclude={[
+    "astro",
+    "bun-hono",
+    "fastify",
+    "node-js-express",
+    "node-js-hono",
+    "react-router",
+  ]}
+  client:load
+/>
 
 ## Configuration
 
