@@ -1,4 +1,4 @@
-import { arcjet as arcjetNuxt, fixedWindow } from "#arcjet";
+import arcjetNuxt, { fixedWindow } from "#arcjet";
 
 export const arcjet = arcjetNuxt({
   rules: [

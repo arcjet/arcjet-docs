@@ -1,4 +1,4 @@
-import { arcjet as arcjetNuxt, fixedWindow, detectBot } from "#arcjet";
+import arcjetNuxt, { fixedWindow, detectBot } from "#arcjet";
 
 export const arcjet = arcjetNuxt({
   rules: [

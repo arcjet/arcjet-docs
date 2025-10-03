@@ -1,5 +1,5 @@
 // @ts-expect-error
-import { arcjet as arcjetNuxt, detectBot, tokenBucket } from "#arcjet";
+import arcjetNuxt, { detectBot, tokenBucket } from "#arcjet";
 
 export const arcjet = arcjetNuxt({
   rules: [

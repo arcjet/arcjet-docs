@@ -1,4 +1,4 @@
-import { arcjet as arcjetNuxt, shield } from "#arcjet";
+import arcjetNuxt, { shield } from "#arcjet";
 
 export const arcjet = arcjetNuxt({
   rules: [
