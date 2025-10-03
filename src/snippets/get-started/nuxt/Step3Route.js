@@ -1,6 +1,6 @@
 // @ts-check
 // @ts-expect-error
-import aj from "arcjet:client";
+import aj from "#arcjet";
 
 export const GET = async ({ request }) => {
   const decision = await aj.protect(request, { requested: 5 }); // Deduct 5 tokens from the bucket
