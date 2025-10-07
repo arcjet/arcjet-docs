@@ -2,36 +2,40 @@ import { Code } from "@astrojs/starlight/components";
 import SelectableContent from "@/components/SelectableContent";
 import { removeTSCCommentDirectives } from "@/lib/utils";
 
-import ConfigBaseTS from "./nuxt-config.ts?raw";
+import ConfigurationTS from "@/snippets/reference/nuxt/Configuration.ts?raw";
 
 {/* prettier-ignore */}
 <SelectableContent client:load syncKey="packageManager" frameworkSwitcher={props.showFrameworkSwitcher ?? true}>
-<div slot="npm" slotIdx="1">
+    <Fragment slot="npm" slotIdx="1">
 
-```sh
-npx nuxt add @arcjet/nuxt
-```
+    ```sh
+    npx nuxt add @arcjet/nuxt
+    ```
 
-</div>
-<div slot="pnpm" slotIdx="2">
+    </Fragment>
+    <Fragment slot="pnpm" slotIdx="2">
 
-```sh
-pnpm nuxt add @arcjet/nuxt
-```
+    ```sh
+    pnpm nuxt add @arcjet/nuxt
+    ```
 
-</div>
-<div slot="yarn" slotIdx="3">
+    </Fragment>
+    <Fragment slot="yarn" slotIdx="3">
 
-```sh
-yarn nuxt add @arcjet/nuxt
-```
+    ```sh
+    yarn nuxt add @arcjet/nuxt
+    ```
 
-</div>
+    </Fragment>
+
 </SelectableContent>
 
 This automatically installs and configures the Arcjet Nuxt integration in your
-project. Learn more about how this works in the [Nuxt docs](https://nuxt.com/docs/4.x/api/commands/add)
-. Alternatively, you can follow the manual installation instructions.
+project. Learn more about how this works in the
+[Nuxt docs](https://nuxt.com/docs/4.x/api/commands/add). Alternatively, you can
+follow the manual installation instructions.
+
+{/* TODO: Mention adding the `arcjet:` key? Test module install */}
 
 <details>
     <summary>Manual installation instruction</summary>
@@ -40,31 +44,31 @@ project. Learn more about how this works in the [Nuxt docs](https://nuxt.com/doc
 
     {/* prettier-ignore */}
     <SelectableContent client:load syncKey="packageManager" frameworkSwitcher={props.showFrameworkSwitcher ?? true}>
-    <div slot="npm" slotIdx="1">
+    <Fragment slot="npm" slotIdx="1">
 
     ```sh
     npm add @arcjet/nuxt
     ```
 
-    </div>
-    <div slot="pnpm" slotIdx="2">
+    </Fragment>
+    <Fragment slot="pnpm" slotIdx="2">
 
     ```sh
     pnpm add @arcjet/nuxt
     ```
 
-    </div>
-    <div slot="yarn" slotIdx="3">
+    </Fragment>
+    <Fragment slot="yarn" slotIdx="3">
 
     ```sh
     yarn add @arcjet/nuxt
     ```
 
-    </div>
+    </Fragment>
     </SelectableContent>
 
     Update your Nuxt configuration file:
 
-    <Code code={removeTSCCommentDirectives(ConfigBaseJS)} lang="js" title="nuxt.config.ts" />
+    <Code code={removeTSCCommentDirectives(ConfigurationTS)} lang="ts" title="nuxt.config.ts" />
 
 </details>
