@@ -290,6 +290,11 @@ export const main = [
           },
           {
             attrs: { class: "feature filters" },
+            label: "Concepts",
+            link: "/filters/concepts",
+          },
+          {
+            attrs: { class: "feature filters" },
             label: "Reference",
             link: "/filters/reference",
           },

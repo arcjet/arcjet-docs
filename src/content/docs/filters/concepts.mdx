@@ -1,0 +1,62 @@
+---
+description: "Arcjet filters let you block unwanted traffic inside your application code with Arcjet."
+prev: false
+title: "Arcjet filters"
+---
+
+import Comments from "/src/components/Comments.astro";
+
+Arcjet filters let you block requests using
+[Wireshark](https://www.wireshark.org/)-like [display
+filter](https://www.wireshark.org/docs/wsug_html_chunked/ChWorkBuildDisplayFilterSection.html)
+expressions over HTTP headers, IP addresses, and other request fields. This
+allows you to quickly enforce rules like allow/deny by country, network, or
+`user-agent`.
+
+## Why use filters?
+
+You can use filters to block unwanted traffic inside your application code with
+Arcjet.
+
+Filters have access to literal request fields such as the `user-agent` header
+and the request IP address.
+With these fields you can for example block a particular spider to solve your
+custom needs.
+This is similar to programming code yourself but with filters these cases
+integrate with the rest of Arcjet.
+
+Filters also have access to _reflected_ fields such as the country of the
+request IP address and whether that is a known VPN or relay service.
+With these fields you can block based on geolocation and other analysis.
+This is similar to accessing the `ip` field on an Arcjet decision and manually
+handling requests in your application code.
+The difference is that with filters the blocking is integrated with other rules,
+whereas `decision.ip` fields are better for customizing the response such as
+showing a particular message.
+
+## How does it work?
+
+The domain-specific language (DSL) is described in the [Filters reference][filters-reference].
+
+We use our Rust crate [`arcjet/wirefilter`][arcjet-wirefilter] to match filters.
+That crate is a fork of [`cloudflare/wirefilter`][cloudflare-wirefilter],
+modified to support an “undetermined” state for fields that are not available.
+
+## Is any data sent to the cloud?
+
+That depends.
+The request body is never sent to the cloud:
+only metadata about the request is sent,
+in some cases.
+
+Whether metadata is sent to the cloud depends on which fields are used.
+Many fields can be analyzed locally in which case no data is sent to the cloud.
+The results of this analysis are reported to your dashboard.
+The `ip.src.*` fields require lookups in large databases so such analysis is
+done in the cloud.
+
+<Comments />
+
+[arcjet-wirefilter]: https://github.com/arcjet/wirefilter
+[cloudflare-wirefilter]: https://github.com/cloudflare/wirefilter
+[filters-reference]: /filters/reference#expression-language
