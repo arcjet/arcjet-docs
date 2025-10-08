@@ -119,23 +119,19 @@ export const main = [
             link: "/blueprints/ai-quota-control",
           },
           {
-            label: "IP geolocation",
-            link: "/blueprints/ip-geolocation",
-          },
-          {
             label: "Cookie banner",
             link: "/blueprints/cookie-banner",
           },
           {
-            label: "Defining custom rules",
+            label: "Custom rule",
             link: "/blueprints/defining-custom-rules",
           },
           {
-            label: "Payment form protection",
-            link: "/blueprints/payment-form",
+            label: "IP geolocation",
+            link: "/blueprints/ip-geolocation",
           },
           {
-            label: "Feedback form protection",
+            label: "Feedback form",
             link: "/blueprints/feedback-form",
           },
           {
@@ -143,11 +139,15 @@ export const main = [
             link: "/blueprints/malicious-traffic",
           },
           {
+            label: "Payment form",
+            link: "/blueprints/payment-form",
+          },
+          {
             label: "Sampling traffic",
             link: "/blueprints/sampling",
           },
           {
-            label: "VPN & proxy detection",
+            label: "VPN & proxy",
             link: "/blueprints/vpn-proxy-detection",
           },
         ],
