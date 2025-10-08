@@ -139,6 +139,10 @@ export const main = [
             link: "/blueprints/feedback-form",
           },
           {
+            label: "Malicious traffic",
+            link: "/blueprints/malicious-traffic",
+          },
+          {
             label: "Sampling traffic",
             link: "/blueprints/sampling",
           },
