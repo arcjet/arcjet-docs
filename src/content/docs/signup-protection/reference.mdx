@@ -100,15 +100,11 @@ configuration options are the same, but specified in a single rule.
 The configuration definition is:
 
 ```ts
-type ProtectSignupOptions = {
-  rateLimit?: SlidingWindowRateLimitOptions | SlidingWindowRateLimitOptions[];
-  bots?:
-    | BotOptionsAllow
-    | BotOptionsDeny
-    | BotOptionsAllow[]
-    | BotOptionsDeny[];
-  email?: EmailOptions | EmailOptions[];
-};
+interface ProtectSignupOptions {
+  bots?: BotOptions;
+  email?: EmailOptions;
+  rateLimit?: SlidingWindowRateLimitOptions;
+}
 ```
 
 The `arcjet` client is configured with one `protectSignup` rule which take
