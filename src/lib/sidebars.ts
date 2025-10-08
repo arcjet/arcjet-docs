@@ -168,7 +168,7 @@ export const main = [
             link: "/bot-protection/concepts",
           },
           {
-            label: "Identifying Bots",
+            label: "Identifying bots",
             link: "/bot-protection/identifying-bots",
           },
           {
