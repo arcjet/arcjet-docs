@@ -1,7 +1,7 @@
 flowchart TD
     A[Client] -->|Request| B(Arcjet SDK)
     B --> C{Evaluate Arcjet Rules}
-    C -->|Rate Limit Rule| D[✦ Arcjet API]
+    C -->|Rate Limit Rule| D[✦ Arcjet Cloud API]
     D -->|Limit exceeded| E[Application constructs response]
     E -. Decision Cached Locally .-> B
     E -->|"429 Too Many Requests Response"| A[Client]
