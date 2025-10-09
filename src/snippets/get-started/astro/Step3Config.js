@@ -1,5 +1,4 @@
 // @ts-check
-// @ts-expect-error
 import { defineConfig } from "astro/config";
 import node from "@astrojs/node";
 import arcjet, { shield, detectBot, tokenBucket } from "@arcjet/astro";
