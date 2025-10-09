@@ -1,0 +1,132 @@
+---
+title: "Malicious traffic"
+description: "How to block custom user agents and dynamic IP lists with Arcjet filters."
+---
+
+You may be looking at your logs and seeing malicious traffic coming through.
+Perhaps you can identify a bot or other automated tool by its `user-agent` or
+IP range.
+
+We would appreciate hearing about such traffic from you!
+We are constantly improving how Arcjet works but security is an ever-evolving
+field and there are [known limitations][arcjet-limitations] to different
+approaches.
+Please reach out to [Arcjet support][arcjet-support] to share what you are
+seeing.
+
+In the meantime you can use [Arcjet filters][arcjet-filters] to block unwanted
+traffic.
+This blueprint covers two example use cases to show how that can be done:
+
+- [Block a custom bot](#block-a-custom-bot)
+  — an expression to block a specific `user-agent` or IP
+- [Block a dynamic list of IPs](#block-a-dynamic-list-of-ips)
+  — a generated expression to block a list of IPs
+
+## Block a custom bot
+
+You could be using [Arcjet bot protection][arcjet-bots] already and still may
+need to block a particular bot or similar tool that is not in
+[our list at `arcjet/well-known-bots`][github-arcjet-well-known-bots].
+(contributions welcome!)
+That could be because the bot is very new,
+not widely used,
+or that it is something custom and different.
+Such bots are often detected by their `user-agent` header,
+an IP,
+or a combination of both (sometimes `and`, sometimes `or`).
+
+Let’s take Bytespider
+(a web crawler built by ByteDance, the parent company of TikTok)
+as an example,
+even though it is already on our list.
+Searching the internet shows that it has different values for `user-agent`
+(sometimes `Bytespider`, sometimes `TikTokSpider`)
+and also uses different IPs
+(the CIDR range `47.128.0.0/16` seems to match).
+
+With [Arcjet filters][arcjet-filters]
+you can write an expression to block traffic matching that user agent _or_
+that IP range:
+
+```ts
+characteristics: ['http.request.headers["user-agent"]', "ip.src"],
+rules: [
+  filter({
+    deny: [
+     'http.request.headers["user-agent"] matches "Bytespider|TikTokSpider" or ip.src in { 47.128.0.0/16 }',
+    ],
+    mode: "LIVE"
+  }),
+  // …
+]
+```
+
+…but it is important to note that bots change,
+so it is good to check and update your rules once in a while.
+
+## Block a dynamic list of IPs
+
+Sometimes you may want to block a list of IPs that changes over time
+and you know where to find that latest list.
+In such cases you can generate an expression dynamically.
+
+Such lists of IPs could be on a remote server,
+in a database,
+or perhaps you maintain a list in a local file.
+These lists may also contain other things instead of IPs,
+like `user-agent`s,
+which would work similarly.
+
+To illustrate,
+Cloudflare provides lists of [IP ranges][cloudflare-ips] that they use.
+This is a theoretical example to show how it could work and not a
+recommendation,
+but one can argue that any traffic through Cloudflare is likely to be
+automated.
+The important caveat is that this may block people using iCloud Relay and
+Cloudflare WARP VPN.
+
+With [`fetch`][mdn-fetch] and [Arcjet filters][arcjet-filters]
+you can generate an expression dynamically:
+
+```ts
+const listsOfIps = await Promise.all(
+  [
+    "https://www.cloudflare.com/ips-v4/",
+    "https://www.cloudflare.com/ips-v6/",
+  ].map(async function (url) {
+    const response = await fetch(url);
+    const body = await response.text();
+    return body.trim().split("\n");
+  }),
+);
+
+const arcjet = arcjetFastify({
+  characteristics: ["ip.src"],
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    filter({
+      deny: [`ip.src in { ${listsOfIps.flat().join(" ")} }`],
+      mode: "LIVE",
+    }),
+    // …
+  ],
+});
+// …
+```
+
+This example fetches when the server starts.
+That is probably more than needed for Cloudflare as these lists change about
+once per year.
+An exercise for the reader is to move this into a script that runs periodically
+and writes to a file,
+then loading that file when starting the server.
+
+[arcjet-bots]: /bot-protection/quick-start
+[arcjet-filters]: /filters/quick-start
+[arcjet-limitations]: /limitations
+[arcjet-support]: /support
+[cloudflare-ips]: https://www.cloudflare.com/ips/
+[github-arcjet-well-known-bots]: https://github.com/arcjet/well-known-bots
+[mdn-fetch]: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
