@@ -1,13 +1,13 @@
 ---
 title: "Malicious traffic"
-description: "Block malicious traffic with Arcjet filters."
+description: "How to block custom user agents and dynamic IP lists with Arcjet filters."
 ---
 
 You may be looking at your logs and seeing malicious traffic coming through.
 Perhaps you can identify a bot or other automated tool by its `user-agent` or
 IP range.
 
-We appreciate hearing about such traffic from you!
+We would appreciate hearing about such traffic from you!
 We are constantly improving how Arcjet works but security is an ever-evolving
 field and there are [known limitations][arcjet-limitations] to different
 approaches.
@@ -28,7 +28,7 @@ This blueprint covers two example use cases to show how that can be done:
 You could be using [Arcjet bot protection][arcjet-bots] already and still may
 need to block a particular bot or similar tool that is not in
 [our list at `arcjet/well-known-bots`][github-arcjet-well-known-bots].
-(PRs welcome!)
+(contributions welcome!)
 That could be because the bot is very new,
 not widely used,
 or that it is something custom and different.
@@ -37,7 +37,7 @@ an IP,
 or a combination of both (sometimes `and`, sometimes `or`).
 
 Let’s take Bytespider
-(by ByteDance, the parent company of TikTok)
+(a web crawler built by ByteDance, the parent company of TikTok)
 as an example,
 even though it is already on our list.
 Searching the internet shows that it has different values for `user-agent`
@@ -107,7 +107,7 @@ const arcjet = arcjetFastify({
   key: process.env.ARCJET_KEY!,
   rules: [
     filter({
-      deny: ["ip.src in { " + listsOfIps.flat().join(" ") + " }"],
+      deny: [`ip.src in { ${listsOfIps.flat().join(" ")} }`],
       mode: "LIVE",
     }),
     // …
