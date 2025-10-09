@@ -87,7 +87,7 @@ In this example flow:
    based on the rules you configured, then decides to allow the request.
 5. Arcjet returns the result and your application code continues to execute as
    normally. You can inspect the decision to understand why Arcjet came to that
-   conclusion. An asynchronous report is made to the Arcjet API for post-request
+   conclusion. An asynchronous report is made to the Cloud API for post-request
    analysis.
 
 <img
@@ -139,14 +139,14 @@ For example:
 ### Arcjet Cloud API
 
 In many cases, Arcjet can make a decision locally and report that decision
-asynchronously to the Arcjet API. However, there are some cases where Arcjet
+asynchronously to the Cloud API. However, there are some cases where Arcjet
 must make a decision in the cloud.
 
 For example, if you are want to enforce a rate limit, the number of requests for
 each client must be tracked. This means you typically need to manage something
 like Redis or another database, something that is particularly tricky in
 serverless environments. If you are using Arcjet, this is managed for you with
-no additional infrastructure. The Arcjet SDK will make a call to the Arcjet API
+no additional infrastructure. The Arcjet SDK will make a call to the Cloud API
 to get the current rate limit for the client.
 
 The API has been designed for high performance and low latency, and combines all
@@ -159,7 +159,7 @@ in-memory cache. In many cases, the total latency will be less than 1ms.
 1. A client makes an HTTP request to your application. It passes through the
    network level DDoS protection as described above then reaches your server.
 2. The Arcjet SDK is configured with a rate limit rule on an API route. The SDK
-   passes the request context through to the Arcjet API which checks the rate
+   passes the request context through to the Cloud API which checks the rate
    limit for that client and then returns an allow decision.
 3. The SDK returns the details and your application code continues to execute as
    normal.
@@ -181,12 +181,12 @@ This time when the request is received, the rate limit has been exceeded.
 
 1. A client makes another request to your application with a rate limit rule
    configured.
-2. As before, the SDK passes the request context through to the Arcjet API which
+2. As before, the SDK passes the request context through to the Cloud API which
    determines the limit has been exceeded.
 3. The SDK provides the details and your application code returns a 429 response
    to the client.
 4. The decision is also cached locally so that subsequent requests which match
-   the rate limit rule does not need to rely on a call to the Arcjet API.
+   the rate limit rule does not need to rely on a call to the Cloud API.
 
 <img
   class="dark"
@@ -215,7 +215,7 @@ the local cache and return the response immediately:
 
 #### When the API is required
 
-A call to the Arcjet API is required when:
+A call to the Cloud API is required when:
 
 - A [shield](/shield/concepts) rule is configured. Behavior must be compared
   across multiple requests to protect against common attacks.
@@ -231,13 +231,13 @@ A call to the Arcjet API is required when:
 - An [email validation](/email-validation/concepts) rule is configured and the
   email address syntax is valid. The Arcjet SDK analyzes the email address
   locally to check the syntax. If it is invalid, the SDK will return a decision
-  immediately. If it is valid, the SDK will make a call to the Arcjet API to
+  immediately. If it is valid, the SDK will make a call to the Cloud API to
   verify the email address e.g. does it have a valid MX record or is it a
   disposable email address.
 - A [filter](/filters/reference) rule is configured that inspects `ip.src.*` IP
   address fields such as `ip.src.vpn`, `ip.src.asnum.domain`, or
   `ip.src.country`. These fields require data from our IP reputation database so
-  a call to the Arcjet API is required. Other fields are analyzed locally.
+  a call to the Cloud API is required. Other fields are analyzed locally.
 
 #### API latency
 
@@ -245,8 +245,8 @@ The Arcjet SDK tries to do as much as possible asynchronously and locally to
 minimize latency for each request. This adds less than 1ms of overhead to a
 typical request.
 
-When a call to the Arcjet API is required there is some additional latency
-before a decision is made. The Arcjet API has been designed for high performance
+When a call to the Cloud API is required there is some additional latency
+before a decision is made. The Cloud API has been designed for high performance
 and low latency, and is deployed to multiple regions around the world. The SDK
 will automatically use the closest region which means the total overhead is
 typically no more than 20-30ms, often significantly less.
@@ -291,7 +291,7 @@ requests are used to inform the decision for the current request.
 2. The request is analyzed by the Arcjet SDK based on the rules you configured.
 3. The SDK returns the result and your application code continues to execute as
    normal.
-4. The result is also reported to the Arcjet API for post-request analysis. This
+4. The result is also reported to the Cloud API for post-request analysis. This
    is used to inform future decisions for that client.
 5. The client makes another request and the result of the post-request analysis
    is used to inform the decision. This will be applied if you have configured a

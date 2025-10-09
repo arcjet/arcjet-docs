@@ -46,11 +46,11 @@ modified to support an “undetermined” state for fields that are not availabl
 
 All `ip.src.*` [fields][filters-fields] reflect information about the client
 IP address (the request source IP). These fields require data from our IP
-reputation database so a call to the Arcjet API is required. Other fields are
+reputation database so a call to the Cloud API is required. Other fields are
 analyzed locally.
 
 Arcjet only ever makes a single call to our Cloud API regardless of the rule
-configuration. The Arcjet API has been designed for high performance and low
+configuration. The Cloud API has been designed for high performance and low
 latency, and is deployed to multiple regions around the world. The SDK will
 automatically use the closest region which means the total overhead is typically
 no more than 20-30ms, often significantly less. See the [Architecture
