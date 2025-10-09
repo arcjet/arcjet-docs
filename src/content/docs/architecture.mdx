@@ -263,6 +263,36 @@ there is a problem, but you can configure the SDK to fail closed if you prefer.
 See an example of how to handle errors and fail open or closed in the [Node.js
 SDK reference](/reference/nodejs#error-handling).
 
+#### Timeout
+
+The total overhead when connecting to the Arcjet Cloud API is typically no more
+than 20-30ms,
+often significantly less.
+There is a timeout in place to prevent waiting for a response indefinitely in
+case of problems.
+This value is configurable in the SDK.
+The default is 500ms in production and 1000ms in development.
+
+The reason for this difference is that in production your app usually runs on a
+server close to the API.
+In development your app may run on a laptop some distance away from the API.
+That introduces additional latency.
+To illustrate,
+a developer in New Zealand may connect to the API in Australia,
+whereas a user in New Zealand may connect to your app in Australia,
+close to the API there.
+
+A shorter timeout may result in faster failure responses but could lead to
+increased error rates if the API needs time to respond.
+Conversely,
+a longer timeout may improve success rates but could lead to a less responsive
+experience.
+
+For more info,
+see the post [Minimizing latency for humans &
+machines](https://blog.arcjet.com/minimizing-latency-for-humans-machines/)
+on the Arcjet blog.
+
 ## Request analysis
 
 Arcjet analyzes every request to your application in real-time. This is based on
