@@ -1,6 +1,6 @@
 // @ts-expect-error
-// The `#arcjet` virtual module is created by the Arcjet Nuxt module
-import arcjetNuxt, { shield, detectBot, tokenBucket } from "#arcjet";
+// The `#arcjet` virtual module is created created when using @arcjet/nuxt
+import arcjetNuxt, { detectBot, shield, tokenBucket } from "#arcjet";
 
 const arcjet = arcjetNuxt({
   rules: [
