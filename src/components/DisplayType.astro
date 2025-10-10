@@ -3,16 +3,52 @@ import { format } from "prettier";
 import { Code } from "@astrojs/starlight/components";
 import twoslasher from "@/lib/twoslasher";
 
-const generics = Array.isArray(Astro.props.generics) && Astro.props.generics.length > 0
-    ? `<${Astro.props.generics.join(", ")}>`
-    : ''
+
+
+type Props = {
+    type: string;
+    from: string;
+    /**
+     * @deprecated Use `genericDefinition` & `genericValue` instead.
+     */
+    generics?: string[];
+    /**
+     * The generic type definitions including constraints.
+     *
+     * @example
+     * ```ts
+     * "T extends string[], S = any"
+     * ```
+     */
+    genericDefinition?: string;
+    /**
+     * How to use the generic types in the type reference.
+     *
+     * @example
+     * ```ts
+     * "any, S, 12"
+     * ```
+     */
+    genericValue?: string;
+};
+
+let genericDefinition = Astro.props.genericDefinition ? `<${Astro.props.genericDefinition}>` : '';
+let genericValue = Astro.props.genericValue ? `<${Astro.props.genericValue}>` : '';
+
+if (Astro.props.generics) {
+    const generics = Array.isArray(Astro.props.generics) && Astro.props.generics.length > 0
+        ? `<${Astro.props.generics.join(", ")}>`
+        : '';
+    genericDefinition = generics;
+    genericValue = generics;
+}
 
 const snippet = `
 import type { Simplify } from "type-fest";
 import type { ${Astro.props.type} as __Dummy } from "${Astro.props.from}";
-type ${Astro.props.type}${generics} = Simplify<__Dummy${generics}>;
+type ${Astro.props.type}${genericDefinition} = Simplify<__Dummy${genericValue}>;
 //   ^?
-`
+`;
 
 const result = twoslasher(snippet, "ts");
 
