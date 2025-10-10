@@ -1,43 +1,25 @@
 import { Code } from "@astrojs/starlight/components";
 import SelectableContent from "@/components/SelectableContent";
-import Step3ConfigJS from "./Step3Config.js?raw";
-import Step3RouteTS from "./Step3Route.ts?raw";
-import Step3RouteJS from "./Step3Route.js?raw";
 import { removeTSCCommentDirectives } from "@/lib/utils";
 
-Update your Nuxt configuration with the contents:
-
-<Code
-  code={removeTSCCommentDirectives(Step3ConfigJS)}
-  lang="ts"
-  title="nuxt.config.ts"
-/>
-
-This creates an Arcjet instance that can be used to protect your routes. It can
-be imported from the `#arcjet` module in your project.
+import Step3RouteTS from "@repo/nuxt/server/api/GetStarted.get.ts?raw";
+import Step3RouteJS from "@repo/nuxt/server/api/GetStarted.get.js?raw";
 
 <SelectableContent client:load syncKey="language" frameworkSwitcher>
-<div slot="TS" slotIdx="1">
-
-Create a new API route at `src/server/api/protected.get.ts`:
-
-<Code
-  code={removeTSCCommentDirectives(Step3RouteTS)}
-  lang="ts"
-  title="server/api/protected.get.ts"
-/>
-
-</div>
-
-<div slot="JS" slotIdx="2">
-
-Create a new API route at `server/api/protected.get.js`:
-
-<Code
-  code={removeTSCCommentDirectives(Step3RouteJS)}
-  lang="js"
-  title="server/api/protected.get.js"
-/>
-
-</div>
+  <Fragment slot="TS" slotIdx="1">
+    Create a new server route at `server/api/protected.get.ts`:
+    <Code
+      code={removeTSCCommentDirectives(Step3RouteTS)}
+      lang="ts"
+      title="server/api/protected.get.ts"
+    />
+  </Fragment>
+  <Fragment slot="JS" slotIdx="2">
+    Create a new server route at `server/api/protected.get.js`:
+    <Code
+      code={removeTSCCommentDirectives(Step3RouteJS)}
+      lang="js"
+      title="server/api/protected.get.js"
+    />
+  </Fragment>
 </SelectableContent>
