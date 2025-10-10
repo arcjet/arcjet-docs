@@ -278,10 +278,14 @@ server close to the Cloud API.
 In development your app may run on a laptop some distance away from the Cloud
 API.
 That introduces additional latency.
+
 To illustrate,
-a developer in New Zealand may connect to the Cloud API in Australia,
-whereas a user in New Zealand may connect to your app in Australia,
-close to the Cloud API there.
+a developer in New Zealand may have to connect to the Arcjet Cloud API running
+in the closest cloud region, which might be Australia.
+In contrast,
+a user would connect to your application and then the application would connect
+to the closest Arcjet Cloud API,
+usually within the same region.
 
 A shorter timeout may result in faster failure responses but could lead to
 increased error rates if the Cloud API needs time to respond.
