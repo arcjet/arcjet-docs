@@ -336,6 +336,10 @@ export const main = [
             link: "/reference/nodejs",
           },
           {
+            label: "Nuxt",
+            link: "/reference/nuxt",
+          },
+          {
             label: "Remix",
             link: "/reference/remix",
           },
