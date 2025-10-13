@@ -1,0 +1,13 @@
+import SelectableContent from "@/components/SelectableContent";
+import { removeTSCCommentDirectives as removeDirectives } from "@/lib/utils";
+import { Code } from "@astrojs/starlight/components";
+import Step3 from "./Step3.tsx?raw";
+
+<SelectableContent client:load frameworkSwitcher syncKey="language">
+  <Fragment slotIdx="1" slot="TS">
+    Create a new route at `app/routes/home.tsx` with the contents:
+
+    <Code code={removeDirectives(Step3)} lang="ts" title="app/routes/home.tsx" />
+
+  </Fragment>
+</SelectableContent>
