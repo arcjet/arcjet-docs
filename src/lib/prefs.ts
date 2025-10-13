@@ -9,47 +9,24 @@ import {
  * Types
  *******************************************************************************************************/
 
-/** The framework keys */
-export type FrameworkKey =
-  | "astro"
-  | "bun"
-  | "bun-hono"
-  | "deno"
-  | "express"
-  | "fastify"
-  | "nest-js"
-  | "next-js"
-  | "node-js"
-  | "node-js-express"
-  | "node-js-hono"
-  | "nuxt"
-  | "react-router"
-  | "remix"
-  | "sveltekit";
+/**
+ * Framework keys,
+ * includes integration keys (which refer to an SDK, an npm package),
+ * but also adds combinations (such as Bun + Hono).
+ */
+export type FrameworkKey = keyof typeof frameworkToLabel;
 
-/** The framework display labels */
-export type FrameworkLabel =
-  | "Astro"
-  | "Bun"
-  | "Bun + Hono"
-  | "Deno"
-  | "Express"
-  | "Fastify"
-  | "NestJS"
-  | "Next.js"
-  | "Node.js"
-  | "Node.js + Express"
-  | "Node.js + Hono"
-  | "Nuxt"
-  | "React Router"
-  | "Remix"
-  | "SvelteKit";
+/**
+ * Display labels for framework choices.
+ */
+export type FrameworkLabel = (typeof frameworkToLabel)[FrameworkKey];
 
-/** The full framework type */
+/**
+ * Framework key and label.
+ */
 export type Framework = {
-  key: FrameworkKey;
-  label: FrameworkLabel;
-};
+  [Key in FrameworkKey]: { key: Key; label: (typeof frameworkToLabel)[Key] };
+}[FrameworkKey];
 
 /**
  * The available user prefs
@@ -68,71 +45,37 @@ export type Prefs = {
  *******************************************************************************************************/
 
 /**
- * Frameworks
+ * Framework keys to label.
+ * Most entries refer to an SDK (an npm package) but some also refer to
+ * combinations (such as Bun + Hono).
+ */
+const frameworkToLabel = {
+  astro: "Astro",
+  bun: "Bun",
+  "bun-hono": "Bun + Hono",
+  deno: "Deno",
+  fastify: "Fastify",
+  "nest-js": "NestJS",
+  "next-js": "Next.js",
+  "node-js": "Node.js",
+  "node-js-express": "Node.js + Express",
+  "node-js-hono": "Node.js + Hono",
+  nuxt: "Nuxt",
+  "react-router": "React Router",
+  remix: "Remix",
+  sveltekit: "SvelteKit",
+} as const;
+
+/**
+ * Frameworks.
  * The user selectable framework options.
  */
-export const frameworks: Array<Framework> = [
-  {
-    key: "astro",
-    label: "Astro",
-  },
-  {
-    key: "bun",
-    label: "Bun",
-  },
-  {
-    key: "bun-hono",
-    label: "Bun + Hono",
-  },
-  {
-    key: "deno",
-    label: "Deno",
-  },
-  // {
-  //   key: "express",
-  //   label: "Express",
-  // },
-  {
-    key: "fastify",
-    label: "Fastify",
-  },
-  {
-    key: "nest-js",
-    label: "NestJS",
-  },
-  {
-    key: "next-js",
-    label: "Next.js",
-  },
-  {
-    key: "node-js",
-    label: "Node.js",
-  },
-  {
-    key: "node-js-express",
-    label: "Node.js + Express",
-  },
-  {
-    key: "node-js-hono",
-    label: "Node.js + Hono",
-  },
-  {
-    key: "nuxt",
-    label: "Nuxt",
-  },
-  {
-    key: "react-router",
-    label: "React Router",
-  },
-  {
-    key: "remix",
-    label: "Remix",
-  },
-  {
-    key: "sveltekit",
-    label: "SvelteKit",
-  },
-];
+export const frameworks = Object.entries(frameworkToLabel).map(function ([
+  key,
+  label,
+]) {
+  return { key, label };
+}) as Array<Framework>;
 
 /**
  * Default Selected Framework
