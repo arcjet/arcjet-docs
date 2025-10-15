@@ -9,47 +9,22 @@ import {
  * Types
  *******************************************************************************************************/
 
-/** The framework keys */
-export type FrameworkKey =
-  | "astro"
-  | "bun"
-  | "bun-hono"
-  | "deno"
-  | "express"
-  | "fastify"
-  | "nest-js"
-  | "next-js"
-  | "node-js"
-  | "node-js-express"
-  | "node-js-hono"
-  | "nuxt"
-  | "react-router"
-  | "remix"
-  | "sveltekit";
+/**
+ * Framework keys,
+ * includes integration keys (which refer to an SDK, an npm package),
+ * but also adds combinations (such as Bun + Hono).
+ */
+export type FrameworkKey = Framework["key"];
 
-/** The framework display labels */
-export type FrameworkLabel =
-  | "Astro"
-  | "Bun"
-  | "Bun + Hono"
-  | "Deno"
-  | "Express"
-  | "Fastify"
-  | "NestJS"
-  | "Next.js"
-  | "Node.js"
-  | "Node.js + Express"
-  | "Node.js + Hono"
-  | "Nuxt"
-  | "React Router"
-  | "Remix"
-  | "SvelteKit";
+/**
+ * Display labels for framework choices.
+ */
+export type FrameworkLabel = Framework["label"];
 
-/** The full framework type */
-export type Framework = {
-  key: FrameworkKey;
-  label: FrameworkLabel;
-};
+/**
+ * Framework key and label.
+ */
+export type Framework = (typeof frameworks)[number];
 
 /**
  * The available user prefs
@@ -68,71 +43,25 @@ export type Prefs = {
  *******************************************************************************************************/
 
 /**
- * Frameworks
+ * Frameworks.
  * The user selectable framework options.
  */
-export const frameworks: Array<Framework> = [
-  {
-    key: "astro",
-    label: "Astro",
-  },
-  {
-    key: "bun",
-    label: "Bun",
-  },
-  {
-    key: "bun-hono",
-    label: "Bun + Hono",
-  },
-  {
-    key: "deno",
-    label: "Deno",
-  },
-  // {
-  //   key: "express",
-  //   label: "Express",
-  // },
-  {
-    key: "fastify",
-    label: "Fastify",
-  },
-  {
-    key: "nest-js",
-    label: "NestJS",
-  },
-  {
-    key: "next-js",
-    label: "Next.js",
-  },
-  {
-    key: "node-js",
-    label: "Node.js",
-  },
-  {
-    key: "node-js-express",
-    label: "Node.js + Express",
-  },
-  {
-    key: "node-js-hono",
-    label: "Node.js + Hono",
-  },
-  {
-    key: "nuxt",
-    label: "Nuxt",
-  },
-  {
-    key: "react-router",
-    label: "React Router",
-  },
-  {
-    key: "remix",
-    label: "Remix",
-  },
-  {
-    key: "sveltekit",
-    label: "SvelteKit",
-  },
-];
+export const frameworks = [
+  { key: "astro", label: "Astro" },
+  { key: "bun", label: "Bun" },
+  { key: "bun-hono", label: "Bun + Hono" },
+  { key: "deno", label: "Deno" },
+  { key: "fastify", label: "Fastify" },
+  { key: "nest-js", label: "NestJS" },
+  { key: "next-js", label: "Next.js" },
+  { key: "node-js", label: "Node.js" },
+  { key: "node-js-express", label: "Node.js + Express" },
+  { key: "node-js-hono", label: "Node.js + Hono" },
+  { key: "nuxt", label: "Nuxt" },
+  { key: "react-router", label: "React Router" },
+  { key: "remix", label: "Remix" },
+  { key: "sveltekit", label: "SvelteKit" },
+] as const;
 
 /**
  * Default Selected Framework
@@ -148,7 +77,9 @@ export const defaultSelectedFramework: FrameworkKey = "next-js";
  * Utility to build a frameworks list from given keys.
  * @param keys - The keys of the frameworks to include in the list
  */
-export const getFrameworks = (keys: FrameworkKey[]): Array<Framework> => {
+export const getFrameworks = (
+  keys: FrameworkKey[],
+): ReadonlyArray<Framework> => {
   return frameworks.filter((f) => keys.includes(f.key));
 };
 
