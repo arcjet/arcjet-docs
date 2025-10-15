@@ -1,0 +1,44 @@
+import SelectableContent from "@/components/SelectableContent";
+
+## 4. Start app
+
+<SelectableContent client:load syncKey="packageManager">
+  <Fragment slotIdx="1" slot="npm">
+
+    ```sh
+    npm run dev
+    ```
+
+  </Fragment>
+
+  <Fragment slotIdx="2" slot="pnpm">
+
+    ```sh
+    pnpm run dev
+    ```
+
+  </Fragment>
+
+  <Fragment slotIdx="3" slot="yarn">
+
+    ```sh
+    yarn run dev
+    ```
+
+  </Fragment>
+
+</SelectableContent>
+
+Visit [`http://localhost:5173`](http://localhost:5173) in your
+browser and refresh a few times to hit the rate limit.
+Wait 10 seconds and then run:
+
+```sh
+curl --head http://localhost:5173
+```
+
+The wait is necessary because the decision is cached for your IP based on the
+`interval` rate limit configuration.
+
+You should see a `403` response because `curl` is considered a bot by default
+([customizable](/bot-protection/identifying-bots)).
