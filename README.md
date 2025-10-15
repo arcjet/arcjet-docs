@@ -33,7 +33,7 @@ root of the project, from a terminal:
 
 ### Adding support for a framework
 
-- In `lib/prefs.ts` add the new framework to the `frameworkToLabel` object.
+- In `lib/prefs.ts` add the new framework to the `frameworks` array.
 - Add framework icon in `src/components/icons/tech/FrameworkName.tsx`.
 - Add framework to `frameworkIcon` in `src/compoenents/FrameworkSwitcher.tsx`.
 
