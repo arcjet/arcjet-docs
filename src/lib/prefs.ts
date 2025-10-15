@@ -14,12 +14,12 @@ import {
  * includes integration keys (which refer to an SDK, an npm package),
  * but also adds combinations (such as Bun + Hono).
  */
-export type FrameworkKey = (typeof frameworks)[number]["key"];
+export type FrameworkKey = Framework["key"];
 
 /**
  * Display labels for framework choices.
  */
-export type FrameworkLabel = (typeof frameworks)[number]["label"];
+export type FrameworkLabel = Framework["label"];
 
 /**
  * Framework key and label.
