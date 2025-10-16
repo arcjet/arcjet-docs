@@ -1,0 +1,279 @@
+---
+prev: false
+title: "Arcjet React Router SDK reference"
+---
+
+import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import Comments from "@/components/Comments.astro";
+import SelectableContent from "@/components/SelectableContent";
+import WhatIsArcjet from "@/components/WhatIsArcjet.astro";
+import CustomClientJs from "/src/snippets/reference/react-router/custom-client.js?raw";
+import CustomLog from "/src/snippets/reference/react-router/custom-log.js?raw";
+import ErrorJs from "/src/snippets/reference/react-router/error.js?raw";
+import ErrorTs from "/src/snippets/reference/react-router/error.ts?raw";
+import ProtectJsx from "/src/snippets/reference/react-router/protect.jsx?raw";
+import ProtectTsx from "/src/snippets/reference/react-router/protect.tsx?raw";
+import { removeTSCCommentDirectives as removeComments } from "@/lib/utils";
+
+{/* TODO(#526): Starlight injects the css & js as siblings of the first codeblock */}
+{/* on the page. This breaks when the first codeblock is in */}
+{/* <SelectableContent> as the css & js are removed from the page. */}
+{/* This is a workaround. */}
+
+<div aria-hidden="true" style={{ display: "none" }}>
+
+```sh
+ignore-me
+```
+
+</div>
+
+<a href="https://www.npmjs.com/package/@arcjet/react-router">
+  <picture class="badge">
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://img.shields.io/npm/v/arcjet?style=flat-square&label=%E2%9C%A6Aj&labelColor=000000&color=5C5866"
+    />
+    <img
+      alt="npm badge"
+      src="https://img.shields.io/npm/v/arcjet?style=flat-square&label=%E2%9C%A6Aj&labelColor=ECE6F0&color=ECE6F0"
+    />
+  </picture>
+</a>
+
+This guide shows how to use the package
+[`@arcjet/react-router`][npmjs-arcjet-react-router].
+Its source code is [on GitHub][github-arcjet-react-router].
+The code is open source and licensed under Apache 2.0.
+
+<WhatIsArcjet />
+
+## Quick start
+
+See the [React Router quick start][arcjet-quick-start-react-router].
+
+## Requirements
+
+- React Router 7 or later
+- Node.js 20 or later, or similar runtime
+- ESM
+
+## Install
+
+<SelectableContent client:load syncKey="packageManager">
+  <Fragment slotIdx="1" slot="npm">
+
+    ```sh
+    npm install @arcjet/react-router
+    ```
+
+  </Fragment>
+
+  <Fragment slotIdx="2" slot="pnpm">
+
+    ```sh
+    pnpm add @arcjet/react-router
+    ```
+
+  </Fragment>
+
+  <Fragment slotIdx="3" slot="yarn">
+
+    ```sh
+    yarn add @arcjet/react-router
+    ```
+
+  </Fragment>
+</SelectableContent>
+
+## Use
+
+### Configure
+
+Build Arcjet clients as few times as possible.
+That means _outside_ request handlers.
+If you need different strategies, such as one for logged-in users and one for
+guests,
+create two clients and choose which one to use inside the handler.
+
+#### Options
+
+The main way to configure Arcjet is to pass options to the `arcjet` function.
+The required fields are:
+
+- `key` (`string`)
+  — API key to identify the site in Arcjet
+  (typically through `process.env.ARCJET_KEY`)
+- `rules` (`Array<ArcjetRule>`)
+  — rules to use (order insensitive)
+
+For all available fields,
+see [`ArcjetOptions` in the readme][api-arcjet-options].
+
+Get your site key from the [Arcjet dashboard][arcjet-app].
+Set it as an environment variable called `ARCJET_KEY` in your `.env` file:
+
+```sh
+ARCJET_KEY=your_site_key_here
+```
+
+#### Environment variables
+
+Next to the convention of using `ARCJET_KEY` for the Arcjet Cloud API key,
+there are several environment variables that affect how Arcjet works.
+
+- `ARCJET_BASE_URL`
+  — an allowed URL to the Cloud API
+  (defaults to `https://decide.arcjet.com`)
+- `ARCJET_ENV`, `MODE`, `NODE_ENV`
+  — whether development mode is on
+- `ARCJET_LOG_LEVEL`
+  — log level to use
+- `FLY_APP_NAME`, `VERCEL`, `RENDER`
+  — hosting platform
+
+### Protect
+
+Use the [`protect`][api-protect] function to protect a request from React
+Router.
+Some rules, such as `validateEmail`, may need extra properties.
+The protect function returns a promise that resolves to a decision.
+
+<SelectableContent client:load syncKey="language">
+  <Fragment slotIdx="1" slot="JS">
+
+    <Code code={ProtectJsx} lang="jsx" title="app/routes/home.jsx" />
+
+  </Fragment>
+
+  <Fragment slotIdx="2" slot="TS">
+
+    <Code code={removeComments(ProtectTsx)} lang="tsx" title="app/routes/home.tsx" />
+
+  </Fragment>
+</SelectableContent>
+
+### Decision
+
+The `ArcjetDecision` that `protect` resolves to has the following fields:
+
+- `conclusion` (`"ALLOW"`, `"DENY"`, or `"ERROR"`)
+  — what to do with the request
+- `id` (`string`)
+  — ID for the request;
+  local decisions start with `lreq_` and remote ones with `req_`
+- `ip` (`ArcjetIpDetails`)
+  — analysis of the client IP address
+- `reason` (`ArcjetReason`)
+  — more info about the conclusion
+- `results` (`Array<ArcjetRuleResult>`)
+  — results of each rule
+- `ttl` (`number`)
+  — time-to-live for the decision in seconds;
+  `"DENY"` decisions are cached by `@arcjet/react-router` for this duration
+
+This top-level decision takes the results from each `"LIVE"` rule into account.
+If one of them is `"DENY"` then the overall conclusion will be `"DENY"`.
+Otherwise, if one of them is `"ERROR"`, then `"ERROR"`.
+Otherwise, it will be `"ALLOW"`.
+The `reason` and `ttl` fields reflect this conclusion.
+
+To illustrate,
+when a bot rule returns an error and a validate email rule returns a deny,
+the overall conclusion is `"DENY"`,
+while the `"ERROR"` is available in the results.
+
+The results of `"DRY_RUN"` rules do not affect this overall decision,
+but are included in `results`.
+
+The `ip` field is available when the Cloud API was called and contains
+IP geolocation and reputation info.
+You can use this field to customize responses or you can use
+[filter rules][arcjet-filter-rules] to make decisions based on it.
+See the
+[IP geolocation][arcjet-blueprint-ip-geolocation] and
+[IP reputation][arcjet-blueprint-vpn-proxy-detection]
+blueprints for more info.
+
+## Errors
+
+Arcjet fails open so that a service issue, misconfiguration, or
+[network timeout][arcjet-architecture-timeout] does not block requests.
+Such errors should in many cases be logged but otherwise treated as `"ALLOW"`
+decisions.
+The `reason.message` field has more info on what occured.
+
+<SelectableContent client:load syncKey="language">
+  <Fragment slotIdx="1" slot="JS">
+
+    <Code code={ErrorJs} lang="js" title="app/routes/home.jsx" />
+
+  </Fragment>
+
+  <Fragment slotIdx="2" slot="TS">
+
+    <Code code={removeComments(ErrorTs)} lang="ts" title="app/routes/home.tsx" />
+
+  </Fragment>
+</SelectableContent>
+
+## Custom logs
+
+You can use a custom log interface matching [`pino`][github-pino]
+to change the default behavior.
+Using `pino-pretty` as an example:
+
+<SelectableContent client:load syncKey="packageManager">
+  <Fragment slotIdx="1" slot="npm">
+
+    ```sh
+    npm install pino pino-pretty
+    ```
+
+  </Fragment>
+
+  <Fragment slotIdx="2" slot="pnpm">
+
+    ```sh
+    pnpm add pino pino-pretty
+    ```
+
+  </Fragment>
+
+  <Fragment slotIdx="3" slot="yarn">
+
+    ```sh
+    yarn add pino pino-pretty
+    ```
+
+  </Fragment>
+</SelectableContent>
+
+Then, create a custom logger that will log to JSON in production and pretty
+print in development:
+
+<Code code={CustomLog} lang="js" />
+
+## Custom client
+
+You can pass a client to change the behavior when connecting to the Cloud API.
+Use [`createRemoteClient`][api-create-remote-client] to create a client.
+
+<Code code={CustomClientJs} lang="js" />
+
+---
+
+<Comments />
+
+[api-arcjet-options]: https://github.com/arcjet/arcjet-js/tree/main/arcjet-react-router#arcjetoptions
+[api-create-remote-client]: https://github.com/arcjet/arcjet-js/tree/main/arcjet-react-router#createremoteclient
+[api-protect]: https://github.com/arcjet/arcjet-js/tree/main/arcjet-react-router#arcjetreactrouterprotectdetails-properties
+[arcjet-app]: https://app.arcjet.com
+[arcjet-architecture-timeout]: /architecture#timeout
+[arcjet-blueprint-ip-geolocation]: /blueprints/ip-geolocation
+[arcjet-blueprint-vpn-proxy-detection]: /blueprints/vpn-proxy-detection
+[arcjet-filter-rules]: /filters/quick-start
+[arcjet-quick-start-react-router]: /get-started?f=react-router
+[github-arcjet-react-router]: https://github.com/arcjet/arcjet-js/tree/main/arcjet-react-router
+[github-pino]: https://github.com/pinojs/pino
+[npmjs-arcjet-react-router]: https://www.npmjs.com/package/@arcjet/react-router
