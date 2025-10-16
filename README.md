@@ -31,34 +31,37 @@ root of the project, from a terminal:
 
 ## Adding content
 
-### Adding support for a framework
+### Add a framework
 
-- In `lib/prefs.ts` add the new framework to the `frameworks` array.
-- Add framework icon in `src/components/icons/tech/FrameworkName.tsx`.
-- Add framework to `frameworkIcon` in `src/compoenents/FrameworkSwitcher.tsx`.
+- in `lib/prefs.ts` add the key and label to the `frameworks` array
+- in `src/components/icons/tech/$Framework.tsx` add an icon
+- in `src/components/FrameworkSwitcher.tsx` reference the icon in the
+  `frameworkIcon` object
+- in `src/components/FrameworkLinks.tsx` add a `case "$framework"` for the icon
+- in `src/content/docs/get-started.mdx` add to `frameworks` and
+  `titleByFramework`, define steps, and use those steps where appropriate
+- in `src/content/docs/reference/$framework.mdx` write a reference guide
+- in `src/components/SdkReferenceLinkByFramework.mdx` and `src/lib/sidebar.ts`
+  link that reference
+- in `public/llms.txt` under SDKs link that reference
 
-If you want the framework to be an available option in the docs index:
+### Add framework options to a page
 
-- Add a framework button in `src/components/FrameworkLinks.tsx`.
+To add a framework option to a page such as `src/content/docs/get-started.mdx`:
 
-### Adding a framework option to a page
+- Add your framework to the frontmatter `frameworks`
+- Add the page title to the frontmatter `titleByFramework`
+- Use `<SlotByFramework />` or `<TextByFramework />` components to display
+  content for the currently selected framework:
 
-To add a framework option to a page, eg. the "Get Started" page at `/get-started`:
+  ```mdx
+  <SlotByFramework client:load>
+    ...
+    <SomeContent slot="$framework" />
+  </SlotByFramework>
+  ```
 
-- Add your framework to the frontmatter `frameworks` in `src/content/docs/get-started.mdx`.
-- Add the page title to the frontmatter `titleByFramework` in `src/content/docs/get-started.mdx`.
-
-Use one of
-`<SlotByFramework />` or `<TextByFramework />` components to display content for the currently selected framework:
-
-```mdx
-<SlotByFramework client:load>
-  ...
-  <SomeContent slot="new-framework-key" />
-</SlotByFramework>
-```
-
-This will make `<SomeContent />` only visible when the new framework is selected.
+  This will make `<SomeContent />` only visible when the new framework is selected.
 
 ### In-page framework links
 
