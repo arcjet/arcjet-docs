@@ -324,6 +324,10 @@ export const main = [
             link: "/reference/bun",
           },
           {
+            label: "Deno",
+            link: "/reference/deno",
+          },
+          {
             label: "Fastify",
             link: "/reference/fastify",
           },
