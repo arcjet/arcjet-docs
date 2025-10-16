@@ -59,6 +59,7 @@ import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import SlotByFramework from "@/components/SlotByFramework";
 import FrameworkLinks from "@/components/FrameworkLinks";
 import FrameworkName from "@/components/FrameworkName";
+import { frameworks } from "@/lib/prefs";
 import AstroStep1 from "@/snippets/shared/astro/Install.mdx";
 import AstroStep2 from "@/snippets/get-started/astro/Step2.mdx";
 import AstroStep3 from "@/snippets/filters/quick-start/astro/Step3.mdx";
@@ -110,9 +111,11 @@ allows you to quickly enforce rules like allow/deny by country, network, or
 <WhatIsArcjet />
 
 <FrameworkLinks
-  title="Choose a framework"
-  exclude={["bun-hono", "node-js-express", "node-js-hono"]}
   client:load
+  exclude={frameworks
+    .filter((d) => !frontmatter.frameworks.includes(d.key))
+    .map((d) => d.key)}
+  title="Choose a framework"
 />
 
 ## Quick start

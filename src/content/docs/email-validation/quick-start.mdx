@@ -46,6 +46,7 @@ import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import FrameworkLinks from "@/components/FrameworkLinks";
 import SlotByFramework from "@/components/SlotByFramework";
 import FrameworkName from "@/components/FrameworkName";
+import { frameworks } from "@/lib/prefs";
 import Step1Bun from "@/snippets/email-validation/quick-start/bun/Step1.mdx";
 import Step1NestJs from "@/snippets/email-validation/quick-start/nestjs/Step1.mdx";
 import Step1NextJs from "@/snippets/email-validation/quick-start/nextjs/Step1.mdx";
@@ -76,17 +77,11 @@ reduce the amount of spam or fraudulent accounts.
 <WhatIsArcjet />
 
 <FrameworkLinks
-  title="Choose a framework"
-  exclude={[
-    "astro",
-    "fastify",
-    "bun-hono",
-    "deno",
-    "node-js-express",
-    "node-js-hono",
-    "react-router",
-  ]}
   client:load
+  exclude={frameworks
+    .filter((d) => !frontmatter.frameworks.includes(d.key))
+    .map((d) => d.key)}
+  title="Choose a framework"
 />
 
 ## Quick start
