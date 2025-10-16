@@ -1,0 +1,68 @@
+{/**
+ * @import { FrameworkKey, IntegrationKey } from "@/lib/prefs";
+ */}
+
+import SlotByFramework from "@/components/SlotByFramework";
+import { frameworkToIntegration, frameworks } from "@/lib/prefs";
+import { LinkCard } from "@astrojs/starlight/components";
+
+{/**
+ * List of frameworks that have SDK reference guides for their integrations.
+ *
+ * @type {Array<FrameworkKey>}
+ */}
+export const documented = [
+  "astro",
+  "bun-hono",
+  "bun",
+  "deno",
+  "fastify",
+  "nest-js",
+  "next-js",
+  "node-js-express",
+  "node-js-hono",
+  "node-js",
+  "nuxt",
+  "react-router",
+  "remix",
+  "sveltekit",
+]
+
+{/**
+ * @type {Record<IntegrationKey, string>}
+ */}
+export const pathOverwrites = {
+  "nest-js": "nestjs",
+  "next-js": "nextjs",
+  "node-js": "nodejs"
+}
+
+<SlotByFramework client:load>
+  {
+    frameworks.map(function (framework) {
+      /** @type {IntegrationKey} */
+      const integration = Object.hasOwn(frameworkToIntegration, framework.key) ? frameworkToIntegration[framework.key] : framework.key;
+      const info = frameworks.find(function (d) {
+        return d.key === integration;
+      });
+      if (!info) throw new Error('Cannot find integration `' + integration + '`');
+
+      if (!documented.includes(framework.key)) {
+        console.warn('Missing reference guide for `%s`; if it exists, add it to `documented in `SdkReferenceLinkByFramework.mdx`', framework.key);
+        return;
+      }
+
+      /** @type {string} */
+      const pathname = Object.hasOwn(pathOverwrites, integration) ? pathOverwrites[integration] : integration;
+
+      return (
+        <LinkCard
+          description={`${info.label} SDK reference guide.`}
+          href={`/reference/${pathname}`}
+          slot={framework.key}
+          title="SDK reference"
+        />
+      )
+    })
+  }
+</SlotByFramework>
