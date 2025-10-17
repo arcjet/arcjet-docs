@@ -1,0 +1,193 @@
+---
+prev: false
+title: "Arcjet Deno SDK reference"
+---
+
+import { Code } from "@astrojs/starlight/components";
+import Comments from "@/components/Comments.astro";
+import WhatIsArcjet from "@/components/WhatIsArcjet.astro";
+import CustomClient from "/src/snippets/reference/deno/custom-client.ts?raw";
+import CustomLog from "/src/snippets/reference/deno/custom-log.ts?raw";
+import Error from "/src/snippets/reference/deno/error.ts?raw";
+import Protect from "/src/snippets/reference/deno/protect.ts?raw";
+
+<a href="https://www.npmjs.com/package/@arcjet/deno">
+  <picture class="badge">
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://img.shields.io/npm/v/arcjet?style=flat-square&label=%E2%9C%A6Aj&labelColor=000000&color=5C5866"
+    />
+    <img
+      alt="npm badge"
+      src="https://img.shields.io/npm/v/arcjet?style=flat-square&label=%E2%9C%A6Aj&labelColor=ECE6F0&color=ECE6F0"
+    />
+  </picture>
+</a>
+
+This guide shows how to use the package
+[`@arcjet/deno`][npmjs-arcjet-deno].
+Its source code is [on GitHub][github-arcjet-deno].
+The code is open source and licensed under Apache 2.0.
+
+<WhatIsArcjet />
+
+## Quick start
+
+See the [Deno quick start][arcjet-quick-start-deno].
+
+## Requirements
+
+- Deno 2 or later
+- ESM
+
+## Install
+
+```sh
+deno add npm:@arcjet/deno
+```
+
+## Use
+
+### Configure
+
+Build Arcjet clients as few times as possible.
+That means _outside_ request handlers.
+If you need different strategies, such as one for logged-in users and one for
+guests,
+create two clients and choose which one to use inside the handler.
+
+#### Options
+
+The main way to configure Arcjet is to pass options to the `arcjet` function.
+The fields are:
+
+- `characteristics` (`Array<string>`, default: `["src.ip"]`)
+  — characteristics to track a user by;
+  can also be passed to rules
+- `client` (`Client`, optional)
+  — client used to make requests to the Cloud API
+- `key` (`string`, **required**)
+  — API key to identify the site in Arcjet
+  (typically through `process.env.ARCJET_KEY`)
+- `log` (`ArcjetLogger`, optional)
+  — log interface to emit useful info
+- `rules` (`Array<ArcjetRule>`, **required**)
+  — rules to use (order insensitive)
+
+Get your site key from the [Arcjet dashboard][arcjet-app].
+Set it as an environment variable called `ARCJET_KEY` in your `.env` file:
+
+```sh
+ARCJET_KEY=your_site_key_here
+```
+
+#### Environment variables
+
+Next to the convention of using `ARCJET_KEY` for the Arcjet Cloud API key,
+there are several environment variables that affect how Arcjet works.
+
+- `ARCJET_BASE_URL`
+  — an allowed URL to the Cloud API
+  (defaults to `https://decide.arcjet.com`)
+- `ARCJET_ENV`, `MODE`, `NODE_ENV`
+  — whether development mode is on
+- `ARCJET_LOG_LEVEL`
+  — log level to use
+- `FLY_APP_NAME`, `VERCEL`, `RENDER`
+  — hosting platform
+
+### Protect
+
+Use the `protect` function to protect a request from Deno.
+Some rules, such as `validateEmail`, may need extra properties.
+The protect function returns a promise that resolves to a decision.
+
+<Code code={Protect} lang="ts" />
+
+### Decision
+
+The `ArcjetDecision` that `protect` resolves to has the following fields:
+
+- `conclusion` (`"ALLOW"`, `"DENY"`, or `"ERROR"`)
+  — what to do with the request
+- `id` (`string`)
+  — ID for the request;
+  local decisions start with `lreq_` and remote ones with `req_`
+- `ip` (`ArcjetIpDetails`)
+  — analysis of the client IP address
+- `reason` (`ArcjetReason`)
+  — more info about the conclusion
+- `results` (`Array<ArcjetRuleResult>`)
+  — results of each rule
+- `ttl` (`number`)
+  — time-to-live for the decision in seconds;
+  `"DENY"` decisions are cached by `@arcjet/deno` for this duration
+
+This top-level decision takes the results from each `"LIVE"` rule into account.
+If one of them is `"DENY"` then the overall conclusion will be `"DENY"`.
+Otherwise, if one of them is `"ERROR"`, then `"ERROR"`.
+Otherwise, it will be `"ALLOW"`.
+The `reason` and `ttl` fields reflect this conclusion.
+
+To illustrate,
+when a bot rule returns an error and a validate email rule returns a deny,
+the overall conclusion is `"DENY"`,
+while the `"ERROR"` is available in the results.
+
+The results of `"DRY_RUN"` rules do not affect this overall decision,
+but are included in `results`.
+
+The `ip` field is available when the Cloud API was called and contains
+IP geolocation and reputation info.
+You can use this field to customize responses or you can use
+[filter rules][arcjet-filter-rules] to make decisions based on it.
+See the
+[IP geolocation][arcjet-blueprint-ip-geolocation] and
+[IP reputation][arcjet-blueprint-vpn-proxy-detection]
+blueprints for more info.
+
+## Errors
+
+Arcjet fails open so that a service issue, misconfiguration, or
+[network timeout][arcjet-architecture-timeout] does not block requests.
+Such errors should in many cases be logged but otherwise treated as `"ALLOW"`
+decisions.
+The `reason.message` field has more info on what occured.
+
+<Code code={Error} lang="ts" />
+
+## Custom logs
+
+You can use a custom log interface matching [`pino`][github-pino]
+to change the default behavior.
+Using `pino-pretty` as an example:
+
+```sh
+deno add npm:pino npm:pino-pretty
+```
+
+Then, create a custom logger that will log to JSON in production and pretty
+print in development:
+
+<Code code={CustomLog} lang="ts" />
+
+## Custom client
+
+You can pass a client to change the behavior when connecting to the Cloud API.
+Use `createRemoteClient` to create a client.
+
+<Code code={CustomClient} lang="ts" />
+
+---
+
+<Comments />
+
+[arcjet-app]: https://app.arcjet.com
+[arcjet-architecture-timeout]: /architecture#timeout
+[arcjet-blueprint-ip-geolocation]: /blueprints/ip-geolocation
+[arcjet-blueprint-vpn-proxy-detection]: /blueprints/vpn-proxy-detection
+[arcjet-filter-rules]: /filters/quick-start
+[arcjet-quick-start-deno]: /get-started?f=deno
+[github-arcjet-deno]: https://github.com/arcjet/arcjet-js/tree/main/arcjet-deno
+[github-pino]: https://github.com/pinojs/pino
+[npmjs-arcjet-deno]: https://www.npmjs.com/package/@arcjet/deno
