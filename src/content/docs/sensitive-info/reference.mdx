@@ -217,6 +217,54 @@ This example will log the full result as well as the sensitive info rule:
   <DecisionLogSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
+## Entity detection
+
+Different kinds of sensitive info are detected by Arcjet itself.
+Next to these,
+it is also possible to detect custom kinds through a `detect` function.
+Custom detect functions can also be used if your needs are more strict or
+instead more loose than the defaults.
+
+### Card numbers
+
+Card numbers can be detected.
+The values `4242424242424242`, `4000 0566 5566 5556`, and `3782-8224-6310005`
+match but `4242424242424241` does not.
+Whether something looks like a card number is based on its initial and final
+digits.
+The initial digits determine the expected length (min, max) of the total
+number.
+The final digit is a [Luhn](https://en.wikipedia.org/wiki/Luhn_algorithm)
+check digit.
+Spaces and dashes are ignored because users often group digits.
+
+### Email addresses
+
+Email addresses can be detected.
+The values `alice@example.com` and `bob.smith@subdomain.example.com` match but
+`alice.example.com` does not.
+A dotless domain (`user@localhost`) and a domain literal (`user@[127.0.0.1]`,
+if it contains a valid IP) also match.
+
+### IP addresses
+
+IP addresses can be detected.
+The values `127.0.0.1` and `::1` match but `012.004.002.000` does not.
+IP v4 and v6 addresses are supported.
+Whether something looks like an IP address is based on whether it parses
+as [`IpAddr` from `std::net`](https://doc.rust-lang.org/std/net/enum.IpAddr.html).
+
+### Phone numbers
+
+Phone numbers can be detected.
+The values `+1 (555) 555-5555` and `(020) 334 4522` match but `555-1234` does not.
+As phone numbers have a wide variety of sizes and formats,
+special short numbers such as `911` or `14 020` are not detected.
+Several characters such as dots (`.`), dashes (`-`), and spaces are allowed
+to separate digit groups.
+The country code can be prefixed with plus (`+`) or omitted,
+the next region group can be in parentheses.
+
 ## Custom entity detection
 
 When configuring Arcjet Sensitive Info you can provide a custom detect function,
