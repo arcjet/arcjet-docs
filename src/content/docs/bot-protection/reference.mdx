@@ -92,6 +92,7 @@ import Comments from "@/components/Comments.astro";
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
 import FrameworkLinks from "@/components/FrameworkLinks";
+import { frameworks } from "@/lib/prefs";
 
 import BunAllowingBots from "@/snippets/bot-protection/reference/bun/AllowingBots.mdx";
 import BunDecisionLog from "@/snippets/bot-protection/reference/bun/DecisionLog.mdx";
@@ -163,16 +164,11 @@ plan](https://arcjet.com/pricing).
 | <Badge text="Enterprise" variant="danger" />                                     | Custom                                                                             |
 
 <FrameworkLinks
-  title="Choose a framework"
-  exclude={[
-    "astro",
-    "bun-hono",
-    "fastify",
-    "node-js-express",
-    "node-js-hono",
-    "react-router",
-  ]}
   client:load
+  exclude={frameworks
+    .filter((d) => !frontmatter.frameworks.includes(d.key))
+    .map((d) => d.key)}
+  title="Choose a framework"
 />
 
 ## Configuration

@@ -75,24 +75,6 @@ In home:
 />
 ```
 
-In other pages – notice the `exclude` prop, make sure the available framework pages match the rendered links.
-
-```mdx
-<FrameworkLinks
-  title="Choose a framework"
-  exclude={[
-    "astro",
-    "fastify",
-    "bun-hono",
-    "deno",
-    "node-js-express",
-    "node-js-hono",
-    "react-router",
-  ]}
-  client:load
-/>
-```
-
 ## Support
 
 [Join our Discord server][discord-invite] or [reach out for support][support].

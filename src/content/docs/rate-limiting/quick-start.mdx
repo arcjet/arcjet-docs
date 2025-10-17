@@ -50,6 +50,7 @@ import FrameworkName from "@/components/FrameworkName";
 import FrameworkLinks from "@/components/FrameworkLinks";
 import FAQs from "@/components/FAQs.astro";
 import Comments from "@/components/Comments.astro";
+import { frameworks } from "@/lib/prefs";
 import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 
 import BunStep1 from "@/snippets/rate-limiting/quick-start/bun/Step1.mdx";
@@ -89,17 +90,11 @@ requests a client can make over a period of time.
 <WhatIsArcjet />
 
 <FrameworkLinks
-  title="Choose a framework"
-  exclude={[
-    "astro",
-    "fastify",
-    "bun-hono",
-    "deno",
-    "node-js-express",
-    "node-js-hono",
-    "react-router",
-  ]}
   client:load
+  exclude={frameworks
+    .filter((d) => !frontmatter.frameworks.includes(d.key))
+    .map((d) => d.key)}
+  title="Choose a framework"
 />
 
 <SlotByFramework client:load>

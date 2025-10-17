@@ -42,6 +42,7 @@ import { Badge } from "@astrojs/starlight/components";
 import FrameworkLinks from "@/components/FrameworkLinks";
 import DisplayType from "@/components/DisplayType.astro";
 import SlotByFramework from "@/components/SlotByFramework";
+import { frameworks } from "@/lib/prefs";
 import BunAllow from "@/snippets/filters/reference/bun/Allow.mdx";
 import DenoAllow from "@/snippets/filters/reference/deno/Allow.mdx";
 import NestJsAllow from "@/snippets/filters/reference/nestjs/Allow.mdx";
@@ -63,16 +64,11 @@ Arcjet filter rules is available on all [pricing
 plans](https://arcjet.com/pricing).
 
 <FrameworkLinks
-  title="Choose a framework"
-  exclude={[
-    "astro",
-    "bun-hono",
-    "fastify",
-    "node-js-express",
-    "node-js-hono",
-    "react-router",
-  ]}
   client:load
+  exclude={frameworks
+    .filter((d) => !frontmatter.frameworks.includes(d.key))
+    .map((d) => d.key)}
+  title="Choose a framework"
 />
 
 Some fields are only available on certain plans:

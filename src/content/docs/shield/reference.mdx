@@ -67,6 +67,8 @@ import TextByFramework from "@/components/TextByFramework";
 import FrameworkLinks from "@/components/FrameworkLinks";
 import DisplayType from "@/components/DisplayType.astro";
 
+import { frameworks } from "@/lib/prefs";
+
 import DecisionLogBun from "@/snippets/shield/reference/bun/DecisionLog.mdx";
 import ErrorsBun from "@/snippets/shield/reference/bun/Errors.mdx";
 import DecisionLogNestJs from "@/snippets/shield/reference/nestjs/DecisionLog.mdx";
@@ -109,17 +111,11 @@ plans. See [Concepts](/shield/concepts#what-does-arcjet-shield-waf-do) for more
 details.
 
 <FrameworkLinks
-  title="Choose a framework"
-  exclude={[
-    "astro",
-    "fastify",
-    "bun-hono",
-    "deno",
-    "node-js-express",
-    "node-js-hono",
-    "react-router",
-  ]}
   client:load
+  exclude={frameworks
+    .filter((d) => !frontmatter.frameworks.includes(d.key))
+    .map((d) => d.key)}
+  title="Choose a framework"
 />
 
 ## Configuration

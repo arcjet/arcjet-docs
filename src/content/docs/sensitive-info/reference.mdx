@@ -66,6 +66,8 @@ import TextByFramework from "@/components/TextByFramework";
 import FrameworkLinks from "@/components/FrameworkLinks";
 import DisplayType from "@/components/DisplayType.astro";
 
+import { frameworks } from "@/lib/prefs";
+
 import NestJsDecoratorRoutes from "@/snippets/sensitive-info/reference/nestjs/DecoratorRoutes.mdx";
 import PerRouteVsMiddlewareNextJs from "@/snippets/sensitive-info/reference/nextjs/PerRouteVsMiddleware.mdx";
 import PerRouteVsHooksSvelteKit from "@/snippets/sensitive-info/reference/sveltekit/PerRouteVsHooks.mdx";
@@ -108,17 +110,11 @@ Arcjet sensitive information detection availability depends depends on your
 | <Badge text="Enterprise" variant="danger" />                                     | Custom                                                 |
 
 <FrameworkLinks
-  title="Choose a framework"
-  exclude={[
-    "astro",
-    "fastify",
-    "bun-hono",
-    "deno",
-    "node-js-express",
-    "node-js-hono",
-    "react-router",
-  ]}
   client:load
+  exclude={frameworks
+    .filter((d) => !frontmatter.frameworks.includes(d.key))
+    .map((d) => d.key)}
+  title="Choose a framework"
 />
 
 ## Configuration

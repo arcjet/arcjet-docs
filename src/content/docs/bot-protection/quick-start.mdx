@@ -47,6 +47,7 @@ ajToc:
 ---
 
 import { LinkCard, CardGrid } from "@astrojs/starlight/components";
+import { frameworks } from "@/lib/prefs";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import SlotByFramework from "@/components/SlotByFramework";
 import FrameworkName from "@/components/FrameworkName";
@@ -100,15 +101,11 @@ Arcjet bot detection allows you to manage traffic by automated clients and bots.
 <WhatIsArcjet />
 
 <FrameworkLinks
-  title="Choose a framework"
-  exclude={[
-    "bun-hono",
-    "fastify",
-    "node-js-express",
-    "node-js-hono",
-    "react-router",
-  ]}
   client:load
+  exclude={frameworks
+    .filter((d) => !frontmatter.frameworks.includes(d.key))
+    .map((d) => d.key)}
+  title="Choose a framework"
 />
 
 ## Quick start
