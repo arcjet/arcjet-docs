@@ -340,6 +340,10 @@ export const main = [
             link: "/reference/nuxt",
           },
           {
+            label: "React Router",
+            link: "/reference/react-router",
+          },
+          {
             label: "Remix",
             link: "/reference/remix",
           },
