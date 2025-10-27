@@ -6,23 +6,23 @@ import MiddlewareMatcher from "./MiddlewareMatcher.ts?raw";
 
 <SelectableContent client:load syncKey="language" frameworkSwitcher>
   <div slot="TS" slotIdx="1">
-    Create a file called `middleware.ts` in your project root (at the same level as
+    Create a file called `proxy.ts` in your project root (at the same level as
 `pages` or `app` or inside `src`):
 
 <Code
   code={MiddlewareTS}
   lang="ts"
-  title="/middleware.ts"
+  title="/proxy.ts"
 />
   </div>
   <div slot="JS" slotIdx="2">
-    Create a file called `middleware.js` in your project root (at the same level as
+    Create a file called `proxy.js` in your project root (at the same level as
 `pages` or `app` or inside `src`):
 
 <Code
   code={MiddlewareJS}
   lang="js"
-  title="/middleware.js"
+  title="/proxy.js"
 />
   </div>
 </SelectableContent>
@@ -32,10 +32,10 @@ import MiddlewareMatcher from "./MiddlewareMatcher.ts?raw";
 If you use Arcjet in middleware and individual routes, you need to be careful
 that Arcjet is not running multiple times per request. This can be avoided by
 excluding the API route from [the middleware
-matcher](https://nextjs.org/docs/pages/building-your-application/routing/middleware#matcher).
+matcher](https://nextjs.org/docs/app/api-reference/file-conventions/proxy#matcher).
 
 For example, if you already have a sensitive info rule defined in the API route
 at `/api/hello`, you can exclude it from the middleware by specifying a matcher
-in `/middleware.ts`:
+in `/proxy.ts`:
 
 <Code code={MiddlewareMatcher} lang="ts" title="/middleware.ts" />
