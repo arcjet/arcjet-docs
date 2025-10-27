@@ -1,59 +1,52 @@
-import Step3JS from "./Step3.js?raw";
-import Step3AdvancedJS from "./Step3Advanced.js?raw";
-import Step3TS from "./Step3.ts?raw";
-import Step3AdvancedTS from "./Step3Advanced.ts?raw";
+import Step3AppJS from "./Step3App.js?raw";
+import Step3AppTS from "./Step3App.ts?raw";
+import Step3PagesJS from "./Step3Pages.js?raw";
+import Step3PagesTS from "./Step3Pages.ts?raw";
 import { Code } from "@astrojs/starlight/components";
 import SelectableContent from "@/components/SelectableContent";
 
-For this quick start we will enable Arcjet Bot Protection across your entire
-Next.js application. [Next.js
-middleware](https://nextjs.org/docs/app/building-your-application/routing/middleware)
-runs before every request, allowing Arcjet to protect your entire application
-before your code runs.
+For this quick start we will enable Arcjet Bot Protection on a single route
+handler. This could be an API you want to protect, such as a form handler.
 
-The **basic** option exports the middleware directly whereas the **advanced**
-option allows you to customize the response based on the [Arcjet
-decision](/bot-protection/reference?f=next-js#decision).
+Arcjet also works in [page routes](/reference/nextjs#pages--page-components),
+[server actions](/reference/nextjs#server-actions), and [middleware (renamed to
+proxy in Next.js 16)](/bot-protection/reference#per-route-vs-middleware).
 
 <SelectableContent client:load syncKey="language" frameworkSwitcher>
-<div slot="TS (Basic)" slotIdx="1">
-Create a file called `middleware.ts` in your project root (at the same level as
-`pages` or `app` or inside `src`).
+<div slot="TS (App)" slotIdx="1">
+Create a new API route at `/app/api/arcjet/route.ts`:
 
 <Code
-  code={Step3TS}
+  code={Step3AppTS}
   lang="ts"
-  title="middleware.ts"
+  title="/app/api/arcjet/route.ts"
 />
 </div>
-<div slot="TS (Advanced)" slotIdx="2">
-Create a file called `middleware.ts` in your project root (at the same level as
-`pages` or `app` or inside `src`).
+<div slot="TS (Pages)" slotIdx="2">
+Create a new API route at `/pages/api/arcjet.ts`:
 
 <Code
-  code={Step3AdvancedTS}
+  code={Step3PagesTS}
   lang="ts"
-  title="middleware.ts"
+  title="/pages/api/arcjet.ts"
 />
 </div>
-<div slot="JS (Basic)" slotIdx="3">
-Create a file called `middleware.js` in your project root (at the same level as
-`pages` or `app` or inside `src`):
+<div slot="JS (App)" slotIdx="3">
+Create a new API route at `/app/api/arcjet/route.js`:
 
 <Code
-  code={Step3JS}
+  code={Step3AppJS}
   lang="js"
-  title="/middleware.js"
+  title="/app/api/arcjet/route.js"
 />
 </div>
-<div slot="JS (Advanced)" slotIdx="4">
-Create a file called `middleware.js` in your project root (at the same level as
-`pages` or `app` or inside `src`):
+<div slot="JS (Pages)" slotIdx="4">
+Create a new API route at `/pages/api/arcjet.js`:
 
 <Code
-  code={Step3AdvancedJS}
+  code={Step3PagesJS}
   lang="js"
-  title="/middleware.js"
+  title="/pages/api/arcjet.js"
 />
 </div>
 </SelectableContent>

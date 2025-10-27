@@ -7,13 +7,15 @@ import PerRouteNextJs from "./PerRoute.mdx";
 
 Bot protection rules can be configured in two ways:
 
-- **Per API route**: The rule is defined in the API route itself. This allows
-  you to configure the rule alongside the code it is protecting which is useful
-  if you want to use the decision to add context to your own code. However, it
-  means rules are not located in a single place.
-- **Middleware**: The rule is defined in the middleware. This allows you to
-  configure rules in a single place or apply them globally to all routes, but
-  it means the rules are not located alongside the code they are protecting.
+- **Route handlers**: The rule is defined in the route handler (previously known
+  as an API route) itself. This allows you to configure the rule alongside the
+  code it is protecting which is useful if you want to use the decision to add
+  context to your own code. However, it means rules are not automatically
+  applied to every request.
+- **Middleware/Proxy**: The rule is defined in the middleware (renamed to proxy
+  in Next.js 16). This allows you to configure rules in a single place or apply
+  them globally to all routes, but it means the rules are not located alongside
+  the code they are protecting and can miss route specific context .
 
 ### Per route
 

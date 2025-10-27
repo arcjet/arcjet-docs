@@ -200,7 +200,8 @@ instance on every request. `protect()` should be called inside the route handler
 attention when implementing Arcjet in middleware and in route handlers to ensure
 that the function is not called multiple times. Use a middleware helper or check
 the matcher config to ensure that Arcjet in middleware does not get called as
-well as in the route handler.
+well as in the route handler. Next.js renamed `middleware.js` to `proxy.js` in
+Next.js 16.
 
 - Each rule can be configured in either `LIVE` or `DRY_RUN` mode. When in
 `DRY_RUN` mode, each rule will return its decision, but the end conclusion will

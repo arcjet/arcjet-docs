@@ -8,55 +8,45 @@ import MiddlewareMatcher from "./MiddlewareMatcher.ts?raw";
 
 <SelectableContent client:load syncKey="language" frameworkSwitcher>
   This will run on every request to your Next.js app, except for static assets
-(configured in the `matcher` - see [the Next.js
-docs](https://nextjs.org/docs/pages/building-your-application/routing/middleware#matcher)
-for details).
+  (configured in the `matcher` - see [the Next.js
+  docs](https://nextjs.org/docs/app/api-reference/file-conventions/proxy#matcher)
+  for details).
 
   <div slot="TS" slotIdx="1">
-    Create a file called `middleware.ts` in your project root (at the same level as
-`pages` or `app` or inside `src`):
+    Create a file called `proxy.ts` (Next.js 16) or `middleware.ts` (Next.js 15)
+    in your project root (at the same level as `pages` or `app` or inside `src`):
 
-<Code
-  code={MiddlewareTS}
-  lang="ts"
-  title="/middleware.ts"
-  mark={["ARCJET_KEY"]}
-/>
+<Code code={MiddlewareTS} lang="ts" title="/proxy.ts" mark={["ARCJET_KEY"]} />
 
 You can also customize the response depending on the decision. In this case we
 will return a 403 Forbidden response only if we detect a hosting provider IP
 address for the bot detection rule result:
 
-<Code code={CustomizedMiddlewareTS} lang="ts" title="/middleware.ts" />
+<Code code={CustomizedMiddlewareTS} lang="ts" title="/proxy.ts" />
   </div>
   <div slot="JS" slotIdx="2">
-    Create a file called `middleware.js` in your project root (at the same level as
+    Create a file called `proxy.js` in your project root (at the same level as
 `pages` or `app` or inside `src`):
 
-<Code
-  code={MiddlewareJS}
-  lang="js"
-  title="/middleware.js"
-  mark={["ARCJET_KEY"]}
-/>
+<Code code={MiddlewareJS} lang="js" title="/proxy.js" mark={["ARCJET_KEY"]} />
 
 You can also customize the response depending on the decision. In this case we
 will return a 403 Forbidden response only if we detect a hosting provider IP
 address for the bot detection rule result:
 
-<Code code={CustomizedMiddlewareJS} lang="js" title="/middleware.js" />
+<Code code={CustomizedMiddlewareJS} lang="js" title="/proxy.js" />
   </div>
 </SelectableContent>
 
-### Avoiding double protection with middleware
+### Avoiding double protection
 
-If you use Arcjet in middleware and individual routes, you need to be careful
+If you use Arcjet in middleware/proxy and individual routes, you need to be careful
 that Arcjet is not running multiple times per request. This can be avoided by
 excluding the API route from [the middleware
-matcher](https://nextjs.org/docs/pages/building-your-application/routing/middleware#matcher).
+matcher](https://nextjs.org/docs/app/api-reference/file-conventions/proxy#matcher).
 
 For example, if you already have a bot detection rule defined in the API route
 at `/api/hello`, you can exclude it from the middleware by specifying a matcher
-in `/middleware.ts`:
+in `/proxy.ts`:
 
-<Code code={MiddlewareMatcher} lang="ts" title="/middleware.ts" />
+<Code code={MiddlewareMatcher} lang="ts" title="/proxy.ts" />

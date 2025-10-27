@@ -38,13 +38,14 @@ In order to fix this, omit your healthcheck route from your Arcjet middleware.
 
 #### Next.js
 
-Assuming you have your Arcjet middleware at `middleware.ts`, adjust the
-`config.matcher` regex to include an omission for the `/healthz` route:
+Assuming you have your Arcjet middleware at `middleware.ts` or `proxy.ts`,
+adjust the `config.matcher` regex to include an omission for the `/healthz`
+route:
 
 ```diff
  export const config = {
-   // matcher tells Next.js which routes to run the middleware on.
-   // This runs the middleware on all routes except for static assets.
+   // matcher tells Next.js which routes to run the middleware/proxy on.
+   // This runs on all routes except for static assets.
 -  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 +  matcher: ["/((?!_next/static|_next/image|favicon.ico|healthz).*)"],
  };
