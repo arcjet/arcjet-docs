@@ -13,7 +13,6 @@ import ProtectTS from "/src/snippets/reference/nodejs/Protect.ts?raw";
 import ProtectJS from "/src/snippets/reference/nodejs/Protect.js?raw";
 import LoggerTS from "/src/snippets/reference/nodejs/Logger.ts?raw";
 import LoggerJS from "/src/snippets/reference/nodejs/Logger.js?raw";
-import ProxiesTS from "/src/snippets/reference/nodejs/Proxies.ts?raw";
 import IPLocationTS from "/src/snippets/reference/nodejs/IPLocation.ts?raw";
 import IPLocationJS from "/src/snippets/reference/nodejs/IPLocation.js?raw";
 import WithRuleTS from "/src/snippets/reference/nodejs/WithRule.ts?raw";
@@ -94,8 +93,18 @@ The optional fields are:
 - `proxies` (`string[]`) - A list of one or more trusted proxies. These
   addresses will be excluded when Arcjet is determining the client IP address.
   This is useful if you are behind a load balancer or proxy that sets the client
-  IP address in a header. See [Load balancers &
-  proxies](#load-balancers--proxies) below for an example.
+  IP address in a header.
+  See “[Concepts: Client IP](/concepts/client-ip)” for more info.
+- `trustedIpHeader` (`string`) - Name of (lowercase) HTTP request header that you
+  trust (such as `x-fah-client-ip`).
+  This value is _preferred_ over IP addresses provided by the framework and IP
+  addresses found in other headers based on the platform,
+  in both development and production.
+  It can point to a regular IP (such as `x-client-ip`) or a list of IPs (such
+  as `x-forwarded-for`).
+  It can contain IPv4 or IPv6 addresses.
+  Proxies are filtered out.
+  See “[Concepts: Client IP](/concepts/client-ip)” for more info.
 
 <Tabs>
   <TabItem label="TS">
@@ -191,37 +200,8 @@ print in development:
 
 If your application is behind a load balancer, Arcjet will only see the IP
 address of the load balancer and not the real client IP address.
-
-To fix this, most load balancers will set the `X-Forwarded-For` header with the
-real client IP address plus a list of proxies that the request has passed
-through.
-
-The problem with is that the `X-Forwarded-For` header can be spoofed by the
-client, so you should only trust it if you are sure that the load balancer is
-setting it correctly. See [the MDN
-docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For)
-for more details.
-
-You can configure Arcjet to trust IP addresses in the `X-Forwarded-For` header
-by setting the `proxies` field in the configuration. This should be a list of
-the IP addresses or the CIDR range of your load balancers to be removed, so that
-the last IP address in the list is the real client IP address.
-
-#### Example
-
-For example, if the load balancer is at `100.100.100.100` and the client IP
-address is `192.168.1.1`, the `X-Forwarded-For` header will be:
-
-```http
-X-Forwarded-For: 192.168.1.1, 100.100.100.100
-```
-
-You should set the `proxies` field to `["100.100.100.100"]` so Arcjet will use
-`192.168.1.1` as the client IP address.
-
-You can also specify CIDR ranges to match multiple IP addresses.
-
-<Code code={ProxiesTS} lang="ts" />
+You can configure Arcjet to trust particular IP addresses.
+See “[Concepts: Client IP](/concepts/client-ip)” for more info.
 
 ## Protect
 

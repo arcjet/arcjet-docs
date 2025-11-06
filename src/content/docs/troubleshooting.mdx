@@ -85,20 +85,12 @@ When you deploy your app next, Arcjet should not trigger on this route.
 
 Arcjet's [IP geolocation](/blueprints/ip-geolocation) and [VPN & proxy
 detection](/blueprints/vpn-proxy-detection) features require a real IP address
-to work. In local development, Arcjet defaults to `127.0.0.1` so the IP analysis
-metadata will be empty.
-
-You can set the IP address to a real public IP by overriding the IP address
-field (`ip`) in the `request` object that is passed to the Arcjet `protect`
-function.
-
-```ts
-// Override the IP address in the request object if `ip` is provided. You could
-// set this using an environment variable or some other method to ensure it is
-// only set in development.
-//const ip = "8.8.8.8"; // Google's public DNS server
-const decision = await aj.protect(ip ? { ...req, ip } : req);
-```
+to work.
+When you are developing your app locally,
+there is no public IP.
+In that case the IP analysis metadata will be empty.
+In development you can pass an `x-arcjet-xxx` header.
+See “[Concepts: Client IP](/concepts/client-ip)” for more info.
 
 ## Common errors
 
@@ -165,6 +157,8 @@ development mode. If this appears in production, check that
 [`ARCJET_ENV`](/environment#arcjet-env) is not incorrectly set to
 `development`.
 
+See also “[Concepts: Client IP](/concepts/client-ip)” for more info.
+
 ### generateFingerprint: ip is empty / [failed_precondition] client IP not provided
 
 Arcjet normally detects when it is running in a local environment and uses a
@@ -185,6 +179,8 @@ Arcjet uses the client IP address as part of a fingerprint to identify where
 each request is coming from. If the IP address is not provided, or it is running
 in production and a private/internal address is provided, then Arcjet will show
 this error.
+
+See also “[Concepts: Client IP](/concepts/client-ip)” for more info.
 
 ### [failed_precondition] request details failed validation
 
