@@ -1,4 +1,4 @@
-import { findIp, parseProxy } from "@arcjet/ip";
+import { findIp } from "@arcjet/ip";
 
 // Some Request-like object, such as node's `http.IncomingMessage`, `Request` or
 // Next.js' `NextRequest`
@@ -8,7 +8,7 @@ const request = new Request("/your-route");
 const proxyExcludedPublicIp = findIp(request, {
   proxies: [
     "100.100.100.100", // A single IP
-    parseProxy("100.100.100.0/24"), // A CIDR for the range
+    "100.100.100.0/24", // A CIDR for the range
   ],
 });
 console.log(proxyExcludedPublicIp);
