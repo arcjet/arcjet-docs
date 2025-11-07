@@ -68,20 +68,22 @@ you’ll see a big warning in the logs.
 In this case,
 if you do know where to find the correct IP address,
 you can [overwrite the client IP][section-overwrite-ip].
-But please also [open an issue][arcjet-arcjet-js-issues] so that we can fix this bug.
+But please also [open an issue][arcjet-arcjet-js-issues] so that this bug can
+be fixed.
 
 ## Platform
 
 Arcjet looks at request headers when a framework does not provide the trusted
 client IP directly.
 Whether to trust these addresses depends on the platform your app is running on.
-Arcjet infers whether an app is running on Fly, Render, or Vercel
+Arcjet infers whether an app is running on Firebase, Fly, Render, or Vercel
 (but not Cloudflare) from the environment.
 On other platforms Arcjet looks for common headers.
 
 | Platform   | Header                                                                                                                                                                                             |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Cloudflare | [`cf-connecting-ipv6`][cloudflare-cf-connecting-ipv6], [`cf-connecting-ip`][cloudflare-cf-connecting-ip]                                                                                           |
+| Firebase   | `x-fah-client-ip`, `x-forwarded-for`                                                                                                                                                               |
 | Fly        | [`fly-client-ip`][fly-client-ip]                                                                                                                                                                   |
 | Render     | `true-client-ip`                                                                                                                                                                                   |
 | Vercel     | [`x-forwarded-for`][vercel-x-forwarded-for], [`x-real-ip`][vercel-x-real-ip], [`x-vercel-forwarded-for`][vercel-x-vercel-forwarded-for]                                                            |
@@ -89,28 +91,23 @@ On other platforms Arcjet looks for common headers.
 
 If you use several platforms,
 such as Cloudflare in front of Vercel,
-you can pass `platforms` so that the correct headers will be looked at.
+you can configure `services`.
 
-TODO: `platforms` option is not real yet (arcjet/arcjet-js#5379).\
-TODO: `@arcjet/proxies` is not real yet (arcjet/arcjet-js#5381).\
+TODO: `services` option is not real yet (arcjet/arcjet-js#5379).\
+TODO: `@arcjet/services` is not real yet (arcjet/arcjet-js#5381).\
 TODO: framework switcher in the following code block.
 
 ```ts
 import arcjetBun from "@arcjet/bun";
-import { cloudflare } from "@arcjet/proxies";
+import { cloudflare } from "@arcjet/services";
 import { env } from "bun";
 
 const arcjet = arcjetBun({
   key: env.ARCJET_KEY!,
-  platforms: ["cloudflare", "vercel"],
-  proxies: [...cloudflare],
   rules: [],
+  services: [cloudflare],
 });
 ```
-
-As shown above, you need to configure both `platforms` and `proxies` when using
-multiple platforms.
-See the next section “[Proxies][section-proxies]” for more info.
 
 When using platforms not listed here and you know which header to trust,
 you can [overwrite the client IP][section-overwrite-ip].
@@ -121,7 +118,8 @@ that untrusted value would be used.
 
 If you use a platform not listed here which can be detected from the
 environment and sets certain headers,
-please [open an issue][arcjet-arcjet-js-issues] so that we can add trusted support for it.
+please [open an issue][arcjet-arcjet-js-issues] so that trusted support can be
+added for it.
 
 ## Proxies
 
@@ -198,12 +196,12 @@ how to do this is different in development and production.
 
 TODO: this header is not real yet (arcjet/arcjet-js#4808).
 
-In development you can pass an `x-arcjet-xxx` header.
+In development you can pass an `x-arcjet-ip` header.
 This value is preferred over any other detected IP address.
 An example with Curl is:
 
 ```sh
-curl https://example.com --header "x-arcjet-xxx: 76.76.21.21" --verbose
+curl https://example.com --header "x-arcjet-ip: 76.76.21.21" --verbose
 ```
 
 This header is ignored in production because otherwise malicious users could
@@ -215,10 +213,9 @@ particularly around rate limiting and IP geolocation.
 
 ### Production
 
-TODO: this field is not real yet (arcjet/arcjet-js#5380).
-
-In production you can set an `ip` field on a `request` object in most frameworks.
-That field is slightly different in XXX and YYY frameworks.
+In production,
+if the client IP is in a header that you trust,
+you can pas a `trustedIpHeader` option.
 
 TODO: framework switcher in the following code block.
 
@@ -230,12 +227,12 @@ const arcjet = arcjetBun({
   key: env.ARCJET_KEY!,
   // To illustrate, allow 3 requests per minute per IP address.
   rules: [slidingWindow({ interval: 60, max: 3, mode: "LIVE" })],
+  // Assuming requests will have an `x-custom` header that you trust:
+  trustedIpHeader: "x-custom",
 });
 
 export default {
   fetch: arcjet.handler(async function (request) {
-    request.ip = request.headers.get("x-some-header-that-you-trust");
-
     const decision = await arcjet.protect(request);
 
     if (decision.isDenied()) {
