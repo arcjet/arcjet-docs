@@ -1,0 +1,166 @@
+---
+title: "Vercel BotID vs Arcjet"
+description: "Vercel BotID vs Arcjet. Compare Arcjet's security SDK with Vercel BotID's bot verification. Hosting requirements, integration model, forms, pricing, and when to choose each."
+---
+
+import Comments from "/src/components/Comments.astro";
+
+Arcjet is an alternative to [Vercel BotID](https://vercel.com/botid) for
+protecting your applications from bots. Both products offer bot detection and
+mitigation features, but there are some key differences to consider when
+choosing between them.
+
+## Key differences: Vercel BotID vs Arcjet
+
+1. **Security platform**: Arcjet is a comprehensive security platform that
+   offers a wide range of protections including [bot
+   management](/bot-protection/quick-start), [rate
+   limiting](/rate-limiting/quick-start), [email
+   verification](/email-validation/quick-start), [personal information detection
+   & redaction](/sensitive-info/quick-start), [web application firewall
+   (WAF)](/shield/quick-start), and more. Vercel BotID is primarily focused on
+   bot detection and mitigation. Vercel's broader platform services include
+   [WAF](https://vercel.com/docs/vercel-firewall/vercel-waf) and [rate
+   limiting](https://vercel.com/docs/vercel-firewall/vercel-waf/rate-limiting),
+   but they are separate from BotID and must be configured independently.
+2. **Integration**: Arcjet is designed to integrate directly into your codebase,
+   allowing you to customize protections for different parts of your
+   application. Vercel BotID is primarily designed as a wrapper around your
+   Next.js application in the [instrumentation
+   client](https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation-client)
+   or within specific event handlers for other frameworks. Protected paths must
+   be configured separately from the code for BotID whereas Arcjet configuration
+   happens in code. Vercel's BotID [doesn't work with traditional HTML
+   forms](https://vercel.com/docs/botid/form-submissions) whereas Arcjet can
+   protect any type of request handler.
+3. **Platform independence**: Arcjet is platform-agnostic and can be used with
+   any hosting provider or framework. Vercel BotID only works for applications
+   hosted on Vercel.
+4. **Developer experience**: Arcjet is called like any other library from your
+   codebase and provides a response with detailed analysis of each request.
+   Rules are just code so can be varied dynamically based on request context
+   e.g. changing rate limits based on user subscription level or allowing /
+   denying certain bots based on the type of traffic you expect. Results can be
+   inspected to understand the decision and customize the response. Vercel BotID
+   provides few configuration options and returns only minimal information about
+   the request.
+
+## Comparison
+
+| Area                  | Arcjet                                                                                                                                         | Vercel BotID                                                                                                                                  |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Features              | App-level security SDK: bot management, rate limiting, WAF, email verification, PII detection/redaction, and more.                             | Bot detection/verification. WAF & rate limiting are separate Vercel features                                                                  |
+| Hosting               | Platform-agnostic. Use on any provider/framework.                                                                                              | Only works on Vercel.                                                                                                                         |
+| Local development     | Same behavior as production.                                                                                                                   | Returns `isBot: false` [locally](https://vercel.com/docs/botid/local-development-behavior); supports `developmentOptions` to bypass/override. |
+| Integration model     | Call from code in any handler.                                                                                                                 | Client script + server `checkBotId()`; you must list protected paths                                                                          |
+| HTML forms            | Works with native forms and any HTTP request.                                                                                                  | Native HTML form `POST` [is not supported](https://vercel.com/docs/botid/form-submissions). You must refactor your forms.                     |
+| Configuration         | Rules-as-code; [configure bots to allow](/bot-protection/identifying-bots) by name and category. Returns detailed context you can log/inspect. | Minimal config, no ability to choose which bots to allow or deny, server API essentially returns `isBot` (boolean) with minimal detail.       |
+| Pricing (bot feature) | Packages based on total requests per month with usage based pricing after that.                                                                | Basic analysis free within compute/request limits per plan. $1 per 1,000 Deep Analysis requests.                                              |
+
+## When to choose which
+
+- **Choose Arcjet** if you want security independence regardless of where you
+  deploy, need native form support, want rules-as-code with inspectable
+  decisions, want to be able to test locally with the same behavior as
+  production or want bot protection next to rate limiting, email validation,
+  WAF, PII detection, and other security rules in one SDK.
+- **Choose BotID** if you're fully on Vercel, want a quick boolean bot check,
+  don't need to make any customizations, and are fine configuring rate
+  limits/WAF separately in the Vercel Firewall.
+
+## FAQs
+
+### Does BotID work without Vercel?
+
+No. Vercel BotID requires hosting on Vercel to function. Arcjet is
+platform-agnostic and can be used with any hosting provider or framework,
+including running locally.
+
+### Can I configure which bots to allow or block?
+
+With Arcjet, you can [customize which bots to allow or
+block](/bot-protection/identifying-bots) based on your application's needs. You
+can allow well-known good bots by name (e.g., Googlebot) and category (e.g.
+search engines) while blocking malicious ones.
+
+Vercel BotID does not provide configuration options to choose which bots to
+allow or deny - you only get the details of which bots were detected afterwards.
+
+For example, this Arcjet configuration allows search engine bots but blocks all others:
+
+```ts
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  rules: [
+    // Create a bot detection rule
+    detectBot({
+      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+      // Block all bots except the following
+      allow: [
+        "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc
+        // Uncomment to allow these other common bot categories
+        // See the full list at https://arcjet.com/bot-list
+        //"CATEGORY:MONITOR", // Uptime monitoring services
+        //"CATEGORY:PREVIEW", // Link previews e.g. Slack, Discord
+      ],
+    }),
+  ],
+});
+```
+
+Arcjet can then be called from within any request handler and the results inspected:
+
+```ts
+export async function GET(req: Request) {
+  const decision = await aj.protect(req);
+
+  if (decision.isDenied()) {
+    if (decision.reason.isBot()) {
+      return NextResponse.json(
+        { error: "No bots allowed", reason: decision.reason },
+        { status: 403 },
+      );
+    } else {
+      return NextResponse.json(
+        { error: "Forbidden", reason: decision.reason },
+        { status: 403 },
+      );
+    }
+  }
+
+  if (decision.ip.isVpn()) {
+    return NextResponse.json(
+      { error: "VPNs are not allowed" },
+      { status: 403 },
+    );
+  }
+
+  if (decision.ip.hasCountry() && decision.ip.country === "US") {
+    // Return a custom response for the United States
+    return NextResponse.json({ message: "Hello from the US!" });
+  }
+
+  return NextResponse.json({ message: "Hello world" });
+}
+```
+
+Compare this to Vercel BotID where you can only inspect minimal details about the results:
+
+```ts
+import { checkBotId } from "botid/server";
+import { NextRequest, NextResponse } from "next/server";
+
+export async function POST(request: NextRequest) {
+  const botResult = await checkBotId();
+  const { isBot, verifiedBotName, isVerifiedBot, verifiedBotCategory } =
+    botResult;
+
+  if (isBot) {
+    return NextResponse.json({ error: "Access denied" }, { status: 403 });
+  }
+
+  return NextResponse.json({ message: "Hello world" });
+}
+```
+
+<Comments />
