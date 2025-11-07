@@ -69,7 +69,7 @@ export default defineConfig({
         {
           icon: "twitter",
           label: "Twitter",
-          href: "https://twitter.com/arcjethq",
+          href: "https://twitter.com/arcjet",
         },
         {
           icon: "youtube",
