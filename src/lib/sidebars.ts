@@ -517,6 +517,16 @@ export const main = [
         link: "/support",
       },
       {
+        label: "Comparisons",
+        collapsed: true,
+        items: [
+          {
+            label: "Vercel BotID",
+            link: "/comparisons/vercel-botid-vs-arcjet",
+          },
+        ],
+      },
+      {
         label: "Pricing",
         link: "https://arcjet.com/pricing",
         attrs: { target: "_blank", class: "external-link" },
