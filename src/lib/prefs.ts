@@ -27,6 +27,14 @@ export type FrameworkLabel = Framework["label"];
 export type Framework = (typeof frameworks)[number];
 
 /**
+ * Integration keys.
+ */
+export type IntegrationKey = Exclude<
+  FrameworkKey,
+  "bun-hono" | "node-js-express" | "node-js-hono"
+>;
+
+/**
  * The available user prefs
  * Defines the user preferences that are persisted.
  */
@@ -62,6 +70,16 @@ export const frameworks = [
   { key: "remix", label: "Remix" },
   { key: "sveltekit", label: "SvelteKit" },
 ] as const;
+
+/**
+ * Some framework choices add some third party onto another framework.
+ * These are mapped here.
+ */
+export const frameworkToIntegration = {
+  "bun-hono": "bun",
+  "node-js-express": "node-js",
+  "node-js-hono": "node-js",
+} as const;
 
 /**
  * Default Selected Framework
