@@ -114,7 +114,7 @@ follows:
 | `x-client-ip`                                             | IP                  | Unknown                           |
 | `x-cluster-client-ip`                                     | IP                  | Unknown                           |
 | `x-fah-client-ip`                                         | IP                  | **Firebase**                      |
-| `x-forwarded-for`                                         | Comma-separated IPs | **Firebase**, **Vercel**, unknown |
+| [`x-forwarded-for`][mdn-x-forwarded-for]                  | Comma-separated IPs | **Firebase**, **Vercel**, unknown |
 | `x-forwarded`                                             | IP                  | Unknown                           |
 | `x-real-ip`                                               | IP                  | **Vercel**, unknown               |
 | [`x-vercel-forwarded-for`][vercel-x-vercel-forwarded-for] | Comma-separated IPs | **Vercel**                        |
@@ -289,6 +289,7 @@ export default {
 [google-app-engine-user-ip]: https://cloud.google.com/appengine/docs/legacy/standard/java/reference/request-response-headers
 [google-firebase-config]: https://firebase.google.com/docs/functions/config-env
 [mdn-forwarded]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Forwarded
+[mdn-x-forwarded-for]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For
 [render-render]: https://render.com/docs/environment-variables#render-62
 [section-overwrite-ip]: #overwriting-client-ips
 [section-platform]: #platform
