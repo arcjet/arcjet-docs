@@ -134,9 +134,8 @@ When you put services like proxies or load balancers in front of your
 application,
 the IP address that Arcjet finds will be that of the last proxy.
 
-Well-behaving services will use particular headers (typically `x-forwarded-for`
-or `forwarded`)
-to forward the IP addresses that connect to them.
+Well-behaving services will use an `x-forwarded-for` or `forwarded` header to
+forward the IP addresses that connect to them.
 Though some services strip them.
 
 Because malicious users can also set headers,
@@ -197,7 +196,7 @@ const arcjet = arcjetBun({
 ```
 
 If you use proxies but deploy to a platform such as Vercel which strips headers
-like `x-forwarded-for`,
+like `x-forwarded-for` (except when on an enterprise plan),
 you can configure a `Service` in `proxies`.
 This works similarly:
 when you know that Cloudflare sets headers correctly,
