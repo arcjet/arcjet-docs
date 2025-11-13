@@ -8,10 +8,10 @@ export default defineConfig({
   env: { validateSecrets: true },
   integrations: [
     arcjet({
-      proxies: [
-        "76.76.21.21", // An IP address.
-        "103.21.244.0/22", // A CIDR range of IP addresses.
-      ],
+      // @ts-expect-error: does not yet exist.
+      // Assumes `cloudflare` are the Cloudflare IP ranges from
+      // <https://docs.arcjet.com/concepts/client-ip#ip-ranges>.
+      proxies: [{ ips: cloudflare, platform: "cloudflare" }],
       rules: [],
     }),
   ],
