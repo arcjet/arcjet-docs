@@ -2,29 +2,81 @@
 description: "How the client IP is detected in Arcjet and how to change that."
 frameworks:
   - astro
+  - bun-hono
   - bun
+  - deno
+  - fastify
   - nest-js
   - next-js
+  - node-js-express
+  - node-js-hono
   - node-js
   - nuxt
+  - react-router
   - remix
   - sveltekit
 next: false
 prev: false
 title: "Client IP"
+ajToc:
+  - anchor: "overview"
+    text: "Overview"
+  - anchor: "framework"
+    text: "Framework"
+  - anchor: "platform"
+    text: "Platform"
+  - anchor: "proxies"
+    children:
+      - anchor: "ip-ranges"
+        text: "IP ranges"
+      - anchor: "proxy-stripping"
+        text: "Proxy stripping"
+    text: "Proxies"
+  - anchor: "overwriting-client-ips"
+    children:
+      - anchor: "development"
+        text: "Development"
+      - anchor: "production"
+        text: "Production"
+    text: "Overwriting client IPs"
 ---
 
 import { Code } from "@astrojs/starlight/components";
 import SlotByFramework from "@/components/SlotByFramework";
 import { removeTSCCommentDirectives as removeTypeScriptDirectives } from "@/lib/utils";
 import AstroProxies from "/src/snippets/reference/astro/Proxies.mjs?raw";
+import AstroService from "/src/snippets/reference/astro/Service.mjs?raw";
+import AstroTrustedIp from "/src/snippets/reference/astro/TrustedIp.mjs?raw";
 import BunProxies from "/src/snippets/reference/bun/Proxies.ts?raw";
+import BunService from "/src/snippets/reference/bun/Service.ts?raw";
+import BunTrustedIp from "/src/snippets/reference/bun/TrustedIp.ts?raw";
+import DenoProxies from "/src/snippets/reference/deno/proxies.ts?raw";
+import DenoService from "/src/snippets/reference/deno/service.ts?raw";
+import DenoTrustedIp from "/src/snippets/reference/deno/trusted-ip.ts?raw";
+import FastifyProxies from "/src/snippets/reference/fastify/proxies.ts?raw";
+import FastifyService from "/src/snippets/reference/fastify/service.ts?raw";
+import FastifyTrustedIp from "/src/snippets/reference/fastify/trusted-ip.ts?raw";
 import NestProxies from "/src/snippets/reference/nestjs/Proxies.ts?raw";
+import NestService from "/src/snippets/reference/nestjs/Service.ts?raw";
+import NestTrustedIp from "/src/snippets/reference/nestjs/TrustedIp.ts?raw";
 import NextProxies from "/src/snippets/reference/nextjs/Proxies.ts?raw";
+import NextService from "/src/snippets/reference/nextjs/Service.ts?raw";
+import NextTrustedIp from "/src/snippets/reference/nextjs/TrustedIp.ts?raw";
 import NodeProxies from "/src/snippets/reference/nodejs/Proxies.ts?raw";
+import NodeService from "/src/snippets/reference/nodejs/Service.ts?raw";
+import NodeTrustedIp from "/src/snippets/reference/nodejs/TrustedIp.ts?raw";
 import NuxtProxies from "@repo/nuxt/server/utils/ProxiesConfig.ts?raw";
+import NuxtService from "@repo/nuxt/server/utils/Service.ts?raw";
+import NuxtTrustedIp from "@repo/nuxt/server/utils/TrustedIp.ts?raw";
+import ReactRouterProxies from "/src/snippets/reference/react-router/proxies.ts?raw";
+import ReactRouterService from "/src/snippets/reference/react-router/service.ts?raw";
+import ReactRouterTrustedIp from "/src/snippets/reference/react-router/trusted-ip.ts?raw";
 import RemixProxies from "/src/snippets/reference/remix/Proxies.ts?raw";
+import RemixService from "/src/snippets/reference/remix/Service.ts?raw";
+import RemixTrustedIp from "/src/snippets/reference/remix/TrustedIp.ts?raw";
 import SveltekitProxies from "/src/snippets/reference/sveltekit/Proxies.ts?raw";
+import SveltekitService from "/src/snippets/reference/sveltekit/Service.ts?raw";
+import SveltekitTrustedIp from "/src/snippets/reference/sveltekit/TrustedIp.ts?raw";
 
 <div aria-hidden="true" style={{ display: "none" }}>
 
@@ -63,7 +115,7 @@ Some frameworks provide that IP address on the request directly
 in other cases it can be inferred from headers
 (see the next section “[Platform][section-platform]”).
 
-The found IP may be of a proxy or other service that is in front of your application.
+The found IP may be of a proxy or other service in front of your application.
 See the section “[Proxies][section-proxies]” for these cases.
 
 If no IP is detected in production,
@@ -78,9 +130,8 @@ be fixed.
 
 Arcjet looks at request headers when frameworks do not provide the client IP
 directly or when it matches a configured proxy.
-Whether to trust addresses from headers depends on the platform your app is
-running on.
-Arcjet infers whether an app is running on Firebase, Fly, Render, or Vercel
+Which headers to trust depends on the platform your app runs on.
+Arcjet infers whether an app runs on Firebase, Fly, Render, or Vercel
 (but not Cloudflare) from the environment.
 On other platforms Arcjet looks for common headers.
 
@@ -136,26 +187,21 @@ the IP address that Arcjet finds will be that of the last proxy.
 
 Well-behaving services will use an `x-forwarded-for` or `forwarded` header to
 forward the IP addresses that connect to them.
-Though some services strip them.
 
 Because malicious users can also set headers,
 the left-most value in such headers cannot be trusted.
-But the right-most value can be trusted.
-And when that IP belongs to a known well-behaving service,
+But the right-most value of these well-behaving services _can_ be trusted.
+And when that IP belongs to another service that you trust,
 the one before it can be used.
 
 To illustrate,
 when you put a service like Cloudflare in front of your application,
 and know that it sets headers correctly,
-and know which IP addresses belong to that service,
-after verifying that the IP belongs to Cloudflare,
-you can trust the IP _before_ Cloudflare IPs.
+and know which IP addresses belong to it,
+after verifying that the IP belongs to it,
+you trust the IP _before_ it.
 
-Setting the `proxies` configuration option in an Arcjet SDK
-works as follows:
-
-TODO: why does this below code block not show a framework picker?\
-TODO: add `bun-hono`, `deno`, `fastify`, `node-js-express`, `node-js-hono`, `react-router`.
+Setting `proxies` works as follows:
 
 <SlotByFramework client:load>
   <Code
@@ -163,60 +209,157 @@ TODO: add `bun-hono`, `deno`, `fastify`, `node-js-express`, `node-js-hono`, `rea
     lang="js"
     slot="astro"
   />
+  <Code code={BunProxies} lang="ts" slot="bun-hono" />
   <Code code={BunProxies} lang="ts" slot="bun" />
+  <Code code={DenoProxies} lang="ts" slot="deno" />
+  <Code code={FastifyProxies} lang="ts" slot="fastify" />
   <Code code={NestProxies} lang="ts" slot="nest-js" />
   <Code code={NextProxies} lang="ts" slot="next-js" />
+  <Code code={NodeProxies} lang="ts" slot="node-js-express" />
+  <Code code={NodeProxies} lang="ts" slot="node-js-hono" />
   <Code code={NodeProxies} lang="ts" slot="node-js" />
-  <Code code={NuxtProxies} lang="ts" slot="nuxt" />
+  <Code code={removeTypeScriptDirectives(NuxtProxies)} lang="ts" slot="nuxt" />
+  <Code code={ReactRouterProxies} lang="ts" slot="react-router" />
   <Code code={RemixProxies} lang="ts" slot="remix" />
   <Code code={SveltekitProxies} lang="ts" slot="sveltekit" />
 </SlotByFramework>
 
 Which values to pass in `proxies` depends on your setup.
 Most services provide a list of their IP ranges as JSON.
-For convenience,
-Arcjet provides common IP ranges for popular services from `@arcjet/proxies`.
-Currently, `cloudflare` and `google` are available.
 
-If Google is in front of your application,
-you can use the `google` as follows:
+It is not needed to configure
+documentation (`192.0.2.1`),
+benchmarking (`198.19.255.255`),
+broadcast (`255.255.255.255`),
+link local (`169.254.255.255`),
+loopback (`127.0.0.1`),
+private (such as `10.1.1.1`),
+reservered (`192.0.0.1`), or
+shared (`100.127.255.255`)
+IP addresses.
+Whether IPv4 or IPv6, those are automatically filtered out.
 
-TODO: framework switcher in the following code block.
+### IP ranges
+
+#### Cloudflare
+
+You can fetch Cloudflare IP ranges as follows:
 
 ```ts
-import arcjetBun from "@arcjet/bun";
-import { google } from "@arcjet/proxies";
-import { env } from "bun";
-
-const arcjet = arcjetBun({
-  key: env.ARCJET_KEY!,
-  proxies: [...google],
-  rules: [],
-});
+const [cloudflareIpv4, cloudflareIpv6] = await Promise.all(
+  [
+    "https://www.cloudflare.com/ips-v4/",
+    "https://www.cloudflare.com/ips-v6/",
+  ].map(async function (url) {
+    const response = await fetch(url);
+    const body = await response.text();
+    return body.trim().split("\n");
+  }),
+);
+const cloudflare = [...cloudflareIpv4, ...cloudflareIpv6].toSorted();
+// You can now pass `...cloudflare` in `proxies`.
 ```
+
+#### Google
+
+You can fetch Google IP ranges as follows:
+
+```ts
+/**
+ * Google IP prefix info.
+ */
+interface GooglePrefixBaseFields {
+  /**
+   * Region.
+   */
+  scope?: string;
+  /**
+   * Service.
+   */
+  service?: "Google Cloud";
+}
+
+/**
+ * Google IPv4 prefix info.
+ */
+interface GooglePrefixIpv4 extends GooglePrefixBaseFields {
+  /**
+   * CIDR range.
+   */
+  ipv4Prefix: string;
+}
+
+/**
+ * Google IPv6 prefix info.
+ */
+interface GooglePrefixIpv6 extends GooglePrefixBaseFields {
+  /**
+   * CIDR range.
+   */
+  ipv6Prefix: string;
+}
+
+/**
+ * Google IP ranges response.
+ */
+interface GoogleResponse {
+  /**
+   * Creation date.
+   */
+  createDate: string;
+  /**
+   * List of IP prefixes.
+   */
+  prefixes: Array<GooglePrefixIpv4 | GooglePrefixIpv6>;
+  /**
+   * Sync token.
+   */
+  syncToken: string;
+}
+
+const googleResponse = await fetch(
+  "https://www.gstatic.com/ipranges/goog.json",
+);
+const googleBody = (await googleResponse.json()) as GoogleResponse;
+const google = googleBody.prefixes
+  .map(function (d) {
+    return "ipv4Prefix" in d ? d.ipv4Prefix : d.ipv6Prefix;
+  })
+  .toSorted();
+// You can now pass `...google` in `proxies`.
+```
+
+### Proxy stripping
 
 If you use proxies but deploy to a platform such as Vercel which strips headers
 like `x-forwarded-for` (except when on an enterprise plan),
-you can configure a `Service` in `proxies`.
+you can pass a `Service` in `proxies`.
 This works similarly:
 when you know that Cloudflare sets headers correctly,
 and know which IP addresses belong to it,
-after verifying that the IP belongs to Cloudflare,
-you can trust the IP in Cloudflare’s headers.
+after verifying that the IP you get from Vercel belongs to Cloudflare,
+you trust the IP in Cloudflare’s headers.
 
-TODO: framework switcher in the following code block.
-
-```ts
-import arcjetBun from "@arcjet/bun";
-import { cloudflare } from "@arcjet/proxies";
-import { env } from "bun";
-
-const arcjet = arcjetBun({
-  key: env.ARCJET_KEY!,
-  proxies: [{ ips: cloudflare, platform: "cloudflare" }],
-  rules: [],
-});
-```
+<SlotByFramework client:load>
+  <Code
+    code={removeTypeScriptDirectives(AstroService)}
+    lang="js"
+    slot="astro"
+  />
+  <Code code={BunService} lang="ts" slot="bun-hono" />
+  <Code code={BunService} lang="ts" slot="bun" />
+  <Code code={DenoService} lang="ts" slot="deno" />
+  <Code code={FastifyService} lang="ts" slot="fastify" />
+  <Code code={NestService} lang="ts" slot="nest-js" />
+  <Code code={NextService} lang="ts" slot="next-js" />
+  <Code code={NodeService} lang="ts" slot="node-js-express" />
+  <Code code={NodeService} lang="ts" slot="node-js-hono" />
+  <Code code={NodeService} lang="ts" slot="node-js" />
+  <Code code={removeTypeScriptDirectives(NuxtService)} lang="ts" slot="nuxt" />
+  <Code code={ReactRouterService} lang="ts" slot="react-router" />
+  <Code code={RemixService} lang="ts" slot="remix" />
+  <Code code={SveltekitService} lang="ts" slot="sveltekit" />
+</SlotByFramework>
 
 ## Overwriting client IPs
 
@@ -247,33 +390,30 @@ In production,
 if the client IP is in a header that you trust,
 you can pas a `trustedIpHeader` option.
 
-TODO: framework switcher in the following code block.
-
-```ts
-import arcjetBun, { slidingWindow } from "@arcjet/bun";
-import { env } from "bun";
-
-const arcjet = arcjetBun({
-  key: env.ARCJET_KEY!,
-  // To illustrate, allow 3 requests per minute per IP address.
-  rules: [slidingWindow({ interval: 60, max: 3, mode: "LIVE" })],
-  // Assuming requests will have an `x-custom` header that you trust:
-  trustedIpHeader: "x-custom",
-});
-
-export default {
-  fetch: arcjet.handler(async function (request) {
-    const decision = await arcjet.protect(request);
-
-    if (decision.isDenied()) {
-      return new Response("Access Denied", { status: 403 });
-    }
-
-    return new Response("Hello world");
-  }),
-  port: 3000,
-};
-```
+<SlotByFramework client:load>
+  <Code
+    code={removeTypeScriptDirectives(AstroTrustedIp)}
+    lang="js"
+    slot="astro"
+  />
+  <Code code={BunTrustedIp} lang="ts" slot="bun-hono" />
+  <Code code={BunTrustedIp} lang="ts" slot="bun" />
+  <Code code={DenoTrustedIp} lang="ts" slot="deno" />
+  <Code code={FastifyTrustedIp} lang="ts" slot="fastify" />
+  <Code code={NestTrustedIp} lang="ts" slot="nest-js" />
+  <Code code={NextTrustedIp} lang="ts" slot="next-js" />
+  <Code code={NodeTrustedIp} lang="ts" slot="node-js-express" />
+  <Code code={NodeTrustedIp} lang="ts" slot="node-js-hono" />
+  <Code code={NodeTrustedIp} lang="ts" slot="node-js" />
+  <Code
+    code={removeTypeScriptDirectives(NuxtTrustedIp)}
+    lang="ts"
+    slot="nuxt"
+  />
+  <Code code={ReactRouterTrustedIp} lang="ts" slot="react-router" />
+  <Code code={RemixTrustedIp} lang="ts" slot="remix" />
+  <Code code={SveltekitTrustedIp} lang="ts" slot="sveltekit" />
+</SlotByFramework>
 
 [arcjet-arcjet-js-issues]: https://github.com/arcjet/arcjet-js/issues
 [cloudflare-cf-connecting-ipv6]: https://developers.cloudflare.com/fundamentals/reference/http-request-headers/#cf-connecting-ipv6
