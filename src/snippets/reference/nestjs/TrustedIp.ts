@@ -1,4 +1,4 @@
-import { ArcjetModule } from "@arcjet/nest";
+import { ArcjetModule, slidingWindow } from "@arcjet/nest";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 
@@ -11,13 +11,11 @@ import { ConfigModule } from "@nestjs/config";
     ArcjetModule.forRoot({
       isGlobal: true,
       key: process.env.ARCJET_KEY!,
-      proxies: [
-        "76.76.21.21", // An IP address.
-        "103.21.244.0/22", // A CIDR range of IP addresses.
-      ],
-      rules: [
-        // Rules set here will apply to every request
-      ],
+      // To illustrate, allow 3 requests per minute per IP address.
+      rules: [slidingWindow({ interval: 60, max: 3, mode: "LIVE" })],
+      // @ts-expect-error: does not yet exist.
+      // Assumes requests will have an `x-my-ip` header that you trust:
+      trustedIpHeader: "x-my-ip",
     }),
     // ... other modules
   ],
