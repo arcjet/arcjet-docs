@@ -521,6 +521,10 @@ export const main = [
         collapsed: true,
         items: [
           {
+            label: "Aikido",
+            link: "/comparisons/aikido-vs-arcjet",
+          },
+          {
             label: "Vercel BotID",
             link: "/comparisons/vercel-botid-vs-arcjet",
           },
