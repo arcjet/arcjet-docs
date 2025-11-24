@@ -14,7 +14,7 @@ approaches.
 Please reach out to [Arcjet support][arcjet-support] to share what you are
 seeing.
 
-In the meantime you can use [Arcjet filters][arcjet-filters] to block unwanted
+In the meantime you can use [Arcjet Filters][arcjet-filters] to block unwanted
 traffic.
 This blueprint covers two example use cases to show how that can be done:
 
@@ -25,7 +25,7 @@ This blueprint covers two example use cases to show how that can be done:
 
 ## Block a custom bot
 
-You could be using [Arcjet bot protection][arcjet-bots] already and still may
+You could be using [Arcjet Bot protection][arcjet-bots] already and still may
 need to block a particular bot or similar tool that is not in
 [our list at `arcjet/well-known-bots`][github-arcjet-well-known-bots].
 (contributions welcome!)
@@ -45,7 +45,7 @@ Searching the internet shows that it has different values for `user-agent`
 and also uses different IPs
 (the CIDR range `47.128.0.0/16` seems to match).
 
-With [Arcjet filters][arcjet-filters]
+With [Arcjet Filters][arcjet-filters]
 you can write an expression to block traffic matching that user agent _or_
 that IP range:
 
@@ -87,7 +87,7 @@ automated.
 The important caveat is that this may block people using iCloud Relay and
 Cloudflare WARP VPN.
 
-With [`fetch`][mdn-fetch] and [Arcjet filters][arcjet-filters]
+With [`fetch`][mdn-fetch] and [Arcjet Filters][arcjet-filters]
 you can generate an expression dynamically:
 
 ```ts
@@ -123,8 +123,8 @@ An exercise for the reader is to move this into a script that runs periodically
 and writes to a file,
 then loading that file when starting the server.
 
-[arcjet-bots]: /bot-protection/quick-start
-[arcjet-filters]: /filters/quick-start
+[arcjet-bots]: /bot-protection/intro
+[arcjet-filters]: /filters/intro
 [arcjet-limitations]: /limitations
 [arcjet-support]: /support
 [cloudflare-ips]: https://www.cloudflare.com/ips/

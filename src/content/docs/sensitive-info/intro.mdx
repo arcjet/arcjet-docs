@@ -1,0 +1,66 @@
+---
+description: "Introduction to Arcjet sensitive info protection."
+prev: false
+title: "Sensitive info: Intro"
+---
+
+import { Badge } from "@astrojs/starlight/components";
+import Comments from "/src/components/Comments.astro";
+
+With Arcjet sensitive info you can prevent clients from sending you data that
+you do not want to handle.
+
+This rule runs entirely locally so no data ever leaves your environment.
+You can block personally identifiable information (PII) such as email addresses,
+card numbers,
+IP addresses,
+phone numbers,
+or custom data types.
+
+Sensitive info works on the request body.
+To detect particular info in headers or other fields use
+[Arcjet Filters][arcjet-filters].
+
+## When to use
+
+You can use Sensitive info protection to prevent clients from sending you
+sensitive info to reduce your compliance burden.
+
+You can use [Arcjet Email validation][arcjet-email-validation] to check email
+addresses.
+
+## How it works
+
+Arcjet takes the body of requests and splits it into tokens (“words”).
+These tokens are analyzed for builtin entities (such as card numbers and email
+addresses) and with user-defined `detect` functions.
+This runs locally within the WebAssembly bundled with SDKs.
+
+The built in entities are:
+
+- card numbers (such as `4242424242424242`)
+- email addresses (such as `alice@example.com`)
+- IP addresses (such as `127.0.0.1`)
+- phone numbers (such as `+1 (555) 555-5555`)
+
+{/* Note: no section on `characteristics`/`fingerprint` needed as this rule is local. */}
+
+This rule works locally.
+Arcjet reports decisions to your dashboard but no data is sent to the
+Arcjet Cloud API.
+
+## Availability
+
+Sensitive info protection is available on paid plans.
+
+| Plan                                         | Sensitive info protection |
+| -------------------------------------------- | :-----------------------: |
+| <Badge text="Free" variant="caution" />      |            🚫             |
+| <Badge text="Starter" variant="note" />      |            ✅             |
+| <Badge text="Business" variant="tip" />      |            ✅             |
+| <Badge text="Enterprise" variant="danger" /> |            ✅             |
+
+<Comments />
+
+[arcjet-email-validation]: /email-validation/intro
+[arcjet-filters]: /filters/intro

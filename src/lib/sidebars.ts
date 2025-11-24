@@ -163,6 +163,11 @@ export const main = [
         collapsed: true,
         items: [
           {
+            attrs: { class: "feature bot-protection" },
+            label: "Intro",
+            link: "/bot-protection/intro",
+          },
+          {
             label: "Quick start",
             link: "/bot-protection/quick-start",
             attrs: { class: "feature bot-protection" },
@@ -186,13 +191,14 @@ export const main = [
         collapsed: true,
         items: [
           {
+            attrs: { class: "feature rate-limiting" },
+            label: "Intro",
+            link: "/rate-limiting/intro",
+          },
+          {
             label: "Quick start",
             link: "/rate-limiting/quick-start",
             attrs: { class: "feature rate-limiting" },
-          },
-          {
-            label: "Concepts",
-            link: "/rate-limiting/concepts",
           },
           {
             label: "Algorithms",
@@ -213,6 +219,11 @@ export const main = [
         collapsed: true,
         items: [
           {
+            attrs: { class: "feature shield-waf" },
+            label: "Intro",
+            link: "/shield/intro",
+          },
+          {
             label: "Quick start",
             link: "/shield/quick-start",
             attrs: { class: "feature shield-waf" },
@@ -231,6 +242,11 @@ export const main = [
         label: "Email validation",
         collapsed: true,
         items: [
+          {
+            attrs: { class: "feature email-validation" },
+            label: "Intro",
+            link: "/email-validation/intro",
+          },
           {
             label: "Quick start",
             link: "/email-validation/quick-start",
@@ -251,13 +267,14 @@ export const main = [
         collapsed: true,
         items: [
           {
+            attrs: { class: "feature signup-form-protection" },
+            label: "Intro",
+            link: "/signup-protection/intro",
+          },
+          {
             label: "Quick start",
             link: "/signup-protection/quick-start",
             attrs: { class: "feature signup-form-protection" },
-          },
-          {
-            label: "Concepts",
-            link: "/signup-protection/concepts",
           },
           {
             label: "Reference",
@@ -270,13 +287,14 @@ export const main = [
         collapsed: true,
         items: [
           {
+            attrs: { class: "feature sensitive-information" },
+            label: "Intro",
+            link: "/sensitive-info/intro",
+          },
+          {
             label: "Quick start",
             link: "/sensitive-info/quick-start",
             attrs: { class: "feature sensitive-information" },
-          },
-          {
-            label: "Concepts",
-            link: "/sensitive-info/concepts",
           },
           {
             label: "Reference",
@@ -289,13 +307,13 @@ export const main = [
         items: [
           {
             attrs: { class: "feature filters" },
-            label: "Quick start",
-            link: "/filters/quick-start",
+            label: "Intro",
+            link: "/filters/intro",
           },
           {
             attrs: { class: "feature filters" },
-            label: "Concepts",
-            link: "/filters/concepts",
+            label: "Quick start",
+            link: "/filters/quick-start",
           },
           {
             attrs: { class: "feature filters" },

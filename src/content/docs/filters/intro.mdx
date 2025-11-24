@@ -1,0 +1,121 @@
+---
+description: "Introduction to Arcjet Filters."
+prev: false
+title: "Filters Intro"
+---
+
+import { Badge } from "@astrojs/starlight/components";
+import Comments from "/src/components/Comments.astro";
+
+With Arcjet Filters you can block unwanted traffic inside your application
+code.
+
+You write expressions in a domain-specific language (DSL) that match against
+request fields.
+You can match against literal request fields such as the `user-agent` header
+or the client IP address,
+and _reflected_ fields such as the country of the client IP address or
+whether that is a known VPN or relay service.
+
+Other platforms provide similar services.
+With Arcjet you configure these expressions _inside_ your application code.
+This gives you full control over what to allow, where and when, dynamically.
+
+With filters you can solve your custom needs that are not covered by other
+Arcjet rules.
+For example, you can block a custom bot that is not (yet) recognized by
+[Arcjet Bot protection][arcjet-bot-protection].
+
+## When to use
+
+You can use filters to block unwanted traffic inside your application code.
+For example:
+
+- You can block a particular bot or user agent.
+- You can block a particular country or known VPN or relay service.
+
+You can alternatively access the `ip` field on an Arcjet decision and manually
+handle requests in your application code. The difference is that with filters
+the blocking is integrated with other rules, whereas `decision.ip` fields are
+better for customizing the response such as showing a particular message. See
+the [VPN & proxy detection blueprint][arcjet-blueprint-vpn-proxy] for an
+example.
+
+## How it works
+
+You define logic yourself using a [domain-specific
+language][arcjet-filters-reference-expression-language] (DSL).
+This language is parsed and evaluated using the Rust crate
+[`arcjet/wirefilter`][github-arcjet-wirefilter]
+(a fork of [`cloudflare/wirefilter`][github-cloudflare-wirefilter] to support
+an “undetermined” state),
+which is shipped locally within the WebAssembly bundled with SDKs.
+
+All `ip.src.*` [fields][arcjet-filters-reference-fields] reflect information
+about the client IP address.
+These fields require data from our IP reputation database so a call to the
+Cloud API is required.
+Other fields are analyzed locally.
+
+Arcjet only ever makes a single call to our Cloud API regardless of the rule
+configuration. The Cloud API has been designed for high performance and low
+latency, and is deployed to multiple regions around the world. The SDK will
+automatically use the closest region which means the total overhead is typically
+no more than 20-30ms, often significantly less. See the [Architecture
+reference][arcjet-architecture-cloud-api] for details.
+
+Clients are tracked by [fingerprints][arcjet-fingerprints] that include
+IP addresses by default.
+This means that clients using the same IP address can be blocked.
+To ensure that rules are applied correctly it is important to carefully
+select characteristics to be similar to the fields in your filters,
+to match your concept of “user”.
+
+## Availability
+
+Many fields are available on the free plan.
+Additional IP analysis (much of the `ip.src.*` fields) is available
+on paid plans.
+
+| Field                    | <Badge text="Free" variant="caution" /> | <Badge text="Starter" variant="note" /> | <Badge text="Business" variant="tip" /> |
+| ------------------------ | :-------------------------------------: | :-------------------------------------: | :-------------------------------------: |
+| `http.host`              |                   ✅                    |                   ✅                    |                   ✅                    |
+| `http.request.cookie`    |                   ✅                    |                   ✅                    |                   ✅                    |
+| `http.request.headers`   |                   ✅                    |                   ✅                    |                   ✅                    |
+| `http.request.method`    |                   ✅                    |                   ✅                    |                   ✅                    |
+| `http.request.uri.args`  |                   ✅                    |                   ✅                    |                   ✅                    |
+| `http.request.uri.path`  |                   ✅                    |                   ✅                    |                   ✅                    |
+| `ip.src.accuracy_radius` |                   🚫                    |                   ✅                    |                   ✅                    |
+| `ip.src.asnum.country`   |                   🚫                    |                   ✅                    |                   ✅                    |
+| `ip.src.asnum.domain`    |                   🚫                    |                   ✅                    |                   ✅                    |
+| `ip.src.asnum.name`      |                   🚫                    |                   ✅                    |                   ✅                    |
+| `ip.src.asnum.type`      |                   🚫                    |                   ✅                    |                   ✅                    |
+| `ip.src.asnum`           |                   🚫                    |                   ✅                    |                   ✅                    |
+| `ip.src.city`            |                   🚫                    |                   ✅                    |                   ✅                    |
+| `ip.src.continent.name`  |                   🚫                    |                   ✅                    |                   ✅                    |
+| `ip.src.continent`       |                   🚫                    |                   ✅                    |                   ✅                    |
+| `ip.src.country.name`    |                   ✅                    |                   ✅                    |                   ✅                    |
+| `ip.src.country`         |                   ✅                    |                   ✅                    |                   ✅                    |
+| `ip.src.hosting`         |                   ✅                    |                   ✅                    |                   ✅                    |
+| `ip.src.lat`             |                   🚫                    |                   ✅                    |                   ✅                    |
+| `ip.src.lon`             |                   🚫                    |                   ✅                    |                   ✅                    |
+| `ip.src.postal_code`     |                   🚫                    |                   ✅                    |                   ✅                    |
+| `ip.src.proxy`           |                   ✅                    |                   ✅                    |                   ✅                    |
+| `ip.src.region`          |                   🚫                    |                   ✅                    |                   ✅                    |
+| `ip.src.relay`           |                   ✅                    |                   ✅                    |                   ✅                    |
+| `ip.src.service`         |                   ✅                    |                   ✅                    |                   ✅                    |
+| `ip.src.timezone.name`   |                   🚫                    |                   ✅                    |                   ✅                    |
+| `ip.src.tor`             |                   ✅                    |                   ✅                    |                   ✅                    |
+| `ip.src.vpn`             |                   ✅                    |                   ✅                    |                   ✅                    |
+| `ip.src`                 |                   ✅                    |                   ✅                    |                   ✅                    |
+
+<Comments />
+
+[arcjet-architecture-cloud-api]: /architecture#arcjet-cloud-api
+[arcjet-blueprint-vpn-proxy]: /blueprints/vpn-proxy-detection
+[arcjet-bot-protection]: /bot-protection/intro
+[arcjet-filters-reference-expression-language]: /filters/reference#expression-language
+[arcjet-filters-reference-fields]: /filters/reference#fields
+[arcjet-fingerprints]: /fingerprints
+[github-arcjet-wirefilter]: https://github.com/arcjet/wirefilter
+[github-cloudflare-wirefilter]: https://github.com/cloudflare/wirefilter

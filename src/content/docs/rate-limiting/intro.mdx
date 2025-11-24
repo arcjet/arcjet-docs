@@ -1,0 +1,81 @@
+---
+description: "Introduction to Arcjet Rate limiting."
+prev: false
+title: "Rate limiting Intro"
+---
+
+import { Badge } from "@astrojs/starlight/components";
+import Comments from "/src/components/Comments.astro";
+
+With Arcjet Rate limiting you can limit the number of requests a client can
+make over a period of time.
+
+Rate limiting is useful for example to prevent a client from overloading your server,
+or to make it costly to try to login with different usernames and passwords.
+
+Other platforms also provide rate limiting.
+With Arcjet you configure rate limiting _inside_ your application code.
+This gives you full control over what to allow, where and when, dynamically.
+You can use different strategies for different routes or based on user
+subscription level.
+You do not need any infrastructure (such as Redis) to keep track of state.
+
+## When to use
+
+You can use Rate limiting to protect your application from abuse.
+For example:
+
+- Prevent brute force attacks on your login page. E.g. a user can only attempt
+  to login 5 times in a 5 minute period. This prevents an attacker from trying
+  multiple username or password combinations.
+- Prevent API clients from making too many requests. E.g. a client can only make
+  100 requests per minute. This prevents a client from overloading your API.
+- Implement quotas e.g. a free tier client can only make 1000 requests per day.
+
+Rate limiting is similar to [Arcjet Shield WAF][arcjet-shield].
+That analyzes what kind of requests are made over time and blocks clients that
+show repeated suspicious behavior.
+
+## How it works
+
+Arcjet rate limiting keeps track of the number of requests made by a client.
+Arcjet supports several rate limit algorithms.
+Clients are blocked from making requests when they exceed a particular limit,
+until a certain condition allows them again.
+
+Tracking happens in the Arcjet Cloud API and does not require any additional
+infrastructure such as Redis.
+
+The rate limit algorithms are:
+
+- [fixed window](/rate-limiting/algorithms#fixed-window)
+- [sliding window](/rate-limiting/algorithms#sliding-window)
+- [token bucket](/rate-limiting/algorithms#token-bucket)
+
+Clients are tracked by [fingerprints][arcjet-fingerprints] that include
+IP addresses by default.
+This means that clients using the same IP address are counted and blocked.
+To ensure that rate limits are applied correctly it is important to carefully
+select characteristics,
+such as a specific HTTP header or an authentication token,
+to match your concept of “user”.
+
+## Availability
+
+You can use a single rate limit rule on the free plan.
+Additional rate limit rules are possible on paid plans.
+With multi-config you can manage varying traffic patterns based on different
+client characteristics,
+such as one per IP and one per API key.
+
+| Plan                                         | One rule | Multiple algorithms |
+| -------------------------------------------- | :------: | :-----------------: |
+| <Badge text="Free" variant="caution" />      |    ✅    |         🚫          |
+| <Badge text="Starter" variant="note" />      |    ✅    |         ✅          |
+| <Badge text="Business" variant="tip" />      |    ✅    |         ✅          |
+| <Badge text="Enterprise" variant="danger" /> |    ✅    |         ✅          |
+
+<Comments />
+
+[arcjet-fingerprints]: /fingerprints
+[arcjet-shield]: /shield/intro

@@ -41,16 +41,16 @@ pre-configured product.
 
 ### Core primitives
 
-- **[Shield](/shield/concepts)** - Protect against common attacks.
-- **[Rate Limiting](/rate-limiting/concepts)** - Limit the number of requests
+- **[Shield](/shield/intro)** - Protect against common attacks.
+- **[Rate limiting](/rate-limiting/intro)** - Limit the number of requests
   from a client over a period of time.
-- **[Bot Protection](/bot-protection/concepts)** - Detect and block automated
+- **[Bot protection](/bot-protection/intro)** - Detect and block automated
   clients.
-- **[Email Validation & Verification](/email-validation/concepts)** - Check
+- **[Email validation](/email-validation/intro)** - Check
   that an email address is valid.
-- **[Sensitive Information](/sensitive-info/concepts)** - Protect against
+- **[Sensitive information](/sensitive-info/intro)** - Protect against
   clients sending you PII that you do not wish to handle.
-- **[Filters](/filters/concepts)** - Block requests using expressions over
+- **[Filters](/filters/intro)** - Block requests using expressions over
   request metadata.
 
 ## Components
@@ -217,24 +217,24 @@ the local cache and return the response immediately:
 
 A call to the Cloud API is required when:
 
-- A [shield](/shield/concepts) rule is configured. Behavior must be compared
+- A [Shield](/shield/intro) rule is configured. Behavior must be compared
   across multiple requests to protect against common attacks.
-- A [rate limit](/rate-limiting/concepts) rule is configured. Client state must
+- A [Rate limiting](/rate-limiting/intro) rule is configured. Client state must
   be tracked across requests to enforce the rate limit. Arcjet manages tracking
   this state for you so you do not need deal with other infrastructure or
   services.
-- A [bot protection](/bot-protection/concepts) rule is configured and local
+- A [Bot protection](/bot-protection/intro) rule is configured and local
   analysis of the client request does not provide enough information to make a
   decision. Local analysis is limited to the request headers whereas the Arcjet
   API also checks a live database of known bots, IP addresses, VPNs, proxies,
   Tor nodes, and other relays.
-- An [email validation](/email-validation/concepts) rule is configured and the
+- An [Email validation](/email-validation/intro) rule is configured and the
   email address syntax is valid. The Arcjet SDK analyzes the email address
   locally to check the syntax. If it is invalid, the SDK will return a decision
   immediately. If it is valid, the SDK will make a call to the Cloud API to
   verify the email address e.g. does it have a valid MX record or is it a
   disposable email address.
-- A [filter](/filters/reference) rule is configured that inspects `ip.src.*` IP
+- A [Filter](/filters/intro) rule is configured that inspects `ip.src.*` IP
   address fields such as `ip.src.vpn`, `ip.src.asnum.domain`, or
   `ip.src.country`. These fields require data from our IP reputation database so
   a call to the Cloud API is required. Other fields are analyzed locally.
@@ -330,7 +330,7 @@ requests are used to inform the decision for the current request.
    is used to inform future decisions for that client.
 5. The client makes another request and the result of the post-request analysis
    is used to inform the decision. This will be applied if you have configured a
-   [Shield](/shield/quick-start) rule.
+   [Shield](/shield/intro) rule.
 
 <img class="dark" src={ImageRequestAnalysisDark.src} alt="Request analysis" />
 <img class="light" src={ImageRequestAnalysisLight.src} alt="Request analysis" />

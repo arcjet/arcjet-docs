@@ -1,0 +1,67 @@
+---
+description: "Introduction to Arcjet Signup form protection."
+prev: false
+title: "Signup form protection Intro"
+---
+
+import { Badge } from "@astrojs/starlight/components";
+import Comments from "/src/components/Comments.astro";
+
+With Arcjet Signup form protection you can combines bot protection,
+email validation, and
+rate limiting,
+to protect your signup forms from abuse.
+
+## When to use
+
+You can use Signup form protection to help protect signup forms
+from abuse by malicious actors.
+
+You can also mix and match the individual protections
+[Arcjet Bot protection][arcjet-bot-protection],
+[Arcjet Email validation][arcjet-email-validation], and
+[Arcjet Rate limiting][arcjet-rate-limiting].
+
+## How it works
+
+This is a pre-built product that combines primitives which can also be used
+individually.
+It comes with our recommended configuration.
+This saves you time and means you can get value from Arcjet with a few lines of
+code in just a few minutes.
+
+This product combines primitives to minimize the number of fake and fraudulent
+accounts that sign up:
+
+- **[Rate limiting][arcjet-rate-limiting]**
+  — signup forms are a common target for bots. Arcjet's rate
+  limiting helps to prevent bots and other automated or malicious clients from
+  submitting your signup form too many times in a short period of time. Even
+  allowing for errors, legitimate users do not usually submit forms more than a
+  few times in a short time window.
+- **[Bot protection][arcjet-bot-protection]**
+  — signup forms are usually exclusively used by humans,
+  which means that any automated submissions to the form are likely to be
+  fraudulent. However, critical transaction forms are often tested by legitimate
+  automated clients, such as monitoring services. These can be specifically
+  allowed.
+- **[Email validation][arcjet-email-validation]**
+  — email addresses should be validated to ensure the
+  signup is coming from a legitimate user with a real email address that can
+  actually receive messages. Some services may also want to restrict signups to
+  avoid disposable or free email addresses.
+
+## Availability
+
+| Plan                                         | Basic protection | Advanced protection | Custom protection |
+| -------------------------------------------- | :--------------: | :-----------------: | :---------------: |
+| <Badge text="Free" variant="caution" />      |        ✅        |         🚫          |        🚫         |
+| <Badge text="Starter" variant="note" />      |        ✅        |         ✅          |        🚫         |
+| <Badge text="Business" variant="tip" />      |        ✅        |         ✅          |        🚫         |
+| <Badge text="Enterprise" variant="danger" /> |        ✅        |         ✅          |        ✅         |
+
+<Comments />
+
+[arcjet-bot-protection]: /bot-protection/intro
+[arcjet-email-validation]: /email-validation/intro
+[arcjet-rate-limiting]: /rate-limiting/intro

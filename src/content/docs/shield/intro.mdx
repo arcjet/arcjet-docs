@@ -1,0 +1,96 @@
+---
+description: "Introduction to Arcjet Shield WAF."
+prev: false
+title: "Shield WAF Intro"
+---
+
+import { Badge } from "@astrojs/starlight/components";
+import Comments from "/src/components/Comments.astro";
+
+With Arcjet shield WAF you can protect your application against common attacks,
+including the [OWASP Top 10][owasp-top-10].
+
+Shield is useful as it is a fully-managed service that tracks requests over time.
+An attacker may look for a WordPress admin panel,
+an accidentally uploaded `.git` directory,
+`.env` file,
+or a login form.
+Separately these requests seem innocent but together they form a suspicious
+pattern.
+Clients are blocked when they exceed a certain threshold.
+
+Other platforms also provide WAFs.
+However they sit in front of your application without context.
+With Arcjet you can for example customize errors or flag accounts,
+as it sits inside your application logic,
+instead of only blocking requests.
+With Arcjet you do not need any infrastructure (such as Redis) to keep track of
+state.
+
+## When to use
+
+You can use Shield WAF to protect your application against common attacks.
+
+Shield WAF is for requests that seem innocent when taken separately but form
+suspicious traffic when taken together.
+You can use the other Arcjet rules,
+such as [Arcjet Bot protection][arcjet-bot-protection]
+or [Arcjet Filters][arcjet-filters],
+when you can judge individual requests,
+or [Arcjet Rate limiting][arcjet-rate-limiting],
+to impose a hard limit.
+
+## How it works
+
+Arcjet tracks metadata about each request (importantly _not_ the body).
+Over time,
+sometimes hundreds of requests,
+patterns become visible in this data.
+When a client exceeds a certain threshold of suspicious requests,
+they will be blocked.
+
+Tracking happens in the Arcjet Cloud API and does not require any additional
+infrastructure such as Redis.
+The included latest rules from the [OWASP Core Rule Set][core-ruleset] protect
+against common attack categories such as:
+
+- SQL injection (SQLi)
+- Cross-site scripting (XSS)
+- Local file inclusion (LFI)
+- Remote file inclusion (RFI)
+- PHP code injection
+- Java code injection
+- HTTPoxy
+- Shellshock
+- Unix/Windows shell injection
+- Session fixation
+
+Clients are tracked by [fingerprints][arcjet-fingerprints] that include
+IP addresses by default.
+This means that clients using the same IP address are counted and blocked.
+To ensure that this rule is applied correctly it is important to carefully
+select characteristics,
+such as a specific HTTP header or an authentication token,
+to match your concept of “user”.
+
+## Availability
+
+Basic protection from common attacks is available on the free plan.
+Additional protection including the latest rules from the
+[OWASP Core Rule Set][core-ruleset] (CRS) is available on paid plans.
+
+| Plan                                         | Basic protection | Advanced protection | Custom protection |
+| -------------------------------------------- | :--------------: | :-----------------: | :---------------: |
+| <Badge text="Free" variant="caution" />      |        ✅        |         🚫          |        🚫         |
+| <Badge text="Starter" variant="note" />      |        ✅        |         ✅          |        🚫         |
+| <Badge text="Business" variant="tip" />      |        ✅        |         ✅          |        🚫         |
+| <Badge text="Enterprise" variant="danger" /> |        ✅        |         ✅          |        ✅         |
+
+<Comments />
+
+[arcjet-bot-protection]: /bot-protection/intro
+[arcjet-filters]: /filters/intro
+[arcjet-fingerprints]: /fingerprints
+[arcjet-rate-limiting]: /rate-limiting/intro
+[core-ruleset]: https://coreruleset.org/
+[owasp-top-10]: https://owasp.org/www-project-top-ten/
