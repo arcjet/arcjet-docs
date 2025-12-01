@@ -385,6 +385,10 @@ export const main = [
         link: "/testing",
       },
       {
+        label: "Best practices",
+        link: "/best-practices",
+      },
+      {
         label: "Platform",
         collapsed: true,
         items: [

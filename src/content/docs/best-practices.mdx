@@ -1,0 +1,150 @@
+---
+title: "Arcjet best practices"
+description: "Recommended best practices for using Arcjet."
+---
+
+import { Tabs, TabItem, Code } from "@astrojs/starlight/components";
+import Comments from "/src/components/Comments.astro";
+import ArcjetLib from "/src/snippets/best-practices/ArcjetLib.ts?raw";
+
+Here are some recommended best practices for using Arcjet effectively in your
+applications.
+
+## Single client instance
+
+We recommend creating a single instance of the Arcjet client object and reusing
+it throughout your application. This is because the SDK caches decisions and
+configuration to improve performance. It also means the object is created
+outside of the route handler to avoid creating a new instance on every request.
+
+The pattern we recommend is to create a utility file that exports the Arcjet
+object and then import it where you need it, using `withRule` to attach rules
+specific to each route or location in your app.
+
+For example, in a Next.js app you might create a file `/lib/arcjet.ts` that
+creates and exports the Arcjet instance:
+
+<Code code={ArcjetLib} lang="ts" title="/lib/arcjet.ts" />
+
+Then, in your request handler you can import the Arcjet instance and use
+`withRule` to add any route-specific rules. `protect()` can then be called
+inside the route handler.
+
+```ts
+import arcjet, { detectBot, fixedWindow } from "@/lib/arcjet";
+
+// Add rules to the base Arcjet instance outside of the handler function
+const aj = arcjet
+  .withRule(
+    detectBot({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+      // configured with a list of bots to allow from
+      // https://arcjet.com/bot-list
+      allow: [], // blocks all automated clients
+    }),
+  )
+  // You can chain multiple rules, so we'll include a rate limit
+  .withRule(
+    fixedWindow({
+      mode: "LIVE",
+      max: 100,
+      window: "60s",
+    }),
+  );
+
+export async function GET(req: Request) {
+  // The protect method returns a decision object that contains information
+  // about the request.
+  const decision = await aj.protect(req);
+
+  // ... handle the request
+}
+```
+
+## Avoid Arcjet in middleware
+
+We do not recommend using Arcjet in middleware. This is because middleware lacks
+the context of the route handler, making it difficult to apply route-specific
+rules or customize responses based on the request.
+
+Our recommendation is to call `protect()` in each route handler where you need
+it. This offers most flexibility and allows you to customize the behavior for
+each route.
+
+## Call `protect()` once per request
+
+The Arcjet `protect()` function should be called only once per request.
+
+This is only usually a problem if you are using Arcjet both in middleware and in
+route handlers. We do not recommend using middleware, but if you are using it
+then use a middleware helper to scope the call to Arcjet only to routes that
+need it.
+
+## Start in dry run mode
+
+We recommend starting each new rule in `DRY_RUN` mode. When configured this way,
+each rule will return its decision, but the end conclusion will always be
+`ALLOW`. This is useful for testing and tuning your rules before switching to
+`LIVE`.
+
+As these are configured in code, you can use other mechanisms to set the mode.
+For example, you could could use an existing feature flag system to dynamically
+change the rule mode. We have an example showing how to sample traffic between
+`DRY_RUN` and `LIVE` modes in the [Sampling traffic
+blueprint](/blueprints/sampling).
+
+## Configure proxies and load balancers
+
+Arcjet needs to see the original client IP address to make accurate decisions.
+If your application is behind a proxy or load balancer, you need to ensure that
+Arcjet can access the original IP address.
+
+Most proxies and load balancers add an `X-Forwarded-For` header to requests that
+contains the original client IP address. You need to ensure that this header is
+passed to your application and that Arcjet is configured to ignore the proxy IP
+addresses.
+
+This is not necessary on platforms like Firebase, Netlify, Fly.io, or Vercel
+because Arcjet can auto-detect the proxy IPs for these platforms.
+
+For other platforms, copnfigure the `proxies` option when creating the Arcjet
+instance. For example, if the load balancer is at `100.100.100.100` and the client IP
+address is `192.168.1.1`, the `X-Forwarded-For` header will be:
+
+```http
+X-Forwarded-For: 192.168.1.1, 100.100.100.100
+```
+
+You should set the `proxies` field to `["100.100.100.100"]` so Arcjet will use
+`192.168.1.1` as the client IP address.
+
+You can also specify CIDR ranges to match multiple IP addresses.
+
+```ts
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [],
+  proxies: [
+    "100.100.100.100", // A single IP
+    "100.100.100.0/24", // A CIDR for the range
+  ],
+});
+```
+
+## Implement your own error handling
+
+Calls to `protect()` will not throw an error. Arcjet is designed to fail open
+so that a service issue or misconfiguration does not block all requests.
+
+If there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the message property on the
+rule's error result for more information. For example:
+
+```ts
+const decision = await aj.protect(req);
+
+if (decision.isErrored()) {
+  // Fail open: log the error and allow the request
+  console.error("Arcjet error", decision.reason.message);
+}
+```
