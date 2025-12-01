@@ -5,10 +5,13 @@ title: "Bot protection Intro"
 ---
 
 import { Badge } from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "../../../components/Comments.astro";
 
-With Arcjet Bot protection you can manage traffic from automated clients and
-bots.
+Arcjet bot detection allows you to block and manage bot traffic, verify
+legitimate bots, and reduce unwanted automated requests.
+
+<WhatIsArcjet />
 
 Bots can be good or bad.
 Good bots identify themselves in a consistent manner so it is straightforward
@@ -21,24 +24,22 @@ all bots would respect `robots.txt` files,
 but unfortunately this is not always the case.
 
 Arcjet Bot protection is different from similar features on other platforms
-because with Arcjet you configure bot protection _inside_ your application
-code.
-This gives you full control over what to allow, where and when, dynamically.
-You can use different strategies for different routes or based on user
-subscription level.
+because with Arcjet you configure bot protection _inside_ your application code.
+This gives you full control over what to allow, where and when, dynamically. You
+can use different strategies for different routes or based on what you know
+about a request e.g. a logged in user's subscription level.
 
 ## When to use
 
-You can use Bot protection to manage traffic by automated clients and bots.
+You can use bot protection to manage traffic by automated clients and bots.
 Arcjet helps reduce bot traffic and gives you more control over what reaches
 your application,
 but it’s important to understand that it’s not possible to achieve 100%
 accuracy.
 
-You can combine this with [Arcjet Rate limiting][arcjet-rate-limiting] to block
-clients that are causing problems while minimizing the impact on real users.
-
-You can use [Arcjet Filters][arcjet-filters] to block other clients.
+Arcjet bot protection can be combined with other Arcjet features to improve your
+overall traffic management strategy, such as [rate
+limiting][arcjet-rate-limiting] and [filters][arcjet-filters].
 
 ## How it works
 
@@ -53,17 +54,15 @@ are open source and maintained in
 This data is shipped locally within the WebAssembly bundled with SDKs.
 Names and categories are autocompleted in your editor if you use TypeScript.
 
-Bots are detected using regular expressions against the `user-agent` header
-and their authenticity verified by checking IP data and performing reverse DNS
-lookups.
+For basic bot detection, regular expressions are used against the `user-agent`
+header and their authenticity verified by checking IP data and performing
+reverse DNS lookups. Advanced bot detection uses additional IP reputation,
+machine learning, and other signals to identify bots more accurately.
 
-Clients are tracked by [fingerprints][arcjet-fingerprints] that include
-IP addresses by default.
-This means that clients using the same IP address as a bot can be blocked.
-To ensure that rules are applied correctly it is important to carefully
-select characteristics,
-such as a specific HTTP header or an authentication token,
-to match your concept of “user”.
+Clients are tracked by configurable [fingerprints][arcjet-fingerprints] (IP
+address by default) to identify unique clients. This can be used to track
+anonymous users as well as attaching rules and detections to known users by
+their session tokens or other identifiers.
 
 ## Availability
 
