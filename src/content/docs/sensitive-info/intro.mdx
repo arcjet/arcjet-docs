@@ -1,53 +1,84 @@
 ---
-description: "Introduction to Arcjet sensitive info protection."
+title: "Introduction to Arcjet Sensitive Info Protection"
+description: "Arcjet sensitive info detection runs locally to detect and block PII in request bodies, helping you avoid storing emails, card numbers, IPs, and phone numbers."
 prev: false
-title: "Sensitive info: Intro"
 ---
 
 import { Badge } from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "../../../components/Comments.astro";
 
-With Arcjet sensitive info you can prevent clients from sending you data that
-you do not want to handle.
+Arcjet sensitive information detection lets you detect and block sensitive data
+in request bodies before it enters your application. Use it to prevent clients
+from sending personally identifiable information (PII) and other data you do not
+want to handle.
 
-This rule runs entirely locally so no data ever leaves your environment.
-You can block personally identifiable information (PII) such as email addresses,
-card numbers,
-IP addresses,
-phone numbers,
-or custom data types.
+<WhatIsArcjet />
 
-Sensitive info works on the request body.
-To detect particular info in headers or other fields use
-[Arcjet Filters][arcjet-filters].
+This rule runs entirely locally in your environment, inside the WebAssembly
+sandbox shipped with the Arcjet SDK. No request body data ever leaves your
+infrastructure.
 
-## When to use
+You can block common types of PII such as email addresses, card numbers, IP
+addresses, and phone numbers, as well as custom patterns you define.
 
-You can use Sensitive info protection to prevent clients from sending you
-sensitive info to reduce your compliance burden.
+Sensitive info works on the request body. To detect specific information in
+headers or other request fields, use [Arcjet filters][arcjet-filters].
 
-You can use [Arcjet Email validation][arcjet-email-validation] to check email
-addresses.
+## When to use Arcjet sensitive info detection
 
-## How it works
+Use sensitive information detection when you want to:
 
-Arcjet takes the body of requests and splits it into tokens (“words”).
-These tokens are analyzed for builtin entities (such as card numbers and email
-addresses) and with user-defined `detect` functions.
-This runs locally within the WebAssembly bundled with SDKs.
+- Reduce your compliance burden by avoiding storage of PII and other regulated
+  data.
+- Prevent users from pasting card numbers or other sensitive data into generic
+  text fields (for example, support forms, feedback forms, or chat boxes).
+- Enforce rules that certain endpoints must not receive PII at all.
+- Prevent sensitive data being sent to third-party integrations, such as support
+  ticket systems or LLMs.
 
-The built in entities are:
+For email addresses specifically, you can also use [Arcjet email
+validation][arcjet-email-validation] to validate and verify addresses before
+creating accounts or sending email.
 
-- card numbers (such as `4242424242424242`)
-- email addresses (such as `alice@example.com`)
-- IP addresses (such as `127.0.0.1`)
-- phone numbers (such as `+1 (555) 555-5555`)
+## How Arcjet sensitive info detection works
+
+Arcjet analyzes the body of each request locally in your application
+environment:
+
+1. The request body is split into tokens ("words").
+2. Tokens are checked against built-in detectors (for example, card numbers and
+   email addresses).
+3. Tokens are also evaluated by any user-defined `detect` functions you
+   configure.
+4. If sensitive information is found, Arcjet returns a decision so your
+   application can block, sanitize, or otherwise handle the request.
+
+All of this logic runs locally with a WebAssembly sandbox that runs in-process.
+The raw request body is never sent to Arcjet.
+
+### Built-in entities
+
+The built-in entities include:
+
+- **Card numbers** (such as `4242424242424242`)
+- **Email addresses** (such as `alice@arcjet.com`)
+- **IP addresses** (such as `127.0.0.1`)
+- **Phone numbers** (such as `+1 (555) 555-5555`)
+
+You can combine these with your own custom detectors to cover additional data
+types specific to your application.
 
 {/* Note: no section on `characteristics`/`fingerprint` needed as this rule is local. */}
 
-This rule works locally.
-Arcjet reports decisions to your dashboard but no data is sent to the
-Arcjet Cloud API.
+### Privacy and reporting
+
+Sensitive info detection runs entirely locally. Arcjet reports only the decision
+(for example, whether sensitive data was detected) to your dashboard; the actual
+request body content is not sent to the Arcjet Cloud API.
+
+This lets you enforce PII detection and compliance controls while keeping
+sensitive data within your own environment.
 
 ## Availability
 
