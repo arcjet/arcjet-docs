@@ -32,6 +32,11 @@ export const main = [
             attrs: { target: "_blank", class: "external-link" },
           },
           {
+            label: "Firebase",
+            link: "https://github.com/arcjet/example-firebase-functions",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
             label: "NestJS",
             link: "https://github.com/arcjet/example-nestjs",
             attrs: { target: "_blank", class: "external-link" },
