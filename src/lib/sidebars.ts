@@ -32,6 +32,11 @@ export const main = [
             attrs: { target: "_blank", class: "external-link" },
           },
           {
+            label: "Firebase",
+            link: "https://github.com/arcjet/example-firebase-functions",
+            attrs: { target: "_blank", class: "external-link" },
+          },
+          {
             label: "NestJS",
             link: "https://github.com/arcjet/example-nestjs",
             attrs: { target: "_blank", class: "external-link" },
@@ -163,13 +168,14 @@ export const main = [
         collapsed: true,
         items: [
           {
+            attrs: { class: "feature bot-protection" },
+            label: "Intro",
+            link: "/bot-protection",
+          },
+          {
             label: "Quick start",
             link: "/bot-protection/quick-start",
             attrs: { class: "feature bot-protection" },
-          },
-          {
-            label: "Concepts",
-            link: "/bot-protection/concepts",
           },
           {
             label: "Identifying bots",
@@ -186,13 +192,14 @@ export const main = [
         collapsed: true,
         items: [
           {
+            attrs: { class: "feature rate-limiting" },
+            label: "Intro",
+            link: "/rate-limiting",
+          },
+          {
             label: "Quick start",
             link: "/rate-limiting/quick-start",
             attrs: { class: "feature rate-limiting" },
-          },
-          {
-            label: "Concepts",
-            link: "/rate-limiting/concepts",
           },
           {
             label: "Algorithms",
@@ -213,13 +220,14 @@ export const main = [
         collapsed: true,
         items: [
           {
+            attrs: { class: "feature shield-waf" },
+            label: "Intro",
+            link: "/shield",
+          },
+          {
             label: "Quick start",
             link: "/shield/quick-start",
             attrs: { class: "feature shield-waf" },
-          },
-          {
-            label: "Concepts",
-            link: "/shield/concepts",
           },
           {
             label: "Reference",
@@ -232,13 +240,14 @@ export const main = [
         collapsed: true,
         items: [
           {
+            attrs: { class: "feature email-validation" },
+            label: "Intro",
+            link: "/email-validation",
+          },
+          {
             label: "Quick start",
             link: "/email-validation/quick-start",
             attrs: { class: "feature email-validation" },
-          },
-          {
-            label: "Concepts",
-            link: "/email-validation/concepts",
           },
           {
             label: "Reference",
@@ -251,13 +260,14 @@ export const main = [
         collapsed: true,
         items: [
           {
+            attrs: { class: "feature signup-form-protection" },
+            label: "Intro",
+            link: "/signup-protection",
+          },
+          {
             label: "Quick start",
             link: "/signup-protection/quick-start",
             attrs: { class: "feature signup-form-protection" },
-          },
-          {
-            label: "Concepts",
-            link: "/signup-protection/concepts",
           },
           {
             label: "Reference",
@@ -270,13 +280,14 @@ export const main = [
         collapsed: true,
         items: [
           {
+            attrs: { class: "feature sensitive-information" },
+            label: "Intro",
+            link: "/sensitive-info",
+          },
+          {
             label: "Quick start",
             link: "/sensitive-info/quick-start",
             attrs: { class: "feature sensitive-information" },
-          },
-          {
-            label: "Concepts",
-            link: "/sensitive-info/concepts",
           },
           {
             label: "Reference",
@@ -289,13 +300,13 @@ export const main = [
         items: [
           {
             attrs: { class: "feature filters" },
-            label: "Quick start",
-            link: "/filters/quick-start",
+            label: "Intro",
+            link: "/filters",
           },
           {
             attrs: { class: "feature filters" },
-            label: "Concepts",
-            link: "/filters/concepts",
+            label: "Quick start",
+            link: "/filters/quick-start",
           },
           {
             attrs: { class: "feature filters" },
