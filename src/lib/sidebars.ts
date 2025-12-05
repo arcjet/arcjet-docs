@@ -165,7 +165,7 @@ export const main = [
           {
             attrs: { class: "feature bot-protection" },
             label: "Intro",
-            link: "/bot-protection/intro",
+            link: "/bot-protection",
           },
           {
             label: "Quick start",
@@ -189,7 +189,7 @@ export const main = [
           {
             attrs: { class: "feature rate-limiting" },
             label: "Intro",
-            link: "/rate-limiting/intro",
+            link: "/rate-limiting",
           },
           {
             label: "Quick start",
@@ -217,7 +217,7 @@ export const main = [
           {
             attrs: { class: "feature shield-waf" },
             label: "Intro",
-            link: "/shield/intro",
+            link: "/shield",
           },
           {
             label: "Quick start",
@@ -237,7 +237,7 @@ export const main = [
           {
             attrs: { class: "feature email-validation" },
             label: "Intro",
-            link: "/email-validation/intro",
+            link: "/email-validation",
           },
           {
             label: "Quick start",
@@ -257,7 +257,7 @@ export const main = [
           {
             attrs: { class: "feature signup-form-protection" },
             label: "Intro",
-            link: "/signup-protection/intro",
+            link: "/signup-protection",
           },
           {
             label: "Quick start",
@@ -277,7 +277,7 @@ export const main = [
           {
             attrs: { class: "feature sensitive-information" },
             label: "Intro",
-            link: "/sensitive-info/intro",
+            link: "/sensitive-info",
           },
           {
             label: "Quick start",
@@ -296,7 +296,7 @@ export const main = [
           {
             attrs: { class: "feature filters" },
             label: "Intro",
-            link: "/filters/intro",
+            link: "/filters",
           },
           {
             attrs: { class: "feature filters" },
