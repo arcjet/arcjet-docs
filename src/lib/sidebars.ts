@@ -173,10 +173,6 @@ export const main = [
             attrs: { class: "feature bot-protection" },
           },
           {
-            label: "Concepts",
-            link: "/bot-protection/concepts",
-          },
-          {
             label: "Identifying bots",
             link: "/bot-protection/identifying-bots",
           },

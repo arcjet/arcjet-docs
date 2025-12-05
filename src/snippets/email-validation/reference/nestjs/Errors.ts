@@ -49,7 +49,7 @@ export class SignupController {
   constructor(
     private readonly signupService: SignupService,
     @Inject(ARCJET) private readonly arcjet: ArcjetNest,
-  ) { }
+  ) {}
 
   // Implement a form handler following
   // https://docs.nestjs.com/techniques/file-upload#no-files. Note this isn't
@@ -112,7 +112,7 @@ export class SignupController {
       // particular bot and could be marked as an errored result. Most
       // legitimate clients send this header, so we recommend blocking requests
       // without it.
-      // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
+      // See https://docs.arcjet.com/bot-protection/reference#user-agent-header
       this.logger.warn("User-Agent header is missing");
       throw new HttpException("Bad request", HttpStatus.BAD_REQUEST);
     }

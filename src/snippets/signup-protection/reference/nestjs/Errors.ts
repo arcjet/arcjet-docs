@@ -134,7 +134,7 @@ export class SignupController {
       // particular bot and could be marked as an errored result. Most
       // legitimate clients send this header, so we recommend blocking requests
       // without it.
-      // See https://docs.arcjet.com/bot-protection/concepts#user-agent-header
+      // See https://docs.arcjet.com/bot-protection/reference#user-agent-header
       console.warn("User-Agent header is missing");
 
       throw new HttpException("Bad request", HttpStatus.BAD_REQUEST);
