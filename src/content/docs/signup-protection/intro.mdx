@@ -1,64 +1,111 @@
 ---
-description: "Introduction to Arcjet Signup form protection."
+title: "Introduction to Arcjet Signup form protection"
+description: "Arcjet signup form protection blocks signup spam, fake accounts, and signup fraud by combining bot protection, email validation, and rate limiting in your app."
 prev: false
-title: "Signup form protection Intro"
 ---
 
 import { Badge } from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "../../../components/Comments.astro";
 
-With Arcjet Signup form protection you can combines bot protection,
-email validation, and
-rate limiting,
-to protect your signup forms from abuse.
+Arcjet signup form protection combines bot protection, email validation, and
+rate limiting to protect your signup and lead capture forms from spam,
+fake accounts, and signup fraud.
 
-## When to use
+Use it to cut down on signup spam, form spam, and abusive signups before they
+become real accounts in your system.
 
-You can use Signup form protection to help protect signup forms
-from abuse by malicious actors.
+<WhatIsArcjet />
 
-You can also mix and match the individual protections
-[Arcjet Bot protection][arcjet-bot-protection],
-[Arcjet Email validation][arcjet-email-validation], and
-[Arcjet Rate limiting][arcjet-rate-limiting].
+## When to use Arcjet signup form protection
 
-## How it works
+Use signup form protection when you want to reduce:
 
-This is a pre-built product that combines primitives which can also be used
-individually.
-It comes with our recommended configuration.
-This saves you time and means you can get value from Arcjet with a few lines of
-code in just a few minutes.
+- **Signup spam and fake accounts**
+  Prevent automated tools and spam bots from mass-creating free accounts or test
+  accounts.
 
-This product combines primitives to minimize the number of fake and fraudulent
-accounts that sign up:
+- **Lead form spam and low-quality leads**
+  Protect marketing forms, waitlist forms, and lead gen forms from junk
+  submissions that pollute your CRM and analytics, and waste sales time.
 
-- **[Rate limiting][arcjet-rate-limiting]**
-  — signup forms are a common target for bots. Arcjet's rate
-  limiting helps to prevent bots and other automated or malicious clients from
-  submitting your signup form too many times in a short period of time. Even
-  allowing for errors, legitimate users do not usually submit forms more than a
-  few times in a short time window.
-- **[Bot protection][arcjet-bot-protection]**
-  — signup forms are usually exclusively used by humans,
-  which means that any automated submissions to the form are likely to be
-  fraudulent. However, critical transaction forms are often tested by legitimate
-  automated clients, such as monitoring services. These can be specifically
-  allowed.
-- **[Email validation][arcjet-email-validation]**
-  — email addresses should be validated to ensure the
-  signup is coming from a legitimate user with a real email address that can
-  actually receive messages. Some services may also want to restrict signups to
-  avoid disposable or free email addresses.
+- **Account fraud and abuse**
+  Make it more expensive for attackers to create large numbers of accounts for
+  abuse (for example, coupon abuse, referral abuse, scraping, or credential
+  stuffing).
+
+- **Disposable and throwaway signups**
+  Block or flag signups that use disposable email addresses so you can focus on
+  real users and legitimate leads.
+
+## How Arcjet signup form protection works
+
+Signup form protection is a pre-built product that combines Arcjet primitives
+which you can also use individually. It comes with Arcjet's recommended defaults
+for common signup and form spam scenarios.
+
+This saves you time and lets you get protection against signup spam and account
+fraud with just a few lines of code.
+
+The product combines three key components:
+
+### 1. Rate limiting — control signup velocity
+
+[Rate limiting][arcjet-rate-limiting] prevents bots and abusive clients from
+submitting your signup or lead forms too many times in a short period.
+
+Examples:
+
+- Limit form submissions per IP, per user agent, or per API key.
+- Slow down attempts to brute-force signup flows or abuse referral codes.
+- Prevent a single client from flooding your signup endpoint.
+
+Legitimate users typically submit a signup form only once or a few times within
+a short time window, so bursts of submissions are a strong indicator of signup
+spam or automated abuse.
+
+### 2. Bot protection — block automated signup bots
+
+[Bot protection][arcjet-bot-protection] helps stop automated signup bots and
+form spam tools that try to create accounts at scale.
+
+For typical signup and lead forms, you expect human users, not bots. Any
+automated submissions are likely to be:
+
+- Bulk account creation for abuse.
+- Automated signup spam for SEO links or junk content.
+- Fake lead submissions to poison your CRM or forms.
+
+Where you do have legitimate automated clients (for example, monitoring or
+synthetic tests), you can explicitly allow them while still blocking unknown
+bots and suspicious automation.
+
+### 3. Email validation — verify email quality
+
+[Email validation][arcjet-email-validation] validates and verifies email
+addresses used in signups and lead forms so you can:
+
+- Confirm that the address is syntactically valid.
+- Check that the domain can receive email (MX records).
+- Identify disposable / temporary email providers.
+- Improve the quality of accounts and leads you accept.
+
+This helps you filter out disposable or undeliverable emails commonly used in
+signup fraud and lead form spam, and ensures important messages such as
+verification and onboarding emails actually reach users.
+
+By combining these three protections, Arcjet signup form protection reduces
+signup spam, form spam, and fake accounts, while letting legitimate users sign
+up with minimal friction.
 
 ## Availability
 
-| Plan                                         | Basic protection | Advanced protection | Custom protection |
-| -------------------------------------------- | :--------------: | :-----------------: | :---------------: |
-| <Badge text="Free" variant="caution" />      |        ✅        |         🚫          |        🚫         |
-| <Badge text="Starter" variant="note" />      |        ✅        |         ✅          |        🚫         |
-| <Badge text="Business" variant="tip" />      |        ✅        |         ✅          |        🚫         |
-| <Badge text="Enterprise" variant="danger" /> |        ✅        |         ✅          |        ✅         |
+| Plan                                         |      Availability      |
+| -------------------------------------------- | :--------------------: |
+| <Badge text="Free" variant="caution" />      |           🚫           |
+| <Badge text="Starter" variant="note" />      | ✅ Usage based pricing |
+| <Badge text="Business" variant="tip" />      | ✅ Usage based pricing |
+| <Badge text="Enterprise" variant="danger" /> | ✅ Usage based pricing |
 
 <Comments />
 
