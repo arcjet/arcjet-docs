@@ -8,10 +8,10 @@ export default defineConfig({
   env: { validateSecrets: true },
   integrations: [
     arcjet({
-      // @ts-expect-error: TODO does not yet exist.
-      // Assumes `cloudflare` are the Cloudflare IP ranges from
-      // <https://docs.arcjet.com/concepts/client-ip#ip-ranges>.
       proxies: [
+        // @ts-expect-error: TODO does not yet exist.
+        // Assumes `cloudflare` are the Cloudflare IP ranges from
+        // <https://docs.arcjet.com/concepts/client-ip#ip-ranges>.
         Object.fromEntries(cloudflare.map((d) => [d, "cf-connecting-ip"])),
       ],
       rules: [],

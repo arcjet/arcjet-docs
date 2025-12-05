@@ -1,3 +1,4 @@
+// @ts-expect-error: TODO add dependency?
 import arcjetFastify from "@arcjet/fastify";
 
 const arcjet = arcjetFastify({
