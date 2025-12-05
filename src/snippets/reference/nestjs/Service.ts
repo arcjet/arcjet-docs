@@ -11,7 +11,7 @@ import { ConfigModule } from "@nestjs/config";
     ArcjetModule.forRoot({
       isGlobal: true,
       key: process.env.ARCJET_KEY!,
-      // @ts-expect-error: does not yet exist.
+      // @ts-expect-error: TODO does not yet exist.
       // Assumes `cloudflare` are the Cloudflare IP ranges from
       // <https://docs.arcjet.com/concepts/client-ip#ip-ranges>.
       proxies: [

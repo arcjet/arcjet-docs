@@ -4,7 +4,7 @@ const arcjet = arcjetNode({
   key: process.env.ARCJET_KEY!,
   // To illustrate, allow 3 requests per minute per IP address.
   rules: [slidingWindow({ interval: 60, max: 3, mode: "LIVE" })],
-  // @ts-expect-error: does not yet exist.
+  // @ts-expect-error: TODO does not yet exist.
   // Assumes requests will have an `x-my-ip` header that you trust:
   trustedIpHeader: "x-my-ip",
 });
