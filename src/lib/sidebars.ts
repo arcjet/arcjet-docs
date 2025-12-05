@@ -225,10 +225,6 @@ export const main = [
             attrs: { class: "feature shield-waf" },
           },
           {
-            label: "Concepts",
-            link: "/shield/concepts",
-          },
-          {
             label: "Reference",
             link: "/shield/reference",
           },
