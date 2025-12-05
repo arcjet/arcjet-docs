@@ -5,65 +5,83 @@ title: "Email validation Intro"
 ---
 
 import { Badge } from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "../../../components/Comments.astro";
 
-With Arcjet Email validation you can validate and verify email addresses.
+Arcjet email validation lets you validate and verify email addresses in your
+application to reduce spam and fraudulent signups.
 
-Email validation is useful to reduce the amount of spam and fraudulent accounts
-on your platform.
+<WhatIsArcjet />
 
-Arcjet Email validation is different from using a package to validate that
-email addresses are syntactically correct because with Arcjet
-you can also verify that email addresses are disposable,
-cannot receive email (no MX records),
-and more,
-without needing to set up any infrastructure.
+Email validation is useful anywhere users enter an email address, such as
+signup, login, password reset, and contact forms. It helps you catch invalid,
+disposable, and undeliverable addresses before they become accounts in your
+system.
 
-## When to use
+Unlike using a simple library that only checks email syntax, Arcjet email
+validation also verifies whether email addresses are disposable, can actually
+receive email (MX records), and more - without you needing to run any
+infrastructure.
 
-You can use Email validation to reduce spam or fraudulent accounts.
+## When to use Arcjet email validation
 
-You can combine this with [Arcjet Rate limiting][arcjet-rate-limiting] to
-prevent brute force attacks
-or [Arcjet Sensitive info][arcjet-sensitive-info] to block unwanted data.
+Use Arcjet email validation when you want to:
 
-## How it works
+- Reduce spam and fraudulent accounts at signup.
+- Improve data quality in user profiles and contact lists.
+- Avoid sending email to invalid or undeliverable addresses.
+- Block temporary / disposable email addresses.
 
-Arcjet validates the email address syntax.
-Validation follows several RFCs with modifications to exclude addresses such as
-localhost domains that don’t make sense for signing up to a real application.
-These algorithms are shipped locally within the WebAssembly bundled with SDKs.
-This code is like the [`johnstonskj/rust-email_address`][github-email-address]
-crate.
+You can combine email validation with
+[Arcjet rate limiting][arcjet-rate-limiting] to prevent brute-force attacks,
+and with [Arcjet sensitive info][arcjet-sensitive-info] to block unwanted or
+unsafe data.
 
-The Arcjet Cloud API verifies addresses that are syntactically valid.
-This includes:
+## How Arcjet email validation works
 
-- **email categorization**
-  — whether the domain is a disposable or free
+Arcjet validates email addresses in two stages: **local syntax validation** and
+**remote verification**.
+
+### 1. Local syntax validation
+
+First, Arcjet validates the email address syntax. Validation follows several
+email RFCs, with deliberate modifications to exclude addresses that don’t make
+sense for real applications (for example, `localhost` domains).
+
+These algorithms are shipped with the Arcjet SDKs.
+
+Only syntactically valid email addresses are sent to the Arcjet Cloud API for
+further verification.
+
+### 2. Remote email verification
+
+The Arcjet Cloud API performs additional checks for syntactically valid
+addresses. This includes:
+
+- **Email categorization** Whether the domain is disposable, free, or custom
+  (for example, `gmail.com` is considered a free email service).
+
 - **MX check**
-  — whether the domain has valid MX records for receiving email
+  Whether the domain has valid MX records and appears able to receive email.
+
 - **Gravatar check**
-  — whether the address has a [Gravatar][] entry associated with it;
-  useful for checking if the email address is a real person
+  Whether the address has a [Gravatar][] entry associated with it. This can be
+  a useful signal that the email address belongs to a real person.
+
+These checks help you decide whether to accept, reject, or flag an email
+address in your application logic.
 
 {/* Note: no section on `characteristics`/`fingerprint` needed as email rules are not cached. */}
 
-## Availability
-
-Validation is available on all plans.
-Advanced verification is available on paid plans.
-
-| Plan                                         | Validation | Verification | Custom |
-| -------------------------------------------- | :--------: | :----------: | :----: |
-| <Badge text="Free" variant="caution" />      |     ✅     |      🚫      |   🚫   |
-| <Badge text="Starter" variant="note" />      |     ✅     |      ✅      |   🚫   |
-| <Badge text="Business" variant="tip" />      |     ✅     |      ✅      |   🚫   |
-| <Badge text="Enterprise" variant="danger" /> |     ✅     |      ✅      |   ✅   |
+| Plan                                         |      Availability      |
+| -------------------------------------------- | :--------------------: |
+| <Badge text="Free" variant="caution" />      |           🚫           |
+| <Badge text="Starter" variant="note" />      | ✅ Usage based pricing |
+| <Badge text="Business" variant="tip" />      | ✅ Usage based pricing |
+| <Badge text="Enterprise" variant="danger" /> | ✅ Usage based pricing |
 
 <Comments />
 
 [arcjet-rate-limiting]: /rate-limiting/intro
 [arcjet-sensitive-info]: /sensitive-info/intro
-[github-email-address]: https://github.com/johnstonskj/rust-email_address
 [gravatar]: https://gravatar.com

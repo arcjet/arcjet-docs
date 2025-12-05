@@ -249,10 +249,6 @@ export const main = [
             attrs: { class: "feature email-validation" },
           },
           {
-            label: "Concepts",
-            link: "/email-validation/concepts",
-          },
-          {
             label: "Reference",
             link: "/email-validation/reference",
           },
