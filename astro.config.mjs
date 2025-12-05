@@ -22,6 +22,7 @@ const ajThemeLight = ExpressiveCodeTheme.fromJSONString(jsoncStringLight);
 
 // https://astro.build/config
 export default defineConfig({
+  prefetch: true,
   env: {
     schema: {
       PUBLIC_POSTHOG_KEY: envField.string({
