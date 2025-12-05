@@ -8,44 +8,67 @@ import { Badge } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "../../../components/Comments.astro";
 
-Arcjet bot detection allows you to block and manage bot traffic, verify
-legitimate bots, and reduce unwanted automated requests.
+Arcjet bot protection lets you detect bots, block bad bots, verify
+legitimate bots, and reduce unwanted automated requests before they reach
+your application.
 
 <WhatIsArcjet />
 
-Bots can be good or bad.
-Good bots identify themselves in a consistent manner so it is straightforward
-to identify them,
-but those are often not the bots you wish to block!
-Bad bots pretend to be real clients and use various mechanisms to evade bot
-detection.
-In an ideal world,
-all bots would respect `robots.txt` files,
-but unfortunately this is not always the case.
+Bots are not all the same. Some are useful (for example, search engine crawlers)
+and identify themselves consistently, which makes them easy to detect and allow.
+However, these are rarely the bots you want to block.
 
-Arcjet Bot protection is different from similar features on other platforms
-because with Arcjet you configure bot protection _inside_ your application code.
-This gives you full control over what to allow, where and when, dynamically. You
-can use different strategies for different routes or based on what you know
-about a request e.g. a logged in user's subscription level.
+Malicious or unwanted bots often pretend to be real users and use a variety of
+techniques to evade bot detection. In an ideal world all bots would respect
+`robots.txt`, but in practice many ignore it entirely. You need a reliable way
+to detect bots and decide what to do with them inside your application.
 
-## When to use
+Arcjet bot protection is different from similar features on other platforms
+because you configure bot detection and blocking inside your application code.
+This gives you full, dynamic control over what to allow or deny, where, and
+when. You can apply different bot protection strategies per route, or base
+decisions on what you know about a request (for example, a logged-in user's
+subscription level).
 
-You can use bot protection to manage traffic by automated clients and bots.
-Arcjet helps reduce bot traffic and gives you more control over what reaches
-your application,
-but it’s important to understand that it’s not possible to achieve 100%
-accuracy.
+## Key benefits of Arcjet bot protection
 
-Arcjet bot protection can be combined with other Arcjet features to improve your
-overall traffic management strategy, such as [rate
-limiting][arcjet-rate-limiting] and [filters][arcjet-filters].
+- Detect and classify hundreds of known bots and crawlers.
+- Block bad bots and unwanted automated traffic.
+- Allow verified “good” bots (such as search engine crawlers) safely.
+- Configure bot rules directly in your application code.
+- Combine bot protection with rate limiting and filters for full traffic
+  control.
 
-## How it works
+## When to use bot protection
 
-Arcjet detects more than 600 different bots (such as `GOOGLE_CRAWLER`) and classifies
-them in 25 different categories (such as `CATEGORY:AI`).
-You can specify individual bots or categories to allow or deny.
+Use Arcjet bot protection whenever you need to control traffic from
+automated clients and bots, for example:
+
+- Signup and login forms targeted by credential stuffing or spam.
+- APIs and endpoints scraped by bots.
+- Pricing pages, search, or content pages that attract heavy scraping.
+
+Arcjet reduces unwanted bot traffic and gives you more control over what
+reaches your application, but it's important to understand that no bot
+detection system can be 100% accurate.
+
+Combine Arcjet bot protection with other Arcjet features to improve your
+overall traffic management strategy, such as
+[rate limiting][arcjet-rate-limiting] and [filters][arcjet-filters].
+
+## In-app bot detection vs network/CDN bot protection
+
+Traditional bot protection runs at the network or CDN layer and often
+provides a fixed set of rules. Arcjet bot protection runs inside your
+application, where you have access to rich context such as user identity,
+subscription level, and business logic. This lets you build more accurate,
+application-aware bot rules and avoid blocking legitimate users.
+
+## How Arcjet bot detection works
+
+Arcjet detects more than 600 different bots (such as `GOOGLE_CRAWLER`) and
+classifies them into 25 categories (such as `CATEGORY:AI`). You can specify
+individual bots or entire categories to allow or deny.
 
 The identifiers of specific bots and categories, and their corresponding
 detection and verification patterns, are open source and maintained in
@@ -53,23 +76,28 @@ detection and verification patterns, are open source and maintained in
 Arcjet SDK. Names and categories are autocompleted in your editor if you use
 TypeScript.
 
-For basic bot detection, regular expressions are used against the `user-agent`
-header and their authenticity verified by checking IP data and performing
-reverse DNS lookups. Advanced bot detection uses additional IP reputation,
-machine learning, and other signals to identify bots more accurately.
+For basic bot detection, regular expressions are applied to the
+`user-agent` header and authenticity is verified using IP data and reverse
+DNS lookups.
 
-Clients are tracked by configurable [fingerprints][arcjet-fingerprints] (IP
-address by default) to identify unique clients. This can be used to track
-anonymous users as well as attaching rules and detections to known users by
-their session tokens or other identifiers.
+Advanced bot detection adds IP reputation,
+[verification][arcjet-bot-protection-reference-verification],
+machine learning, and additional signals to identify bots more accurately
+and distinguish real users from automated traffic.
+
+Clients are tracked using configurable
+[fingerprints][arcjet-fingerprints] (IP address by default) to identify
+unique clients. Fingerprints let you track anonymous users and attach rules
+and detections to known users via session tokens or other identifiers.
 
 ## Availability
 
-Basic detection through `user-agent` headers and IP type analysis is available on all plans.
-Advanced detection uses additional IP reputation,
-[verification][arcjet-bot-protection-reference-verification],
-machine learning,
-and other signals, are used on paid plans.
+Basic detection (using `user-agent` headers and IP type analysis) is available
+on all plans.
+
+Advanced detection (using IP reputation,
+[verification][arcjet-bot-protection-reference-verification], machine learning,
+and additional signals) is available on paid plans.
 
 | Plan                                         | Basic protection | Advanced protection | Custom protection |
 | -------------------------------------------- | :--------------: | :-----------------: | :---------------: |
