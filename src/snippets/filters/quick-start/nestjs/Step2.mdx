@@ -1,14 +1,14 @@
 NestJS loads environment variables with the [`@nestjs/config`][nestjs-config]
 module.
-Arcjet integrations read from `ARCJET_*` environment variables.
-Create a `.env` file in the root of your project and add your key:
+Create a `.env` file in the root of your project and add your key.
+You can also set
+[`ARCJET_ENV`](https://docs.arcjet.com/concepts/environment#arcjet-env)
+and other values in `.env` files.
 
-Add your key to a `.env` file in your project root.
-
-```ini title=".env"
-# Run in development mode; leave this unset in production.
+```ini title=".env.local"
+# Run Arcjet in development <https://docs.arcjet.com/concepts/environment#arcjet-env>.
 ARCJET_ENV=development
-# Get your site key at <https://app.arcjet.com>.
+# Your Arcjet Cloud API key <https://docs.arcjet.com/concepts/environment#arcjet-key>.
 ARCJET_KEY=ajkey_yourkey
 ```
 

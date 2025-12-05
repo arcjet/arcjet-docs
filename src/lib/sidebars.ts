@@ -319,6 +319,16 @@ export const main = [
     ],
   },
   {
+    label: "Concepts",
+    collapsed: false,
+    items: [
+      {
+        label: "Environment variables",
+        link: "/concepts/environment",
+      },
+    ],
+  },
+  {
     label: "Advanced",
     collapsed: false,
     items: [

@@ -436,9 +436,9 @@ response headers similar to the following:
 ## Error handling
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
-not block all requests. The SDK will also time out and fail open after 1000ms
-when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
-in most cases, the response time will be less than 20-30ms.
+not block all requests. The SDK will also time out and fail open after 1000ms in
+development (see [`ARCJET_ENV`](/concepts/environment#arcjet-env)) and 500ms
+otherwise. However, in most cases, the response time will be less than 20-30ms.
 
 If there is an error condition when processing the rule, Arcjet will return an
 `ERROR` result for that rule and you can check the `message` property on the rule's

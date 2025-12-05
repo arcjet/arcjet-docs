@@ -1,0 +1,160 @@
+---
+description: "What environment variables are used by Arcjet."
+next: false
+prev: false
+title: "Environment variables"
+---
+
+The following environment variables are used throughout Arcjet:
+
+| Environment variable    | Example value      |
+| ----------------------- | ------------------ |
+| `ARCJET_BASE_URL`       | `"https://…"`      |
+| `ARCJET_ENV`            | `"development"`    |
+| `ARCJET_KEY`            | `"ajkey_…"`        |
+| `ARCJET_LOG_LEVEL`      | `"warn"`           |
+| `FIREBASE_CONFIG`       | `"{databaseURL…}"` |
+| `FLY_APP_NAME`          | `"name"`           |
+| `NODE_ENV`              | `"development"`    |
+| `RENDER`                | `"1"`              |
+| `VERCEL_GIT_COMMIT_SHA` | `"fa1eade…"`       |
+| `VERCEL`                | `"1"`              |
+
+## List of environment variables
+
+<a name="arcjet-base-url" />
+
+### `ARCJET_BASE_URL`
+
+URL to Arcjet Cloud API
+(default: `"https://fly.decide.arcjet.com"` on Fly,
+`"https://decide.arcjet.com"` otherwise).
+Several known trusted URLs are allowlisted,
+other values cannot be used.
+Should only be set if directed by Arcjet support.
+See [Architecture: Cloud API][arcjet-architecture-cloud-api] for more info.
+
+{/* TODO: `baseUrl` can also be passed in `RemoteClientOptions` of `createRemoteClient`, in which case there is no verification; document that somewhere and link to it from here. */}
+
+<a name="arcjet-env" />
+
+<a name="node-env" />
+
+### `ARCJET_ENV`, `NODE_ENV`
+
+Whether the app is running in development
+(`"development" | "production"`, default: `"production"`).
+Arcjet is in development mode if either of these fields is set to `"development"`
+and production mode otherwise.
+`NODE_ENV` is a convention used in Node.js apps.
+
+In development, the timeout for connecting to Cloud API is increased.
+In production, the timeout is quicker.
+This is because in production your app typically runs close to an Arcjet server,
+but in development your app may run on your local machine, far away from Arcjet
+servers.
+See [Architecture: API latency][arcjet-architecture-api-latency] for more info.
+
+In production, an error is logged when no client IP is found.
+In development, the local IP `127.0.0.1` is used as a fallback.
+When the client IP is missing (or local),
+geolocation and other IP lookup info will be empty.
+In development, an `x-arcjet-ip` header can be used to overwrite the client IP.
+This is because it’s useful to overwrite IPs for testing,
+but in production headers cannot be trusted as they can be set by malicious
+users.
+
+{/* TODO: link to Client IP concept when that lands. */}
+
+The Arcjet Astro SDK uses `ARCJET_ENV` and the value at `import.meta.env.MODE`
+(from Vite) but does not use `NODE_ENV`.
+
+<a name="arcjet-key" />
+
+### `ARCJET_KEY`
+
+Arcjet Cloud API key for your site (`string`).
+In most cases, this variable name is a recommended convention.
+This value is not read automatically, unlike other variables, but should be
+retrieved manually from the environment and must be passed explicitly to
+Arcjet SDKs.
+
+You can find your site key in the [Arcjet dashboard][arcjet-app].
+Select your site, select “SDK configuration”, then click to copy.
+
+Arcjet keys are secrets that are always prefixed with `ajkey_`.
+As this is a secret, do not commit it to source control or otherwise expose it!
+
+This value is read automatically when using the Arcjet Astro SDK.
+
+<a name="arcjet-log-level" />
+
+### `ARCJET_LOG_LEVEL`
+
+Log level to use (`"debug" | "error" | "info" | "warn"`, default: `"warn"`).
+Setting for example `warn` will log warning _and_ error messages.
+The order of log levels from most verbose to least verbose is `debug`, `info`,
+`warn`, `error`.
+
+<a name="firebase-config" />
+
+<a name="fly-app-name" />
+
+<a name="render" />
+
+<a name="vercel" />
+
+### `FIREBASE_CONFIG`, `FLY_APP_NAME`, `RENDER`, `VERCEL`
+
+Environment variables set by hosting platforms (`string`).
+These should not be set in `.env` files but are set automatically by the
+platforms where your app runs.
+Arcjet checks whether values are non-empty.
+
+[`FIREBASE_CONFIG`][google-firebase-config] is set by Firebase,
+[`FLY_APP_NAME`][fly-app-name] is set by Fly,
+[`RENDER`][render-render] is set by Render, and
+[`VERCEL`][vercel-vercel] is set by Vercel.
+
+The inferred platform affects which request headers are trusted when determining the
+client IP.
+When Fly is detected, that affects the default value of `ARCJET_BASE_URL`.
+
+{/* TODO: link to Client IP concept when that lands. */}
+
+<a name="vercel-git-commit-sha" />
+
+### `VERCEL_GIT_COMMIT_SHA`
+
+Git SHA of the commit the deployment was triggered by (`string`).
+This should not be set in `.env` files but
+[`VERCEL_GIT_COMMIT_SHA`][vercel-git-commit-sha] is automatically
+set by Vercel.
+When present in the Arcjet Next.js SDK,
+its value is sent to Arcjet Cloud API as part of the `extra` fields,
+which are displayed in the [Arcjet dashboard][arcjet-app].
+
+## `.env` files
+
+Arcjet recommends using `.env` files in development to set environment
+variables.
+It is also recommended to put `ARCJET_KEY`s in `.env` files.
+As that is a secret, do not commit `.env` files to source control.
+
+Whether `.env` files are loaded automatically depends on the framework or
+runtime.
+You can typically use an `--env-file` flag or similar to load `.env` files
+explicitly.
+
+In production it is recommended to set environment variables using the
+dashboard provided by the platform where your app runs,
+and not to use `.env` files.
+
+[arcjet-app]: https://app.arcjet.com
+[arcjet-architecture-api-latency]: /architecture#api-latency
+[arcjet-architecture-cloud-api]: /architecture#arcjet-cloud-api
+[google-firebase-config]: https://firebase.google.com/docs/functions/config-env
+[fly-app-name]: https://fly.io/docs/machines/runtime-environment/#fly_app_name
+[render-render]: https://render.com/docs/environment-variables#render-62
+[vercel-git-commit-sha]: https://vercel.com/docs/environment-variables/system-environment-variables#VERCEL_GIT_COMMIT_SHA
+[vercel-vercel]: https://vercel.com/docs/environment-variables/system-environment-variables#VERCEL

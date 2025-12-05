@@ -111,7 +111,7 @@ The fields are:
 - `rules` (`Array<ArcjetRule>`, **required**)
   — rules to use (order insensitive)
 
-Get your site key from the [Arcjet dashboard][arcjet-app].
+Get your Arcjet Cloud API key from the [Arcjet dashboard][arcjet-app].
 Set it as an environment variable called `ARCJET_KEY` in your `.env` file:
 
 ```sh
@@ -120,18 +120,17 @@ ARCJET_KEY=your_site_key_here
 
 #### Environment variables
 
-Next to the convention of using `ARCJET_KEY` for the Arcjet Cloud API key,
-there are several environment variables that affect how Arcjet works.
+The Arcjet Fastify SDK works with Node.js environment variable support
+(`process.env`).
+Node.js can load `.env` automatically when running with the `--env-file=file`
+flag.
+See [“Environment variables” in the Node.js
+docs](https://nodejs.org/docs/latest/api/environment_variables.html) for more info.
 
-- `ARCJET_BASE_URL`
-  — an allowed URL to the Cloud API
-  (defaults to `https://decide.arcjet.com`)
-- `ARCJET_ENV`, `MODE`, `NODE_ENV`
-  — whether development mode is on
-- `ARCJET_LOG_LEVEL`
-  — log level to use
-- `FLY_APP_NAME`, `VERCEL`, `RENDER`
-  — hosting platform
+The Arcjet Fastify SDK uses several environment variables to configure its behavior.
+See [Concepts: Environment variables](/concepts/environment) for more info.
+The `ARCJET_KEY` environment variable is not read automatically and must be passed
+explicitly.
 
 ### Protect
 

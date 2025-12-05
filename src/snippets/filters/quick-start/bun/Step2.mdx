@@ -1,11 +1,13 @@
 Bun automatically loads environment variables from [certain files][bun-env].
-Arcjet integrations read from `ARCJET_*` environment variables.
-Create a `.env.local` file in the root of your project and add your key:
+Create a `.env.local` file in the root of your project and add your key.
+You can also set
+[`ARCJET_ENV`](https://docs.arcjet.com/concepts/environment#arcjet-env)
+and other values in `.env` files.
 
 ```ini title=".env.local"
-# Run in development mode; leave this unset in production.
+# Run Arcjet in development <https://docs.arcjet.com/concepts/environment#arcjet-env>.
 ARCJET_ENV=development
-# Get your site key at <https://app.arcjet.com>.
+# Your Arcjet Cloud API key <https://docs.arcjet.com/concepts/environment#arcjet-key>.
 ARCJET_KEY=ajkey_yourkey
 ```
 
