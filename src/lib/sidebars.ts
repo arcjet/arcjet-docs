@@ -319,6 +319,16 @@ export const main = [
     ],
   },
   {
+    label: "Concepts",
+    collapsed: false,
+    items: [
+      {
+        label: "Client IP",
+        link: "/concepts/client-ip",
+      },
+    ],
+  },
+  {
     label: "Advanced",
     collapsed: false,
     items: [

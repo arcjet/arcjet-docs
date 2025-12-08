@@ -1,6 +1,7 @@
-import arcjetNext from "@arcjet/next";
+// @ts-expect-error: TODO add dependency?
+import arcjetFastify from "@arcjet/fastify";
 
-const arcjet = arcjetNext({
+const arcjet = arcjetFastify({
   key: process.env.ARCJET_KEY!,
   proxies: [
     "76.76.21.21", // An IP address.
