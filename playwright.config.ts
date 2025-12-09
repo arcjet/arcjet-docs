@@ -38,8 +38,9 @@ export default defineConfig({
   testDir: "./tests",
   use: {
     baseURL,
+    headless: !!process.env.CI,
     trace: "on-first-retry",
   },
-  workers: process.env.CI ? 8 : undefined,
+  workers: process.env.CI ? 2 : undefined,
   webServer,
 });
