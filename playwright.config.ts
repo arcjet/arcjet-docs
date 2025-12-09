@@ -11,6 +11,11 @@ if (!baseURL) {
   baseURL = "http://localhost:4321";
   webServer = {
     command: "npm run dev",
+    env: {
+      // We need an Arcjet key for the dev server to run, but it doesn't
+      // actually need to be valid for the tests to run.
+      ARCJET_KEY: "ajkey_dummy",
+    },
     port: 4321,
     reuseExistingServer: !process.env.CI,
   };
