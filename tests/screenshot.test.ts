@@ -142,8 +142,9 @@ test.describe("Screenshots", () => {
               y: 0,
             },
             fullPage: true,
+            // Using absolute threshold rather than a ration seems to be more
+            // consistent for these large text-heavy screenshots.
             maxDiffPixels: 100,
-            // maxDiffPixelRatio: 0.005,
             threshold: 0.1,
           },
         );
