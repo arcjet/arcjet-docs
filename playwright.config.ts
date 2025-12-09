@@ -40,6 +40,5 @@ export default defineConfig({
     baseURL,
     trace: "on-first-retry",
   },
-  workers: process.env.CI ? 1 : undefined,
   webServer,
 });
