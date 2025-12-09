@@ -14,6 +14,47 @@ root of the project, from a terminal:
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
 
+## Tests
+
+We use [Playwright](https://playwright.dev/) for integration testing. The tests
+are located in the [`./tests`](./tests) directory.
+
+_These instructions assume you are already running in the provided devcontainer_.
+
+### Run Playwright locally
+
+Playwright will automatically detect if your local dev server is already
+running. **If your local dev server isn't running, Playwright will build and
+preview the site for testing.**
+
+To open Playwright in UI mode:
+
+```sh
+npm run pw:open
+```
+
+To run Playwright tests in the terminal:
+
+```sh
+npm run pw:run
+```
+
+### Updating screenshots
+
+We use screenshot testing to ensure visual consistency. If you make intentional
+changes you will likely need to update the stored screenshots. To do so run:
+
+```sh
+npm run pw:run -- --update-snapshots changed
+```
+
+This will update only the screenshots for tests that have changed. On rare
+occasions you may want to update all screenshots, which you can do with:
+
+```sh
+npm run pw:run -- --update-snapshots all
+```
+
 ## Adding content
 
 ### Add a framework
