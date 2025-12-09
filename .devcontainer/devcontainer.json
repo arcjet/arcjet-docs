@@ -14,14 +14,16 @@
   // Uses array syntax to skip the shell: https://containers.dev/implementors/json_reference/#formatting-string-vs-array-properties
   "updateContentCommand": ["trunk", "install"],
   // Install npm dependencies within the container
-  // Uses array syntax to skip the shell: https://containers.dev/implementors/json_reference/#formatting-string-vs-array-properties
-  "postCreateCommand": ["npm", "ci"],
+  // Uses array syntax to skip default shell. Instead makes explicit sh call:
+  // https://containers.dev/implementors/json_reference/#formatting-string-vs-array-properties
+  "postCreateCommand": ["sh", "-c", "npm ci && npm run pw:install"],
   "customizations": {
     "vscode": {
       "extensions": [
         "astro-build.astro-vscode",
-        "unifiedjs.vscode-mdx",
-        "trunk.io"
+        "ms-playwright.playwright",
+        "trunk.io",
+        "unifiedjs.vscode-mdx"
       ]
     }
   }
