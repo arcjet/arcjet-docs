@@ -138,7 +138,8 @@ test.describe("Screenshots", () => {
               y: 0,
             },
             fullPage: true,
-            maxDiffPixelRatio: 0.005,
+            // Tuned to tolerate subpixel anti-aliasing differences
+            maxDiffPixelRatio: 0.01,
             threshold: 0.1,
           },
         );
