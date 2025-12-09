@@ -1,15 +1,16 @@
 ---
-description: "What environment variables are used by Arcjet."
+description: "What environment variables are used by Arcjet and how to define and read them."
 next: false
 prev: false
 title: "Environment variables"
 ---
 
 Arcjet uses several environment variables that influence its behavior.
-These are [listed and explained][list-of-environment-variables] in this article.
+These are [listed and explained][section-list] in this article.
 
-Arcjet recommends using [`.env` files][dotenv-files] in development and to use
-the dashboard provided by your hosting platform in production.
+Arcjet recommends [defining environment variables][section-define] with `.env`
+files in development and to use the dashboard provided by your hosting platform
+in production.
 
 ## List of environment variables
 
@@ -123,29 +124,66 @@ When present in the Arcjet Next.js SDK,
 its value is sent to Arcjet Cloud API as part of the `extra` fields,
 which are displayed in the [Arcjet dashboard][arcjet-app].
 
-## `.env` files
+## How to define environment variables
+
+In production it is recommended to set environment variables using the
+dashboard provided by the platform where your app runs,
+and not to use `.env` files.
 
 Arcjet recommends using `.env` files in development to set environment
 variables.
 It is also recommended to put `ARCJET_KEY`s in `.env` files.
 As that is a secret, do not commit `.env` files to source control.
 
+### How to load `.env` files
+
 Whether `.env` files are loaded automatically depends on the framework or
 runtime.
-You can typically use an `--env-file` flag or similar to load `.env` files
-explicitly.
 
-In production it is recommended to set environment variables using the
-dashboard provided by the platform where your app runs,
-and not to use `.env` files.
+In [Astro](https://docs.astro.build/en/guides/environment-variables/),
+[Bun](https://bun.com/docs/runtime/environment-variables),
+[Nuxt](https://nuxt.com/docs/4.x/guide/going-further/runtime-config#environment-variables),
+[Remix](https://v2.remix.run/docs/guides/envvars) (in development), and
+[SvelteKit](https://svelte.dev/docs/kit/adapter-node#Environment-variables)
+(with `adapter-node`, in development),
+`.env` files are loaded automatically.
+
+In [Deno](https://docs.deno.com/runtime/reference/env_variables/),
+you can load `.env` files by running with the `--env-file` flag.
+
+In [Node.js](https://nodejs.org/docs/latest/api/environment_variables.html)
+(which includes Fastify, NestJS, and React Router),
+you can load a specific `.env` file by running with the `--env-file=file` flag.
+
+In [Next.js](https://nextjs.org/docs/pages/guides/environment-variables),
+`.env` files are loaded automatically when using `loadEnvConfig` from
+`@next/env`.
+
+## How to read environment variables
+
+Arcjet reads most environment variables automatically.
+The `ARCJET_KEY` value is not read automatically, except in Astro.
+How to read it and other environment variables depends on your framework or
+runtime:
+
+In [Node.js](https://nodejs.org/docs/latest/api/process.html#processenv)
+and [Bun](https://bun.com/docs/runtime/environment-variables#reading-environment-variables),
+you can read environment variables from `process.env`.
+
+In [Deno](https://docs.deno.com/api/deno/~/Deno.Env.get),
+you can read environment variables with `Deno.env.get()`.
+
+In SvelteKit you can read environment variables from
+[`$env/dynamic/private`](https://svelte.dev/docs/kit/$env-dynamic-private) and
+the like.
 
 [arcjet-app]: https://app.arcjet.com
 [arcjet-architecture-api-latency]: /architecture#api-latency
 [arcjet-architecture-cloud-api]: /architecture#arcjet-cloud-api
-[dotenv-files]: #env-files
 [google-firebase-config]: https://firebase.google.com/docs/functions/config-env
 [fly-app-name]: https://fly.io/docs/machines/runtime-environment/#fly_app_name
-[list-of-environment-variables]: #list-of-environment-variables
 [render-render]: https://render.com/docs/environment-variables#render-62
+[section-define]: #how-to-define-environment-variables
+[section-list]: #list-of-environment-variables
 [vercel-git-commit-sha]: https://vercel.com/docs/environment-variables/system-environment-variables#VERCEL_GIT_COMMIT_SHA
 [vercel-vercel]: https://vercel.com/docs/environment-variables/system-environment-variables#VERCEL
