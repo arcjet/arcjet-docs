@@ -127,19 +127,25 @@ which are displayed in the [Arcjet dashboard][arcjet-app].
 
 ## How to define environment variables
 
-In production it is recommended to set environment variables using the
-dashboard provided by the platform where your app runs,
-and not to use `.env` files.
-
 Arcjet recommends using `.env` files in development to set environment
 variables.
 It is also recommended to put `ARCJET_KEY`s in `.env` files.
 As that is a secret, do not commit `.env` files to source control.
 
+In production it is recommended to set environment variables using the
+dashboard provided by the platform where your app runs,
+and not to use `.env` files.
+
+You can also pass environment variables as you run your project:
+
+```sh
+ARCJET_LOG_LEVEL=debug node server.js
+```
+
 ### How to load `.env` files
 
-Whether `.env` files are loaded automatically depends on the framework and
-runtime.
+Whether `.env` files are loaded automatically and how to load them manually
+depends on the framework and runtime.
 
 In [Astro](https://docs.astro.build/en/guides/environment-variables/),
 [Bun](https://bun.com/docs/runtime/environment-variables),
