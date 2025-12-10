@@ -8,21 +8,26 @@ title: "Environment variables"
 Arcjet uses several environment variables that influence its behavior.
 These are [listed and explained][section-list] in this article.
 
-Arcjet recommends [defining environment variables][section-define] based on the guidance and best practices of your chosen framework and hosting provider.
+Arcjet recommends [defining environment variables][section-define] based on the
+guidance and best practices of your chosen framework and hosting provider e.g.
+use `.env.local` files in development and the secrets management of your hosting
+platform in production.
 
-## List of environment variables
+## List of Arcjet environment variables
 
 <a name="arcjet-base-url" />
 
 ### `ARCJET_BASE_URL`
 
+Default: `"https://decide.arcjet.com"`
+
 URL to Arcjet Cloud API.
 Should only be set if directed by Arcjet support.
 See [Architecture: Cloud API][arcjet-architecture-cloud-api] for more info.
 
-default: `"https://decide.arcjet.com"`*
-
-*Note that when deployed to Fly.io the default is automatically changed to `"https://fly.decide.arcjet.com"`.
+Note that when deployed to Fly.io the default is automatically changed to
+`"https://fly.decide.arcjet.com"`, which is a dedicated endpoint that runs on on
+the Fly platform for lower latency.
 
 {/* TODO: `baseUrl` can also be passed in `RemoteClientOptions` of `createRemoteClient`, in which case there is no verification; document that somewhere and link to it from here. */}
 
@@ -95,6 +100,8 @@ The order of log levels from most verbose to least verbose is `debug`, `info`,
 
 <a name="vercel" />
 
+## List of environment variables read by Arcjet
+
 ### `FIREBASE_CONFIG`, `FLY_APP_NAME`, `RENDER`, `VERCEL`
 
 Environment variables set by hosting platforms (`string`).
@@ -127,19 +134,20 @@ which are displayed in the [Arcjet dashboard][arcjet-app].
 
 ## How to define environment variables
 
-Arcjet recommends using `.env` files in development to set environment
-variables.
-It is also recommended to put `ARCJET_KEY`s in `.env` files.
-As that is a secret, do not commit `.env` files to source control.
+Arcjet recommends using `.env.local` files in development to set environment
+variables. Be sure to avoid committing any `.env` files that contain secrets to
+source control.
 
-In production it is recommended to set environment variables using the
-dashboard provided by the platform where your app runs,
-and not to use `.env` files.
+In production it is recommended to set environment variables using the dashboard
+provided by the platform where your app runs, and not to use `.env` files.
 
-You can also pass environment variables as you run your project:
+Node 20+ supports loading environment variables from a local file with
+`--env-file`. If you're using an older version of Node, you can use a package
+like [`dotenv`](https://www.npmjs.com/package/dotenv) to load the environment
+variables from a `.env.local` file.
 
 ```sh
-ARCJET_LOG_LEVEL=debug node server.js
+node --env-file .env.local index.js
 ```
 
 ### How to load `.env` files
