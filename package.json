@@ -3,12 +3,14 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "prepare": "patch-package && npm --workspaces run check",
-    "dev": "astro dev --host",
-    "start": "astro dev",
+    "astro": "astro",
     "build": "astro check --minimumSeverity warning && astro build",
+    "dev": "astro dev --host",
+    "prepare": "patch-package && npm --workspaces run check",
     "preview": "astro preview",
-    "astro": "astro"
+    "pw:install": "playwright install --with-deps chromium --only-shell",
+    "pw:open": "playwright test --ui-host=0.0.0.0",
+    "pw:run": "playwright test"
   },
   "dependencies": {
     "@ai-sdk/openai": "1.3.24",
@@ -98,6 +100,7 @@
     "rollup": "npm:@rollup/wasm-node"
   },
   "devDependencies": {
+    "@playwright/test": "1.57.0",
     "@repo/astro": "workspace:*",
     "@repo/fastify": "workspace:*",
     "@repo/nuxt": "workspace:*",
@@ -107,7 +110,8 @@
     "@types/node": "22.18.13",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
-    "patch-package": "8.0.1"
+    "patch-package": "8.0.1",
+    "playwright": "1.57.0"
   },
   "workspaces": [
     "snippets/*"

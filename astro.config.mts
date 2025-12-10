@@ -8,6 +8,24 @@ import { defineConfig, envField } from "astro/config";
 import arcjet from "@arcjet/astro";
 import starlightLinksValidator from "starlight-links-validator";
 import { main as sidebar } from "./src/lib/sidebars";
+import type { AstroUserConfig } from "astro";
+
+/*
+ * @astrojs/vercel does not support local previews without installing and
+ * authenticating the vercel cli. In order to avoid that in CI and for local
+ * dev we use this environment variable to force usage of the @astrojs/node
+ * adapter. It is a good enough approximation for our use case.
+ */
+
+let adapter: AstroUserConfig["adapter"] = vercelAdapter();
+const isLocalPreview = process.env.ASTRO_FORCE_NODE_ADAPTER === "1";
+if (isLocalPreview) {
+  console.warn("Using @astrojs/node adapter due to ASTRO_FORCE_NODE_ADAPTER=1");
+  const { default: nodeAdapter } = await import("@astrojs/node");
+  adapter = nodeAdapter({
+    mode: "standalone",
+  });
+}
 
 const jsoncString = fs.readFileSync(
   new URL(`./src/lib/code-dark.json`, import.meta.url),
@@ -22,6 +40,7 @@ const ajThemeLight = ExpressiveCodeTheme.fromJSONString(jsoncStringLight);
 
 // https://astro.build/config
 export default defineConfig({
+  adapter,
   env: {
     schema: {
       PUBLIC_POSTHOG_KEY: envField.string({
@@ -44,7 +63,6 @@ export default defineConfig({
     },
   },
   site: "https://docs.arcjet.com",
-  adapter: vercelAdapter(),
   output: "server",
   // This is a fix for https://github.com/withastro/astro/issues/8297
   vite: {
