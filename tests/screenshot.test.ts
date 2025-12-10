@@ -95,9 +95,15 @@ test.describe("Screenshots", () => {
       test(`${name}-${colorScheme}`, async ({ page }) => {
         await page.emulateMedia({ colorScheme });
 
-        await page.goto(path, {
+        const status = await page.goto(path, {
           waitUntil: "networkidle",
         });
+
+        // Verify the page loaded correctly and we are on the expected path.
+
+        expect(status?.ok()).toBeTruthy();
+        const actualUrl = new URL(page.url());
+        expect(actualUrl.pathname).toBe(path);
 
         await page.evaluate(() => {
           // Astro dev toolbar interferes with screenshots.
