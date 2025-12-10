@@ -16,11 +16,13 @@ Arcjet recommends [defining environment variables][section-define] based on the 
 
 ### `ARCJET_BASE_URL`
 
-URL to Arcjet Cloud API
-(default: `"https://fly.decide.arcjet.com"` on Fly,
-`"https://decide.arcjet.com"` otherwise).
+URL to Arcjet Cloud API.
 Should only be set if directed by Arcjet support.
 See [Architecture: Cloud API][arcjet-architecture-cloud-api] for more info.
+
+default: `"https://decide.arcjet.com"`*
+
+*Note that when deployed to Fly.io the default is automatically changed to `"https://fly.decide.arcjet.com"`.
 
 {/* TODO: `baseUrl` can also be passed in `RemoteClientOptions` of `createRemoteClient`, in which case there is no verification; document that somewhere and link to it from here. */}
 
