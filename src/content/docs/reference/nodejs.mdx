@@ -157,7 +157,7 @@ execution ordering is automatically optimized for performance.
 ### Environment variables
 
 The Arcjet Node.js SDK uses several environment variables to configure its behavior.
-See [Concepts: Environment variables](/concepts/environment) for more info.
+See [Concepts: Environment variables](/environment) for more info.
 The `ARCJET_KEY` environment variable is not read automatically and must be passed
 explicitly.
 
@@ -446,7 +446,7 @@ fields we have data for will be returned:
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
 not block all requests. The SDK will also time out and fail open after 1000ms in
-development (see [`ARCJET_ENV`](/concepts/environment#arcjet-env)) and 500ms
+development (see [`ARCJET_ENV`](/environment#arcjet-env)) and 500ms
 otherwise. However, in most cases, the response time will be less than 20-30ms.
 
 If there is an error condition when processing the rule, Arcjet will return an
@@ -501,7 +501,7 @@ Arcjet will automatically detect the IP address of the client making the request
 based on the context provided. The implementation is open source in our
 [@arcjet/ip package](https://github.com/arcjet/arcjet-js/blob/main/ip).
 
-in development (see [`ARCJET_ENV`](/concepts/environment#arcjet-env)),
+in development (see [`ARCJET_ENV`](/environment#arcjet-env)),
 we allow private/internal addresses so that the SDKs work correctly locally.
 
 ## Client override
