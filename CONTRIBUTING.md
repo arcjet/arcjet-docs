@@ -16,8 +16,8 @@ root of the project, from a terminal:
 
 ## Tests
 
-We use [Playwright](https://playwright.dev/) for integration testing. The tests
-are located in the [`./tests`](./tests) directory.
+We use [Playwright](https://playwright.dev/) for browser testing. The tests are
+located in the [`./tests`](./tests) directory.
 
 _These instructions assume you are already running in the provided devcontainer_.
 
