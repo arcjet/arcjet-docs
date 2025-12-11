@@ -122,9 +122,8 @@ example in this case the key is defined in an environment variable called
 import arcjet from "arcjet";
 
 const aj = arcjet({
-  // Get your site key from https://app.arcjet.com
-  // and set it as an environment variable rather than hard coding.
-  // See: https://www.npmjs.com/package/dotenv
+  // Your Arcjet key from https://app.arcjet.com
+  // Read more: <https://docs.arcjet.com/environment#arcjet-key>.
   key: process.env.ARCJET_KEY,
   rules: [
     // Protect against common attacks with Arcjet Shield
@@ -157,12 +156,14 @@ VPN/proxy detection. In production, if the IP is invalid (e.g. `127.0.0.1`), the
 request is rejected to prevent spoofing.
 
 In development, private/internal addresses are common. To avoid errors, set the
-environment variable `ARCJET_ENV` to `development`. This will disable the IP
+environment variable [`ARCJET_ENV`](/environment#arcjet-env) to
+`development`. This will disable the IP
 address validation and allow you to test your application without errors.
 
 This log means Arcjet is falling back to `127.0.0.1` because it's running in
-development mode. If this appears in production, check that `ARCJET_ENV` is not
-incorrectly set to `development`.
+development mode. If this appears in production, check that
+[`ARCJET_ENV`](/environment#arcjet-env) is not incorrectly set to
+`development`.
 
 ### generateFingerprint: ip is empty / [failed_precondition] client IP not provided
 
@@ -173,7 +174,8 @@ production. In production environments we disallow private/internal addresses,
 but they are allowed in development to allow you to test locally.
 
 You can force the SDK to run in development mode by setting the environment
-variable `ARCJET_ENV` to `development` in your `.env.local` file:
+variable [`ARCJET_ENV`](/environment#arcjet-env) to `development` in
+your `.env.local` file:
 
 ```ini title=".env.local"
 ARCJET_ENV=development
@@ -260,9 +262,8 @@ Shield rules. To restore the old behavior you can add a simple Shield rule:
 import arcjet, { shield } from "@arcjet/next";
 
 const aj = arcjet({
-  // Get your site key from https://app.arcjet.com
-  // and set it as an environment variable rather than hard coding.
-  // See: https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables
+  // Arcjet key for your site (from <https://app.arcjet.com>).
+  // More info: <https://docs.arcjet.com/environment#arcjet-key>.
   key: process.env.ARCJET_KEY,
   rules: [
     // Protect against common attacks with Arcjet Shield

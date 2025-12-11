@@ -1,11 +1,14 @@
 React Router loads environment variables for you in development and expects
 you to define them in your hosting platform in production.
-Arcjet integrations read from `ARCJET_*` environment variables.
-Create a `.env` file in the root of your project and add your key:
+Create a `.env` file in the root of your project and add your key.
+You can also set
+[`ARCJET_ENV`](https://docs.arcjet.com/environment#arcjet-env)
+and other values in `.env` files.
 
 ```ini title=".env"
-# Run in development mode; leave this unset in production.
+# Run Arcjet in development <https://docs.arcjet.com/environment#arcjet-env>.
 ARCJET_ENV=development
-# Get your site key at <https://app.arcjet.com>.
+# Arcjet key for your site (from <https://app.arcjet.com>).
+# More info: <https://docs.arcjet.com/environment#arcjet-key>.
 ARCJET_KEY=ajkey_yourkey
 ```

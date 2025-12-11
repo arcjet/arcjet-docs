@@ -1,15 +1,12 @@
 Add your key to a `.env` file in your project root.
+You can also set
+[`ARCJET_ENV`](https://docs.arcjet.com/environment#arcjet-env)
+and other values in `.env` files.
 
 ```ini title=".env"
-# NODE_ENV is not set automatically, so tell Arcjet we're in dev
-# You can leave this unset in prod
+# Run Arcjet in development <https://docs.arcjet.com/environment#arcjet-env>.
 ARCJET_ENV=development
-# Get your site key from https://app.arcjet.com
+# Arcjet key for your site (from <https://app.arcjet.com>).
+# More info: <https://docs.arcjet.com/environment#arcjet-key>.
 ARCJET_KEY=ajkey_yourkey
 ```
-
-:::caution[IP Address]
-Since NestJS doesn't set `NODE_ENV` for you, you also need to set `ARCJET_ENV`
-in your environment file. This allows Arcjet to accept a local IP address for
-development purposes.
-:::

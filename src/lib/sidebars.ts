@@ -400,6 +400,10 @@ export const main = [
         link: "/best-practices",
       },
       {
+        label: "Environment variables",
+        link: "/environment",
+      },
+      {
         label: "Platform",
         collapsed: true,
         items: [

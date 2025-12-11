@@ -186,18 +186,10 @@ execution ordering is automatically optimized for performance.
 
 ### Environment variables
 
-- `ARCJET_BASE_URL` - Will override the Cloud API which the SDK communicates
-  with. This defaults to `https://decide.arcjet.com` and should only be changed
-  if directed by Arcjet support.
-- `ARCJET_LOG_LEVEL` - The log level to use, either `debug`, `info`, `warn`, or
-  `error`. Defaults to `warn`. If a rule is in dry run mode, a warning will be
-  output with the decision that would have been applied.
-- `ARCJET_ENV` - Set to `development` to force Arcjet into development mode.
-  This will allow private/internal addresses so that the SDKs work correctly
-  locally. You usually do not need to set this because it uses `NODE_ENV` when
-  set. See
-  [Troubleshooting](/troubleshooting#generatefingerprint-ip-is-empty--failed_precondition-client-ip-not-provided)
-  for when this may be needed.
+The Arcjet Bun SDK uses several environment variables to configure its behavior.
+See [Concepts: Environment variables](/environment) for more info.
+The `ARCJET_KEY` environment variable is not read automatically and must be passed
+explicitly.
 
 ### Custom logging
 
@@ -486,8 +478,8 @@ more information about these properties.
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
 not block all requests. The SDK will also time out and fail open after 1000ms
-when `NODE_ENV` or `ARCJET_ENV` is `development` and 500ms otherwise. However,
-in most cases, the response time will be less than 20-30ms.
+in development (see [`ARCJET_ENV`](/environment#arcjet-env)) and 500ms
+otherwise. However, in most cases, the response time will be less than 20-30ms.
 
 If there is an error condition when processing the rule, Arcjet will return an
 `ERROR` result for that rule and you can check the `message` property on the rule's
@@ -541,9 +533,8 @@ Arcjet will automatically detect the IP address of the client making the request
 based on the context provided. The implementation is open source in our
 [@arcjet/ip package](https://github.com/arcjet/arcjet-js/blob/main/ip).
 
-In development environments (`NODE_ENV === "development"` or
-`ARCJET_ENV === "development"`), we allow private/internal addresses so that the
-SDKs work correctly locally.
+In development (see [`ARCJET_ENV`](/environment#arcjet-env)),
+we allow private/internal addresses so that the SDKs work correctly locally.
 
 ## Client override
 
