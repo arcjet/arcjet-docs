@@ -1,17 +1,4 @@
 {
-  "name": "docs",
-  "version": "0.0.1",
-  "type": "module",
-  "scripts": {
-    "astro": "astro",
-    "build": "astro check --minimumSeverity warning && astro build",
-    "dev": "astro dev --host",
-    "prepare": "patch-package && npm --workspaces run check",
-    "preview": "astro preview",
-    "pw:install": "playwright install --with-deps chromium --only-shell",
-    "pw:open": "playwright test --ui-host=0.0.0.0",
-    "pw:run": "playwright test"
-  },
   "dependencies": {
     "@ai-sdk/openai": "1.3.24",
     "@arcjet/astro": "1.0.0-beta.15",
@@ -89,16 +76,6 @@
     "zod": "3.25.76",
     "zod-validation-error": "3.5.3"
   },
-  "overrides": {
-    "@sveltejs/kit": {
-      "cookie": "^0.7.2"
-    },
-    "@vercel/routing-utils": {
-      "path-to-regexp": "^6.3.0"
-    },
-    "glob": "^11.1.0",
-    "rollup": "npm:@rollup/wasm-node"
-  },
   "devDependencies": {
     "@playwright/test": "1.57.0",
     "@repo/astro": "workspace:*",
@@ -113,6 +90,29 @@
     "patch-package": "8.0.1",
     "playwright": "1.57.0"
   },
+  "name": "docs",
+  "overrides": {
+    "@sveltejs/kit": {
+      "cookie": "^0.7.2"
+    },
+    "@vercel/routing-utils": {
+      "path-to-regexp": "^6.3.0"
+    },
+    "glob": "^11.1.0",
+    "rollup": "npm:@rollup/wasm-node"
+  },
+  "scripts": {
+    "astro": "astro",
+    "build": "astro check --minimumSeverity warning && astro build",
+    "dev": "astro dev --host",
+    "prepare": "patch-package && npm --workspaces run check",
+    "preview": "astro preview",
+    "pw:install": "playwright install --with-deps chromium --only-shell",
+    "pw:open": "playwright test --ui-host=0.0.0.0",
+    "pw:run": "playwright test"
+  },
+  "type": "module",
+  "version": "0.0.1",
   "workspaces": [
     "snippets/*"
   ]
