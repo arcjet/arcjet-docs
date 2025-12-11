@@ -2,7 +2,7 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node
 {
   "name": "arcjet-docs",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:24",
   // Features to add to the dev container. More info: https://containers.dev/features.
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2.5.2": {},
@@ -10,6 +10,7 @@
   },
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   // "forwardPorts": [],
+  "onCreateCommand": ["bash", "-i", "-c", "nvm install 24 --latest-npm"],
   // Install trunk tools inside the container
   // Uses array syntax to skip the shell: https://containers.dev/implementors/json_reference/#formatting-string-vs-array-properties
   "updateContentCommand": ["trunk", "install"],
