@@ -3,6 +3,14 @@
 @use "@/styles/partials/_vars";
 @use "@/styles/utils/expressive-code";
 
+// STARLIGHT OVERRIDES
+
+// Revert change that causes table values to overflow last character
+// See: https://github.com/withastro/starlight/releases/tag/%40astrojs%2Fstarlight%400.37.0
+code {
+  overflow-wrap: anywhere;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // LAYOUT
 :root {
