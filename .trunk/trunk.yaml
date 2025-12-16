@@ -35,6 +35,11 @@ lint:
   threshold:
     - linters: [markdownlint]
       level: medium
+  ignore:
+    - linters: [ALL]
+      paths:
+        # Ignore playwright snapshots
+        - "**/*-snapshots/**"
 actions:
   enabled:
     - trunk-announce

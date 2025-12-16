@@ -15,6 +15,7 @@ export const collections = {
     loader: docsLoader(),
     schema: docsSchema({
       extend: z.object({
+        generateMarkdownRoute: z.boolean().optional().default(false),
         ajToc: z.custom<TocNode[]>(),
         frameworks: z.custom<FrameworkKey[]>().optional(),
         titleByFramework: z
