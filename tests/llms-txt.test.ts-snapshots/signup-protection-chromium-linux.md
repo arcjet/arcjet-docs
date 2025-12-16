@@ -4,18 +4,24 @@ Use it to cut down on signup spam, form spam, and abusive signups before they be
 
 **What is Arcjet?** [Arcjet](https://arcjet.com) helps developers protect their apps in just a few lines of code. Bot detection. Rate limiting. Email validation. Attack protection. Data redaction. A developer-first approach to security.
 
-## When to use Arcjet signup form protection
+When to use Arcjet signup form protection
+-----------------------------------------
 
 [Section titled “When to use Arcjet signup form protection”](#when-to-use-arcjet-signup-form-protection)
 
 Use signup form protection when you want to reduce:
 
-- **Signup spam and fake accounts** Prevent automated tools and spam bots from mass-creating free accounts or test accounts.
-- **Lead form spam and low-quality leads** Protect marketing forms, waitlist forms, and lead gen forms from junk submissions that pollute your CRM and analytics, and waste sales time.
-- **Account fraud and abuse** Make it more expensive for attackers to create large numbers of accounts for abuse (for example, coupon abuse, referral abuse, scraping, or credential stuffing).
-- **Disposable and throwaway signups** Block or flag signups that use disposable email addresses so you can focus on real users and legitimate leads.
+*   **Signup spam and fake accounts** Prevent automated tools and spam bots from mass-creating free accounts or test accounts.
+    
+*   **Lead form spam and low-quality leads** Protect marketing forms, waitlist forms, and lead gen forms from junk submissions that pollute your CRM and analytics, and waste sales time.
+    
+*   **Account fraud and abuse** Make it more expensive for attackers to create large numbers of accounts for abuse (for example, coupon abuse, referral abuse, scraping, or credential stuffing).
+    
+*   **Disposable and throwaway signups** Block or flag signups that use disposable email addresses so you can focus on real users and legitimate leads.
+    
 
-## How Arcjet signup form protection works
+How Arcjet signup form protection works
+---------------------------------------
 
 [Section titled “How Arcjet signup form protection works”](#how-arcjet-signup-form-protection-works)
 
@@ -33,9 +39,9 @@ The product combines three key components:
 
 Examples:
 
-- Limit form submissions per IP, per user agent, or per API key.
-- Slow down attempts to brute-force signup flows or abuse referral codes.
-- Prevent a single client from flooding your signup endpoint.
+*   Limit form submissions per IP, per user agent, or per API key.
+*   Slow down attempts to brute-force signup flows or abuse referral codes.
+*   Prevent a single client from flooding your signup endpoint.
 
 Legitimate users typically submit a signup form only once or a few times within a short time window, so bursts of submissions are a strong indicator of signup spam or automated abuse.
 
@@ -47,9 +53,9 @@ Legitimate users typically submit a signup form only once or a few times within 
 
 For typical signup and lead forms, you expect human users, not bots. Any automated submissions are likely to be:
 
-- Bulk account creation for abuse.
-- Automated signup spam for SEO links or junk content.
-- Fake lead submissions to poison your CRM or forms.
+*   Bulk account creation for abuse.
+*   Automated signup spam for SEO links or junk content.
+*   Fake lead submissions to poison your CRM or forms.
 
 Where you do have legitimate automated clients (for example, monitoring or synthetic tests), you can explicitly allow them while still blocking unknown bots and suspicious automation.
 
@@ -59,16 +65,17 @@ Where you do have legitimate automated clients (for example, monitoring or synth
 
 [Email validation](/email-validation) validates and verifies email addresses used in signups and lead forms so you can:
 
-- Confirm that the address is syntactically valid.
-- Check that the domain can receive email (MX records).
-- Identify disposable / temporary email providers.
-- Improve the quality of accounts and leads you accept.
+*   Confirm that the address is syntactically valid.
+*   Check that the domain can receive email (MX records).
+*   Identify disposable / temporary email providers.
+*   Improve the quality of accounts and leads you accept.
 
 This helps you filter out disposable or undeliverable emails commonly used in signup fraud and lead form spam, and ensures important messages such as verification and onboarding emails actually reach users.
 
 By combining these three protections, Arcjet signup form protection reduces signup spam, form spam, and fake accounts, while letting legitimate users sign up with minimal friction.
 
-## Availability
+Availability
+------------
 
 [Section titled “Availability”](#availability)
 
@@ -92,4 +99,5 @@ Enterprise
 
 ✅ Usage based pricing
 
-## Discussion
+Discussion
+----------

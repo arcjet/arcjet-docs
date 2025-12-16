@@ -10,27 +10,31 @@ This guide shows how to use the package [`@arcjet/fastify`](https://www.npmjs.co
 
 **What is Arcjet?** [Arcjet](https://arcjet.com) helps developers protect their apps in just a few lines of code. Bot detection. Rate limiting. Email validation. Attack protection. Data redaction. A developer-first approach to security.
 
-## Quick start
+Quick start
+-----------
 
 [Section titled “Quick start”](#quick-start)
 
 See the [Fastify quick start](/get-started?f=fastify).
 
-## Requirements
+Requirements
+------------
 
 [Section titled “Requirements”](#requirements)
 
-- Fastify 5 or later
-- Node.js 20 or later, or similar runtime
-- ESM
+*   Fastify 5 or later
+*   Node.js 20 or later, or similar runtime
+*   ESM
 
-## Install
+Install
+-------
 
 [Section titled “Install”](#install)
 
 astro-island
 
-## Use
+Use
+---
 
 [Section titled “Use”](#use)
 
@@ -46,11 +50,11 @@ Build Arcjet clients as few times as possible. That means _outside_ request hand
 
 The main way to configure Arcjet is to pass options to the `arcjet` function. The fields are:
 
-- `characteristics` (`Array<string>`, default: `["src.ip"]`) — characteristics to track a user by; can also be passed to rules
-- `client` (`Client`, optional) — client used to make requests to the Cloud API
-- `key` (`string`, **required**) — API key to identify the site in Arcjet (typically through `process.env.ARCJET_KEY`)
-- `log` (`ArcjetLogger`, optional) — log interface to emit useful info
-- `rules` (`Array<ArcjetRule>`, **required**) — rules to use (order insensitive)
+*   `characteristics` (`Array<string>`, default: `["src.ip"]`) — characteristics to track a user by; can also be passed to rules
+*   `client` (`Client`, optional) — client used to make requests to the Cloud API
+*   `key` (`string`, **required**) — API key to identify the site in Arcjet (typically through `process.env.ARCJET_KEY`)
+*   `log` (`ArcjetLogger`, optional) — log interface to emit useful info
+*   `rules` (`Array<ArcjetRule>`, **required**) — rules to use (order insensitive)
 
 Get the Arcjet key for your site from the [Arcjet dashboard](https://app.arcjet.com). Set it as an environment variable called `ARCJET_KEY` in your `.env` file:
 
@@ -90,12 +94,12 @@ Use the `protect` function to protect a request from Fastify. Some rules, such a
 
 The `ArcjetDecision` that `protect` resolves to has the following fields:
 
-- `conclusion` (`"ALLOW"`, `"DENY"`, or `"ERROR"`) — what to do with the request
-- `id` (`string`) — ID for the request; local decisions start with `lreq_` and remote ones with `req_`
-- `ip` (`ArcjetIpDetails`) — analysis of the client IP address
-- `reason` (`ArcjetReason`) — more info about the conclusion
-- `results` (`Array<ArcjetRuleResult>`) — results of each rule
-- `ttl` (`number`) — time-to-live for the decision in seconds; `"DENY"` decisions are cached by `@arcjet/fastify` for this duration
+*   `conclusion` (`"ALLOW"`, `"DENY"`, or `"ERROR"`) — what to do with the request
+*   `id` (`string`) — ID for the request; local decisions start with `lreq_` and remote ones with `req_`
+*   `ip` (`ArcjetIpDetails`) — analysis of the client IP address
+*   `reason` (`ArcjetReason`) — more info about the conclusion
+*   `results` (`Array<ArcjetRuleResult>`) — results of each rule
+*   `ttl` (`number`) — time-to-live for the decision in seconds; `"DENY"` decisions are cached by `@arcjet/fastify` for this duration
 
 This top-level decision takes the results from each `"LIVE"` rule into account. If one of them is `"DENY"` then the overall conclusion will be `"DENY"`. Otherwise, if one of them is `"ERROR"`, then `"ERROR"`. Otherwise, it will be `"ALLOW"`. The `reason` and `ttl` fields reflect this conclusion.
 
@@ -105,7 +109,8 @@ The results of `"DRY_RUN"` rules do not affect this overall decision, but are in
 
 The `ip` field is available when the Cloud API was called and contains IP geolocation and reputation info. You can use this field to customize responses or you can use [Arcjet Filters](/filters) to make decisions based on it. See the [IP geolocation](/blueprints/ip-geolocation) and [IP reputation](/blueprints/vpn-proxy-detection) blueprints for more info.
 
-## Errors
+Errors
+------
 
 [Section titled “Errors”](#errors)
 
@@ -124,7 +129,8 @@ Arcjet fails open so that a service issue, misconfiguration, or [network timeout
 34await fastify.listen({ port: 3000 });
 ```
 
-## Custom logs
+Custom logs
+-----------
 
 [Section titled “Custom logs”](#custom-logs)
 
@@ -139,7 +145,8 @@ Then, create a custom logger that will log to JSON in production and pretty prin
 10const arcjet = arcjetFastify({11  key: arcjetKey,12  log: pino({13    // Warn in development, debug otherwise.14    level:15      process.env.ARCJET_LOG_LEVEL ||16      (process.env.ARCJET_ENV === "development" ? "debug" : "warn"),17    // Pretty print in development, JSON otherwise.18    transport:19      process.env.ARCJET_ENV === "development"20        ? { options: { colorize: true }, target: "pino-pretty" }21        : undefined,22  }),23  rules: [24    // …25  ],26});
 ```
 
-## Custom client
+Custom client
+-------------
 
 [Section titled “Custom client”](#custom-client)
 
@@ -152,6 +159,7 @@ You can pass a client to change the behavior when connecting to the Cloud API. U
 9const arcjet = arcjetFastify({10  key: arcjetKey,11  client: createRemoteClient({ timeout: 3000 }),12  rules: [13    // …14  ],15});
 ```
 
----
+* * *
 
-## Discussion
+Discussion
+----------

@@ -8,20 +8,22 @@ You can block common types of PII such as email addresses, card numbers, IP addr
 
 Sensitive info works on the request body. To detect specific information in headers or other request fields, use [Arcjet filters](/filters).
 
-## When to use Arcjet sensitive info detection
+When to use Arcjet sensitive info detection
+-------------------------------------------
 
 [Section titled “When to use Arcjet sensitive info detection”](#when-to-use-arcjet-sensitive-info-detection)
 
 Use sensitive information detection when you want to:
 
-- Reduce your compliance burden by avoiding storage of PII and other regulated data.
-- Prevent users from pasting card numbers or other sensitive data into generic text fields (for example, support forms, feedback forms, or chat boxes).
-- Enforce rules that certain endpoints must not receive PII at all.
-- Prevent sensitive data being sent to third-party integrations, such as support ticket systems or LLMs.
+*   Reduce your compliance burden by avoiding storage of PII and other regulated data.
+*   Prevent users from pasting card numbers or other sensitive data into generic text fields (for example, support forms, feedback forms, or chat boxes).
+*   Enforce rules that certain endpoints must not receive PII at all.
+*   Prevent sensitive data being sent to third-party integrations, such as support ticket systems or LLMs.
 
 For email addresses specifically, you can also use [Arcjet email validation](/email-validation) to validate and verify addresses before creating accounts or sending email.
 
-## How Arcjet sensitive info detection works
+How Arcjet sensitive info detection works
+-----------------------------------------
 
 [Section titled “How Arcjet sensitive info detection works”](#how-arcjet-sensitive-info-detection-works)
 
@@ -40,10 +42,10 @@ All of this logic runs locally with a WebAssembly sandbox that runs in-process. 
 
 The built-in entities include:
 
-- **Card numbers** (such as `4242424242424242`)
-- **Email addresses** (such as `alice@arcjet.com`)
-- **IP addresses** (such as `127.0.0.1`)
-- **Phone numbers** (such as `+1 (555) 555-5555`)
+*   **Card numbers** (such as `4242424242424242`)
+*   **Email addresses** (such as `alice@arcjet.com`)
+*   **IP addresses** (such as `127.0.0.1`)
+*   **Phone numbers** (such as `+1 (555) 555-5555`)
 
 You can combine these with your own custom detectors to cover additional data types specific to your application.
 
@@ -55,7 +57,8 @@ Sensitive info detection runs entirely locally. Arcjet reports only the decision
 
 This lets you enforce PII detection and compliance controls while keeping sensitive data within your own environment.
 
-## Availability
+Availability
+------------
 
 [Section titled “Availability”](#availability)
 
@@ -81,4 +84,5 @@ Enterprise
 
 ✅
 
-## Discussion
+Discussion
+----------

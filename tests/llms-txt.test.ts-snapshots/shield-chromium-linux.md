@@ -6,7 +6,8 @@ Shield is a fully managed, application-aware web application firewall. It tracks
 
 Other platforms also provide WAFs, but they usually sit in front of your application without access to your business logic. Arcjet Shield runs as part of the Arcjet SDK inside your application, so you can customize responses, flag accounts, or trigger additional checks instead of only blocking requests. You do not need any additional infrastructure.
 
-## When to use Arcjet Shield
+When to use Arcjet Shield
+-------------------------
 
 [Section titled “When to use Arcjet Shield”](#when-to-use-arcjet-shield)
 
@@ -14,17 +15,18 @@ Use Arcjet Shield WAF to protect your application from common web attacks and su
 
 Shield is most effective for requests that seem innocent when taken individually but form suspicious traffic when seen together. Examples:
 
-- Repeated requests for admin panels or well-known login paths.
-- Scans for backup files, configuration files, or version control directories.
-- Probing for injection vulnerabilities using crafted query strings or payloads.
+*   Repeated requests for admin panels or well-known login paths.
+*   Scans for backup files, configuration files, or version control directories.
+*   Probing for injection vulnerabilities using crafted query strings or payloads.
 
 We recommend using Arcjet Shield WAF alongside other Arcjet features such as:
 
-- [Arcjet bot protection](/bot-protection) to detect and control bot traffic.
-- [Arcjet filters](/filters) to apply custom per-request rules.
-- [Arcjet rate limiting](/rate-limiting) to impose hard limits on request volume.
+*   [Arcjet bot protection](/bot-protection) to detect and control bot traffic.
+*   [Arcjet filters](/filters) to apply custom per-request rules.
+*   [Arcjet rate limiting](/rate-limiting) to impose hard limits on request volume.
 
-## How Arcjet Shield works
+How Arcjet Shield works
+-----------------------
 
 [Section titled “How Arcjet Shield works”](#how-arcjet-shield-works)
 
@@ -38,16 +40,16 @@ Tracking happens in the Arcjet Cloud API and does not require any additional inf
 
 Shield includes the latest rules from the [OWASP Core Rule Set](https://coreruleset.org/), which protect against common attack categories such as:
 
-- SQL injection (SQLi)
-- Cross-site scripting (XSS)
-- Local file inclusion (LFI)
-- Remote file inclusion (RFI)
-- PHP code injection
-- Java code injection
-- HTTPoxy
-- Shellshock
-- Unix/Windows shell injection
-- Session fixation
+*   SQL injection (SQLi)
+*   Cross-site scripting (XSS)
+*   Local file inclusion (LFI)
+*   Remote file inclusion (RFI)
+*   PHP code injection
+*   Java code injection
+*   HTTPoxy
+*   Shellshock
+*   Unix/Windows shell injection
+*   Session fixation
 
 These rules provide broad coverage of known attack patterns and are combined with Arcjet’s own analysis of request patterns over time.
 
@@ -59,9 +61,9 @@ Clients are tracked by configurable [fingerprints](/fingerprints) that include I
 
 To ensure Shield behaves correctly, choose fingerprint characteristics that match your concept of a “user”. For example:
 
-- IP address only (per-IP behavior).
-- IP + authentication token (per logged-in user).
-- API key or client ID (per-client behavior for APIs).
+*   IP address only (per-IP behavior).
+*   IP + authentication token (per logged-in user).
+*   API key or client ID (per-client behavior for APIs).
 
 Aligning fingerprints with the right identifiers avoids blocking the wrong users and makes Shield’s decisions more meaningful.
 
@@ -73,13 +75,14 @@ When a request is blocked by Arcjet Shield WAF, the Arcjet SDK includes detailed
 
 For example:
 
-- On user-facing pages, you might return a friendly error page.
-- In an API, you might return a structured error that fits your JSON or XML schema.
-- In critical flows such as checkout or sensitive account actions, you might log the request context, flag the account for review, or require additional verification in case the request came from a legitimate user.
+*   On user-facing pages, you might return a friendly error page.
+*   In an API, you might return a structured error that fits your JSON or XML schema.
+*   In critical flows such as checkout or sensitive account actions, you might log the request context, flag the account for review, or require additional verification in case the request came from a legitimate user.
 
 Generic, network-level protections are often insufficient for modern applications where context and sensitivity vary across routes and features. Arcjet Shield gives developers request-level security with application context, without sacrificing usability.
 
-## Is Arcjet Shield a Web Application Firewall (WAF)?
+Is Arcjet Shield a Web Application Firewall (WAF)?
+--------------------------------------------------
 
 [Section titled “Is Arcjet Shield a Web Application Firewall (WAF)?”](#is-arcjet-shield-a-web-application-firewall-waf)
 
@@ -96,7 +99,8 @@ Arcjet Shield solves these problems by being part of the Arcjet SDK, integrated 
 
 Because Shield runs alongside your code, engineers can integrate results into application logic, control how suspicious requests are handled, and test behavior locally and in staging before deploying to production.
 
-## Availability
+Availability
+------------
 
 [Section titled “Availability”](#availability)
 
@@ -142,4 +146,5 @@ Enterprise
 
 ✅
 
-## Discussion
+Discussion
+----------

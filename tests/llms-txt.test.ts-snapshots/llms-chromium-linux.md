@@ -158,15 +158,15 @@ The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
 ## Product philosophy
 
 1. Proper security protections need the full context of the application, which
-   is why security rules and protections should be located alongside the code they
-   are protecting.
+is why security rules and protections should be located alongside the code they
+are protecting.
 
 2. Security rules should be easy to test. You should be able to run them in
-   development as well as production.
+development as well as production.
 
 3. Arcjet should not interfere with the rest of the application. It should be
-   easy to install, must not add significant latency to requests, and should not
-   require changes to the application’s architecture.
+easy to install, must not add significant latency to requests, and should not
+require changes to the application’s architecture.
 
 Find out more at https://docs.arcjet.com/architecture
 
@@ -175,51 +175,51 @@ Find out more at https://docs.arcjet.com/architecture
 - Arcjet runs server-side and does not require any client-side integration.
 
 - Arcjet is a paid service, but it offers a free tier with limited features.
-  Free tier users do not get access to more advanced bot detection, have limited
-  IP analysis data (country only), and cannot use the email validation or
-  sensitive information detection features. See https://arcjet.com/pricing for
-  details.
+Free tier users do not get access to more advanced bot detection, have limited
+IP analysis data (country only), and cannot use the email validation or
+sensitive information detection features. See https://arcjet.com/pricing for
+details.
 
 - Arcjet currently supports JS with SDKs for Astro, Bun, Deno, Fastify, NestJS,
-  Next.js, Node.js, Nuxt, React Router, Remix, and SvelteKit.
+Next.js, Node.js, Nuxt, React Router, Remix, and SvelteKit.
 
 ## Tips
 
 - We recommend creating a single instance of the Arcjet object and reusing it
-  throughout your application. This is because the SDK caches decisions and
-  configuration to improve performance. The pattern we use is to create a utility
-  file that exports the Arcjet object and then import it where you need it, using
-  `withRule` to attach rules specific to each route or location in your app. See
-  our example Next.js app for how this is done:
-  https://github.com/arcjet/example-nextjs/blob/main/lib/arcjet.ts
+throughout your application. This is because the SDK caches decisions and
+configuration to improve performance. The pattern we use is to create a utility
+file that exports the Arcjet object and then import it where you need it, using
+`withRule` to attach rules specific to each route or location in your app. See
+our example Next.js app for how this is done:
+https://github.com/arcjet/example-nextjs/blob/main/lib/arcjet.ts 
 
 - Create the Arcjet object outside of the route handler to avoid creating a new
-  instance on every request. `protect()` should be called inside the route handler.
+instance on every request. `protect()` should be called inside the route handler.
 
 - We do not recommend using Arcjet in middleware. This is because middleware
-  lacks the context of the route handler, making it difficult to apply
-  route-specific rules or customize responses based on the request. Our
-  recommendation is to call `protect()` in each route handler where you need it.
-  This offers most flexibility and allows you to customize the behavior for each
-  route.
+lacks the context of the route handler, making it difficult to apply
+route-specific rules or customize responses based on the request. Our
+recommendation is to call `protect()` in each route handler where you need it.
+This offers most flexibility and allows you to customize the behavior for each
+route.
 
 - The Arcjet `protect()` function should be called only once per request. Pay
-  attention when implementing Arcjet in middleware and in route handlers to ensure
-  that the function is not called multiple times. Use a middleware helper or check
-  the matcher config to ensure that Arcjet in middleware does not get called as
-  well as in the route handler. Next.js renamed `middleware.js` to `proxy.js` in
-  Next.js 16.
+attention when implementing Arcjet in middleware and in route handlers to ensure
+that the function is not called multiple times. Use a middleware helper or check
+the matcher config to ensure that Arcjet in middleware does not get called as
+well as in the route handler. Next.js renamed `middleware.js` to `proxy.js` in
+Next.js 16.
 
 - Each rule can be configured in either `LIVE` or `DRY_RUN` mode. When in
-  `DRY_RUN` mode, each rule will return its decision, but the end conclusion will
-  always be `ALLOW`. This is useful for testing. As these are configured in code,
-  you can use other mechanisms to set the mode. For example, you could could use
-  an existing feature flag system to dynamically change the rule mode.
+`DRY_RUN` mode, each rule will return its decision, but the end conclusion will
+always be `ALLOW`. This is useful for testing. As these are configured in code,
+you can use other mechanisms to set the mode. For example, you could could use
+an existing feature flag system to dynamically change the rule mode.
 
 - Rule Evaluation: Arcjet evaluates all rules and combines their decisions. If
-  any rule results in a `DENY` (e.g., rate limit exceeded or bot detected), the
-  request is denied with the most relevant reason. However, you can inspect the
-  results of each rule to determine the reason for the denial. For example:
+any rule results in a `DENY` (e.g., rate limit exceeded or bot detected), the
+request is denied with the most relevant reason. However, you can inspect the
+results of each rule to determine the reason for the denial. For example:
 
 ```ts
 const decision = await aj.protect(req);
@@ -237,10 +237,10 @@ if (decision.isDenied()) {
 ```
 
 - Calls to `protect()` will not throw an error. Arcjet is designed to fail open
-  so that a service issue or misconfiguration does not block all requests. If
-  there is an error condition when processing the rule, Arcjet will return an
-  `ERROR` result for that rule and you can check the message property on the
-  rule’s error result for more information. For example:
+so that a service issue or misconfiguration does not block all requests. If
+there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the message property on the
+rule’s error result for more information. For example:
 
 ```ts
 const decision = await aj.protect(req);
@@ -252,12 +252,12 @@ if (decision.isErrored()) {
 ```
 
 - Arcjet needs to see the original client IP address to make accurate decisions.
-  If your application is behind a proxy or load balancer, you need to ensure that
-  Arcjet can access the original IP address. This is not necessary on platforms
-  like Firebase, Netlify, Fly.io, or Vercel because Arcjet can auto-detect the
-  proxy IPs for these platforms. For other platforms, the load balancer or proxy
-  IP or IP range should be configured in the Arcjet client `proxies` option. For
-  example:
+If your application is behind a proxy or load balancer, you need to ensure that
+Arcjet can access the original IP address. This is not necessary on platforms
+like Firebase, Netlify, Fly.io, or Vercel because Arcjet can auto-detect the
+proxy IPs for these platforms. For other platforms, the load balancer or proxy
+IP or IP range should be configured in the Arcjet client `proxies` option. For
+example:
 
 ```ts
 const aj = arcjet({
