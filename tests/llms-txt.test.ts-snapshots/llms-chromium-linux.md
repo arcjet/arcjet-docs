@@ -274,13 +274,13 @@ const aj = arcjet({
 
 ### Features
 
-- [Shield](https://docs.arcjet.com/shield)
-- [Rate limiting](https://docs.arcjet.com/rate-limiting)
-- [Bot protection](https://docs.arcjet.com/bot-protection)
-- [Email validation](https://docs.arcjet.com/email-validation)
-- [Sensitive information](https://docs.arcjet.com/sensitive-info)
-- [Signup form protection](https://docs.arcjet.com/signup-protection)
-- [Filters](https://docs.arcjet.com/filters)
+- [Shield](https://docs.arcjet.com/shield.md)
+- [Rate limiting](https://docs.arcjet.com/rate-limiting.md)
+- [Bot protection](https://docs.arcjet.com/bot-protection.md)
+- [Email validation](https://docs.arcjet.com/email-validation.md)
+- [Sensitive information](https://docs.arcjet.com/sensitive-info.md)
+- [Signup form protection](https://docs.arcjet.com/signup-protection.md)
+- [Filters](https://docs.arcjet.com/filters.md)
 
 ### SDKs
 
