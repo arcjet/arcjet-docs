@@ -1,0 +1,20 @@
+## 4. Start app
+
+```shell
+uv run uvicorn main:app --reload
+```
+
+Visit [`http://localhost:8000`](http://localhost:8000) in your browser and
+refresh a few times to hit the rate limit.
+
+Wait 10 seconds, then run:
+
+```sh
+curl -v http://localhost:8000
+```
+
+The wait is necessary because the decision is cached for your IP based on the
+`interval` rate limit configuration.
+
+You should see a `403` response because `curl` is considered a bot by default
+([customizable](/bot-protection/identifying-bots)).

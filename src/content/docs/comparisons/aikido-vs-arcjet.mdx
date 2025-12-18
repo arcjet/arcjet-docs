@@ -28,8 +28,9 @@ there are some key differences to consider when choosing between them.
 2. **Integration**: Arcjet is designed to integrate as a library directly into
    your codebase. You define rules in code and call Arcjet alongside your
    application logic, and it does not modify your runtime or frameworks. Arcjet
-   works with any modern JS/TS framework or bundler, and rules can be adjusted
-   dynamically at runtime as regular code. Aikido's Zen Firewall only works with
+   works with any modern JS/TS framework or bundler, and any Python application
+   (supporting both async and sync APIs) and rules can be adjusted dynamically
+   at runtime as regular code. Aikido's Zen Firewall for JS only works with
    Node.js and [monkey-patches your
    code](https://github.com/AikidoSec/firewall-node/blob/2f39052390e6ceff845a8f3addfefe7237b42f8d/instrumentation-wasm/src/js_transformer/helpers/insert_code.rs#L12)
    [at
@@ -39,12 +40,13 @@ there are some key differences to consider when choosing between them.
    handled primarily through environment variables and the Aikido dashboard
    rather than rules-as-code inside your application.
 3. **Framework, runtime & language support:** Arcjet currently focuses on the
-   JavaScript and TypeScript ecosystem, with native ESM-only SDKs for platforms
-   like Next.js, Node.js, Bun, Remix, SvelteKit, NestJS, and others. Aikido's
-   Zen Firewall has a wider language surface area, with agents for Node.js,
-   Python, PHP, Java, .NET, and Ruby. However, Aikido's monkey-patching approach
-   causes issues with certain fameworks, such as [not being able to use custom
-   rate limits by user ID in
+   JavaScript, TypeScript, and Python ecosystems, with native SDKs for JS
+   platforms like Next.js, Node.js, Bun, Remix, SvelteKit, NestJS, and Python
+   FastAPI and Flask (async and sync APIs), and other web servers. Aikido's Zen
+   Firewall has a wider language surface area, with agents for Node.js, Python,
+   PHP, Java, .NET, and Ruby. However, Aikido's monkey-patching approach causes
+   issues with certain fameworks, such as [not being able to use custom rate
+   limits by user ID in
    Next.js](https://github.com/AikidoSec/firewall-node/blob/2f39052390e6ceff845a8f3addfefe7237b42f8d/docs/next.md#caveats),
    [problems with
    bundlers](https://github.com/AikidoSec/firewall-node/blob/2f39052390e6ceff845a8f3addfefe7237b42f8d/docs/bundler.md)
@@ -70,8 +72,8 @@ there are some key differences to consider when choosing between them.
 
 | Area                     | Arcjet                                                                                                                                                                                                                                                    | Aikido (Zen Firewall)                                                                                                                                                                                                            |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Product scope            | In-code security SDK for JS/TS apps: bot protection, rate limiting, WAF (Shield), email validation, signup protection, sensitive info detection & redaction, filters.                                                                                     | Firewall focused on Node.js for JavaScript, with agents for other languages.                                                                                                                                                     |
-| Languages & platforms    | JS/TS only today. SDKs for Astro, Bun, Deno, Fastify, NestJS, Next.js, Node.js, Nuxt, React Router, Remix, SvelteKit, etc.                                                                                                                                | Multiple languages: Python, PHP, Java, each with its own agent and framework support matrix. In the JS ecosystem Aikido only supports Node.js.                                                                                   |
+| Product scope            | In-code security SDK for Javascript, TypeScript, and Python apps: bot protection, rate limiting, WAF (Shield), email validation, signup protection, sensitive info detection & redaction, filters.                                                        | Firewall focused on Node.js for JavaScript, with agents for other languages.                                                                                                                                                     |
+| Languages & platforms    | Javascript, TypeScript, and Python only. SDKs for Astro, Bun, Deno, Fastify, NestJS, Next.js, Node.js, Nuxt, React Router, Remix, SvelteKit, Python FastAPI, Flask, and other Python web servers.                                                         | Multiple languages: Python, PHP, Java, each with its own agent and framework support matrix. In the JS ecosystem Aikido only supports Node.js.                                                                                   |
 | Integration model        | Library you import and call from your handlers or middleware. Rules are written in code and can branch on any request context (user ID, plan, route, feature flags, etc.).                                                                                | Agent embeds into the runtime by monkey-patching frameworks, built-ins and libraries automatically; most behavior and policies are configured via dashboard and environment variables, not per-handler code.                     |
 | Runtime & module system  | ESM-only. Designed for modern runtimes and edge environments.                                                                                                                                                                                             | Node.js agent currently CommonJS-only; ESM is documented as experimental/limited and may require wrappers or special setup.                                                                                                      |
 | Bot protection           | Rules defined in code with rich request context (user, headers, IP, path, plan, etc.); can be combined with rate limits and other rules in a single decision.                                                                                             | Maintained list of bot user agent signatures plus IP-based controls (bots, known threat actors, Tor) and geo-blocking, driven from the Aikido dashboard.                                                                         |
@@ -79,21 +81,23 @@ there are some key differences to consider when choosing between them.
 | WAF / attack coverage    | Shield WAF integrated into the SDK to detect and block common web attacks (SQLi, XSS, file inclusion, etc.).                                                                                                                                              | Performs in-process taint-style analysis by instrumenting code paths to detect injections, path traversal, SSRF and other common attack patterns.                                                                                |
 | Data & privacy model     | "Local-first": a WebAssembly engine runs inside your app; decisions are taken locally where possible and reported asynchronously. Some rules (rate limiting, Shield) call the Cloud API with request metadata, not full payloads, and results are cached. | "Local-only" for security checks: decisions are made inside your process. Metadata about attacks and events is reported back for dashboards and analytics.                                                                       |
 | Configuration            | Everything is code: rules, thresholds and behavior live alongside your application logic; works naturally with env-specific configs, feature flags, and tests.                                                                                            | Core behavior configured in the Aikido UI (routes, rate limits, bot/IP rules, countries) plus environment variables; less emphasis on rules-as-code and per-route custom logic in the app itself.                                |
-| Hosting / vendor lock-in | Platform-agnostic. Works wherever you can run your JS/TS app (Vercel, Netlify, Fly.io, Render, Kubernetes, self-hosted, etc.).                                                                                                                            | Also platform-agnostic, but tied to Aikido's broader appsec platform. Some limitations for certain frameworks e.g. Next.js only supported in standalone mode (inside a Docker container).                                        |
+| Hosting / vendor lock-in | Platform-agnostic. Works wherever you can run your app (Vercel, Netlify, Fly.io, Render, Kubernetes, self-hosted, etc.).                                                                                                                                  | Also platform-agnostic, but tied to Aikido's broader appsec platform. Some limitations for certain frameworks e.g. Next.js only supported in standalone mode (inside a Docker container).                                        |
 | Local development        | Same behavior as production; you call the SDK in dev and can inspect decisions directly, including detailed reasons and metadata.                                                                                                                         | Installed like a tracing/profiling agent; runs locally with the same instrumentation model as production, with events visible in the Aikido dashboard once connected.                                                            |
 
 ## When to choose which
 
-If you're building a modern application JS/TS and care about predictable
-behavior, testability, and treating security as code, **Arcjet is usually the
-better default**. If you need a multi-language runtime firewall tightly coupled
-to Aikido's broader security platform, **Zen Firewall can be the right fit**.
+If you're building a modern application in JavaScript, TypeScript, or Python and
+care about predictable behavior, testability, and treating security as code,
+**Arcjet is usually the better default**. If you need a multi-language runtime
+firewall tightly coupled to Aikido's broader security platform, **Zen Firewall
+can be the right fit**.
 
 ### Choose Arcjet if...
 
-- **Your core stack is JS/TS** You live in Next.js, Node, Bun, Remix, SvelteKit,
-  etc. You want an ESM-first SDK that behaves like any other library, works on
-  edge runtimes, and doesn't depend on runtime patching or agents.
+- **Your core stack is JavaScript, TypeScript and/or Python** You live in
+  Next.js, Node, Bun, Remix, SvelteKit, etc. You want a modern SDK that behaves
+  like any other library, works in serverless environments, and doesn't depend
+  on runtime patching or agents.
 
 - **You want security as part of your application design** You're happy to write
   rules in code, in the same place as your auth, billing, and routing logic. You
@@ -112,16 +116,15 @@ to Aikido's broader security platform, **Zen Firewall can be the right fit**.
   richer analysis) with clear, explicit calls from your code — not a black-box
   agent making decisions you can't easily trace.
 
-In short: if your product is primarily JS/TS and you want security that feels
-like part of your application architecture, Arcjet is the better,
-developer-first choice.
+In short: if your product is primarily JavaScript, TypeScript, and/or Python and
+you want security that feels like part of your application architecture, Arcjet
+is the better, developer-first choice.
 
 ### Choose Aikido if...
 
-- **You have a genuine polyglot estate** You're running Node, Python, PHP, Java,
-  .NET, Ruby, etc., and you want one vendor with agents for all of them,
-  integrated into a broader platform that also does code, cloud and container
-  scanning.
+- **You have a genuine polyglot estate** You're running Node, PHP, Java, .NET,
+  Ruby, etc., and you want one vendor with agents for all of them, integrated
+  into a broader platform that also does code, cloud and container scanning.
 
 - **You want agent-style runtime protection with minimal code changes** You're
   comfortable installing agents that instrument frameworks, built-ins and
@@ -130,7 +133,7 @@ developer-first choice.
 
 - **You're already bought into Aikido's platform** You want Zen as another
   module in the same place you manage SAST, cloud scanning and other security
-  controls, and are happy with CommoJS-only Node.js-only monkey-patching.
+  controls, and are happy with CommonJS-only Node.js-only monkey-patching.
 
 Aikido makes more sense when the primary constraint is "one security vendor and
 agent model across many languages" and you're happy to accept that operational
@@ -140,32 +143,35 @@ shape.
 
 ### Can I use Arcjet and Aikido at the same time?
 
-Yes. Arcjet runs as a normal library inside your JS/TS code, while Aikido Zen
-runs as an agent that injects into your runtime. You can start by adding Arcjet
-for things that are easier as rules-as-code (bot protection, signup protection,
-rate limiting) while keeping Aikido for other languages or existing policies.
-Over time you can migrate traffic and rules to Arcjet route by route.
+Yes. Arcjet runs as a normal library inside your JavaScript, TypeScript or
+Python code, while Aikido Zen runs as an agent that injects into your runtime.
+You can start by adding Arcjet for things that are easier as rules-as-code (bot
+protection, signup protection, rate limiting) while keeping Aikido for other
+languages or existing policies. Over time you can migrate traffic and rules to
+Arcjet route by route.
 
-### What if I have services in Python, PHP, Java, .NET or Ruby?
+### What if I have services in PHP, Java, .NET or Ruby?
 
-Arcjet is currently focused on JavaScript and TypeScript. If a large part of
-your stack is non-JS, you have a couple of options:
+Arcjet is currently focused on JavaScript, TypeScript, and Python. If a large
+part of your stack is in other languages, you have a couple of options:
 
-- Use Arcjet for the JS/TS functions and user-facing APIs where latency and
+- Use Arcjet for the supports languages and user-facing APIs where latency and
   developer ergonomics matter most.
 - Keep Aikido on other languages, or use their platform where you don't want to
   touch application code.
 
-If your primary product surface is JS/TS, you'll usually get a better developer
-experience by standardizing on Arcjet there and treating other languages as
-exceptions.
+If your primary product surface is JavaScript, TypeScript, and/or Python, you'll
+usually get a better developer experience by standardizing on Arcjet there and
+treating other languages as exceptions.
 
-### Which should I choose for a greenfield JS/TS SaaS?
+### Which should I choose for a greenfield SaaS?
 
-If the app is primarily JS/TS and you control the code, Arcjet is the better default:
+If the app is primarily JavaScript, TypeScript and/or Python, and you control
+the code, Arcjet is the better default:
 
-- Fits naturally into handlers/middleware for all JS frameworks and runtimes.
-- ESM-first and edge-friendly.
+- Fits naturally into handlers/middleware for all JavaScript, TypeScript, and
+  Python frameworks and runtimes.
+- Modern - ESM for JS and Python 3.10+ with support for sync and async APIs.
 - Rules live in your codebase, reviewed and tested like everything else.
 - Strong primitives for bots, rate limits, WAF, email, signup flows, and PII.
 
