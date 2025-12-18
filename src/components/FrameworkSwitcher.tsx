@@ -43,6 +43,8 @@ const frameworkIcon = {
   "node-js-hono": <IconNodeJs />,
   "node-js": <IconNodeJs />,
   nuxt: <IconNuxt />,
+  "python-fastapi": <></>,
+  "python-flask": <></>,
   "react-router": <IconReactRouter />,
   remix: <IconRemix />,
   sveltekit: <IconSvelteKit />,

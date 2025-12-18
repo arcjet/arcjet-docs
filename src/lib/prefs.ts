@@ -58,6 +58,8 @@ export const frameworks = [
   { key: "node-js-express", label: "Node.js + Express" },
   { key: "node-js-hono", label: "Node.js + Hono" },
   { key: "nuxt", label: "Nuxt" },
+  { key: "python-fastapi", label: "Python + FastAPI" },
+  { key: "python-flask", label: "Python + Flask" },
   { key: "react-router", label: "React Router" },
   { key: "remix", label: "Remix" },
   { key: "sveltekit", label: "SvelteKit" },

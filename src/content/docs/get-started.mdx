@@ -13,6 +13,8 @@ titleByFramework:
   node-js-express: "Get started with Node.js + Express"
   node-js-hono: "Get started with Node.js + Hono"
   nuxt: "Get started with Nuxt"
+  python-fastapi: "Get started with Python + FastAPI"
+  python-flask: "Get started with Python + Flask"
   react-router: "Get started with React Router"
   remix: "Get started with Remix"
   sveltekit: "Get started with SvelteKit"
@@ -31,6 +33,8 @@ frameworks:
   - node-js-express
   - node-js-hono
   - nuxt
+  - python-fastapi
+  - python-flask
   - react-router
   - remix
   - sveltekit
@@ -45,6 +49,8 @@ ajToc:
     anchor: "3-add-rules"
   - text: 4. Start app
     anchor: "4-start-app"
+  - text: "Video guides"
+    anchor: "video-guides"
   - text: "FAQs"
     anchor: "faqs"
   - text: "What next?"
@@ -138,6 +144,20 @@ import NuxtStep2 from "@/snippets/shared/nuxt/Key.mdx";
 import NuxtStep3 from "@/snippets/get-started/nuxt/Step3.mdx";
 import NuxtStep4 from "@/snippets/get-started/nuxt/Step4.mdx";
 
+import PythonFastapiStep0 from "@/snippets/get-started/python-fastapi/Step0.mdx";
+import PythonFastapiStep1 from "@/snippets/get-started/python-fastapi/Step1.mdx";
+import PythonFastapiRequirements from "@/snippets/get-started/python-fastapi/Requirements.mdx";
+import PythonFastapiStep2 from "@/snippets/get-started/python-fastapi/Step2.mdx";
+import PythonFastapiStep3 from "@/snippets/get-started/python-fastapi/Step3.mdx";
+import PythonFastapiStep4 from "@/snippets/get-started/python-fastapi/Step4.mdx";
+
+import PythonFlaskStep0 from "@/snippets/get-started/python-flask/Step0.mdx";
+import PythonFlaskStep1 from "@/snippets/get-started/python-flask/Step1.mdx";
+import PythonFlaskRequirements from "@/snippets/get-started/python-flask/Requirements.mdx";
+import PythonFlaskStep2 from "@/snippets/get-started/python-flask/Step2.mdx";
+import PythonFlaskStep3 from "@/snippets/get-started/python-flask/Step3.mdx";
+import PythonFlaskStep4 from "@/snippets/get-started/python-flask/Step4.mdx";
+
 import ReactRouterStep0 from "@/snippets/get-started/react-router/Step0.mdx";
 import ReactRouterStep1 from "@/snippets/get-started/react-router/Step1.mdx";
 import ReactRouterRequirements from "@/snippets/get-started/react-router/Requirements.mdx";
@@ -165,8 +185,6 @@ protection. Data redaction. A developer-first approach to security.
 
 This guide will show you how to set up a simple API server protected by Arcjet.
 
-<YouTube id="CuemptpnIVQ" />
-
 <FrameworkLinks title="Choose a framework" client:load />
 
 ## 0. Get Started
@@ -183,6 +201,8 @@ This guide will show you how to set up a simple API server protected by Arcjet.
   <NodeJsExpressStep0 slot="node-js-express" />
   <NodeJsHonoStep0 slot="node-js-hono" />
   <NuxtStep0 slot="nuxt" />
+  <PythonFastapiStep0 slot="python-fastapi" />
+  <PythonFlaskStep0 slot="python-flask" />
   <ReactRouterStep0 slot="react-router" />
   <RemixStep0 slot="remix" />
   <SvelteKitStep0 slot="sveltekit" />
@@ -190,7 +210,7 @@ This guide will show you how to set up a simple API server protected by Arcjet.
 
 ## 1. Install Arcjet
 
-In your project root, run the following command:
+In your project root, run the following:
 
 <SlotByFramework client:load>
   <AstroStep1 slot="astro" />
@@ -204,6 +224,8 @@ In your project root, run the following command:
   <NodeJsExpressStep1 slot="node-js-express" />
   <NodeJsHonoStep1 slot="node-js-hono" />
   <NuxtStep1 slot="nuxt" />
+  <PythonFastapiStep1 slot="python-fastapi" />
+  <PythonFlaskStep1 slot="python-flask" />
   <ReactRouterStep1 slot="react-router" />
   <RemixStep1 slot="remix" />
   <SvelteKitStep1 slot="sveltekit" />
@@ -223,6 +245,8 @@ In your project root, run the following command:
   <NodeJsExpressRequirements slot="node-js-express" />
   <NodeJsHonoRequirements slot="node-js-hono" />
   <NuxtRequirements slot="nuxt" />
+  <PythonFastapiRequirements slot="python-fastapi" />
+  <PythonFlaskRequirements slot="python-flask" />
   <ReactRouterRequirements slot="react-router" />
   <RemixRequirements slot="remix" />
   <SvelteKitRequirements slot="sveltekit" />
@@ -245,6 +269,8 @@ instructions to add a site and get a key.
   <NodeJsExpressStep2 slot="node-js-express" />
   <NodeJsHonoStep2 slot="node-js-hono" />
   <NuxtStep2 slot="nuxt" />
+  <PythonFastapiStep2 slot="python-fastapi" />
+  <PythonFlaskStep2 slot="python-flask" />
   <ReactRouterStep2 slot="react-router" />
   <RemixStep2 slot="remix" />
   <SvelteKitStep2 slot="sveltekit" />
@@ -267,6 +293,8 @@ limit, and prevent bots from accessing your app.
   <NodeJsExpressStep3 slot="node-js-express" />
   <NodeJsHonoStep3 slot="node-js-hono" />
   <NuxtStep3 slot="nuxt" />
+  <PythonFastapiStep3 slot="python-fastapi" />
+  <PythonFlaskStep3 slot="python-flask" />
   <ReactRouterStep3 slot="react-router" />
   <RemixStep3 slot="remix" />
   <SvelteKitStep3 slot="sveltekit" />
@@ -284,12 +312,20 @@ limit, and prevent bots from accessing your app.
   <NodeJsExpressStep4 slot="node-js-express" />
   <NodeJsHonoStep4 slot="node-js-hono" />
   <NuxtStep4 slot="nuxt" />
+  <PythonFastapiStep4 slot="python-fastapi" />
+  <PythonFlaskStep4 slot="python-flask" />
   <ReactRouterStep4 slot="react-router" />
   <RemixStep4 slot="remix" />
   <SvelteKitStep4 slot="sveltekit" />
 </SlotByFramework>
 
 The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
+
+## Video guides
+
+<YouTube id="CuemptpnIVQ" />
+
+<YouTube id="NDI68Dcp4Gg" />
 
 ## FAQs
 
