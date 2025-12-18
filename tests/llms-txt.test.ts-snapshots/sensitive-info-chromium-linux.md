@@ -74,15 +74,15 @@ Free
 
 Starter
 
-✅
+✅ Add-on
 
 Business
 
-✅
+✅ Included
 
 Enterprise
 
-✅
+✅ Included
 
 Discussion
 ----------
