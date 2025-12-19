@@ -89,15 +89,15 @@ Free
 
 Starter
 
-✅ Usage based pricing
+✅ Add-on
 
 Business
 
-✅ Usage based pricing
+✅ Included
 
 Enterprise
 
-✅ Usage based pricing
+✅ Included
 
 Discussion
 ----------

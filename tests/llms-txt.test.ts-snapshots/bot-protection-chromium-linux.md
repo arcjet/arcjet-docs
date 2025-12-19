@@ -71,13 +71,9 @@ Basic protection
 
 Advanced protection
 
-Custom protection
-
 Free
 
 ✅
-
-🚫
 
 🚫
 
@@ -87,19 +83,7 @@ Starter
 
 ✅
 
-🚫
-
 Business
-
-✅
-
-✅
-
-🚫
-
-Enterprise
-
-✅
 
 ✅
 
