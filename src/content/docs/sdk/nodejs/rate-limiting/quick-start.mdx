@@ -1,0 +1,104 @@
+---
+title: "Rate limiting for Node.js"
+description: "Quick start guide for adding Arcjet rate limiting to your Node.js app."
+---
+
+import { LinkCard, CardGrid } from "@astrojs/starlight/components";
+import WhatIsArcjet from "@/components/WhatIsArcjet.astro";
+import FAQs from "@/components/FAQs.astro";
+import Comments from "@/components/Comments.astro";
+
+import Step1 from "@/snippets/rate-limiting/quick-start/nodejs/Step1.mdx";
+import Step2 from "@/snippets/rate-limiting/quick-start/nodejs/Step2.mdx";
+import Step3 from "@/snippets/rate-limiting/quick-start/nodejs/Step3.mdx";
+import Step4 from "@/snippets/rate-limiting/quick-start/nodejs/Step4.mdx";
+
+Arcjet rate limiting allows you to define rules which limit the number of
+requests a client can make over a period of time.
+
+<WhatIsArcjet />
+
+## Quick start
+
+This guide will show you how to add a simple rate limit to your Node.js app.
+
+### 1. Install Arcjet
+
+In your project root, run the following command to install the SDK:
+
+<Step1 />
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key.
+
+<Step2 />
+
+### 3. Add a rate limit to a route
+
+The example below applies a token bucket rate limit rule to a route where we
+identify the user based on their ID e.g. if they are logged in. The bucket is
+configured with a maximum capacity of 10 tokens and refills by 5 tokens every
+10 seconds. Each request consumes 5 tokens.
+
+<Step3 />
+
+<Step4 />
+
+The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+<CardGrid>
+  <LinkCard
+    title="Rate limiting reference"
+    href="/rate-limiting/reference"
+    description="Full details about rate limiting."
+  />
+  <LinkCard
+    title="Rate limiting algorithms"
+    href="/rate-limiting/algorithms"
+    description="Learn which algorithm to use."
+  />
+  <LinkCard
+    title="Testing"
+    href="/testing"
+    description="Write tests for your rules."
+  />
+</CardGrid>
+
+### Explore
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can setup bot protection,
+minimize fraudulent registrations with the signup form protection and more.
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  />
+  <LinkCard
+    title="Learn how Arcjet works"
+    href="/architecture"
+    description="Arcjet's architecture."
+  />
+  <LinkCard
+    title="SDK reference"
+    href="/reference/nodejs"
+    description="Node.js SDK reference guide."
+  />
+</CardGrid>
+
+## Get help
+
+Need help with anything? Email support@arcjet.com to get support from our
+engineering team.
+
+<Comments />

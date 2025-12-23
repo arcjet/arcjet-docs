@@ -1,0 +1,104 @@
+---
+title: "Email validation for Next.js"
+description: "Quick start guide for adding Arcjet email validation to your Next.js app."
+---
+
+import { LinkCard, CardGrid } from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import { frameworks } from "@/lib/prefs";
+
+import Step1 from "@/snippets/email-validation/quick-start/nextjs/Step1.mdx";
+import Step2 from "@/snippets/email-validation/quick-start/shared/Step2.mdx";
+import Step3 from "@/snippets/email-validation/quick-start/nextjs/Step3.mdx";
+import Step4 from "@/snippets/email-validation/quick-start/nextjs/Step4.mdx";
+
+import FAQs from "/src/components/FAQs.astro";
+import Comments from "/src/components/Comments.astro";
+
+Arcjet allows you to validate & verify an email address. This is useful for
+preventing users from signing up with fake email addresses and can significantly
+reduce the amount of spam or fraudulent accounts.
+
+<WhatIsArcjet />
+
+## Quick start
+
+This guide will show you how to add email validation and verification to
+your Next.js app.
+
+### 1. Install Arcjet
+
+In your project root, run the following command to install the SDK:
+
+<Step1 />
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key. Add it to a `.env.local` file in your
+project root.
+
+<Step2 />
+
+### 3. Validate an email address
+
+The example below shows how to use Arcjet to check an email address. If the
+email address is invalid or if no MX records are configured, Arcjet will return
+a deny decision.
+
+<Step3 />
+
+<Step4 />
+
+The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+<CardGrid>
+  <LinkCard
+    title="Email validation reference"
+    href="/email-validation/reference"
+    description="Full details about email validation."
+  ></LinkCard>
+  <LinkCard
+    title="Testing"
+    href="/testing"
+    description="Write tests for your rules."
+  />
+</CardGrid>
+
+### Explore
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can setup bot protection, rate
+limiting for your API, minimize fraudulent registrations with the signup form
+protection and more.
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  />
+  <LinkCard
+    title="Learn how Arcjet works"
+    href="/architecture"
+    description="Arcjet's architecture."
+  />
+  <LinkCard
+    title="SDK reference"
+    href="/sdk/nextjs/reference"
+    description="Next.js SDK reference guide."
+  />
+</CardGrid>
+
+## Get help
+
+Need help with anything? Email support@arcjet.com to get support from our
+engineering team.
+
+<Comments />

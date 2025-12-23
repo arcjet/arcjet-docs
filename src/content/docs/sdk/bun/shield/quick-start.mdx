@@ -1,0 +1,108 @@
+---
+title: "Shield WAF for Bun"
+description: "Quick start guide for adding protection to your Bun app with Arcjet Shield WAF."
+---
+
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+import Comments from "/src/components/Comments.astro";
+import FAQs from "/src/components/FAQs.astro";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+
+import Step1 from "@/snippets/shield/quick-start/bun/Step1.mdx";
+import Step2 from "@/snippets/shield/quick-start/shared/Step2SetEnv.mdx";
+import Step3 from "@/snippets/shield/quick-start/bun/Step3.mdx";
+import Step4 from "@/snippets/shield/quick-start/bun/Step4.mdx";
+import Step5 from "@/snippets/shield/quick-start/bun/Step5.mdx";
+
+Arcjet Shield WAF protects your application against common attacks, including
+the [OWASP Top 10](https://owasp.org/www-project-top-ten/).
+
+<WhatIsArcjet />
+
+## Quick start
+
+This guide will show you how to protect your entire Bun
+application from common attacks.
+
+### 1. Install Arcjet
+
+In your project root, run the following command to install the SDK:
+
+<Step1 />
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key. Add it to a `.env.local` file in your
+project root.
+
+<Step2 />
+
+### 3. Protect a route
+
+<Step3 />
+
+<Step4 />
+
+### 5. Simulate a suspicious request
+
+To see Arcjet Shield WAF in action, try making a request with the special header
+`x-arcjet-suspicious` set to `true`. After 5 requests, Arcjet Shield will be
+triggered and will block the request. This simulates the threshold being reached
+and is a constant, so you can use it as part of your tests.
+
+<Step5 />
+
+The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+<CardGrid>
+  <LinkCard
+    title="Shield WAF reference"
+    href="/shield/reference"
+    description="Full details about Arcjet shield WAF."
+  ></LinkCard>
+  <LinkCard
+    title="Testing"
+    href="/testing"
+    description="Write tests for your rules."
+  />
+</CardGrid>
+
+### Explore
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can setup bot protection, rate
+limiting for your API, minimize fraudulent registrations with the signup form
+protection and more.
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  />
+  <LinkCard
+    title="Learn how Arcjet works"
+    href="/architecture"
+    description="Arcjet's architecture."
+  />
+  <LinkCard
+    title="SDK reference"
+    href="/reference/bun"
+    description="Bun SDK reference guide."
+  />
+</CardGrid>
+
+## Get help
+
+Need help with anything? [Email us](mailto:support@arcjet.com) or [join our
+Discord](https://discord.gg/VRtMdATWNE) to get support from our
+engineering team.
+
+<Comments />

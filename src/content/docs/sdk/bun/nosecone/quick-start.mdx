@@ -1,0 +1,122 @@
+---
+title: "Arcjet Nosecone: security headers for Bun"
+description: "How to use the open source Arcjet Nosecone library to set security headers (CSP, HSTS, and others) in your Bun app."
+prev: false
+next: false
+---
+
+import WhatAreArcjetUtilities from "@/components/WhatAreArcjetUtilities.astro";
+import SDKVersionNosecone from "@/components/SDKVersionNosecone.astro";
+import { LinkCard, CardGrid } from "@astrojs/starlight/components";
+import Comments from "/src/components/Comments.astro";
+
+import Step1 from "@/snippets/nosecone/quick-start/bun/Step1.mdx";
+import Step2 from "@/snippets/nosecone/quick-start/bun/Step2.mdx";
+import Step3 from "@/snippets/nosecone/quick-start/bun/Step3.mdx";
+import Step4 from "@/snippets/nosecone/quick-start/bun/Step4.mdx";
+
+[<SDKVersionNosecone/>](https://www.npmjs.com/package/nosecone)
+
+Arcjet Nosecone is an [open source library](https://github.com/arcjet/arcjet-js)
+that helps set security headers such as `Content-Security-Policy` (CSP),
+`Strict-Transport-Security` (HSTS), and `X-Content-Type-Options` in JS
+applications built with Bun, Deno, Next.js, Node.js, or SvelteKit.
+
+<WhatAreArcjetUtilities />
+
+## Supported headers
+
+Nosecone makes it easy to add and configure these headers:
+
+- `Content-Security-Policy` (CSP)
+- `Cross-Origin-Embedder-Policy` (COEP)
+- `Cross-Origin-Opener-Policy`
+- `Cross-Origin-Resource-Policy`
+- `Origin-Agent-Cluster`
+- `Referrer-Policy`
+- `Strict-Transport-Security` (HSTS)
+- `X-Content-Type-Options`
+- `X-DNS-Prefetch-Control`
+- `X-Download-Options`
+- `X-Frame-Options`
+- `X-Permitted-Cross-Domain-Policies`
+- `X-XSS-Protection`
+
+See the [reference guide](/nosecone/reference) for full details on each option.
+
+:::note
+If you are using Express, NestJS, or Remix we recommend using the excellent
+[Helmet](https://helmetjs.github.io/) library, which informed much of our work
+on Nosecone.
+:::
+
+## Quick start
+
+This guide will show you how to add our recommended Bun
+default security headers.
+
+### 1. Install Nosecone
+
+In your project root, run the following command to install the Arcjet Nosecone
+library for your framework:
+
+<Step1 />
+
+### 2. Configure your application
+
+<Step2 />
+
+### 3. Run your application
+
+<Step3 />
+
+### 4. Inspect the headers
+
+The default headers apply a pragmatic set of security headers to your
+application, but may break things (particularly the CSP header).
+
+We recommend you test your application thoroughly and tweak the settings to
+ensure it continues to work as expected.
+
+<Step4 />
+
+## What next?
+
+<LinkCard
+  title="Nosecone reference"
+  href="/nosecone/reference"
+  description="Details about each security header and how to configure them."
+/>
+
+### Explore
+
+Arcjet can protect your entire app or individual routes with just
+a few lines of code. Using the main Arcjet SDK you can setup bot protection,
+rate limiting for your API, minimize fraudulent registrations with the
+signup form protection and more.
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  />
+  <LinkCard
+    title="Learn how Arcjet works"
+    href="/architecture"
+    description="Arcjet's architecture."
+  />
+  <LinkCard
+    title="SDK reference"
+    href="/reference/bun"
+    description="Bun SDK reference guide."
+  />
+</CardGrid>
+
+## Get help
+
+Need help with anything? Email support@arcjet.com to get support from our
+engineering team, [join our Discord](https://arcjet.com/discord), or [open an
+issue on GitHub](https://github.com/arcjet/arcjet-js).
+
+<Comments />
