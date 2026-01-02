@@ -1,0 +1,423 @@
+---
+title: "Arcjet NestJS SDK reference"
+next: false
+generateMarkdownRoute: true
+---
+
+import Requirements from "@/snippets/get-started/nest-js/Requirements.mdx";
+import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import Comments from "/src/components/Comments.astro";
+import SDKVersionNestjs from "/src/components/SDKVersionNestjs.astro";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+
+import ErrorLoggingTS from "/src/snippets/reference/nestjs/ErrorLogging.ts?raw";
+import ErrorUserAgentTS from "/src/snippets/reference/nestjs/ErrorUserAgent.ts?raw";
+import LoggerTS from "/src/snippets/reference/nestjs/ClientLogger.ts?raw";
+import ProxiesTS from "/src/snippets/reference/nestjs/Proxies.ts?raw";
+import ConfigurationTS from "/src/snippets/reference/nestjs/Configuration.ts?raw";
+import IPLocationTS from "/src/snippets/reference/nestjs/IPLocation.ts?raw";
+import NodeVersions from "/src/snippets/reference/node-versions.mdx";
+import IPAnalysis from "/src/snippets/reference/shared/IPAnalysis.mdx";
+
+[<SDKVersionNestjs />](https://www.npmjs.com/package/@arcjet/nest)
+
+This is the reference guide for the Arcjet NestJS SDK, [available on
+GitHub](https://github.com/arcjet/arcjet-js) and licensed under the Apache 2.0
+license.
+
+<WhatIsArcjet />
+
+## Installation
+
+In your project root, run the following command to install the SDK:
+
+{/* prettier-ignore */}
+<Tabs>
+<TabItem label="npm">
+```sh
+npm i @arcjet/nest
+```
+</TabItem>
+<TabItem label="pnpm">
+```sh
+pnpm add @arcjet/nest
+```
+</TabItem>
+<TabItem label="yarn">
+```sh
+yarn add @arcjet/nest
+```
+</TabItem>
+</Tabs>
+
+### Requirements
+
+<Requirements />
+
+## Quick start
+
+Check out the [quick start guide](/get-started?f=nest-js).
+
+## Configuration
+
+Create a new root `ArcjetModule.forRoot` object with your API key and any
+default rules you want to apply to every route. This is usually in the `app.module.ts` file.
+
+The required fields are:
+
+- `key` (`string`) - Your Arcjet site key. This can be found in the SDK
+  Installation section for the site in the [Arcjet
+  Dashboard](https://app.arcjet.com).
+- `rules` - The rules to apply to the request. This can be empty in the root
+  object so you can set rules within each controller. See the various sections
+  of the docs for how to configure these e.g.
+  [shield](/shield/reference?f=nest-js), [rate
+  limiting](/rate-limiting/reference?f=nest-js), [bot
+  protection](/bot-protection/reference?f=nest-js), [email
+  validation](/email-validation/reference?f=nest-js).
+
+The optional fields are:
+
+- `characteristics` (`string[]`) - A list of
+  [characteristics](/fingerprints#built-in-characteristics) to be used to
+  uniquely identify clients.
+- `proxies` (`string[]`) - A list of one or more trusted proxies. These
+  addresses will be excluded when Arcjet is determining the client IP address.
+  This is useful if you are behind a load balancer or proxy that sets the client
+  IP address in a header. See [Load balancers &
+  proxies](#load-balancers--proxies) below for an example.
+
+<Code code={ConfigurationTS} lang="ts" title="src/app.module.ts" />
+
+### Root instance
+
+The `ArcjetModule.forRoot` method creates a root instance of the `Arcjet`
+object. This can be called through a global guard, per route guards for each
+controller, or directly in the controller.
+
+Having a single instance allows the SDK to cache decisions and configuration to
+improve performance.
+
+### Rule modes
+
+Each rule can be configured in either `LIVE` or `DRY_RUN` mode. When in
+`DRY_RUN` mode, each rule will return its decision, but the end conclusion will
+always be `ALLOW`.
+
+This allows you to run Arcjet in passive / demo mode to test rules before
+enabling them.
+
+As the top level conclusion will always be `ALLOW` in `DRY_RUN` mode, you can
+loop through each rule result to check what would have happened:
+
+```ts
+for (const result of decision.results) {
+  if (result.isDenied()) {
+    console.log("Rule returned deny conclusion", result);
+  }
+}
+```
+
+### Environment variables
+
+The Arcjet NestJS SDK uses several environment variables to configure its behavior.
+See [Concepts: Environment variables](/environment) for more info.
+The `ARCJET_KEY` environment variable is not read automatically and must be passed
+explicitly.
+
+### Custom logging
+
+The Arcjet SDK can be integrated into the [NestJS
+logger](https://docs.nestjs.com/techniques/logger). You should define an
+interface to extend the built-in logger and then use this within your
+controllers.
+
+<Code code={LoggerTS} lang="ts" title="src/app.module.ts" />
+
+### Load balancers & proxies
+
+If your application is behind a load balancer, Arcjet will only see the IP
+address of the load balancer and not the real client IP address.
+
+To fix this, most load balancers will set the `X-Forwarded-For` header with the
+real client IP address plus a list of proxies that the request has passed
+through.
+
+The problem with is that the `X-Forwarded-For` header can be spoofed by the
+client, so you should only trust it if you are sure that the load balancer is
+setting it correctly. See [the MDN
+docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For)
+for more details.
+
+You can configure Arcjet to trust IP addresses in the `X-Forwarded-For` header
+by setting the `proxies` field in the configuration. This should be a list of
+the IP addresses or the CIDR range of your load balancers to be removed, so
+that the last IP address in the list is the real client IP address.
+
+#### Example
+
+For example, if the load balancer is at `100.100.100.100` and the client IP
+address is `192.168.1.1`, the `X-Forwarded-For` header will be:
+
+```http
+X-Forwarded-For: 192.168.1.1, 100.100.100.100
+```
+
+You should set the `proxies` field to `["100.100.100.100"]` so Arcjet will use
+`192.168.1.1` as the client IP address.
+
+You can also specify CIDR ranges to match multiple IP addresses.
+
+<Code code={ProxiesTS} lang="ts" />
+
+## Decision
+
+Arcjet can be integrated into NestJS in several places using NestJS
+[guards](https://docs.nestjs.com/guards) or directly within the route
+controller:
+
+- **Global guard:** Applies Arcjet rules on every request, but does not allow
+  you to configure rules per route. The `protect` function is called for you
+  inside the guard and you can't access the response.
+- **Per route guard:** Allows you to configure rules per route, but requires you
+  to add the guard to every route and has limited flexibility. The `protect`
+  function is called for you inside the guard and you can't access the response.
+- **Within route:** Requires some code duplication, but allows maximum
+  flexibility because you can customize the rules and response. You call the
+  `protect` function directly in the controller and can access the return
+  `Promise` that resolves to an `ArcjetDecision` object.
+
+The decision available when you call `protect` directly contains the following
+properties:
+
+- `id` (`string`) - The unique ID for the request. This can be used to look up
+  the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
+  involving the Arcjet cloud API. For decisions taken locally, the prefix is
+  `lreq_`.
+- `conclusion` (`"ALLOW" | "DENY" | "CHALLENGE" | "ERROR"`) - The final
+  conclusion based on evaluating each of the configured rules. If you wish to
+  accept Arcjet's recommended action based on the configured rules then you can
+  use this property.
+- `reason` (`ArcjetReason`) - An object containing more detailed
+  information about the conclusion.
+- `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
+  containing the results of each rule that was executed.
+- `ttl` (`uint32`) - The time-to-live for the decision in seconds. This is the
+  time that the decision is valid for. After this time, the decision will be
+  re-evaluated. The SDK automatically caches `DENY` decisions for the length of
+  the TTL.
+- `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
+  client IP address. See [IP analysis](#ip-analysis) below for more information.
+
+### Conclusion
+
+The `ArcjetDecision` object has the following methods that should be used to
+check the conclusion:
+
+- `isAllowed()` (`bool`) - The request should be allowed.
+- `isDenied()` (`bool`) - The request should be denied.
+- `isErrored()` (`bool`) - There was an unrecoverable error.
+
+The conclusion will be the highest-severity finding when evaluating the configured
+rules. `"DENY"` is the highest severity, followed by `"CHALLENGE"`, then `"ERROR"` and
+finally `"ALLOW"` as the lowest severity.
+
+For example, when a bot protection rule returns an error and a validate email
+rule returns a deny, the overall conclusion would be deny. To access the error
+you would have to use the `results` property on the decision.
+
+### Reason
+
+The `reason` property of the `ArcjetDecision` object contains an `ArcjetReason`
+object which provides more detailed information about the conclusion. This is
+the final decision reason and is based on the configured rules.
+
+It will always be the highest-priority rule that produced that conclusion,
+to inspect other rules consider iterating over the `results` property on the decision.
+
+The `ArcjetReason` object has the following methods that can be used to check
+which rule caused the conclusion:
+
+- `isBot()` (`bool`) - Returns `true` if the bot protection rules have been
+  applied and the request was considered to have been made by a bot.
+- `isEmail()` (`bool`) - Returns `true` if the email rules have been applied and
+  the email address has a problem.
+- `isRateLimit()` (`bool`) - Returns `true` if the rate limit rules have been
+  applied and the request has exceeded the rate limit.
+- `isSensitiveInfo()` (`bool`) - Returns `true` if sensitive info rules have
+  been applied and sensitive info has been detected.
+- `isShield()` (`bool`) - Returns `true` if the shield rules have been applied
+  and the request is suspicious based on analysis by Arcjet Shield WAF.
+- `isError()` (`bool`) - Returns `true` if there was an error processing the
+  request.
+
+### Results
+
+The `results` property of the `ArcjetDecision` object contains an array of
+`ArcjetRuleResult` objects. There will be one for each configured rule so you
+can inspect the individual results:
+
+- `id` (`string`) - The ID of the rule result. Not yet implemented.
+- `state` (`ArcjetRuleState`) - Whether the rule was executed or not.
+- `conclusion` (`ArcjetConclusion`) - The conclusion of the rule. This will be
+  one of the above conclusions: `ALLOW`, `DENY`, `CHALLENGE`, or `ERROR`.
+- `reason` (`ArcjetReason`) - An object containing more detailed information
+  about the conclusion for this rule. Each rule type has its own reason object
+  with different properties.
+
+You can iterate through the results and check the conclusion for each rule.
+
+```ts
+for (const result of decision.results) {
+  this.logger.log("Rule Result", result);
+}
+```
+
+#### Rule state
+
+The `state` property of the `ArcjetRuleResult` object is an `ArcjetRuleState`.
+Each rule is evaluated individually and can be in one of the following states:
+
+- `DRY_RUN` - The rule was executed in dry run mode. This means that the rule
+  was executed but the conclusion was not applied to the request. This is useful
+  for testing rules before enabling them.
+- `RUN` - The rule was executed and the conclusion was applied to the request.
+- `NOT_RUN` - The rule was not executed. This can happen if another rule has
+  already reached a conclusion that applies to the request. For example, if a
+  rate limit rule is configured then these are evaluated before all other rules.
+  If the client has reached the maximum number of requests then other rules will
+  not be evaluated.
+- `CACHED` - The rule was not executed because the previous result was cached.
+  Results are cached when the decision conclusion is `DENY`. Subsequent requests
+  from the same client will not be evaluated against the rule until the cache
+  expires.
+
+#### Rule reason
+
+The `reason` property of the `ArcjetRuleResult` object contains an
+`ArcjetReason` object which provides more detailed information about the
+conclusion for that configured rule.
+
+##### Shield
+
+The `ArcjetReason` object for shield rules has the following properties:
+
+```ts
+shieldTriggered: boolean;
+```
+
+See the [shield documentation](/shield/reference?f=remix) for more information
+about these properties.
+
+##### Bot protection
+
+The `ArcjetReason` object for bot protection rules has the following properties:
+
+```ts
+allowed: string[];
+denied: string[];
+```
+
+Each of the `allowed` and `denied` arrays contains the identifiers of the bots
+allowed or denied from our [full list of bots](https://arcjet.com/bot-list).
+
+##### Rate limiting
+
+The `ArcjetReason` object for rate limiting rules has the following properties:
+
+```ts
+max: number;
+remaining: number;
+window: number;
+reset: number;
+```
+
+See the [rate limiting documentation](/rate-limiting/reference?f=node-js) for more
+information about these properties.
+
+##### Email validation & verification
+
+The `ArcjetReason` object for email rules has the following properties:
+
+```ts
+emailTypes: ArcjetEmailType[];
+```
+
+An `ArcjetEmailType` is one of the following strings:
+
+```ts
+"DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
+```
+
+See the [email validation documentation](/email-validation/reference?f=node-js) for more
+information about these properties.
+
+### IP analysis
+
+<IPAnalysis />
+
+#### Example
+
+<Code code={IPLocationTS} lang="ts" />
+
+For the IP address `8.8.8.8` you might get the following response. Only the
+fields we have data for will be returned:
+
+```json
+{
+  "name": "Hello United States!",
+  "ip": {
+    "country": "US",
+    "countryName": "United States",
+    "continent": "NA",
+    "continentName": "North America",
+    "asn": "AS15169",
+    "asnName": "Google LLC",
+    "asnDomain": "google.com"
+  }
+}
+```
+
+## Error handling
+
+Arcjet is designed to fail open so that a service issue or misconfiguration does
+not block all requests. The SDK will also time out and fail open after 1000ms in
+development (see [`ARCJET_ENV`](/environment#arcjet-env)) and 500ms
+otherwise. However, in most cases, the response time will be less than 20-30ms.
+
+If there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the `message` property on the rule's
+error result for more information.
+
+If all other rules that were run returned an `ALLOW` result, then the final Arcjet
+conclusion will be `ERROR`.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={ErrorLoggingTS} lang="ts" mark={[{ range: "47-54" }]} />
+  </TabItem>
+</Tabs>
+
+The [@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect) package provides
+utilities for dealing with common errors.
+
+<Tabs>
+  <TabItem label="TS">
+    <Code code={ErrorUserAgentTS} lang="ts" mark={[{ range: "65-74" }]} />
+  </TabItem>
+</Tabs>
+
+## IP address detection
+
+Arcjet will automatically detect the IP address of the client making the request
+based on the context provided. The implementation is open source in our
+[@arcjet/ip package](https://github.com/arcjet/arcjet-js/blob/main/ip).
+
+In development (see [`ARCJET_ENV`](/environment#arcjet-env)),
+we allow private/internal addresses so that the SDKs work correctly locally.
+
+## Version support
+
+<NodeVersions />
+
+<Comments />

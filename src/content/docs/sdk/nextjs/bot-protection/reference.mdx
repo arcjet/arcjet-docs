@@ -1,0 +1,307 @@
+---
+title: "Bot protection reference for Next.js"
+description: "Reference guide for adding Arcjet bot protection to your Next.js app."
+---
+
+import { Badge } from "@astrojs/starlight/components";
+import Free from "@/components/badges/Free.astro";
+import Starter from "@/components/badges/Starter.astro";
+import Business from "@/components/badges/Business.astro";
+import Enterprise from "@/components/badges/Enterprise.astro";
+import Comments from "@/components/Comments.astro";
+
+import AllowingBots from "@/snippets/bot-protection/reference/nextjs/AllowingBots.mdx";
+import DecisionLog from "@/snippets/bot-protection/reference/nextjs/DecisionLog.mdx";
+import DenyingBots from "@/snippets/bot-protection/reference/nextjs/DenyingBots.mdx";
+import Errors from "@/snippets/bot-protection/reference/nextjs/Errors.mdx";
+import Examples from "@/snippets/bot-protection/reference/nextjs/Examples.mdx";
+import Filtering from "@/snippets/bot-protection/reference/nextjs/Filtering.mdx";
+import IdentifiedBots from "@/snippets/bot-protection/reference/nextjs/IdentifiedBots.mdx";
+import PerRouteVsMiddleware from "@/snippets/bot-protection/reference/nextjs/PerRouteVsMiddleware.mdx";
+import PagesServerActions from "@/snippets/bot-protection/reference/nextjs/PagesServerActions.mdx";
+
+Arcjet bot detection allows you to manage traffic by automated clients and bots.
+
+## Configuration
+
+Bot detection is configured by allowing or denying a subset of bots. The `allow`
+and `deny` lists are mutually-exclusive, such that using `allow` will result in
+a `DENY` decision for any detected bot that is not specified in the `allow` list
+and using `deny` will result in an `ALLOW` decision for any detected bot that is
+not specified in the `deny` list.
+
+You can use only one of the following configuration definitions:
+
+```ts
+type BotOptionsAllow = {
+  mode?: "LIVE" | "DRY_RUN";
+  allow: Array<ArcjetWellKnownBot | ArcjetBotCategory>;
+};
+```
+
+```ts
+type BotOptionsDeny = {
+  mode?: "LIVE" | "DRY_RUN";
+  deny: Array<ArcjetWellKnownBot | ArcjetBotCategory>;
+};
+```
+
+The `arcjet` client is configured with one or more `detectBot` rules which take
+one or many `BotOptions`.
+
+:::note
+When specifying multiple rules, the order of the rules is ignored. Rule
+execution ordering is automatically optimized for performance. See below for
+how to examine the execution results.
+:::
+
+### Allowing specific bots
+
+Most applications want to block almost all bots. However, it is common to allow
+some bots to access your system, such as bots for search indexing or API
+access from the command line.
+
+When allowing specific bots we recommend that you also [check the verification
+status](#bot-verification) after an allow decision is returned to ensure that the bots are who they
+say they are.
+
+This behavior is configured with an `allow` list from our [full list of
+bots](https://arcjet.com/bot-list) and/or [bot
+categories](/bot-protection/identifying-bots#bot-categories).
+
+<AllowingBots />
+
+### Denying specific bots
+
+Some applications may only want to block a small subset of bots, while allowing
+the majority continued access. This may be due to many reasons, such as
+misconfigured or high-traffic bots.
+
+This behavior is configured with a `deny` list from our [full list of
+bots](https://arcjet.com/bot-list) and/or [bot
+categories](/bot-protection/identifying-bots#bot-categories).
+
+<DenyingBots />
+
+<PerRouteVsMiddleware />
+
+<PagesServerActions />
+
+## Decision
+
+The [quick start example](/bot-protection/quick-start) will deny requests that
+match the bot detection rules, immediately returning a response to the client.
+
+Arcjet provides a single `protect` function that is used to execute your
+protection rules. This requires a `request` argument which is the request
+context as passed to the request handler.
+
+This function returns a `Promise` that resolves to an
+`ArcjetDecision` object. This contains the following properties:
+
+- `id` (`string`) - The unique ID for the request. This can be used to look up
+  the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
+  involving the Arcjet cloud API. For decisions taken locally, the prefix is
+  `lreq_`.
+- `conclusion` (`ArcjetConclusion`) - The final conclusion based on evaluating
+  each of the configured rules. If you wish to accept Arcjet's recommended
+  action based on the configured rules then you can use this property.
+- `reason` (`ArcjetReason`) - An object containing more detailed
+  information about the conclusion.
+- `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
+  containing the results of each rule that was executed.
+- `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
+  client IP address. See the SDK reference for more information.
+
+You check if a deny conclusion has been returned by a bot protection rule by
+using `decision.isDenied()` and `decision.reason.isBot()` respectively.
+
+You can iterate through the results and check whether a bot protection rule was
+applied:
+
+```ts
+for (const result of decision.results) {
+  console.log("Rule Result", result);
+}
+```
+
+<DecisionLog />
+
+### Identified bots
+
+The decision also contains all of the [identified
+bots and matched categories](/bot-protection/identifying-bots) detected from the
+request. A request may be identified as zero, one, or more bots/categories-all
+of which will be available on the `decision.allowed` and `decision.denied`
+properties.
+
+<IdentifiedBots />
+
+## Error handling
+
+Arcjet is designed to fail open so that a service issue or misconfiguration does
+not block all requests. The SDK will also time out and fail open after 1000ms
+in development (see [`ARCJET_ENV`](/environment#arcjet-env)) and 500ms
+otherwise. However, in most cases, the response time will be less than 20-30ms.
+
+If there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the `message` property on the rule's
+error result for more information.
+
+If all other rules that were run returned an `ALLOW` result, then the final Arcjet
+conclusion will be `ERROR`.
+
+:::note
+Requests without `User-Agent` headers might not be identified as any particular
+bot and could be marked as an errored result. Our recommendation is to block
+requests without `User-Agent` headers because most legitimate clients send this
+header.
+
+See [an example of how to do this](/bot-protection/reference#user-agent-header).
+:::
+
+<Errors />
+
+## Filtering categories
+
+All categories are also provided as enumerations, which allows for programmatic
+access. For example, you may want to allow most of `CATEGORY:GOOGLE` except
+their "advertising quality" bot.
+
+<Filtering />
+
+## Bot verification
+
+Requests analyzed by Arcjet on <Starter /> or <Business /> plans include
+automatic bot verification. For `allow` rules, Arcjet verifies the authenticity
+of detected bots by checking IP data and performing reverse DNS lookups.
+
+This helps protect against spoofed bots where clients pretend to be someone
+else.
+
+:::note
+Because verification is only helpful when you want to specifically `allow`
+certain bots, any `deny` rules bypass verification and simply block bots
+matching the `deny` list.
+:::
+
+### Example: Allowing verified bots
+
+Well-behaved bots, such as search engine indexers, are often desirable traffic.
+The companies that operate these bots will make them verifiable so application
+developers can choose to avoid additional signals about the request.
+
+For example, when a request claims to be GoogleBot, Arcjet will check if the IP
+truly belongs to Google. You can check the verification status in your code and
+take actions based on the results, such as allowing all verified bots.
+
+```ts
+import { isVerifiedBot } from "@arcjet/inspect";
+
+// ...
+const aj = arcjet({
+  // ...
+  rules: [
+    detectBot({
+      mode: "LIVE",
+      allow: ["CATEGORY:SEARCH_ENGINE"],
+    }),
+  ],
+});
+
+// ...
+const decision = await aj.protect(req);
+// ...
+
+// Ignore other signals for verified search engine bots
+if (decision.results.some(isVerifiedBot)) {
+  return new Response("Hello Bot!");
+}
+
+// Leverage all Arcjet signals
+if (decision.isDenied()) {
+  return new Response(null, { status: 403 });
+}
+```
+
+### Check for spoofed bots
+
+This will check if the bot is spoofed. You would usually return a 403 or similar
+response to block the request.
+
+```ts
+for (const { reason } of decision.results) {
+  if (reason.isBot() && reason.isSpoofed()) {
+    console.log("Detected spoofed bot", reason.spoofed);
+    // Return a 403 or similar response
+  }
+}
+```
+
+### Check bot verification
+
+This will check if the bot is verified.
+
+```ts
+for (const { reason } of decision.results) {
+  if (reason.isBot() && reason.isVerified()) {
+    console.log("Verified bot", reason.verified);
+    // Allow the request
+  }
+}
+```
+
+### `User-Agent` header
+
+Requests without `User-Agent` headers cannot be identified as any particular
+bot and are marked as an errored result.
+
+Most legitimate clients send it because HTTP/1.1 (RFC 7231) says it _should_ be
+sent.
+You can choose to block such requests with [Arcjet Filters](/filters).
+
+```ts
+filter({
+  // This will deny any traffic that has no user agent:
+  deny: ['len(http.request.headers["user-agent"]) eq 0'],
+  // Block requests with `LIVE`, use `DRY_RUN` to log only.
+  mode: "LIVE",
+}),
+```
+
+An alternative approach is to check the rule results using the
+`isMissingUserAgent` function in
+[@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect) after the decision is
+made:
+
+```ts
+import { isMissingUserAgent } from "@arcjet/inspect";
+
+if (decision.results.some(isMissingUserAgent)) {
+  log.warn(
+    { error: decision.reason.message },
+    "request missing required user-agent header",
+  );
+  // You could return a 400 Bad request error here
+  // Next.js example:
+  // return NextResponse.json({ error: "Bad request" }, { status: 400 });
+  // Node.js example:
+  // res.writeHead(400, { "Content-Type": "application/json" });
+  // res.end(JSON.stringify({ error: "Bad request" }));
+}
+```
+
+## Testing
+
+Arcjet runs the same in any environment, including locally and in CI. You can
+use the `mode` set to `DRY_RUN` to log the results of rule execution without
+blocking any requests.
+
+We have an example test framework you can use to automatically test your rules.
+Arcjet can also be triggered based using a sample of your traffic.
+
+See the [Testing](/testing) section of the docs for details.
+
+<Examples />
+
+<Comments />

@@ -1,0 +1,246 @@
+---
+title: "Rate limiting reference for Node.js"
+description: "Reference guide for adding Arcjet rate limiting to your Node.js app."
+---
+
+import { Badge } from "@astrojs/starlight/components";
+import Comments from "/src/components/Comments.astro";
+
+import ByUserId from "@/snippets/rate-limiting/reference/nodejs/ByUserId.mdx";
+import DecisionLog from "@/snippets/rate-limiting/reference/nodejs/DecisionLog.mdx";
+import Errors from "@/snippets/rate-limiting/reference/nodejs/Errors.mdx";
+import FixedWindow from "@/snippets/rate-limiting/reference/nodejs/FixedWindow.mdx";
+import Headers from "@/snippets/rate-limiting/reference/nodejs/Headers.mdx";
+import SlidingWindow from "@/snippets/rate-limiting/reference/nodejs/SlidingWindow.mdx";
+import TokenBucket from "@/snippets/rate-limiting/reference/nodejs/TokenBucket.mdx";
+import TokenBucketRequest from "@/snippets/rate-limiting/reference/nodejs/TokenBucketRequest.mdx";
+
+Arcjet rate limiting allows you to define rules which limit the number of
+requests a client can make over a period of time.
+
+## Configuration
+
+Each rate limit is configured on an exact path with a set of client
+characteristics and algorithm specific options.
+
+### Fixed window rate limit options
+
+Tracks the number of requests made by a client over a fixed time window. Options
+are explained in the [Configuration](/rate-limiting/configuration)
+documentation. See the [fixed window algorithm
+description](/rate-limiting/algorithms#fixed-window) for more details about how
+the algorithm works.
+
+```ts
+// Options for fixed window rate limit
+// See https://docs.arcjet.com/rate-limiting/configuration
+type FixedWindowRateLimitOptions = {
+  // "LIVE" will block requests. "DRY_RUN" will log only
+  mode?: "LIVE" | "DRY_RUN";
+  // How the client is identified. See https://docs.arcjet.com/fingerprints
+  characteristics?: string[];
+  // Time window the rate limit applies to
+  window: string;
+  // Maximum number of requests allowed in the time window
+  max: number;
+};
+```
+
+#### Fixed window example
+
+<FixedWindow />
+
+### Sliding window rate limit options
+
+Tracks the number of requests made by a client over a sliding window so that the
+window moves with time. Options are explained in the
+[Configuration](/rate-limiting/configuration) documentation. See the [sliding
+window algorithm description](/rate-limiting/algorithms#sliding-window) for more
+details about how the algorithm works.
+
+```ts
+// Options for sliding window rate limit
+// See https://docs.arcjet.com/rate-limiting/configuration
+type SlidingWindowRateLimitOptions = {
+  // "LIVE" will block requests. "DRY_RUN" will log only
+  mode?: "LIVE" | "DRY_RUN";
+  // How the client is identified. See https://docs.arcjet.com/fingerprints
+  characteristics?: string[];
+  // The time interval in seconds for the rate limit
+  interval: number;
+  // Maximum number of requests allowed over the time interval
+  max: number;
+};
+```
+
+#### Sliding window example
+
+<SlidingWindow />
+
+### Token bucket rate limit options
+
+Based on a bucket filled with a specific number of tokens. Each request
+withdraws a token from the bucket and the bucket is refilled at a fixed rate.
+Once the bucket is empty, the client is blocked until the bucket refills.
+Options are explained in the [Configuration](/rate-limiting/configuration)
+documentation. See the [token bucket algorithm
+description](/rate-limiting/algorithms#token-bucket) for more details about how
+the algorithm works.
+
+```ts
+// Options for token bucket rate limit
+// See https://docs.arcjet.com/rate-limiting/configuration
+type TokenBucketRateLimitOptions = {
+  // "LIVE" will block requests. "DRY_RUN" will log only
+  mode?: "LIVE" | "DRY_RUN";
+  // How the client is identified. See https://docs.arcjet.com/fingerprints
+  characteristics?: string[];
+  // Number of tokens to add to the bucket at each interval
+  refillRate: number;
+  // The interval in seconds to add tokens to the bucket
+  interval: number;
+  // The maximum number of tokens the bucket can hold
+  capacity: number;
+};
+```
+
+#### Token bucket example
+
+See the [token bucket request example](#token-bucket-request) for how to specify
+the number of tokens to request.
+
+<TokenBucket />
+
+## Identifying users
+
+Rate limit rules use `characteristics` to identify the client and apply the
+limit across requests. The default is to use the client's IP address. However,
+you can specify other [characteristics](/fingerprints) such as a user ID or
+other metadata from your application.
+
+:::caution
+Avoid passing personal information such as an email address as a custom
+characteristic. The value is hashed on Arcjet's servers, but it's still a best
+practice to avoid sending us sensitive information.
+:::
+
+In this example we define a rate limit rule that applies to a specific user ID.
+The custom characteristic is `userId` with the value passed as a prop on the
+`protect` function. You can use any string for the characteristic name and any
+`string`, `number` or `boolean` for the value.
+
+<ByUserId />
+
+To identify users with different characteristics e.g. IP address for anonymous
+users and a user ID for logged in users, you can use `withRule` to create
+augmented clients that use different characteristics. See the
+[example in the custom characteristics section](/rate-limiting/configuration#ip-address--user-id).
+
+## Decision
+
+Arcjet provides a single `protect` function that is used to execute your
+protection rules. This requires a `RequestEvent` property which is the event
+context as passed to the request handler.
+
+This function returns a `Promise` that resolves to an
+`ArcjetDecision` object. This contains the following properties:
+
+- `id` (`string`) - The unique ID for the request. This can be used to look up
+  the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
+  involving the Arcjet cloud API. For decisions taken locally, the prefix is
+  `lreq_`.
+- `conclusion` (`ArcjetConclusion`) - The final conclusion based on evaluating
+  each of the configured rules. If you wish to accept Arcjet's recommended
+  action based on the configured rules then you can use this property.
+- `reason` (`ArcjetReason`) - An object containing more detailed
+  information about the conclusion.
+- `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
+  containing the results of each rule that was executed.
+- `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
+  client IP address. See the SDK reference for more information.
+
+You check if a deny conclusion has been returned by a rate limit rule by using
+`decision.isDenied()` and `decision.reason.isRateLimit()`.
+
+You can iterate through the results and check whether a rate limit was applied:
+
+```ts
+for (const result of decision.results) {
+  console.log("Rule Result", result);
+}
+```
+
+This example will log the full result as well as each rate limit rule:
+
+<DecisionLog />
+
+### Token bucket request
+
+When using a token bucket rule, an additional `requested` prop should be passed
+to the `protect` function. This is the number of tokens the client is requesting
+to withdraw from the bucket.
+
+<TokenBucketRequest />
+
+### Rate limit headers
+
+With a rate limit rule enabled, you can access additional metadata in every
+Arcjet decision result:
+
+- `max` (`number`): The configured maximum number of requests applied to this
+  request.
+- `remaining` (`number`): The number of requests remaining before `max` is
+  reached within the window.
+- `window` (`number`): The total amount of seconds in which requests are
+  counted.
+- `reset` (`number`): The remaining amount of seconds in the window.
+
+These can be used to return `RateLimit` HTTP headers ([draft
+RFC](https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-ratelimit-headers-08)) to
+offer the client more detail.
+
+We provide the [@arcjet/decorate
+package](https://github.com/arcjet/arcjet-js/tree/main/decorate) for decorating
+your responses with appropriate `RateLimit` headers based on a decision.
+
+<Headers />
+
+This would result in [draft
+RFC](https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-ratelimit-headers-08)
+response headers similar to the following:
+
+```http
+...
+< RateLimit: limit=10, remaining=5, reset=9
+< RateLimit-Policy: 10;w=10
+...
+```
+
+## Error handling
+
+Arcjet is designed to fail open so that a service issue or misconfiguration does
+not block all requests. The SDK will also time out and fail open after 1000ms in
+development (see [`ARCJET_ENV`](/environment#arcjet-env)) and 500ms
+otherwise. However, in most cases, the response time will be less than 20-30ms.
+
+If there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the `message` property on the rule's
+error result for more information.
+
+If all other rules that were run returned an `ALLOW` result, then the final Arcjet
+conclusion will be `ERROR`.
+
+<Errors />
+
+## Testing
+
+Arcjet runs the same in any environment, including locally and in CI. You can
+use the `mode` set to `DRY_RUN` to log the results of rule execution without
+blocking any requests.
+
+We have an example test framework you can use to automatically test your rules.
+Arcjet can also be triggered based using a sample of your traffic.
+
+See the [Testing](/testing) section of the docs for details.
+
+<Comments />

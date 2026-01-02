@@ -1,0 +1,103 @@
+---
+title: "Bot protection for Astro"
+description: "Quick start guide for adding Arcjet bot protection to your Astro app."
+---
+
+import { LinkCard, CardGrid } from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import FAQs from "/src/components/FAQs.astro";
+import Comments from "/src/components/Comments.astro";
+
+import Step1 from "@/snippets/shared/astro/InstallWithInspect.mdx";
+import Step2 from "@/snippets/get-started/astro/Step2.mdx";
+import Step3 from "@/snippets/bot-protection/quick-start/astro/Step3.mdx";
+import Step4 from "@/snippets/bot-protection/quick-start/astro/Step4.mdx";
+
+Arcjet bot detection allows you to manage traffic by automated clients and bots.
+
+<WhatIsArcjet />
+
+## Quick start
+
+This guide will show you how to protect your Astro
+application from bots and automated clients.
+
+### 1. Install Arcjet
+
+In your project root, run the following command to install the SDK:
+
+<Step1 />
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key.
+
+<Step2 />
+
+### 3. Add bot protection
+
+<Step3 />
+
+<Step4 />
+
+The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
+
+### 5. Choose bots to allow or deny
+
+Arcjet maintains a list of known bots so you can choose to either only [allow
+specific bots](/bot-protection/reference#allowing-specific-bots) or only [deny
+specific bots](/bot-protection/reference#denying-specific-bots).
+
+Bots can be identified individually or through managed categories. See
+[Identifiying Bots](/bot-protection/identifying-bots) for more details.
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+<CardGrid>
+  <LinkCard
+    title="Bot protection reference"
+    href="/bot-protection/reference"
+    description="Full details about bot protection."
+  />
+  <LinkCard
+    title="Testing"
+    href="/testing"
+    description="Write tests for your rules."
+  />
+</CardGrid>
+
+### Explore
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can setup rate limiting for your
+API, minimize fraudulent registrations with the signup form protection and more.
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  />
+  <LinkCard
+    title="Learn how Arcjet works"
+    href="/architecture"
+    description="Arcjet's architecture."
+  />
+  <LinkCard
+    title="SDK reference"
+    href="/sdk/astro/reference"
+    description="Astro SDK reference guide."
+  />
+</CardGrid>
+
+## Get help
+
+Need help with anything? Email support@arcjet.com to get support from our
+engineering team.
+
+<Comments />

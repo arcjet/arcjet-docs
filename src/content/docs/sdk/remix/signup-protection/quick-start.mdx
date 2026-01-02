@@ -1,0 +1,104 @@
+---
+title: "Signup form protection for Remix"
+description: "Quick start guide to protect your signup forms from abuse to your Remix app with Arcjet Signup form protection."
+---
+
+import { LinkCard, CardGrid } from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import FAQs from "/src/components/FAQs.astro";
+import Comments from "/src/components/Comments.astro";
+
+import Step1 from "@/snippets/signup-protection/quick-start/remix/Step1.mdx";
+import Step2 from "@/snippets/signup-protection/quick-start/shared/Step2.mdx";
+import Step3 from "@/snippets/signup-protection/quick-start/remix/Step3.mdx";
+import Step4 from "@/snippets/signup-protection/quick-start/remix/Step4.mdx";
+
+Arcjet signup form protection combines rate limiting, bot protection, and email validation to protect your signup forms from abuse.
+
+<WhatIsArcjet />
+
+## Quick start
+
+This guide will show you how to protect your Remix signup form from common attacks.
+
+### 1. Install Arcjet SDK
+
+In your project root, run the following command to install the SDK:
+
+<Step1 />
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key. Add it to a `.env.local` file in your Remix project root.
+
+<Step2 />
+
+### 3. Protect a form
+
+Arcjet signup form protection is a combination of the [rate
+limiting](/rate-limiting/quick-start?f=node-js), [bot
+protection](/bot-protection/quick-start?f=node-js), and [email
+validation](/email-validation/quick-start?f=node-js) primitives. These are
+configured using our recommended rules.
+
+The example below is a simple email form. You could adapt this as part of a
+signup form.
+
+<Step3 />
+
+<Step4 />
+
+The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+<CardGrid>
+  <LinkCard
+    title="Signup form protection reference"
+    href="/signup-protection/reference"
+    description="Full details about Arcjet signup form protection."
+  ></LinkCard>
+  <LinkCard
+    title="Testing"
+    href="/testing"
+    description="Write tests for your rules."
+  />
+</CardGrid>
+
+### Explore
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can setup bot protection, rate
+limiting for your API, minimize fraudulent registrations with the signup form
+protection and more.
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  />
+  <LinkCard
+    title="Learn how Arcjet works"
+    href="/architecture"
+    description="Arcjet's architecture."
+  />
+  <LinkCard
+    title="SDK reference"
+    href="/reference/remix"
+    description="Remix SDK reference guide."
+  />
+</CardGrid>
+
+## Get help
+
+Need help with anything? [Email us](mailto:support@arcjet.com) or [join our
+Discord](https://discord.gg/VRtMdATWNE) to get support from our
+engineering team.
+
+<Comments />

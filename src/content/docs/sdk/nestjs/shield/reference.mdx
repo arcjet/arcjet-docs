@@ -1,0 +1,100 @@
+---
+title: "Shield WAF reference for NestJS"
+description: "Reference guide for adding Arcjet Shield WAF to your NestJS app."
+---
+
+import DisplayType from "@/components/DisplayType.astro";
+
+import DecisionLog from "@/snippets/shield/reference/nestjs/DecisionLog.mdx";
+import DecoratorRoutes from "@/snippets/shield/reference/nestjs/DecoratorRoutes.mdx";
+import Errors from "@/snippets/shield/reference/nestjs/Errors.mdx";
+import GuardDecision from "@/snippets/shield/reference/nestjs/GuardDecision.mdx";
+
+Arcjet Shield WAF protects your application against common attacks, including
+the [OWASP Top 10](https://owasp.org/www-project-top-ten/).
+
+## Configuration
+
+Shield is configured by specifying which mode you want it to run in.
+
+The `arcjet` client can be configured with one or more Shield rules, which are
+constructed with the `shield(options: ShieldOptions)` function and configured by
+`ShieldOptions`:
+
+<DisplayType type="ShieldOptions" from="@arcjet/nest" />
+<DisplayType type="ArcjetMode" from="@arcjet/nest" />
+
+:::note
+When specifying multiple rules, the order of the rules is ignored. Rule
+execution ordering is automatically optimized for performance. See
+[decision](#decision) below for details of examining the execution results.
+:::
+
+<DecoratorRoutes />
+
+## Decision
+
+Arcjet provides a single `protect` function that is used to execute your
+protection rules. This requires a `RequestEvent` property which is the event
+context as passed to the request handler.
+
+<GuardDecision />
+
+This function returns a `Promise` that resolves to an
+`ArcjetDecision` object. This contains the following properties:
+
+- `id` (`string`) - The unique ID for the request. This can be used to look up
+  the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
+  involving the Arcjet cloud API. For decisions taken locally, the prefix is
+  `lreq_`.
+- `conclusion` (`ArcjetConclusion`) - The final conclusion based on evaluating
+  each of the configured rules. If you wish to accept Arcjet's recommended
+  action based on the configured rules then you can use this property.
+- `reason` (`ArcjetReason`) - An object containing more detailed
+  information about the conclusion.
+- `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
+  containing the results of each rule that was executed.
+- `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
+  client IP address. See the SDK reference for more information.
+
+You check if a deny conclusion has been returned by a shield rule by using
+`decision.isDenied()` and `decision.reason.isShield()` respectively.
+
+You can iterate through the results and check whether a shield rule was applied:
+
+```ts
+for (const result of decision.results) {
+  console.log("Rule Result", result);
+}
+```
+
+This example will log the full result as well as the shield rule:
+
+<DecisionLog />
+
+## Error handling
+
+Arcjet is designed to fail open so that a service issue or misconfiguration does
+not block all requests. The SDK will also time out and fail open after 1000ms in
+development (see [`ARCJET_ENV`](/environment#arcjet-env)) and 500ms
+otherwise. However, in most cases, the response time will be less than 20-30ms.
+
+If there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the `message` property on the rule's
+error result for more information.
+
+If all other rules that were run returned an `ALLOW` result, then the final Arcjet
+conclusion will be `ERROR`.
+
+<Errors />
+
+## Testing
+
+Arcjet runs the same in any environment, including locally and in CI. You can
+use the `mode` set to `DRY_RUN` to log the results of rule execution without
+blocking any requests.
+
+We have an example test framework you can use to automatically test your rules.
+Arcjet can also be triggered based using a sample of your traffic.
+
+See the [Testing](/testing) section of the docs for details.

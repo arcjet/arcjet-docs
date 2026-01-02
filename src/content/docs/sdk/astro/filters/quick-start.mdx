@@ -1,0 +1,125 @@
+---
+description: "Quick start guide for adding Arcjet filters to your Astro app."
+title: "Filters for Astro"
+---
+
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+import Comments from "/src/components/Comments.astro";
+import Faqs from "/src/components/FAQs.astro";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+
+import Step1 from "@/snippets/shared/astro/Install.mdx";
+import Step2 from "@/snippets/get-started/astro/Step2.mdx";
+import Step3 from "@/snippets/filters/quick-start/astro/Step3.mdx";
+import Step4 from "@/snippets/filters/quick-start/astro/Step4.mdx";
+
+Arcjet filters let you block requests using
+[Wireshark](https://www.wireshark.org/)-like [display
+filter](https://www.wireshark.org/docs/wsug_html_chunked/ChWorkBuildDisplayFilterSection.html)
+expressions over HTTP headers, IP addresses, and other request fields. This
+allows you to quickly enforce rules like allow/deny by country, network, or
+`user-agent`.
+
+<WhatIsArcjet />
+
+## Quick start
+
+This guide shows how to protect your Astro app with
+filters.
+
+### 1. Install Arcjet
+
+Run the following command to install the SDK in your project:
+
+<Step1 />
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) and follow the
+instructions to add a site and get a key.
+
+<Step2 />
+
+### 3. Add filters
+
+<Step3 />
+
+{/* Note: Step 4 has its heading inside it as it is dynamic. Make sure that the table of contents (in frontmatter) reflects that dynamic heading correctly. */}
+
+<Step4 />
+
+### 5. Try it out
+
+Make a `curl` request from your terminal to your app:
+
+```sh
+curl --head http://localhost:4321
+```
+
+You should get a `403 Forbidden` response.
+
+The Curl request could result in a `200 OK` if you have a `.curlrc` somewhere
+(probably `~/.curlrc`) that sets a `user-agent` field to something other than
+Curl.
+
+Try changing the filter expression to match `"chrome"` or `"firefox"` and visit
+your app with different browsers.
+
+These requests should also show in the [Arcjet dashboard][arcjet-dashboard].
+Make sure you configured `ARCJET_KEY` correctly if things don't show up.
+
+See the [Filters reference][arcjet-filters-reference] to learn more about the
+expression language.
+
+## FAQs
+
+<Faqs />
+
+## What next?
+
+<CardGrid>
+  <LinkCard
+    title="Filter reference"
+    href="/filters/reference"
+    description="Full details about filters."
+  />
+  <LinkCard
+    title="Testing"
+    href="/testing"
+    description="Write tests for your rules."
+  />
+</CardGrid>
+
+### Explore
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can setup rate limiting for your
+API, minimize fraudulent registrations with the signup form protection and more.
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  />
+  <LinkCard
+    title="Learn how Arcjet works"
+    href="/architecture"
+    description="Arcjet's architecture."
+  />
+  <LinkCard
+    title="SDK reference"
+    href="/sdk/astro/reference"
+    description="Astro SDK reference guide."
+  />
+</CardGrid>
+
+## Get help
+
+Need help with anything? Email support@arcjet.com to get support from our
+engineering team.
+
+<Comments />
+
+[arcjet-dashboard]: https://app.arcjet.com
+[arcjet-filters-reference]: /filters/reference

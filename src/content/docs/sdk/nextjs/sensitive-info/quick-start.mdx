@@ -1,0 +1,137 @@
+---
+title: "Sensitive information detection for Next.js"
+description: "Quick start guide for detecting sensitive information with Arcjet in your Next.js app."
+---
+
+import { LinkCard, CardGrid } from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import FAQs from "/src/components/FAQs.astro";
+import Comments from "/src/components/Comments.astro";
+
+import Step1 from "@/snippets/sensitive-info/quick-start/nextjs/Step1.mdx";
+import Step2 from "@/snippets/sensitive-info/quick-start/shared/Step2.mdx";
+import Step3 from "@/snippets/sensitive-info/quick-start/nextjs/Step3.mdx";
+import Step4 from "@/snippets/sensitive-info/quick-start/nextjs/Step4.mdx";
+
+Arcjet Sensitive Information Detection protects against clients sending you
+sensitive information such as personally identifiable information (PII) that
+you do not wish to handle.
+
+<WhatIsArcjet />
+
+## Quick start
+
+This guide will show you how to configure Arcjet for a Next.js
+app.
+
+### 1. Install Arcjet
+
+In your project root, run the following command to install the SDK:
+
+<Step1 />
+
+### 2. Set your key
+
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key. Add it to a `.env.local` file in your
+project root.
+
+<Step2 />
+
+### 3. Protect a route
+
+Create a sensitive info detection rule. You can also configure Arcjet to detect
+credit/debit card numbers, IP addresses, phone numbers, and/or implement a
+custom detection function. See the [reference](/sensitive-info/reference) for
+details.
+
+<Step3 />
+
+### 4. Test sending personal info
+
+Start your app and try making a request with an email address in the body of the
+request:
+
+<Step4 />
+
+You should see this in your logs
+
+```text
+Arcjet decision ArcjetDenyDecision {
+  id: '', // This will contain the Arcjet request ID
+  ttl: 0,
+  results: [
+    ArcjetRuleResult {
+      ruleId: '',
+      ttl: 0,
+      state: 'RUN',
+      conclusion: 'DENY',
+      reason: [ArcjetSensitiveInfoReason]
+    }
+  ],
+...
+```
+
+The default response for a request containing unexpected sensitive information
+is a 400:
+
+```sh
+< HTTP/2 400
+< content-type: application/json; charset=utf-8
+< date: Tue, 09 Jan 2024 13:43:04 GMT
+< vary: Accept-Encoding
+< content-length: 72
+```
+
+The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
+
+## FAQs
+
+<FAQs />
+
+## What next?
+
+<CardGrid>
+  <LinkCard
+    title="Sensitive Information reference"
+    href="/sensitive-info/reference"
+    description="Full details about Sensitive Info."
+  />
+  <LinkCard
+    title="Testing"
+    href="/testing"
+    description="Write tests for your rules."
+  />
+</CardGrid>
+
+### Explore
+
+Arcjet can be used with specific rules on individual routes or as general
+protection on your entire application. You can setup bot protection, rate
+limiting for your API, minimize fraudulent registrations with the signup form
+protection and more.
+
+<CardGrid>
+  <LinkCard
+    title="Example apps"
+    href="https://github.com/arcjet/arcjet-js/tree/main/examples"
+    description="Check out the examples."
+  />
+  <LinkCard
+    title="Learn how Arcjet works"
+    href="/architecture"
+    description="Arcjet's architecture."
+  />
+  <LinkCard
+    title="SDK reference"
+    href="/sdk/nextjs/reference"
+    description="Next.js SDK reference guide."
+  />
+</CardGrid>
+
+## Get help
+
+Need help with anything? Email support@arcjet.com to get support from our
+engineering team.
+
+<Comments />
