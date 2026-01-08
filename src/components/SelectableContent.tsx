@@ -1,4 +1,3 @@
-import FrameworkSwitcher from "@/components/FrameworkSwitcher";
 import Select from "@/components/Select";
 import { getStoredSyncKey, storeSyncKey } from "@/lib/prefs";
 import { syncKeys as storedSyncKeys } from "@/store";
@@ -16,7 +15,6 @@ type Slot = {
 
 interface Props extends HTMLProps<HTMLDivElement> {
   syncKey?: string;
-  frameworkSwitcher: boolean;
 }
 
 /**
@@ -35,11 +33,9 @@ interface Props extends HTMLProps<HTMLDivElement> {
  * ...
  *
  * @param syncKey - The sync key to persist the selection.
- * @param frameworkSwitcher - Shows the framework switcher.
  */
 const SelectableContent = ({
   syncKey,
-  frameworkSwitcher = false,
   className,
   children,
   ...props
@@ -152,11 +148,6 @@ const SelectableContent = ({
               );
             })}
           </Select>
-        )}
-        {frameworkSwitcher && (
-          <FrameworkSwitcher
-            select={{ level: "secondary", trigger: { size: "sm" } }}
-          />
         )}
       </div>
       {selectedSlot?.value}

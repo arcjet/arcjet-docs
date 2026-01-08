@@ -24,15 +24,11 @@ use `event.url.pathname.startsWith`.
 
 #### Rate limit only on `/api/*`
 
-<SlotByFramework client:load>
-  <HookMatchingPaths slot="sveltekit" />
-</SlotByFramework>
+<HookMatchingPaths />
 
 #### Rate limit on all routes
 
-<SlotByFramework client:load>
-  <HookAllRoutes slot="sveltekit" />
-</SlotByFramework>
+<HookAllRoutes />
 
 ### Avoiding double protection with hooks
 
@@ -43,6 +39,4 @@ excluding the individual routes before running Arcjet in the hook.
 For example, if you already have a rule defined in the route at `/api`, you can
 exclude it from the hook like this:
 
-<SlotByFramework client:load>
-  <HookMatcher slot="sveltekit" />
-</SlotByFramework>
+<HookMatcher />

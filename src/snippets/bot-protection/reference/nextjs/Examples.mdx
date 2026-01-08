@@ -22,7 +22,7 @@ import WrapPagesNodeTS from "./WrapPagesNode.ts?raw";
 You can protect a Next.js page from bots by calling the Arcjet SDK from within
 the page loader:
 
-<SelectableContent client:load syncKey="language" frameworkSwitcher>
+<SelectableContent client:load syncKey="language">
   <div slot="TS (App)" slotIdx="1">
     Protecting an app router page within the handler itself is not currently
 supported, but you can set up a matcher on the middleware (renamed to proxy in Next.js 16) instead:
@@ -51,7 +51,7 @@ All the examples on this page show how you can inspect the decision to control
 what to do next. However, if you just wish to send a generic `403 Forbidden`
 response you can delegate this to Arcjet by wrapping your handler `withArcjet`.
 
-<SelectableContent client:load syncKey="language" frameworkSwitcher>
+<SelectableContent client:load syncKey="language">
   <div slot="TS (App)" slotIdx="1">
     For both [the Node or Edge runtime](https://nextjs.org/docs/app/building-your-application/routing/route-handlers#edge-and-nodejs-runtimes):
 
@@ -90,7 +90,7 @@ For the Edge runtime:
 Arcjet works in Edge Functions and with the [Edge
 Runtime](https://edge-runtime.vercel.app/).
 
-<SelectableContent client:load syncKey="language" frameworkSwitcher>
+<SelectableContent client:load syncKey="language">
   <div slot="TS (App)" slotIdx="1">
     <Code code={EdgeAppTS} title="/app/api/hello/route.ts" lang="ts" />
   </div>

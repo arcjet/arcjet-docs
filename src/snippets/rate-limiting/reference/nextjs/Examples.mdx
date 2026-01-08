@@ -33,7 +33,7 @@ further requests.
 Applying a rate limit by IP address is the default if no
 `characteristics` are specified.
 
-<SelectableContent client:load syncKey="language" frameworkSwitcher>
+<SelectableContent client:load syncKey="language">
   <div slot="TS (App)" slotIdx="1">
     <Code code={ByIPAppTS} title="/app/api/hello/route.ts" lang="ts" />
   </div>
@@ -53,7 +53,7 @@ Applying a rate limit by IP address is the default if no
 The example below is the same as the one above. However this example also shows
 a customized response rather than the default.
 
-<SelectableContent client:load syncKey="language" frameworkSwitcher>
+<SelectableContent client:load syncKey="language">
   <div slot="TS (App)" slotIdx="1">
     <Code
       code={ByIPCustomResponseAppTS}
@@ -105,7 +105,7 @@ See the [arcjet-js GitHub repo](https://github.com/arcjet/arcjet-js) for [a
 full example using
 Next.js](https://github.com/arcjet/arcjet-js/tree/main/examples/nextjs-openai).
 
-<SelectableContent client:load syncKey="language" frameworkSwitcher>
+<SelectableContent client:load syncKey="language">
   <div slot="TS (App)" slotIdx="1">
     <Code code={AIChatBotAppTS} title="/app/api/chat/route.ts" lang="ts" />
   </div>
@@ -143,7 +143,7 @@ inadvertently rate limit everyone. Be sure to include a characteristic which can
 narrowly identify each client, such as an API key as shown here.
 :::
 
-<SelectableContent client:load syncKey="language" frameworkSwitcher>
+<SelectableContent client:load syncKey="language">
   <div slot="TS" slotIdx="1">
     <Code code={ByAPIKeyHeader} lang="ts" />
   </div>
@@ -159,7 +159,7 @@ Middleware runs on every route so be careful to avoid double
 protection if you are configuring Arcjet directly on other routes.
 :::
 
-<SelectableContent client:load syncKey="language" frameworkSwitcher>
+<SelectableContent client:load syncKey="language">
   <div slot="TS" slotIdx="1">
     <Code code={MiddlewareGlobal} title="/middleware.ts" lang="ts" />
   </div>
@@ -172,7 +172,7 @@ You can also use the `req`
 object to customize the response based on the path. In this example, we'll
 return a JSON response for API requests, and a HTML response for other requests.
 
-<SelectableContent client:load syncKey="language" frameworkSwitcher>
+<SelectableContent client:load syncKey="language">
   <div slot="TS" slotIdx="1">
     <Code code={MiddlewareResponsePath} title="/middleware.ts" lang="ts" />
   </div>
@@ -186,7 +186,7 @@ object returned to the client can also be used to rewrite or redirect the
 request. For example, you might want to return a JSON response for API route
 requests, but redirect all page route requests to an error page.
 
-<SelectableContent client:load syncKey="language" frameworkSwitcher>
+<SelectableContent client:load syncKey="language">
   <div slot="TS" slotIdx="1">
     <Code code={MiddlewareRewriteRedirect} title="/middleware.ts" lang="ts" />
   </div>
@@ -199,7 +199,7 @@ what to do next. However, if you just wish to send a generic `429 Too Many
 Requests` response you can delegate this to Arcjet by wrapping your handler
 `withArcjet`.
 
-<SelectableContent client:load syncKey="language" frameworkSwitcher>
+<SelectableContent client:load syncKey="language">
   <div slot="TS (App)" slotIdx="1">
     For both [the Node or Edge runtime](https://nextjs.org/docs/app/building-your-application/routing/route-handlers#edge-and-nodejs-runtimes):
 
