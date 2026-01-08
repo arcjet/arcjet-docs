@@ -377,6 +377,26 @@ Otherwise, [see this
 discussion](https://github.com/orgs/supabase/discussions/29552) for other
 Supabase instances.
 
+### Error: Stream closed with error code NGHTTP2_FRAME_SIZE_ERROR
+
+You may see this error if you are using Bun instead of Node.js with a framework
+that bundles.
+These bundlers, such as Vite or Webpack, typically resolve files for Node.js.
+However, these Node.js-specific APIs are not fully supported in Bun, leading to
+this error:
+
+```txt
+Internal server error: [internal] Stream closed with error code NGHTTP2_FRAME_SIZE_ERROR
+```
+
+To solve this, you can configure the bundler to also resolve using the `bun`
+condition.
+For Vite you can set
+[`ssr.resolve.externalConditions`](https://vite.dev/config/ssr-options#ssr-resolve-externalconditions)
+to include `"bun"`,
+for Webpack you can set
+[`resolve.conditionNames`](https://webpack.js.org/configuration/resolve/#resolveconditionnames).
+
 ## Get help
 
 We provide [technical support](/support) for all Arcjet users so if you need

@@ -33,6 +33,26 @@ Terminal window
 yarn add @arcjet/next @arcjet/inspect
 ```
 
+Note
+
+If you use Bun to run your Next.js app, you may get an error along the lines of:
+
+```
+Internal server error: [internal] Stream closed with error code NGHTTP2_FRAME_SIZE_ERROR
+```
+
+This happens because Next.js bundles for Node.js but Bun does not support all Node.js APIs. To solve this configure Webpack in Next.js to bundle for Bun by adding the following to your `next.config.js`:
+
+next.config.js
+
+```
+1/**2 * @import {NextConfig} from "next"3 */4
+5/** @type {NextConfig} */6const nextConfig = {7  // …8  webpack(config) {9    // See: <https://webpack.js.org/configuration/resolve/#resolveconditionnames>10    config.resolve.conditionNames?.unshift("bun");11    return config;12  },13  // …14};15
+16export default nextConfig;
+```
+
+This may require running Next.js with the `--webpack` flag. Turbopack does not support conditions.
+
 ### Requirements
 
 [Section titled “Requirements”](#requirements)

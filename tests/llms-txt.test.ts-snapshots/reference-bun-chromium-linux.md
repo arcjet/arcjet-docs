@@ -19,7 +19,11 @@ bun add @arcjet/bun
 
 Note
 
-Our `@arcjet/bun` package is built for Bun’s [HTTP server](https://bun.sh/docs/api/http). If your application relies on Bun’s [Node.js Compatiblity](https://bun.sh/docs/runtime/nodejs-apis) (uses `node:http` or a Node.js framework like express) you should instead review our [Node.js SDK reference](/reference/nodejs).
+This package `@arcjet/bun` is made for the [Bun HTTP server](https://bun.sh/docs/api/http) (`Bun.serve`).
+
+If you use `node:http` (including tools like Express) in Bun, that requires the [Node.js compatibility layer](https://bun.sh/docs/runtime/nodejs-apis). It is recommended to use [`@arcjet/node`](/reference/nodejs).
+
+If you use Bun with frameworks like Astro, Fastify, Next.js, Nuxt, and SvelteKit, it is recommended to use [`@arcjet/astro`](/reference/astro), [`@arcjet/fastify`](/reference/fastify), [`@arcjet/next`](/reference/nextjs), [`@arcjet/nuxt`](/reference/nuxt), and [`@arcjet/sveltekit`](/reference/sveltekit), respectively.
 
 ### Requirements
 

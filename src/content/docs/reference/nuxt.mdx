@@ -62,6 +62,30 @@ In your project root, run the following command to install the SDK:
 
 <Installation showFrameworkSwitcher={false} />
 
+:::note
+If you use Bun to run your Nuxt app,
+you may get an error along the lines of:
+
+```txt
+Internal server error: [internal] Stream closed with error code NGHTTP2_FRAME_SIZE_ERROR
+```
+
+This happens because Nuxt bundles for Node.js but Bun does not support all
+Node.js APIs.
+To solve this configure Nitro in Nuxt to bundle for Bun by adding the following
+to your `nitro.config.ts`:
+
+```ts title="nitro.config.ts"
+// See: <https://nuxt.com/docs/api/configuration/nuxt-config>
+export default defineNuxtConfig({
+  // …
+  nitro: { exportConditions: ["bun"] },
+  // …
+});
+```
+
+:::
+
 ### Requirements
 
 <Requirements />

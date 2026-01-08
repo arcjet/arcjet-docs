@@ -34,6 +34,23 @@ astro.config.mjs
 5// https://astro.build/config6export default defineConfig({7  adapter: node({8    mode: "standalone",9  }),10  env: {11    // We recommend enabling secret validation12    validateSecrets: true,13  },14  integrations: [15    // Add the Arcjet Astro integration16    arcjet(),17  ],18});
 ```
 
+Note
+
+If you use Bun to run your Astro app, you may get an error along the lines of:
+
+```
+Internal server error: [internal] Stream closed with error code NGHTTP2_FRAME_SIZE_ERROR
+```
+
+This happens because Astro bundles for Node.js but Bun does not support all Node.js APIs. To solve this configure Vite in Astro to bundle for Bun by adding the following to your `astro.config.mjs`:
+
+astro.config.mjs
+
+```
+1import { defineConfig } from "astro/config";2
+3export default defineConfig({4  // …5  // See: <https://vite.dev/config/ssr-options#ssr-resolve-externalconditions>.6  vite: { ssr: { resolve: { externalConditions: ["bun", "node"] } } },7  // …8});
+```
+
 ### Requirements
 
 [Section titled “Requirements”](#requirements)
