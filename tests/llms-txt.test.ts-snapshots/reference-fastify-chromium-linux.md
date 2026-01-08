@@ -4,7 +4,7 @@ Terminal window
 ignore-me
 ```
 
-[![npm badge](https://img.shields.io/npm/v/arcjet?style=flat-square&label=%E2%9C%A6Aj&labelColor=ECE6F0&color=ECE6F0)](https://www.npmjs.com/package/@arcjet/fastify)
+ [![npm badge](https://img.shields.io/npm/v/@arcjet/fastify?style=flat-square&label=%E2%9C%A6Aj&labelColor=ECE6F0&color=ECE6F0)](https://www.npmjs.com/package/@arcjet/fastify)
 
 This guide shows how to use the package [`@arcjet/fastify`](https://www.npmjs.com/package/@arcjet/fastify). Its source code is [on GitHub](https://github.com/arcjet/arcjet-js/tree/main/arcjet-fastify). The code is open source and licensed under Apache 2.0.
 
