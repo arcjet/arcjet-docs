@@ -25,6 +25,22 @@ nuxt.config.ts
 1export default defineNuxtConfig({2  arcjet: {3    key: process.env.ARCJET_KEY,4  },5  compatibilityDate: "2025-07-15",6  devtools: { enabled: true },7  modules: ["@arcjet/nuxt"],8});
 ```
 
+Note
+
+If you use Bun to run your Nuxt app, you may get an error along the lines of:
+
+```
+Internal server error: [internal] Stream closed with error code NGHTTP2_FRAME_SIZE_ERROR
+```
+
+This happens because Nuxt bundles for Node.js but Bun does not support all Node.js APIs. To solve this configure Nitro in Nuxt to bundle for Bun by adding the following to your `nitro.config.ts`:
+
+nitro.config.ts
+
+```
+1// See: <https://nuxt.com/docs/api/configuration/nuxt-config>2export default defineNuxtConfig({3  // …4  nitro: { exportConditions: ["bun"] },5  // …6});
+```
+
 ### Requirements
 
 [Section titled “Requirements”](#requirements)
