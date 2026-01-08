@@ -55,11 +55,25 @@ bun add @arcjet/bun
 ```
 
 :::note
-Our `@arcjet/bun` package is built for
-Bun's [HTTP server](https://bun.sh/docs/api/http). If your application relies
-on Bun's [Node.js Compatiblity](https://bun.sh/docs/runtime/nodejs-apis)
-(uses `node:http` or a Node.js framework like express) you should instead
-review our [Node.js SDK reference](/reference/nodejs).
+This package `@arcjet/bun` is made for the
+[Bun HTTP server](https://bun.sh/docs/api/http) (`Bun.serve`).
+
+If you use `node:http` (including tools like Express) in Bun,
+that requires the [Node.js compatibility layer](https://bun.sh/docs/runtime/nodejs-apis).
+It is recommended to use [`@arcjet/node`][arcjet-node].
+
+{/* The below are the ones that have pages on Bun’s website <https://bun.com/docs/guides/ecosystem> */}
+{/* Important: no Remix, that is listed but not properly supported <https://bun.com/docs/guides/ecosystem/remix> */}
+
+If you use Bun with frameworks like Astro, Fastify, Next.js, Nuxt, and
+SvelteKit,
+it is recommended to use
+[`@arcjet/astro`][arcjet-astro],
+[`@arcjet/fastify`][arcjet-fastify],
+[`@arcjet/next`][arcjet-next],
+[`@arcjet/nuxt`][arcjet-nuxt], and
+[`@arcjet/sveltekit`][arcjet-sveltekit],
+respectively.
 :::
 
 ### Requirements
@@ -566,3 +580,10 @@ versions for paid users. We will provide security fixes for the current and
 previous major SDK versions.
 
 <Comments />
+
+[arcjet-astro]: /reference/astro
+[arcjet-fastify]: /reference/fastify
+[arcjet-next]: /reference/nextjs
+[arcjet-node]: /reference/nodejs
+[arcjet-nuxt]: /reference/nuxt
+[arcjet-sveltekit]: /reference/sveltekit

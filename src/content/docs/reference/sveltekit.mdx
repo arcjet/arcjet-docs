@@ -68,6 +68,33 @@ yarn add @arcjet/sveltekit @arcjet/inspect
 </TabItem>
 </Tabs>
 
+:::note
+If you use Bun to run your SvelteKit app,
+you may get an error along the lines of:
+
+```txt
+Internal server error: [internal] Stream closed with error code NGHTTP2_FRAME_SIZE_ERROR
+```
+
+This happens because SvelteKit bundles for Node.js but Bun does not support all
+Node.js APIs.
+To solve this configure Vite in SvelteKit to bundle for Bun by adding the following
+to your `vite.config.ts`:
+
+```js title="vite.config.ts"
+import { sveltekit } from "@sveltejs/kit/vite";
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  plugins: [sveltekit()],
+  // …
+  // See: <https://vite.dev/config/ssr-options#ssr-resolve-externalconditions>.
+  ssr: { resolve: { externalConditions: ["bun", "node"] } },
+});
+```
+
+:::
+
 ### Requirements
 
 <Requirements />
