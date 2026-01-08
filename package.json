@@ -89,6 +89,7 @@
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
     "@types/turndown": "5.0.6",
+    "npm-check-updates": "19.3.1",
     "patch-package": "8.0.1",
     "playwright": "1.57.0"
   },
@@ -112,7 +113,11 @@
     "preview": "astro preview",
     "pw:install": "playwright install --with-deps chromium --only-shell",
     "pw:open": "playwright test --ui-host=0.0.0.0",
-    "pw:run": "playwright test"
+    "pw:run": "playwright test",
+    "update:latest": "npm-check-updates --interactive --workspaces --filter \"arcjet, @arcjet/*, nosecone, @nosecone/*\"",
+    "update:arcjet": "npm up arcjet \"@arcjet/*\" nosecone \"@nosecone/*\" --workspaces",
+    "update:minor": "npm-check-updates --interactive --cooldown 30 --target minor --workspaces",
+    "update:major": "npm-check-updates --interactive --cooldown 30 --target @latest --workspaces"
   },
   "type": "module",
   "version": "0.0.1",
