@@ -1,0 +1,30 @@
+---
+type Props = {
+    /**
+     * Optional label to display on the badge.
+     *
+     * @default "✦Aj"
+     */
+    label?: string;
+    /**
+     * npm package name to display the version badge for.
+     */
+    packageName: string;
+}
+
+const url = new URL(Astro.props.packageName, 'https://img.shields.io/npm/v/');
+url.searchParams.set('style', 'flat-square');
+url.searchParams.set('label', Astro.props.label ?? '✦Aj');
+
+url.searchParams.set('labelColor', 'ECE6F0');
+url.searchParams.set('color', 'ECE6F0');
+const light = url.toString();
+
+url.searchParams.set('labelColor', '000000');
+url.searchParams.set('color', '5C5866');
+const dark = url.toString();
+---
+<picture class="badge" data-playwright-mask>
+    <source media="(prefers-color-scheme: dark)" srcset={dark}>
+    <img alt="npm badge" src={light}>
+</picture>

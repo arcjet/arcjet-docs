@@ -151,6 +151,7 @@ test.describe("Screenshots", () => {
             // Using absolute threshold rather than a ration seems to be more
             // consistent for these large text-heavy screenshots.
             maxDiffPixels: 100,
+            mask: [page.locator("[data-playwright-mask]")],
             threshold: 0.1,
           },
         );

@@ -4,7 +4,7 @@ Terminal window
 ignore-me
 ```
 
-[![npm badge](https://img.shields.io/npm/v/arcjet?style=flat-square&label=%E2%9C%A6Aj&labelColor=ECE6F0&color=ECE6F0)](https://www.npmjs.com/package/@arcjet/react-router)
+ [![npm badge](https://img.shields.io/npm/v/@arcjet/react-router?style=flat-square&label=%E2%9C%A6Aj&labelColor=ECE6F0&color=ECE6F0)](https://www.npmjs.com/package/@arcjet/react-router)
 
 This guide shows how to use the package [`@arcjet/react-router`](https://www.npmjs.com/package/@arcjet/react-router). Its source code is [on GitHub](https://github.com/arcjet/arcjet-js/tree/main/arcjet-react-router). The code is open source and licensed under Apache 2.0.
 

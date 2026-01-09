@@ -1,4 +1,4 @@
-[![npm badge](https://img.shields.io/npm/v/arcjet?style=flat-square&label=%E2%9C%A6Aj&labelColor=ECE6F0&color=ECE6F0)](https://www.npmjs.com/package/@arcjet/deno)
+ [![npm badge](https://img.shields.io/npm/v/@arcjet/deno?style=flat-square&label=%E2%9C%A6Aj&labelColor=ECE6F0&color=ECE6F0)](https://www.npmjs.com/package/@arcjet/deno)
 
 This guide shows how to use the package [`@arcjet/deno`](https://www.npmjs.com/package/@arcjet/deno). Its source code is [on GitHub](https://github.com/arcjet/arcjet-js/tree/main/arcjet-deno). The code is open source and licensed under Apache 2.0.
 
