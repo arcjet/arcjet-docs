@@ -94,7 +94,7 @@ ajToc:
         anchor: "wrap-existing-handler"
 ---
 
-import { Badge } from "@astrojs/starlight/components";
+import { Badge, Aside } from "@astrojs/starlight/components";
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
 import FrameworkLinks from "@/components/FrameworkLinks";
@@ -274,6 +274,10 @@ type TokenBucketRateLimitOptions = {
 };
 ```
 
+When using a token bucket rate limit, each request must specify the number of
+tokens it wishes to withdraw from the bucket. This is done by passing a
+`requested` property to the `protect` function.
+
 #### Token bucket example
 
 See the [token bucket request example](#token-bucket-request) for how to specify
@@ -287,6 +291,17 @@ the number of tokens to request.
   <TokenBucketRemix slot="remix" />
   <TokenBucketSvelteKit slot="sveltekit" />
 </SlotByFramework>
+
+The amount of tokens to deduct from the bucket is specified in the `requested`
+option as a positive integer when calling the Arcjet `protect` function.
+
+```ts
+// Deduct 50 tokens from the bucket
+// The value for `requested` must be a positive integer
+const decision = await aj.protect(req, { requested: 50 });
+```
+
+<Aside type="note">The requested amount must be a positive integer.</Aside>
 
 ## Identifying users
 
@@ -379,9 +394,9 @@ This example will log the full result as well as each rate limit rule:
 
 ### Token bucket request
 
-When using a token bucket rule, an additional `requested` prop should be passed
-to the `protect` function. This is the number of tokens the client is requesting
-to withdraw from the bucket.
+When using a token bucket rule, an additional `requested` prop (positive
+integer) should be passed to the `protect` function. This is the number of
+tokens the client is requesting to withdraw from the bucket.
 
 <SlotByFramework client:load>
   <TokenBucketRequestBun slot="bun" />

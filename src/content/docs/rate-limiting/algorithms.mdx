@@ -4,7 +4,7 @@ description: "Arcjet rate limiting supports fixed window, sliding window, and to
 prev: false
 ---
 
-import { Code } from "@astrojs/starlight/components";
+import { Code, Aside } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import FixedWindow from "/src/snippets/rate-limiting/reference/nextjs/FixedWindow.ts?raw";
 import SlidingWindow from "/src/snippets/rate-limiting/reference/nextjs/SlidingWindow.ts?raw";
@@ -120,9 +120,11 @@ requests to `/api/hello` and is tracked by the client's IP address.
 
 <Code code={TokenBucket} lang="ts" />
 
-The amount of tokens to deduct from the bucket is specified when calling the
-Arcjet `protect` function. You can request any number of tokens up to the
-capacity of the bucket.
+The amount of tokens to deduct from the bucket is specified in the `requested`
+option when calling the Arcjet `protect` function. You can request any number of
+tokens up to the capacity of the bucket.
+
+<Aside type="note">The requested amount must be a positive integer.</Aside>
 
 ```ts
 // Deduct 1 token from the bucket
