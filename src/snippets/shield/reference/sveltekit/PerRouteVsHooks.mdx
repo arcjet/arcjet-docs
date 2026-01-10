@@ -22,18 +22,14 @@ Bot protection rules can be configured in two ways:
 
 This configures bot protection on a single route.
 
-<SlotByFramework client:load>
-  <PerRoute slot="sveltekit" />
-</SlotByFramework>
+<PerRoute />
 
 ### Hooks
 
 This will run on every request to your SvelteKit app - see [the SvelteKit Hooks
 docs](https://kit.svelte.dev/docs/hooks) for details.
 
-<SlotByFramework client:load>
-  <Hooks slot="sveltekit" />
-</SlotByFramework>
+<Hooks />
 
 ### Avoiding double protection with hooks
 
@@ -44,7 +40,7 @@ excluding the individual routes before running Arcjet in the hook.
 For example, if you already have a shield rule defined in the API route
 at `/api/arcjet`, you can exclude it from the hook like this:
 
-<SelectableContent client:load syncKey="language" frameworkSwitcher>
+<SelectableContent client:load syncKey="language">
   <div slot="TS" slotIdx="1">
     <Code
       code={FilterRoutesTS}
