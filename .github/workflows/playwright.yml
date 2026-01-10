@@ -26,6 +26,14 @@ jobs:
           node-version: lts/*
       - name: Install dependencies
         run: npm ci
+      - name: Build
+        run: npm run build
+        env:
+          # We need an Arcjet key for the dev server to run, but it doesn't
+          # actually need to be valid for the tests to run.
+          ARCJET_KEY: ajkey_dummy
+          # See astro.config.mts for context.
+          ASTRO_FORCE_NODE_ADAPTER: "1"
       - name: Install Playwright Browsers
         run: npm run pw:install
       - name: Run Playwright tests
