@@ -1,3 +1,4 @@
+import type { AstroUserConfig } from "astro";
 import fs from "node:fs";
 import react from "@astrojs/react";
 import starlight from "@astrojs/starlight";
@@ -8,7 +9,6 @@ import { defineConfig, envField } from "astro/config";
 import arcjet from "@arcjet/astro";
 import starlightLinksValidator from "starlight-links-validator";
 import { main as sidebar } from "./src/lib/sidebars";
-import type { AstroUserConfig } from "astro";
 
 /*
  * @astrojs/vercel does not support local previews without installing and
@@ -140,7 +140,10 @@ export default defineConfig({
         Hero: "./src/components/overrides/Hero.astro",
         ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
       },
-      sidebar: sidebar,
+      routeMiddleware: "./src/routeData.ts",
+      // The sidebar is also dynamically managed by the routeMiddleware defined
+      // in ./src/routeData.ts
+      sidebar,
       expressiveCode: {
         themes: [ajThemeDark, ajThemeLight],
       },

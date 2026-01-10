@@ -21,6 +21,7 @@ if (!baseURL) {
     },
     port: 4321,
     reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000, // 2m
   };
 }
 
