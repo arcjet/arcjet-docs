@@ -1,0 +1,245 @@
+---
+prev: false
+title: "Arcjet Fastify SDK reference"
+generateMarkdownRoute: true
+---
+
+import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import Comments from "@/components/Comments.astro";
+import SelectableContent from "@/components/SelectableContent";
+import WhatIsArcjet from "@/components/WhatIsArcjet.astro";
+import CustomClientJs from "/src/snippets/reference/fastify/custom-client.js?raw";
+import CustomLog from "/src/snippets/reference/fastify/custom-log.js?raw";
+import Error from "/src/snippets/reference/fastify/error.js?raw";
+import Protect from "/src/snippets/reference/fastify/protect.js?raw";
+
+{/* TODO(#526): Starlight injects the css & js as siblings of the first codeblock */}
+{/* on the page. This breaks when the first codeblock is in */}
+{/* <SelectableContent> as the css & js are removed from the page. */}
+{/* This is a workaround. */}
+
+<div aria-hidden="true" style={{ display: "none" }}>
+
+```sh
+ignore-me
+```
+
+</div>
+
+<a href="https://www.npmjs.com/package/@arcjet/fastify">
+  <picture class="badge">
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://img.shields.io/npm/v/arcjet?style=flat-square&label=%E2%9C%A6Aj&labelColor=000000&color=5C5866"
+    />
+    <img
+      alt="npm badge"
+      src="https://img.shields.io/npm/v/arcjet?style=flat-square&label=%E2%9C%A6Aj&labelColor=ECE6F0&color=ECE6F0"
+    />
+  </picture>
+</a>
+
+This guide shows how to use the package
+[`@arcjet/fastify`][npmjs-arcjet-fastify].
+Its source code is [on GitHub][github-arcjet-fastify].
+The code is open source and licensed under Apache 2.0.
+
+<WhatIsArcjet />
+
+## Quick start
+
+See the [Fastify quick start][arcjet-quick-start-fastify].
+
+## Requirements
+
+- Fastify 5 or later
+- Node.js 20 or later, or similar runtime
+- ESM
+
+## Install
+
+<SelectableContent client:load syncKey="packageManager">
+  <Fragment slotIdx="1" slot="npm">
+
+    ```sh
+    npm install @arcjet/fastify
+    ```
+
+  </Fragment>
+
+  <Fragment slotIdx="2" slot="pnpm">
+
+    ```sh
+    pnpm add @arcjet/fastify
+    ```
+
+  </Fragment>
+
+  <Fragment slotIdx="3" slot="yarn">
+
+    ```sh
+    yarn add @arcjet/fastify
+    ```
+
+  </Fragment>
+</SelectableContent>
+
+## Use
+
+### Configure
+
+Build Arcjet clients as few times as possible.
+That means _outside_ request handlers.
+If you need different strategies, such as one for logged-in users and one for
+guests,
+create two clients and choose which one to use inside the handler.
+
+#### Options
+
+The main way to configure Arcjet is to pass options to the `arcjet` function.
+The fields are:
+
+- `characteristics` (`Array<string>`, default: `["src.ip"]`)
+  — characteristics to track a user by;
+  can also be passed to rules
+- `client` (`Client`, optional)
+  — client used to make requests to the Cloud API
+- `key` (`string`, **required**)
+  — API key to identify the site in Arcjet
+  (typically through `process.env.ARCJET_KEY`)
+- `log` (`ArcjetLogger`, optional)
+  — log interface to emit useful info
+- `rules` (`Array<ArcjetRule>`, **required**)
+  — rules to use (order insensitive)
+
+Get the Arcjet key for your site from the [Arcjet dashboard][arcjet-app].
+Set it as an environment variable called `ARCJET_KEY` in your `.env` file:
+
+```sh
+ARCJET_KEY=your_site_key_here
+```
+
+#### Environment variables
+
+The Arcjet Fastify SDK uses several environment variables to configure its behavior.
+See [Concepts: Environment variables](/environment) for more info.
+The `ARCJET_KEY` environment variable is not read automatically and must be passed
+explicitly.
+
+### Protect
+
+Use the `protect` function to protect a request from Fastify.
+Some rules, such as `validateEmail`, may need extra properties.
+The protect function returns a promise that resolves to a decision.
+
+<Code code={Protect} lang="js" />
+
+### Decision
+
+The `ArcjetDecision` that `protect` resolves to has the following fields:
+
+- `conclusion` (`"ALLOW"`, `"DENY"`, or `"ERROR"`)
+  — what to do with the request
+- `id` (`string`)
+  — ID for the request;
+  local decisions start with `lreq_` and remote ones with `req_`
+- `ip` (`ArcjetIpDetails`)
+  — analysis of the client IP address
+- `reason` (`ArcjetReason`)
+  — more info about the conclusion
+- `results` (`Array<ArcjetRuleResult>`)
+  — results of each rule
+- `ttl` (`number`)
+  — time-to-live for the decision in seconds;
+  `"DENY"` decisions are cached by `@arcjet/fastify` for this duration
+
+This top-level decision takes the results from each `"LIVE"` rule into account.
+If one of them is `"DENY"` then the overall conclusion will be `"DENY"`.
+Otherwise, if one of them is `"ERROR"`, then `"ERROR"`.
+Otherwise, it will be `"ALLOW"`.
+The `reason` and `ttl` fields reflect this conclusion.
+
+To illustrate,
+when a bot rule returns an error and a validate email rule returns a deny,
+the overall conclusion is `"DENY"`,
+while the `"ERROR"` is available in the results.
+
+The results of `"DRY_RUN"` rules do not affect this overall decision,
+but are included in `results`.
+
+The `ip` field is available when the Cloud API was called and contains
+IP geolocation and reputation info.
+You can use this field to customize responses or you can use
+[Arcjet Filters][arcjet-filters] to make decisions based on it.
+See the
+[IP geolocation][arcjet-blueprint-ip-geolocation] and
+[IP reputation][arcjet-blueprint-vpn-proxy-detection]
+blueprints for more info.
+
+## Errors
+
+Arcjet fails open so that a service issue, misconfiguration, or
+[network timeout][arcjet-architecture-timeout] does not block requests.
+Such errors should in many cases be logged but otherwise treated as `"ALLOW"`
+decisions.
+The `reason.message` field has more info on what occured.
+
+<Code code={Error} lang="js" />
+
+## Custom logs
+
+You can use a custom log interface matching [`pino`][github-pino]
+to change the default behavior.
+Using `pino-pretty` as an example:
+
+<SelectableContent client:load syncKey="packageManager">
+  <Fragment slotIdx="1" slot="npm">
+
+    ```sh
+    npm install pino pino-pretty
+    ```
+
+  </Fragment>
+
+  <Fragment slotIdx="2" slot="pnpm">
+
+    ```sh
+    pnpm add pino pino-pretty
+    ```
+
+  </Fragment>
+
+  <Fragment slotIdx="3" slot="yarn">
+
+    ```sh
+    yarn add pino pino-pretty
+    ```
+
+  </Fragment>
+</SelectableContent>
+
+Then, create a custom logger that will log to JSON in production and pretty
+print in development:
+
+<Code code={CustomLog} lang="js" />
+
+## Custom client
+
+You can pass a client to change the behavior when connecting to the Cloud API.
+Use `createRemoteClient` to create a client.
+
+<Code code={CustomClientJs} lang="js" />
+
+---
+
+<Comments />
+
+[arcjet-app]: https://app.arcjet.com
+[arcjet-architecture-timeout]: /architecture#timeout
+[arcjet-blueprint-ip-geolocation]: /blueprints/ip-geolocation
+[arcjet-blueprint-vpn-proxy-detection]: /blueprints/vpn-proxy-detection
+[arcjet-filters]: /filters
+[arcjet-quick-start-fastify]: /get-started?f=fastify
+[github-arcjet-fastify]: https://github.com/arcjet/arcjet-js/tree/main/arcjet-fastify
+[github-pino]: https://github.com/pinojs/pino
+[npmjs-arcjet-fastify]: https://www.npmjs.com/package/@arcjet/fastify

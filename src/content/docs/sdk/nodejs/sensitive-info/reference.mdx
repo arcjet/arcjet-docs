@@ -1,0 +1,186 @@
+---
+title: "Sensitive information reference for Node.js"
+description: "Reference guide for detecting sensitive information (PII) with Arcjet in your Node.js app."
+---
+
+import { Badge } from "@astrojs/starlight/components";
+import DisplayType from "@/components/DisplayType.astro";
+
+import DecisionLog from "@/snippets/sensitive-info/reference/nodejs/DecisionLog.mdx";
+import Errors from "@/snippets/sensitive-info/reference/nodejs/Errors.mdx";
+import CustomDetect from "@/snippets/sensitive-info/reference/nodejs/CustomDetect.mdx";
+
+Arcjet Sensitive Information Detection protects against clients sending you
+sensitive information such as PII that you do not wish to handle.
+
+## Configuration
+
+Sensitive information detection is configured by allowing or denying a subset of
+sensitive information. The `allow` and `deny` lists are mutually-exclusive, such
+that using `allow` will result in a `DENY` decision for any detected sensitive
+information that is not specified in the `allow` list and using `deny` will
+result in an `ALLOW` decision for any detected sensitive information that is not
+specified in the `deny` list.
+
+The `arcjet` client can be configured with one or more Sensitive information
+rules, which are constructed with the
+`sensitiveInfo(options: SensitiveInfoOptionsAllow | SensitiveInfoOptionsDeny)`
+function and configured by `SensitiveInfoOptionsAllow` or
+`SensitiveInfoOptionsDeny`:
+
+```ts
+type SensitiveInfoOptionsAllow = {
+  mode?: "LIVE" | "DRY_RUN";
+  allow?: Array<ArcjetSensitiveInfoType>;
+  contextWindowSize?: number;
+  // You can also provide a custom detection function to detect other types
+  // of sensitive information (see below).
+  detect?: (tokens: string[]) -> Array<SensitiveInfoType | undefined>;
+};
+```
+
+```ts
+type SensitiveInfoOptionsDeny = {
+  mode?: "LIVE" | "DRY_RUN";
+  deny?: Array<ArcjetSensitiveInfoType>;
+  contextWindowSize?: number;
+  // You can also provide a custom detection function to detect other types
+  // of sensitive information (see below).
+  detect?: (tokens: string[]) -> Array<SensitiveInfoType | undefined>;
+};
+```
+
+<DisplayType type="ArcjetSensitiveInfoType" from="@arcjet/node" />
+
+:::note
+When specifying multiple rules, the order of the rules is ignored. Rule
+execution ordering is automatically optimized for performance. See
+[decision](#decision) below for details of examining the execution results.
+:::
+
+## Decision
+
+Arcjet provides a single `protect` function that is used to execute your
+protection rules.
+
+This function returns a `Promise` that resolves to an
+`ArcjetDecision` object. This contains the following properties:
+
+- `id` (`string`) - The unique ID for the request. This can be used to look up
+  the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
+  involving the Arcjet cloud API. For decisions taken locally, the prefix is
+  `lreq_`.
+- `conclusion` (`ArcjetConclusion`) - The final conclusion based on evaluating
+  each of the configured rules. If you wish to accept Arcjet's recommended
+  action based on the configured rules then you can use this property.
+- `reason` (`ArcjetReason`) - An object containing more detailed
+  information about the conclusion.
+- `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
+  containing the results of each rule that was executed.
+- `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
+  client IP address. See the SDK reference for more information.
+
+You check if a deny conclusion has been returned by a sensitive info rule by using
+`decision.isDenied()` and `decision.reason.isSensitiveInfo()` respectively.
+
+You can iterate through the results and check whether a sensitive info rule was applied:
+
+```ts
+for (const result of decision.results) {
+  console.log("Rule Result", result);
+}
+```
+
+This example will log the full result as well as the sensitive info rule:
+
+<DecisionLog />
+
+## Entity detection
+
+Different kinds of sensitive info are detected by Arcjet itself.
+Next to these,
+it is also possible to detect custom kinds through a `detect` function.
+Custom detect functions can also be used if your needs are more strict or
+instead more loose than the defaults.
+
+### Card numbers
+
+Card numbers can be detected.
+The values `4242424242424242`, `4000 0566 5566 5556`, and `3782-8224-6310005`
+match but `4242424242424241` does not.
+Whether something looks like a card number is based on its initial and final
+digits.
+The initial digits determine the expected length (min, max) of the total
+number.
+The final digit is a [Luhn](https://en.wikipedia.org/wiki/Luhn_algorithm)
+check digit.
+Spaces and dashes are ignored because users often group digits.
+
+### Email addresses
+
+Email addresses can be detected.
+The values `alice@example.com` and `bob.smith@subdomain.example.com` match but
+`alice.example.com` does not.
+A dotless domain (`user@localhost`) and a domain literal (`user@[127.0.0.1]`,
+if it contains a valid IP) also match.
+
+### IP addresses
+
+IP addresses can be detected.
+The values `127.0.0.1` and `::1` match but `012.004.002.000` does not.
+IP v4 and v6 addresses are supported.
+Whether something looks like an IP address is based on whether it parses
+as [`IpAddr` from `std::net`](https://doc.rust-lang.org/std/net/enum.IpAddr.html).
+
+### Phone numbers
+
+Phone numbers can be detected.
+The values `+1 (555) 555-5555` and `(020) 334 4522` match but `555-1234` does not.
+As phone numbers have a wide variety of sizes and formats,
+special short numbers such as `911` or `14 020` are not detected.
+Several characters such as dots (`.`), dashes (`-`), and spaces are allowed
+to separate digit groups.
+The country code can be prefixed with plus (`+`) or omitted,
+the next region group can be in parentheses.
+
+## Custom entity detection
+
+When configuring Arcjet Sensitive Info you can provide a custom detect function,
+this enables you to detect entities that we don't support out of the box using
+custom logic.
+
+The function will take a list of tokens and must return a list of either
+`undefined`, if the corresponding token in the input list is not sensitive, or
+the name of the entity if it does match. The number of tokens that are provided
+to the function is controlled by the `contextWindowSize` option, which defaults
+to 1. If you need additional context to perform detections then you can increase
+this value.
+
+<CustomDetect />
+
+## Error handling
+
+Arcjet is designed to fail open so that a service issue or misconfiguration does
+not block all requests. The SDK will also time out and fail open after 1000ms in
+development (see [`ARCJET_ENV`](/environment#arcjet-env)) and 500ms
+otherwise. However, in most cases, the response time will be less than 20-30ms.
+
+If there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the `message` property on the rule's
+error result for more information.
+
+If all other rules that were run returned an `ALLOW` result, then the final Arcjet
+conclusion will be `ERROR`.
+
+<Errors />
+
+## Testing
+
+Arcjet runs the same in any environment, including locally and in CI. You can
+use the `mode` set to `DRY_RUN` to log the results of rule execution without
+blocking any requests.
+
+We have an example test framework you can use to automatically test your rules.
+Arcjet can also be triggered based using a sample of your traffic.
+
+See the [Testing](/testing) section of the docs for details.

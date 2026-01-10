@@ -1,0 +1,304 @@
+---
+title: "Filters reference for Node.js"
+description: "Reference guide for filtering requests with Arcjet in your Node.js app."
+---
+
+import { Badge } from "@astrojs/starlight/components";
+import DisplayType from "@/components/DisplayType.astro";
+import Allow from "@/snippets/filters/reference/nodejs/Allow.mdx";
+
+Arcjet filters let you block requests using
+[Wireshark](https://www.wireshark.org/)-like [display
+filter](https://www.wireshark.org/docs/wsug_html_chunked/ChWorkBuildDisplayFilterSection.html)
+expressions over HTTP headers, IP addresses, and other request fields. This
+allows you to quickly enforce rules like allow/deny by country, network, or
+`user-agent`.
+
+## Configuration
+
+Allow or deny filters are configured using one or more expressions:
+
+- `allow` - A list of expressions that will result in an `ALLOW` decision if the
+  request matches. If none of the expressions match, the request will be denied.
+- `deny` - A list of expressions that will result in a `DENY` decision if the
+  request matches. If none of the expressions match, the request will be
+  allowed.
+- These lists are mutually-exclusive, so you can only use one or the other.
+
+They are constructed with the `filters(options)` function and configured by
+`FilterOptionsAllow` or `FilterOptionsDeny`:
+
+<DisplayType from="@arcjet/node" type="FilterOptions" />
+<DisplayType from="@arcjet/node" type="ArcjetMode" />
+
+:::note
+When specifying multiple rules, the order of the rules is ignored. Rule
+execution ordering is automatically optimized for performance.
+See [decision](#decision) below for details of examining the execution results.
+:::
+
+### Example: Allow non-VPN, US-based GET requests
+
+In this example, the expression matches non-VPN GET requests from the US.
+Requests matching the expression are allowed and all others are denied.
+
+<Allow />
+
+## Expression language
+
+The expression language is based on [Wireshark](https://www.wireshark.org/)-like
+[display
+filter](https://www.wireshark.org/docs/wsug_html_chunked/ChWorkBuildDisplayFilterSection.html)
+expressions. Like other programming languages, there are fields (`ip.src.vpn`),
+functions (`lower()`), operators (`or`, `matches`), and values (`"curl"`).
+
+### Example: Matching VPN, Tor, or Curl requests
+
+This example matches VPN or Tor traffic and basic Curl requests.
+
+```text
+ip.src.vpn or
+ip.src.tor or
+lower(http.request.headers["user-agent"]) matches "curl"
+```
+
+To use it as a filter deny rule so that any requests matching the expression are
+denied (and all others allowed), you would configure Arcjet like this:
+
+```ts
+filter({
+  deny: [
+    'ip.src.vpn or ip.src.tor or lower(http.request.headers["user-agent"]) matches "curl"',
+  ],
+  mode: "LIVE",
+}),
+```
+
+You can also split the expressions within the array for readability. They will
+be combined as an `OR` operation:
+
+```ts
+filter({
+  deny: [
+    // Expressions will be combined with OR
+    'ip.src.vpn',
+    'ip.src.tor',
+    'lower(http.request.headers["user-agent"]) matches "curl"',
+  ],
+  mode: "LIVE",
+}),
+```
+
+To combine multiple conditions e.g. with `and`, use a single expression string.
+
+### Example: Matching requests from specific countries
+
+This example matches requests from the European Union:
+
+```text
+ip.src.country in {"AT" "BE" "BG" "CY" "CZ" "DE" "DK" "EE" "ES" "FI" "FR" "GR" "HR" "HU" "IE" "IT" "LT" "LU" "LV" "MT" "NL" "PL" "PT" "RO" "SE" "SI" "SK"}
+```
+
+To use it as a filter allow rule so that only requests matching the expression
+are allowed (and all others denied), you would configure Arcjet like this:
+
+```ts
+filter({
+  allow: [
+    'ip.src.country in {"AT" "BE" "BG" "CY" "CZ" "DE" "DK" "EE" "ES" "FI" "FR" "GR" "HR" "HU" "IE" "IT" "LT" "LU" "LV" "MT" "NL" "PL" "PT" "RO" "SE" "SI" "SK"}',
+  ],
+  mode: "LIVE",
+}),
+```
+
+## Fields
+
+| Field                    | Type          | Example value                                 |
+| ------------------------ | ------------- | --------------------------------------------- |
+| `http.host`              | `string`      | `"example.com"`                               |
+| `http.request.cookie`    | `Map<string>` | `{NEXT_LOCALE: "en-US", …}`                   |
+| `http.request.headers`   | `Map<string>` | `{"user-agent": "Mozilla/5.0 (Macintosh; …"}` |
+| `http.request.method`    | `string`      | `"GET"`                                       |
+| `http.request.uri.args`  | `Map<string>` | `{q: "search"}`                               |
+| `http.request.uri.path`  | `string`      | `"/quick-start"`                              |
+| `ip.src.accuracy_radius` | `string`      | `"2"`                                         |
+| `ip.src.asnum.country`   | `string`      | `"US"`                                        |
+| `ip.src.asnum.domain`    | `string`      | `"google.com"`                                |
+| `ip.src.asnum.name`      | `string`      | `"Google, LLC."`                              |
+| `ip.src.asnum.type`      | `string`      | `"business"`                                  |
+| `ip.src.asnum`           | `string`      | `"15169"`                                     |
+| `ip.src.city`            | `string`      | `"Mountain View"`                             |
+| `ip.src.continent.name`  | `string`      | `"North America"`                             |
+| `ip.src.continent`       | `string`      | `"NA"`                                        |
+| `ip.src.country.name`    | `string`      | `"United States"`                             |
+| `ip.src.country`         | `string`      | `"US"`                                        |
+| `ip.src.crawler.name`    | `string`      | `""`                                          |
+| `ip.src.crawler`         | `boolean`     | `false`                                       |
+| `ip.src.hosting`         | `boolean`     | `false`                                       |
+| `ip.src.lat`             | `string`      | `"37.33939"`                                  |
+| `ip.src.lon`             | `string`      | `"-121.89496"`                                |
+| `ip.src.mobile`          | `boolean`     | `false`                                       |
+| `ip.src.postal_code`     | `string`      | `"94043"`                                     |
+| `ip.src.proxy`           | `boolean`     | `false`                                       |
+| `ip.src.region`          | `string`      | `"California"`                                |
+| `ip.src.relay`           | `boolean`     | `false`                                       |
+| `ip.src.service`         | `string`      | `""`                                          |
+| `ip.src.timezone.name`   | `string`      | `"America/Los_Angeles"`                       |
+| `ip.src.tor`             | `boolean`     | `false`                                       |
+| `ip.src.vpn`             | `boolean`     | `false`                                       |
+| `ip.src`                 | `Ip`          | `8.8.8.8`                                     |
+
+All `ip.src.*` fields reflect information about the client IP address (the
+request source IP). These fields require data from our IP reputation database so
+a call to the Cloud API is required. Other fields are analyzed locally.
+
+Arcjet only ever makes a single call to our Cloud API regardless of the rule
+configuration. The Cloud API has been designed for high performance and low
+latency, and is deployed to multiple regions around the world. The SDK will
+automatically use the closest region which means the total overhead is typically
+no more than 20-30ms, often significantly less. See the [Architecture
+reference](/architecture#arcjet-cloud-api) for details.
+
+## Operators
+
+| Operator          | Example expression                                                         |
+| ----------------- | -------------------------------------------------------------------------- |
+| `and` (`&&`)      | `http.request.method eq "GET" and http.request.uri.path eq "/quick-start"` |
+| `contains`        | `http.request.uri.path contains "quick-start"`                             |
+| `eq` (`==`)       | `http.request.method eq "GET"`                                             |
+| `ge` (`>=`)       | `len(http.request.uri.args["q"]) ge 1`                                     |
+| `gt` (`>`)        | `len(http.request.uri.args["q"]) gt 0`                                     |
+| `in`              | `ip.src in { 185.199.108.153 185.199.109.153 }`                            |
+| `le` (`<=`)       | `len(http.request.uri.args["q"]) le 3`                                     |
+| `lt` (`<`)        | `len(http.request.uri.args["q"]) lt 4`                                     |
+| `matches` (`~`)   | `http.request.headers["user-agent"] matches "Chrome"`                      |
+| `ne` (`!=`)       | `http.request.method ne "GET"`                                             |
+| `not` (`!`)       | `not ip.src.vpn`                                                           |
+| `or` (`\|\|`)     | `ip.src.vpn or ip.src.relay`                                               |
+| `strict wildcard` | `http.request.uri.path strict wildcard "/articles/*"`                      |
+| `wildcard`        | `http.request.uri.path wildcard "/articles/*"`                             |
+| `xor` (`^^`)      | `ip.src.vpn xor ip.src.relay`                                              |
+
+## Functions
+
+| Function | Example                                                       |
+| -------- | ------------------------------------------------------------- |
+| `len`    | `len(http.request.uri.args["q"]) gt 0`                        |
+| `lower`  | `lower(ip.src.country) contains "be"`                         |
+| `upper`  | `upper(http.request.headers["user-agent"]) contains "CHROME"` |
+
+## Values
+
+### Strings
+
+String values are enclosed in double quotes (`"`).
+
+Double quotes within the string must be escaped with a backslash (`\"`).
+
+```text
+http.host eq "example.com"
+```
+
+### Booleans
+
+Boolean values are either `true` or `false`.
+You can negate a boolean value with the `not` (`!`) operator.
+
+```text
+ip.src.vpn
+```
+
+```text
+not ip.src.vpn
+```
+
+### IP addresses
+
+IP addresses are a special type which must not be quoted like strings.
+
+```text
+ip.src eq 185.199.108.153
+```
+
+```text
+ip.src in { 185.199.108.153 185.199.109.153 185.199.110.153 185.199.111.153 }
+```
+
+```text
+ip.src in { 192.0.2.0/24 }
+```
+
+### Maps
+
+Maps (or associative arrays) are a collection of keys to values.
+
+They cannot be written literally in the expression language, but they exist for
+the fields `http.request.cookie`, `http.request.headers`, and
+`http.request.uri.args`.
+
+```text
+http.request.headers["user-agent"] matches "Chrome"
+```
+
+## Decision
+
+Arcjet provides a single `protect` function that is used to execute your
+protection rules.
+
+This function returns a `Promise` that resolves to an `ArcjetDecision` object.
+This contains the following properties:
+
+- `id` (`string`) - The unique ID for the request. This can be used to look up
+  the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
+  involving the Arcjet cloud API. For decisions taken locally, the prefix is
+  `lreq_`.
+- `conclusion` (`ArcjetConclusion`) - The final conclusion based on evaluating
+  each of the configured rules. If you wish to accept Arcjet's recommended
+  action based on the configured rules then you can use this property.
+- `reason` (`ArcjetReason`) - An object containing more detailed
+  information about the conclusion.
+- `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
+  containing the results of each rule that was executed.
+- `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
+  client IP address. See the SDK reference for more information.
+
+You check if a deny conclusion has been returned by a filter rule by using
+`decision.isDenied()` and `decision.reason.isFilterRule()` respectively.
+
+You can iterate through the results and check whether a filter rule was applied:
+
+```ts
+for (const result of decision.results) {
+  console.log("Rule Result", result);
+}
+```
+
+## Error handling
+
+Arcjet is designed to fail open so that a service issue or misconfiguration does
+not block all requests. The SDK will also time out and fail open after 1000ms in
+development (see [`ARCJET_ENV`](/environment#arcjet-env)) and 500ms
+otherwise. However, in most cases, the response time will be less than 20-30ms.
+
+If there is an error condition when processing the rule, Arcjet will return an
+`ERROR` result for that rule and you can check the `message` property on the rule's
+error result for more information.
+
+If all other rules that were run returned an `ALLOW` result, then the final Arcjet
+conclusion will be `ERROR`.
+
+## Testing
+
+Arcjet runs the same in any environment, including locally and in CI. You can
+use the `mode` set to `DRY_RUN` to log the results of rule execution without
+blocking any requests.
+
+We have an example test framework you can use to automatically test your rules.
+Arcjet can also be triggered based using a sample of your traffic.
+
+See the [Testing](/testing) section of the docs for details.
+
+## Limitations
+
+- A maximum of 10 expressions can be specified.
+- Each expression can be a maximum of 1024 bytes.
