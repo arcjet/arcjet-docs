@@ -1,4 +1,6 @@
 // @ts-check
+export const prerender = false;
+
 // @ts-expect-error
 import aj from "arcjet:client";
 
