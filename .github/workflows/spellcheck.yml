@@ -1,0 +1,35 @@
+name: Typos Spell Check
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+env:
+  CLICOLOR: 1
+
+jobs:
+  typos:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf # v2.11.1
+        with:
+          egress-policy: audit
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@f7ccc83f9ed1e5b9c81d8a67d7ad1a747e22a561
+        with:
+          toolchain: 1.91.1
+          targets: x86_64-unknown-linux-musl
+      - name: Install Typos-CLI
+        run: cargo install --git https://github.com/crate-ci/typos.git --rev bb4666ad77b539a6b4ce4eda7ebb6de553704021
+      - name: Spell Check Repo
+        run: typos

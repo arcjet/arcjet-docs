@@ -32,7 +32,7 @@ const TOC = forwardRef(
       astroEntry.data.ajToc,
     );
 
-    // Managet the selected framework
+    // Manager the selected framework
     const $displayedFramework = useStore(displayedFramework);
 
     const [selectedFramework, setSelectedFramework] = useState<FrameworkKey>();

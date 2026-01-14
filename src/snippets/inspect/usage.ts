@@ -35,7 +35,7 @@ export default async function handler(
     return res.status(403).json({ error: "Forbidden" });
   }
 
-  // Blcok any request without a User-Agent header because we expect all
+  // Block any request without a User-Agent header because we expect all
   // well-behaved clients to have it
   if (decision.results.some(isMissingUserAgent)) {
     return res.status(400).json({ error: "You are a bot!" });
