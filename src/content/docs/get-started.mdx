@@ -49,8 +49,6 @@ ajToc:
     anchor: "3-add-rules"
   - text: 4. Start app
     anchor: "4-start-app"
-  - text: "Video guides"
-    anchor: "video-guides"
   - text: "FAQs"
     anchor: "faqs"
   - text: "What next?"
@@ -59,13 +57,13 @@ ajToc:
     anchor: "get-help"
 ---
 
+import { YouTube } from "astro-embed";
 import SlotByFramework from "@/components/SlotByFramework";
 import FrameworkLinks from "@/components/FrameworkLinks";
 import { LinkButton, LinkCard, CardGrid } from "@astrojs/starlight/components";
 import FAQs from "/src/components/FAQs.astro";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
-import { YouTube } from "astro-embed";
 
 import AstroStep1 from "@/snippets/shared/astro/Install.mdx";
 import AstroRequirements from "@/snippets/get-started/astro/Requirements.mdx";
@@ -168,6 +166,10 @@ lines of code. Bot detection. Rate limiting. Email validation. Attack
 protection. Data redaction. A developer-first approach to security.
 
 This guide will show you how to set up a simple API server protected by Arcjet.
+
+<SlotByFramework client:load>
+  <YouTube id="CuemptpnIVQ" slot="next-js" />
+</SlotByFramework>
 
 <FrameworkLinks title="Choose a framework" client:load />
 
@@ -283,12 +285,6 @@ limit, and prevent bots from accessing your app.
 </SlotByFramework>
 
 The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
-
-## Video guides
-
-<YouTube id="CuemptpnIVQ" />
-
-<YouTube id="NDI68Dcp4Gg" />
 
 ## FAQs
 
