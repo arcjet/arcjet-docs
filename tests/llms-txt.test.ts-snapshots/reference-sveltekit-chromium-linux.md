@@ -454,7 +454,7 @@ The IP location fields may be `undefined`, but you can use various methods to ch
 
 ##### Location accuracy
 
-IP geolocation can be notoriously inaccurate, especially for mobile devices, satellite internet providers, and even just normal users. Likewise with the specific fields like `city` and `region`, which can be very inaccurate. Country is usually accurate, but there are often cases where IP addresses are mis-located. These fields are provided for convenience e.g. suggesting a user location, but should not be relied upon by themselves.
+IP geolocation can be notoriously inaccurate, especially for mobile devices, satellite internet providers, and even just normal users. Likewise with the specific fields like `city` and `region`, which can be very inaccurate. Country is usually accurate, but there are often cases where IP addresses are mislocated. These fields are provided for convenience e.g. suggesting a user location, but should not be relied upon by themselves.
 
 #### IP AS
 
