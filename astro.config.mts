@@ -142,7 +142,8 @@ export default defineConfig({
       },
       sidebar: sidebar,
       expressiveCode: {
-        themes: [ajThemeDark, ajThemeLight],
+        minSyntaxHighlightingColorContrast: 0,
+        themes: [ajThemeLight, ajThemeDark],
       },
       defaultLocale: "root",
       locales: {

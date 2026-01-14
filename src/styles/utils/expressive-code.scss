@@ -1,38 +1,76 @@
 /* 
   Arcjet's expressive code overrides
 */
-
 [data-theme="dark"],
-[data-theme="dark"].aj,
-[data-theme="light"],
-[data-theme="light"].aj {
-  // Text and line markers colors
+[data-theme="dark"].aj {
   .expressive-code {
-    --ec-tm-markBg: var(--aj-palette-source-neutral-02);
-    --ec-tm-markBrdCol: var(--aj-palette-source-neutral-03);
-    --ec-tm-insBg: var(--aj-palette-source-tint-09-02);
-    --ec-tm-insBrdCol: var(--aj-palette-source-tint-09-03);
-    --ec-tm-insDiffIndCol: var(--aj-palette-source-tint-09-05);
+    --ec-brdCol: var(--aj-palette-block-level1-border);
+
+    --ec-collapsibleSections-closedBgCol: var(--aj-palette-source-neutral-01);
+
+    --ec-frm-edActTabBg: var(--aj-palette-source-black);
+    --ec-frm-edBg: var(--aj-palette-source-black);
+    --ec-frm-edTabBarBrdCol: var(--aj-palette-block-level1-border);
+
+    --ec-frm-trmBg: var(--aj-palette-source-black);
+    --ec-frm-trmTtbBg: var(--aj-palette-source-black);
+    --ec-frm-trmTtbBrdBtmCol: var(--aj-palette-block-level1-border);
+
+    --ec-gtrHlFg: var(--aj-palette-source-neutral-04);
+
     --ec-tm-delBg: var(--aj-palette-source-tint-14-01);
     --ec-tm-delBrdCol: var(--aj-palette-source-tint-14-02);
     --ec-tm-delDiffIndCol: var(--aj-palette-source-tint-14-04);
-    --ec-collapsibleSections-closedBgCol: var(--aj-palette-source-neutral-01);
-    --ec-gtrHlFg: var(--aj-palette-source-neutral-04);
-    --ec-frm-edBg: var(--aj-palette-source-black);
-    --ec-frm-trmBg: var(--aj-palette-source-black);
-    --ec-frm-edActTabBg: var(--aj-palette-source-black);
-    --ec-frm-trmTtbBg: var(--aj-palette-source-black);
+
+    --ec-tm-insBg: var(--aj-palette-source-tint-09-02);
+    --ec-tm-insBrdCol: var(--aj-palette-source-tint-09-03);
+    --ec-tm-insDiffIndCol: var(--aj-palette-source-tint-09-05);
+
+    --ec-tm-markBg: var(--aj-palette-source-neutral-02);
+    --ec-tm-markBrdCol: var(--aj-palette-source-neutral-03);
+  }
+
+  .expressive-code .frame.has-title:not(.is-terminal) .header {
+    background: linear-gradient(
+      rgba(var(--aj-palette-source-neutralRgb-01) / 1) 0%,
+      rgba(var(--aj-palette-source-neutralRgb-01) / 1) 100%
+    );
   }
 }
 
 [data-theme="light"],
 [data-theme="light"].aj {
-  // Text and line markers colors
   .expressive-code {
-    --ec-frm-edBg: var(--aj-palette-source-neutral-00);
-    --ec-frm-trmBg: var(--aj-palette-source-neutral-00);
-    --ec-frm-edActTabBg: var(--aj-palette-source-neutral-00);
-    --ec-frm-trmTtbBg: var(--aj-palette-source-neutral-00);
+    --ec-brdCol: var(--aj-palette-source-neutral-14);
+
+    --ec-collapsibleSections-closedBgCol: var(--aj-palette-source-neutral-14);
+
+    --ec-frm-edActTabBg: var(--aj-palette-source-white);
+    --ec-frm-edBg: var(--aj-palette-source-white);
+    --ec-frm-edTabBarBrdCol: var(--aj-palette-source-neutral-14);
+    --ec-frm-trmBg: var(--aj-palette-source-white);
+    --ec-frm-trmTtbBg: var(--aj-palette-source-white);
+    --ec-frm-trmTtbBrdBtmCol: var(--aj-palette-source-neutral-14);
+
+    --ec-gtrHlFg: var(--aj-palette-source-neutral-11);
+
+    --ec-tm-delBg: var(--aj-palette-source-tint-14-14);
+    --ec-tm-delBrdCol: var(--aj-palette-source-tint-14-13);
+    --ec-tm-delDiffIndCol: var(--aj-palette-source-tint-14-11);
+
+    --ec-tm-insBg: var(--aj-palette-source-tint-09-13);
+    --ec-tm-insBrdCol: var(--aj-palette-source-tint-09-12);
+    --ec-tm-insDiffIndCol: var(--aj-palette-source-tint-09-10);
+
+    --ec-tm-markBg: var(--aj-palette-source-neutral-13);
+    --ec-tm-markBrdCol: var(--aj-palette-source-neutral-12);
+  }
+
+  .expressive-code .frame.has-title:not(.is-terminal) .header {
+    background: linear-gradient(
+      rgba(var(--aj-palette-source-neutralRgb-15) / 1) 0%,
+      rgba(var(--aj-palette-source-neutralRgb-15) / 1) 100%
+    );
   }
 }
 
@@ -41,8 +79,6 @@
   .expressive-code {
     --ec-brdRad: var(--sp);
     --ec-frm-edTabBrdRad: var(--sp);
-    --ec-brdCol: var(--aj-palette-block-level1-border);
-    --ec-frm-edTabBarBrdCol: var(--aj-palette-block-level1-border);
     --ec-tm-lineDiffIndMargLeft: 0.1rem;
   }
 
@@ -79,10 +115,6 @@
 
   .expressive-code .frame .header {
     font-size: 12px;
-  }
-
-  .expressive-code .frame.has-title:not(.is-terminal) .header {
-    background: var(--aj-palette-block-level1-bg);
   }
 
   .expressive-code .frame.has-title:not(.is-terminal) .title {
