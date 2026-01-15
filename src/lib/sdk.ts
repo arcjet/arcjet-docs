@@ -3,7 +3,7 @@ import type { FrameworkKey } from "@/lib/prefs";
 /**
  * Keys for all of the valid Arcjet SDKs.
  *
- * These values should correspond as directly as possible to our SDK namess to
+ * These values should correspond as directly as possible to our SDK names to
  * avoid confusion. For example use `node` because the SDK is `@arcjet/node`.
  */
 export type ArcjetSdkKey =
