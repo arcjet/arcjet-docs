@@ -4,14 +4,22 @@ import {
   type PlaywrightTestConfig,
 } from "@playwright/test";
 
+const IS_CI = !!process.env.CI;
+
 let baseURL: string | undefined = process.env.PLAYWRIGHT_BASE_URL;
 let webServer: PlaywrightTestConfig["webServer"] = undefined;
 
 if (!baseURL) {
+  let command =
+    "npm run astro build && npm run astro -- preview --port 4321 --host 0.0.0.0";
+  if (IS_CI) {
+    // In CI we do a full build in a previous step, so we can skip that here.
+    command = "npm run astro -- preview --port 4321 --host 0.0.0.0";
+  }
+
   baseURL = "http://localhost:4321";
   webServer = {
-    command:
-      "npm run astro build && npm run astro -- preview --port 4321 --host 0.0.0.0",
+    command,
     env: {
       // We need an Arcjet key for the dev server to run, but it doesn't
       // actually need to be valid for the tests to run.
@@ -20,7 +28,9 @@ if (!baseURL) {
       ASTRO_FORCE_NODE_ADAPTER: "1",
     },
     port: 4321,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: !IS_CI,
+    // We have a lot of pages so builds can take a while.
+    timeout: 5 * 60 * 1000, // 5m
   };
 }
 
@@ -28,7 +38,7 @@ if (!baseURL) {
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  forbidOnly: !!process.env.CI,
+  forbidOnly: !!IS_CI,
   fullyParallel: true,
   projects: [
     {
