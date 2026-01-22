@@ -22,7 +22,9 @@ const aj = arcjet({
 });
 
 export default async function handler(req, res) {
-  const decision = await aj.protect(req);
+  const decision = await aj.protect(req, {
+    sensitiveInfoValue: req.body,
+  });
   console.log("Decision", decision);
 
   for (const result of decision.results) {

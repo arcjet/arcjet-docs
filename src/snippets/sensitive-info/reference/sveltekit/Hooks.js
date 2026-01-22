@@ -15,7 +15,9 @@ const aj = arcjet({
 });
 
 export async function handle({ event, resolve }) {
-  const decision = await aj.protect(event);
+  const decision = await aj.protect(event, {
+    sensitiveInfoValue: await event.request.text(),
+  });
 
   if (decision.isDenied()) {
     return error(400, "Bad request - sensitive information detected");

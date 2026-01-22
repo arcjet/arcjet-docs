@@ -14,7 +14,11 @@ const aj = arcjet({
 });
 
 export async function POST(req: Request) {
-  const decision = await aj.protect(req);
+  const message = await req.text();
+
+  const decision = await aj.protect(req, {
+    sensitiveInfoValue: message,
+  });
   console.log("Arcjet decision", decision);
 
   if (decision.isDenied() && decision.reason.isSensitiveInfo()) {
@@ -29,6 +33,5 @@ export async function POST(req: Request) {
     );
   }
 
-  const message = await req.text();
   return NextResponse.json({ message: `You said: ${message}` });
 }

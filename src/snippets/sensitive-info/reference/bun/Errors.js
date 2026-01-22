@@ -14,7 +14,9 @@ const aj = arcjet({
 export default {
   port: 3000,
   fetch: aj.handler(async (req) => {
-    const decision = await aj.protect(req);
+    const decision = await aj.protect(req, {
+      sensitiveInfoValue: await req.text(),
+    });
 
     for (const { reason } of decision.results) {
       if (reason.isError()) {

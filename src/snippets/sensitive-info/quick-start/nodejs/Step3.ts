@@ -1,5 +1,6 @@
-import arcjet, { sensitiveInfo } from "@arcjet/node";
 import http from "node:http";
+import { text } from "node:stream/consumers";
+import arcjet, { sensitiveInfo } from "@arcjet/node";
 
 const aj = arcjet({
   // Get your site key from https://app.arcjet.com
@@ -19,7 +20,11 @@ const server = http.createServer(async function (
   req: http.IncomingMessage,
   res: http.ServerResponse,
 ) {
-  const decision = await aj.protect(req);
+  const message = await text(req);
+
+  const decision = await aj.protect(req, {
+    sensitiveInfoValue: message,
+  });
   console.log("Arcjet decision", decision);
 
   if (decision.isDenied()) {

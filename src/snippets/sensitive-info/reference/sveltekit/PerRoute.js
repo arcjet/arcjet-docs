@@ -13,7 +13,9 @@ const aj = arcjet({
 });
 
 export async function load(event) {
-  const decision = await aj.protect(event);
+  const decision = await aj.protect(event, {
+    sensitiveInfoValue: await event.request.text(),
+  });
 
   if (decision.isDenied()) {
     return error(403, "You are suspicious!");

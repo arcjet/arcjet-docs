@@ -22,7 +22,9 @@ const aj = arcjet({
 });
 
 export async function POST(req) {
-  const decision = await aj.protect(req);
+  const decision = await aj.protect(req, {
+    sensitiveInfoValue: await req.text(),
+  });
 
   for (const result of decision.results) {
     console.log("Rule Result", result);

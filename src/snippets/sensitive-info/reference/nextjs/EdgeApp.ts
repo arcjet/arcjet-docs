@@ -19,7 +19,9 @@ const aj = arcjet({
 });
 
 export default async function handler(req: NextRequest, res: NextResponse) {
-  const decision = await aj.protect(req);
+  const decision = await aj.protect(req, {
+    sensitiveInfoValue: await req.text(),
+  });
 
   if (decision.isDenied()) {
     return NextResponse.json(

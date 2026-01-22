@@ -23,7 +23,9 @@ const aj = arcjet({
 });
 
 export async function action(args: ActionFunctionArgs) {
-  const decision = await aj.protect(args);
+  const decision = await aj.protect(args, {
+    sensitiveInfoValue: await args.request.text(),
+  });
 
   if (decision.isDenied()) {
     if (decision.reason.isSensitiveInfo()) {

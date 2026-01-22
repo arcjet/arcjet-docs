@@ -1,5 +1,6 @@
 import arcjet, { sensitiveInfo } from "@arcjet/node";
 import http from "node:http";
+import { text } from "node:stream/consumers";
 
 // This function is called by the `sensitiveInfo` rule to perform custom detection on strings.
 function detectDash(tokens: string[]): Array<"CONTAINS_DASH" | undefined> {
@@ -26,7 +27,9 @@ const server = http.createServer(async function (
   req: http.IncomingMessage,
   res: http.ServerResponse,
 ) {
-  const decision = await aj.protect(req);
+  const decision = await aj.protect(req, {
+    sensitiveInfoValue: await text(req),
+  });
 
   for (const result of decision.results) {
     console.log("Rule Result", result);
