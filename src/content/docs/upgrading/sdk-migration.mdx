@@ -35,10 +35,9 @@ You can now pass what value to check explicitly:
 const decision = await arcjet.protect(request, { sensitiveInfoValue: "..." });
 ```
 
-This value is not sent to the server.
+This value is processed locally and is not sent to the Arcjet cloud API.
 
-If you use tools such as `body-parser`, which patch `request.body`, you are not affected.
-That continues to work.
+If you use tools that patch `request.body` e.g. [`body-parser`](https://www.npmjs.com/package/body-parser) you are not affected and can continue to use them.
 
 ## Arcjet JS SDK 1.0.0 beta 17
 
