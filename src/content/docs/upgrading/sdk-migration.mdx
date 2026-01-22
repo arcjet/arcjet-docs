@@ -17,8 +17,7 @@ This page documents breaking changes and migrations between SDK releases.
 
 The
 [`1.0.0`](https://github.com/arcjet/arcjet-js/releases/tag/v1.0.0)
-version of the Arcjet JS SDK was released on 2026-01-22 and includes no breaking changes.
-It is the same as the latest beta release `1.0.0-beta-18`.
+version of the Arcjet JS SDK was released on 2026-01-22. No migrations are required from the last `1.0.0-beta-18` release. 
 
 ## Arcjet JS SDK 1.0.0 beta 18
 
@@ -48,22 +47,14 @@ The
 version of the Arcjet JS SDK was released on 2026-01-13 and includes the
 following breaking changes.
 
-### Add limits to web streams
-
-In Arcjet SDKs that use web streams (such as the `Request` object in Deno and React Router),
-those are now limited to a maximum size of 1MB.
-These limits already applied to Node.js streams.
-
 ### Remove `block` field in `validateEmail` rule config
 
-This fields was deprecated in
+This field was deprecated in
 [`1.0.0-beta-1`](https://github.com/arcjet/arcjet-js/releases/tag/v1.0.0-beta.1)
 in favor of `deny`:
 
 ```ts
 validateEmail({ deny: ["DISPOSABLE"], mode: "LIVE" });
-```
-
 ## Arcjet JS SDK 1.0.0 beta 16
 
 The
