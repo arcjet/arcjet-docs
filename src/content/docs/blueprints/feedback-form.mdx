@@ -34,7 +34,7 @@ const aj = arcjet({
     // with no valid MX records:
     validateEmail({
       mode: "LIVE",
-      block: ["DISPOSABLE", "INVALID", "NO_MX_RECORDS"],
+      deny: ["DISPOSABLE", "INVALID", "NO_MX_RECORDS"],
     }),
     // Rate limit forms being submitted from the same IP address:
     slidingWindow({
@@ -199,7 +199,7 @@ const aj = arcjet({
       // Strict email validation to block disposable, invalid, free, and domains
       // with no valid MX records. Free emails include Gmail, Hotmail, Yahoo,
       // etc, so you may wish to remove this rule
-      block: ["DISPOSABLE", "INVALID", "NO_MX_RECORDS", "FREE"],
+      deny: ["DISPOSABLE", "INVALID", "NO_MX_RECORDS", "FREE"],
     }),
     // It would be unusual for a form to be submitted more than 5 times in 10
     // minutes from the same IP address
