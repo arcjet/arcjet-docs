@@ -16,7 +16,12 @@ const aj = arcjet({
 export default {
   port: 3000,
   fetch: aj.handler(async (req) => {
-    const decision = await aj.protect(req);
+    const data = await req.text();
+
+    const decision = await aj.protect(req, {
+      sensitiveInfoValue: data,
+    });
+
     console.log("Arcjet decision", decision);
 
     if (decision.isDenied()) {

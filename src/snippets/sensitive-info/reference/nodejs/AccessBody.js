@@ -19,7 +19,9 @@ const aj = arcjet({
 app.use(express.text());
 
 app.post("/", async (req, res) => {
-  const decision = await aj.protect(req);
+  const decision = await aj.protect(req, {
+    sensitiveInfoValue: req.body,
+  });
 
   if (decision.isDenied() && decision.reason.isSensitiveInfo()) {
     res.writeHead(400, { "Content-Type": "application/json" });

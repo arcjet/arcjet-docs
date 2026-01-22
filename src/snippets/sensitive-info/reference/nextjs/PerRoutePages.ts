@@ -15,7 +15,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  const decision = await aj.protect(req);
+  const decision = await aj.protect(req, {
+    sensitiveInfoValue: req.body,
+  });
 
   if (decision.isDenied() && decision.reason.isSensitiveInfo()) {
     return res

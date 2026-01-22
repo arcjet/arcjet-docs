@@ -13,7 +13,9 @@ const aj = arcjet({
 });
 
 export async function GET(event: RequestEvent) {
-  const decision = await aj.protect(event);
+  const decision = await aj.protect(event, {
+    sensitiveInfoValue: await event.request.text(),
+  });
 
   for (const result of decision.results) {
     console.log("Rule Result", result);

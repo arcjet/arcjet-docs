@@ -18,7 +18,9 @@ const aj = arcjet({
 // The action function is called for non-GET requests, which is where you
 // typically handle form submissions that might contain sensitive information.
 export async function action(args: ActionFunctionArgs) {
-  const decision = await aj.protect(args);
+  const decision = await aj.protect(args, {
+    sensitiveInfoValue: await args.request.text(),
+  });
   console.log("Arcjet decision", decision);
 
   if (decision.isDenied()) {

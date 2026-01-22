@@ -12,7 +12,9 @@ const aj = arcjet({
 });
 
 export async function POST(req: Request) {
-  const decision = await aj.protect(req);
+  const decision = await aj.protect(req, {
+    sensitiveInfoValue: await req.text(),
+  });
 
   for (const { reason } of decision.results) {
     if (reason.isError()) {
