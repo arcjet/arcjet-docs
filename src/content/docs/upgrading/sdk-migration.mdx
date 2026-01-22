@@ -13,6 +13,49 @@ and provide a clear migration path that will remain supported for some time.
 
 This page documents breaking changes and migrations between SDK releases.
 
+## Arcjet JS SDK 1.0.0
+
+The
+[`1.0.0`](https://github.com/arcjet/arcjet-js/releases/tag/v1.0.0)
+version of the Arcjet JS SDK was released on 2026-01-22. No migrations are required from the last `1.0.0-beta-18` release. 
+
+## Arcjet JS SDK 1.0.0 beta 18
+
+The
+[`1.0.0-beta-18`](https://github.com/arcjet/arcjet-js/releases/tag/v1.0.0-beta.18)
+version of the Arcjet JS SDK was released on 2026-01-22 and includes the
+following breaking changes.
+
+### Deprecate automatic body reading
+
+Reading streams has various pitfalls.
+You can now pass what value to check explicitly:
+
+```ts
+const decision = await arcjet.protect(request, { sensitiveInfoValue: "..." });
+```
+
+This value is processed locally and is not sent to the Arcjet cloud API.
+
+If you use tools that patch `request.body` e.g. [`body-parser`](https://www.npmjs.com/package/body-parser) you are not affected and can continue to use them.
+
+## Arcjet JS SDK 1.0.0 beta 17
+
+The
+[`1.0.0-beta-17`](https://github.com/arcjet/arcjet-js/releases/tag/v1.0.0-beta.17)
+version of the Arcjet JS SDK was released on 2026-01-13 and includes the
+following breaking changes.
+
+### Remove `block` field in `validateEmail` rule config
+
+This field was deprecated in
+[`1.0.0-beta-1`](https://github.com/arcjet/arcjet-js/releases/tag/v1.0.0-beta.1)
+in favor of `deny`:
+
+```ts
+validateEmail({ deny: ["DISPOSABLE"], mode: "LIVE" });
+```
+
 ## Arcjet JS SDK 1.0.0 beta 1
 
 The
