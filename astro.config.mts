@@ -133,11 +133,13 @@ export default defineConfig({
       ],
       components: {
         Header: "./src/components/overrides/Header.astro",
-        Sidebar: "./src/components/overrides/Sidebar.astro",
-        PageSidebar: "./src/components/overrides/PageSidebar.astro",
-        PageFrame: "./src/components/overrides/PageFrame.astro",
-        PageTitle: "./src/components/overrides/PageTitle.astro",
         Hero: "./src/components/overrides/Hero.astro",
+        MobileTableOfContents:
+          "./src/components/overrides/MobileTableOfContents.astro",
+        PageFrame: "./src/components/overrides/PageFrame.astro",
+        PageSidebar: "./src/components/overrides/PageSidebar.astro",
+        PageTitle: "./src/components/overrides/PageTitle.astro",
+        Sidebar: "./src/components/overrides/Sidebar.astro",
         ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
       },
       routeMiddleware: "./src/routeData.ts",
