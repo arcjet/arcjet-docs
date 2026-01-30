@@ -1,13 +1,18 @@
 ---
 import TOC from "@/components/TOC";
+import { sdkFromPathname } from "@/lib/sdk";
 import Default from "@astrojs/starlight/components/PageSidebar.astro";
+
+// TODO: Remove this override once client-side framework switching has been
+//       removed in favor of route-based sdks.
+const sdk = sdkFromPathname(Astro.url.pathname);
 
 const props = Astro.locals.starlightRoute;
 const isAjToc = props.entry.data.ajToc != undefined;
 ---
 
 {
-  isAjToc ? (
+  isAjToc && !sdk ? (
 <TOC client:load astroEntry={props.entry} />
   ) : (
 <Default>
