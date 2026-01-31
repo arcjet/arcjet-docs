@@ -1,0 +1,176 @@
+---
+import { pathnameForSdk, sdk, sdkFromPathname, sdks } from "@/lib/sdk";
+import Default from "@astrojs/starlight/components/TableOfContents.astro";
+import { Icon } from "@astrojs/starlight/components";
+import { SelectChevron } from "@/components/icons/SelectChevron";
+
+const activeSdkKey = sdkFromPathname(Astro.url.pathname);
+const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
+---
+
+{
+    activeSdk && (
+        <div class="toc-wrapper">
+            <h2 class="toc-label">SDK</h2>
+            <button class="toc-toggle" popovertarget="toc-sdk" type="button">
+                {activeSdk.ReactIcon && <activeSdk.ReactIcon />}
+                {activeSdk.label}
+                <SelectChevron className="chevron" />
+            </button>
+            <nav id="toc-sdk" popover>
+                <ul>
+                    {sdks().map((sdkItem) => {
+                        const isCurrent = sdkItem.key === activeSdk.key;
+
+                        return (
+                            <li>
+                                <a
+                                    aria-current={
+                                        isCurrent ? "true" : undefined
+                                    }
+                                    href={pathnameForSdk(
+                                        Astro.url.pathname,
+                                        sdkItem.key,
+                                    )}
+                                >
+                                    {sdkItem.ReactIcon && <sdkItem.ReactIcon />}
+                                    {sdkItem.label}
+                                    {isCurrent && (
+                                        <Icon
+                                            class="check"
+                                            name="approve-check"
+                                            size="1rem"
+                                        />
+                                    )}
+                                </a>
+                            </li>
+                        );
+                    })}
+                </ul>
+            </nav>
+        </div>
+    )
+}
+<Default />
+
+<style>
+    @layer arcjet.components {
+        .toc-wrapper {
+            margin-bottom: calc(var(--sp) * 3);
+        }
+
+        .toc-label {
+            color: var(--aj-palette-txt-quaternary);
+            font-family: var(--sl-heading);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .toc-toggle {
+            align-items: center;
+            align-self: end;
+            anchor-name: --toc-anchor;
+            background-color: var(--sl-color-black);
+            border-radius: 0.5rem;
+            border: none;
+            color: var(--aj-palette-txt-primary);
+            cursor: pointer;
+            display: flex;
+            display: flex;
+            flex-shrink: 0;
+            font-size: var(--sl-text-xs);
+            gap: 0.5rem;
+            justify-content: space-between;
+            line-height: 1;
+            padding-block: 0.5rem;
+            padding-inline-end: 0.5rem;
+            padding-inline-start: 0.5rem;
+            user-select: none;
+            width: 100%;
+
+            svg {
+                color: var(--aj-palette-txt-primary);
+                height: 16px;
+                width: 16px;
+            }
+
+            .chevron {
+                margin-left: auto;
+                height: 12px;
+                width: 12px;
+            }
+        }
+
+        #toc-sdk[popover] {
+            backdrop-filter: blur(var(--blur1));
+            background: linear-gradient(
+                rgba(var(--colorBgRgb) / 1) 8px,
+                rgba(var(--colorBgRgb) / 0)
+            );
+            border: 1px solid
+                rgba(var(--aj-palette-input-primary-solid-border) / 0.2);
+            border-radius: calc(var(--sp) * 0.5);
+            overflow-y: auto;
+            padding: 0.25rem;
+            position-anchor: --toc-anchor;
+            position-area: bottom;
+            position: fixed;
+            top: anchor(top);
+            width: anchor-size(width);
+            z-index: 1;
+
+            ul {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            li {
+                margin: 0;
+                padding: 0;
+            }
+
+            a {
+                align-items: center;
+                border-radius: calc(var(--sp) * 0.5);
+                color: var(--aj-palette-txt-tertiary);
+                display: flex;
+                font-size: var(--sl-text-sm);
+                gap: calc(var(--sp) * 1);
+                line-height: 1;
+                margin-left: calc(1rem * var(--depth));
+                margin: 0;
+                margin: calc(var(--sp) * 0.2) 0;
+                outline: none;
+                padding: calc(var(--sp) * 1) calc(var(--sp) * 1);
+                text-decoration: none;
+                transition: all var(--time-sm) var(--easing-default);
+
+                svg {
+                    height: 16px;
+                    width: 16px;
+                }
+
+                .check {
+                    margin-left: auto;
+                }
+            }
+
+            a:hover,
+            a:focus {
+                background: var(--sidebar-link-hoverBg);
+                color: var(--aj-palette-txt-tertiary);
+            }
+
+            a:active {
+                background: var(--sidebar-link-activeBg);
+            }
+
+            a[aria-current="true"] {
+                color: var(--aj-palette-txt-primary);
+                background: var(--sidebar-link-selectedBg);
+            }
+        }
+    }
+</style>
