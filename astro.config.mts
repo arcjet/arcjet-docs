@@ -140,6 +140,7 @@ export default defineConfig({
         PageSidebar: "./src/components/overrides/PageSidebar.astro",
         PageTitle: "./src/components/overrides/PageTitle.astro",
         Sidebar: "./src/components/overrides/Sidebar.astro",
+        TableOfContents: "./src/components/overrides/TableOfContents.astro",
         ThemeSelect: "./src/components/overrides/ThemeSelect.astro",
       },
       routeMiddleware: "./src/routeData.ts",
