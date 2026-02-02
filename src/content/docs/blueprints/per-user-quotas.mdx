@@ -31,52 +31,59 @@ const aj = arcjet({
   ],
 });
 
-// Function to get rate limit rule based on user plan
+// Define the rate limit rules for each plan
+const freePlan = aj.withRule(
+  tokenBucket({
+    mode: "LIVE",
+    characteristics: ["userId"],
+    refillRate: 50,
+    interval: 60,
+    capacity: 100,
+  }),
+);
+
+const proPlan = aj.withRule(
+  tokenBucket({
+    mode: "LIVE",
+    characteristics: ["userId"],
+    refillRate: 500,
+    interval: 60,
+    capacity: 400,
+  }),
+);
+
+const noPlan = aj.withRule(
+  tokenBucket({
+    mode: "LIVE",
+    characteristics: ["userId"],
+    refillRate: 5,
+    interval: 60,
+    capacity: 2000,
+  }),
+);
+
+// Function to get the appropriate rate limit based on user plan
 function getRateLimitByPlan(plan: string) {
   switch (plan) {
     case "free":
-      return aj.withRule(
-        tokenBucket({
-          mode: "LIVE",
-          characteristics: ["userId"],
-          refillRate: 50,
-          interval: 60,
-          capacity: 100,
-        })
-      )
+      return freePlan;
     case "pro":
-      return aj.withRule(
-        tokenBucket({
-          mode: "LIVE",
-          characteristics: ["userId"],
-          refillRate: 500,
-          interval: 60,
-          capacity: 400,
-        })
-      )
+      return proPlan;
     default:
-      return aj.withRule(
-        tokenBucket({
-          mode: "LIVE",
-          characteristics: ["userId"],
-          refillRate: 5,
-          interval: 60,
-          capacity: 2000,
-        })
-      )
+      return noPlan;
   }
+}
 
+export async function POST(req: Request) {
+  // Example session lookup to get user plan and ID
+  // You would replace this with your own auth logic
+  const session = await auth();
 
-  export async function POST(req: Request) {
-    // Example session lookup to get user plan and ID
-    // You would replace this with your own auth logic
-    const session = await auth();
+  const decision = await getRateLimitByPlan(session.user.plan).protect(req, {
+    requested: 1,
+    userId: session.user.id,
+  });
 
-    const decision = await getRateLimitByPlan(session.user.plan).protect(req, {
-      requested: 1,
-      userId: session.user.id,
-    });
-
-    // Handle decision
-  }
+  // Handle decision
+}
 ```
