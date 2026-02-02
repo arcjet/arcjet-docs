@@ -1,0 +1,82 @@
+---
+title: "Per user quotas / limits"
+description: "Dynamically adjust user quotas and rate limits based on their pricing plan."
+---
+
+import SelectableContent from "@/components/SelectableContent";
+import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
+
+Arcjet can help you implement per-user quotas and rate limits in your
+application. This allows you to dynamically adjust the allowed usage for each
+user based on their pricing plan or subscription level.
+
+Custom quotas can be implemented using ad-hoc rules dynamically configured
+within the request handler.
+
+In this example, the Arcjet client is created outside of the request handler. A
+custom function is defined which sets the rate limit based on the user's plan.
+This function is called within the request handler to add the rules dynamically.
+
+The rate limit is tracked by user ID, but you can use any characteristic that
+makes sense for your application.
+
+```ts
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    // Add rules to apply to every request
+    shield({
+      mode: "LIVE",
+    }),
+  ],
+});
+
+// Function to get rate limit rule based on user plan
+function getRateLimitByPlan(plan: string) {
+  switch (plan) {
+    case "free":
+      return aj.withRule(
+        tokenBucket({
+          mode: "LIVE",
+          characteristics: ["userId"],
+          refillRate: 50,
+          interval: 60,
+          capacity: 100,
+        })
+      )
+    case "pro":
+      return aj.withRule(
+        tokenBucket({
+          mode: "LIVE",
+          characteristics: ["userId"],
+          refillRate: 500,
+          interval: 60,
+          capacity: 400,
+        })
+      )
+    default:
+      return aj.withRule(
+        tokenBucket({
+          mode: "LIVE",
+          characteristics: ["userId"],
+          refillRate: 5,
+          interval: 60,
+          capacity: 2000,
+        })
+      )
+  }
+
+
+  export async function POST(req: Request) {
+    // Example session lookup to get user plan and ID
+    // You would replace this with your own auth logic
+    const session = await auth();
+
+    const decision = await getRateLimitByPlan(session.user.plan).protect(req, {
+      requested: 1,
+      userId: session.user.id,
+    });
+
+    // Handle decision
+  }
+```

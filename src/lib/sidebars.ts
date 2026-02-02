@@ -144,6 +144,10 @@ export const main = [
             link: "/blueprints/malicious-traffic",
           },
           {
+            label: "Per user quotas / limits",
+            link: "/blueprints/per-user-quotas",
+          },
+          {
             label: "Payment form",
             link: "/blueprints/payment-form",
           },
