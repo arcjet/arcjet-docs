@@ -5,18 +5,18 @@ import { ConfigModule } from "@nestjs/config";
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true,
       envFilePath: ".env.local",
+      isGlobal: true,
     }),
     ArcjetModule.forRoot({
       isGlobal: true,
       key: process.env.ARCJET_KEY!,
+      proxies: [
+        "76.76.21.21", // An IP address.
+        "103.21.244.0/22", // A CIDR range of IP addresses.
+      ],
       rules: [
         // Rules set here will apply to every request
-      ],
-      proxies: [
-        "100.100.100.100", // A single IP
-        "100.100.100.0/24", // A CIDR for the range
       ],
     }),
     // ... other modules
