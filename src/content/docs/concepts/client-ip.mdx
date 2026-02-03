@@ -29,8 +29,6 @@ ajToc:
     children:
       - anchor: "ip-ranges"
         text: "IP ranges"
-      - anchor: "proxy-stripping"
-        text: "Proxy stripping"
     text: "Proxies"
   - anchor: "overwriting-client-ips"
     children:
@@ -45,37 +43,26 @@ import { Code } from "@astrojs/starlight/components";
 import SlotByFramework from "@/components/SlotByFramework";
 import { removeTSCCommentDirectives as removeTypeScriptDirectives } from "@/lib/utils";
 import AstroProxies from "/src/snippets/reference/astro/Proxies.mjs?raw";
-import AstroService from "/src/snippets/reference/astro/Service.mjs?raw";
 import AstroTrustedIp from "/src/snippets/reference/astro/TrustedIp.mjs?raw";
 import BunProxies from "/src/snippets/reference/bun/Proxies.ts?raw";
-import BunService from "/src/snippets/reference/bun/Service.ts?raw";
 import BunTrustedIp from "/src/snippets/reference/bun/TrustedIp.ts?raw";
 import DenoProxies from "/src/snippets/reference/deno/proxies.ts?raw";
-import DenoService from "/src/snippets/reference/deno/service.ts?raw";
 import DenoTrustedIp from "/src/snippets/reference/deno/trusted-ip.ts?raw";
 import FastifyProxies from "/src/snippets/reference/fastify/proxies.ts?raw";
-import FastifyService from "/src/snippets/reference/fastify/service.ts?raw";
 import FastifyTrustedIp from "/src/snippets/reference/fastify/trusted-ip.ts?raw";
 import NestProxies from "/src/snippets/reference/nestjs/Proxies.ts?raw";
-import NestService from "/src/snippets/reference/nestjs/Service.ts?raw";
 import NestTrustedIp from "/src/snippets/reference/nestjs/TrustedIp.ts?raw";
 import NextProxies from "/src/snippets/reference/nextjs/Proxies.ts?raw";
-import NextService from "/src/snippets/reference/nextjs/Service.ts?raw";
 import NextTrustedIp from "/src/snippets/reference/nextjs/TrustedIp.ts?raw";
 import NodeProxies from "/src/snippets/reference/nodejs/Proxies.ts?raw";
-import NodeService from "/src/snippets/reference/nodejs/Service.ts?raw";
 import NodeTrustedIp from "/src/snippets/reference/nodejs/TrustedIp.ts?raw";
 import NuxtProxies from "@repo/nuxt/server/utils/ProxiesConfig.ts?raw";
-import NuxtService from "@repo/nuxt/server/utils/Service.ts?raw";
 import NuxtTrustedIp from "@repo/nuxt/server/utils/TrustedIp.ts?raw";
 import ReactRouterProxies from "/src/snippets/reference/react-router/proxies.ts?raw";
-import ReactRouterService from "/src/snippets/reference/react-router/service.ts?raw";
 import ReactRouterTrustedIp from "/src/snippets/reference/react-router/trusted-ip.ts?raw";
 import RemixProxies from "/src/snippets/reference/remix/Proxies.ts?raw";
-import RemixService from "/src/snippets/reference/remix/Service.ts?raw";
 import RemixTrustedIp from "/src/snippets/reference/remix/TrustedIp.ts?raw";
 import SveltekitProxies from "/src/snippets/reference/sveltekit/Proxies.ts?raw";
-import SveltekitService from "/src/snippets/reference/sveltekit/Service.ts?raw";
 import SveltekitTrustedIp from "/src/snippets/reference/sveltekit/TrustedIp.ts?raw";
 
 <div aria-hidden="true" style={{ display: "none" }}>
@@ -88,7 +75,7 @@ ignore-me
 
 Arcjet needs the public IP address of incoming requests for much of what it does.
 By default,
-Arcjet uses the IP as a `characteristic` to differentiate users.
+Arcjet uses the IP as a characteristic to differentiate users.
 If that doesn’t work correctly,
 several good users may be denied access because they cannot be differentiated
 from a bad user.
@@ -135,10 +122,8 @@ Arcjet infers whether an app runs on Firebase, Fly, Render, or Vercel
 (but not Cloudflare) from the environment.
 On other platforms Arcjet looks for common headers.
 
-The considered environment variables and their corresponding platforms are as
-follows:
-
-{/* TODO: link to https://github.com/arcjet/arcjet-docs/pull/716 when that lands. */}
+The considered [environment variables][arcjet-env-external] and their
+corresponding platforms are as follows:
 
 | Environment variable                        | Platform     |
 | ------------------------------------------- | ------------ |
@@ -331,45 +316,13 @@ const google = googleBody.prefixes
 // You can now pass `...google` in `proxies`.
 ```
 
-### Proxy stripping
-
-If you use proxies but deploy to a platform such as Vercel which strips headers
-like `x-forwarded-for` (except when on an enterprise plan),
-you can pass a record in `proxies`.
-This works similarly:
-when you know that Cloudflare sets headers correctly,
-and know which IP addresses belong to it,
-after verifying that the IP you get from Vercel belongs to Cloudflare,
-you trust the IP in Cloudflare’s headers.
-
-<SlotByFramework client:load>
-  <Code
-    code={removeTypeScriptDirectives(AstroService)}
-    lang="js"
-    slot="astro"
-  />
-  <Code code={BunService} lang="ts" slot="bun-hono" />
-  <Code code={BunService} lang="ts" slot="bun" />
-  <Code code={DenoService} lang="ts" slot="deno" />
-  <Code code={FastifyService} lang="ts" slot="fastify" />
-  <Code code={NestService} lang="ts" slot="nest-js" />
-  <Code code={NextService} lang="ts" slot="next-js" />
-  <Code code={NodeService} lang="ts" slot="node-js-express" />
-  <Code code={NodeService} lang="ts" slot="node-js-hono" />
-  <Code code={NodeService} lang="ts" slot="node-js" />
-  <Code code={removeTypeScriptDirectives(NuxtService)} lang="ts" slot="nuxt" />
-  <Code code={ReactRouterService} lang="ts" slot="react-router" />
-  <Code code={RemixService} lang="ts" slot="remix" />
-  <Code code={SveltekitService} lang="ts" slot="sveltekit" />
-</SlotByFramework>
-
 ## Overwriting client IPs
 
 It is possible to overwrite the client IP address.
 To make this easy locally but secure when deployed,
 how to do this is different in development and production.
-
-{/* TODO: explain how to use env variables and link to https://github.com/arcjet/arcjet-docs/pull/716 when that lands. */}
+This difference is based on environment variables.
+See [_How to define environment variables_][arcjet-env-set] for more info.
 
 ### Development
 
@@ -420,6 +373,8 @@ you can pas a `trustedIpHeader` option.
 </SlotByFramework>
 
 [arcjet-arcjet-js-issues]: https://github.com/arcjet/arcjet-js/issues
+[arcjet-env-external]: /environment#list-of-environment-variables-read-by-arcjet
+[arcjet-env-set]: /environment#list-of-environment-variables-read-by-arcjet
 [cloudflare-cf-connecting-ipv6]: https://developers.cloudflare.com/fundamentals/reference/http-request-headers/#cf-connecting-ipv6
 [cloudflare-cf-connecting-ip]: https://developers.cloudflare.com/fundamentals/reference/http-request-headers/#cf-connecting-ip
 [digitalocean-do-connecting-ip]: https://docs.digitalocean.com/support/where-can-i-find-the-client-ip-address-of-a-request-connecting-to-my-app/
