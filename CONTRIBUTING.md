@@ -113,18 +113,18 @@ security updates.
 ### Update all Arcjet packages to their latest versions
 
 ```sh
-npm run update:latest
-npm run update:arcjet
+npx --no -- npm-check-updates --interactive --workspaces --filter 'arcjet, @arcjet/*, nosecone, @nosecone/*' --target latest
+npm up arcjet "@arcjet/*" nosecone "@nosecone/*" --workspaces
 ```
 
 ### Update all dependencies to their cooldown minor versions
 
 ```sh
-npm run update:minor
+npx --no -- npm-check-updates --interactive --workspaces --cooldown 30 --target minor
 ```
 
 ### Update all dependencies to their cooldown major versions
 
 ```sh
-npm run update:major
+npx --no -- npm-check-updates --interactive --workspaces --cooldown 30 --target @latest
 ```
