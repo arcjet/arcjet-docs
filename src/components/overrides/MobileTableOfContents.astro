@@ -54,7 +54,6 @@ const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
                                             <Icon
                                                 class="check"
                                                 name="approve-check"
-                                                size="1rem"
                                             />
                                         )}
                                     </a>
@@ -88,6 +87,7 @@ const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
                     }
 
                     .toggle {
+                        background-color: var(--aj-palette-block-level2-blurBg);
                         border: none;
                     }
 
@@ -116,7 +116,7 @@ const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
                             border: 0px;
 
                             border-radius: calc(var(--sp) * 0.5);
-                            color: var(--aj-palette-txt-tertiary);
+                            color: var(--aj-palette-txt-secondary);
 
                             transition: all var(--time-sm) var(--easing-default);
 
@@ -129,7 +129,7 @@ const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
                             &:hover,
                             &:focus {
                                 background: var(--sidebar-link-hoverBg);
-                                color: var(--aj-palette-txt-tertiary);
+                                color: var(--aj-palette-txt-secondary);
                             }
 
                             &:active {
@@ -197,20 +197,20 @@ const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
             /* Match starlight "Content" button */
             button {
                 align-items: center;
-                background-color: var(--sl-color-black);
+                background-color: var(--aj-palette-block-level2-blurBg);
                 border-radius: 0.5rem;
                 border: none;
                 color: var(--color);
+                cursor: pointer;
                 display: flex;
                 flex-shrink: 0;
+                font-size: var(--sl-text-xs);
                 gap: 0.5rem;
                 justify-content: space-between;
                 line-height: 1;
-                font-size: var(--sl-text-xs);
                 padding-block: 0.5rem;
                 padding-inline-end: 0.5rem;
                 padding-inline-start: 0.5rem;
-                user-select: none;
             }
 
             .caret {
@@ -267,7 +267,7 @@ const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
             a {
                 align-items: center;
                 border-radius: calc(var(--sp) * 0.5);
-                color: var(--aj-palette-txt-tertiary);
+                color: var(--aj-palette-txt-secondary);
                 display: flex;
                 font-size: var(--sl-text-sm);
                 gap: calc(var(--sp) * 1);
@@ -296,7 +296,7 @@ const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
             a:hover,
             a:focus {
                 background: var(--sidebar-link-hoverBg);
-                color: var(--aj-palette-txt-tertiary);
+                color: var(--aj-palette-txt-secondary);
             }
 
             a:active {
