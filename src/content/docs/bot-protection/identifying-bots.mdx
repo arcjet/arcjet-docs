@@ -55,7 +55,7 @@ We provide the following categories:
 - `CATEGORY:SLACK`: Scrape data for Slack products and services
 - `CATEGORY:SOCIAL`: Scrape data for social media products and services
 - `CATEGORY:TOOL`: Interact via command line and GUI tools
-- `CATEGORY:UNKNOWN`: Undetermined purposes
+- `CATEGORY:UNKNOWN`: Known bots that cannot be classified.
 - `CATEGORY:VERCEL`: Scrape data for Vercel products and services
 - `CATEGORY:WEBHOOK`: Automated HTTP notifications for events e.g. Stripe payments
 - `CATEGORY:YAHOO`: Scrape data for Yahoo products and services
@@ -127,5 +127,25 @@ compiled into the module as part of the release process.
 
 Please read the repository's [README.md](https://github.com/arcjet/well-known-bots/blob/main/README.md)
 for specific instructions on how to contribute to our bot detection.
+
+### Unknown bots
+
+If a bot is detected but cannot be identified as a known bot, it will be labeled
+as `UNKNOWN_BOT`. This is separate from the `CATEGORY:UNKNOWN` category, which
+is for bots that cannot be classified into any category but can still be
+identified as a specific bot. You can see a list of these named, but
+unclassified bots in the [bot
+list](https://github.com/arcjet/arcjet-js/blob/24d2ee3139f277499ef3cb65f1f1eab998647819/protocol/well-known-bots.ts#L990).
+
+Detections returned as `UNKNOWN_BOT` happen if the bot is new or hides itself.
+It's a bot with no name. Arcjet uses various techniques to detect these bots,
+including analyzing request patterns and tracking IP addresses.
+
+If you configure an `allow` rule and do not include `UNKNOWN_BOT`, then detected
+bots that cannot be identified will be blocked. This is the default behavior to
+protect against new and rapidly evolving bots.
+
+If you want to be more permissive and only block known, named bots, you can
+include `UNKNOWN_BOT` in your `allow` rules.
 
 <Comments />
