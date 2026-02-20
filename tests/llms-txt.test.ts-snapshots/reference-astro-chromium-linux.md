@@ -1,3 +1,5 @@
+astro-island
+
 Terminal window
 
 ```
@@ -16,8 +18,6 @@ Installation
 [Section titled “Installation”](#installation)
 
 In your project root, run the following command to install the SDK:
-
-astro-island
 
 This automatically installs and configures the Arcjet Astro integration in your project. Learn more about how this works in the [Astro docs](https://docs.astro.build/en/guides/integrations-guide/) . Alternatively, you can follow the manual installation instructions.
 
