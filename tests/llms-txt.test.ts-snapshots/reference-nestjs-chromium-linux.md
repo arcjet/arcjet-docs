@@ -64,7 +64,8 @@ The required fields are:
 The optional fields are:
 
 *   `characteristics` (`string[]`) - A list of [characteristics](/fingerprints#built-in-characteristics) to be used to uniquely identify clients.
-*   `proxies` (`string[]`) - A list of one or more trusted proxies. These addresses will be excluded when Arcjet is determining the client IP address. This is useful if you are behind a load balancer or proxy that sets the client IP address in a header. See [Load balancers & proxies](#load-balancers--proxies) below for an example.
+*   `proxies` (`string[]`) - A list of one or more trusted proxies. These addresses will be excluded when Arcjet is determining the client IP address. This is useful if you are behind a load balancer or proxy that sets the client IP address in a header. See “[Concepts: Client IP](/concepts/client-ip)” for more info.
+*   `trustedIpHeader` (`string`) - Name of (lowercase) HTTP request header that you trust (such as `x-fah-client-ip`). This value is _preferred_ over IP addresses provided by the framework and IP addresses found in other headers based on the platform, in both development and production. It can point to a regular IP (such as `x-client-ip`) or a list of IPs (such as `x-forwarded-for`). It can contain IPv4 or IPv6 addresses. Proxies are filtered out. See “[Concepts: Client IP](/concepts/client-ip)” for more info.
 
 src/app.module.ts
 
@@ -125,32 +126,7 @@ src/app.module.ts
 
 [Section titled “Load balancers & proxies”](#load-balancers--proxies)
 
-If your application is behind a load balancer, Arcjet will only see the IP address of the load balancer and not the real client IP address.
-
-To fix this, most load balancers will set the `X-Forwarded-For` header with the real client IP address plus a list of proxies that the request has passed through.
-
-The problem with is that the `X-Forwarded-For` header can be spoofed by the client, so you should only trust it if you are sure that the load balancer is setting it correctly. See [the MDN docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For) for more details.
-
-You can configure Arcjet to trust IP addresses in the `X-Forwarded-For` header by setting the `proxies` field in the configuration. This should be a list of the IP addresses or the CIDR range of your load balancers to be removed, so that the last IP address in the list is the real client IP address.
-
-#### Example
-
-[Section titled “Example”](#example)
-
-For example, if the load balancer is at `100.100.100.100` and the client IP address is `192.168.1.1`, the `X-Forwarded-For` header will be:
-
-```
-X-Forwarded-For: 192.168.1.1, 100.100.100.100
-```
-
-You should set the `proxies` field to `["100.100.100.100"]` so Arcjet will use `192.168.1.1` as the client IP address.
-
-You can also specify CIDR ranges to match multiple IP addresses.
-
-```
-1import { ArcjetModule } from "@arcjet/nest";2import { Module } from "@nestjs/common";3import { ConfigModule } from "@nestjs/config";4
-5@Module({6  imports: [7    ConfigModule.forRoot({8      isGlobal: true,9      envFilePath: ".env.local",10    }),11    ArcjetModule.forRoot({12      isGlobal: true,13      key: process.env.ARCJET_KEY!,14      rules: [15        // Rules set here will apply to every request16      ],17      proxies: [18        "100.100.100.100", // A single IP19        "100.100.100.0/24", // A CIDR for the range20      ],21    }),22    // ... other modules23  ],24})25export class AppModule {}
-```
+If your application is behind a load balancer, Arcjet will only see the IP address of the load balancer and not the real client IP address. You can configure Arcjet to trust particular IP addresses. See “[Concepts: Client IP](/concepts/client-ip)” for more info.
 
 Decision
 --------
@@ -363,7 +339,7 @@ The following are available on all pricing plans:
 
 #### Example
 
-[Section titled “Example”](#example-1)
+[Section titled “Example”](#example)
 
 ```
 1import { ARCJET, type ArcjetNest } from "@arcjet/nest";2import {3  Controller,4  Get,5  HttpException,6  HttpStatus,7  Inject,8  Injectable,9  Logger,10  Req,11} from "@nestjs/common";12import type { Request } from "express";13
