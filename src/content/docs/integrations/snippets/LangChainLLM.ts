@@ -3,8 +3,8 @@ import { OpenAI } from "@langchain/openai";
 
 // Create an instance of another LLM for Arcjet to wrap
 const openai = new OpenAI({
-  modelName: "gpt-3.5-turbo",
-  openAIApiKey: process.env.OPENAI_API_KEY,
+  model: "gpt-3.5-turbo-instruct",
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 const arcjetRedact = new ArcjetRedact({

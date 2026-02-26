@@ -4,7 +4,7 @@ import { ChatOpenAI } from "@langchain/openai";
 // Create an instance of another chat model for Arcjet to wrap
 const openai = new ChatOpenAI({
   temperature: 0.8,
-  model: "gpt-3.5-turbo-0125",
+  model: "gpt-4o-mini",
 });
 
 const arcjetRedact = new ArcjetRedact({
