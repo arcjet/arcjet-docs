@@ -1,5 +1,3 @@
-astro-island
-
  [![npm badge](https://img.shields.io/npm/v/@arcjet/nuxt?style=flat-square&label=%E2%9C%A6Aj&labelColor=ECE6F0&color=ECE6F0)](https://www.npmjs.com/package/@arcjet/nuxt)
 
 This is the reference guide for the Arcjet Nuxt SDK, [available on GitHub](https://github.com/arcjet/arcjet-js) and licensed under the Apache 2.0 license.
@@ -12,6 +10,8 @@ Installation
 [Section titled “Installation”](#installation)
 
 In your project root, run the following command to install the SDK:
+
+astro-island
 
 This automatically installs and configures the Arcjet Nuxt integration in your project. Learn more about how this works in the [Nuxt docs](https://nuxt.com/docs/4.x/api/commands/add). Alternatively, you can follow the manual installation instructions.
 

@@ -1,5 +1,3 @@
-astro-island
-
 Terminal window
 
 ```
@@ -32,6 +30,8 @@ Install
 -------
 
 [Section titled “Install”](#install)
+
+astro-island
 
 Use
 ---
