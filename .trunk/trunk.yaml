@@ -36,6 +36,10 @@ lint:
     - linters: [markdownlint]
       level: medium
   ignore:
+    - linters: [prettier]
+      paths:
+        # Prettier forces <JSX /> in mdx to cause line breaks
+        - "**/*.mdx"
     - linters: [ALL]
       paths:
         # Ignore playwright snapshots
