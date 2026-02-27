@@ -6,6 +6,7 @@ next: false
 ---
 
 import { Aside, Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import AuthJSAppTS from "/src/snippets/integrations/AuthJSApp.ts?raw";
 import AuthJSPagesTS from "/src/snippets/integrations/AuthJSPages.ts?raw";
@@ -24,9 +25,9 @@ authenticated user ID to implement user-specific rate limits.
   NextAuth 4 is the current stable version, but is [being renamed
   Auth.js](https://twitter.com/balazsorban44/status/1603082914362986496) with
   version 5. This guide is about integrating Arcjet with the beta version of
-  [Auth.js](https://authjs.dev/) 5. See the [Arcjet / NextAuth integration
-  docs](/integrations/nextauth) for instructions specific to the old (stable)
-  version.
+  [Auth.js](https://authjs.dev/) 5. See the{" "}
+  <Link.Page href="/integrations/nextauth">Arcjet / NextAuth integration docs</Link.Page>{" "}
+  for instructions specific to the old (stable) version.
 </Aside>
 
 ## Example use case
@@ -76,9 +77,9 @@ within a 60 second window and also prevents bots from making requests.
 
 ## Rate limits using Auth.js user ID
 
-Arcjet rate limits allow [custom fingerprint
-characteristics](/fingerprints#custom-characteristics) to identify the client
-and apply the limit. Using the Auth.js
+Arcjet rate limits allow
+<Link.Page href="/fingerprints#custom-characteristics">custom fingerprint characteristics</Link.Page>
+to identify the client and apply the limit. Using the Auth.js
 [`auth`](https://authjs.dev/reference/nextjs#auth) helper you can pass through a
 user ID.
 
@@ -103,9 +104,10 @@ user ID.
 
 ## Chaining middleware
 
-If you want to protect every page with [Arcjet Shield](/shield)
-automatically you can run it through Next.js middleware. Auth.js can also use
-middleware to add authentication to your pages. You can chain the two together.
+If you want to protect every page with
+<Link.Page href="/shield">Arcjet Shield</Link.Page> automatically you can run
+it through Next.js middleware. Auth.js can also use middleware to add
+authentication to your pages. You can chain the two together.
 
 <Code code={AuthJSMiddleware} lang="ts" title="/middleware.ts" />
 

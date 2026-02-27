@@ -5,6 +5,7 @@ prev: false
 next: false
 ---
 
+import { Link } from "@/components/link";
 import Comments from "/src/components/Comments.astro";
 
 Our philosophy around major SDK version upgrades is to avoid breaking changes
@@ -133,12 +134,12 @@ strings.
 
 ### Handling of url-encoded data in sensitive info detection
 
-[Arcjet Sensitive info detection](/sensitive-info) and
-[`@arcjet/redact`](/redact/quick-start) features now handle both raw and
-URL-encoded data simultaneously. This dual processing approach ensures
-comprehensive detection, particularly for content containing the + character,
-which serves both as a literal plus sign (common in phone numbers) and as an
-encoded space in URLs.
+<Link.Page href="/sensitive-info">Arcjet Sensitive info detection</Link.Page> and
+<Link.Page href="/redact/quick-start">`@arcjet/redact`</Link.Page> features
+now handle both raw and URL-encoded data simultaneously. This dual processing
+approach ensures comprehensive detection, particularly for content containing
+the + character, which serves both as a literal plus sign (common in phone
+numbers) and as an encoded space in URLs.
 
 When implementing custom detection functions on data containing + characters,
 you may observe duplicate token matches across different processing windows.
@@ -185,9 +186,10 @@ detectBot({
 });
 ```
 
-We now publish [a list of known bots](/bot-protection/identifying-bots) as both
-individual user agents as well as categories of types of bots. You can use these
-to configure your bot detection rules.
+We now publish
+<Link.Page href="/bot-protection/identifying-bots">a list of known bots</Link.Page>
+as both individual user agents as well as categories of types of bots. You can
+use these to configure your bot detection rules.
 
 For example, a common configuration is to block all bots except search engine
 crawlers:

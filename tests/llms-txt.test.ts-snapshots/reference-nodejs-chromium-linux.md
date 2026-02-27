@@ -319,7 +319,7 @@ The `ArcjetReason` object for shield rules has the following properties:
 1shieldTriggered: boolean;
 ```
 
-See the [shield documentation](/shield/reference?f=remix) for more information about these properties.
+See the [shield documentation](/shield/reference?f=node-js) for more information about these properties.
 
 ##### Bot protection
 

@@ -8,6 +8,7 @@ generateMarkdownRoute: true
 import { Badge } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "../../../components/Comments.astro";
+import { Link } from "@/components/link";
 
 Arcjet signup form protection combines bot protection, email validation, and
 rate limiting to protect your signup and lead capture forms from spam,
@@ -52,8 +53,9 @@ The product combines three key components:
 
 ### 1. Rate limiting - control signup velocity
 
-[Rate limiting][arcjet-rate-limiting] prevents bots and abusive clients from
-submitting your signup or lead forms too many times in a short period.
+<Link.Page href="/rate-limiting">Rate limiting</Link.Page> prevents bots and
+abusive clients from submitting your signup or lead forms too many times in a
+short period.
 
 Examples:
 
@@ -67,8 +69,8 @@ spam or automated abuse.
 
 ### 2. Bot protection - block automated signup bots
 
-[Bot protection][arcjet-bot-protection] helps stop automated signup bots and
-form spam tools that try to create accounts at scale.
+<Link.Page href="/bot-protection">Bot protection</Link.Page> helps stop
+automated signup bots and form spam tools that try to create accounts at scale.
 
 For typical signup and lead forms, you expect human users, not bots. Any
 automated submissions are likely to be:
@@ -83,8 +85,8 @@ bots and suspicious automation.
 
 ### 3. Email validation - verify email quality
 
-[Email validation][arcjet-email-validation] validates and verifies email
-addresses used in signups and lead forms so you can:
+<Link.Page href="/email-validation">Email validation</Link.Page> validates
+and verifies email addresses used in signups and lead forms so you can:
 
 - Confirm that the address is syntactically valid.
 - Check that the domain can receive email (MX records).
@@ -109,7 +111,3 @@ up with minimal friction.
 | <Badge text="Enterprise" variant="danger" /> | ✅ Included  |
 
 <Comments />
-
-[arcjet-bot-protection]: /bot-protection
-[arcjet-email-validation]: /email-validation
-[arcjet-rate-limiting]: /rate-limiting

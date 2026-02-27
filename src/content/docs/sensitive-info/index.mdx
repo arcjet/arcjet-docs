@@ -8,6 +8,7 @@ generateMarkdownRoute: true
 import { Badge } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "../../../components/Comments.astro";
+import { Link } from "@/components/link";
 
 Arcjet sensitive information detection lets you detect and block sensitive data
 in request bodies before it enters your application. Use it to prevent clients
@@ -24,7 +25,7 @@ You can block common types of PII such as email addresses, card numbers, IP
 addresses, and phone numbers, as well as custom patterns you define.
 
 Sensitive info works on the request body. To detect specific information in
-headers or other request fields, use [Arcjet filters][arcjet-filters].
+headers or other request fields, use <Link.Page href="/filters">Arcjet filters</Link.Page>.
 
 ## When to use Arcjet sensitive info detection
 
@@ -38,9 +39,9 @@ Use sensitive information detection when you want to:
 - Prevent sensitive data being sent to third-party integrations, such as support
   ticket systems or LLMs.
 
-For email addresses specifically, you can also use [Arcjet email
-validation][arcjet-email-validation] to validate and verify addresses before
-creating accounts or sending email.
+For email addresses specifically, you can also use
+<Link.Page href="/email-validation">Arcjet email validation</Link.Page> to
+validate and verify addresses before creating accounts or sending email.
 
 ## How Arcjet sensitive info detection works
 
@@ -93,6 +94,3 @@ Sensitive info protection is available on paid plans.
 | <Badge text="Enterprise" variant="danger" /> |        ✅ Included        |
 
 <Comments />
-
-[arcjet-email-validation]: /email-validation
-[arcjet-filters]: /filters

@@ -5,6 +5,7 @@ prev: false
 generateMarkdownRoute: true
 ---
 
+import { Link } from "@/components/link";
 import { Badge } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "../../../components/Comments.astro";
@@ -46,8 +47,9 @@ excessive traffic. For example:
   requests per day, paid tiers get higher limits) and enforce them directly in
   your application code.
 
-Rate limiting is complementary to [Arcjet Shield WAF][arcjet-shield]. Shield
-analyzes what kind of requests are made over time and blocks clients that show
+Rate limiting is complementary to
+<Link.Page href="/shield">Arcjet Shield WAF</Link.Page>. Shield analyzes what
+kind of requests are made over time and blocks clients that show
 repeated suspicious behavior, while rate limiting focuses on controlling request
 volume and frequency.
 
@@ -68,24 +70,26 @@ instances of your application.
 Arcjet supports several rate limiting algorithms so you can choose the behavior
 that best fits your use case:
 
-- [**Fixed window**](/rate-limiting/algorithms#fixed-window) Counts requests in
-  discrete time windows (for example, 100 requests per minute, reset every
-  minute).
+- <Link.Page href="/rate-limiting/algorithms#fixed-window">**Fixed window**</Link.Page>
+  Counts requests in discrete time windows (for example,
+  100 requests per minute, reset every minute).
 
-- [**Sliding window**](/rate-limiting/algorithms#sliding-window) Uses a moving
-  time window to smooth out bursts and avoid sharp reset boundaries.
+- <Link.Page href="/rate-limiting/algorithms#sliding-window">**Sliding window**</Link.Page>
+  Uses a moving time window to smooth out bursts and avoid
+  sharp reset boundaries.
 
-- [**Token bucket**](/rate-limiting/algorithms#token-bucket) Allows short bursts
-  while enforcing an average rate over time, by consuming and replenishing
-  tokens.
+- <Link.Page href="/rate-limiting/algorithms#token-bucket">**Token bucket**</Link.Page>
+  Allows short bursts while enforcing an average rate over
+  time, by consuming and replenishing tokens.
 
 You can choose different algorithms for different endpoints, clients, or
 subscription tiers.
 
 ### Fingerprints and identifying clients
 
-Clients are tracked by configurable [fingerprints][arcjet-fingerprints] that
-include IP addresses by default. This means clients using the same IP address
+Clients are tracked by configurable
+<Link.Page href="/fingerprints">fingerprints</Link.Page> that include IP
+addresses by default. This means clients using the same IP address
 are counted and limited together.
 
 To ensure rate limits are applied correctly, choose fingerprint characteristics
@@ -110,6 +114,3 @@ Rate limiting is available on all Arcjet plans:
 | <Badge text="Enterprise" variant="danger" /> |      ✅      |
 
 <Comments />
-
-[arcjet-fingerprints]: /fingerprints
-[arcjet-shield]: /shield

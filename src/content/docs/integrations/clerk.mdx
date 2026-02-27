@@ -6,6 +6,7 @@ next: false
 ---
 
 import { Aside, Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import NextJSClerkApp from "/src/snippets/integrations/ClerkNextJSApp.ts?raw";
 import NextJSClerkMiddleware from "/src/snippets/integrations/ClerkNextJSMiddleware.ts?raw";
@@ -36,11 +37,11 @@ GitHub](https://github.com/arcjet/arcjet-js/blob/main/examples/nextjs-clerk-rate
 
 ## Rate limits using Clerk user ID
 
-Arcjet rate limits allow [custom fingerprint
-characteristics](/fingerprints#custom-characteristics) to identify the client
-and apply the limit. Using Clerk's
-[`currentUser()`](https://clerk.com/docs/references/nextjs/current-user) (app
-router) or [`getAuth()`](https://clerk.com/docs/references/nextjs/get-auth)
+Arcjet rate limits allow
+<Link.Page href="/fingerprints#custom-characteristics">custom fingerprint characteristics</Link.Page>
+to identify the client and apply the limit. Using
+Clerk's [`currentUser()`](https://clerk.com/docs/references/nextjs/current-user)
+(app router) or [`getAuth()`](https://clerk.com/docs/references/nextjs/get-auth)
 (pages router) helpers you can pass through a user ID.
 
 <Tabs>
@@ -76,9 +77,10 @@ router) or [`getAuth()`](https://clerk.com/docs/references/nextjs/get-auth)
 
 ## Chaining middleware
 
-If you want to protect every page with [Arcjet Shield](/shield)
-automatically you can run it through Next.js middleware. Clerk also uses
-middleware to add authentication to your pages. You can chain the two together.
+If you want to protect every page with
+<Link.Page href="/shield">Arcjet Shield</Link.Page> automatically you can run
+it through Next.js middleware. Clerk also uses middleware to add authentication
+to your pages. You can chain the two together.
 
 See an [example Next.js implementation on
 GitHub](https://github.com/arcjet/arcjet-js/tree/main/examples/nextjs-clerk-shield).

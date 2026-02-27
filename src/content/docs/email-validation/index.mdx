@@ -8,6 +8,7 @@ generateMarkdownRoute: true
 import { Badge } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "../../../components/Comments.astro";
+import { Link } from "@/components/link";
 
 Arcjet email validation lets you validate and verify email addresses in your
 application to reduce spam and fraudulent signups.
@@ -34,9 +35,10 @@ Use Arcjet email validation when you want to:
 - Block temporary / disposable email addresses.
 
 You can combine email validation with
-[Arcjet rate limiting][arcjet-rate-limiting] to prevent brute-force attacks,
-and with [Arcjet sensitive info][arcjet-sensitive-info] to block unwanted or
-unsafe data.
+<Link.Page href="/rate-limiting">Arcjet rate limiting</Link.Page> to prevent
+brute-force attacks, and with
+<Link.Page href="/sensitive-info">Arcjet sensitive info</Link.Page> to block
+unwanted or unsafe data.
 
 ## How Arcjet email validation works
 
@@ -66,8 +68,9 @@ addresses. This includes:
   Whether the domain has valid MX records and appears able to receive email.
 
 - **Gravatar check**
-  Whether the address has a [Gravatar][] entry associated with it. This can be
-  a useful signal that the email address belongs to a real person.
+  Whether the address has a [Gravatar](https://gravatar.com) entry associated
+  with it. This can be a useful signal that the email address belongs to a real
+  person.
 
 These checks help you decide whether to accept, reject, or flag an email
 address in your application logic.
@@ -82,7 +85,3 @@ address in your application logic.
 | <Badge text="Enterprise" variant="danger" /> | ✅ Included  |
 
 <Comments />
-
-[arcjet-rate-limiting]: /rate-limiting
-[arcjet-sensitive-info]: /sensitive-info
-[gravatar]: https://gravatar.com

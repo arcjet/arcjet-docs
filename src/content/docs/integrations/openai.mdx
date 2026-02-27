@@ -6,6 +6,7 @@ next: false
 ---
 
 import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import OpenAINextJSChat from "/src/snippets/integrations/OpenAINextJSChat.ts?raw";
 import Comments from "/src/components/Comments.astro";
@@ -28,11 +29,12 @@ developer token budget.
 
 ## How it works
 
-- Arcjet rate limits allow [custom fingerprint
-  characteristics](/fingerprints#custom-characteristics) to identify the client
-  and apply the limit. We provide the user ID to identify the user. This can use
-  any authentication system you have in place, such as
-  [Clerk](/integrations/clerk).
+- Arcjet rate limits allow
+  <Link.Page href="/fingerprints#custom-characteristics">custom fingerprint characteristics</Link.Page>
+  to identify the client and apply the limit. We
+  provide the user ID to identify the user. This can use any authentication
+  system you have in place, such as
+  <Link.Page href="/integrations/clerk">Clerk</Link.Page>.
 - Define a rate limit of `2,000` tokens per hour with a maximum of `5,000`
   tokens in the bucket. This allows for a reasonable conversation length without
   consuming too many tokens.

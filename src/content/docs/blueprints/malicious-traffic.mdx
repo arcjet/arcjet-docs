@@ -3,18 +3,20 @@ title: "Malicious traffic"
 description: "How to block custom user agents and dynamic IP lists with Arcjet filters."
 ---
 
+import { Link } from "@/components/link";
+
 You may be looking at your logs and seeing malicious traffic coming through.
 Perhaps you can identify a bot or other automated tool by its `user-agent` or
 IP range.
 
 We would appreciate hearing about such traffic from you!
 We are constantly improving how Arcjet works but security is an ever-evolving
-field and there are [known limitations][arcjet-limitations] to different
+field and there are <Link.Page href="/limitations">known limitations</Link.Page> to different
 approaches.
-Please reach out to [Arcjet support][arcjet-support] to share what you are
+Please reach out to <Link.Page href="/support">Arcjet support</Link.Page> to share what you are
 seeing.
 
-In the meantime you can use [Arcjet Filters][arcjet-filters] to block unwanted
+In the meantime you can use <Link.Page href="/filters">Arcjet Filters</Link.Page> to block unwanted
 traffic.
 This blueprint covers two example use cases to show how that can be done:
 
@@ -25,9 +27,9 @@ This blueprint covers two example use cases to show how that can be done:
 
 ## Block a custom bot
 
-You could be using [Arcjet Bot protection][arcjet-bots] already and still may
+You could be using <Link.Page href="/bot-protection">Arcjet Bot protection</Link.Page> already and still may
 need to block a particular bot or similar tool that is not in
-[our list at `arcjet/well-known-bots`][github-arcjet-well-known-bots].
+[our list at `arcjet/well-known-bots`](https://github.com/arcjet/well-known-bots).
 (contributions welcome!)
 That could be because the bot is very new,
 not widely used,
@@ -45,7 +47,7 @@ Searching the internet shows that it has different values for `user-agent`
 and also uses different IPs
 (the CIDR range `47.128.0.0/16` seems to match).
 
-With [Arcjet Filters][arcjet-filters]
+With <Link.Page href="/filters">Arcjet Filters</Link.Page>
 you can write an expression to block traffic matching that user agent _or_
 that IP range:
 
@@ -79,7 +81,7 @@ like `user-agent`s,
 which would work similarly.
 
 To illustrate,
-Cloudflare provides lists of [IP ranges][cloudflare-ips] that they use.
+Cloudflare provides lists of [IP ranges](https://www.cloudflare.com/ips/) that they use.
 This is a theoretical example to show how it could work and not a
 recommendation,
 but one can argue that any traffic through Cloudflare is likely to be
@@ -87,7 +89,7 @@ automated.
 The important caveat is that this may block people using iCloud Relay and
 Cloudflare WARP VPN.
 
-With [`fetch`][mdn-fetch] and [Arcjet Filters][arcjet-filters]
+With [`fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) and <Link.Page href="/filters">Arcjet Filters</Link.Page>
 you can generate an expression dynamically:
 
 ```ts
@@ -122,11 +124,3 @@ once per year.
 An exercise for the reader is to move this into a script that runs periodically
 and writes to a file,
 then loading that file when starting the server.
-
-[arcjet-bots]: /bot-protection
-[arcjet-filters]: /filters
-[arcjet-limitations]: /limitations
-[arcjet-support]: /support
-[cloudflare-ips]: https://www.cloudflare.com/ips/
-[github-arcjet-well-known-bots]: https://github.com/arcjet/well-known-bots
-[mdn-fetch]: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch

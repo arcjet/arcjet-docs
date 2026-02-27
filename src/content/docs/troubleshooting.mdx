@@ -4,6 +4,7 @@ description: "Debugging common problems and errors with Arcjet."
 ---
 
 import Comments from "/src/components/Comments.astro";
+import { Link } from "@/components/link";
 
 import { Tabs, TabItem, Code } from "@astrojs/starlight/components";
 import HealthzRouteAppJS from "/src/snippets/reference/nextjs/HealthzRouteApp.js?raw";
@@ -83,10 +84,11 @@ When you deploy your app next, Arcjet should not trigger on this route.
 
 ### Override development IP
 
-Arcjet's [IP geolocation](/blueprints/ip-geolocation) and [VPN & proxy
-detection](/blueprints/vpn-proxy-detection) features require a real IP address
-to work. In local development, Arcjet defaults to `127.0.0.1` so the IP analysis
-metadata will be empty.
+Arcjet's <Link.Page href="/blueprints/ip-geolocation">IP geolocation</Link.Page>
+and <Link.Page href="/blueprints/vpn-proxy-detection">VPN & proxy detection</Link.Page>
+features require a real IP address to work. In local
+development, Arcjet defaults to `127.0.0.1` so the IP analysis metadata will be
+empty.
 
 You can set the IP address to a real public IP by overriding the IP address
 field (`ip`) in the `request` object that is passed to the Arcjet `protect`
@@ -146,8 +148,8 @@ within the short timeout period. This is usually caused by a network issue. The
 SDK is designed to fail open so that in the event of a network problem or
 outage, requests will be allowed.
 
-If you are seeing this error frequently, please [contact us](/support) so we can
-investigate.
+If you are seeing this error frequently, please
+<Link.Page href="/support">contact us</Link.Page> so we can investigate.
 
 ### Arcjet will use 127.0.0.1 when missing public IP address in development mode
 
@@ -156,14 +158,15 @@ VPN/proxy detection. In production, if the IP is invalid (e.g. `127.0.0.1`), the
 request is rejected to prevent spoofing.
 
 In development, private/internal addresses are common. To avoid errors, set the
-environment variable [`ARCJET_ENV`](/environment#arcjet-env) to
-`development`. This will disable the IP
-address validation and allow you to test your application without errors.
+environment variable
+<Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page> to
+`development`. This will disable the IP address validation and allow you to test
+your application without errors.
 
 This log means Arcjet is falling back to `127.0.0.1` because it's running in
 development mode. If this appears in production, check that
-[`ARCJET_ENV`](/environment#arcjet-env) is not incorrectly set to
-`development`.
+<Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page> is not
+incorrectly set to `development`.
 
 ### generateFingerprint: ip is empty / [failed_precondition] client IP not provided
 
@@ -174,8 +177,8 @@ production. In production environments we disallow private/internal addresses,
 but they are allowed in development to allow you to test locally.
 
 You can force the SDK to run in development mode by setting the environment
-variable [`ARCJET_ENV`](/environment#arcjet-env) to `development` in
-your `.env.local` file:
+variable <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page> to
+`development` in your `.env.local` file:
 
 ```ini title=".env.local"
 ARCJET_ENV=development
@@ -255,8 +258,9 @@ for a while to give you time to update your code, which is why this is warning
 you. Shield is still configured automatically but you should now migrate to
 explicitly configuring it.
 
-Check out the [Shield documentation](/shield) to learn how to configure
-Shield rules. To restore the old behavior you can add a simple Shield rule:
+Check out the <Link.Page href="/shield">Shield documentation</Link.Page> to
+learn how to configure Shield rules. To restore the old behavior you can add a
+simple Shield rule:
 
 ```ts
 import arcjet, { shield } from "@arcjet/next";
@@ -313,8 +317,10 @@ rather than an adapter. You probably meant to use the `@arcjet/node` package
 instead.
 
 The `arcjet` package is a low-level package that is used to build adapters for
-different [frameworks and runtimes we support](/get-started). Unless you are
-doing something custom, we recommend using one of the adapters.
+different
+<Link.Page href="/get-started">frameworks and runtimes we support</Link.Page>.
+Unless you are doing something custom, we recommend using
+one of the adapters.
 
 ### Error: Body already read or Body is unusable
 
@@ -328,9 +334,8 @@ Another example is if you access a field in the body to perform email validation
 and then later try to access the body again in another part of your request
 handler.
 
-To fix this with sensitive information detection, see the [Accessing the
-body](/sensitive-info/reference?f=node-js#accessing-the-body) section of the
-reference.
+To fix this with sensitive information detection, see the
+<Link.ToSdk href="/sensitive-info/reference#accessing-the-body" sdk="node">Accessing the body</Link.ToSdk> section of the reference.
 
 To fix this with other cases, clone the request before accessing the body:
 
@@ -349,9 +354,9 @@ const decision = await aj.protect(req, { email });
 
 If you see this error then you are probably running an older version of Next.js.
 Arcjet supports the [active and maintenance LTS versions of
-Next.js](https://nextjs.org/support-policy) as indicated in [the SDK
-reference](/reference/nextjs#requirements). Upgrade your Next.js version to the
-latest version to fix this error.
+Next.js](https://nextjs.org/support-policy) as indicated in
+<Link.Page href="/reference/nextjs#requirements">the SDK reference</Link.Page>.
+Upgrade your Next.js version to the latest version to fix this error.
 
 ### http2.connect is not implemented yet!
 
@@ -399,9 +404,8 @@ for Webpack you can set
 
 ## Get help
 
-We provide [technical support](/support) for all Arcjet users so if you need
-help, [email us](mailto:support@arcjet.com) or [join our
-Discord](https://arcjet.com/discord).
+We provide <Link.Page href="/support">technical support</Link.Page> for all
+Arcjet users so if you need help, [email us](mailto:support@arcjet.com) or [join
+our Discord](https://arcjet.com/discord).
 
 <Comments />
-```

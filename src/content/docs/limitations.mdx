@@ -3,6 +3,7 @@ title: "Arcjet limitations"
 description: "Things to be aware of and limitations with Arcjet."
 ---
 
+import { Link } from "@/components/link";
 import Comments from "/src/components/Comments.astro";
 
 No security product is perfect and Arcjet is no exception. Here are some things
@@ -44,11 +45,12 @@ it were simply blocked on the network.
 
 ## Shield analysis does not use the request body
 
-[Arcjet Shield](/shield) analysis is currently based on the request
-headers and query parameters. To minimize false positives and achieve
-low-latency responses, Shield analysis happens in the background on the Arcjet
-platform after a request has been reported to our API. For [privacy](/privacy)
-we do not send the request body to our API, so it cannot be used for analysis.
+<Link.Page href="/shield">Arcjet Shield</Link.Page> analysis is currently
+based on the request headers and query parameters. To minimize false positives
+and achieve low-latency responses, Shield analysis happens in the background on
+the Arcjet platform after a request has been reported to our API. For
+<Link.Page href="/privacy">privacy</Link.Page> we do not send the request body
+to our API, so it cannot be used for analysis.
 
 In the future we intend to support local request body analysis as part of
 Shield.

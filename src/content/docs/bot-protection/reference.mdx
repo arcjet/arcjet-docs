@@ -89,6 +89,7 @@ import Starter from "@/components/badges/Starter.astro";
 import Business from "@/components/badges/Business.astro";
 import Enterprise from "@/components/badges/Enterprise.astro";
 import Comments from "@/components/Comments.astro";
+import { Link } from "@/components/link";
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
 import FrameworkLinks from "@/components/FrameworkLinks";
@@ -204,8 +205,8 @@ status](#bot-verification) after an allow decision is returned to ensure that th
 say they are.
 
 This behavior is configured with an `allow` list from our [full list of
-bots](https://arcjet.com/bot-list) and/or [bot
-categories](/bot-protection/identifying-bots#bot-categories).
+bots](https://arcjet.com/bot-list) and/or
+<Link.Page href="/bot-protection/identifying-bots#bot-categories">bot categories</Link.Page>.
 
 <SlotByFramework client:load>
   <BunAllowingBots slot="bun" />
@@ -224,8 +225,8 @@ the majority continued access. This may be due to many reasons, such as
 misconfigured or high-traffic bots.
 
 This behavior is configured with a `deny` list from our [full list of
-bots](https://arcjet.com/bot-list) and/or [bot
-categories](/bot-protection/identifying-bots#bot-categories).
+bots](https://arcjet.com/bot-list) and/or
+<Link.Page href="/bot-protection/identifying-bots#bot-categories">bot categories</Link.Page>.
 
 <SlotByFramework client:load>
   <BunDenyingBots slot="bun" />
@@ -247,7 +248,7 @@ categories](/bot-protection/identifying-bots#bot-categories).
 
 ## Decision
 
-The [quick start example](/bot-protection/quick-start) will deny requests that
+The <Link.Page href="/bot-protection/quick-start">quick start example</Link.Page> will deny requests that
 match the bot detection rules, immediately returning a response to the client.
 
 Arcjet provides a single `protect` function that is used to execute your
@@ -299,8 +300,8 @@ for (const result of decision.results) {
 
 ### Identified bots
 
-The decision also contains all of the [identified
-bots and matched categories](/bot-protection/identifying-bots) detected from the
+The decision also contains all of the
+<Link.Page href="/bot-protection/identifying-bots">identified bots and matched categories</Link.Page> detected from the
 request. A request may be identified as zero, one, or more bots/categories-all
 of which will be available on the `decision.allowed` and `decision.denied`
 properties.
@@ -319,7 +320,7 @@ properties.
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
 not block all requests. The SDK will also time out and fail open after 1000ms
-in development (see [`ARCJET_ENV`](/environment#arcjet-env)) and 500ms
+in development (see <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>) and 500ms
 otherwise. However, in most cases, the response time will be less than 20-30ms.
 
 If there is an error condition when processing the rule, Arcjet will return an
@@ -335,7 +336,7 @@ bot and could be marked as an errored result. Our recommendation is to block
 requests without `User-Agent` headers because most legitimate clients send this
 header.
 
-See [an example of how to do this](/bot-protection/reference#user-agent-header).
+See <Link.Page href="/bot-protection/reference#user-agent-header">an example of how to do this</Link.Page>.
 :::
 
 <SlotByFramework client:load>
@@ -452,7 +453,7 @@ bot and are marked as an errored result.
 
 Most legitimate clients send it because HTTP/1.1 (RFC 7231) says it _should_ be
 sent.
-You can choose to block such requests with [Arcjet Filters](/filters).
+You can choose to block such requests with <Link.Page href="/filters">Arcjet Filters</Link.Page>.
 
 ```ts
 filter({
@@ -494,7 +495,7 @@ blocking any requests.
 We have an example test framework you can use to automatically test your rules.
 Arcjet can also be triggered based using a sample of your traffic.
 
-See the [Testing](/testing) section of the docs for details.
+See the <Link.Page href="/testing">Testing</Link.Page> section of the docs for details.
 
 <SlotByFramework client:load>
   <NextJsExamples slot="next-js" />

@@ -4,6 +4,7 @@ description: "Aikido Zen Firewall vs Arcjet. Compare Arcjet's security SDK with 
 ---
 
 import Comments from "/src/components/Comments.astro";
+import { Link } from "@/components/link";
 
 Arcjet is an alternative to [Aikido](https://www.aikido.dev/zen) Zen Firewall
 for protecting your applications from bots, implementing rate limiting, and
@@ -14,11 +15,14 @@ there are some key differences to consider when choosing between them.
 
 1. **Security components for developers**: Arcjet provides a range of security
    components that developers can integrate directly into their applications,
-   including [bot management](/bot-protection/quick-start), [rate
-   limiting](/rate-limiting/quick-start), [email
-   verification](/email-validation/quick-start), [personal information detection
-   & redaction](/sensitive-info/quick-start), and a full [web application
-   firewall (WAF)](/shield/quick-start) that covers SQL injection, cross-site
+   including
+   <Link.Page href="/bot-protection/quick-start">bot management</Link.Page>,
+   <Link.Page href="/rate-limiting/quick-start">rate limiting</Link.Page>,
+   <Link.Page href="/email-validation/quick-start">email verification</Link.Page>,
+   <Link.Page href="/sensitive-info/quick-start">personal information detection & redaction</Link.Page>,
+   and a full
+   <Link.Page href="/shield/quick-start">web application firewall (WAF)</Link.Page>
+   that covers SQL injection, cross-site
    scripting, file inclusion attacks, and others. Aikido's Zen Firewall focuses
    on runtime application protection: blocking dangerous user input (injection,
    path traversal, SSRF, etc.), per-route and per-user rate limiting, and

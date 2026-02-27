@@ -4,6 +4,7 @@ description: "Recommended best practices for using Arcjet."
 ---
 
 import { Tabs, TabItem, Code } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
 import Comments from "/src/components/Comments.astro";
 import ArcjetLib from "/src/snippets/best-practices/ArcjetLib.ts?raw";
 
@@ -90,8 +91,8 @@ each rule will return its decision, but the end conclusion will always be
 As these are configured in code, you can use other mechanisms to set the mode.
 For example, you could could use an existing feature flag system to dynamically
 change the rule mode. We have an example showing how to sample traffic between
-`DRY_RUN` and `LIVE` modes in the [Sampling traffic
-blueprint](/blueprints/sampling).
+`DRY_RUN` and `LIVE` modes in the
+<Link.Page href="/blueprints/sampling">Sampling traffic blueprint</Link.Page>.
 
 ## Configure proxies and load balancers
 
