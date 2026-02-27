@@ -3,6 +3,13 @@
 This file contains instructions specifically for AI agents working on this
 codebase.
 
+## Internal links
+
+See [Internal links](CONTRIBUTING.md#internal-links) in CONTRIBUTING.md.
+
+When editing MDX files, convert any plain markdown internal links to
+`<Link.Page>` or `<Link.ToSdk>`. Never split Link text across multiple lines.
+
 ## Dependency updates
 
 See the [Dependency updates](CONTRIBUTING.md#dependency-updates) section in
