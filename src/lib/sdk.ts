@@ -200,3 +200,108 @@ export function pathnameForSdk(pathname: string, sdk: ArcjetSdkKey): string {
 
   return pathname.replace(`/sdk/${previousSdk}`, `/sdk/${sdk}`);
 }
+
+/**
+ * Returns the SDK key corresponding to a legacy framework key, if one exists.
+ *
+ * For example, `"nest-js"` → `"nest"`, `"bun"` → `"bun"`.
+ */
+export function sdkKeyFromLegacyFrameworkKey(
+  legacyKey: string,
+): ArcjetSdkKey | undefined {
+  for (const sdkConfig of Object.values(ARCJET_SDKS)) {
+    if (sdkConfig.legacyFrameworkKey === legacyKey) {
+      return sdkConfig.key;
+    }
+  }
+  return undefined;
+}
+
+// Paths that should never be scoped to an SDK
+const UNSCOPED_PATH_PREFIXES = ["/_", "/assets/", "/fonts/", "/favicon"];
+
+/**
+ * Scopes an internal href to the current page's SDK, if on an SDK-scoped page.
+ *
+ * On a non-SDK page, the href is returned unchanged.
+ *
+ * @example
+ * // On /sdk/next/bot-protection:
+ * scopeHrefToCurrentSdk("/sdk/next/bot-protection", "/get-started")
+ * // => "/sdk/next/get-started"
+ *
+ * // On /bot-protection (non-SDK page):
+ * scopeHrefToCurrentSdk("/bot-protection", "/get-started")
+ * // => "/get-started"
+ */
+export function scopeHrefToCurrentSdk(
+  currentPathname: string,
+  href: string,
+): string {
+  if (!href.startsWith("/") || href.startsWith("/sdk/")) {
+    return href;
+  }
+
+  if (UNSCOPED_PATH_PREFIXES.some((prefix) => href.startsWith(prefix))) {
+    return href;
+  }
+
+  const currentSdk = sdkFromPathname(currentPathname);
+  if (!currentSdk) {
+    return href;
+  }
+
+  return `/sdk/${currentSdk}${href}`;
+}
+
+/**
+ * Scopes an internal href to a specific target SDK.
+ *
+ * When the current page is SDK-scoped, produces an `/sdk/{targetSdk}/` path.
+ * When the current page is not SDK-scoped, falls back to a `?f={legacyKey}`
+ * query parameter for backwards compatibility.
+ *
+ * @example
+ * // On /sdk/next/reference/nodejs:
+ * scopeHrefToSdk("/sdk/next/reference/nodejs", "/get-started", "node")
+ * // => "/sdk/node/get-started"
+ *
+ * // On /reference/nodejs (non-SDK page):
+ * scopeHrefToSdk("/reference/nodejs", "/get-started", "node")
+ * // => "/get-started?f=node-js"
+ */
+export function scopeHrefToSdk(
+  currentPathname: string,
+  href: string,
+  targetSdk: ArcjetSdkKey,
+): string {
+  if (!href.startsWith("/") || href.startsWith("/sdk/")) {
+    return href;
+  }
+
+  if (UNSCOPED_PATH_PREFIXES.some((prefix) => href.startsWith(prefix))) {
+    return href;
+  }
+
+  const currentSdk = sdkFromPathname(currentPathname);
+
+  if (currentSdk) {
+    // On an SDK-scoped page — produce a clean /sdk/ path
+    return `/sdk/${targetSdk}${href}`;
+  }
+
+  // On a non-SDK page — fall back to ?f= for backwards compatibility
+  const sdkConfig = ARCJET_SDKS[targetSdk];
+  const legacyKey = sdkConfig.legacyFrameworkKey;
+
+  if (!legacyKey) {
+    // No legacy key mapping (e.g. python) — return bare href
+    return href;
+  }
+
+  // Parse the href to handle existing query params and hash fragments
+  const url = new URL(href, "https://placeholder.invalid");
+  url.searchParams.set("f", legacyKey);
+  // Return only the path + search + hash (no origin)
+  return `${url.pathname}${url.search}${url.hash}`;
+}
