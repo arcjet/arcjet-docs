@@ -62,5 +62,5 @@ export async function POST(event: RequestEvent) {
     messages,
   });
 
-  return result.toDataStreamResponse();
+  return result.toUIMessageStreamResponse();
 }
