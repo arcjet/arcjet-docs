@@ -1,0 +1,14 @@
+---
+import { LinkCard as StarlightLinkCard } from "@astrojs/starlight/components";
+import { scopeHrefToCurrentSdk } from "@/lib/sdk";
+import type { ComponentProps } from "astro/types";
+
+type Props = ComponentProps<typeof StarlightLinkCard>;
+
+const { href, ...rest } = Astro.props;
+
+const hrefString = typeof href === "string" ? href : href?.toString();
+const resolvedHref = hrefString ? scopeHrefToCurrentSdk(Astro.url.pathname, hrefString) : href;
+---
+
+<StarlightLinkCard href={resolvedHref} {...rest} />
