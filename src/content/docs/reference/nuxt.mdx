@@ -47,6 +47,7 @@ import ClientOverrideTS from "@repo/nuxt/server/utils/ClientOverride.ts?raw";
 import ClientOverrideJS from "@repo/nuxt/server/utils/ClientOverride.js?raw";
 
 import NodeVersions from "@/snippets/reference/node-versions.mdx";
+import { Link } from "@/components/link";
 
 [<NpmSdkVersion packageName="@arcjet/nuxt" />](https://www.npmjs.com/package/@arcjet/nuxt)
 
@@ -92,7 +93,7 @@ export default defineNuxtConfig({
 
 ## Quick start
 
-Check out the [quick start guide](/get-started?f=nuxt).
+Check out the <Link.ToSdk href="/get-started" sdk="nuxt">quick start guide</Link.ToSdk>.
 
 ## Configuration
 
@@ -148,16 +149,17 @@ The required fields are:
 The required fields are:
 
 - `rules` - The rules to apply to the request. See the various sections of the
-  docs for how to configure these e.g. [shield](/shield/reference?f=bun), [rate
-  limiting](/rate-limiting/reference?f=bun), [bot
-  protection](/bot-protection/reference?f=bun), [email
-  validation](/email-validation/reference?f=bun).
+  docs for how to configure these e.g.
+  <Link.ToSdk href="/shield/reference" sdk="bun">shield</Link.ToSdk>,
+  <Link.ToSdk href="/rate-limiting/reference" sdk="bun">rate limiting</Link.ToSdk>,
+  <Link.ToSdk href="/bot-protection/reference" sdk="bun">bot protection</Link.ToSdk>,
+  <Link.ToSdk href="/email-validation/reference" sdk="bun">email validation</Link.ToSdk>.
 
 The optional fields are:
 
 - `characteristics` (`string[]`) - A list of
-  [characteristics](/fingerprints#built-in-characteristics) to be used to
-  uniquely identify clients.
+  <Link.Page href="/fingerprints#built-in-characteristics">characteristics</Link.Page>
+  to be used to uniquely identify clients.
 - `proxies` (`string[]`) - A list of one or more trusted proxies. These
   addresses will be excluded when Arcjet is determining the client IP address.
   This is useful if you are behind a load balancer or proxy that sets the client
@@ -240,10 +242,12 @@ execution ordering is automatically optimized for performance.
 
 ### Environment variables
 
-The Arcjet Nuxt SDK uses several environment variables to configure its behavior.
-See [Concepts: Environment variables](/environment) for more info.
-The `ARCJET_KEY` environment variable is not read automatically and must be passed
-explicitly in `nuxt.config.ts`.
+The Arcjet Nuxt SDK uses several environment variables to configure its
+behavior.
+See <Link.Page href="/environment">Concepts: Environment variables</Link.Page>
+for more info.
+The `ARCJET_KEY` environment variable is not read automatically and must be
+passed explicitly in `nuxt.config.ts`.
 
 ### Load balancers & proxies
 
@@ -522,7 +526,7 @@ shieldTriggered: boolean;
 ```
 
 {/* TODO(#): Uncomment once nuxt shield docs are done */}
-{/* See the [shield documentation](/shield/reference?f=nuxt) for more information */}
+{/* See the <Link.ToSdk href="/shield/reference" sdk="nuxt">shield documentation</Link.ToSdk> for more information */}
 {/* about these properties. */}
 
 ##### Bot protection
@@ -549,7 +553,7 @@ reset: number;
 ```
 
 {/* TODO(#): Uncomment once nuxt rate limit docs are done */}
-{/* See the [rate limiting documentation](/rate-limiting/reference?f=nuxt) for more */}
+{/* See the <Link.ToSdk href="/rate-limiting/reference" sdk="nuxt">rate limiting documentation</Link.ToSdk> for more */}
 {/* information about these properties. */}
 
 ##### Email validation & verification
@@ -567,7 +571,7 @@ An `ArcjetEmailType` is one of the following strings:
 ```
 
 {/* TODO(#): Uncomment once nuxt email validation docs are done */}
-{/* See the [email validation documentation](/email-validation/reference?f=nuxt) for */}
+{/* See the <Link.ToSdk href="/email-validation/reference" sdk="nuxt">email validation documentation</Link.ToSdk> for */}
 {/* more information about these properties. */}
 
 ### IP analysis
@@ -625,7 +629,7 @@ fields we have data for will be returned:
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
 not block all requests. The SDK will also time out and fail open after 1000ms in
-development (see [`ARCJET_ENV`](/environment#arcjet-env)) and 500ms
+development (see <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>) and 500ms
 otherwise. However, in most cases, the response time will be less than 20-30ms.
 
 If there is an error condition when processing the rule, Arcjet will return an
@@ -704,8 +708,9 @@ Arcjet will automatically detect the IP address of the client making the request
 based on the context provided. The implementation is open source in our
 [@arcjet/ip package](https://github.com/arcjet/arcjet-js/blob/main/ip).
 
-in development (see [`ARCJET_ENV`](/environment#arcjet-env)),
-we allow private/internal addresses so that the SDKs work correctly locally.
+in development (see
+<Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>), we allow
+private/internal addresses so that the SDKs work correctly locally.
 
 ## Client override
 
@@ -740,9 +745,9 @@ Astro SDK will automatically handle this for you.
 
 Arcjet supports Nuxt 4.
 
-[Technical support](/support) is provided for the current major
-version of the Arcjet SDK for all users and for the current and previous major
-versions for paid users. We will provide security fixes for the current and
-previous major versions.
+<Link.Page href="/support">Technical support</Link.Page> is provided for the
+current major version of the Arcjet SDK for all users and for the current and
+previous major versions for paid users. We will provide security fixes for the
+current and previous major versions.
 
 <Comments />

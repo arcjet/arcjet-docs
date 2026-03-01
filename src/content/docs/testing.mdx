@@ -4,6 +4,7 @@ description: "How to test your Arcjet security rules."
 ---
 
 import { Tabs, TabItem, Code } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
 import Comments from "/src/components/Comments.astro";
 
 Unlike network-based security solutions, Arcjet can run locally, in staging and
@@ -60,16 +61,16 @@ true` to trigger the shield rule on the next request.
 - **Bot protection:** Bot detection uses multiple heuristics so the quickest way
   to get a bot detection `DENY` response is to make a request that is always
   considered a bot. With a deny rule set to `CURL` you should see a `DENY`
-  response if you make a request using the `curl` command. See [Identifying
-  Bots](/bot-protection/identifying-bots) for more information.
+  response if you make a request using the `curl` command. See
+  <Link.Page href="/bot-protection/identifying-bots">Identifying Bots</Link.Page> for more information.
 - **Email validation:** Use an email address that has invalid syntax or does not
   match any other rules you have configured e.g. has no MX records or if from a
   disposable email service.
 
 ## Sampling
 
-See the [Sampling Blueprint](/blueprints/sampling) to see how to write a
-sampling function to test your Arcjet security rules on a subset of your
-traffic.
+See the <Link.Page href="/blueprints/sampling">Sampling Blueprint</Link.Page> to
+see how to write a sampling function to test your Arcjet security rules on a
+subset of your traffic.
 
 <Comments />

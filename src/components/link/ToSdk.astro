@@ -1,0 +1,31 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { scopeHrefToSdk, isSdkKey, type ArcjetSdkKey } from "@/lib/sdk";
+
+type Props = HTMLAttributes<"a"> & {
+  /**
+   * Internal absolute path to link to e.g. `"/get-started"`.
+   */
+  href: string;
+  /**
+   * The target SDK key to scope the link to e.g. `"node"`, `"next"`.
+   *
+   * On SDK-scoped pages this produces `/sdk/{sdk}/{path}`. On non-SDK pages
+   * it falls back to `{path}?f={legacyFrameworkKey}` for backwards
+   * compatibility.
+   */
+  sdk: ArcjetSdkKey;
+};
+
+const { href, sdk, ...rest } = Astro.props;
+
+if (!sdk || !isSdkKey(sdk)) {
+  throw new Error(
+    `<Link.ToSdk> received invalid sdk="${sdk}". Expected a valid ArcjetSdkKey.`
+  );
+}
+
+const resolvedHref = scopeHrefToSdk(Astro.url.pathname, href, sdk);
+---
+
+<a href={resolvedHref} {...rest}><slot /></a>

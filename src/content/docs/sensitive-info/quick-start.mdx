@@ -39,7 +39,8 @@ ajToc:
     anchor: "get-help"
 ---
 
-import { LinkCard, CardGrid } from "@astrojs/starlight/components";
+import { CardGrid } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import SlotByFramework from "@/components/SlotByFramework";
 import FrameworkLinks from "@/components/FrameworkLinks";
@@ -125,8 +126,8 @@ project root.
 
 Create a sensitive info detection rule. You can also configure Arcjet to detect
 credit/debit card numbers, IP addresses, phone numbers, and/or implement a
-custom detection function. See the [reference](/sensitive-info/reference) for
-details.
+custom detection function. See the
+<Link.Page href="/sensitive-info/reference">reference</Link.Page> for details.
 
 <SlotByFramework client:load>
   <Step3Bun slot="bun" />
@@ -189,12 +190,12 @@ The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
 ## What next?
 
 <CardGrid>
-  <LinkCard
+  <Link.Card
     title="Sensitive Information reference"
     href="/sensitive-info/reference"
     description="Full details about Sensitive Info."
   />
-  <LinkCard
+  <Link.Card
     title="Testing"
     href="/testing"
     description="Write tests for your rules."
@@ -209,12 +210,12 @@ limiting for your API, minimize fraudulent registrations with the signup form
 protection and more.
 
 <CardGrid>
-  <LinkCard
+  <Link.Card
     title="Example apps"
     href="https://github.com/arcjet/arcjet-js/tree/main/examples"
     description="Check out the examples."
   />
-  <LinkCard
+  <Link.Card
     title="Learn how Arcjet works"
     href="/architecture"
     description="Arcjet's architecture."

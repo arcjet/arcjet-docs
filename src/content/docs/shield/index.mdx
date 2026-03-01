@@ -8,9 +8,10 @@ generateMarkdownRoute: true
 import { Badge } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "../../../components/Comments.astro";
+import { Link } from "@/components/link";
 
 Arcjet Shield WAF protects your application against common web attacks,
-including the [OWASP Top 10][owasp-top-10], by analyzing requests over time and
+including the [OWASP Top 10](https://owasp.org/www-project-top-ten/), by analyzing requests over time and
 blocking clients that show suspicious behavior.
 
 <WhatIsArcjet />
@@ -42,11 +43,12 @@ but form suspicious traffic when seen together. Examples:
 
 We recommend using Arcjet Shield WAF alongside other Arcjet features such as:
 
-- [Arcjet bot protection][arcjet-bot-protection] to detect and control bot
-  traffic.
-- [Arcjet filters][arcjet-filters] to apply custom per-request rules.
-- [Arcjet rate limiting][arcjet-rate-limiting] to impose hard limits on request
-  volume.
+- <Link.Page href="/bot-protection">Arcjet bot protection</Link.Page> to
+  detect and control bot traffic.
+- <Link.Page href="/filters">Arcjet filters</Link.Page> to apply custom
+  per-request rules.
+- <Link.Page href="/rate-limiting">Arcjet rate limiting</Link.Page> to impose
+  hard limits on request volume.
 
 ## How Arcjet Shield works
 
@@ -60,7 +62,7 @@ application.
 
 ### Rules and the OWASP Core Rule Set
 
-Shield includes the latest rules from the [OWASP Core Rule Set][core-ruleset],
+Shield includes the latest rules from the [OWASP Core Rule Set](https://coreruleset.org/),
 which protect against common attack categories such as:
 
 - SQL injection (SQLi)
@@ -79,9 +81,10 @@ with Arcjet's own analysis of request patterns over time.
 
 ### Fingerprints and your concept of “user”
 
-Clients are tracked by configurable [fingerprints][arcjet-fingerprints] that
-include IP addresses by default. This means that clients using the same IP
-address are counted and may be blocked together.
+Clients are tracked by configurable
+<Link.Page href="/fingerprints">fingerprints</Link.Page> that include IP
+addresses by default. This means that clients using the same IP address are
+counted and may be blocked together.
 
 To ensure Shield behaves correctly, choose fingerprint characteristics that
 match your concept of a "user". For example:
@@ -143,7 +146,7 @@ behavior locally and in staging before deploying to production.
 
 Basic protection from common attacks is available on the free plan. Additional
 protection including the latest rules from the [OWASP Core Rule
-Set][core-ruleset] (CRS) is available on paid plans.
+Set](https://coreruleset.org/) (CRS) is available on paid plans.
 
 | Plan                                         | Basic protection | Advanced protection |
 | -------------------------------------------- | :--------------: | :-----------------: |
@@ -153,10 +156,3 @@ Set][core-ruleset] (CRS) is available on paid plans.
 | <Badge text="Enterprise" variant="danger" /> |        ✅        |     ✅ Included     |
 
 <Comments />
-
-[arcjet-bot-protection]: /bot-protection
-[arcjet-filters]: /filters
-[arcjet-fingerprints]: /fingerprints
-[arcjet-rate-limiting]: /rate-limiting
-[core-ruleset]: https://coreruleset.org/
-[owasp-top-10]: https://owasp.org/www-project-top-ten/

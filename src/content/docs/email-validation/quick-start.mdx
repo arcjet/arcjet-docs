@@ -40,7 +40,8 @@ ajToc:
     anchor: "get-help"
 ---
 
-import { LinkCard, CardGrid } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+import { CardGrid } from "@astrojs/starlight/components";
 import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import FrameworkLinks from "@/components/FrameworkLinks";
@@ -150,12 +151,12 @@ The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
 ## What next?
 
 <CardGrid>
-  <LinkCard
+  <Link.Card
     title="Email validation reference"
     href="/email-validation/reference"
     description="Full details about email validation."
-  ></LinkCard>
-  <LinkCard
+  />
+  <Link.Card
     title="Testing"
     href="/testing"
     description="Write tests for your rules."
@@ -170,12 +171,12 @@ limiting for your API, minimize fraudulent registrations with the signup form
 protection and more.
 
 <CardGrid>
-  <LinkCard
+  <Link.Card
     title="Example apps"
     href="https://github.com/arcjet/arcjet-js/tree/main/examples"
     description="Check out the examples."
   />
-  <LinkCard
+  <Link.Card
     title="Learn how Arcjet works"
     href="/architecture"
     description="Arcjet's architecture."

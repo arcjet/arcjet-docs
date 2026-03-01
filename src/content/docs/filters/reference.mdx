@@ -36,6 +36,7 @@ ajToc:
     anchor: "limitations"
 ---
 
+import { Link } from "@/components/link";
 import { Badge } from "@astrojs/starlight/components";
 import FrameworkLinks from "@/components/FrameworkLinks";
 import DisplayType from "@/components/DisplayType.astro";
@@ -214,8 +215,8 @@ Arcjet only ever makes a single call to our Cloud API regardless of the rule
 configuration. The Cloud API has been designed for high performance and low
 latency, and is deployed to multiple regions around the world. The SDK will
 automatically use the closest region which means the total overhead is typically
-no more than 20-30ms, often significantly less. See the [Architecture
-reference](/architecture#arcjet-cloud-api) for details.
+no more than 20-30ms, often significantly less. See the
+<Link.Page href="/architecture#arcjet-cloud-api">Architecture reference</Link.Page> for details.
 
 ## Operators
 
@@ -335,7 +336,7 @@ for (const result of decision.results) {
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
 not block all requests. The SDK will also time out and fail open after 1000ms in
-development (see [`ARCJET_ENV`](/environment#arcjet-env)) and 500ms
+development (see <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>) and 500ms
 otherwise. However, in most cases, the response time will be less than 20-30ms.
 
 If there is an error condition when processing the rule, Arcjet will return an
@@ -354,7 +355,8 @@ blocking any requests.
 We have an example test framework you can use to automatically test your rules.
 Arcjet can also be triggered based using a sample of your traffic.
 
-See the [Testing](/testing) section of the docs for details.
+See the <Link.Page href="/testing">Testing</Link.Page> section of the docs
+for details.
 
 ## Limitations
 

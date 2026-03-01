@@ -42,7 +42,8 @@ import NpmSdkVersion from "@/components/NpmSdkVersion.astro";
 import FrameworkLinks from "@/components/FrameworkLinks";
 import SlotByFramework from "@/components/SlotByFramework";
 import { frameworks } from "@/lib/prefs";
-import { LinkCard, CardGrid } from "@astrojs/starlight/components";
+import { CardGrid } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
 import Comments from "/src/components/Comments.astro";
 import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 
@@ -98,7 +99,8 @@ Nosecone makes it easy to add and configure these headers:
 - `X-Permitted-Cross-Domain-Policies`
 - `X-XSS-Protection`
 
-See the [reference guide](/nosecone/reference) for full details on each option.
+See the <Link.Page href="/nosecone/reference">reference guide</Link.Page> for
+full details on each option.
 
 <FrameworkLinks
   client:load
@@ -170,7 +172,7 @@ ensure it continues to work as expected.
 
 ## What next?
 
-<LinkCard
+<Link.Card
   title="Nosecone reference"
   href="/nosecone/reference"
   description="Details about each security header and how to configure them."
@@ -184,12 +186,12 @@ rate limiting for your API, minimize fraudulent registrations with the
 signup form protection and more.
 
 <CardGrid>
-  <LinkCard
+  <Link.Card
     title="Example apps"
     href="https://github.com/arcjet/arcjet-js/tree/main/examples"
     description="Check out the examples."
   />
-  <LinkCard
+  <Link.Card
     title="Learn how Arcjet works"
     href="/architecture"
     description="Arcjet's architecture."

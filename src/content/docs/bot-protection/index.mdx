@@ -8,6 +8,7 @@ generateMarkdownRoute: true
 import { Badge } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "../../../components/Comments.astro";
+import { Link } from "@/components/link";
 
 Arcjet bot protection lets you detect bots, block bad bots, verify
 legitimate bots, and reduce unwanted automated requests before they reach
@@ -55,7 +56,8 @@ detection system can be 100% accurate.
 
 Combine Arcjet bot protection with other Arcjet features to improve your
 overall traffic management strategy, such as
-[rate limiting][arcjet-rate-limiting] and [filters][arcjet-filters].
+<Link.Page href="/rate-limiting">rate limiting</Link.Page> and
+<Link.Page href="/filters">filters</Link.Page>.
 
 ## In-app bot detection vs network/CDN bot protection
 
@@ -73,7 +75,7 @@ individual bots or entire categories to allow or deny.
 
 The identifiers of specific bots and categories, and their corresponding
 detection and verification patterns, are open source and maintained in
-[`arcjet/well-known-bots`][github-arcjet-well-known-bots], which ships with the
+[`arcjet/well-known-bots`](https://github.com/arcjet/well-known-bots), which ships with the
 Arcjet SDK. Names and categories are autocompleted in your editor if you use
 TypeScript.
 
@@ -82,14 +84,15 @@ For basic bot detection, regular expressions are applied to the
 DNS lookups.
 
 Advanced bot detection adds IP reputation,
-[verification][arcjet-bot-protection-reference-verification],
+<Link.Page href="/bot-protection/reference#bot-verification">verification</Link.Page>,
 machine learning, and additional signals to identify bots more accurately
 and distinguish real users from automated traffic.
 
 Clients are tracked using configurable
-[fingerprints][arcjet-fingerprints] (IP address by default) to identify
-unique clients. Fingerprints let you track anonymous users and attach rules
-and detections to known users via session tokens or other identifiers.
+<Link.Page href="/fingerprints">fingerprints</Link.Page> (IP address by default)
+to identify unique clients. Fingerprints let you track anonymous users and
+attach rules and detections to known users via session tokens or other
+identifiers.
 
 ## Availability
 
@@ -97,8 +100,8 @@ Basic detection (using `user-agent` headers and IP type analysis) is available
 on all plans.
 
 Advanced detection (using IP reputation,
-[verification][arcjet-bot-protection-reference-verification], machine learning,
-and additional signals) is available on paid plans.
+<Link.Page href="/bot-protection/reference#bot-verification">verification</Link.Page>,
+machine learning, and additional signals) is available on paid plans.
 
 | Plan                                    | Basic protection | Advanced protection |
 | --------------------------------------- | :--------------: | :-----------------: |
@@ -107,9 +110,3 @@ and additional signals) is available on paid plans.
 | <Badge text="Business" variant="tip" /> |        ✅        |         ✅          |
 
 <Comments />
-
-[arcjet-bot-protection-reference-verification]: /bot-protection/reference#bot-verification
-[arcjet-filters]: /filters
-[arcjet-fingerprints]: /fingerprints
-[arcjet-rate-limiting]: /rate-limiting
-[github-arcjet-well-known-bots]: https://github.com/arcjet/well-known-bots

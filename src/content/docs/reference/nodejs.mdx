@@ -30,6 +30,7 @@ import NodeVersions from "/src/snippets/reference/node-versions.mdx";
 import Comments from "/src/components/Comments.astro";
 import Requirements from "@/snippets/get-started/node-js/Requirements.mdx";
 import IPAnalysis from "@/snippets/reference/shared/IPAnalysis.mdx";
+import { Link } from "@/components/link";
 
 [<NpmSdkVersion packageName="@arcjet/node" />](https://www.npmjs.com/package/@arcjet/node)
 
@@ -68,7 +69,7 @@ yarn add @arcjet/node @arcjet/inspect
 
 ## Quick start
 
-Check out the [quick start guide](/get-started?f=node-js).
+Check out the <Link.ToSdk href="/get-started" sdk="node">quick start guide</Link.ToSdk>.
 
 ## Configuration
 
@@ -81,16 +82,17 @@ The required fields are:
   Installation section for the site in the [Arcjet
   Dashboard](https://app.arcjet.com).
 - `rules` - The rules to apply to the request. See the various sections of the
-  docs for how to configure these e.g. [shield](/shield/reference?f=node-js), [rate
-  limiting](/rate-limiting/reference?f=node-js), [bot
-  protection](/bot-protection/reference?f=node-js), [email
-  validation](/email-validation/reference?f=node-js).
+  docs for how to configure these e.g.
+  <Link.ToSdk href="/shield/reference" sdk="node">shield</Link.ToSdk>,
+  <Link.ToSdk href="/rate-limiting/reference" sdk="node">rate limiting</Link.ToSdk>,
+  <Link.ToSdk href="/bot-protection/reference" sdk="node">bot protection</Link.ToSdk>,
+  <Link.ToSdk href="/email-validation/reference" sdk="node">email validation</Link.ToSdk>.
 
 The optional fields are:
 
 - `characteristics` (`string[]`) - A list of
-  [characteristics](/fingerprints#built-in-characteristics) to be used to
-  uniquely identify clients.
+  <Link.Page href="/fingerprints#built-in-characteristics">characteristics</Link.Page>
+  to be used to uniquely identify clients.
 - `proxies` (`string[]`) - A list of one or more trusted proxies. These
   addresses will be excluded when Arcjet is determining the client IP address.
   This is useful if you are behind a load balancer or proxy that sets the client
@@ -157,10 +159,12 @@ execution ordering is automatically optimized for performance.
 
 ### Environment variables
 
-The Arcjet Node.js SDK uses several environment variables to configure its behavior.
-See [Concepts: Environment variables](/environment) for more info.
-The `ARCJET_KEY` environment variable is not read automatically and must be passed
-explicitly.
+The Arcjet Node.js SDK uses several environment variables to configure its
+behavior.
+See <Link.Page href="/environment">Concepts: Environment variables</Link.Page>
+for more info.
+The `ARCJET_KEY` environment variable is not read automatically and must be
+passed explicitly.
 
 ### Custom logging
 
@@ -364,8 +368,8 @@ The `ArcjetReason` object for shield rules has the following properties:
 shieldTriggered: boolean;
 ```
 
-See the [shield documentation](/shield/reference?f=remix) for more information
-about these properties.
+See the <Link.ToSdk href="/shield/reference" sdk="node">shield documentation</Link.ToSdk>
+for more information about these properties.
 
 ##### Bot protection
 
@@ -390,8 +394,8 @@ window: number;
 reset: number;
 ```
 
-See the [rate limiting documentation](/rate-limiting/reference?f=node-js) for more
-information about these properties.
+See the <Link.ToSdk href="/rate-limiting/reference" sdk="node">rate limiting documentation</Link.ToSdk>
+for more information about these properties.
 
 ##### Email validation & verification
 
@@ -407,8 +411,9 @@ An `ArcjetEmailType` is one of the following strings:
 "DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
 ```
 
-See the [email validation documentation](/email-validation/reference?f=node-js) for more
-information about these properties.
+See the <Link.ToSdk href="/email-validation/reference" sdk="node">email validation documentation</Link.ToSdk>
+for more information about these
+properties.
 
 ### IP analysis
 
@@ -447,7 +452,7 @@ fields we have data for will be returned:
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
 not block all requests. The SDK will also time out and fail open after 1000ms in
-development (see [`ARCJET_ENV`](/environment#arcjet-env)) and 500ms
+development (see <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>) and 500ms
 otherwise. However, in most cases, the response time will be less than 20-30ms.
 
 If there is an error condition when processing the rule, Arcjet will return an
@@ -502,8 +507,9 @@ Arcjet will automatically detect the IP address of the client making the request
 based on the context provided. The implementation is open source in our
 [@arcjet/ip package](https://github.com/arcjet/arcjet-js/blob/main/ip).
 
-in development (see [`ARCJET_ENV`](/environment#arcjet-env)),
-we allow private/internal addresses so that the SDKs work correctly locally.
+in development (see
+<Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>), we allow
+private/internal addresses so that the SDKs work correctly locally.
 
 ## Client override
 

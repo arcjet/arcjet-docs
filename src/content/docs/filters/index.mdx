@@ -8,6 +8,7 @@ generateMarkdownRoute: true
 import { Badge } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "../../../components/Comments.astro";
+import { Link } from "@/components/link";
 
 Arcjet filters let you define custom security and traffic rules inside your
 application code. Use filters to block unwanted traffic based on request
@@ -15,9 +16,9 @@ fields, IP reputation, geography, VPN or proxy usage, and other signals.
 
 <WhatIsArcjet />
 
-You write expressions in a [domain-specific
-language][arcjet-filters-reference-expression-language] (DSL) that match against
-request fields. Filters can use:
+You write expressions in a
+<Link.Page href="/filters/reference#expression-language">domain-specific language</Link.Page>
+(DSL) that match against request fields. Filters can use:
 
 - **Literal fields** - values directly from the request, such as the
   `user-agent` header or client IP address.
@@ -32,7 +33,7 @@ and when.
 
 Filters are ideal for handling custom logic that is not covered by other Arcjet
 rules. For example, you can block a custom bot that is not (yet) recognized by
-[Arcjet bot protection][arcjet-bot-protection].
+<Link.Page href="/bot-protection">Arcjet bot protection</Link.Page>.
 
 ## When to use Arcjet filters
 
@@ -53,8 +54,9 @@ manually in your application code. The key difference is:
 - **`decision.ip` fields** are better for customizing the response, such as
   showing a specific message or challenge.
 
-See the [VPN & proxy detection blueprint][arcjet-blueprint-vpn-proxy] for a
-concrete example.
+See the
+<Link.Page href="/blueprints/vpn-proxy-detection">VPN & proxy detection blueprint</Link.Page>
+for a concrete example.
 
 ## How Arcjet filters work
 
@@ -65,11 +67,11 @@ application.
 
 ### Filter rules and expression language
 
-You define your logic using a [domain-specific
-language][arcjet-filters-reference-expression-language] (DSL). This language is
-parsed and evaluated by the Rust crate
-[`arcjet/wirefilter`][github-arcjet-wirefilter] (a fork of
-[`cloudflare/wirefilter`][github-cloudflare-wirefilter]).
+You define your logic using a
+<Link.Page href="/filters/reference#expression-language">domain-specific language</Link.Page>
+(DSL). This language is parsed and evaluated by the Rust
+crate [`arcjet/wirefilter`](https://github.com/arcjet/wirefilter) (a fork of
+[`cloudflare/wirefilter`](https://github.com/cloudflare/wirefilter)).
 
 The filter engine is shipped locally within the WebAssembly bundled with the
 Arcjet SDKs, so expression parsing and evaluation are fast and do not depend on
@@ -77,9 +79,10 @@ network round-trips.
 
 ### IP-based fields and reputation data
 
-All `ip.src.*` [fields][arcjet-filters-reference-fields] reflect information
-about the client IP address. These fields require IP reputation data from the
-Arcjet Cloud API, so a call to the Cloud API is required to populate them.
+All `ip.src.*` <Link.Page href="/filters/reference#fields">fields</Link.Page>
+reflect information about the client IP address. These fields require IP
+reputation data from the Arcjet Cloud API, so a call to the Cloud API is
+required to populate them.
 
 Examples include:
 
@@ -98,12 +101,12 @@ performance and low latency, and is deployed to multiple regions worldwide. The
 SDK automatically uses the closest region, so the total overhead is typically no
 more than 20-30 ms, often significantly less.
 
-See the [architecture reference][arcjet-architecture-cloud-api] for more
+See the <Link.Page href="/architecture#arcjet-cloud-api">architecture reference</Link.Page> for more
 details.
 
 ### Fingerprints and your concept of "user"
 
-Clients are tracked by configurable [fingerprints][arcjet-fingerprints] that
+Clients are tracked by configurable <Link.Page href="/fingerprints">fingerprints</Link.Page> that
 include IP addresses by default. This means clients sharing the same IP address
 can be blocked or limited as a group.
 
@@ -150,12 +153,3 @@ that align with the fields used in your filters and match your concept of a
 | `ip.src`                 |                   ✅                    |                   ✅                    |                   ✅                    |
 
 <Comments />
-
-[arcjet-architecture-cloud-api]: /architecture#arcjet-cloud-api
-[arcjet-blueprint-vpn-proxy]: /blueprints/vpn-proxy-detection
-[arcjet-bot-protection]: /bot-protection
-[arcjet-filters-reference-expression-language]: /filters/reference#expression-language
-[arcjet-filters-reference-fields]: /filters/reference#fields
-[arcjet-fingerprints]: /fingerprints
-[github-arcjet-wirefilter]: https://github.com/arcjet/wirefilter
-[github-cloudflare-wirefilter]: https://github.com/cloudflare/wirefilter

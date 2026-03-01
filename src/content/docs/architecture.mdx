@@ -17,6 +17,7 @@ import ImageRequestAnalysisLight from "/src/assets/architecture/request-analysis
 import ImageCDNDark from "/src/assets/architecture/security-cdn-architecture-dark.png";
 import ImageCDNLight from "/src/assets/architecture/security-cdn-architecture-light.png";
 import Comments from "/src/components/Comments.astro";
+import { Link } from "@/components/link";
 
 Arcjet has been architected around a few key principles:
 
@@ -41,16 +42,16 @@ pre-configured product.
 
 ### Core primitives
 
-- **[Shield](/shield)** - Protect against common attacks.
-- **[Rate limiting](/rate-limiting)** - Limit the number of requests
+- **<Link.Page href="/shield">Shield</Link.Page>** - Protect against common attacks.
+- **<Link.Page href="/rate-limiting">Rate limiting</Link.Page>** - Limit the number of requests
   from a client over a period of time.
-- **[Bot protection](/bot-protection)** - Detect and block automated
+- **<Link.Page href="/bot-protection">Bot protection</Link.Page>** - Detect and block automated
   clients.
-- **[Email validation](/email-validation)** - Check
+- **<Link.Page href="/email-validation">Email validation</Link.Page>** - Check
   that an email address is valid.
-- **[Sensitive information](/sensitive-info)** - Protect against
+- **<Link.Page href="/sensitive-info">Sensitive information</Link.Page>** - Protect against
   clients sending you PII that you do not wish to handle.
-- **[Filters](/filters)** - Block requests using expressions over
+- **<Link.Page href="/filters">Filters</Link.Page>** - Block requests using expressions over
   request metadata.
 
 ## Components
@@ -217,24 +218,24 @@ the local cache and return the response immediately:
 
 A call to the Cloud API is required when:
 
-- A [Shield](/shield) rule is configured. Behavior must be compared
+- A <Link.Page href="/shield">Shield</Link.Page> rule is configured. Behavior must be compared
   across multiple requests to protect against common attacks.
-- A [Rate limiting](/rate-limiting) rule is configured. Client state must
+- A <Link.Page href="/rate-limiting">Rate limiting</Link.Page> rule is configured. Client state must
   be tracked across requests to enforce the rate limit. Arcjet manages tracking
   this state for you so you do not need deal with other infrastructure or
   services.
-- A [Bot protection](/bot-protection) rule is configured and local
+- A <Link.Page href="/bot-protection">Bot protection</Link.Page> rule is configured and local
   analysis of the client request does not provide enough information to make a
   decision. Local analysis is limited to the request headers whereas the Arcjet
   API also checks a live database of known bots, IP addresses, VPNs, proxies,
   Tor nodes, and other relays.
-- An [Email validation](/email-validation) rule is configured and the
+- An <Link.Page href="/email-validation">Email validation</Link.Page> rule is configured and the
   email address syntax is valid. The Arcjet SDK analyzes the email address
   locally to check the syntax. If it is invalid, the SDK will return a decision
   immediately. If it is valid, the SDK will make a call to the Cloud API to
   verify the email address e.g. does it have a valid MX record or is it a
   disposable email address.
-- A [Filter](/filters) rule is configured that inspects `ip.src.*` IP
+- A <Link.Page href="/filters">Filter</Link.Page> rule is configured that inspects `ip.src.*` IP
   address fields such as `ip.src.vpn`, `ip.src.asnum.domain`, or
   `ip.src.country`. These fields require data from our IP reputation database so
   a call to the Cloud API is required. Other fields are analyzed locally.
@@ -260,8 +261,8 @@ network problem or outage and a call to the API is needed, the Arcjet SDK
 defaults to failing open so all requests will be allowed. This is a deliberate
 design decision to ensure that your application continues to function even if
 there is a problem, but you can configure the SDK to fail closed if you prefer.
-See an example of how to handle errors and fail open or closed in the [Node.js
-SDK reference](/reference/nodejs#error-handling).
+See an example of how to handle errors and fail open or closed in the
+<Link.Page href="/reference/nodejs#error-handling">Node.js SDK reference</Link.Page>.
 
 #### Timeout
 
@@ -330,7 +331,7 @@ requests are used to inform the decision for the current request.
    is used to inform future decisions for that client.
 5. The client makes another request and the result of the post-request analysis
    is used to inform the decision. This will be applied if you have configured a
-   [Shield](/shield) rule.
+   <Link.Page href="/shield">Shield</Link.Page> rule.
 
 <img class="dark" src={ImageRequestAnalysisDark.src} alt="Request analysis" />
 <img class="light" src={ImageRequestAnalysisLight.src} alt="Request analysis" />

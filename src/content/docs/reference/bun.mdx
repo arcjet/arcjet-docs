@@ -7,12 +7,12 @@ generateMarkdownRoute: true
 import {
   Tabs,
   TabItem,
-  LinkCard,
   CardGrid,
   Code,
 } from "@astrojs/starlight/components";
 import NpmSdkVersion from "@/components/NpmSdkVersion.astro";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import { Link } from "@/components/link";
 import ConfigurationTS from "/src/snippets/reference/bun/Configuration.ts?raw";
 import ConfigurationJS from "/src/snippets/reference/bun/Configuration.js?raw";
 import MultipleRulesTS from "/src/snippets/reference/bun/MultipleRules.ts?raw";
@@ -60,19 +60,19 @@ This package `@arcjet/bun` is made for the
 
 If you use `node:http` (including tools like Express) in Bun,
 that requires the [Node.js compatibility layer](https://bun.sh/docs/runtime/nodejs-apis).
-It is recommended to use [`@arcjet/node`][arcjet-node].
+It is recommended to use <Link.Page href="/reference/nodejs">`@arcjet/node`</Link.Page>.
 
-{/* The below are the ones that have pages on Bun’s website <https://bun.com/docs/guides/ecosystem> */}
+{/* The below are the ones that have pages on Bun's website <https://bun.com/docs/guides/ecosystem> */}
 {/* Important: no Remix, that is listed but not properly supported <https://bun.com/docs/guides/ecosystem/remix> */}
 
 If you use Bun with frameworks like Astro, Fastify, Next.js, Nuxt, and
 SvelteKit,
 it is recommended to use
-[`@arcjet/astro`][arcjet-astro],
-[`@arcjet/fastify`][arcjet-fastify],
-[`@arcjet/next`][arcjet-next],
-[`@arcjet/nuxt`][arcjet-nuxt], and
-[`@arcjet/sveltekit`][arcjet-sveltekit],
+<Link.Page href="/reference/astro">`@arcjet/astro`</Link.Page>,
+<Link.Page href="/reference/fastify">`@arcjet/fastify`</Link.Page>,
+<Link.Page href="/reference/nextjs">`@arcjet/next`</Link.Page>,
+<Link.Page href="/reference/nuxt">`@arcjet/nuxt`</Link.Page>, and
+<Link.Page href="/reference/sveltekit">`@arcjet/sveltekit`</Link.Page>,
 respectively.
 :::
 
@@ -82,7 +82,7 @@ respectively.
 
 ## Quick start
 
-Check out the [quick start guide](/get-started?f=bun).
+Check out the <Link.ToSdk href="/get-started" sdk="bun">quick start guide</Link.ToSdk>.
 
 ## Configuration
 
@@ -94,16 +94,17 @@ The required fields are:
   Installation section for the site in the [Arcjet
   Dashboard](https://app.arcjet.com).
 - `rules` - The rules to apply to the request. See the various sections of the
-  docs for how to configure these e.g. [shield](/shield/reference?f=bun), [rate
-  limiting](/rate-limiting/reference?f=bun), [bot
-  protection](/bot-protection/reference?f=bun), [email
-  validation](/email-validation/reference?f=bun).
+  docs for how to configure these e.g.
+  <Link.ToSdk href="/shield/reference" sdk="bun">shield</Link.ToSdk>,
+  <Link.ToSdk href="/rate-limiting/reference" sdk="bun">rate limiting</Link.ToSdk>,
+  <Link.ToSdk href="/bot-protection/reference" sdk="bun">bot protection</Link.ToSdk>,
+  <Link.ToSdk href="/email-validation/reference" sdk="bun">email validation</Link.ToSdk>.
 
 The optional fields are:
 
 - `characteristics` (`string[]`) - A list of
-  [characteristics](/fingerprints#built-in-characteristics) to be used to
-  uniquely identify clients.
+  <Link.Page href="/fingerprints#built-in-characteristics">characteristics</Link.Page>
+  to be used to uniquely identify clients.
 - `proxies` (`string[]`) - A list of one or more trusted proxies. These
   addresses will be excluded when Arcjet is determining the client IP address.
   This is useful if you are behind a load balancer or proxy that sets the client
@@ -202,9 +203,9 @@ execution ordering is automatically optimized for performance.
 ### Environment variables
 
 The Arcjet Bun SDK uses several environment variables to configure its behavior.
-See [Concepts: Environment variables](/environment) for more info.
-The `ARCJET_KEY` environment variable is not read automatically and must be passed
-explicitly.
+See <Link.Page href="/environment">Concepts: Environment variables</Link.Page>
+for more info. The `ARCJET_KEY` environment variable is not read automatically
+and must be passed explicitly.
 
 ### Custom logging
 
@@ -290,10 +291,10 @@ made by Arcjet.
 
 ### `aj.handler()`
 
-Arcjet uses client [IP addresses for fingerprinting](/architecture#ip-address-detection),
-but Bun doesn't provide the IP address in the request object. By wrapping the `fetch()`
-handler in `aj.handler()`, the Arcjet SDK will be able to perform some preprocessing on the
-request to include the IP address.
+Arcjet uses client <Link.Page href="/architecture#ip-address-detection">IP addresses for fingerprinting</Link.Page>, but Bun doesn't provide the IP address in the
+request object. By wrapping the `fetch()` handler in `aj.handler()`, the Arcjet
+SDK will be able to perform some preprocessing on the request to include the IP
+address.
 
 You don't need to use `aj.handler()` if you have another way of adding a proper IP
 address to the request object, or if there is an alternative way for the Arcjet SDK
@@ -439,8 +440,8 @@ The `ArcjetReason` object for shield rules has the following properties:
 shieldTriggered: boolean;
 ```
 
-See the [shield documentation](/shield/reference?f=bun) for more information
-about these properties.
+See the <Link.ToSdk href="/shield/reference" sdk="bun">shield documentation</Link.ToSdk>
+for more information about these properties.
 
 ##### Bot protection
 
@@ -465,8 +466,8 @@ window: number;
 reset: number;
 ```
 
-See the [rate limiting documentation](/rate-limiting/reference?f=bun) for more
-information about these properties.
+See the <Link.ToSdk href="/rate-limiting/reference" sdk="bun">rate limiting documentation</Link.ToSdk>
+for more information about these properties.
 
 ##### Email validation & verification
 
@@ -482,8 +483,9 @@ An `ArcjetEmailType` is one of the following strings:
 "DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
 ```
 
-See the [email validation documentation](/email-validation/reference?f=bun) for
-more information about these properties.
+See the <Link.ToSdk href="/email-validation/reference" sdk="bun">email validation documentation</Link.ToSdk>
+for more information about these
+properties.
 
 ### IP analysis
 
@@ -492,8 +494,8 @@ more information about these properties.
 ## Error handling
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
-not block all requests. The SDK will also time out and fail open after 1000ms
-in development (see [`ARCJET_ENV`](/environment#arcjet-env)) and 500ms
+not block all requests. The SDK will also time out and fail open after 1000ms in
+development (see <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>) and 500ms
 otherwise. However, in most cases, the response time will be less than 20-30ms.
 
 If there is an error condition when processing the rule, Arcjet will return an
@@ -548,8 +550,9 @@ Arcjet will automatically detect the IP address of the client making the request
 based on the context provided. The implementation is open source in our
 [@arcjet/ip package](https://github.com/arcjet/arcjet-js/blob/main/ip).
 
-In development (see [`ARCJET_ENV`](/environment#arcjet-env)),
-we allow private/internal addresses so that the SDKs work correctly locally.
+In development (see
+<Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>), we allow
+private/internal addresses so that the SDKs work correctly locally.
 
 ## Client override
 
@@ -574,16 +577,9 @@ As Bun is under active development, Arcjet aims to support [Bun
 releases](https://github.com/oven-sh/bun/releases) since v1.1.27.
 
 When a Bun version goes end of life, we will bump the major version of the
-Arcjet SDK. [Technical support](/support) is provided for the current major
-version of the Arcjet SDK for all users and for the current and previous major
-versions for paid users. We will provide security fixes for the current and
-previous major SDK versions.
+Arcjet SDK. <Link.Page href="/support">Technical support</Link.Page> is
+provided for the current major version of the Arcjet SDK for all users and for
+the current and previous major versions for paid users. We will provide security
+fixes for the current and previous major SDK versions.
 
 <Comments />
-
-[arcjet-astro]: /reference/astro
-[arcjet-fastify]: /reference/fastify
-[arcjet-next]: /reference/nextjs
-[arcjet-node]: /reference/nodejs
-[arcjet-nuxt]: /reference/nuxt
-[arcjet-sveltekit]: /reference/sveltekit

@@ -3,6 +3,8 @@ title: "Arcjet privacy"
 description: "Details about the data processed by Arcjet. What data does Arcjet collect?"
 ---
 
+import { Link } from "@/components/link";
+
 Arcjet is designed to process data primarily within your environment to minimize
 latency and reduce the amount of sensitive information sent to our systems.
 However, we do process some data remotely through our real-time Cloud API to
@@ -25,10 +27,12 @@ Request data processed remotely:
 
 - Request IP address.
 - Request headers.
-- If you use [custom characteristics](/fingerprints#custom-characteristics) for
-  request [fingerprints](/fingerprints): any provided characteristics.
-- If you use [Email validation](/email-validation): the provided email
-  address.
+- If you use
+  <Link.Page href="/fingerprints#custom-characteristics">custom characteristics</Link.Page>
+  for request
+  <Link.Page href="/fingerprints">fingerprints</Link.Page>: any provided
+  characteristics.
+- If you use <Link.Page href="/email-validation">Email validation</Link.Page>: the provided email address.
 
 All other request data, including the request body, is processed entirely within
 your environment.

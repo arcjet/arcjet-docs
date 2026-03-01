@@ -8,13 +8,13 @@ import Requirements from "@/snippets/get-started/next-js/Requirements.mdx";
 import {
   CardGrid,
   Code,
-  LinkCard,
   TabItem,
   Tabs,
 } from "@astrojs/starlight/components";
 import Comments from "/src/components/Comments.astro";
 import NpmSdkVersion from "@/components/NpmSdkVersion.astro";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import { Link } from "@/components/link";
 import ClientOverrideJS from "/src/snippets/reference/nextjs/ClientOverride.js?raw";
 import ClientOverrideTS from "/src/snippets/reference/nextjs/ClientOverride.ts?raw";
 import ConfigurationJS from "/src/snippets/reference/nextjs/Configuration.js?raw";
@@ -129,7 +129,7 @@ Turbopack does not support conditions.
 
 ## Quick start
 
-Check out the [quick start guide](/get-started?f=next-js).
+Check out the <Link.ToSdk href="/get-started" sdk="next">quick start guide</Link.ToSdk>.
 
 ## Configuration
 
@@ -142,16 +142,17 @@ The required fields are:
   Installation section for the site in the [Arcjet
   Dashboard](https://app.arcjet.com).
 - `rules` - The rules to apply to the request. See the various sections of the
-  docs for how to configure these e.g. [shield](/shield/reference?f=next-js), [rate
-  limiting](/rate-limiting/reference?f=next-js), [bot
-  protection](/bot-protection/reference?f=next-js), [email
-  validation](/email-validation/reference?f=next-js).
+  docs for how to configure these e.g.
+  <Link.ToSdk href="/shield/reference" sdk="next">shield</Link.ToSdk>,
+  <Link.ToSdk href="/rate-limiting/reference" sdk="next">rate limiting</Link.ToSdk>,
+  <Link.ToSdk href="/bot-protection/reference" sdk="next">bot protection</Link.ToSdk>,
+  <Link.ToSdk href="/email-validation/reference" sdk="next">email validation</Link.ToSdk>.
 
 The optional fields are:
 
 - `characteristics` (`string[]`) - A list of
-  [characteristics](/fingerprints#built-in-characteristics) to be used to
-  uniquely identify clients.
+  <Link.Page href="/fingerprints#built-in-characteristics">characteristics</Link.Page>
+  to be used to uniquely identify clients.
 - `proxies` (`string[]`) - A list of one or more trusted proxies. These
   addresses will be excluded when Arcjet is determining the client IP address.
   This is useful if you are behind a load balancer or proxy that sets the client
@@ -229,10 +230,12 @@ execution ordering is automatically optimized for performance.
 
 ### Environment variables
 
-The Arcjet Next.js SDK uses several environment variables to configure its behavior.
-See [Concepts: Environment variables](/environment) for more info.
-The `ARCJET_KEY` environment variable is not read automatically and must be passed
-explicitly.
+The Arcjet Next.js SDK uses several environment variables to configure its
+behavior.
+See <Link.Page href="/environment">Concepts: Environment variables</Link.Page>
+for more info.
+The `ARCJET_KEY` environment variable is not read automatically and must be
+passed explicitly.
 
 ### Custom logging
 
@@ -537,8 +540,8 @@ The `ArcjetReason` object for shield rules has the following properties:
 shieldTriggered: boolean;
 ```
 
-See the [shield documentation](/shield/reference?f=next-js) for more information
-about these properties.
+See the <Link.ToSdk href="/shield/reference" sdk="next">shield documentation</Link.ToSdk>
+for more information about these properties.
 
 ##### Bot protection
 
@@ -563,8 +566,8 @@ window: number;
 reset: number;
 ```
 
-See the [rate limiting documentation](/rate-limiting/reference?f=next-js) for more
-information about these properties.
+See the <Link.ToSdk href="/rate-limiting/reference" sdk="next">rate limiting documentation</Link.ToSdk>
+for more information about these properties.
 
 ##### Email validation & verification
 
@@ -580,8 +583,9 @@ An `ArcjetEmailType` is one of the following strings:
 "DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
 ```
 
-See the [email validation documentation](/email-validation/reference?f=next-js) for
-more information about these properties.
+See the <Link.ToSdk href="/email-validation/reference" sdk="next">email validation documentation</Link.ToSdk>
+for more information about these
+properties.
 
 ### IP analysis
 
@@ -626,7 +630,7 @@ fields we have data for will be returned:
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
 not block all requests. The SDK will also time out and fail open after 1000ms in
-development (see [`ARCJET_ENV`](/environment#arcjet-env)) and 500ms
+development (see <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>) and 500ms
 otherwise. However, in most cases, the response time will be less than 20-30ms.
 
 If there is an error condition when processing the rule, Arcjet will return an
@@ -739,8 +743,9 @@ Arcjet will automatically detect the IP address of the client making the request
 based on the context provided. The implementation is open source in our
 [@arcjet/ip package](https://github.com/arcjet/arcjet-js/blob/main/ip).
 
-in development (see [`ARCJET_ENV`](/environment#arcjet-env)),
-we allow private/internal addresses so that the SDKs work correctly locally.
+in development (see
+<Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>), we allow
+private/internal addresses so that the SDKs work correctly locally.
 
 ## Client override
 
@@ -776,9 +781,9 @@ Active LTS: Next.js 16.x
 
 The pages router will be supported for as long as Next.js supports it.
 
-[Technical support](/support) is provided for the current major
-version of the Arcjet SDK for all users and for the current and previous major
-versions for paid users. We will provide security fixes for the current and
-previous major versions.
+<Link.Page href="/support">Technical support</Link.Page> is provided for the
+current major version of the Arcjet SDK for all users and for the current and
+previous major versions for paid users. We will provide security fixes for the
+current and previous major versions.
 
 <Comments />

@@ -22,6 +22,7 @@ ajToc:
     anchor: "testing"
 ---
 
+import { Link } from "@/components/link";
 import { Aside, Badge } from "@astrojs/starlight/components";
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
@@ -167,8 +168,9 @@ and configured by `EmailOptions`:
 
 <Aside type="note">
   When specifying multiple rules, the order of the rules is ignored. Rule
-  execution ordering is automatically optimized for performance. See
-  [decision](#decision) below for details of examining the execution results.
+  execution ordering is automatically optimized for performance. See{" "}
+  <Link.Page href="#decision">decision</Link.Page> below for details of
+  examining the execution results.
 </Aside>
 
 The `allow`and `deny` lists are mutually-exclusive, such that using `allow` will
@@ -294,9 +296,8 @@ if (decision.reason.emailTypes.includes("DISPOSABLE")) {
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
 not block all requests. The SDK will also time out and fail open after 1000ms in
-development (see [`ARCJET_ENV`](/environment#arcjet-env)) and 500ms
-otherwise.
-However, in most cases, the response time will be less than 20-30ms.
+development (see <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>) and 500ms
+otherwise. However, in most cases, the response time will be less than 20-30ms.
 
 If there is an error condition when processing the rule, Arcjet will return an
 `ERROR` result for that rule and you can check the `message` property on the rule's
@@ -323,7 +324,8 @@ blocking any requests.
 We have an example test framework you can use to automatically test your rules.
 Arcjet can also be triggered based using a sample of your traffic.
 
-See the [Testing](/testing) section of the docs for details.
+See the <Link.Page href="/testing">Testing</Link.Page> section of the docs for
+details.
 
 ## RFC reference
 

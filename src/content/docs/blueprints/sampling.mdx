@@ -3,11 +3,12 @@ title: "Sampling traffic"
 description: "How to write a sampling function to test your Arcjet security rules on a subset of your traffic."
 ---
 
+import { Link } from "@/components/link";
 import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
 import SamplingMiddlewareJS from "/src/snippets/blueprints/SamplingMiddleware.js?raw";
 import SamplingMiddlewareTS from "/src/snippets/blueprints/SamplingMiddleware.ts?raw";
 
-Arcjet is designed to run on every request. When [testing your rules](/testing),
+Arcjet is designed to run on every request. When <Link.Page href="/testing">testing your rules</Link.Page>,
 you can use `DRY_RUN` mode to see how your rules would behave without actually
 enforcing them. The result will be logged, but all requests will be allowed.
 This is useful for testing your rules without affecting your users.

@@ -104,6 +104,37 @@ In home:
 />
 ```
 
+## Internal links
+
+Internal links between docs pages **must** use `<Link.Page>` or `<Link.ToSdk>`
+components, not plain markdown links. This enables framework-aware routing.
+
+```mdx
+import { Link } from "@/components/link";
+
+{/* Internal page link */}
+See <Link.Page href="/environment">Environment variables</Link.Page>.
+
+{/* SDK-specific link (backwards compatible with ?f= framework switcher) */}
+See the <Link.ToSdk href="/get-started" sdk="next">quick start</Link.ToSdk>.
+```
+
+### Rules
+
+- Import once per file: `import { Link } from "@/components/link";`
+- `href` is the root-relative path without domain (e.g. `/environment#arcjet-env`)
+- Link text must be on a **single line** — newlines inside `<Link.*>…</Link.*>`
+  break MDX rendering
+- External links and `[Arcjet Dashboard](https://app.arcjet.com)` style links
+  remain plain markdown
+
+### Background
+
+Older pages used markdown reference-style links (`[text][ref-id]`) with
+definitions at the bottom of the file. Those have been replaced. Any remaining
+plain markdown internal links (e.g. `[text](/path)`) should be converted to
+`<Link.Page>` or `<Link.ToSdk>` when editing a file.
+
 ## Dependency updates
 
 We maintain a 30 day cooldown period for dependency versions to mitigate supply

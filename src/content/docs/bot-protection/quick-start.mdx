@@ -48,7 +48,8 @@ ajToc:
     anchor: "get-help"
 ---
 
-import { LinkCard, CardGrid } from "@astrojs/starlight/components";
+import { CardGrid } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
 import { frameworks } from "@/lib/prefs";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import SlotByFramework from "@/components/SlotByFramework";
@@ -183,12 +184,13 @@ The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
 
 ### 5. Choose bots to allow or deny
 
-Arcjet maintains a list of known bots so you can choose to either only [allow
-specific bots](/bot-protection/reference#allowing-specific-bots) or only [deny
-specific bots](/bot-protection/reference#denying-specific-bots).
+Arcjet maintains a list of known bots so you can choose to either only
+<Link.Page href="/bot-protection/reference#allowing-specific-bots">allow specific bots</Link.Page>
+or only
+<Link.Page href="/bot-protection/reference#denying-specific-bots">deny specific bots</Link.Page>.
 
 Bots can be identified individually or through managed categories. See
-[Identifying Bots](/bot-protection/identifying-bots) for more details.
+<Link.Page href="/bot-protection/identifying-bots">Identifying Bots</Link.Page> for more details.
 
 ## FAQs
 
@@ -197,12 +199,12 @@ Bots can be identified individually or through managed categories. See
 ## What next?
 
 <CardGrid>
-  <LinkCard
+  <Link.Card
     title="Bot protection reference"
     href="/bot-protection/reference"
     description="Full details about bot protection."
   />
-  <LinkCard
+  <Link.Card
     title="Testing"
     href="/testing"
     description="Write tests for your rules."
@@ -216,12 +218,12 @@ protection on your entire application. You can setup rate limiting for your
 API, minimize fraudulent registrations with the signup form protection and more.
 
 <CardGrid>
-  <LinkCard
+  <Link.Card
     title="Example apps"
     href="https://github.com/arcjet/arcjet-js/tree/main/examples"
     description="Check out the examples."
   />
-  <LinkCard
+  <Link.Card
     title="Learn how Arcjet works"
     href="/architecture"
     description="Arcjet's architecture."
