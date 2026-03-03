@@ -1,5 +1,11 @@
 ---
-import { pathnameForSdk, sdk, sdkFromPathname, sdks } from "@/lib/sdk";
+import {
+    pathnameForSdk,
+    sdk,
+    sdkFromPathname,
+    sdks,
+} from "@/lib/sdk";
+import SdkIcon from "@/components/SdkIcon.astro";
 import Default from "@astrojs/starlight/components/TableOfContents.astro";
 import { Icon } from "@astrojs/starlight/components";
 import { SelectChevron } from "@/components/icons/SelectChevron";
@@ -13,14 +19,15 @@ const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
         <div class="toc-wrapper">
             <h2 class="toc-label">SDK</h2>
             <button class="toc-toggle" popovertarget="toc-sdk" type="button">
-                {activeSdk.ReactIcon && <activeSdk.ReactIcon />}
+                <SdkIcon sdk={activeSdk.key} />
                 {activeSdk.label}
                 <SelectChevron className="chevron" />
             </button>
             <nav id="toc-sdk" popover>
                 <ul>
                     {sdks().map((sdkItem) => {
-                        const isCurrent = sdkItem.key === activeSdk.key;
+                        const isCurrent =
+                            sdkItem.key === activeSdk.key;
 
                         return (
                             <li>
@@ -33,7 +40,7 @@ const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
                                         sdkItem.key,
                                     )}
                                 >
-                                    {sdkItem.ReactIcon && <sdkItem.ReactIcon />}
+                                    <SdkIcon sdk={sdkItem.key} />
                                     {sdkItem.label}
                                     {isCurrent && (
                                         <Icon

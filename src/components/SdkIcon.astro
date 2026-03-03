@@ -1,0 +1,36 @@
+---
+import type { ArcjetSdkKey } from "@/lib/sdk";
+import { Astro as AstroIcon } from "@/components/icons/tech/Astro";
+import { Bun } from "@/components/icons/tech/Bun";
+import { Deno } from "@/components/icons/tech/Deno";
+import { Fastify } from "@/components/icons/tech/Fastify";
+import { NestJs } from "@/components/icons/tech/NestJs";
+import { NextJs } from "@/components/icons/tech/NextJs";
+import { NodeJs } from "@/components/icons/tech/NodeJs";
+import { Nuxt } from "@/components/icons/tech/Nuxt";
+import { ReactRouter } from "@/components/icons/tech/ReactRouter";
+import { Remix } from "@/components/icons/tech/Remix";
+import { SvelteKit } from "@/components/icons/tech/SvelteKit";
+
+type Props = {
+    sdk: ArcjetSdkKey;
+}
+
+const icons: Partial<Record<ArcjetSdkKey, typeof AstroIcon>> = {
+    astro: AstroIcon,
+    bun: Bun,
+    deno: Deno,
+    fastify: Fastify,
+    nest: NestJs,
+    next: NextJs,
+    node: NodeJs,
+    nuxt: Nuxt,
+    "react-router": ReactRouter,
+    remix: Remix,
+    sveltekit: SvelteKit,
+};
+
+const Icon = icons[Astro.props.sdk];
+---
+
+{Icon && <Icon />}
