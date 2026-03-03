@@ -24,9 +24,9 @@ ajToc:
 
 import { Link } from "@/components/link";
 import { Aside, Badge } from "@astrojs/starlight/components";
-import SlotByFramework from "@/components/SlotByFramework";
-import TextByFramework from "@/components/TextByFramework";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import SlotByFramework from "@/components/SlotByFramework.astro";
+import TextByFramework from "@/components/TextByFramework.astro";
+import FrameworkLinks from "@/components/FrameworkLinks.astro";
 import DisplayType from "@/components/DisplayType.astro";
 
 import { frameworks } from "@/lib/prefs";
@@ -58,7 +58,6 @@ preventing users from signing up with fake email addresses and can significantly
 reduce the amount of spam or fraudulent accounts.
 
 <FrameworkLinks
-  client:load
   exclude={frameworks
     .filter((d) => !frontmatter.frameworks.includes(d.key))
     .map((d) => d.key)}
@@ -188,7 +187,7 @@ to allow certain types of email addresses, you can modify the options:
   literals. Defaults to `false`. Changing to `true` means that
   `foo@[123.456.789.0]` would be allowed.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <NextJsPagesServerActions slot="next-js" />
 </SlotByFramework>
 
@@ -199,7 +198,7 @@ protection rules. This requires a `request` argument which is the request
 context as passed to the request handler. When configured with a `validateEmail`
 rule it also requires an additional `email` prop.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <NestJsGuardDecision slot="nest-js" />
 </SlotByFramework>
 
@@ -234,7 +233,7 @@ for (const result of decision.results) {
 
 This example will log the full result as well as the email validation rule:
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <DecisionLogDenyBun slot="bun" />
   <DecisionLogDenyNestJs slot="nest-js" />
   <DecisionLogDenyNextJs slot="next-js" />
@@ -248,7 +247,7 @@ This example will log the full result as well as the email validation rule:
 In addition to being able to deny specific email types, you can also configure
 Arcjet to only allow specific email types and all other types will be blocked.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <DecisionLogAllowBun slot="bun" />
   <DecisionLogAllowNestJs slot="nest-js" />
   <DecisionLogAllowNextJs slot="next-js" />
@@ -306,7 +305,7 @@ error result for more information.
 If all other rules that were run returned an `ALLOW` result, then the final Arcjet
 conclusion will be `ERROR`.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <ErrorsBun slot="bun" />
   <ErrorsNestJs slot="nest-js" />
   <ErrorsNextJs slot="next-js" />

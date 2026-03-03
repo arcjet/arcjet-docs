@@ -1,5 +1,5 @@
 import SelectableContent from "@/components/SelectableContent";
-import SlotByFramework from "@/components/SlotByFramework";
+import SlotByFramework from "@/components/SlotByFramework.astro";
 import MiddlewareMatchingPaths from "./MiddlewareMatchingPaths.mdx";
 import MiddlewareAllRoutes from "./MiddlewareAllRoutes.mdx";
 import MiddlewareMatcher from "./MiddlewareMatcher.mdx";
@@ -35,13 +35,13 @@ the middleware for, or use `request.nextUrl.pathname.startsWith`.
 
 You can use conditionals in your Next.js middleware to match multiple paths.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <MiddlewareMatchingPaths slot="next-js" />
 </SlotByFramework>
 
 #### Middleware
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <MiddlewareAllRoutes slot="next-js" />
 </SlotByFramework>
 
@@ -56,6 +56,6 @@ For example, if you already have a rate limit defined in the API route at
 `/api/hello`, you can exclude it from the middleware by specifying a matcher in
 `/proxy.ts`:
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <MiddlewareMatcher slot="next-js" />
 </SlotByFramework>

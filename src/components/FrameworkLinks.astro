@@ -1,0 +1,23 @@
+---
+/**
+ * FrameworkLinks — Astro wrapper
+ *
+ * On SDK-scoped routes (`/sdk/:sdk/...`), renders nothing — the SDK switcher
+ * in the table of contents already provides navigation between SDK variants.
+ *
+ * On legacy (unscoped) routes, delegates to the React `FrameworkLinksReact`
+ * component with `client:load` so the existing `?f=` link grid stays the same.
+ */
+import FrameworkLinksReact from "@/components/FrameworkLinksReact";
+import { sdkFromPathname } from "@/lib/sdk";
+
+const sdkKey = sdkFromPathname(Astro.url.pathname);
+---
+
+{
+  sdkKey ? null : (
+    <FrameworkLinksReact client:load {...Astro.props}>
+      <slot />
+    </FrameworkLinksReact>
+  )
+}

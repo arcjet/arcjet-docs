@@ -42,8 +42,8 @@ ajToc:
 import { CardGrid } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
-import SlotByFramework from "@/components/SlotByFramework";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import SlotByFramework from "@/components/SlotByFramework.astro";
+import FrameworkLinks from "@/components/FrameworkLinks.astro";
 import FrameworkName from "@/components/FrameworkName";
 import { frameworks } from "@/lib/prefs";
 import FAQs from "/src/components/FAQs.astro";
@@ -82,7 +82,6 @@ you do not wish to handle.
 <WhatIsArcjet />
 
 <FrameworkLinks
-  client:load
   exclude={frameworks
     .filter((d) => !frontmatter.frameworks.includes(d.key))
     .map((d) => d.key)}
@@ -98,7 +97,7 @@ app.
 
 In your project root, run the following command to install the SDK:
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <Step1Bun slot="bun" />
   <Step1NestJs slot="nest-js" />
   <Step1NextJs slot="next-js" />
@@ -113,7 +112,7 @@ In your project root, run the following command to install the SDK:
 instructions to add a site and get a key. Add it to a `.env.local` file in your
 project root.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <Step2SetEnv slot="bun" />
   <Step2SetEnv slot="nest-js" />
   <Step2 slot="next-js" />
@@ -129,7 +128,7 @@ credit/debit card numbers, IP addresses, phone numbers, and/or implement a
 custom detection function. See the
 <Link.Page href="/sensitive-info/reference">reference</Link.Page> for details.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <Step3Bun slot="bun" />
   <Step3NestJs slot="nest-js" />
   <Step3NextJs slot="next-js" />
@@ -143,7 +142,7 @@ custom detection function. See the
 Start your app and try making a request with an email address in the body of the
 request:
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <Step4Bun slot="bun" />
   <Step4NestJs slot="nest-js" />
   <Step4NextJs slot="next-js" />

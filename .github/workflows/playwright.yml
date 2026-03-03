@@ -11,9 +11,11 @@ on:
     branches: [main]
     types: [opened, synchronize, reopened]
 
+# TODO: Shard tests across a matrix to speed up CI.
+# See: https://playwright.dev/docs/test-sharding#github-actions-example
 jobs:
   test:
-    timeout-minutes: 10
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
