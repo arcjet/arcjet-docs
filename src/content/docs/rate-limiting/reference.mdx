@@ -96,9 +96,9 @@ ajToc:
 
 import { Badge, Aside } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
-import SlotByFramework from "@/components/SlotByFramework";
-import TextByFramework from "@/components/TextByFramework";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import SlotByFramework from "@/components/SlotByFramework.astro";
+import TextByFramework from "@/components/TextByFramework.astro";
+import FrameworkLinks from "@/components/FrameworkLinks.astro";
 import { frameworks } from "@/lib/prefs";
 import Comments from "/src/components/Comments.astro";
 
@@ -168,7 +168,6 @@ Arcjet rate limiting allows you to define rules which limit the number of
 requests a client can make over a period of time.
 
 <FrameworkLinks
-  client:load
   exclude={frameworks
     .filter((d) => !frontmatter.frameworks.includes(d.key))
     .map((d) => d.key)}
@@ -206,7 +205,7 @@ type FixedWindowRateLimitOptions = {
 
 #### Fixed window example
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <FixedWindowBun slot="bun" />
   <FixedWindowNestJs slot="nest-js" />
   <FixedWindowNextJs slot="next-js" />
@@ -241,7 +240,7 @@ type SlidingWindowRateLimitOptions = {
 
 #### Sliding window example
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <SlidingWindowBun slot="bun" />
   <SlidingWindowNestJs slot="nest-js" />
   <SlidingWindowNextJs slot="next-js" />
@@ -287,7 +286,7 @@ tokens it wishes to withdraw from the bucket. This is done by passing a
 See the [token bucket request example](#token-bucket-request) for how to specify
 the number of tokens to request.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <TokenBucketBun slot="bun" />
   <TokenBucketNestJs slot="nest-js" />
   <TokenBucketNextJs slot="next-js" />
@@ -326,7 +325,7 @@ The custom characteristic is `userId` with the value passed as a prop on the
 `protect` function. You can use any string for the characteristic name and any
 `string`, `number` or `boolean` for the value.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <ByUserIdBun slot="bun" />
   <ByUserIdNestJs slot="nest-js" />
   <ByUserIdNextJs slot="next-js" />
@@ -340,7 +339,7 @@ users and a user ID for logged in users, you can use `withRule` to create
 augmented clients that use different characteristics. See the
 <Link.Page href="/rate-limiting/configuration#ip-address--user-id">example in the custom characteristics section</Link.Page>.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <NestJsDecoratorRoutes slot="nest-js" />
   <NextJsPerRouteVsMiddleware slot="next-js" />
   <NextJsPagesServerActions slot="next-js" />
@@ -354,7 +353,7 @@ Arcjet provides a single `protect` function that is used to execute your
 protection rules. This requires a `RequestEvent` property which is the event
 context as passed to the request handler.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <NestJsGuardDecision slot="nest-js" />
 </SlotByFramework>
 
@@ -388,7 +387,7 @@ for (const result of decision.results) {
 
 This example will log the full result as well as each rate limit rule:
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <DecisionLogBun slot="bun" />
   <DecisionLogNestJs slot="nest-js" />
   <DecisionLogNextJs slot="next-js" />
@@ -403,7 +402,7 @@ When using a token bucket rule, an additional `requested` prop (positive
 integer) should be passed to the `protect` function. This is the number of
 tokens the client is requesting to withdraw from the bucket.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <TokenBucketRequestBun slot="bun" />
   <TokenBucketRequestNestJs slot="nest-js" />
   <TokenBucketRequestNextJs slot="next-js" />
@@ -433,7 +432,7 @@ We provide the [@arcjet/decorate
 package](https://github.com/arcjet/arcjet-js/tree/main/decorate) for decorating
 your responses with appropriate `RateLimit` headers based on a decision.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <HeadersBun slot="bun" />
   <HeadersNestJs slot="nest-js" />
   <HeadersNextJs slot="next-js" />
@@ -467,7 +466,7 @@ error result for more information.
 If all other rules that were run returned an `ALLOW` result, then the final Arcjet
 conclusion will be `ERROR`.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <ErrorsBun slot="bun" />
   <ErrorsNestJs slot="nest-js" />
   <ErrorsNextJs slot="next-js" />
@@ -488,7 +487,7 @@ Arcjet can also be triggered based using a sample of your traffic.
 See the <Link.Page href="/testing">Testing</Link.Page> section of the docs for
 details.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <ExamplesNextJs slot="next-js" />
 </SlotByFramework>
 

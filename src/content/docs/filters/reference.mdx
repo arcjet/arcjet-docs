@@ -38,9 +38,9 @@ ajToc:
 
 import { Link } from "@/components/link";
 import { Badge } from "@astrojs/starlight/components";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import FrameworkLinks from "@/components/FrameworkLinks.astro";
 import DisplayType from "@/components/DisplayType.astro";
-import SlotByFramework from "@/components/SlotByFramework";
+import SlotByFramework from "@/components/SlotByFramework.astro";
 import { frameworks } from "@/lib/prefs";
 import BunAllow from "@/snippets/filters/reference/bun/Allow.mdx";
 import DenoAllow from "@/snippets/filters/reference/deno/Allow.mdx";
@@ -58,7 +58,6 @@ allows you to quickly enforce rules like allow/deny by country, network, or
 `user-agent`.
 
 <FrameworkLinks
-  client:load
   exclude={frameworks
     .filter((d) => !frontmatter.frameworks.includes(d.key))
     .map((d) => d.key)}
@@ -93,7 +92,7 @@ See [decision](#decision) below for details of examining the execution results.
 In this example, the expression matches non-VPN GET requests from the US.
 Requests matching the expression are allowed and all others are denied.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <BunAllow slot="bun" />
   <DenoAllow slot="deno" />
   <NestJsAllow slot="nest-js" />

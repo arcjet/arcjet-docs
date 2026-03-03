@@ -46,9 +46,9 @@ ajToc:
 import { Link } from "@/components/link";
 import { CardGrid } from "@astrojs/starlight/components";
 import WhatIsArcjet from "@/components/WhatIsArcjet.astro";
-import SlotByFramework from "@/components/SlotByFramework";
+import SlotByFramework from "@/components/SlotByFramework.astro";
 import FrameworkName from "@/components/FrameworkName";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import FrameworkLinks from "@/components/FrameworkLinks.astro";
 import FAQs from "@/components/FAQs.astro";
 import Comments from "@/components/Comments.astro";
 import { frameworks } from "@/lib/prefs";
@@ -91,14 +91,13 @@ requests a client can make over a period of time.
 <WhatIsArcjet />
 
 <FrameworkLinks
-  client:load
   exclude={frameworks
     .filter((d) => !frontmatter.frameworks.includes(d.key))
     .map((d) => d.key)}
   title="Choose a framework"
 />
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <NextJsVideoQuickStart slot="next-js" />
 </SlotByFramework>
 
@@ -110,7 +109,7 @@ This guide will show you how to add a simple rate limit to your <FrameworkName c
 
 In your project root, run the following command to install the SDK:
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <BunStep1 slot="bun" />
   <NestJsStep1 slot="nest-js" />
   <NextJsStep1 slot="next-js" />
@@ -124,7 +123,7 @@ In your project root, run the following command to install the SDK:
 [Create a free Arcjet account](https://app.arcjet.com) then follow the
 instructions to add a site and get a key.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <BunStep2 slot="bun" />
   <NestJsStep2 slot="nest-js" />
   <NextJsStep2 slot="next-js" />
@@ -140,7 +139,7 @@ identify the user based on their ID e.g. if they are logged in. The bucket is
 configured with a maximum capacity of 10 tokens and refills by 5 tokens every
 10 seconds. Each request consumes 5 tokens.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <BunStep3 slot="bun" />
   <NestJsStep3 slot="nest-js" />
   <NextJsStep3 slot="next-js" />
@@ -149,7 +148,7 @@ configured with a maximum capacity of 10 tokens and refills by 5 tokens every
   <SvelteKitStep3 slot="sveltekit" />
 </SlotByFramework>
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <BunStep4 slot="bun" />
   <NestJsStep4 slot="nest-js" />
   <NextJsStep4 slot="next-js" />

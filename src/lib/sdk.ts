@@ -21,6 +21,64 @@ export type ArcjetSdkKey =
   | "sveltekit";
 
 /**
+ * A sub-variant of an SDK that uses the same Arcjet SDK package but
+ * pairs it with a different framework (e.g. Bun + Hono, Node.js + Express).
+ */
+export type ArcjetSdkVariant = {
+  /** URL-safe key used in `/sdk/:sdk/plus/:variant/` paths */
+  readonly key: string;
+  /** Human readable label */
+  readonly label: string;
+  /** Maps to a legacy FrameworkKey for slot resolution */
+  readonly legacyFrameworkKey: FrameworkKey;
+};
+
+/**
+ * Sub-variants for SDKs that support multiple framework pairings.
+ */
+const SDK_VARIANTS: Partial<Record<ArcjetSdkKey, readonly ArcjetSdkVariant[]>> =
+  {
+    bun: [{ key: "hono", label: "Hono", legacyFrameworkKey: "bun-hono" }],
+    node: [
+      {
+        key: "express",
+        label: "Express",
+        legacyFrameworkKey: "node-js-express",
+      },
+      { key: "hono", label: "Hono", legacyFrameworkKey: "node-js-hono" },
+    ],
+    python: [
+      {
+        key: "fastapi",
+        label: "FastAPI",
+        legacyFrameworkKey: "python-fastapi",
+      },
+      { key: "flask", label: "Flask", legacyFrameworkKey: "python-flask" },
+    ],
+  } as const;
+
+/**
+ * Returns the sub-variants for a given SDK, or an empty array if none.
+ */
+export function sdkVariants(sdkKey: ArcjetSdkKey): readonly ArcjetSdkVariant[] {
+  return SDK_VARIANTS[sdkKey] ?? [];
+}
+
+/**
+ * Returns all SDKs that have sub-variants.
+ */
+export function sdksWithVariants(): [
+  ArcjetSdkKey,
+  readonly ArcjetSdkVariant[],
+][] {
+  // Object.entries widens keys to `string`; narrow back to ArcjetSdkKey.
+  return Object.entries(SDK_VARIANTS) as [
+    ArcjetSdkKey,
+    readonly ArcjetSdkVariant[],
+  ][];
+}
+
+/**
  * Documentation configuration object for an Arcjet SDK
  */
 type ArcjetSdk<TKey extends ArcjetSdkKey = ArcjetSdkKey> = {
@@ -132,6 +190,47 @@ export function isSdkKey(value: string): value is ArcjetSdkKey {
 }
 
 const SDK_PATH_REGEX = /^\/sdk\/([a-z-]+)/;
+const SDK_PLUS_PATH_REGEX = /^\/sdk\/([a-z-]+)\/plus\/([a-z-]+)/;
+
+/**
+ * Extracts an Arcjet SDK variant key from a `/sdk/:sdk/plus/:variant/` pathname.
+ * Returns `undefined` if the path is not a plus-variant route.
+ */
+export function sdkVariantFromPathname(
+  pathname: string,
+): ArcjetSdkVariant | undefined {
+  if (typeof pathname !== "string") return undefined;
+
+  const match = pathname.match(SDK_PLUS_PATH_REGEX);
+  if (!match) return undefined;
+
+  const sdkKey = match[1];
+  const variantKey = match[2];
+
+  if (!isSdkKey(sdkKey)) return undefined;
+
+  const variants = SDK_VARIANTS[sdkKey];
+  return variants?.find((v) => v.key === variantKey);
+}
+
+/**
+ * Resolves the legacy FrameworkKey for the current SDK-scoped pathname.
+ *
+ * For plus-variant paths like `/sdk/bun/plus/hono/...`, returns the variant's
+ * legacy key (e.g. `"bun-hono"`). For plain SDK paths like `/sdk/next/...`,
+ * returns the SDK's legacy key (e.g. `"next-js"`).
+ */
+export function legacyKeyFromPathname(
+  pathname: string,
+): FrameworkKey | undefined {
+  const variant = sdkVariantFromPathname(pathname);
+  if (variant) return variant.legacyFrameworkKey;
+
+  const sdkKey = sdkFromPathname(pathname);
+  if (!sdkKey) return undefined;
+
+  return ARCJET_SDKS[sdkKey].legacyFrameworkKey ?? undefined;
+}
 
 /**
  * Extracts an Arcjet SDK key from a given pathname, if possible.
@@ -160,8 +259,15 @@ export function sdkFromPathname(pathname: string): ArcjetSdkKey | undefined {
 
 /**
  * Returns a pathname scoped to the given SDK.
+ *
+ * If the current path is a plus-variant route (e.g. `/sdk/bun/plus/hono/foo`),
+ * the variant segment is stripped when switching to a different SDK because
+ * variants are SDK-specific.
  */
-export function pathnameForSdk(pathname: string, sdk: ArcjetSdkKey): string {
+export function pathnameForSdk(
+  pathname: string,
+  targetSdk: ArcjetSdkKey,
+): string {
   const previousSdk = sdkFromPathname(pathname);
 
   if (!previousSdk) {
@@ -170,7 +276,48 @@ export function pathnameForSdk(pathname: string, sdk: ArcjetSdkKey): string {
     );
   }
 
-  return pathname.replace(`/sdk/${previousSdk}`, `/sdk/${sdk}`);
+  // Strip any /plus/:variant/ segment since variants are SDK-specific
+  const plusVariant = sdkVariantFromPathname(pathname);
+  let cleanPathname = pathname;
+  if (plusVariant) {
+    cleanPathname = pathname.replace(`/plus/${plusVariant.key}`, "");
+  }
+
+  return cleanPathname.replace(`/sdk/${previousSdk}`, `/sdk/${targetSdk}`);
+}
+
+/**
+ * Returns a pathname scoped to a specific SDK variant.
+ *
+ * @example
+ * pathnameForSdkVariant("/sdk/bun/get-started", "bun", "hono")
+ * // => "/sdk/bun/plus/hono/get-started"
+ */
+export function pathnameForSdkVariant(
+  pathname: string,
+  sdkKey: ArcjetSdkKey,
+  variantKey: string,
+): string {
+  const previousSdk = sdkFromPathname(pathname);
+
+  if (!previousSdk) {
+    throw new Error(
+      `@/lib/sdk:pathnameForSdkVariant only supports SDK scoped pathnames.`,
+    );
+  }
+
+  // Strip any existing /plus/:variant/ segment
+  const existingVariant = sdkVariantFromPathname(pathname);
+  let cleanPathname = pathname;
+  if (existingVariant) {
+    cleanPathname = pathname.replace(`/plus/${existingVariant.key}`, "");
+  }
+
+  // Replace SDK and inject variant
+  return cleanPathname.replace(
+    `/sdk/${previousSdk}`,
+    `/sdk/${sdkKey}/plus/${variantKey}`,
+  );
 }
 
 /**

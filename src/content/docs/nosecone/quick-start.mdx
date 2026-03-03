@@ -39,8 +39,8 @@ ajToc:
 import WhatAreArcjetUtilities from "@/components/WhatAreArcjetUtilities.astro";
 import FrameworkName from "@/components/FrameworkName";
 import NpmSdkVersion from "@/components/NpmSdkVersion.astro";
-import FrameworkLinks from "@/components/FrameworkLinks";
-import SlotByFramework from "@/components/SlotByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks.astro";
+import SlotByFramework from "@/components/SlotByFramework.astro";
 import { frameworks } from "@/lib/prefs";
 import { CardGrid } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
@@ -103,7 +103,6 @@ See the <Link.Page href="/nosecone/reference">reference guide</Link.Page> for
 full details on each option.
 
 <FrameworkLinks
-  client:load
   exclude={frameworks
     .filter((d) => !frontmatter.frameworks.includes(d.key))
     .map((d) => d.key)}
@@ -126,7 +125,7 @@ default security headers.
 In your project root, run the following command to install the Arcjet Nosecone
 library for your framework:
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <BunStep1 slot="bun" />
   <DenoStep1 slot="deno" />
   <NextJsStep1 slot="next-js" />
@@ -136,7 +135,7 @@ library for your framework:
 
 ### 2. Configure your application
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <BunStep2 slot="bun" />
   <DenoStep2 slot="deno" />
   <NextJsStep2 slot="next-js" />
@@ -146,7 +145,7 @@ library for your framework:
 
 ### 3. Run your application
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <BunStep3 slot="bun" />
   <DenoStep3 slot="deno" />
   <NextJsStep3 slot="next-js" />
@@ -162,7 +161,7 @@ application, but may break things (particularly the CSP header).
 We recommend you test your application thoroughly and tweak the settings to
 ensure it continues to work as expected.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <BunStep4 slot="bun" />
   <DenoStep4 slot="deno" />
   <NextJsStep4 slot="next-js" />

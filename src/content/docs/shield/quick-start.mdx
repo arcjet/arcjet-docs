@@ -43,8 +43,8 @@ ajToc:
 ---
 
 import FrameworkName from "@/components/FrameworkName";
-import SlotByFramework from "@/components/SlotByFramework";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import SlotByFramework from "@/components/SlotByFramework.astro";
+import FrameworkLinks from "@/components/FrameworkLinks.astro";
 import { frameworks } from "@/lib/prefs";
 import { Link } from "@/components/link";
 import { CardGrid } from "@astrojs/starlight/components";
@@ -86,7 +86,6 @@ the [OWASP Top 10](https://owasp.org/www-project-top-ten/).
 <WhatIsArcjet />
 
 <FrameworkLinks
-  client:load
   exclude={frameworks
     .filter((d) => !frontmatter.frameworks.includes(d.key))
     .map((d) => d.key)}
@@ -102,7 +101,7 @@ application from common attacks.
 
 In your project root, run the following command to install the SDK:
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <Step1Bun slot="bun" />
   <Step1NestJs slot="nest-js" />
   <Step1NextJs slot="next-js" />
@@ -117,7 +116,7 @@ In your project root, run the following command to install the SDK:
 instructions to add a site and get a key. Add it to a `.env.local` file in your
 project root.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <Step2SetEnv slot="bun" />
   <Step2SetEnv slot="nest-js" />
   <Step2 slot="next-js" />
@@ -128,7 +127,7 @@ project root.
 
 ### 3. Protect a route
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <Step3Bun slot="bun" />
   <Step3NestJs slot="nest-js" />
   <Step3NextJs slot="next-js" />
@@ -137,7 +136,7 @@ project root.
   <Step3SvelteKit slot="sveltekit" />
 </SlotByFramework>
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <Step4Bun slot="bun" />
   <Step4NestJs slot="nest-js" />
   <Step4 slot="next-js" />
@@ -153,7 +152,7 @@ To see Arcjet Shield WAF in action, try making a request with the special header
 triggered and will block the request. This simulates the threshold being reached
 and is a constant, so you can use it as part of your tests.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <Step5Bun slot="bun" />
   <Step5NestJs slot="nest-js" />
   <Step5 slot="next-js" />

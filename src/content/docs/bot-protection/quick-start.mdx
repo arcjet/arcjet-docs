@@ -52,10 +52,10 @@ import { CardGrid } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 import { frameworks } from "@/lib/prefs";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
-import SlotByFramework from "@/components/SlotByFramework";
+import SlotByFramework from "@/components/SlotByFramework.astro";
 import FrameworkName from "@/components/FrameworkName";
 import FAQs from "/src/components/FAQs.astro";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import FrameworkLinks from "@/components/FrameworkLinks.astro";
 import Comments from "/src/components/Comments.astro";
 import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 
@@ -109,7 +109,6 @@ Arcjet bot detection allows you to manage traffic by automated clients and bots.
 <WhatIsArcjet />
 
 <FrameworkLinks
-  client:load
   exclude={frameworks
     .filter((d) => !frontmatter.frameworks.includes(d.key))
     .map((d) => d.key)}
@@ -125,7 +124,7 @@ application from bots and automated clients.
 
 In your project root, run the following command to install the SDK:
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <AstroStep1 slot="astro" />
   <BunStep1 slot="bun" />
   <DenoStep1 slot="deno" />
@@ -142,7 +141,7 @@ In your project root, run the following command to install the SDK:
 [Create a free Arcjet account](https://app.arcjet.com) then follow the
 instructions to add a site and get a key.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <AstroStep2 slot="astro" />
   <BunStep2 slot="bun" />
   <DenoStep2 slot="deno" />
@@ -156,7 +155,7 @@ instructions to add a site and get a key.
 
 ### 3. Add bot protection
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <AstroStep3 slot="astro" />
   <BunStep3 slot="bun" />
   <DenoStep3 slot="deno" />
@@ -168,7 +167,7 @@ instructions to add a site and get a key.
   <SvelteKitStep3 slot="sveltekit" />
 </SlotByFramework>
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <AstroStep4 slot="astro" />
   <BunStep4 slot="bun" />
   <DenoStep4 slot="deno" />
