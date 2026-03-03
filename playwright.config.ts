@@ -55,7 +55,7 @@ export default defineConfig({
       },
     },
   ],
-  reporter: [["html", { host: "0.0.0.0" }]],
+  reporter: process.env.CI ? "blob" : [["html", { host: "0.0.0.0" }]],
   retries: process.env.CI ? 1 : 0,
   testDir: "./tests",
   use: {
