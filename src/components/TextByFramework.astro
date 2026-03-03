@@ -1,0 +1,49 @@
+---
+/**
+ * TextByFramework — Astro wrapper
+ *
+ * On SDK-scoped routes (`/sdk/:sdk/...`), renders the matching text prop at
+ * build time with zero client JavaScript.
+ *
+ * On legacy (unscoped) routes, delegates to the React `TextByFrameworkReact`
+ * component with `client:load` so the existing client-side framework switching
+ * continues to work.
+ */
+import type { FrameworkKey } from "@/lib/prefs";
+import TextByFrameworkReact from "@/components/TextByFrameworkReact";
+import { sdkFromPathname, legacyKeyFromPathname } from "@/lib/sdk";
+import { kebabToCamel } from "@/lib/utils";
+
+type Props = { [key in FrameworkKey]?: string } & {
+  /** Fallback text when no framework-specific prop matches. */
+  default?: string;
+};
+
+const props = Astro.props as Props;
+const sdkKey = sdkFromPathname(Astro.url.pathname);
+
+let resolvedText: string | undefined;
+if (sdkKey) {
+  const legacyKey = legacyKeyFromPathname(Astro.url.pathname);
+  if (legacyKey) {
+    const camelKey = kebabToCamel(legacyKey) as FrameworkKey;
+    if (props[legacyKey] !== undefined) {
+      resolvedText = props[legacyKey];
+    } else if (props[camelKey] !== undefined) {
+      resolvedText = props[camelKey];
+    } else {
+      resolvedText = props["default"];
+    }
+  }
+}
+---
+
+{
+  sdkKey && resolvedText !== undefined ? (
+    <Fragment set:html={resolvedText} />
+  ) : (
+    <TextByFrameworkReact client:load {...Astro.props as any}>
+      <slot />
+    </TextByFrameworkReact>
+  )
+}

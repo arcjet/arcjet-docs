@@ -1,0 +1,129 @@
+---
+/**
+ * SlotByFramework — Astro wrapper
+ *
+ * On SDK-scoped routes (`/sdk/:sdk/...`), renders only the matching slot at
+ * build time with zero client JavaScript.
+ *
+ * On legacy (unscoped) routes, delegates to the React `SlotByFrameworkReact`
+ * component with `client:load` so the existing client-side framework switching
+ * via nanostores continues to work.
+ */
+import SlotByFrameworkReact from "@/components/SlotByFrameworkReact";
+import { sdkFromPathname, legacyKeyFromPathname } from "@/lib/sdk";
+
+import "@/components/SlotByFramework.scss";
+
+type Props = {
+  /** When true, renders the slot content inline without a wrapper div. */
+  inline?: boolean;
+};
+
+const { inline } = Astro.props;
+const sdkKey = sdkFromPathname(Astro.url.pathname);
+
+// Resolve the legacy framework key for the current SDK (or variant) so we can
+// look up the correct named slot (slots use legacy keys like "next-js", etc.).
+const legacyKey = sdkKey ? legacyKeyFromPathname(Astro.url.pathname) : undefined;
+
+const hasMatchingSlot = legacyKey ? Astro.slots.has(legacyKey) : false;
+---
+
+{
+  sdkKey && hasMatchingSlot ? (
+    inline ? (
+      <Fragment set:html={await Astro.slots.render(legacyKey!)} />
+    ) : (
+      <div class="SlotByFramework">
+        <Fragment set:html={await Astro.slots.render(legacyKey!)} />
+      </div>
+    )
+  ) : (
+    <SlotByFrameworkReact client:load inline={inline}>
+      {Astro.slots.has("default") && (
+        <Fragment set:html={await Astro.slots.render("default")} />
+      )}
+      {Astro.slots.has("astro") && (
+        <Fragment slot="astro" set:html={await Astro.slots.render("astro")} />
+      )}
+      {Astro.slots.has("bun") && (
+        <Fragment slot="bun" set:html={await Astro.slots.render("bun")} />
+      )}
+      {Astro.slots.has("bun-hono") && (
+        <Fragment
+          slot="bun-hono"
+          set:html={await Astro.slots.render("bun-hono")}
+        />
+      )}
+      {Astro.slots.has("deno") && (
+        <Fragment slot="deno" set:html={await Astro.slots.render("deno")} />
+      )}
+      {Astro.slots.has("fastify") && (
+        <Fragment
+          slot="fastify"
+          set:html={await Astro.slots.render("fastify")}
+        />
+      )}
+      {Astro.slots.has("nest-js") && (
+        <Fragment
+          slot="nest-js"
+          set:html={await Astro.slots.render("nest-js")}
+        />
+      )}
+      {Astro.slots.has("next-js") && (
+        <Fragment
+          slot="next-js"
+          set:html={await Astro.slots.render("next-js")}
+        />
+      )}
+      {Astro.slots.has("node-js") && (
+        <Fragment
+          slot="node-js"
+          set:html={await Astro.slots.render("node-js")}
+        />
+      )}
+      {Astro.slots.has("node-js-express") && (
+        <Fragment
+          slot="node-js-express"
+          set:html={await Astro.slots.render("node-js-express")}
+        />
+      )}
+      {Astro.slots.has("node-js-hono") && (
+        <Fragment
+          slot="node-js-hono"
+          set:html={await Astro.slots.render("node-js-hono")}
+        />
+      )}
+      {Astro.slots.has("nuxt") && (
+        <Fragment slot="nuxt" set:html={await Astro.slots.render("nuxt")} />
+      )}
+      {Astro.slots.has("python-fastapi") && (
+        <Fragment
+          slot="python-fastapi"
+          set:html={await Astro.slots.render("python-fastapi")}
+        />
+      )}
+      {Astro.slots.has("python-flask") && (
+        <Fragment
+          slot="python-flask"
+          set:html={await Astro.slots.render("python-flask")}
+        />
+      )}
+      {Astro.slots.has("react-router") && (
+        <Fragment
+          slot="react-router"
+          set:html={await Astro.slots.render("react-router")}
+        />
+      )}
+      {Astro.slots.has("remix") && (
+        <Fragment slot="remix" set:html={await Astro.slots.render("remix")} />
+      )}
+      {Astro.slots.has("sveltekit") && (
+        <Fragment
+          slot="sveltekit"
+          set:html={await Astro.slots.render("sveltekit")}
+        />
+      )}
+    </SlotByFrameworkReact>
+  )
+}

@@ -1,5 +1,5 @@
-import type { Props as TextByFrameworkProps } from "@/components/TextByFramework";
-import TextByFramework from "@/components/TextByFramework";
+import type { Props as TextByFrameworkProps } from "@/components/TextByFrameworkReact";
+import TextByFramework from "@/components/TextByFrameworkReact";
 import type { FrameworkKey } from "@/lib/prefs";
 import type { ForwardedRef, PropsWithChildren } from "react";
 import { forwardRef, useCallback, useEffect, useState } from "react";
