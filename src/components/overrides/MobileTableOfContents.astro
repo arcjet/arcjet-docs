@@ -1,5 +1,11 @@
 ---
-import { pathnameForSdk, sdk, sdkFromPathname, sdks } from "@/lib/sdk";
+import {
+    pathnameForSdk,
+    sdk,
+    sdkFromPathname,
+    sdks,
+} from "@/lib/sdk";
+import SdkIcon from "@/components/SdkIcon.astro";
 import Default from "@astrojs/starlight/components/MobileTableOfContents.astro";
 import { Icon } from "@astrojs/starlight/components";
 
@@ -25,7 +31,7 @@ const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
                         popovertarget="mtoc-sdk"
                         type="button"
                     >
-                        {activeSdk.ReactIcon && <activeSdk.ReactIcon />}
+                        <SdkIcon sdk={activeSdk.key} />
                         {activeSdk.label}
                         <Icon class="caret" name="right-caret" size="1rem" />
                     </button>
@@ -33,7 +39,8 @@ const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
                 <nav id="mtoc-sdk" popover>
                     <ul>
                         {sdks().map((sdkItem) => {
-                            const isCurrent = sdkItem.key === activeSdk.key;
+                            const isCurrent =
+                                sdkItem.key === activeSdk.key;
 
                             return (
                                 <li>
@@ -46,9 +53,7 @@ const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
                                             sdkItem.key,
                                         )}
                                     >
-                                        {sdkItem.ReactIcon && (
-                                            <sdkItem.ReactIcon />
-                                        )}
+                                        <SdkIcon sdk={sdkItem.key} />
                                         {sdkItem.label}
                                         {isCurrent && (
                                             <Icon
