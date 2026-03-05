@@ -4,6 +4,28 @@ export const main = [
     link: "/get-started",
   },
   {
+    label: "AI app protection",
+    collapsed: false,
+    items: [
+      {
+        label: "Overview",
+        link: "/ai-protection",
+      },
+      {
+        label: "Abuse protection",
+        link: "/ai-protection/abuse-protection",
+      },
+      {
+        label: "Budget control",
+        link: "/ai-protection/budget-control",
+      },
+      {
+        label: "Data loss prevention",
+        link: "/ai-protection/data-loss-prevention",
+      },
+    ],
+  },
+  {
     label: "Examples",
     collapsed: false,
     items: [
@@ -164,7 +186,7 @@ export const main = [
     ],
   },
   {
-    label: "Features",
+    label: "Building blocks",
     collapsed: false,
     items: [
       {
@@ -496,7 +518,7 @@ export const main = [
       },
       {
         label: "LangChain",
-        link: "/integrations/langchain",
+        link: "/ai-protection/abuse-protection?f=python-fastapi",
       },
       {
         label: "Netlify",
@@ -509,7 +531,7 @@ export const main = [
       },
       {
         label: "OpenAI",
-        link: "/integrations/openai",
+        link: "/ai-protection/abuse-protection?f=next-js",
       },
       {
         label: "Vercel",

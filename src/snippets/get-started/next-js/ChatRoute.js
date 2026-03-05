@@ -1,0 +1,88 @@
+import { openai } from "@ai-sdk/openai";
+import arcjet, {
+  detectBot,
+  shield,
+  tokenBucket,
+  sensitiveInfo,
+} from "@arcjet/next";
+import { convertToModelMessages, isTextUIPart, streamText } from "ai";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  // Track budgets per user — replace "userId" with any stable identifier
+  characteristics: ["userId"],
+  rules: [
+    // Shield protects against common web attacks e.g. SQL injection
+    shield({ mode: "LIVE" }),
+    // Block all automated clients — bots inflate AI costs
+    detectBot({
+      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+      allow: [], // Block all bots. See https://arcjet.com/bot-list
+    }),
+    // Enforce budgets to control AI costs. Adjust rates and limits as needed.
+    tokenBucket({
+      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+      refillRate: 2_000, // Refill 2,000 tokens per hour
+      interval: "1h",
+      capacity: 5_000, // Maximum 5,000 tokens in the bucket
+    }),
+    // Block messages containing sensitive information to prevent data leaks
+    sensitiveInfo({
+      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+      // Block PII types that should never appear in AI prompts.
+      // Remove types your app legitimately handles (e.g. EMAIL for a support bot).
+      deny: ["CREDIT_CARD_NUMBER", "EMAIL"],
+    }),
+  ],
+});
+
+export async function POST(req) {
+  // Replace with your session/auth lookup to get a stable user ID
+  const userId = "user-123";
+  const { messages } = await req.json();
+  const modelMessages = await convertToModelMessages(messages);
+
+  // Estimate token cost: ~1 token per 4 characters of text (rough heuristic).
+  // For accurate counts use https://www.npmjs.com/package/tiktoken
+  const totalChars = modelMessages.reduce((sum, m) => {
+    const content =
+      typeof m.content === "string" ? m.content : JSON.stringify(m.content);
+    return sum + content.length;
+  }, 0);
+  const estimate = Math.ceil(totalChars / 4);
+
+  // Check the most recent user message for sensitive information.
+  // Pass the full conversation if you want to scan all messages.
+  const lastMessage = (messages.at(-1)?.parts ?? [])
+    .filter(isTextUIPart)
+    .map((p) => p.text)
+    .join(" ");
+
+  // Check with Arcjet before calling the AI provider
+  const decision = await aj.protect(req, {
+    userId,
+    requested: estimate,
+    sensitiveInfoValue: lastMessage,
+  });
+
+  if (decision.isDenied()) {
+    if (decision.reason.isBot()) {
+      return new Response("Automated clients are not permitted", {
+        status: 403,
+      });
+    } else if (decision.reason.isRateLimit()) {
+      return new Response("AI usage limit exceeded", { status: 429 });
+    } else if (decision.reason.isSensitiveInfo()) {
+      return new Response("Sensitive information detected", { status: 400 });
+    } else {
+      return new Response("Forbidden", { status: 403 });
+    }
+  }
+
+  const result = await streamText({
+    model: openai("gpt-4o"),
+    messages: modelMessages,
+  });
+
+  return result.toUIMessageStreamResponse();
+}

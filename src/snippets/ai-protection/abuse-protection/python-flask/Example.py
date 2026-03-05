@@ -6,7 +6,6 @@ from arcjet import (
     arcjet_sync,
     detect_bot,
     shield,
-    token_bucket,
 )
 from flask import Flask, jsonify, request
 from langchain_core.output_parsers import StrOutputParser
@@ -50,23 +49,12 @@ aj = arcjet_sync(
             # An empty allow list blocks all bots, which is a good default for
             # an AI chat app
             allow=[
-                "CURL",  # Allow curl so we can test it
+                "CURL",  # Allow curl so we can test it (see README)
                 # Uncomment to allow these other common bot categories
                 # See the full list at https://arcjet.com/bot-list
                 # BotCategory.MONITOR, # Uptime monitoring services
                 # BotCategory.PREVIEW, # Link previews e.g. Slack, Discord
             ],
-        ),
-        # Create a token bucket rate limit. Other algorithms are supported
-        token_bucket(
-            # Track budgets by arbitrary characteristics of the request. Here
-            # we use user ID, but you could pass any value. Removing this will
-            # fall back to IP-based rate limiting.
-            characteristics=["userId"],
-            mode=Mode.LIVE,
-            refill_rate=5,  # Refill 5 tokens per interval
-            interval=10,  # Refill every 10 seconds
-            capacity=10,  # Bucket capacity of 10 tokens
         ),
     ],
 )
@@ -74,21 +62,13 @@ aj = arcjet_sync(
 
 @app.post("/chat")
 def chat():
-    # Replace with actual user ID from the user session
-    userId = "your_user_id"
     # Call protect() to evaluate the request against the rules
-    decision = aj.protect(
-        request,
-        # Deduct 5 tokens from the bucket
-        requested=5,
-        # Identify the user for rate limiting purposes
-        characteristics={"userId": userId},
-    )
+    decision = aj.protect(request)
 
     # Handle denied requests
     if decision.is_denied():
         status = 429 if decision.reason.is_rate_limit() else 403
-        return jsonify(error="Denied", reason=decision.reason.to_dict()), status
+        return jsonify(error="Denied"), status
 
     # All rules passed, proceed with handling the request
     body = request.get_json()

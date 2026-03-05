@@ -1,0 +1,44 @@
+import Step from "./Example.py?raw";
+import { Code } from "@astrojs/starlight/components";
+
+In this example we use [LangChain](https://www.langchain.com/) to create a
+simple AI chat server with FastAPI, and Arcjet to protect it from abuse. The
+same principles can be applied to any AI application, including those built with
+other frameworks.
+
+Set up the environment and install dependencies (uses
+[uv](https://docs.astral.sh/uv/), but you can also use pip to install the
+[Arcjet Python SDK](https://github.com/arcjet/arcjet-py)):
+
+```shell
+# Export your Arcjet API key from https://app.arcjet.com
+export ARCJET_KEY="ajkey_..."
+export ARCJET_ENV=development
+
+# Export your OpenAI API key (used by LangChain)
+export OPENAI_API_KEY="sk-..."
+
+# Install dependencies
+uv add arcjet fastapi uvicorn langchain langchain-openai
+```
+
+Create the chat server:
+
+<Code code={Step} lang="py" title="main.py" />
+
+Then run the server:
+
+```shell
+uv run uvicorn main:app --reload
+```
+
+And send a message to the API endpoint:
+
+```shell
+curl -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What is the capital of France?"}'
+```
+
+You will see requests being processed in your [Arcjet
+dashboard](https://app.arcjet.com) in real time.

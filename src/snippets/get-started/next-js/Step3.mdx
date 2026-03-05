@@ -1,45 +1,55 @@
-import Step3AppJS from "./Step3App.js?raw";
-import Step3AppTS from "./Step3App.ts?raw";
-import Step3PagesJS from "./Step3Pages.js?raw";
-import Step3PagesTS from "./Step3Pages.ts?raw";
+import ChatRouteTS from "./ChatRoute.ts?raw";
+import ChatRouteJS from "./ChatRoute.js?raw";
+import ChatUITSX from "/src/snippets/ai-protection/ChatUI.tsx?raw";
 import { Code } from "@astrojs/starlight/components";
 import SelectableContent from "@/components/SelectableContent";
 
+This example uses the [Vercel AI SDK](https://sdk.vercel.ai/). Install it along with an AI provider:
+
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="packageManager">
+<div slot="npm" slotIdx="1">
+```sh
+npm install ai @ai-sdk/openai
+```
+</div>
+<div slot="pnpm" slotIdx="2">
+```sh
+pnpm add ai @ai-sdk/openai
+```
+</div>
+<div slot="yarn" slotIdx="3">
+```sh
+yarn add ai @ai-sdk/openai
+```
+</div>
+</SelectableContent>
+
 <SelectableContent client:load syncKey="language">
 <div slot="TS (App)" slotIdx="1">
-Create a new API route at `/app/api/arcjet/route.ts`:
+Create a new API route at `/app/api/chat/route.ts`:
 
 <Code
-  code={Step3AppTS}
+  code={ChatRouteTS}
   lang="ts"
-  title="/app/api/arcjet/route.ts"
-/>
-</div>
-<div slot="TS (Pages)" slotIdx="2">
-Create a new API route at `/pages/api/arcjet.ts`:
-
-<Code
-  code={Step3PagesTS}
-  lang="ts"
-  title="/pages/api/arcjet.ts"
+  title="/app/api/chat/route.ts"
 />
 </div>
 <div slot="JS (App)" slotIdx="3">
-Create a new API route at `/app/api/arcjet/route.js`:
+Create a new API route at `/app/api/chat/route.js`:
 
 <Code
-  code={Step3AppJS}
+  code={ChatRouteJS}
   lang="js"
-  title="/app/api/arcjet/route.js"
-/>
-</div>
-<div slot="JS (Pages)" slotIdx="4">
-Create a new API route at `/pages/api/arcjet.js`:
-
-<Code
-  code={Step3PagesJS}
-  lang="js"
-  title="/pages/api/arcjet.js"
+  title="/app/api/chat/route.js"
 />
 </div>
 </SelectableContent>
+
+And create a new page at `/app/page.tsx`:
+
+<Code
+  code={ChatUITSX}
+  lang="ts"
+  title="/app/page.tsx"
+/>

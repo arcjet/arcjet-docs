@@ -15,9 +15,17 @@ your application or API over a given period of time.
 
 <WhatIsArcjet />
 
-Application-level rate limiting is useful to protect your server from overload,
-prevent abuse of APIs, and make brute-force login attacks expensive and
-impractical.
+Rate limiting is the foundation of AI [Budget
+Control](/ai-protection/budget-control) - enforcing per-user token quotas and
+preventing cost explosions in AI applications. Token bucket rate limiting maps
+directly onto AI token consumption: deduct the estimated token cost of each
+request and deny when the budget is exhausted. Combined with [bot
+protection](/bot-protection), rate limiting gives you complete control over AI
+application access and spend.
+
+Application-level rate limiting is also useful to protect your server from
+overload, prevent abuse of APIs, and make brute-force login attacks expensive
+and impractical.
 
 Other platforms also provide rate limiting, usually at the CDN or network layer.
 Arcjet rate limiting is different because you configure limits inside your
@@ -32,6 +40,11 @@ Arcjet handles rate limit tracking for you.
 
 Use Arcjet rate limiting to protect your application and APIs from abuse and
 excessive traffic. For example:
+
+- **Control AI token spend**
+  Limit how many tokens a user can consume per hour (for example, 5,000
+  tokens/hour) using a token bucket that maps to your AI provider's billing
+  model. Prevents cost attacks and enforces per-user AI usage budgets.
 
 - **Protect login and authentication flows**
   Limit how often a user can attempt to log in (for example, 5 attempts in 5

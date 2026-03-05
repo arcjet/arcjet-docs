@@ -4,8 +4,6 @@ import os
 from arcjet import (
     Mode,
     arcjet_sync,
-    detect_bot,
-    shield,
     token_bucket,
 )
 from flask import Flask, jsonify, request
@@ -42,21 +40,6 @@ chain = prompt | llm | StrOutputParser()
 aj = arcjet_sync(
     key=arcjet_key,  # Get your key from https://app.arcjet.com
     rules=[
-        # Shield protects your app from common attacks e.g. SQL injection
-        shield(mode=Mode.LIVE),
-        # Create a bot detection rule
-        detect_bot(
-            mode=Mode.LIVE,
-            # An empty allow list blocks all bots, which is a good default for
-            # an AI chat app
-            allow=[
-                "CURL",  # Allow curl so we can test it
-                # Uncomment to allow these other common bot categories
-                # See the full list at https://arcjet.com/bot-list
-                # BotCategory.MONITOR, # Uptime monitoring services
-                # BotCategory.PREVIEW, # Link previews e.g. Slack, Discord
-            ],
-        ),
         # Create a token bucket rate limit. Other algorithms are supported
         token_bucket(
             # Track budgets by arbitrary characteristics of the request. Here
@@ -74,8 +57,8 @@ aj = arcjet_sync(
 
 @app.post("/chat")
 def chat():
-    # Replace with actual user ID from the user session
-    userId = "your_user_id"
+    userId = "user-123"  # In a real app, identify the user from the request (e.g. auth token)
+
     # Call protect() to evaluate the request against the rules
     decision = aj.protect(
         request,
@@ -88,7 +71,7 @@ def chat():
     # Handle denied requests
     if decision.is_denied():
         status = 429 if decision.reason.is_rate_limit() else 403
-        return jsonify(error="Denied", reason=decision.reason.to_dict()), status
+        return jsonify(error="Denied"), status
 
     # All rules passed, proceed with handling the request
     body = request.get_json()

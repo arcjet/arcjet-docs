@@ -1,0 +1,100 @@
+---
+title: "AI budget control"
+titleByFramework:
+  default: "AI budget control"
+  next-js: "AI budget control for Next.js"
+  python-fastapi: "AI budget control for Python + FastAPI"
+  python-flask: "AI budget control for Python + Flask"
+description: "Enforce per-user AI token budgets with Arcjet rate limiting. Stop cost explosions and free-tier abuse with token bucket rate limits."
+prev: true
+next: true
+frameworks:
+  - next-js
+  - python-fastapi
+  - python-flask
+ajToc:
+  - text: "Get started"
+    anchor: "get-started"
+  - text: "Configuring the rate limit"
+    anchor: "configuring-the-rate-limit"
+  - text: "Token estimation"
+    anchor: "token-estimation"
+---
+
+import { Link } from "@/components/link";
+import SlotByFramework from "@/components/SlotByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
+import { frameworks } from "@/lib/prefs";
+
+import NextJsStep from "@/snippets/ai-protection/budget-control/nextjs/Example.mdx";
+import PythonFastapiStep from "@/snippets/ai-protection/budget-control/python-fastapi/Example.mdx";
+import PythonFlaskStep from "@/snippets/ai-protection/budget-control/python-flask/Example.mdx";
+
+AI providers bill per token. Without per-user limits, a single user can exhaust
+your entire monthly budget - through prompt attacks, runaway loops, or just
+heavy legitimate use.
+
+A token bucket rate limit maps directly onto how AI billing works: you estimate
+the cost of each request in tokens, deduct it from the user's bucket, and deny
+requests when the bucket is empty. The bucket refills over time, giving each
+user a sustained allowance without sharp rate-limit cliffs.
+
+Alternatively, you can use a fixed window or sliding window limit to enforce a
+hard cap on spend per user per day, week, or month. See the [rate limiting
+algorithms reference](/rate-limiting/algorithms) for details on different
+approaches.
+
+Arcjet handles bucket state across all instances of your application - no Redis
+or external state store required.
+
+## Get started
+
+<FrameworkLinks
+  client:load
+  exclude={frameworks
+    .filter((d) => !frontmatter.frameworks.includes(d.key))
+    .map((d) => d.key)}
+/>
+
+<SlotByFramework client:load>
+  <NextJsStep slot="next-js" />
+  <PythonFastapiStep slot="python-fastapi" />
+  <PythonFlaskStep slot="python-flask" />
+</SlotByFramework>
+
+## Configuring the rate limit
+
+`characteristics: ["userId"]` - Tracks the bucket per user. Replace
+`"userId"` with the characteristic that identifies a unique user in your
+application (e.g. a session token, API key, or authenticated user ID). Pass the
+value to `aj.protect()` as a named argument.
+
+`refillRate` and `interval` - Set the sustained allowance. `refillRate: 2_000,
+interval: "1h"` gives each user 2,000 tokens per hour. Adjust to match your AI
+provider's pricing and your cost targets. These are hard coded in this example,
+but you can also calculate them dynamically based on user subscription level or
+other factors. Just pass in the calculated values to the rule.
+
+`capacity` - The maximum tokens a user can accumulate. Setting `capacity:
+5_000` with `refillRate: 2_000` lets users burst up to 5,000 tokens if they
+haven't used their allowance recently.
+
+## Token estimation
+
+The example uses a `characters / 4` heuristic (~1 token per 4 characters for
+common English text). This is a reasonable starting point — it avoids
+introducing extra dependencies and works well enough for budget enforcement
+where a small margin of error is acceptable.
+
+For accurate counts, use a tokenizer:
+
+- JavaScript / TypeScript: [`tiktoken`](https://www.npmjs.com/package/tiktoken)
+- Python: [`tiktoken`](https://github.com/openai/tiktoken)
+- Anthropic: [provides a token counting API](https://docs.anthropic.com/en/docs/build-with-claude/token-counting)
+
+## Learn more
+
+- <Link.Page href="/rate-limiting">Rate limiting introduction</Link.Page>
+- <Link.Page href="/rate-limiting/algorithms">Rate limiting algorithms</Link.Page>
+- <Link.Page href="/rate-limiting/reference">Full rate limiting reference</Link.Page>
+- <Link.Page href="/blueprints/ai-quota-control">AI quota control blueprint</Link.Page>

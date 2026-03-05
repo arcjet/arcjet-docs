@@ -3,20 +3,16 @@ import { Link } from "@/components/link";
 ## 4. Start app
 
 ```sh
-uv run --env-file .env flask run --reload
+uv run flask run --reload
 ```
 
-Visit [`http://localhost:5000`](http://localhost:5000) in your browser and
-refresh a few times to hit the rate limit.
+And send a message to the API endpoint:
 
-Wait 10 seconds, then run:
-
-```sh
-curl -v http://localhost:5000
+```shell
+curl -X POST http://localhost:5000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What is the capital of France?"}'
 ```
 
-The wait is necessary because the decision is cached for your IP based on the
-`interval` rate limit configuration.
-
-You should see a `403` response because `curl` is considered a bot by default
-(<Link.Page href="/bot-protection/identifying-bots">customizable</Link.Page>).
+You will see requests being processed in your [Arcjet
+dashboard](https://app.arcjet.com) in real time.

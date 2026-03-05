@@ -22,17 +22,8 @@ yarn run dev
 </div>
 </SelectableContent>
 
-Visit [`http://localhost:3000/api/arcjet`](http://localhost:3000/api/arcjet) in
-your browser and refresh a few times to hit the rate limit.
+Then start chatting with the AI in your app! You will see requests being
+processed in your [Arcjet dashboard](https://app.arcjet.com) in real time.
 
-Wait 10 seconds, then run:
-
-```sh
-curl -v http://localhost:3000/api/arcjet
-```
-
-The wait is necessary because the decision is cached for your IP based on the
-`interval` rate limit configuration.
-
-You should see a `403` response because `curl` is considered a bot by default
-(<Link.Page href="/bot-protection/identifying-bots">customizable</Link.Page>).
+Try entering an email address to see the sensitive info detection in action, or
+sending many messages in a row to trigger the rate limit.

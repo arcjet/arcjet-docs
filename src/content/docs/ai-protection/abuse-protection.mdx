@@ -1,0 +1,102 @@
+---
+title: "AI app abuse protection"
+titleByFramework:
+  default: "AI app abuse protection"
+  next-js: "AI app abuse protection for Next.js"
+  python-fastapi: "AI app abuse protection for Python + FastAPI"
+  python-flask: "AI app abuse protection for Python + Flask"
+description: "Block automated clients from your AI applications. Detect and deny bots using Arcjet bot detection to prevent cost inflation and abuse."
+prev: true
+next: true
+frameworks:
+  - next-js
+  - python-fastapi
+  - python-flask
+ajToc:
+  - text: "Get started"
+    anchor: "get-started"
+  - text: "Configuring bot detection"
+    anchor: "configuring-bot-detection"
+  - text: "Budget control"
+    anchor: "budget-control"
+---
+
+import { Link } from "@/components/link";
+import SlotByFramework from "@/components/SlotByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
+import { frameworks } from "@/lib/prefs";
+
+import NextJsStep from "@/snippets/ai-protection/abuse-protection/nextjs/Example.mdx";
+import PythonFastapiStep from "@/snippets/ai-protection/abuse-protection/python-fastapi/Example.mdx";
+import PythonFlaskStep from "@/snippets/ai-protection/abuse-protection/python-flask/Example.mdx";
+
+Automated clients - scrapers, data harvesters, and script-based attackers -
+treat AI features as free compute. Without bot protection, every request from a
+bot reaches your AI provider and inflates your costs.
+
+Arcjet bot detection runs inside your application, before the AI call, so denied
+requests never reach your provider. It classifies known bots, verifies good
+bots, and detects emerging threats in real time so you can control access per
+route with full application context (identity, subscription level, session
+state).
+
+## Get started
+
+<FrameworkLinks
+  client:load
+  exclude={frameworks
+    .filter((d) => !frontmatter.frameworks.includes(d.key))
+    .map((d) => d.key)}
+/>
+
+<SlotByFramework client:load>
+  <NextJsStep slot="next-js" />
+  <PythonFastapiStep slot="python-fastapi" />
+  <PythonFlaskStep slot="python-flask" />
+</SlotByFramework>
+
+## Configuring bot detection
+
+`allow: []` blocks all automated clients. This is the recommended default for AI
+routes where no bot traffic is legitimate.
+
+To allow specific categories or named bots [from our list of known
+bots](/bot-protection/identifying-bots), add them to the allow list:
+
+```ts
+detectBot({
+  mode: "LIVE",
+  allow: [
+    "CURL", // Allow curl-based scripts
+    "CATEGORY:MONITOR",  // Uptime monitoring services
+    "CATEGORY:PREVIEW",  // Link previewers (Slack, Discord, etc.)
+  ],
+})
+```
+
+## Budget control
+
+Bot protection controls *who* can call your AI features. To also control *how
+much* each user can consume, combine it with
+[AI budget control](/ai-protection/budget-control):
+
+```ts
+rules: [
+  detectBot({ mode: "LIVE", allow: [] }),
+  tokenBucket({ // Token bucket rate limiting is best for AI budget control
+    mode: "LIVE",
+    characteristics: ["userId"], // Link limits to users
+    refillRate: 2_000, // Refill 2000 tokens per interval
+    interval: "1h", // Refill interval
+    capacity: 5_000, // Max tokens
+  }),
+]
+```
+
+The [get started guide](/get-started) shows the combined pattern.
+
+## Learn more
+
+- <Link.Page href="/bot-protection">Bot protection introduction</Link.Page>
+- <Link.Page href="/bot-protection/identifying-bots">Identifying and allowing specific bots</Link.Page>
+- <Link.Page href="/bot-protection/reference">Full bot protection reference</Link.Page>

@@ -3,17 +3,17 @@ import os
 
 from arcjet import (
     Mode,
-    arcjet_sync,
-    detect_bot,
-    shield,
+    arcjet,
     token_bucket,
 )
-from flask import Flask, jsonify, request
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
+from pydantic import BaseModel
 
-app = Flask(__name__)
+app = FastAPI()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -39,24 +39,14 @@ prompt = ChatPromptTemplate.from_messages(
 
 chain = prompt | llm | StrOutputParser()
 
-aj = arcjet_sync(
+
+class ChatRequest(BaseModel):
+    message: str
+
+
+aj = arcjet(
     key=arcjet_key,  # Get your key from https://app.arcjet.com
     rules=[
-        # Shield protects your app from common attacks e.g. SQL injection
-        shield(mode=Mode.LIVE),
-        # Create a bot detection rule
-        detect_bot(
-            mode=Mode.LIVE,
-            # An empty allow list blocks all bots, which is a good default for
-            # an AI chat app
-            allow=[
-                "CURL",  # Allow curl so we can test it
-                # Uncomment to allow these other common bot categories
-                # See the full list at https://arcjet.com/bot-list
-                # BotCategory.MONITOR, # Uptime monitoring services
-                # BotCategory.PREVIEW, # Link previews e.g. Slack, Discord
-            ],
-        ),
         # Create a token bucket rate limit. Other algorithms are supported
         token_bucket(
             # Track budgets by arbitrary characteristics of the request. Here
@@ -73,11 +63,11 @@ aj = arcjet_sync(
 
 
 @app.post("/chat")
-def chat():
-    # Replace with actual user ID from the user session
-    userId = "your_user_id"
+async def chat(request: Request, body: ChatRequest):
+    userId = "user-123"  # In a real app, identify the user from the request (e.g. auth token)
+
     # Call protect() to evaluate the request against the rules
-    decision = aj.protect(
+    decision = await aj.protect(
         request,
         # Deduct 5 tokens from the bucket
         requested=5,
@@ -88,15 +78,9 @@ def chat():
     # Handle denied requests
     if decision.is_denied():
         status = 429 if decision.reason.is_rate_limit() else 403
-        return jsonify(error="Denied", reason=decision.reason.to_dict()), status
+        return JSONResponse({"error": "Denied"}, status_code=status)
 
     # All rules passed, proceed with handling the request
-    body = request.get_json()
-    message = body.get("message", "") if body else ""
-    reply = chain.invoke({"message": message})
+    reply = await chain.ainvoke({"message": body.message})
 
-    return jsonify(reply=reply)
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
+    return {"reply": reply}

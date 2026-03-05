@@ -1,0 +1,36 @@
+import ChatRoute from "./ChatRoute.ts?raw";
+import ChatUI from "../../ChatUI.tsx?raw";
+import { Code } from "@astrojs/starlight/components";
+
+In this example we use the [Vercel AI SDK](https://sdk.vercel.ai/) to create a
+simple AI chat endpoint with Next.js, and Arcjet to enforce per-user token
+budgets to prevent cost overruns. The same principles can be applied to any AI
+application, including those built with other frameworks.
+
+We assume you already have a Next.js app set up.
+
+Install the dependencies:
+
+```shell
+# Export your Arcjet API key from https://app.arcjet.com
+export ARCJET_KEY="ajkey_..."
+
+npm install @arcjet/next ai @ai-sdk/openai
+```
+
+Create an AI chat endpoint:
+
+<Code code={ChatRoute} lang="ts" title="/app/api/chat/route.ts" />
+
+And hook it up to a chat UI:
+
+<Code code={ChatUI} lang="ts" title="/app/page.tsx" />
+
+Then run the server:
+
+```shell
+npm run dev
+```
+
+You will see requests being processed in your [Arcjet
+dashboard](https://app.arcjet.com) in real time.
