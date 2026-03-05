@@ -9,6 +9,10 @@ import { expect, test } from "@playwright/test";
  */
 const PATHS_FROM_SITEMAP = [
   "/",
+  "/ai-protection/",
+  "/ai-protection/abuse-protection",
+  "/ai-protection/budget-control",
+  "/ai-protection/data-loss-prevention",
   "/architecture/",
   "/best-practices/",
   "/blueprints/ai-quota-control/",
@@ -41,7 +45,6 @@ const PATHS_FROM_SITEMAP = [
   "/integrations/clerk/",
   "/integrations/langchain/",
   "/integrations/nextauth/",
-  "/integrations/openai/",
   "/ip/",
   "/limitations/",
   "/nosecone/quick-start/",

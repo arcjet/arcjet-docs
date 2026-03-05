@@ -8,7 +8,7 @@ ignore-me
 
 This guide shows how to use the package [`@arcjet/react-router`](https://www.npmjs.com/package/@arcjet/react-router). Its source code is [on GitHub](https://github.com/arcjet/arcjet-js/tree/main/arcjet-react-router). The code is open source and licensed under Apache 2.0.
 
-**What is Arcjet?** [Arcjet](https://arcjet.com) helps developers protect their apps in just a few lines of code. Bot detection. Rate limiting. Email validation. Attack protection. Data redaction. A developer-first approach to security.
+**What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime policy engine for AI features. Authorize tools, control budgets, and protect against spam and bots. A developer-first approach to securing AI applications.
 
 Quick start
 -----------

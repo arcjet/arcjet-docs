@@ -1,8 +1,10 @@
 Arcjet rate limiting lets you control how many requests a client can make to your application or API over a given period of time.
 
-**What is Arcjet?** [Arcjet](https://arcjet.com) helps developers protect their apps in just a few lines of code. Bot detection. Rate limiting. Email validation. Attack protection. Data redaction. A developer-first approach to security.
+**What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime policy engine for AI features. Authorize tools, control budgets, and protect against spam and bots. A developer-first approach to securing AI applications.
 
-Application-level rate limiting is useful to protect your server from overload, prevent abuse of APIs, and make brute-force login attacks expensive and impractical.
+Rate limiting is the foundation of AI [Budget Control](/ai-protection/budget-control) - enforcing per-user token quotas and preventing cost explosions in AI applications. Token bucket rate limiting maps directly onto AI token consumption: deduct the estimated token cost of each request and deny when the budget is exhausted. Combined with [bot protection](/bot-protection), rate limiting gives you complete control over AI application access and spend.
+
+Application-level rate limiting is also useful to protect your server from overload, prevent abuse of APIs, and make brute-force login attacks expensive and impractical.
 
 Other platforms also provide rate limiting, usually at the CDN or network layer. Arcjet rate limiting is different because you configure limits inside your application code. This gives you full, dynamic control over what to allow or block, where, and when. You can use different strategies per route, per endpoint, or based on user subscription level.
 
@@ -15,6 +17,8 @@ When to use Arcjet rate limiting
 
 Use Arcjet rate limiting to protect your application and APIs from abuse and excessive traffic. For example:
 
+*   **Control AI token spend** Limit how many tokens a user can consume per hour (for example, 5,000 tokens/hour) using a token bucket that maps to your AI provider’s billing model. Prevents cost attacks and enforces per-user AI usage budgets.
+    
 *   **Protect login and authentication flows** Limit how often a user can attempt to log in (for example, 5 attempts in 5 minutes) to slow down attackers trying many username/password combinations.
     
 *   **Throttle API clients** Limit how many requests a client can make to an API (for example, 100 requests per minute) to prevent a single client from overloading your API or impacting other users.

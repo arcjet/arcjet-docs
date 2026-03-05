@@ -1,19 +1,15 @@
 # Arcjet
 
-Arcjet is an SDK to help developers protect their applications from security
-threats. It provides features like bot protection, rate limiting, WAF, email
-validation, signup form protection, and sensitive information detection &
-redaction. These can be integrated into applications with just a few lines of
-code.
+Arcjet is the runtime policy engine for AI features. It helps protect AI
+applications by providing guardrails across the entire AI lifecycle, using real
+application context (identity, route, session, cost budgets), not just prompt
+content. Authorize tools, control budgets, and protect against spam and bots.
 
 ## Docs
 
 A quick start guide is available to show how to configure Arcjet rules to
-protect your app from attacks, apply a rate limit, and prevent bots from
-accessing your app for the following frameworks.
-
-Each link below directs to the quick start guide page with a framework-specific
-view:
+protect your app from attacks. Each link below directs to the quick start guide
+page with a framework-specific view:
 
 - [Astro quick start](https://docs.arcjet.com/get-started?f=astro)
 - [Bun quick start](https://docs.arcjet.com/get-started?f=bun)
@@ -26,6 +22,8 @@ view:
 - [Node.js + Express.js quick start](https://docs.arcjet.com/get-started?f=node-js-express)
 - [Node.js + Hono quick start](https://docs.arcjet.com/get-started?f=node-js-hono)
 - [Nuxt quick start](https://docs.arcjet.com/get-started?f=nuxt)
+- [Python FastAPI quick start](https://docs.arcjet.com/get-started?f=python-fastapi)
+- [Python Flask quick start](https://docs.arcjet.com/get-started?f=python-flask)
 - [React Router quick start](https://docs.arcjet.com/get-started?f=react-router)
 - [Remix quick start](https://docs.arcjet.com/get-started?f=remix)
 - [SvelteKit quick start](https://docs.arcjet.com/get-started?f=sveltekit)
@@ -34,8 +32,8 @@ The full docs can be found at https://docs.arcjet.com
 
 ## Next.js example
 
-This example will protect a Next.js API route with a rate limit, bot detection,
-and Shield WAF.
+This configures Arcjet to protect your AI application: block automated clients
+that inflate costs, and enforce per-user token budgets.
 
 ### 1. Installation
 
@@ -57,80 +55,162 @@ Add your key to a `.env.local` file in your project root.
 ARCJET_KEY=ajkey_yourkey
 ```
 
-### 3. Add rules
+### 3. Configure
 
 Create a new API route at `/app/api/arcjet/route.ts`:
 
 ```ts
+import { openai } from "@ai-sdk/openai";
 import arcjet, {
-  type ArcjetRuleResult,
   detectBot,
+  sensitiveInfo,
   shield,
   tokenBucket,
 } from "@arcjet/next";
-import { NextResponse } from "next/server";
+import type { UIMessage } from "ai";
+import { convertToModelMessages, isTextUIPart, streamText } from "ai";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!,
+  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  // Track budgets per user — replace "userId" with any stable identifier
+  characteristics: ["userId"],
   rules: [
-    // Shield protects your app from common attacks e.g. SQL injection
+    // Shield protects against common web attacks e.g. SQL injection
     shield({ mode: "LIVE" }),
-    // Create a bot detection rule
+    // Block all automated clients — bots inflate AI costs
     detectBot({
       mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
-      // Block all bots except the following
-      allow: [
-        "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc
-        // Uncomment to allow these other common bot categories
-        // See the full list at https://arcjet.com/bot-list
-        //"CATEGORY:MONITOR", // Uptime monitoring services
-        //"CATEGORY:PREVIEW", // Link previews e.g. Slack, Discord
-      ],
+      allow: [], // Block all bots. See https://arcjet.com/bot-list
     }),
-    // Create a token bucket rate limit. Other algorithms are supported.
+    // Enforce budgets to control AI costs. Adjust rates and limits as needed.
     tokenBucket({
-      mode: "LIVE",
-      refillRate: 5, // Refill 5 tokens per interval
-      interval: 10, // Refill every 10 seconds
-      capacity: 10, // Bucket capacity of 10 tokens
+      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+      refillRate: 2_000, // Refill 2,000 tokens per hour
+      interval: "1h",
+      capacity: 5_000, // Maximum 5,000 tokens in the bucket
+    }),
+    // Block messages containing sensitive information to prevent data leaks
+    sensitiveInfo({
+      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+      // Block PII types that should never appear in AI prompts.
+      // Remove types your app legitimately handles (e.g. EMAIL for a support bot).
+      deny: ["CREDIT_CARD_NUMBER", "EMAIL"],
     }),
   ],
 });
 
-export async function GET(req: Request) {
-  // Deduct 5 tokens from the bucket for this request
-  const decision = await aj.protect(req, { requested: 5 });
-  console.log("Arcjet decision", decision);
+export async function POST(req: Request) {
+  // Replace with your session/auth lookup to get a stable user ID
+  const userId = "user-123";
+  const { messages }: { messages: UIMessage[] } = await req.json();
+  const modelMessages = await convertToModelMessages(messages);
+
+  // Estimate token cost: ~1 token per 4 characters of text (rough heuristic).
+  // For accurate counts use https://www.npmjs.com/package/tiktoken
+  const totalChars = modelMessages.reduce((sum, m) => {
+    const content =
+      typeof m.content === "string" ? m.content : JSON.stringify(m.content);
+    return sum + content.length;
+  }, 0);
+  const estimate = Math.ceil(totalChars / 4);
+
+  // Check the most recent user message for sensitive information.
+  // Pass the full conversation if you want to scan all messages.
+  const lastMessage: string = (messages.at(-1)?.parts ?? [])
+    .filter(isTextUIPart)
+    .map((p) => p.text)
+    .join(" ");
+
+  // Check with Arcjet before calling the AI provider
+  const decision = await aj.protect(req, {
+    userId,
+    requested: estimate,
+    sensitiveInfoValue: lastMessage,
+  });
 
   if (decision.isDenied()) {
-    if (decision.reason.isRateLimit()) {
-      return NextResponse.json(
-        { error: "Too Many Requests", reason: decision.reason },
-        { status: 429 },
-      );
-    } else if (decision.reason.isBot()) {
-      return NextResponse.json(
-        { error: "No bots allowed", reason: decision.reason },
-        { status: 403 },
-      );
+    if (decision.reason.isBot()) {
+      return new Response("Automated clients are not permitted", {
+        status: 403,
+      });
+    } else if (decision.reason.isRateLimit()) {
+      return new Response("AI usage limit exceeded", { status: 429 });
+    } else if (decision.reason.isSensitiveInfo()) {
+      return new Response("Sensitive information detected", { status: 400 });
     } else {
-      return NextResponse.json(
-        { error: "Forbidden", reason: decision.reason },
-        { status: 403 },
-      );
+      return new Response("Forbidden", { status: 403 });
     }
   }
 
-  return NextResponse.json({ message: "Hello world" });
+  const result = await streamText({
+    model: openai("gpt-4o"),
+    messages: modelMessages,
+  });
+
+  return result.toUIMessageStreamResponse();
 }
 ```
 
-The `{ requested: 5 }` option specifies that this request consumes 5 tokens from
-the rate limit bucket. Adjust this value based on the "cost" of each request.
+The `requested` option specifies how many tokens this request consumes from the
+rate limit bucket. The example estimates cost at ~1 token per 4 characters of
+text. Adjust this value based on your AI provider's billing model or use a
+tokenizer like `tiktoken` for accurate counts.
 
 Calls to `protect()` only require additional options when the rule requires
 additional information. For example, the token bucket rate limit rule requires
 the number of tokens to consume.
+
+Next, create a new page at `/app/page.tsx` for the chat UI:
+
+```tsx
+"use client";
+
+import { useChat } from "@ai-sdk/react";
+import { useState } from "react";
+
+export default function Chat() {
+  const [input, setInput] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { messages, sendMessage } = useChat({
+    onError: async (e) => setErrorMessage(e.message),
+  });
+  return (
+    <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
+      {messages.map((message) => (
+        <div key={message.id} className="whitespace-pre-wrap">
+          {message.role === "user" ? "User: " : "AI: "}
+          {message.parts.map((part, i) => {
+            switch (part.type) {
+              case "text":
+                return <div key={`${message.id}-${i}`}>{part.text}</div>;
+            }
+          })}
+        </div>
+      ))}
+
+      {errorMessage && (
+        <div className="text-red-500 text-sm mb-4">{errorMessage}</div>
+      )}
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          sendMessage({ text: input });
+          setInput("");
+          setErrorMessage(null);
+        }}
+      >
+        <input
+          className="fixed dark:bg-zinc-900 bottom-0 w-full max-w-md p-2 mb-8 border border-zinc-300 dark:border-zinc-800 rounded shadow-xl"
+          value={input}
+          placeholder="Say something..."
+          onChange={(e) => setInput(e.currentTarget.value)}
+        />
+      </form>
+    </div>
+  );
+}
+```
 
 ### 4. Start your app
 
@@ -138,22 +218,172 @@ the number of tokens to consume.
 npm run dev
 ```
 
-Visit `http://localhost:3000/api/arcjet` in your browser and refresh a few times
-to hit the rate limit.
+Then start chatting with the AI in your app! You will see requests being
+processed in your [Arcjet dashboard](https://app.arcjet.com) in real time.
 
-Wait 10 seconds, then run:
+Try entering an email address to see the sensitive info detection in action, or
+sending many messages in a row to trigger the rate limit.
+
+## Python FastAPI example
+
+This configures Arcjet to protect your AI application: block automated clients
+that inflate costs, and enforce per-user token budgets.
+
+### 1. Installation
+
+Set up a project and install dependencies (uses [uv](https://docs.astral.sh/uv/),
+but you can also use pip to install the
+[Arcjet Python SDK](https://github.com/arcjet/arcjet-py)):
 
 ```shell
-curl -v http://localhost:3000/api/arcjet
+mkdir arcjet-fastapi
+cd arcjet-fastapi
+uv init
+uv add arcjet fastapi uvicorn langchain langchain-openai
 ```
 
-The wait is necessary because the decision is cached for your IP based on the
-`interval` rate limit configuration.
+### 2. Set your key
 
-You should see a `403` response because `curl` is considered a bot by default
-([customizable](https://docs.arcjet.com/bot-protection/identifying-bots)).
+[Create a free Arcjet account](https://app.arcjet.com) then follow the
+instructions to add a site and get a key.
 
-The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
+Set your environment variables:
+
+```ini
+ARCJET_KEY=ajkey_yourkey
+ARCJET_ENV=development
+
+# OpenAI API key (used by LangChain)
+OPENAI_API_KEY=sk-...
+```
+
+### 3. Configure
+
+Create `main.py`:
+
+```python
+import logging
+import os
+
+from arcjet import (
+    Mode,
+    arcjet,
+    detect_bot,
+    shield,
+    token_bucket,
+)
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+arcjet_key = os.getenv("ARCJET_KEY")
+if not arcjet_key:
+    raise RuntimeError("ARCJET_KEY is required. Get one at https://app.arcjet.com")
+
+openai_api_key = os.getenv("OPENAI_API_KEY")
+if not openai_api_key:
+    raise RuntimeError(
+        "OPENAI_API_KEY is required. Get one at https://platform.openai.com"
+    )
+
+llm = ChatOpenAI(model="gpt-4o-mini", api_key=openai_api_key)
+
+prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", "You are a helpful assistant."),
+        ("human", "{message}"),
+    ]
+)
+
+chain = prompt | llm | StrOutputParser()
+
+
+class ChatRequest(BaseModel):
+    message: str
+
+
+aj = arcjet(
+    key=arcjet_key,  # Get your key from https://app.arcjet.com
+    rules=[
+        # Shield protects your app from common attacks e.g. SQL injection
+        shield(mode=Mode.LIVE),
+        # Create a bot detection rule
+        detect_bot(
+            mode=Mode.LIVE,
+            # An empty allow list blocks all bots, which is a good default for
+            # an AI chat app
+            allow=[
+                "CURL",  # Allow curl so we can test it
+                # Uncomment to allow these other common bot categories
+                # See the full list at https://arcjet.com/bot-list
+                # BotCategory.MONITOR, # Uptime monitoring services
+                # BotCategory.PREVIEW, # Link previews e.g. Slack, Discord
+            ],
+        ),
+        # Create a token bucket rate limit. Other algorithms are supported
+        token_bucket(
+            # Track budgets by arbitrary characteristics of the request. Here
+            # we use user ID, but you could pass any value. Removing this will
+            # fall back to IP-based rate limiting.
+            characteristics=["userId"],
+            mode=Mode.LIVE,
+            refill_rate=5,  # Refill 5 tokens per interval
+            interval=10,  # Refill every 10 seconds
+            capacity=10,  # Bucket capacity of 10 tokens
+        ),
+    ],
+)
+
+
+@app.post("/chat")
+async def chat(request: Request, body: ChatRequest):
+    # Replace with actual user ID from the user session
+    userId = "your_user_id"
+
+    # Call protect() to evaluate the request against the rules
+    decision = await aj.protect(
+        request,
+        # Deduct 5 tokens from the bucket
+        requested=5,
+        # Identify the user for rate limiting purposes
+        characteristics={"userId": userId},
+    )
+
+    # Handle denied requests
+    if decision.is_denied():
+        status = 429 if decision.reason.is_rate_limit() else 403
+        return JSONResponse({"error": "Denied"}, status_code=status)
+
+    # All rules passed, proceed with handling the request
+    reply = await chain.ainvoke({"message": body.message})
+
+    return {"reply": reply}
+```
+
+### 4. Start your app
+
+```shell
+uv run uvicorn main:app --reload
+```
+
+Send a message to the API endpoint:
+
+```shell
+curl -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What is the capital of France?"}'
+```
+
+You will see requests being processed in your [Arcjet
+dashboard](https://app.arcjet.com) in real time.
 
 ## Product philosophy
 
@@ -180,8 +410,15 @@ IP analysis data (country only), and cannot use the email validation or
 sensitive information detection features. See https://arcjet.com/pricing for
 details.
 
-- Arcjet currently supports JS with SDKs for Astro, Bun, Deno, Fastify, NestJS,
-Next.js, Node.js, Nuxt, React Router, Remix, and SvelteKit.
+- Review https://docs.arcjet.com/best-practices for tips on how to get the most out of Arcjet and avoid
+common pitfalls.
+
+## Language and framework support
+
+- JS with SDKs for Astro, Bun, Deno, Fastify, NestJS, Next.js, Node.js, Nuxt,
+React Router, Remix, and SvelteKit. 
+
+- Python with SDKs for FastAPI and Flask.
 
 ## Tips
 
