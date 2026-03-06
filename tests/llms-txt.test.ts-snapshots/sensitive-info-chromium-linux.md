@@ -1,8 +1,8 @@
 Arcjet sensitive information detection lets you detect and block sensitive data in request bodies before it enters your application. Use it to prevent clients from sending personally identifiable information (PII) and other data you do not want to handle.
 
-**What is Arcjet?** [Arcjet](https://arcjet.com) helps developers protect their apps in just a few lines of code. Bot detection. Rate limiting. Email validation. Attack protection. Data redaction. A developer-first approach to security.
+**What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime policy engine for AI features. Authorize tools, control budgets, and protect against spam and bots. A developer-first approach to securing AI applications.
 
-This rule runs entirely locally in your environment, inside the WebAssembly sandbox shipped with the Arcjet SDK. No request body data ever leaves your infrastructure.
+Sensitive information detection is Arcjet’s [AI Data Loss Prevention layer](/ai-protection/data-loss-prevention) - stopping PII from leaking into AI model context, training data, or third-party tool calls made by agents. When a user pastes a credit card number or email address into a chat prompt, Arcjet catches it before it reaches your AI provider. All detection runs entirely locally inside the WebAssembly sandbox shipped with the Arcjet SDK. No request body data ever leaves your infrastructure.
 
 You can block common types of PII such as email addresses, card numbers, IP addresses, and phone numbers, as well as custom patterns you define.
 
@@ -15,10 +15,11 @@ When to use Arcjet sensitive info detection
 
 Use sensitive information detection when you want to:
 
+*   **Prevent PII from leaking into AI model context** — stop users from accidentally (or deliberately) pasting card numbers, email addresses, or other regulated data into prompts sent to your AI provider.
+*   **Block sensitive data from agent tool calls** — prevent PII from appearing in tool arguments or responses that may be logged or forwarded to third-party services.
 *   Reduce your compliance burden by avoiding storage of PII and other regulated data.
 *   Prevent users from pasting card numbers or other sensitive data into generic text fields (for example, support forms, feedback forms, or chat boxes).
 *   Enforce rules that certain endpoints must not receive PII at all.
-*   Prevent sensitive data being sent to third-party integrations, such as support ticket systems or LLMs.
 
 For email addresses specifically, you can also use [Arcjet email validation](/email-validation) to validate and verify addresses before creating accounts or sending email.
 

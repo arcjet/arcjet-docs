@@ -1,6 +1,8 @@
 Arcjet bot protection lets you detect bots, block bad bots, verify legitimate bots, and reduce unwanted automated requests before they reach your application.
 
-**What is Arcjet?** [Arcjet](https://arcjet.com) helps developers protect their apps in just a few lines of code. Bot detection. Rate limiting. Email validation. Attack protection. Data redaction. A developer-first approach to security.
+**What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime policy engine for AI features. Authorize tools, control budgets, and protect against spam and bots. A developer-first approach to securing AI applications.
+
+Bot protection is a core component of [AI Abuse Protection](/ai-protection/abuse-protection) - blocking automated clients that inflate token costs and exhaust per-user budgets in AI applications. Bots targeting AI features don’t just cause security problems; they cause direct financial harm. Combined with [rate limiting](/rate-limiting), bot protection gives you full control over who can access your AI features and at what cost.
 
 Bots are not all the same. Some are useful (for example, search engine crawlers) and identify themselves consistently, which makes them easy to detect and allow. However, these are rarely the bots you want to block.
 
@@ -26,6 +28,8 @@ When to use bot protection
 
 Use Arcjet bot protection whenever you need to control traffic from automated clients and bots, for example:
 
+*   AI chat applications and completion APIs targeted by automated clients seeking to exploit free tiers or inflate your AI provider costs.
+*   Agent tools where bot access could trigger unauthorized side-effects or bypass per-user budget controls.
 *   Signup and login forms targeted by credential stuffing or spam.
 *   APIs and endpoints scraped by bots.
 *   Pricing pages, search, or content pages that attract heavy scraping.

@@ -1,0 +1,75 @@
+---
+title: "AI data loss prevention"
+titleByFramework:
+  default: "AI data loss prevention"
+  next-js: "AI data loss prevention for Next.js"
+description: "Stop PII from reaching your AI provider. Use Arcjet sensitive info detection to block credit card numbers, phone numbers, and other personal data in AI prompts."
+prev: true
+next: true
+frameworks:
+  - next-js
+ajToc:
+  - text: "Get started"
+    anchor: "get-started"
+  - text: "Configuring sensitive info detection"
+    anchor: "configuring-sensitive-info-detection"
+---
+
+import { Link } from "@/components/link";
+import SlotByFramework from "@/components/SlotByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
+import { frameworks } from "@/lib/prefs";
+
+import NextJsStep from "@/snippets/ai-protection/data-loss-prevention/nextjs/Example.mdx";
+
+Users paste sensitive data into AI prompts - credit card numbers, phone numbers,
+passwords, and other PII - often without realizing the risk. Once that data
+reaches your AI provider it may appear in logs, training pipelines, or model
+outputs.
+
+Arcjet sensitive info detection scans prompt content inside your application
+before it reaches the AI provider. Detected PII is blocked before it leaves your
+app environment.
+
+## Get started
+
+<FrameworkLinks
+  client:load
+  exclude={frameworks
+    .filter((d) => !frontmatter.frameworks.includes(d.key))
+    .map((d) => d.key)}
+/>
+
+<SlotByFramework client:load>
+  <NextJsStep slot="next-js" />
+</SlotByFramework>
+
+## Configuring sensitive info detection
+
+`deny: ["CREDIT_CARD_NUMBER", "EMAIL"]` - the list of PII entity types to
+block. Remove any types your application legitimately handles - for example, a
+support bot that collects phone numbers should remove `"PHONE_NUMBER"` from the
+deny list.
+
+Available entity types include: `CREDIT_CARD_NUMBER`, `PHONE_NUMBER`, `EMAIL`,
+`IP_ADDRESS`, `URL`. See the [full reference](/sensitive-info/reference) for the
+complete list.
+
+`sensitiveInfoValue` - The text to scan. Pass the user's prompt or the most
+recent message. You can also pass the full conversation history if you want to
+scan all messages, not just the latest one.
+
+`mode: "DRY_RUN"` - Logs detections without blocking. Use this to audit what PII
+appears in prompts before switching to `"LIVE"`.
+
+## Combine with abuse protection
+
+Sensitive info detection controls *what* reaches your AI provider. To also
+block automated clients and enforce per-user budgets, combine it with
+[AI abuse protection](/ai-protection/abuse-protection) and
+[AI budget control](/ai-protection/budget-control).
+
+## Learn more
+
+- <Link.Page href="/sensitive-info">Sensitive info detection introduction</Link.Page>
+- <Link.Page href="/sensitive-info/reference">Full sensitive info reference</Link.Page>

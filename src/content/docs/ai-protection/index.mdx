@@ -1,0 +1,80 @@
+---
+title: "AI Runtime Protection"
+description: "Arcjet is the runtime policy engine for AI features. Authorize tools, control budgets, and protect against spam and bots. A developer-first approach to securing AI applications."
+prev: false
+next: true
+---
+
+import { CardGrid } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+The riskiest parts of an AI application isn't text generation - it's tool
+execution and data management. Arcjet helps protect AI applications by providing
+guardrails across the entire AI lifecycle, using real application context
+(identity, route, session, cost budgets), not just prompt content.
+
+Production AI failures follow three patterns:
+
+- **Cost explosion.** Automated traffic, user abuse, and prompt attacks inflate
+  token and tool spend. Risky for providers and users.
+- **Unauthorized side-effects.** Agents invoke tools in ways they shouldn't -
+  issuing refunds, accessing data, escalating privileges. The prompt can be
+  benign; the tool call is catastrophic.
+- **Data exfiltration.** Sensitive data leaks into logs, third-party contexts,
+  or model memory through tool outputs and unguarded responses.
+
+Arcjet's core features map directly onto these problems.
+
+## AI abuse protection
+
+**Building block:** Bot detection
+
+Block automated clients before they reach your AI provider. Arcjet lets you deny
+all automated traffic - or selectively allow uptime monitors, link previewers,
+and other trusted clients.
+
+<CardGrid>
+  <Link.Card
+    title="AI Abuse Protection"
+    href="/ai-protection/abuse-protection"
+    description="Block automated clients from your AI applications."
+  />
+</CardGrid>
+
+## AI budget control
+
+**Building block:** Token bucket rate limiting
+
+Enforce per-user token quotas to prevent cost explosions. Dynamically link user
+quotas to rate limits tracked by tokens.
+
+<CardGrid>
+  <Link.Card
+    title="AI Budget Control"
+    href="/ai-protection/budget-control"
+    description="Enforce per-user token budgets"
+  />
+</CardGrid>
+
+## AI data loss prevention
+
+**Building blocks:** Sensitive information detection
+
+Prevent PII and sensitive data from leaking into AI model context, logs, or
+third-party tool calls. Arcjet detects card numbers, email addresses, phone
+numbers, and custom patterns in request bodies - entirely locally, with no data
+leaving your infrastructure.
+
+<CardGrid>
+  <Link.Card
+    title="AI Data Loss Prevention"
+    href="/ai-protection/data-loss-prevention"
+    description="Detect and block PII before it enters AI model context."
+  />
+</CardGrid>
+
+## Quick start
+
+The fastest way to get started is the [get started guide](/get-started), which
+walks through protecting an AI chat application with bot detection and per-user
+token budgets.

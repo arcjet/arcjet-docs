@@ -17,9 +17,13 @@ want to handle.
 
 <WhatIsArcjet />
 
-This rule runs entirely locally in your environment, inside the WebAssembly
-sandbox shipped with the Arcjet SDK. No request body data ever leaves your
-infrastructure.
+Sensitive information detection is Arcjet's [AI Data Loss Prevention
+layer](/ai-protection/data-loss-prevention) - stopping PII from leaking into AI
+model context, training data, or third-party tool calls made by agents. When a
+user pastes a credit card number or email address into a chat prompt, Arcjet
+catches it before it reaches your AI provider. All detection runs entirely
+locally inside the WebAssembly sandbox shipped with the Arcjet SDK. No request
+body data ever leaves your infrastructure.
 
 You can block common types of PII such as email addresses, card numbers, IP
 addresses, and phone numbers, as well as custom patterns you define.
@@ -31,13 +35,17 @@ headers or other request fields, use <Link.Page href="/filters">Arcjet filters</
 
 Use sensitive information detection when you want to:
 
+- **Prevent PII from leaking into AI model context** — stop users from
+  accidentally (or deliberately) pasting card numbers, email addresses, or
+  other regulated data into prompts sent to your AI provider.
+- **Block sensitive data from agent tool calls** — prevent PII from appearing
+  in tool arguments or responses that may be logged or forwarded to third-party
+  services.
 - Reduce your compliance burden by avoiding storage of PII and other regulated
   data.
 - Prevent users from pasting card numbers or other sensitive data into generic
   text fields (for example, support forms, feedback forms, or chat boxes).
 - Enforce rules that certain endpoints must not receive PII at all.
-- Prevent sensitive data being sent to third-party integrations, such as support
-  ticket systems or LLMs.
 
 For email addresses specifically, you can also use
 <Link.Page href="/email-validation">Arcjet email validation</Link.Page> to
