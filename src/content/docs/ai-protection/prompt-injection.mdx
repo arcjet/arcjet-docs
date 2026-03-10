@@ -1,0 +1,79 @@
+---
+title: "AI prompt injection detection"
+titleByFramework:
+  default: "AI prompt injection detection"
+  next-js: "AI prompt injection detection for Next.js"
+description: "AI prompt injection detection for Next.js, JS, and Python applications. Block prompt injection and jailbreak attacks before they reach your AI model."
+prev: true
+next: true
+frameworks:
+  - next-js
+ajToc:
+  - text: "Get started"
+    anchor: "get-started"
+  - text: "Configuring prompt injection detection"
+    anchor: "configuring-prompt-injection-detection"
+  - text: "Combine with abuse protection"
+    anchor: "combine-with-abuse-protection"
+---
+
+import { Link } from "@/components/link";
+import SlotByFramework from "@/components/SlotByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
+import { frameworks } from "@/lib/prefs";
+
+import NextJsStep from "@/snippets/ai-protection/prompt-injection/nextjs/Example.mdx";
+
+Prompt injection attacks trick AI models into ignoring their instructions —
+users paste in jailbreaks like "DAN" prompts, role-play escapes, or instruction
+overrides designed to bypass your system prompt and extract restricted
+information or cause your AI to behave in unintended ways.
+
+Arcjet prompt injection detection scores each incoming message for injection
+patterns inside your application before it reaches the AI provider. Detected
+attacks are blocked before the AI call is made, protecting both your
+application behavior and your AI budget.
+
+:::note
+Prompt injection detection is currently in early access. If you're interested in trying it out, please
+[reach out](/support).
+:::
+
+## Get started
+
+<FrameworkLinks
+  client:load
+  exclude={frameworks
+    .filter((d) => !frontmatter.frameworks.includes(d.key))
+    .map((d) => d.key)}
+/>
+
+<SlotByFramework client:load>
+  <NextJsStep slot="next-js" />
+</SlotByFramework>
+
+## Configuring prompt injection detection
+
+`threshold: 0.5` — the minimum confidence score (0–1) required to block a
+request. Lower values are more aggressive and catch more attacks but may produce
+false positives. The default of `0.5` is a balanced starting point; raise it
+(e.g. `0.8`) to reduce false positives, or lower it (e.g. `0.3`) for stricter
+enforcement.
+
+`detectPromptInjectionMessage` — the text to score. Pass the user's most recent
+message, or the full conversation history if you want to scan all messages.
+
+`mode: "DRY_RUN"` — logs detections without blocking. Use this to measure the
+false-positive rate in production before switching to `"LIVE"`.
+
+## Combine with abuse protection
+
+Prompt injection detection controls *what* your AI model receives. To also block
+automated clients and enforce per-user budgets, combine it with
+[AI abuse protection](/ai-protection/abuse-protection) and
+[AI budget control](/ai-protection/budget-control).
+
+## Learn more
+
+- <Link.Page href="/sensitive-info">Sensitive info detection introduction</Link.Page>
+- <Link.Page href="/sensitive-info/reference">Full sensitive info reference</Link.Page>

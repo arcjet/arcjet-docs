@@ -23,6 +23,10 @@ export const main = [
         label: "Data loss prevention",
         link: "/ai-protection/data-loss-prevention",
       },
+      {
+        label: "Prompt injection detection",
+        link: "/ai-protection/prompt-injection",
+      },
     ],
   },
   {

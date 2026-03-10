@@ -8,10 +8,10 @@ next: true
 import { CardGrid } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 
-The riskiest parts of an AI application isn't text generation - it's tool
-execution and data management. Arcjet helps protect AI applications by providing
-guardrails across the entire AI lifecycle, using real application context
-(identity, route, session, cost budgets), not just prompt content.
+The riskiest parts of an AI application revolve around the prompt and any tools
+it can invoke. Arcjet helps protect AI applications by providing guardrails
+across the entire AI lifecycle, using real application context (identity, route,
+session, cost budgets), not just prompt content.
 
 Production AI failures follow three patterns:
 
@@ -27,17 +27,23 @@ Arcjet's core features map directly onto these problems.
 
 ## AI abuse protection
 
-**Building block:** Bot detection
+**Building blocks:** Bot detection, prompt injection detection
 
-Block automated clients before they reach your AI provider. Arcjet lets you deny
-all automated traffic - or selectively allow uptime monitors, link previewers,
-and other trusted clients.
+Block automated clients and detect prompt injection attacks before they reach
+your AI. Arcjet lets you deny all automated traffic - or selectively allow
+trusted clients - and scores incoming messages for injection patterns like
+jailbreaks, role-play escapes, and instruction overrides.
 
 <CardGrid>
   <Link.Card
     title="AI Abuse Protection"
     href="/ai-protection/abuse-protection"
     description="Block automated clients from your AI applications."
+  />
+  <Link.Card
+    title="Prompt Injection Detection"
+    href="/ai-protection/prompt-injection"
+    description="Detect and block prompt injection attacks before they reach your AI model."
   />
 </CardGrid>
 
