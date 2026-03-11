@@ -3,11 +3,15 @@ title: "AI prompt injection detection"
 titleByFramework:
   default: "AI prompt injection detection"
   next-js: "AI prompt injection detection for Next.js"
+  python-fastapi: "AI prompt injection detection for Python + FastAPI"
+  python-flask: "AI prompt injection detection for Python + Flask"
 description: "AI prompt injection detection for Next.js, JS, and Python applications. Block prompt injection and jailbreak attacks before they reach your AI model."
 prev: true
 next: true
 frameworks:
   - next-js
+  - python-fastapi
+  - python-flask
 ajToc:
   - text: "Get started"
     anchor: "get-started"
@@ -23,6 +27,8 @@ import FrameworkLinks from "@/components/FrameworkLinks";
 import { frameworks } from "@/lib/prefs";
 
 import NextJsStep from "@/snippets/ai-protection/prompt-injection/nextjs/Example.mdx";
+import PythonFastapiStep from "@/snippets/ai-protection/prompt-injection/python-fastapi/Example.mdx";
+import PythonFlaskStep from "@/snippets/ai-protection/prompt-injection/python-flask/Example.mdx";
 
 Prompt injection attacks trick AI models into ignoring their instructions —
 users paste in jailbreaks like "DAN" prompts, role-play escapes, or instruction
@@ -50,20 +56,22 @@ Prompt injection detection is currently in early access. If you're interested in
 
 <SlotByFramework client:load>
   <NextJsStep slot="next-js" />
+  <PythonFastapiStep slot="python-fastapi" />
+  <PythonFlaskStep slot="python-flask" />
 </SlotByFramework>
 
 ## Configuring prompt injection detection
 
-`threshold: 0.5` — the minimum confidence score (0–1) required to block a
-request. Lower values are more aggressive and catch more attacks but may produce
-false positives. The default of `0.5` is a balanced starting point; raise it
-(e.g. `0.8`) to reduce false positives, or lower it (e.g. `0.3`) for stricter
-enforcement.
+`threshold: 0.5` — the minimum confidence score (range of `0` to `1`, exclusive)
+required to block a request. Lower values are more aggressive and catch more
+attacks but may produce false positives. The default of `0.5` is a balanced
+starting point; raise it (e.g. `0.8`) to reduce false positives, or lower it
+(e.g. `0.3`) for stricter enforcement.
 
-`detectPromptInjectionMessage` — the text to score. Pass the user's most recent
+`detectPromptInjectionMessage` - the text to score. Pass the user's most recent
 message, or the full conversation history if you want to scan all messages.
 
-`mode: "DRY_RUN"` — logs detections without blocking. Use this to measure the
+`mode: "DRY_RUN"` - logs detections without blocking. Use this to measure the
 false-positive rate in production before switching to `"LIVE"`.
 
 ## Combine with abuse protection
