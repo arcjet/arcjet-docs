@@ -1,9 +1,9 @@
 # Arcjet
 
-Arcjet is the runtime policy engine for AI features. It helps protect AI
-applications by providing guardrails across the entire AI lifecycle, using real
-application context (identity, route, session, cost budgets), not just prompt
-content. Authorize tools, control budgets, and protect against spam and bots.
+Arcjet is the runtime AI security platform that ships with your code. Stop bots and automated attacks from
+burning your AI budget, leaking data, or misusing tools with Arcjet's AI
+security building blocks: prompt injection protection, bot protection, rate
+limiting, signup spam prevention, PII detection.
 
 ## Docs
 

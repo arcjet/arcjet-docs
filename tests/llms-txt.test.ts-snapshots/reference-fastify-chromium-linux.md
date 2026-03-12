@@ -8,7 +8,7 @@ ignore-me
 
 This guide shows how to use the package [`@arcjet/fastify`](https://www.npmjs.com/package/@arcjet/fastify). Its source code is [on GitHub](https://github.com/arcjet/arcjet-js/tree/main/arcjet-fastify). The code is open source and licensed under Apache 2.0.
 
-**What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime policy engine for AI features. Authorize tools, control budgets, and protect against spam and bots. A developer-first approach to securing AI applications.
+**What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime AI security platform that ships with your code. Stop bots and automated attacks from burning your AI budget, leaking data, or misusing tools with Arcjet's AI security building blocks.
 
 Quick start
 -----------
