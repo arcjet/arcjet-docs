@@ -1,0 +1,86 @@
+---
+title: "Prompt injection detection"
+titleByFramework:
+  default: "Prompt injection detection"
+  next-js: "Prompt injection detection for Next.js"
+  python-fastapi: "Prompt injection detection for Python + FastAPI"
+  python-flask: "Prompt injection detection for Python + Flask"
+description: "Quick start guide for protecting AI applications from prompt injection attacks with Arcjet."
+frameworks:
+  - next-js
+  - python-fastapi
+  - python-flask
+ajToc:
+  - text: "Quick start"
+    anchor: "quick-start"
+  - text: "What next?"
+    anchor: "what-next"
+  - text: "Get help"
+    anchor: "get-help"
+---
+
+import { CardGrid } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import SlotByFramework from "@/components/SlotByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
+import { frameworks } from "@/lib/prefs";
+import Comments from "/src/components/Comments.astro";
+
+import NextJsStep from "@/snippets/ai-protection/prompt-injection/nextjs/Example.mdx";
+import PythonFastapiStep from "@/snippets/ai-protection/prompt-injection/python-fastapi/Example.mdx";
+import PythonFlaskStep from "@/snippets/ai-protection/prompt-injection/python-flask/Example.mdx";
+
+Arcjet prompt injection detection scores each incoming prompt for injection
+patterns inside your application before it reaches the AI provider. Detected
+attacks are blocked before the AI call is made, protecting both your
+application behavior and your AI budget.
+
+<WhatIsArcjet />
+
+<FrameworkLinks
+  client:load
+  exclude={frameworks
+    .filter((d) => !frontmatter.frameworks.includes(d.key))
+    .map((d) => d.key)}
+/>
+
+## Quick start
+
+<SlotByFramework client:load>
+  <NextJsStep slot="next-js" />
+  <PythonFastapiStep slot="python-fastapi" />
+  <PythonFlaskStep slot="python-flask" />
+</SlotByFramework>
+
+## What next?
+
+<CardGrid>
+  <Link.Card
+    title="Prompt injection detection intro"
+    href="/prompt-injection"
+    description="Learn how prompt injection detection works and when to use it."
+  />
+  <Link.Card
+    title="AI abuse protection"
+    href="/ai-protection/abuse-protection"
+    description="Combine with bot detection for complete AI app protection."
+  />
+  <Link.Card
+    title="AI data loss prevention"
+    href="/ai-protection/data-loss-prevention"
+    description="Prevent PII from entering model context alongside prompt injection protection."
+  />
+  <Link.Card
+    title="Testing"
+    href="/testing"
+    description="Write tests for your rules."
+  />
+</CardGrid>
+
+## Get help
+
+Need help with anything? Email support@arcjet.com to get support from our
+engineering team.
+
+<Comments />

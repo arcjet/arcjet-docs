@@ -4,7 +4,7 @@ import os
 from arcjet import (
     Mode,
     arcjet,
-    experimental_detect_prompt_injection,
+    detect_prompt_injection,
     shield,
 )
 from fastapi import FastAPI, Request
@@ -51,7 +51,7 @@ aj = arcjet(
         # Shield protects your app from common attacks e.g. SQL injection
         shield(mode=Mode.LIVE),
         # Detect prompt injection attacks before they reach your AI model
-        experimental_detect_prompt_injection(
+        detect_prompt_injection(
             mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
             # threshold=0.5,  # Confidence threshold, lower is more strict
         ),

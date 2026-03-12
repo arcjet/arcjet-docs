@@ -194,6 +194,22 @@ export const main = [
     collapsed: false,
     items: [
       {
+        label: "Prompt injection",
+        collapsed: true,
+        items: [
+          {
+            attrs: { class: "feature shield-waf" },
+            label: "Intro",
+            link: "/prompt-injection",
+          },
+          {
+            attrs: { class: "feature shield-waf" },
+            label: "Quick start",
+            link: "/prompt-injection/quick-start",
+          },
+        ],
+      },
+      {
         label: "Bot protection",
         collapsed: true,
         items: [
