@@ -1,8 +1,5 @@
 import { openai } from "@ai-sdk/openai";
-import arcjet, {
-  experimental_detectPromptInjection,
-  shield,
-} from "@arcjet/next";
+import arcjet, { detectPromptInjection, shield } from "@arcjet/next";
 import type { UIMessage } from "ai";
 import { convertToModelMessages, isTextUIPart, streamText } from "ai";
 
@@ -12,7 +9,7 @@ const aj = arcjet({
     // Shield protects against common web attacks e.g. SQL injection
     shield({ mode: "LIVE" }),
     // Detect prompt injection attacks before they reach your AI model
-    experimental_detectPromptInjection({
+    detectPromptInjection({
       mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
       // Confidence threshold, lower is more strict. Default = 0.5
       // threshold: 0.5,

@@ -1,6 +1,6 @@
 ---
 title: "AI Runtime Protection"
-description: "Arcjet is the runtime policy engine for AI features. Authorize tools, control budgets, and protect against spam and bots. A developer-first approach to securing AI applications."
+description: "Arcjet is the runtime AI security platform that ships with your code. Stop bots and automated attacks from burning your AI budget, leaking data, or misusing tools with Arcjet's AI security building blocks: prompt injection protection, bot protection, rate limiting, signup spam prevention, PII detection."
 prev: false
 next: true
 ---
@@ -46,6 +46,31 @@ jailbreaks, role-play escapes, and instruction overrides.
     description="Detect and block prompt injection attacks before they reach your AI model."
   />
 </CardGrid>
+
+Prompt injection and bot detection compose with budget control and data loss
+prevention into a single layered policy for a production chat endpoint:
+
+```ts
+import arcjet, {
+  detectBot,
+  detectPromptInjection,
+  sensitiveInfo,
+  shield,
+} from "@arcjet/next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    shield({ mode: "LIVE" }),
+    detectBot({ mode: "LIVE", allow: [] }),
+    detectPromptInjection({ mode: "LIVE" }),
+    sensitiveInfo({
+      mode: "LIVE",
+      deny: ["CREDIT_CARD_NUMBER", "EMAIL"],
+    }),
+  ],
+});
+```
 
 ## AI budget control
 

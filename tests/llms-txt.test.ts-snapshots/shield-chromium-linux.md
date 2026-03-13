@@ -1,6 +1,6 @@
 Arcjet Shield WAF protects your application against common web attacks, including the [OWASP Top 10](https://owasp.org/www-project-top-ten/), by analyzing requests over time and blocking clients that show suspicious behavior.
 
-**What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime policy engine for AI features. Authorize tools, control budgets, and protect against spam and bots. A developer-first approach to securing AI applications.
+**What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime AI security platform that ships with your code. Stop bots and automated attacks from burning your AI budget, leaking data, or misusing tools with Arcjet's AI security building blocks.
 
 Shield is a fully managed, application-aware web application firewall. It tracks request metadata over time so it can detect patterns that look benign in isolation but malicious when combined. An attacker might probe for a WordPress admin panel, an accidentally uploaded `.git` directory, a `.env` file, or a login form. Each request alone looks harmless, but together they form a clear attack pattern. Arcjet blocks clients when they exceed a threshold.
 
