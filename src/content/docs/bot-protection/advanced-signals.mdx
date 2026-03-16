@@ -9,6 +9,8 @@ titleByFramework:
   node-js: "Advanced bot signals for Node.js"
   remix: "Advanced bot signals for Remix"
   sveltekit: "Advanced bot signals for SvelteKit"
+  python-fastapi: "Advanced bot signals for FastAPI"
+  python-flask: "Advanced bot signals for Flask"
 description: "Use Arcjet advanced bot signals for browser-based bot detection that identifies automation without CAPCTCHAs or user challenges."
 frameworks:
   - bun
@@ -16,6 +18,8 @@ frameworks:
   - nest-js
   - next-js
   - node-js
+  - python-fastapi
+  - python-flask
   - remix
   - sveltekit
 ajToc:
@@ -50,6 +54,8 @@ import NextJsAddScript from "@/snippets/bot-protection/advanced-signals/nextjs/A
 import NodeJsAddScript from "@/snippets/bot-protection/advanced-signals/html/AddScript.mdx";
 import RemixAddScript from "@/snippets/bot-protection/advanced-signals/html/AddScript.mdx";
 import SvelteKitAddScript from "@/snippets/bot-protection/advanced-signals/html/AddScript.mdx";
+import PythonFastapiAddScript from "@/snippets/bot-protection/advanced-signals/html/AddScript.mdx";
+import PythonFlaskAddScript from "@/snippets/bot-protection/advanced-signals/html/AddScript.mdx";
 
 import BunBlockSignals from "@/snippets/bot-protection/advanced-signals/bun/BlockSignals.mdx";
 import DenoBlockSignals from "@/snippets/bot-protection/advanced-signals/deno/BlockSignals.mdx";
@@ -58,15 +64,37 @@ import NextJsBlockSignals from "@/snippets/bot-protection/advanced-signals/nextj
 import NodeJsBlockSignals from "@/snippets/bot-protection/advanced-signals/nodejs/BlockSignals.mdx";
 import RemixBlockSignals from "@/snippets/bot-protection/advanced-signals/remix/BlockSignals.mdx";
 import SvelteKitBlockSignals from "@/snippets/bot-protection/advanced-signals/sveltekit/BlockSignals.mdx";
+import PythonFastapiBlockSignals from "@/snippets/bot-protection/advanced-signals/python-fastapi/BlockSignals.mdx";
+import PythonFlaskBlockSignals from "@/snippets/bot-protection/advanced-signals/python-flask/BlockSignals.mdx";
+
+import BunDenySignals from "@/snippets/bot-protection/advanced-signals/shared-js/DenySignals.mdx";
+import DenoDenySignals from "@/snippets/bot-protection/advanced-signals/shared-js/DenySignals.mdx";
+import NestJsDenySignals from "@/snippets/bot-protection/advanced-signals/shared-js/DenySignals.mdx";
+import NextJsDenySignals from "@/snippets/bot-protection/advanced-signals/shared-js/DenySignals.mdx";
+import NodeJsDenySignals from "@/snippets/bot-protection/advanced-signals/shared-js/DenySignals.mdx";
+import RemixDenySignals from "@/snippets/bot-protection/advanced-signals/shared-js/DenySignals.mdx";
+import SvelteKitDenySignals from "@/snippets/bot-protection/advanced-signals/shared-js/DenySignals.mdx";
+import PythonFastapiDenySignals from "@/snippets/bot-protection/advanced-signals/shared-py/DenySignals.mdx";
+import PythonFlaskDenySignals from "@/snippets/bot-protection/advanced-signals/shared-py/DenySignals.mdx";
+
+import BunMonitorSignals from "@/snippets/bot-protection/advanced-signals/shared-js/MonitorSignals.mdx";
+import DenoMonitorSignals from "@/snippets/bot-protection/advanced-signals/shared-js/MonitorSignals.mdx";
+import NestJsMonitorSignals from "@/snippets/bot-protection/advanced-signals/shared-js/MonitorSignals.mdx";
+import NextJsMonitorSignals from "@/snippets/bot-protection/advanced-signals/shared-js/MonitorSignals.mdx";
+import NodeJsMonitorSignals from "@/snippets/bot-protection/advanced-signals/shared-js/MonitorSignals.mdx";
+import RemixMonitorSignals from "@/snippets/bot-protection/advanced-signals/shared-js/MonitorSignals.mdx";
+import SvelteKitMonitorSignals from "@/snippets/bot-protection/advanced-signals/shared-js/MonitorSignals.mdx";
+import PythonFastapiMonitorSignals from "@/snippets/bot-protection/advanced-signals/shared-py/MonitorSignals.mdx";
+import PythonFlaskMonitorSignals from "@/snippets/bot-protection/advanced-signals/shared-py/MonitorSignals.mdx";
 
 Arcjet advanced bot signals provides browser-based bot detection using client-side
 telemetry. A WebAssembly module runs in the browser to collect signals about
-the environment to detect automation anomalies. The result is stored as the `aj_signals`
+the environment to detect automation anomalies. The result is stored in the `aj_signals`
 cookie and evaluated server-side as part of the `detectBot` rule.
 
-## When to use signals
+## When to use advanced signals
 
-Signals is ideal for detecting bots that execute JavaScript and interact with the page
+Advanced signals is ideal for detecting bots that execute JavaScript and interact with the page
 like a real user, such as headless browsers and sophisticated scrapers. It can identify
 automation that mimics human behavior and evades simpler bot detection methods.
 
@@ -109,7 +137,9 @@ For details, see the [pricing page](https://arcjet.com/pricing).
   title="Choose a framework"
 />
 
-Load the signals script on every page where you want browser-based detection.
+Load the signals script on every page that might lead into a sensitive route e.g. a lead or signup form. This ensures the `aj_signals` cookie is set before the user reachs the protected endpoint e.g. via the form submissions.
+
+We recommend adding the script to every page. Usage billing is based on when you call the `detectBot` rule, not on when the script runs, so you won't be charged for simply loading the script.
 
 <SlotByFramework client:load>
   <BunAddScript slot="bun" />
@@ -119,6 +149,8 @@ Load the signals script on every page where you want browser-based detection.
   <NodeJsAddScript slot="node-js" />
   <RemixAddScript slot="remix" />
   <SvelteKitAddScript slot="sveltekit" />
+  <PythonFastapiAddScript slot="python-fastapi" />
+  <PythonFlaskAddScript slot="python-flask" />
 </SlotByFramework>
 
 The script evaluates the browser environment and sets the `aj_signals` cookie,
@@ -144,10 +176,12 @@ high-sensitivity endpoints:
   <NodeJsBlockSignals slot="node-js" />
   <RemixBlockSignals slot="remix" />
   <SvelteKitBlockSignals slot="sveltekit" />
+  <PythonFastapiBlockSignals slot="python-fastapi" />
+  <PythonFlaskBlockSignals slot="python-flask" />
 </SlotByFramework>
 
 If the result indicates automation, the request is denied with `ARCJET_SIGNALS`
-in the denial reason.
+in the denial reason. You can see this in your logs and in the [Arcjet dashboard](https://app.arcjet.com).
 
 #### Deny signals explicitly
 
@@ -155,31 +189,34 @@ To block signals failures alongside other specific identifiers, add
 `ARCJET_SIGNALS` to the `deny` list. With a `deny` list, only the listed
 identifiers are blocked — any bot not in the list is allowed:
 
-```ts
-detectBot({
-  mode: "LIVE",
-  deny: [
-    "ARCJET_SIGNALS", // Block requests that fail signals detection
-    "CATEGORY:AI",    // Block AI scrapers
-    // All other bots are allowed
-  ],
-}),
-```
+<SlotByFramework client:load>
+  <BunDenySignals slot="bun" />
+  <DenoDenySignals slot="deno" />
+  <NestJsDenySignals slot="nest-js" />
+  <NextJsDenySignals slot="next-js" />
+  <NodeJsDenySignals slot="node-js" />
+  <RemixDenySignals slot="remix" />
+  <SvelteKitDenySignals slot="sveltekit" />
+  <PythonFastapiDenySignals slot="python-fastapi" />
+  <PythonFlaskDenySignals slot="python-flask" />
+</SlotByFramework>
 
 #### Monitor without blocking
 
 To collect signals data without blocking, add `ARCJET_SIGNALS` to the `allow`
 list. Signals are still evaluated but the result does not affect the decision:
 
-```ts
-detectBot({
-  mode: "LIVE",
-  allow: [
-    "CATEGORY:SEARCH_ENGINE", // Allow search engine crawlers
-    "ARCJET_SIGNALS",         // Don't block on signals failures
-  ],
-}),
-```
+<SlotByFramework client:load>
+  <BunMonitorSignals slot="bun" />
+  <DenoMonitorSignals slot="deno" />
+  <NestJsMonitorSignals slot="nest-js" />
+  <NextJsMonitorSignals slot="next-js" />
+  <NodeJsMonitorSignals slot="node-js" />
+  <RemixMonitorSignals slot="remix" />
+  <SvelteKitMonitorSignals slot="sveltekit" />
+  <PythonFastapiMonitorSignals slot="python-fastapi" />
+  <PythonFlaskMonitorSignals slot="python-flask" />
+</SlotByFramework>
 
 ## Content Security Policy
 
