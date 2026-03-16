@@ -5,6 +5,7 @@ from arcjet import (
     Mode,
     arcjet,
     detect_bot,
+    detect_prompt_injection,
     shield,
     token_bucket,
 )
@@ -75,6 +76,10 @@ aj = arcjet(
             interval=10,  # Refill every 10 seconds
             capacity=10,  # Bucket capacity of 10 tokens
         ),
+        # Detect prompt injection attacks before they reach your AI model
+        detect_prompt_injection(
+            mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
+        ),
     ],
 )
 
@@ -91,10 +96,17 @@ async def chat(request: Request, body: ChatRequest):
         requested=5,
         # Identify the user for rate limiting purposes
         characteristics={"userId": userId},
+        # Check the user message for prompt injection
+        detect_prompt_injection_message=body.message,
     )
 
     # Handle denied requests
     if decision.is_denied():
+        if decision.reason.is_prompt_injection():
+            return JSONResponse(
+                {"error": "Prompt injection detected — please rephrase your message"},
+                status_code=400,
+            )
         status = 429 if decision.reason.is_rate_limit() else 403
         return JSONResponse({"error": "Denied"}, status_code=status)
 

@@ -1,6 +1,7 @@
 import { openai } from "@ai-sdk/openai";
 import arcjet, {
   detectBot,
+  detectPromptInjection,
   sensitiveInfo,
   shield,
   tokenBucket,
@@ -34,6 +35,10 @@ const aj = arcjet({
       // Remove types your app legitimately handles (e.g. EMAIL for a support bot).
       deny: ["CREDIT_CARD_NUMBER", "EMAIL"],
     }),
+    // Detect prompt injection attacks before they reach your AI model
+    detectPromptInjection({
+      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+    }),
   ],
 });
 
@@ -52,7 +57,7 @@ export async function POST(req: Request) {
   }, 0);
   const estimate = Math.ceil(totalChars / 4);
 
-  // Check the most recent user message for sensitive information.
+  // Check the most recent user message for sensitive information and prompt injection.
   // Pass the full conversation if you want to scan all messages.
   const lastMessage: string = (messages.at(-1)?.parts ?? [])
     .filter(isTextUIPart)
@@ -64,6 +69,7 @@ export async function POST(req: Request) {
     userId,
     requested: estimate,
     sensitiveInfoValue: lastMessage,
+    detectPromptInjectionMessage: lastMessage,
   });
 
   if (decision.isDenied()) {
@@ -75,6 +81,11 @@ export async function POST(req: Request) {
       return new Response("AI usage limit exceeded", { status: 429 });
     } else if (decision.reason.isSensitiveInfo()) {
       return new Response("Sensitive information detected", { status: 400 });
+    } else if (decision.reason.isPromptInjection()) {
+      return new Response(
+        "Prompt injection detected — please rephrase your message",
+        { status: 400 },
+      );
     } else {
       return new Response("Forbidden", { status: 403 });
     }
