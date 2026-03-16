@@ -524,10 +524,6 @@ export const main = [
     collapsed: false,
     items: [
       {
-        label: "Auth.js",
-        link: "/integrations/authjs",
-      },
-      {
         label: "Better Auth",
         link: "/integrations/better-auth",
       },
@@ -548,10 +544,6 @@ export const main = [
         label: "Netlify",
         link: "https://www.netlify.com/integrations/arcjet/",
         attrs: { target: "_blank", class: "external-link" },
-      },
-      {
-        label: "NextAuth",
-        link: "/integrations/nextauth",
       },
       {
         label: "OpenAI",
