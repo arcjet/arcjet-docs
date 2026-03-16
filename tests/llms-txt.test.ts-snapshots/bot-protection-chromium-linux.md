@@ -56,7 +56,7 @@ The identifiers of specific bots and categories, and their corresponding detecti
 
 For basic bot detection, regular expressions are applied to the `user-agent` header and authenticity is verified using IP data and reverse DNS lookups.
 
-Advanced bot detection adds IP reputation, [verification](/bot-protection/reference#bot-verification), machine learning, and additional signals to identify bots more accurately and distinguish real users from automated traffic.
+Advanced bot detection adds IP reputation, [verification](/bot-protection/reference#bot-verification), machine learning, and [advanced signals](/bot-protection/advanced-signals) to identify bots more accurately and distinguish real users from automated traffic.
 
 Clients are tracked using configurable [fingerprints](/fingerprints) (IP address by default) to identify unique clients. Fingerprints let you track anonymous users and attach rules and detections to known users via session tokens or other identifiers.
 
@@ -67,7 +67,7 @@ Availability
 
 Basic detection (using `user-agent` headers and IP type analysis) is available on all plans.
 
-Advanced detection (using IP reputation, [verification](/bot-protection/reference#bot-verification), machine learning, and additional signals) is available on paid plans.
+Advanced detection (using IP reputation, [verification](/bot-protection/reference#bot-verification), machine learning, and [advanced signals](/bot-protection/advanced-signals)) is available on paid plans.
 
 Plan
 
