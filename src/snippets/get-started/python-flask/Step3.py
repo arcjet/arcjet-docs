@@ -5,6 +5,7 @@ from arcjet import (
     Mode,
     arcjet_sync,
     detect_bot,
+    detect_prompt_injection,
     shield,
     token_bucket,
 )
@@ -68,6 +69,10 @@ aj = arcjet_sync(
             interval=10,  # Refill every 10 seconds
             capacity=10,  # Bucket capacity of 10 tokens
         ),
+        # Detect prompt injection attacks before they reach your AI model
+        detect_prompt_injection(
+            mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
+        ),
     ],
 )
 
@@ -76,6 +81,9 @@ aj = arcjet_sync(
 def chat():
     # Replace with actual user ID from the user session
     userId = "your_user_id"
+    body = request.get_json()
+    message = body.get("message", "") if body else ""
+
     # Call protect() to evaluate the request against the rules
     decision = aj.protect(
         request,
@@ -83,16 +91,20 @@ def chat():
         requested=5,
         # Identify the user for rate limiting purposes
         characteristics={"userId": userId},
+        # Check the user message for prompt injection
+        detect_prompt_injection_message=message,
     )
 
     # Handle denied requests
     if decision.is_denied():
+        if decision.reason.is_prompt_injection():
+            return jsonify(
+                error="Prompt injection detected — please rephrase your message"
+            ), 400
         status = 429 if decision.reason.is_rate_limit() else 403
-        return jsonify(error="Denied", reason=decision.reason.to_dict()), status
+        return jsonify(error="Denied"), status
 
     # All rules passed, proceed with handling the request
-    body = request.get_json()
-    message = body.get("message", "") if body else ""
     reply = chain.invoke({"message": message})
 
     return jsonify(reply=reply)
