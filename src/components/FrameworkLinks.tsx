@@ -2,7 +2,9 @@ import Button from "@/components/Button";
 import { Astro as IconAstro } from "@/components/icons/tech/Astro";
 import { Bun as IconBun } from "@/components/icons/tech/Bun";
 import { Deno as IconDeno } from "@/components/icons/tech/Deno";
+import { FastApi as IconFastApi } from "@/components/icons/tech/FastApi";
 import { Fastify as IconFastify } from "@/components/icons/tech/Fastify";
+import { Flask as IconFlask } from "@/components/icons/tech/Flask";
 import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
 import { NextJs as IconNextJs } from "@/components/icons/tech/NextJs";
 import { NodeJs as IconNodeJs } from "@/components/icons/tech/NodeJs";
@@ -109,6 +111,12 @@ const FrameworkLinks = forwardRef(
                   break;
                 case "nuxt":
                   icon = <IconNuxt />;
+                  break;
+                case "python-fastapi":
+                  icon = <IconFastApi />;
+                  break;
+                case "python-flask":
+                  icon = <IconFlask />;
                   break;
                 case "react-router":
                   icon = <IconReactRouter />;

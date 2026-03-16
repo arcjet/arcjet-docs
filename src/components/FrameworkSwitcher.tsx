@@ -2,7 +2,9 @@ import { Astro as IconAstro } from "@/components/icons/tech/Astro";
 import { Bun as IconBun } from "@/components/icons/tech/Bun";
 import { Deno as IconDeno } from "@/components/icons/tech/Deno";
 import { Express as IconExpress } from "@/components/icons/tech/Express";
+import { FastApi as IconFastApi } from "@/components/icons/tech/FastApi";
 import { Fastify as IconFastify } from "@/components/icons/tech/Fastify";
+import { Flask as IconFlask } from "@/components/icons/tech/Flask";
 import { Hono as IconHono } from "@/components/icons/tech/Hono";
 import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
 import { NextJs as IconNextJs } from "@/components/icons/tech/NextJs";
@@ -43,8 +45,8 @@ const frameworkIcon = {
   "node-js-hono": <IconNodeJs />,
   "node-js": <IconNodeJs />,
   nuxt: <IconNuxt />,
-  "python-fastapi": <></>,
-  "python-flask": <></>,
+  "python-fastapi": <IconFastApi />,
+  "python-flask": <IconFlask />,
   "react-router": <IconReactRouter />,
   remix: <IconRemix />,
   sveltekit: <IconSvelteKit />,
