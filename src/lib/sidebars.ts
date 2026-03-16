@@ -597,6 +597,18 @@ export const main = [
             label: "Vercel BotID",
             link: "/comparisons/vercel-botid-vs-arcjet",
           },
+          {
+            label: "Vercel WAF",
+            link: "/comparisons/vercel-waf-vs-arcjet",
+          },
+          {
+            label: "Cloudflare WAF",
+            link: "/comparisons/cloudflare-waf-vs-arcjet",
+          },
+          {
+            label: "CAPTCHAs",
+            link: "/comparisons/captchas-vs-arcjet",
+          },
         ],
       },
       {

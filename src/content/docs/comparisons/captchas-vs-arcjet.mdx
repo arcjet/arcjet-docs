@@ -1,0 +1,170 @@
+---
+title: "CAPTCHAs vs Arcjet"
+description: "CAPTCHAs vs Arcjet Advanced Bot Signals. Compare Cloudflare Turnstile, Google reCAPTCHA, and hCaptcha with Arcjet's invisible browser-based bot detection. User experience, API protection, privacy, and when to choose each."
+---
+
+import Comments from "/src/components/Comments.astro";
+import { Link } from "@/components/link";
+
+[Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/),
+[Google reCAPTCHA](https://developers.google.com/recaptcha), and
+[hCaptcha](https://docs.hcaptcha.com/) are the most common tools for protecting
+forms from bots. Arcjet's
+<Link.Page href="/bot-protection/advanced-signals">advanced bot signals</Link.Page>
+is a different approach to the same problem — detecting bots in the browser
+without asking users to solve a challenge.
+
+## How CAPTCHAs work
+
+All CAPTCHA-style tools follow the same pattern:
+
+1. A client-side JavaScript widget is embedded on the page.
+2. The widget runs challenges (visible or invisible) and generates a token.
+3. On form submission, the token is sent to your server.
+4. Your server calls the CAPTCHA provider's API to verify the token.
+5. If verification passes, the request is allowed; if not, it is rejected.
+
+**Cloudflare Turnstile** offers three widget modes: Managed (shows a checkbox
+only if the visitor looks risky), Non-interactive (shows a spinner while
+challenges run silently), and Invisible (completely hidden, no UI at all).
+Detection uses proof-of-work, proof-of-space, web API probing, and
+browser-quirk analysis.
+
+**Google reCAPTCHA** offers reCAPTCHA v2 (checkbox or image challenge) and
+reCAPTCHA v3 (invisible, returns a risk score rather than a pass/fail decision).
+v3 requires you to decide what to do with the score — challenge, block, or allow.
+
+**hCaptcha** is similar to reCAPTCHA v2/v3 but privacy-focused, does not send
+data to Google, and offers a revenue-sharing model for verified traffic.
+
+## How Arcjet advanced bot signals work
+
+Arcjet advanced signals uses a different model:
+
+1. A small JavaScript script loads a WebAssembly module in the browser.
+2. The module collects environment signals and sends them to the Arcjet API.
+3. The API returns a continue token stored in the `aj_signals` cookie.
+4. On the next server-side request, Arcjet's `detectBot` rule reads the cookie
+   and uses the collected signals as part of its decision.
+5. The cookie remains valid for a period, so signals do not need to be
+   recollected on every page load.
+
+There is no challenge shown to the user. The process is invisible and
+asynchronous — it does not block the user interaction or require solving any
+puzzle.
+
+## Key differences
+
+1. **User experience**: Turnstile's invisible and non-interactive modes and
+   reCAPTCHA v3 avoid visible challenges, but they still add latency to the
+   interaction as the challenge executes and the token is verified. Managed and
+   v2 modes can surface an interactive checkbox or image puzzle to users who
+   look risky. Arcjet advanced signals runs asynchronously before the user
+   reaches the protected action — by the time the form is submitted, signals
+   have already been evaluated and the cookie is set. There is no visible widget
+   and no synchronous latency on the form submission itself.
+
+2. **API and non-browser endpoints**: CAPTCHAs are fundamentally a
+   browser-based mechanism. They require a web page that can load JavaScript
+   and render the widget. They cannot protect:
+   - Pure API endpoints called directly by scripts or services.
+   - Server-to-server requests.
+   - Native mobile app backends (without additional native CAPTCHA SDKs).
+   - Any endpoint where a client-side widget cannot be embedded.
+
+   Arcjet bot detection and
+   <Link.Page href="/filters">filter rules</Link.Page> protect any HTTP request
+   regardless of whether a browser was involved. Advanced signals adds a browser
+   layer on top of existing server-side bot detection — it complements rather
+   than replaces server-side analysis.
+
+3. **One-time token vs persistent cookie**: CAPTCHA tokens are single-use and
+   expire quickly (Turnstile tokens expire after 300 seconds and can only be
+   used once). This means a new CAPTCHA token is needed for every protected
+   action, and every form submission requires a round-trip to the CAPTCHA
+   provider's verification API before you can process the request. Arcjet
+   signals are stored in a cookie that persists across multiple requests,
+   reducing the overhead for legitimate users navigating your application.
+
+## Comparison
+
+| Area                        | Arcjet Advanced Signals                                                                                                                                                                                 | CAPTCHAs (Turnstile / reCAPTCHA / hCaptcha)                                                                                                                            |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| User challenge shown        | Never. Completely invisible.                                                                                                                                                                            | Turnstile: never (Invisible/Non-interactive) or conditional checkbox (Managed). reCAPTCHA v2: checkbox or image puzzle. reCAPTCHA v3: never (score only). hCaptcha: image puzzle or invisible. |
+| API / non-browser endpoints | Server-side bot detection works on any endpoint. Signals cookie complements it for browser traffic. Filter rules enforce cookie presence.                                                               | Cannot protect API endpoints that don't load a web page and render the widget client-side. Requests must be proxied through a network e.g. Cloudflare for additional protection.                                                                             |
+| Integration                 | Load a script tag; configure `detectBot` server-side. Works with any framework.                                                                                                                         | Embed a client-side widget; add server-side verification call. Framework-specific widgets available for React, Vue, etc.                                                |
+| Platform independence       | Works on any hosting provider.                                                                                                                                                                          | Turnstile: works without Cloudflare hosting. reCAPTCHA/hCaptcha: works anywhere.                                                                                       |
+| CAPTCHA farm resistance     | No token to solve; automation markers are harder to fake at scale.                                                                                                                                      | CAPTCHA farms solve challenges for money; high-reputation bot accounts can accumulate passing scores.                                                                   |
+| Accessibility               | No user interaction required — inherently accessible.                                                                                                                                                   | Turnstile: WCAG 2.2 AAA compliant. reCAPTCHA v3: no user interaction. v2 image puzzles have accessibility concerns.                                                   |
+| Scope beyond bot detection  | Rate limiting, WAF, email validation, PII detection, filter rules, AI Runtime Protection — all in one SDK.                                                                                              | Bot challenge for protected forms/pages only. No rate limiting, WAF, email validation, or other security features.                                                     |
+
+## When to use which
+
+### Use Arcjet advanced signals if...
+
+- **You need to protect API endpoints** Your protected routes include APIs,
+  webhooks, or any endpoint that doesn't involve an interactive browser session.
+  CAPTCHAs cannot protect these; Arcjet bot detection and filter rules can.
+
+- **You want zero friction for legitimate users** You don't want any visible
+  widget, spinner, or challenge shown to real users — even in error cases. Arcjet
+  signals run before the user reaches the protected action with no visible
+  indicator.
+
+- **You want the token to persist across requests** Users navigating between
+  pages and submitting multiple forms should not need to re-verify on every
+  action. Arcjet's cookie-based approach reuses collected signals across requests.
+
+- **You want security beyond bot detection** Alongside advanced signals, Arcjet
+  provides rate limiting, WAF, email validation, PII detection, and AI protection
+  in the same SDK.
+
+- **You're protecting AI applications** Arcjet AI Runtime Protection covers
+  prompt injection, token budgets, and PII in AI flows — use cases that
+  CAPTCHAs don't address at all.
+
+### Use a CAPTCHA if...
+
+- **You need a free, client-side-only solution** Turnstile and reCAPTCHA are
+  free. If your entire threat model is form spam and you have no server-side
+  security infrastructure, a CAPTCHA is a zero-cost starting point.
+
+- **Your users expect a verification step** Some use cases (high-value
+  transactions, account recovery, access to sensitive resources) benefit from a
+  deliberate, explicit verification checkpoint. A visible challenge communicates
+  to the user that a security check is happening.
+
+- **You only need to protect browser-rendered forms** If every protected action
+  goes through a browser form and you have no API surface to protect, a CAPTCHA
+  addresses the use case.
+
+## FAQs
+
+### Can I use a CAPTCHA and Arcjet together?
+
+Yes. You might use a CAPTCHA for explicit high-value verification steps (account
+recovery, payment confirmation) while using Arcjet for ongoing API protection,
+rate limiting, bot detection on all routes, and WAF coverage. They operate
+independently.
+
+### Does Arcjet advanced signals replace CAPTCHA entirely?
+
+For most developer-facing bot protection use cases, yes. Advanced signals
+detects automation using browser environment analysis, and Arcjet's server-side
+bot detection classifies 600+ known bots by user agent and IP reputation
+regardless of whether a browser was involved. For use cases where you
+specifically want a visible, deliberate human verification checkpoint — such as
+high-value account actions — a CAPTCHA still makes sense as an explicit UX
+signal.
+
+### What happens if a user has JavaScript disabled?
+
+If JavaScript is disabled, the Arcjet signals script won't run and the
+`aj_signals` cookie won't be set. You can use a
+<Link.Page href="/filters">filter rule</Link.Page> to block requests that are
+missing the cookie, which would block non-JavaScript clients. Alternatively,
+configure Arcjet in a permissive mode that does not require the cookie for users
+who have already authenticated. The right policy depends on your application's
+audience and risk tolerance.
+
+<Comments />
