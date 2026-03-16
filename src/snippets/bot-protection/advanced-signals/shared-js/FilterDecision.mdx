@@ -1,0 +1,13 @@
+```ts
+if (decision.isDenied()) {
+  if (decision.reason.isFilter()) {
+    // The aj_signals cookie is missing — the request didn't come from a
+    // browser that loaded the signals script. Return a helpful error so
+    // the user knows to enable cookies rather than seeing a silent 403.
+    return new Response("Cookies are required to submit this form", {
+      status: 403,
+    });
+  }
+  return new Response("Forbidden", { status: 403 });
+}
+```

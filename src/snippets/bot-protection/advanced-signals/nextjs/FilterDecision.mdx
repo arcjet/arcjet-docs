@@ -1,0 +1,13 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import FilterDecisionAppTS from "./FilterDecisionApp.ts?raw";
+import FilterDecisionAppJS from "./FilterDecisionApp.js?raw";
+
+<SelectableContent client:load syncKey="language">
+  <div slot="TS" slotIdx="1">
+    <Code code={FilterDecisionAppTS} lang="ts" title="app/api/contact/route.ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={FilterDecisionAppJS} lang="js" title="app/api/contact/route.js" />
+  </div>
+</SelectableContent>

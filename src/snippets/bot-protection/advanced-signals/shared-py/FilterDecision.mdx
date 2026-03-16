@@ -1,0 +1,12 @@
+```py
+if decision.is_denied():
+    if decision.reason.is_filter():
+        # The aj_signals cookie is missing — the request didn't come from a
+        # browser that loaded the signals script. Return a helpful error so
+        # the user knows to enable cookies rather than seeing a silent 403.
+        return JSONResponse(
+            {"error": "Cookies are required to submit this form"},
+            status_code=403,
+        )
+    return JSONResponse({"error": "Forbidden"}, status_code=403)
+```

@@ -36,6 +36,8 @@ ajToc:
       anchor: "step-1-add-the-script"
     - text: "Step 2: Configure bot detection"
       anchor: "step-2-configure-bot-detection"
+    - text: "Step 3: Enforce with a filter rule"
+      anchor: "step-3-enforce-with-a-filter-rule"
   - text: "Content Security Policy"
     anchor: "content-security-policy"
 ---
@@ -86,6 +88,26 @@ import RemixMonitorSignals from "@/snippets/bot-protection/advanced-signals/shar
 import SvelteKitMonitorSignals from "@/snippets/bot-protection/advanced-signals/shared-js/MonitorSignals.mdx";
 import PythonFastapiMonitorSignals from "@/snippets/bot-protection/advanced-signals/shared-py/MonitorSignals.mdx";
 import PythonFlaskMonitorSignals from "@/snippets/bot-protection/advanced-signals/shared-py/MonitorSignals.mdx";
+
+import BunFilterSignals from "@/snippets/bot-protection/advanced-signals/shared-js/FilterSignals.mdx";
+import DenoFilterSignals from "@/snippets/bot-protection/advanced-signals/shared-js/FilterSignals.mdx";
+import NestJsFilterSignals from "@/snippets/bot-protection/advanced-signals/shared-js/FilterSignals.mdx";
+import NextJsFilterSignals from "@/snippets/bot-protection/advanced-signals/shared-js/FilterSignals.mdx";
+import NodeJsFilterSignals from "@/snippets/bot-protection/advanced-signals/shared-js/FilterSignals.mdx";
+import RemixFilterSignals from "@/snippets/bot-protection/advanced-signals/shared-js/FilterSignals.mdx";
+import SvelteKitFilterSignals from "@/snippets/bot-protection/advanced-signals/shared-js/FilterSignals.mdx";
+import PythonFastapiFilterSignals from "@/snippets/bot-protection/advanced-signals/shared-py/FilterSignals.mdx";
+import PythonFlaskFilterSignals from "@/snippets/bot-protection/advanced-signals/shared-py/FilterSignals.mdx";
+
+import BunFilterDecision from "@/snippets/bot-protection/advanced-signals/shared-js/FilterDecision.mdx";
+import DenoFilterDecision from "@/snippets/bot-protection/advanced-signals/shared-js/FilterDecision.mdx";
+import NestJsFilterDecision from "@/snippets/bot-protection/advanced-signals/shared-js/FilterDecision.mdx";
+import NextJsFilterDecision from "@/snippets/bot-protection/advanced-signals/nextjs/FilterDecision.mdx";
+import NodeJsFilterDecision from "@/snippets/bot-protection/advanced-signals/shared-js/FilterDecision.mdx";
+import RemixFilterDecision from "@/snippets/bot-protection/advanced-signals/shared-js/FilterDecision.mdx";
+import SvelteKitFilterDecision from "@/snippets/bot-protection/advanced-signals/shared-js/FilterDecision.mdx";
+import PythonFastapiFilterDecision from "@/snippets/bot-protection/advanced-signals/shared-py/FilterDecision.mdx";
+import PythonFlaskFilterDecision from "@/snippets/bot-protection/advanced-signals/shared-py/FilterDecision.mdx";
 
 Arcjet advanced bot signals provides browser-based bot detection using client-side
 telemetry. A WebAssembly module runs in the browser to collect signals about
@@ -216,6 +238,52 @@ list. Signals are still evaluated but the result does not affect the decision:
   <SvelteKitMonitorSignals slot="sveltekit" />
   <PythonFastapiMonitorSignals slot="python-fastapi" />
   <PythonFlaskMonitorSignals slot="python-flask" />
+</SlotByFramework>
+
+## Step 3: Enforce with a filter rule
+
+Once you install the signals script, the `aj_signals` cookie is set for any
+browser that loads it. This means that if a request is missing the cookie,
+it's a strong signal that the client is not a real browser — for example, a
+bot that doesn't execute JavaScript or a scraper that targets your API directly.
+
+You can enforce the cookie by using a [filter rule](/filters) to block any request.
+
+<SlotByFramework client:load>
+  <BunFilterSignals slot="bun" />
+  <DenoFilterSignals slot="deno" />
+  <NestJsFilterSignals slot="nest-js" />
+  <NextJsFilterSignals slot="next-js" />
+  <NodeJsFilterSignals slot="node-js" />
+  <RemixFilterSignals slot="remix" />
+  <SvelteKitFilterSignals slot="sveltekit" />
+  <PythonFastapiFilterSignals slot="python-fastapi" />
+  <PythonFlaskFilterSignals slot="python-flask" />
+</SlotByFramework>
+
+The expression `len(http.request.cookie["aj_signals"]) eq 0` matches any
+request where the cookie is missing or empty, and the `deny` list causes
+those requests to be blocked before `detectBot` is even evaluated. You can
+combine this with a `detectBot` rule to layer both checks on the same route.
+
+### Handling the filter decision
+
+When a filter rule denies a request, `decision.reason.isFilter()` returns
+`true`. This lets you distinguish a missing-cookie denial from a bot
+detection denial and return a more helpful response — for example, redirecting
+the user to an error page that explains cookies are required rather than
+returning a silent 403:
+
+<SlotByFramework client:load>
+  <BunFilterDecision slot="bun" />
+  <DenoFilterDecision slot="deno" />
+  <NestJsFilterDecision slot="nest-js" />
+  <NextJsFilterDecision slot="next-js" />
+  <NodeJsFilterDecision slot="node-js" />
+  <RemixFilterDecision slot="remix" />
+  <SvelteKitFilterDecision slot="sveltekit" />
+  <PythonFastapiFilterDecision slot="python-fastapi" />
+  <PythonFlaskFilterDecision slot="python-flask" />
 </SlotByFramework>
 
 ## Content Security Policy
