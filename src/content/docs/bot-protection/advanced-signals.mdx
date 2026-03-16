@@ -1,0 +1,235 @@
+---
+title: "Advanced bot signals"
+titleByFramework:
+  default: "Advanced bot signals"
+  bun: "Advanced bot signals for Bun"
+  deno: "Advanced bot signals for Deno"
+  nest-js: "Advanced bot signals for NestJS"
+  next-js: "Advanced bot signals for Next.js"
+  node-js: "Advanced bot signals for Node.js"
+  remix: "Advanced bot signals for Remix"
+  sveltekit: "Advanced bot signals for SvelteKit"
+description: "Use Arcjet advanced bot signals for browser-based bot detection that identifies automation without CAPCTCHAs or user challenges."
+frameworks:
+  - bun
+  - deno
+  - nest-js
+  - next-js
+  - node-js
+  - remix
+  - sveltekit
+ajToc:
+  - text: "When to use signals"
+    anchor: "when-to-use-signals"
+  - text: "How it works"
+    anchor: "how-it-works"
+  - text: "Pricing"
+    anchor: "pricing"
+  - text: "Setup"
+    anchor: "setup"
+    children:
+    - text: "Step 1: Add the script"
+      anchor: "step-1-add-the-script"
+    - text: "Step 2: Configure bot detection"
+      anchor: "step-2-configure-bot-detection"
+  - text: "Content Security Policy"
+    anchor: "content-security-policy"
+---
+
+import { Badge } from "@astrojs/starlight/components";
+import Comments from "@/components/Comments.astro";
+import { Link } from "@/components/link";
+import { frameworks } from "@/lib/prefs";
+import SlotByFramework from "@/components/SlotByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
+
+import BunAddScript from "@/snippets/bot-protection/advanced-signals/html/AddScript.mdx";
+import DenoAddScript from "@/snippets/bot-protection/advanced-signals/html/AddScript.mdx";
+import NestJsAddScript from "@/snippets/bot-protection/advanced-signals/html/AddScript.mdx";
+import NextJsAddScript from "@/snippets/bot-protection/advanced-signals/nextjs/AddScript.mdx";
+import NodeJsAddScript from "@/snippets/bot-protection/advanced-signals/html/AddScript.mdx";
+import RemixAddScript from "@/snippets/bot-protection/advanced-signals/html/AddScript.mdx";
+import SvelteKitAddScript from "@/snippets/bot-protection/advanced-signals/html/AddScript.mdx";
+
+import BunBlockSignals from "@/snippets/bot-protection/advanced-signals/bun/BlockSignals.mdx";
+import DenoBlockSignals from "@/snippets/bot-protection/advanced-signals/deno/BlockSignals.mdx";
+import NestJsBlockSignals from "@/snippets/bot-protection/advanced-signals/nestjs/BlockSignals.mdx";
+import NextJsBlockSignals from "@/snippets/bot-protection/advanced-signals/nextjs/BlockSignals.mdx";
+import NodeJsBlockSignals from "@/snippets/bot-protection/advanced-signals/nodejs/BlockSignals.mdx";
+import RemixBlockSignals from "@/snippets/bot-protection/advanced-signals/remix/BlockSignals.mdx";
+import SvelteKitBlockSignals from "@/snippets/bot-protection/advanced-signals/sveltekit/BlockSignals.mdx";
+
+Arcjet advanced bot signals provides browser-based bot detection using client-side
+telemetry. A WebAssembly module runs in the browser to collect signals about
+the environment to detect automation anomalies. The result is stored as the `aj_signals`
+cookie and evaluated server-side as part of the `detectBot` rule.
+
+## When to use signals
+
+Signals is ideal for detecting bots that execute JavaScript and interact with the page
+like a real user, such as headless browsers and sophisticated scrapers. It can identify
+automation that mimics human behavior and evades simpler bot detection methods.
+
+Arcjet advanced bot signals is most effective on sensitive routes where you want to be 
+sure the request comes from a real browser, such as form `POST` handlers, login and signup 
+endpoints, and other routes that are common targets for abuse.
+
+It works by setting a cookie to identify the browser with analysis results stored on 
+Arcjet's cloud. The client-side signals are then linked when server-side bot detection 
+rules are evaluated. This approach provides robust bot detection without relying on 
+CAPTCHAs or user challenges, creating a seamless experience for legitimate users 
+while effectively blocking bots.
+
+## How it works
+
+1. A browser script loads and starts a WebAssembly-based signal collector.
+2. The collector gathers signals and sends them to the Arcjet API. Arcjet then returns
+   a continue token, which is stored in the `aj_signals` cookie.
+3. That cookie remains valid for a period of time, so the collected signals can be
+   reused on later requests instead of being collected again on every page load.
+4. On the next request, the browser sends the `aj_signals` cookie. An Arcjet `detectBot`
+   rule can then read it server-side, for example in a form `POST` handler.
+5. If the signals suggest automation, or if the cookie is missing, Arcjet denies the
+   request and includes `ARCJET_SIGNALS` as the denial reason.
+
+## Pricing
+
+Arcjet advanced bot signals are available on all paid plans and charged based on usage.
+For details, see the [pricing page](https://arcjet.com/pricing).
+
+## Setup
+
+### Step 1: Add the script
+
+<FrameworkLinks
+  client:load
+  exclude={frameworks
+    .filter((d) => !frontmatter.frameworks.includes(d.key))
+    .map((d) => d.key)}
+  title="Choose a framework"
+/>
+
+Load the signals script on every page where you want browser-based detection.
+
+<SlotByFramework client:load>
+  <BunAddScript slot="bun" />
+  <DenoAddScript slot="deno" />
+  <NestJsAddScript slot="nest-js" />
+  <NextJsAddScript slot="next-js" />
+  <NodeJsAddScript slot="node-js" />
+  <RemixAddScript slot="remix" />
+  <SvelteKitAddScript slot="sveltekit" />
+</SlotByFramework>
+
+The script evaluates the browser environment and sets the `aj_signals` cookie,
+which is then read server-side by `detectBot`.
+
+### Step 2: Configure bot detection
+
+Use a [`detectBot` rule](/bot-protection/quick-start) to act on signals results. Signals is most useful on sensitive
+routes such as form `POST` handlers, login, and signup endpoints — routes where
+you care whether the request comes from a real browser.
+
+#### Block when signals fails (recommended for sensitive routes)
+
+With an empty `allow` list, all detected bots are denied — including requests
+that fail signals evaluation. This is the recommended configuration for
+high-sensitivity endpoints:
+
+<SlotByFramework client:load>
+  <BunBlockSignals slot="bun" />
+  <DenoBlockSignals slot="deno" />
+  <NestJsBlockSignals slot="nest-js" />
+  <NextJsBlockSignals slot="next-js" />
+  <NodeJsBlockSignals slot="node-js" />
+  <RemixBlockSignals slot="remix" />
+  <SvelteKitBlockSignals slot="sveltekit" />
+</SlotByFramework>
+
+If the result indicates automation, the request is denied with `ARCJET_SIGNALS`
+in the denial reason.
+
+#### Deny signals explicitly
+
+To block signals failures alongside other specific identifiers, add
+`ARCJET_SIGNALS` to the `deny` list. With a `deny` list, only the listed
+identifiers are blocked — any bot not in the list is allowed:
+
+```ts
+detectBot({
+  mode: "LIVE",
+  deny: [
+    "ARCJET_SIGNALS", // Block requests that fail signals detection
+    "CATEGORY:AI",    // Block AI scrapers
+    // All other bots are allowed
+  ],
+}),
+```
+
+#### Monitor without blocking
+
+To collect signals data without blocking, add `ARCJET_SIGNALS` to the `allow`
+list. Signals are still evaluated but the result does not affect the decision:
+
+```ts
+detectBot({
+  mode: "LIVE",
+  allow: [
+    "CATEGORY:SEARCH_ENGINE", // Allow search engine crawlers
+    "ARCJET_SIGNALS",         // Don't block on signals failures
+  ],
+}),
+```
+
+## Content Security Policy
+
+If your application sets a Content Security Policy (CSP), add the following
+directives to allow the signals script to load and run:
+
+| Directive    | Value                                                     | Reason                                                            |
+| ------------ | --------------------------------------------------------- | ----------------------------------------------------------------- |
+| `script-src` | `https://signals-cdn.arcjet.com`                          | Loads the signals JavaScript and WebAssembly module from the Arcjet CDN  |
+| `script-src` | `'wasm-unsafe-eval'`                                      | Required to execute the WebAssembly module                        |
+| `connect-src`| `https://signals-cdn.arcjet.com`                          | Fetches assets from the Arcjet CDN at runtime                            |
+| `connect-src`| `https://signals.arcjet.com`                              | Sends collected signals to the Arcjet API                         |
+| `frame-src`  | `https://signals-cdn.arcjet.com`                          | Allows collecting signals from different contexts |
+
+### Using nosecone
+
+[Nosecone](/nosecone/quick-start) is a library for setting secure HTTP
+headers, including CSP, in Next.js middleware and other frameworks. If you're
+already using nosecone, extend the default directives to include the signals
+URLs:
+
+```ts title="middleware.ts"
+import * as nosecone from "@nosecone/next";
+
+const noseconeConfig: nosecone.Options = {
+  ...nosecone.defaults,
+  contentSecurityPolicy: {
+    ...nosecone.defaults.contentSecurityPolicy,
+    directives: {
+      ...nosecone.defaults.contentSecurityPolicy.directives,
+      scriptSrc: [
+        ...nosecone.defaults.contentSecurityPolicy.directives.scriptSrc,
+        "https://signals-cdn.arcjet.com",
+        "'wasm-unsafe-eval'",
+      ],
+      connectSrc: [
+        ...nosecone.defaults.contentSecurityPolicy.directives.connectSrc,
+        "https://signals-cdn.arcjet.com",
+        "https://signals.arcjet.com",
+      ],
+      frameSrc: [
+        "https://signals-cdn.arcjet.com",
+      ],
+    },
+  },
+};
+
+export default nosecone.createMiddleware(noseconeConfig);
+```
+
+
+
+<Comments />

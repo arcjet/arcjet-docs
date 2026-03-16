@@ -1,0 +1,21 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import BlockSignalsAppTS from "./BlockSignalsApp.ts?raw";
+import BlockSignalsAppJS from "./BlockSignalsApp.js?raw";
+import BlockSignalsPagesTS from "./BlockSignalsPages.ts?raw";
+import BlockSignalsPagesJS from "./BlockSignalsPages.js?raw";
+
+<SelectableContent client:load syncKey="language">
+  <div slot="TS (App)" slotIdx="1">
+    <Code code={BlockSignalsAppTS} lang="ts" title="app/api/contact/route.ts" />
+  </div>
+  <div slot="TS (Pages)" slotIdx="2">
+    <Code code={BlockSignalsPagesTS} lang="ts" title="pages/api/contact.ts" />
+  </div>
+  <div slot="JS (App)" slotIdx="3">
+    <Code code={BlockSignalsAppJS} lang="js" title="app/api/contact/route.js" />
+  </div>
+  <div slot="JS (Pages)" slotIdx="4">
+    <Code code={BlockSignalsPagesJS} lang="js" title="pages/api/contact.js" />
+  </div>
+</SelectableContent>

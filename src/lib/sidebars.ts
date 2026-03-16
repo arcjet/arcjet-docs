@@ -228,6 +228,10 @@ export const main = [
             link: "/bot-protection/identifying-bots",
           },
           {
+            label: "Advanced signals",
+            link: "/bot-protection/advanced-signals",
+          },
+          {
             label: "Reference",
             link: "/bot-protection/reference",
           },

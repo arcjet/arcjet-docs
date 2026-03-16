@@ -1,0 +1,13 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import BlockSignalsTS from "./BlockSignals.ts?raw";
+import BlockSignalsJS from "./BlockSignals.js?raw";
+
+<SelectableContent client:load syncKey="language">
+  <div slot="TS" slotIdx="1">
+    <Code code={BlockSignalsTS} lang="ts" title="src/app.module.ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={BlockSignalsJS} lang="js" title="src/app.module.js" />
+  </div>
+</SelectableContent>
