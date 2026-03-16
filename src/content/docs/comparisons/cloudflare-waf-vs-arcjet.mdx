@@ -1,0 +1,168 @@
+---
+title: "Cloudflare WAF vs Arcjet"
+description: "Cloudflare WAF vs Arcjet. Compare Arcjet's in-code security SDK with Cloudflare's network-layer WAF. Configuration model, bot detection, rate limiting, AI protection, platform independence, and when to choose each."
+---
+
+import Comments from "/src/components/Comments.astro";
+import { Link } from "@/components/link";
+
+Arcjet is an alternative to
+[Cloudflare WAF](https://developers.cloudflare.com/waf/) for protecting web
+applications from bots, attack traffic, and abuse. Both provide WAF and bot
+detection capabilities, but they operate at different layers and suit different
+use cases.
+
+## Key differences: Cloudflare WAF vs Arcjet
+
+1. **Where security runs**: Cloudflare WAF runs at the network edge — rules are
+   evaluated by Cloudflare's CDN infrastructure before requests reach your
+   application. This requires routing your DNS and traffic through Cloudflare. Arcjet runs
+   inside your application as a library, called from your request handlers and
+   middleware. Arcjet works alongside any CDN or proxy, including Cloudflare,
+   without replacing it.
+
+2. **Configuration model**: Cloudflare WAF rules are configured in the
+   Cloudflare dashboard or via the API and Terraform. Rules are infrastructure
+   changes that deploy globally in seconds but are separate from your
+   application codebase. Arcjet rules are written in your application code,
+   committed to your repository, reviewed in pull requests, and deployed with
+   your application. They can branch on any value your application knows at
+   runtime — user identity, subscription tier, feature flags, or any other
+   request context.
+
+3. **Bot detection**: Cloudflare offers three tiers of bot detection:
+   [Bot Fight Mode](https://developers.cloudflare.com/bots/) (all plans, limited
+   configuration), Super Bot Fight Mode (Pro/Business, limited configuration),
+   and Bot Management for Enterprise (full customization, "Contact sales").
+   Basic and Super Bot Fight Mode offer "limited configuration options". Arcjet
+   bot detection classifies 600+ known bots across 25 categories, is configured
+   in code, and works at any plan tier on paid plans. Arcjet
+   <Link.Page href="/bot-protection/advanced-signals">advanced client signals</Link.Page>
+   add browser-based WebAssembly telemetry to detect headless browsers and
+   sophisticated scrapers without CAPTCHAs.
+
+4. **Rate limiting**: Cloudflare rate limiting is heavily tiered. On Free plans,
+   only 1 rule keyed on IP is available with a maximum 10-second window. Per-user
+   or per-account rate limiting (keying on headers, cookies, or body values) is
+   locked behind Enterprise with Advanced Rate Limiting. Arcjet rate limiting is
+   configured in code and can key on any value your application can compute —
+   user ID, account, subscription, session — on paid self-serve plans. Token
+   Bucket is available on all Arcjet plans; on Cloudflare it requires Enterprise
+   with Advanced Rate Limiting.
+
+5. **Plan gating**: Many of Cloudflare WAF's most capable features require
+   Business or Enterprise plans. Custom rules allow Log action only on
+   Enterprise. Rate limiting with non-IP keys (headers, cookies, body, user
+   identity) is Enterprise-only. Bot Management with full configuration is
+   Enterprise-only. Sensitive Data Detection is an Enterprise paid add-on. Arcjet
+   advanced features (bot detection with IP reputation, advanced signals, AI
+   protection) are available on self-serve paid plans.
+
+6. **Cloudflare Workers**: Cloudflare Workers allows running JavaScript at
+   Cloudflare's edge — this is in-code logic, but it is a full platform
+   migration requiring your code to run on Cloudflare's runtime (not Node.js,
+   Bun, or standard Python runtimes). Arcjet is a library that runs inside your
+   existing application framework, wherever it runs, without changing your
+   runtime or deployment target.
+
+## Comparison
+
+| Area                  | Arcjet                                                                                                                                                                                                                                             | Cloudflare WAF                                                                                                                                                                                                                       |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Where it runs         | Inside your application, as a library called from handlers and middleware.                                                                                                                                                                         | At the Cloudflare network edge, before requests reach your application. Requires routing traffic through Cloudflare.                                                                                                                     |
+| Configuration         | Rules-as-code in your application; committed to your repo, reviewed in PRs, deployed with your app. Can branch on any runtime value.                                                                                                               | Dashboard, API, or Terraform. Fast global propagation (~seconds). Separate from your application codebase; static rules only.                                                                                                        |
+| Hosting               | Platform-agnostic. Works on any provider alongside any CDN, including Cloudflare.                                                                                                                                                                  | Requires DNS routed through Cloudflare. Works with any origin behind the Cloudflare proxy.                                                                                                                                          |
+| Languages & frameworks | JavaScript, TypeScript, and Python. Native SDKs for Next.js, Node.js, Bun, Deno, Remix, SvelteKit, NestJS, React Router, Fastify, Astro, Python FastAPI, Flask, and other Python web servers.                                                    | Any language/framework behind Cloudflare's proxy. WAF rules apply at the network layer regardless of origin stack.                                                                                                                   |
+| Bot detection         | 600+ known bots across 25 categories in code. Advanced client signals (browser WebAssembly telemetry) detect headless browsers without CAPTCHAs. Available on paid self-serve plans.                                                              | Bot Fight Mode (all plans, limited config). Super Bot Fight Mode (Pro/Business, limited config). Full Bot Management: Enterprise only ("Contact sales").                                                                             |
+| AI bot blocking       | <Link.Page href="/bot-protection/identifying-bots">AI crawler category</Link.Page> (`CATEGORY:AI`) available on paid plans; configured in code.                                                                                                    | No dedicated AI bot blocking ruleset in WAF (separate from Bot Management).                                                                                                                                                          |
+| AI app protection     | <Link.Page href="/ai-protection">AI Runtime Protection</Link.Page>: prompt injection detection, per-user token budgets, PII detection in AI flows.                                                                                                 | None. No protection for AI application logic.                                                                                                                                                                                        |
+| WAF / attack coverage | <Link.Page href="/shield">Shield WAF</Link.Page> detects SQLi, XSS, path traversal, and other common attacks on paid plans.                                                                                                                        | Cloudflare Managed Ruleset (Pro+), OWASP Core Ruleset (Pro+), Free Managed Ruleset (all plans). OWASP on Pro and above.                                                                                                              |
+| Rate limiting         | Rules-as-code; key on user ID, account, session, plan, or any computed value.                                                                                                                                         | Free: 1 rule, IP only, 10s max window. Pro: 2 rules, 60s max. Business: 5 rules, 10min max. Non-IP keys (header, cookie, user identity): Enterprise Advanced Rate Limiting only. Token Bucket: Enterprise only.                    |
+| Custom rules          | No per-project rule count limit (rules are code).                                                                                                                                                                                                  | Free: 5 rules. Pro: 20 rules. Business: 100 rules. Enterprise: 1,000 rules. Log action: Enterprise only.                                                                                                                            |
+| Filter rules          | <Link.Page href="/filters">Expression-based filter rules</Link.Page> in code; compose cookie, IP reputation, geo, VPN/proxy, header, and path conditions alongside bot and rate limiting rules.                                                    | Custom rules with similar condition types in the dashboard. Regex support on Business+.                                                                                                                                              |
+| Local development     | Same behavior as production; inspect decisions directly in code.                                                                                                                                                                                   | WAF rules apply only to traffic routed through Cloudflare; local development bypasses WAF entirely.                                                                                                                                  |
+| In-code option        | Arcjet is natively in-code — it is a library you import and call.                                                                                                                                                                                  | Cloudflare Workers allows in-code logic at the edge, but requires migrating your application runtime to Cloudflare's V8 isolate environment.                                                                                        |
+
+## When to choose which
+
+### Choose Arcjet if...
+
+- **You want security as code** Your security rules live in your repo, pass code
+  review, and deploy with your application. You want per-route, per-user, or
+  per-plan logic that branches on what your application knows at runtime.
+
+- **You're not routing DNS through Cloudflare** Arcjet works on any hosting
+  provider without requiring a CDN proxy in front of your application.
+
+- **You need per-user rate limiting without Enterprise** Keying rate limits on
+  user identity, account, or subscription tier is a paid-plan feature in Arcjet.
+  On Cloudflare, it requires Enterprise with Advanced Rate Limiting.
+
+- **You want advanced bot signals on a self-serve plan** Arcjet's browser
+  WebAssembly signal collection for headless browser detection is available on
+  paid self-serve plans. Cloudflare's equivalent Bot Management requires
+  Enterprise.
+
+- **You want OWASP-level WAF protection without a Pro plan** Arcjet Shield WAF
+  is available on self-serve paid plans. Cloudflare's OWASP Core Ruleset
+  requires Pro or above.
+
+### Choose Cloudflare WAF if...
+
+- **You're already on Cloudflare and need zero-code network protection** If your
+  DNS is already through Cloudflare, the WAF is a natural addition. Dashboard
+  rules propagate in seconds without touching application code.
+
+- **You need L3/L4/L7 DDoS mitigation** Cloudflare's network-layer DDoS
+  protection is one of the strongest in the industry and is available on all
+  plans including Free.
+
+- **You want TLS fingerprinting (JA3/JA4)** Cloudflare WAF supports JA4 on
+  Business+ and JA3 on Enterprise as rule conditions, useful for blocking
+  distributed attacks sharing a TLS fingerprint.
+
+- **You need instant rollback without redeployment** WAF rule changes propagate
+  globally in seconds and can be reverted instantly from the dashboard.
+
+In short: Cloudflare WAF and Arcjet are complementary. Cloudflare provides
+excellent network-layer DDoS protection and OWASP coverage that is independent
+of your application code. Arcjet provides application-aware security — per-user
+rules, AI protection, advanced signals, and the full suite — that operates
+inside your code. Many teams use both.
+
+## FAQs
+
+### Can I use Arcjet and Cloudflare WAF together?
+
+Yes, and this is a common setup. Cloudflare WAF operates at the network layer
+and Arcjet operates inside your application — they are independent layers.
+Cloudflare handles DDoS mitigation and broad network-layer rules; Arcjet handles
+application-aware rules that depend on user identity, route context, and
+business logic. Arcjet works correctly behind Cloudflare's proxy.
+
+### How does Cloudflare Workers compare to Arcjet?
+
+Cloudflare Workers runs JavaScript at Cloudflare's edge and supports custom
+security logic in code. However, Workers is a full application runtime — your
+code runs in a V8 isolate environment on Cloudflare's infrastructure, not in
+Node.js, Bun, Deno, or standard Python runtimes. Arcjet is a library that
+integrates into your existing application framework wherever it runs. If you're
+already building on Workers, you can use Arcjet there too. If you're building on
+standard server or serverless runtimes, Arcjet requires no infrastructure change.
+
+### Does Cloudflare WAF support per-user rate limiting?
+
+Only on Enterprise with Advanced Rate Limiting. Cloudflare WAF can key rate
+limits on headers, cookies, and body values — but mapping those to application
+users requires your application to emit an identifying header or cookie for the
+WAF to key on. There is no concept of authenticated users or subscription tiers
+in WAF rules. Arcjet rate limiting is configured in code and can key on any
+value your application can compute directly.
+
+### Does the Cloudflare WAF work in local development?
+
+No. Cloudflare WAF rules only apply to traffic routed through Cloudflare's
+network. Local development bypasses the WAF entirely. Arcjet behaves the same
+in local development as in production.
+
+<Comments />

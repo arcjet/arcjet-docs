@@ -20,15 +20,20 @@ there are some key differences to consider when choosing between them.
    <Link.Page href="/rate-limiting/quick-start">rate limiting</Link.Page>,
    <Link.Page href="/email-validation/quick-start">email verification</Link.Page>,
    <Link.Page href="/sensitive-info/quick-start">personal information detection & redaction</Link.Page>,
-   and a full
+   a full
    <Link.Page href="/shield/quick-start">web application firewall (WAF)</Link.Page>
-   that covers SQL injection, cross-site
-   scripting, file inclusion attacks, and others. Aikido's Zen Firewall focuses
-   on runtime application protection: blocking dangerous user input (injection,
-   path traversal, SSRF, etc.), per-route and per-user rate limiting, and
-   blocking bots, Tor traffic, known threat actors, and traffic by country.
-   Aikido also offers a broader cloud security platform (code scanning, cloud
-   scanning, etc.) that is not directly comparable to Arcjet's SDK.
+   that covers SQL injection, cross-site scripting, file inclusion attacks, and
+   others, and <Link.Page href="/filters">filter rules</Link.Page> for
+   expression-based traffic control. Arcjet also provides
+   <Link.Page href="/ai-protection">AI Runtime Protection</Link.Page>: bot
+   detection and prompt injection protection for AI endpoints, per-user token
+   budget enforcement, and PII detection in AI request/response flows. Aikido's
+   Zen Firewall focuses on runtime application protection: blocking dangerous
+   user input (injection, path traversal, SSRF, etc.), per-route and per-user
+   rate limiting, and blocking bots, Tor traffic, known threat actors, and
+   traffic by country. Aikido also offers a broader cloud security platform
+   (code scanning, cloud scanning, etc.) that is not directly comparable to
+   Arcjet's SDK.
 2. **Integration**: Arcjet is designed to integrate as a library directly into
    your codebase. You define rules in code and call Arcjet alongside your
    application logic, and it does not modify your runtime or frameworks. Arcjet
@@ -71,16 +76,23 @@ there are some key differences to consider when choosing between them.
    machine learning models, and other advanced techniques whilst still keeping
    sensitive data local. As a result, Arcjet can provide more effective
    protection against new threats with rule updates as they emerge.
+5. **Advanced client signals for bot detection:** Arcjet provides
+   <Link.Page href="/bot-protection/advanced-signals">advanced bot signals</Link.Page>,
+   a browser-based detection layer that runs a WebAssembly module in the
+   client to collect environment signals and identify headless browsers and
+   sophisticated scrapers — without CAPTCHAs or user challenges. Aikido's bot detection remains
+   focused on user-agent signature matching and IP-based controls, with no
+   equivalent to client-side signal collection or expression-based filter rules.
 
 ## Comparison
 
 | Area                     | Arcjet                                                                                                                                                                                                                                                    | Aikido (Zen Firewall)                                                                                                                                                                                                            |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Product scope            | In-code security SDK for Javascript, TypeScript, and Python apps: bot protection, rate limiting, WAF (Shield), email validation, signup protection, sensitive info detection & redaction, filters.                                                        | Firewall focused on Node.js for JavaScript, with agents for other languages.                                                                                                                                                     |
+| Product scope            | In-code security SDK for Javascript, TypeScript, and Python apps: bot protection, rate limiting, WAF (Shield), email validation, signup protection, sensitive info detection & redaction, filter rules, and AI Runtime Protection (prompt injection detection, per-user token budgets, PII in AI flows). | Firewall focused on Node.js for JavaScript, with agents for other languages. No dedicated AI runtime protection features.                                                                                                        |
 | Languages & platforms    | Javascript, TypeScript, and Python only. SDKs for Astro, Bun, Deno, Fastify, NestJS, Next.js, Node.js, Nuxt, React Router, Remix, SvelteKit, Python FastAPI, Flask, and other Python web servers.                                                         | Multiple languages: Python, PHP, Java, each with its own agent and framework support matrix. In the JS ecosystem Aikido only supports Node.js.                                                                                   |
 | Integration model        | Library you import and call from your handlers or middleware. Rules are written in code and can branch on any request context (user ID, plan, route, feature flags, etc.).                                                                                | Agent embeds into the runtime by monkey-patching frameworks, built-ins and libraries automatically; most behavior and policies are configured via dashboard and environment variables, not per-handler code.                     |
 | Runtime & module system  | ESM-only. Designed for modern runtimes and edge environments.                                                                                                                                                                                             | Node.js agent currently CommonJS-only; ESM is documented as experimental/limited and may require wrappers or special setup.                                                                                                      |
-| Bot protection           | Rules defined in code with rich request context (user, headers, IP, path, plan, etc.); can be combined with rate limits and other rules in a single decision.                                                                                             | Maintained list of bot user agent signatures plus IP-based controls (bots, known threat actors, Tor) and geo-blocking, driven from the Aikido dashboard.                                                                         |
+| Bot protection           | Rules defined in code with rich request context (user, headers, IP, path, plan, etc.); can be combined with rate limits and other rules in a single decision. Advanced client signals (browser WebAssembly telemetry) detect headless browsers and sophisticated scrapers without CAPTCHAs. | Maintained list of bot user agent signatures plus IP-based controls (bots, known threat actors, Tor) and geo-blocking, driven from the Aikido dashboard. No client-side signal collection or filter rule language.               |
 | Rate limiting            | Rules-as-code: define per-route, per-user, per-account, or arbitrary key function; backed by Arcjet Cloud API with local caching for low latency.                                                                                                         | Route and user-centric rate limiting configured primarily via the dashboard; supports user-aware rate limiting with limitations with some frameworks e.g. Next.js, but not a general-purpose rate limiting API inside your code. |
 | WAF / attack coverage    | Shield WAF integrated into the SDK to detect and block common web attacks (SQLi, XSS, file inclusion, etc.).                                                                                                                                              | Performs in-process taint-style analysis by instrumenting code paths to detect injections, path traversal, SSRF and other common attack patterns.                                                                                |
 | Data & privacy model     | "Local-first": a WebAssembly engine runs inside your app; decisions are taken locally where possible and reported asynchronously. Some rules (rate limiting, Shield) call the Cloud API with request metadata, not full payloads, and results are cached. | "Local-only" for security checks: decisions are made inside your process. Metadata about attacks and events is reported back for dashboards and analytics.                                                                       |
@@ -110,10 +122,16 @@ can be the right fit**.
   review and CI.
 
 - **You care about strong primitives beyond "firewall"** Bot protection, rate
-  limiting, WAF, email verification, signup protection, and PII
-  detection/redaction are all part of the Arcjet product suite. You'd rather
-  compose these into flows than sprinkle generic "block this request" calls
-  around.
+  limiting, WAF, email verification, signup protection, PII detection/redaction,
+  filter rules, and AI Runtime Protection are all part of the Arcjet product
+  suite. You'd rather compose these into flows than sprinkle generic "block this
+  request" calls around.
+
+- **You're building AI applications** You need to protect AI endpoints from
+  automated clients inflating token costs, detect prompt injection attacks, or
+  enforce per-user token budgets. Arcjet's AI Runtime Protection covers abuse,
+  budget control, and data loss prevention with the same SDK you use for
+  everything else.
 
 - **You want hybrid local + cloud analysis, not just IP lists** You like the
   idea of a local WebAssembly engine plus cloud-side context (global reputation,

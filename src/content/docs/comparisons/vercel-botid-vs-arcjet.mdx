@@ -20,8 +20,13 @@ choosing between them.
    <Link.Page href="/email-validation">email validation</Link.Page>,
    <Link.Page href="/sensitive-info">sensitive info detection</Link.Page>,
    <Link.Page href="/shield">shield WAF</Link.Page> (web application firewall),
-   and more. Vercel BotID is primarily focused on bot detection and mitigation.
-   Vercel's broader platform services include
+   <Link.Page href="/filters">filter rules</Link.Page> for expression-based
+   traffic control, and
+   <Link.Page href="/ai-protection">AI Runtime Protection</Link.Page> (bot
+   detection and prompt injection for AI endpoints, per-user token budget
+   enforcement, and PII detection in AI flows). Vercel BotID is primarily
+   focused on bot detection and mitigation. Vercel's broader platform services
+   include
    [WAF](https://vercel.com/docs/vercel-firewall/vercel-waf) and [rate
    limiting](https://vercel.com/docs/vercel-firewall/vercel-waf/rate-limiting),
    but they are separate from BotID and must be configured independently.
@@ -46,17 +51,30 @@ choosing between them.
    inspected to understand the decision and customize the response. Vercel BotID
    provides few configuration options and returns only minimal information about
    the request.
+5. **Advanced client signals and filter rules**: Arcjet provides
+   <Link.Page href="/bot-protection/advanced-signals">advanced bot signals</Link.Page>,
+   a browser-based detection layer that runs a WebAssembly module in the client
+   to collect environment signals identifying headless browsers and
+   sophisticated scrapers — without CAPTCHAs or user challenges. Vercel BotID provides its own
+   client-side script for bot verification, but unlike Arcjet does not expose
+   filter rules for composing cookie, header, IP, or geo conditions in code
+   alongside your other bot and rate limiting rules. Vercel's BotID deep check
+   feature provides similuar functionality to Arcjet's advanced client signals,
+   but is very expensive.
+
 
 ## Comparison
 
 | Area                  | Arcjet                                                                                                                                                                    | Vercel BotID                                                                                                                                  |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Features              | App-level security SDK: bot management, rate limiting, WAF, email verification, PII detection/redaction, and more.                                                        | Bot detection/verification. WAF & rate limiting are separate Vercel features                                                                  |
+| Features              | App-level security SDK: bot management, rate limiting, WAF, email verification, PII detection/redaction, filter rules, and AI Runtime Protection (prompt injection, token budgets, PII in AI flows). | Bot detection/verification. WAF & rate limiting are separate Vercel features. No AI runtime protection.                                       |
 | Hosting               | Platform-agnostic. Use on any provider/framework.                                                                                                                         | Only works on Vercel.                                                                                                                         |
 | Local development     | Same behavior as production.                                                                                                                                              | Returns `isBot: false` [locally](https://vercel.com/docs/botid/local-development-behavior); supports `developmentOptions` to bypass/override. |
 | Integration model     | Call from code in any handler.                                                                                                                                            | Client script + server `checkBotId()`; you must list protected paths                                                                          |
 | HTML forms            | Works with native forms and any HTTP request.                                                                                                                             | Native HTML form `POST` [is not supported](https://vercel.com/docs/botid/form-submissions). You must refactor your forms.                     |
-| Configuration         | Rules-as-code; <Link.Page href="/bot-protection/identifying-bots">configure bots to allow</Link.Page> by name and category. Returns detailed context you can log/inspect. | Minimal config, no ability to choose which bots to allow or deny, server API essentially returns `isBot` (boolean) with minimal detail.       |
+| Configuration         | Rules-as-code; <Link.Page href="/bot-protection/identifying-bots">configure bots to allow</Link.Page> by name and category. Returns detailed context you can log/inspect. <Link.Page href="/filters">Filter rules</Link.Page> let you compose cookie, header, IP reputation, and geo conditions alongside bot and rate limiting rules using an expression DSL. | Minimal config, no ability to choose which bots to allow or deny, server API essentially returns `isBot` (boolean) with minimal detail. No filter rule language.       |
+| Advanced bot signals  | <Link.Page href="/bot-protection/advanced-signals">Browser-based WebAssembly signal collection</Link.Page> detects headless browsers and sophisticated scrapers without CAPTCHAs. | Client-side script provides bot verification signals; no equivalent filter rule language to compose with other rules in code. |
+| AI protection         | <Link.Page href="/ai-protection">AI Runtime Protection</Link.Page>: bot + prompt injection detection for AI endpoints, per-user token budget enforcement, PII detection in AI flows — all in the same SDK. | No AI runtime protection features.                                                                                                            |
 | Pricing (bot feature) | Packages based on total requests per month with usage based pricing after that.                                                                                           | Basic analysis free within compute/request limits per plan. $1 per 1,000 Deep Analysis requests.                                              |
 
 ## When to choose which
@@ -64,9 +82,12 @@ choosing between them.
 - **Choose Arcjet** if you want security independence regardless of where you
   deploy, need native form support, want rules-as-code with inspectable
   decisions, have applications built in multiple languages (JavaScript,
-  TypeScript, and/or Python) want to be able to test locally with the same
-  behavior as production or want bot protection next to rate limiting, email
-  validation, WAF, PII detection, and other security rules in one SDK.
+  TypeScript, and/or Python), want to be able to test locally with the same
+  behavior as production, need advanced client signals for headless browser
+  detection without CAPTCHAs, want filter rules to compose cookie/IP/geo
+  conditions with bot and rate limiting rules in code, or are building AI
+  applications that need prompt injection detection, per-user token budgets, or
+  PII protection — all in one SDK.
 - **Choose BotID** if you're fully on Vercel, want a quick boolean bot check,
   don't need to make any customizations, and are fine configuring rate
   limits/WAF separately in the Vercel Firewall.
