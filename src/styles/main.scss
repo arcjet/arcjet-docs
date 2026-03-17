@@ -440,7 +440,7 @@ starlight-theme-select {
     summary ~ ul summary:has(~ ul a.feature) {
       display: flex;
       flex-flow: row nowrap;
-      align-items: flex-start;
+      align-items: center;
       gap: calc(var(--sp) * 0.75);
 
       &:before {
@@ -450,7 +450,6 @@ starlight-theme-select {
 
         display: inline-block;
         vertical-align: top;
-        margin-top: 0.1em;
       }
 
       .group-label {
@@ -605,7 +604,6 @@ starlight-theme-select {
         width: 14px;
         height: 14px;
         background-color: var(--aj-palette-txt-secondary);
-        transform: translateY(0.1em);
 
         // Circle mask for any newly added features without an icon yet
         mask: url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 128 128' fill='none' stroke='none' xmlns='http://www.w3.org/2000/svg' stroke='%23bfb9c8' fill='none' vector-effect='non-scaling-stroke' /%3E%3C/svg%3E");
@@ -621,6 +619,11 @@ starlight-theme-select {
     }
 
     // Feature icons
+    summary ~ ul summary:has(~ ul a.feature.prompt-injection-detection) {
+      &:before {
+        mask: url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 128 128' fill='none' stroke='none' xmlns='http://www.w3.org/2000/svg' %3E%3Ccircle cx='64.002' cy='64' r='58' stroke='%23bfb9c8' fill='none' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M32.8 38H95.2L116 64L95.2 90H32.8L12 64L32.8 38Z' stroke='%23bfb9c8' fill='none' vector-effect='non-scaling-stroke' /%3E%3Cpath d='M42 58C45.3137 58 48 60.6863 48 64C48 67.3137 45.3137 70 42 70C38.6863 70 36 67.3137 36 64C36 60.6863 38.6863 58 42 58ZM64 58C67.3137 58 70 60.6863 70 64C70 67.3137 67.3137 70 64 70C60.6863 70 58 67.3137 58 64C58 60.6863 60.6863 58 64 58ZM86 58C89.3137 58 92 60.6863 92 64C92 67.3137 89.3137 70 86 70C82.6863 70 80 67.3137 80 64C80 60.6863 82.6863 58 86 58Z' fill='%23000' stroke='none' /%3E%3C/svg%3E");
+      }
+    }
     summary ~ ul summary:has(~ ul a.feature.bot-protection) {
       &:before {
         mask: url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 128 128' fill='none' stroke='none' xmlns='http://www.w3.org/2000/svg' %3E%3Ccircle cx='64' cy='64' r='16' stroke='none' fill='%23000' /%3E%3Cpath d='M21.9563 21.9563L64 4.5412L106.044 21.9563L123.459 64L106.044 106.044L64 123.459L21.9563 106.044L4.5412 64L21.9563 21.9563Z' fill='none' stroke='%23bfb9c8' vector-effect='non-scaling-stroke' /%3E%3C/svg%3E");

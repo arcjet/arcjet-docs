@@ -198,12 +198,12 @@ export const main = [
         collapsed: true,
         items: [
           {
-            attrs: { class: "feature shield-waf" },
+            attrs: { class: "feature prompt-injection-detection" },
             label: "Intro",
             link: "/prompt-injection",
           },
           {
-            attrs: { class: "feature shield-waf" },
+            attrs: { class: "feature prompt-injection-detection" },
             label: "Quick start",
             link: "/prompt-injection/quick-start",
           },
