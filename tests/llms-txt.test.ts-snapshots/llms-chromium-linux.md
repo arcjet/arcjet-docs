@@ -507,6 +507,54 @@ const aj = arcjet({
 });
 ```
 
+## MCP Server
+
+Endpoint: `https://api.arcjet.com/mcp`
+Transport: Streamable HTTP
+Auth: OAuth (browser-based, automatic on first connection)
+
+### Tools
+
+- `list-teams` — Returns teams the authenticated user belongs to.
+- `list-sites(teamId)` — Returns sites within a team.
+- `get-site-key(siteId)` — Returns the `ARCJET_KEY` for a site. Use this to
+  configure the Arcjet SDK.
+
+### Typical workflow
+
+1. Connect to the MCP server using one of the methods below.
+2. Call `list-teams` to get available teams.
+3. Call `list-sites` with a team ID to find the site.
+4. Call `get-site-key` to retrieve the `ARCJET_KEY`.
+5. Set `ARCJET_KEY` in the project environment (e.g. `.env.local`).
+
+### Connect
+
+Any MCP client supporting the latest MCP specification (Streamable HTTP +
+OAuth) can connect to `https://api.arcjet.com/mcp`.
+
+Claude Code:
+```bash
+claude mcp add arcjet --transport http https://api.arcjet.com/mcp
+```
+
+VS Code (Copilot) `.vscode/mcp.json`:
+```json
+{ "servers": { "arcjet": { "type": "http", "url": "https://api.arcjet.com/mcp" } } }
+```
+
+Cursor `.cursor/mcp.json`:
+```json
+{ "mcpServers": { "arcjet": { "type": "streamable-http", "url": "https://api.arcjet.com/mcp" } } }
+```
+
+Windsurf `mcp_config.json`:
+```json
+{ "mcpServers": { "arcjet": { "serverUrl": "https://api.arcjet.com/mcp" } } }
+```
+
+Full documentation: https://docs.arcjet.com/mcp-server
+
 ## Reference guides
 
 ### Features

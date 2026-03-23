@@ -369,6 +369,21 @@ export const main = [
     ],
   },
   {
+    label: "For Agents",
+    collapsed: false,
+    items: [
+      {
+        label: "MCP Server",
+        link: "/mcp-server",
+      },
+      {
+        label: "llms.txt",
+        link: "https://docs.arcjet.com/llms.txt",
+        attrs: { target: "_blank", class: "external-link" },
+      },
+    ],
+  },
+  {
     label: "Advanced",
     collapsed: false,
     items: [
