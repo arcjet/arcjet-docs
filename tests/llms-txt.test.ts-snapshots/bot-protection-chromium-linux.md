@@ -1,6 +1,6 @@
 Arcjet bot protection lets you detect bots, block bad bots, verify legitimate bots, and reduce unwanted automated requests before they reach your application.
 
-**What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime AI security platform that ships with your code. Stop bots and automated attacks from burning your AI budget, leaking data, or misusing tools with Arcjet's AI security building blocks.
+**What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime security platform that ships with your AI code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
 
 Bot protection is a core component of [AI Abuse Protection](/ai-protection/abuse-protection) - blocking automated clients that inflate token costs and exhaust per-user budgets in AI applications. Bots targeting AI features don’t just cause security problems; they cause direct financial harm. Combined with [rate limiting](/rate-limiting), bot protection gives you full control over who can access your AI features and at what cost.
 
@@ -60,38 +60,12 @@ Advanced bot detection adds IP reputation, [verification](/bot-protection/refere
 
 Clients are tracked using configurable [fingerprints](/fingerprints) (IP address by default) to identify unique clients. Fingerprints let you track anonymous users and attach rules and detections to known users via session tokens or other identifiers.
 
-Availability
-------------
+Pricing
+-------
 
-[Section titled “Availability”](#availability)
+[Section titled “Pricing”](#pricing)
 
-Basic detection (using `user-agent` headers and IP type analysis) is available on all plans.
-
-Advanced detection (using IP reputation, [verification](/bot-protection/reference#bot-verification), machine learning, and [advanced signals](/bot-protection/advanced-signals)) is available on paid plans.
-
-Plan
-
-Basic protection
-
-Advanced protection
-
-Free
-
-✅
-
-🚫
-
-Starter
-
-✅
-
-✅
-
-Business
-
-✅
-
-✅
+See the [pricing page](https://arcjet.com/pricing) for details.
 
 Discussion
 ----------

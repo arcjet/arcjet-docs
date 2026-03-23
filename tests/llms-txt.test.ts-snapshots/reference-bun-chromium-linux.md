@@ -2,7 +2,7 @@
 
 This is the reference guide for the Arcjet Bun SDK, [available on GitHub](https://github.com/arcjet/arcjet-js) and licensed under the Apache 2.0 license.
 
-**What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime AI security platform that ships with your code. Stop bots and automated attacks from burning your AI budget, leaking data, or misusing tools with Arcjet's AI security building blocks.
+**What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime security platform that ships with your AI code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
 
 Installation
 ------------
