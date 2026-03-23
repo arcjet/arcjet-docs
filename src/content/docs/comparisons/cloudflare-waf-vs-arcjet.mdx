@@ -36,7 +36,7 @@ use cases.
    and Bot Management for Enterprise (full customization, "Contact sales").
    Basic and Super Bot Fight Mode offer "limited configuration options". Arcjet
    bot detection classifies 600+ known bots across 25 categories, is configured
-   in code, and works at any plan tier on paid plans. Arcjet
+   in code, and works at any plan tier. Arcjet
    <Link.Page href="/bot-protection/advanced-signals">advanced client signals</Link.Page>
    add browser-based WebAssembly telemetry to detect headless browsers and
    sophisticated scrapers without CAPTCHAs.
@@ -46,7 +46,7 @@ use cases.
    or per-account rate limiting (keying on headers, cookies, or body values) is
    locked behind Enterprise with Advanced Rate Limiting. Arcjet rate limiting is
    configured in code and can key on any value your application can compute —
-   user ID, account, subscription, session — on paid self-serve plans. Token
+   user ID, account, subscription, session — on self-serve plans. Token
    Bucket is available on all Arcjet plans; on Cloudflare it requires Enterprise
    with Advanced Rate Limiting.
 
@@ -56,7 +56,7 @@ use cases.
    identity) is Enterprise-only. Bot Management with full configuration is
    Enterprise-only. Sensitive Data Detection is an Enterprise paid add-on. Arcjet
    advanced features (bot detection with IP reputation, advanced signals, AI
-   protection) are available on self-serve paid plans.
+   protection) are available on self-serve plans.
 
 6. **Cloudflare Workers**: Cloudflare Workers allows running JavaScript at
    Cloudflare's edge — this is in-code logic, but it is a full platform
@@ -73,10 +73,10 @@ use cases.
 | Configuration         | Rules-as-code in your application; committed to your repo, reviewed in PRs, deployed with your app. Can branch on any runtime value.                                                                                                               | Dashboard, API, or Terraform. Fast global propagation (~seconds). Separate from your application codebase; static rules only.                                                                                                        |
 | Hosting               | Platform-agnostic. Works on any provider alongside any CDN, including Cloudflare.                                                                                                                                                                  | Requires DNS routed through Cloudflare. Works with any origin behind the Cloudflare proxy.                                                                                                                                          |
 | Languages & frameworks | JavaScript, TypeScript, and Python. Native SDKs for Next.js, Node.js, Bun, Deno, Remix, SvelteKit, NestJS, React Router, Fastify, Astro, Python FastAPI, Flask, and other Python web servers.                                                    | Any language/framework behind Cloudflare's proxy. WAF rules apply at the network layer regardless of origin stack.                                                                                                                   |
-| Bot detection         | 600+ known bots across 25 categories in code. Advanced client signals (browser WebAssembly telemetry) detect headless browsers without CAPTCHAs. Available on paid self-serve plans.                                                              | Bot Fight Mode (all plans, limited config). Super Bot Fight Mode (Pro/Business, limited config). Full Bot Management: Enterprise only ("Contact sales").                                                                             |
-| AI bot blocking       | <Link.Page href="/bot-protection/identifying-bots">AI crawler category</Link.Page> (`CATEGORY:AI`) available on paid plans; configured in code.                                                                                                    | No dedicated AI bot blocking ruleset in WAF (separate from Bot Management).                                                                                                                                                          |
+| Bot detection         | 600+ known bots across 25 categories in code. Advanced client signals (browser WebAssembly telemetry) detect headless browsers without CAPTCHAs. Available on self-serve plans.                                                              | Bot Fight Mode (all plans, limited config). Super Bot Fight Mode (Pro/Business, limited config). Full Bot Management: Enterprise only ("Contact sales").                                                                             |
+| AI bot blocking       | <Link.Page href="/bot-protection/identifying-bots">AI crawler category</Link.Page> (`CATEGORY:AI`) configured in code.                                                                                                    | No dedicated AI bot blocking ruleset in WAF (separate from Bot Management).                                                                                                                                                          |
 | AI app protection     | <Link.Page href="/ai-protection">AI Runtime Protection</Link.Page>: prompt injection detection, per-user token budgets, PII detection in AI flows.                                                                                                 | None. No protection for AI application logic.                                                                                                                                                                                        |
-| WAF / attack coverage | <Link.Page href="/shield">Shield WAF</Link.Page> detects SQLi, XSS, path traversal, and other common attacks on paid plans.                                                                                                                        | Cloudflare Managed Ruleset (Pro+), OWASP Core Ruleset (Pro+), Free Managed Ruleset (all plans). OWASP on Pro and above.                                                                                                              |
+| WAF / attack coverage | <Link.Page href="/shield">Shield WAF</Link.Page> detects SQLi, XSS, path traversal, and other common attacks.                                                                                                                        | Cloudflare Managed Ruleset (Pro+), OWASP Core Ruleset (Pro+), Free Managed Ruleset (all plans). OWASP on Pro and above.                                                                                                              |
 | Rate limiting         | Rules-as-code; key on user ID, account, session, plan, or any computed value.                                                                                                                                         | Free: 1 rule, IP only, 10s max window. Pro: 2 rules, 60s max. Business: 5 rules, 10min max. Non-IP keys (header, cookie, user identity): Enterprise Advanced Rate Limiting only. Token Bucket: Enterprise only.                    |
 | Custom rules          | No per-project rule count limit (rules are code).                                                                                                                                                                                                  | Free: 5 rules. Pro: 20 rules. Business: 100 rules. Enterprise: 1,000 rules. Log action: Enterprise only.                                                                                                                            |
 | Filter rules          | <Link.Page href="/filters">Expression-based filter rules</Link.Page> in code; compose cookie, IP reputation, geo, VPN/proxy, header, and path conditions alongside bot and rate limiting rules.                                                    | Custom rules with similar condition types in the dashboard. Regex support on Business+.                                                                                                                                              |
@@ -95,17 +95,16 @@ use cases.
   provider without requiring a CDN proxy in front of your application.
 
 - **You need per-user rate limiting without Enterprise** Keying rate limits on
-  user identity, account, or subscription tier is a paid-plan feature in Arcjet.
-  On Cloudflare, it requires Enterprise with Advanced Rate Limiting.
+  user identity, account, or subscription tier is available on Arcjet self-serve
+  plans. On Cloudflare, it requires Enterprise with Advanced Rate Limiting.
 
 - **You want advanced bot signals on a self-serve plan** Arcjet's browser
   WebAssembly signal collection for headless browser detection is available on
-  paid self-serve plans. Cloudflare's equivalent Bot Management requires
-  Enterprise.
+  self-serve plans. Cloudflare's equivalent Bot Management requires Enterprise.
 
 - **You want OWASP-level WAF protection without a Pro plan** Arcjet Shield WAF
-  is available on self-serve paid plans. Cloudflare's OWASP Core Ruleset
-  requires Pro or above.
+  is available on self-serve plans. Cloudflare's OWASP Core Ruleset requires
+  Pro or above.
 
 ### Choose Cloudflare WAF if...
 

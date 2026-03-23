@@ -63,15 +63,13 @@ different layers and have different configuration models.
    users. Token Bucket algorithm is Enterprise-only; the maximum window on
    Hobby and Pro is 10 minutes. Arcjet rate limiting is configured in code,
    can be keyed on any value your application can compute (user ID, account,
-   session, plan tier), and supports Token Bucket on paid plans with windows up
-   to 24 hours.
+   session, plan tier), and supports Token Bucket with windows up to 24 hours.
 
 7. **Plan gating**: The most capable Vercel WAF features — OWASP Core Ruleset,
    Bot Protection, AI Bots ruleset, Token Bucket rate limiting, account-level
    IP blocking, and JA3 fingerprint conditions — are all Enterprise-only
    ("Contact sales"). Arcjet's advanced features (advanced bot detection, IP
-   reputation, advanced signals) are available on paid plans that are
-   self-serve.
+   reputation, advanced signals) are available on self-serve plans.
 
 ## Comparison
 
@@ -84,7 +82,7 @@ different layers and have different configuration models.
 | Bot detection         | 600+ known bots across 25 categories classified in code; browser-based WebAssembly <Link.Page href="/bot-protection/advanced-signals">advanced signals</Link.Page> detect headless browsers without CAPTCHAs. Works behind any proxy or CDN.    | Bot Protection managed ruleset (Enterprise-only) uses JS challenge; explicitly documented as broken behind reverse proxies (Cloudflare, Azure CDN, etc.).                                                           |
 | AI bot blocking       | <Link.Page href="/bot-protection/identifying-bots">AI crawler category</Link.Page> (`CATEGORY:AI`) configured in code alongside other bot rules.                                                                         | AI Bots managed ruleset (Enterprise-only); automatically maintained by Vercel. Log or Deny only.                                                                                                                    |
 | AI app protection     | <Link.Page href="/ai-protection">AI Runtime Protection</Link.Page>: prompt injection detection, per-user token budgets, PII detection in AI flows — protects AI application logic, not just content scraping.                                    | No protection for AI application layer (no prompt injection, no token budgets, no PII in AI flows).                                                                                                                 |
-| WAF / attack coverage | <Link.Page href="/shield">Shield WAF</Link.Page> detects and blocks common web attacks (SQLi, XSS, path traversal, etc.) on paid plans.                                                                                                         | OWASP Core Ruleset (Enterprise-only). Platform-level DDoS mitigation (L3/L4/L7) is automatic and free on all plans.                                                                                                |
+| WAF / attack coverage | <Link.Page href="/shield">Shield WAF</Link.Page> detects and blocks common web attacks (SQLi, XSS, path traversal, etc.).                                                                                                         | OWASP Core Ruleset (Enterprise-only). Platform-level DDoS mitigation (L3/L4/L7) is automatic and free on all plans.                                                                                                |
 | Rate limiting         | Rules-as-code; key on user ID, account, session, plan, or any computed value.                                                                                                               | Dashboard-configured; keyed on IP, JA4, user agent, or header value only — no application-level user identity. Token Bucket is Enterprise-only. Max window 10 min on Hobby/Pro, 1 hour on Enterprise.             |
 | Filter rules          | <Link.Page href="/filters">Expression-based filter rules</Link.Page> in code; compose cookie, IP reputation, geo, VPN/proxy, header, and path conditions alongside bot and rate limiting rules. Powered by Rust/WebAssembly, evaluated locally. | Custom rules in dashboard with similar condition types (IP, geo, path, header, JA4, user agent). Up to 3 rules on Hobby, 40 on Pro, 1,000 on Enterprise. Logic is static — no runtime branching on app context.   |
 | IP blocking           | Via filter rules in code; compose with other rules.                                                                                                                                                                                              | Project-level IP blocking (10 Hobby / 100 Pro / custom Enterprise). Account-level blocking is Enterprise-only.                                                                                                      |
@@ -123,7 +121,7 @@ different layers and have different configuration models.
   touch the browser.
 
 - **You want OWASP protection without Enterprise pricing** Arcjet Shield WAF
-  is available on paid self-serve plans. Vercel's OWASP Core Ruleset is
+  is available on self-serve plans. Vercel's OWASP Core Ruleset is
   Enterprise-only.
 
 ### Choose Vercel WAF if...
