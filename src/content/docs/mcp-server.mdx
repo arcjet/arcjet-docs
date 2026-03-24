@@ -16,7 +16,11 @@ Connect your AI coding tools to Arcjet to:
 
 - **List teams** you belong to.
 - **List sites** within a team.
+- **Create new sites** within a team.
 - **Get site keys** (`ARCJET_KEY`) for use in your projects.
+- **List requests** received by a site with optional filtering.
+- **Get request details** including headers, rules executed, and decision info.
+- **Get site quota** usage and limits for the current billing window.
 
 The MCP server is available at:
 
@@ -151,7 +155,11 @@ Once connected, the following tools are available to your AI assistant:
 | --- | --- |
 | `list-teams` | Lists teams the authenticated user belongs to. |
 | `list-sites` | Lists sites within a specified team. |
+| `create-site` | Creates a new site within a specified team. |
 | `get-site-key` | Returns the SDK key (`ARCJET_KEY`) for a specific site. |
+| `list-requests` | Lists recent requests for a site. Supports filtering by conclusion (`ALLOW`, `DENY`, `ERROR`) and pagination. |
+| `get-request-details` | Returns full details for a specific request including headers, rules executed, and decision information. |
+| `get-site-quota` | Returns quota usage and limits for a site in the current billing window. |
 
 ## Authentication
 
