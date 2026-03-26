@@ -1,6 +1,6 @@
 Arcjet Shield WAF protects your application against common web attacks, including the [OWASP Top 10](https://owasp.org/www-project-top-ten/), by analyzing requests over time and blocking clients that show suspicious behavior.
 
-**What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime AI security platform that ships with your code. Stop bots and automated attacks from burning your AI budget, leaking data, or misusing tools with Arcjet's AI security building blocks.
+**What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime security platform that ships with your AI code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
 
 Shield is a fully managed, application-aware web application firewall. It tracks request metadata over time so it can detect patterns that look benign in isolation but malicious when combined. An attacker might probe for a WordPress admin panel, an accidentally uploaded `.git` directory, a `.env` file, or a login form. Each request alone looks harmless, but together they form a clear attack pattern. Arcjet blocks clients when they exceed a threshold.
 
@@ -99,42 +99,12 @@ Arcjet Shield solves these problems by being part of the Arcjet SDK, integrated 
 
 Because Shield runs alongside your code, engineers can integrate results into application logic, control how suspicious requests are handled, and test behavior locally and in staging before deploying to production.
 
-Availability
-------------
+Pricing
+-------
 
-[Section titled “Availability”](#availability)
+[Section titled “Pricing”](#pricing)
 
-Basic protection from common attacks is available on the free plan. Additional protection including the latest rules from the [OWASP Core Rule Set](https://coreruleset.org/) (CRS) is available on paid plans.
-
-Plan
-
-Basic protection
-
-Advanced protection
-
-Free
-
-✅
-
-🚫
-
-Starter
-
-✅
-
-✅ Add-on
-
-Business
-
-✅
-
-✅ Included
-
-Enterprise
-
-✅
-
-✅ Included
+See the [pricing page](https://arcjet.com/pricing) for details.
 
 Discussion
 ----------

@@ -1,9 +1,8 @@
 # Arcjet
 
-Arcjet is the runtime AI security platform that ships with your code. Stop bots and automated attacks from
-burning your AI budget, leaking data, or misusing tools with Arcjet's AI
-security building blocks: prompt injection protection, bot protection, rate
-limiting, signup spam prevention, PII detection.
+Arcjet is the runtime security platform that ships with your AI code. Enforce
+budgets, stop prompt injection, detect bots, and protect personal information
+with Arcjet's AI security building blocks.
 
 ## Docs
 
@@ -404,11 +403,7 @@ Find out more at https://docs.arcjet.com/architecture
 
 - Arcjet runs server-side and does not require any client-side integration.
 
-- Arcjet is a paid service, but it offers a free tier with limited features.
-Free tier users do not get access to more advanced bot detection, have limited
-IP analysis data (country only), and cannot use the email validation or
-sensitive information detection features. See https://arcjet.com/pricing for
-details.
+- Arcjet is a paid service. See https://arcjet.com/pricing for details.
 
 - Review https://docs.arcjet.com/best-practices for tips on how to get the most out of Arcjet and avoid
 common pitfalls.

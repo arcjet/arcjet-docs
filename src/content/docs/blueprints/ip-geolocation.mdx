@@ -4,31 +4,31 @@ description: "Use Arcjet's IP analysis to customize the response based on the IP
 ---
 
 import { Link } from "@/components/link";
-import { Aside, Badge } from "@astrojs/starlight/components";
+import { Aside } from "@astrojs/starlight/components";
 
 Arcjet provides IP geolocation information in two places:
 
-- Decisions after calling `protect()` include IP address analysis fields
-  depending on your pricing plan. You can use this to customize responses. See
-  the SDK reference for details e.g. <Link.Page href="/reference/nextjs#ip-analysis">Next.js</Link.Page>.
+- Decisions after calling `protect()` include IP address analysis fields. You
+  can use this to customize responses. See the SDK reference for details e.g.
+  <Link.Page href="/reference/nextjs#ip-analysis">Next.js</Link.Page>.
 - <Link.Page href="/filters">Arcjet Filters</Link.Page> have access to IP
   address analysis. You can use this to block traffic.
 
 ## Available fields
 
-| Filters                  | Decision            | <Badge text="Free" variant="caution" /> | <Badge text="Starter" variant="note" /> | <Badge text="Business" variant="tip" /> |
-| ------------------------ | ------------------- | --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| `ip.src.accuracy_radius` | `ip.accuracyRadius` | 🚫                                      | ✅                                      | ✅                                      |
-| `ip.src.city`            | `ip.city`           | 🚫                                      | ✅                                      | ✅                                      |
-| `ip.src.continent.name`  | `ip.continentName`  | 🚫                                      | ✅                                      | ✅                                      |
-| `ip.src.continent`       | `ip.continent`      | 🚫                                      | ✅                                      | ✅                                      |
-| `ip.src.country.name`    | `ip.countryName`    | ✅                                      | ✅                                      | ✅                                      |
-| `ip.src.country`         | `ip.country`        | ✅                                      | ✅                                      | ✅                                      |
-| `ip.src.lat`             | `ip.latitude`       | 🚫                                      | ✅                                      | ✅                                      |
-| `ip.src.lon`             | `ip.longitude`      | 🚫                                      | ✅                                      | ✅                                      |
-| `ip.src.postal_code`     | `ip.postalCode`     | 🚫                                      | ✅                                      | ✅                                      |
-| `ip.src.region`          | `ip.region`         | 🚫                                      | ✅                                      | ✅                                      |
-| `ip.src.timezone.name`   | `ip.timezone`       | 🚫                                      | ✅                                      | ✅                                      |
+| Filters                  | Decision            |
+| ------------------------ | ------------------- |
+| `ip.src.accuracy_radius` | `ip.accuracyRadius` |
+| `ip.src.city`            | `ip.city`           |
+| `ip.src.continent.name`  | `ip.continentName`  |
+| `ip.src.continent`       | `ip.continent`      |
+| `ip.src.country.name`    | `ip.countryName`    |
+| `ip.src.country`         | `ip.country`        |
+| `ip.src.lat`             | `ip.latitude`       |
+| `ip.src.lon`             | `ip.longitude`      |
+| `ip.src.postal_code`     | `ip.postalCode`     |
+| `ip.src.region`          | `ip.region`         |
+| `ip.src.timezone.name`   | `ip.timezone`       |
 
 <Aside type="caution">
   IP geolocation can be notoriously inaccurate, especially for mobile devices,
