@@ -8,6 +8,10 @@ export const main = [
     collapsed: false,
     items: [
       {
+        label: "Agent Get Started",
+        link: "/agent-get-started",
+      },
+      {
         label: "MCP Server",
         link: "/mcp-server",
       },
