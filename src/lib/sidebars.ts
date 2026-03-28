@@ -4,6 +4,21 @@ export const main = [
     link: "/get-started",
   },
   {
+    label: "For Agents",
+    collapsed: false,
+    items: [
+      {
+        label: "MCP Server",
+        link: "/mcp-server",
+      },
+      {
+        label: "llms.txt",
+        link: "/llms.txt",
+        attrs: { target: "_blank", class: "external-link" },
+      },
+    ],
+  },
+  {
     label: "AI app protection",
     collapsed: false,
     items: [
@@ -365,21 +380,6 @@ export const main = [
           },
         ],
         label: "Filters",
-      },
-    ],
-  },
-  {
-    label: "For Agents",
-    collapsed: false,
-    items: [
-      {
-        label: "MCP Server",
-        link: "/mcp-server",
-      },
-      {
-        label: "llms.txt",
-        link: "https://docs.arcjet.com/llms.txt",
-        attrs: { target: "_blank", class: "external-link" },
       },
     ],
   },
