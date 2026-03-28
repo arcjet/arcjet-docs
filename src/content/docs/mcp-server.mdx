@@ -22,6 +22,11 @@ Connect your AI coding tools to Arcjet to:
 - **Explain decisions** to understand why requests were allowed or denied.
 - **Get request details** including headers, rules executed, and decision info.
 - **Get site quota** usage and limits for the current billing window.
+- **List remote rules** configured for a site.
+- **Create remote rules** with DRY_RUN or LIVE mode — configure rules with no code changes needed.
+- **Update remote rules** by replacing the full rule configuration.
+- **Delete remote rules** to immediately stop evaluation.
+- **Promote remote rules** from DRY_RUN to LIVE after verification.
 
 The MCP server is available at:
 
@@ -161,6 +166,37 @@ Once connected, the following tools are available to your AI assistant:
 | `list-requests` | Lists recent requests for a site. Supports filtering by conclusion (`ALLOW`, `DENY`, `ERROR`) and pagination. |
 | `get-request-details` | Returns full details for a specific request including headers, rules executed, and decision information. |
 | `get-site-quota` | Returns quota usage and limits for a site in the current billing window. |
+| `list-rules` | Lists all remote rules configured for a site with their ID, type, mode, and configuration summary. |
+| `create-rule` | Creates a new remote rule for a site. Supports rate limit, bot, shield, and filter rule types. |
+| `update-rule` | Replaces an existing remote rule configuration. All fields must be provided (full replacement). |
+| `delete-rule` | Deletes a remote rule, immediately stopping it from being evaluated. |
+| `promote-rule` | Promotes a remote rule from DRY_RUN to LIVE mode after verification. |
+
+### Remote rules
+
+Remote rules are managed through the MCP server or the Arcjet dashboard — no
+code changes or redeployment needed. They apply globally to all requests for a
+site. Only `rate_limit`, `bot`, `shield`, and `filter` rule types are supported
+as remote rules. Rules that need parsed request body content (`email`,
+`sensitive_info`, `prompt_injection`) require the SDK.
+
+The most common use case for remote rules is responding to an active attack. For
+example, if you notice suspicious traffic from a specific country, VPN, or IP
+address, you can create a filter rule to block it immediately without deploying
+new code:
+
+1. Use `list-requests` to investigate the suspicious traffic and identify
+   patterns (e.g. a specific country, IP range, or VPN usage).
+2. Use `create-rule` to add a filter rule in `DRY_RUN` mode to verify it
+   matches the right traffic. For example, block a specific country:
+   `ip.src.country == "XX"` (ISO 3166-1 alpha-2 country code e.g. `US`, `CN`,
+   `RU`), block VPN traffic: `ip.src.vpn`, or block an IP range:
+   `ip.src in { 1.2.3.0/24 }`.
+3. Use `list-requests` again to confirm the rule is matching the expected
+   traffic without blocking legitimate users.
+4. Use `promote-rule` to switch the rule from `DRY_RUN` to `LIVE`, immediately
+   blocking the attack traffic.
+5. Once the attack subsides, use `delete-rule` to remove the block.
 
 ## Authentication
 
