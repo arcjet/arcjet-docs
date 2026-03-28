@@ -8,7 +8,7 @@ export const main = [
     collapsed: false,
     items: [
       {
-        label: "Agent Get Started",
+        label: "Agent get started",
         link: "/agent-get-started",
       },
       {
