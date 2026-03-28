@@ -1,0 +1,177 @@
+---
+title: "Agent get started"
+description: "A step-by-step guide for AI coding agents to set up Arcjet security in any project. Connect via MCP, get your API key, install the SDK, and add protection."
+prev: false
+next: false
+---
+
+import { Aside, Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+Arcjet is the runtime security layer for AI apps. It protects your application
+from bots, prompt injection, PII leaks, and abuse — all configured in code,
+not a separate WAF or proxy. This page walks AI coding agents through the full
+setup flow.
+
+<Aside type="tip">
+  This guide is designed for AI coding agents. If you are a developer, see the
+  <Link.Page href="/get-started">quick start guide</Link.Page>.
+</Aside>
+
+## Step 1: Connect the MCP server
+
+The Arcjet MCP server lets you manage your account directly from your AI
+coding tool. Connect it to retrieve your API key and verify requests.
+
+<Tabs>
+  <TabItem label="Claude Code">
+    ```bash
+    claude mcp add arcjet --transport http https://api.arcjet.com/mcp
+    ```
+  </TabItem>
+  <TabItem label="Cursor">
+    Add to `.cursor/mcp.json`:
+    ```json
+    { "mcpServers": { "arcjet": { "type": "streamable-http", "url": "https://api.arcjet.com/mcp" } } }
+    ```
+  </TabItem>
+  <TabItem label="VS Code (Copilot)">
+    Add to `.vscode/mcp.json`:
+    ```json
+    { "servers": { "arcjet": { "type": "http", "url": "https://api.arcjet.com/mcp" } } }
+    ```
+  </TabItem>
+  <TabItem label="Windsurf">
+    Add to `mcp_config.json`:
+    ```json
+    { "mcpServers": { "arcjet": { "serverUrl": "https://api.arcjet.com/mcp" } } }
+    ```
+  </TabItem>
+</Tabs>
+
+OAuth authentication happens automatically on first connection — a browser
+window will open for the user to sign in.
+
+See the <Link.Page href="/mcp-server">MCP server docs</Link.Page> for more
+details and additional clients (ChatGPT, Claude Desktop).
+
+## Step 2: Get your ARCJET_KEY
+
+Use the MCP tools to retrieve your site key:
+
+1. Call `list-teams` to get available teams.
+2. Call `list-sites` with the team ID to find the site (or call `create-site`
+   to create a new one).
+3. Call `get-site-key` with the site ID to retrieve the `ARCJET_KEY`.
+
+Set the key in the project environment:
+
+```ini
+# .env.local (Next.js, Astro) or .env (other frameworks)
+ARCJET_KEY=ajkey_yourkey
+ARCJET_ENV=development
+```
+
+If the user doesn't have an Arcjet account yet, direct them to
+[app.arcjet.com](https://app.arcjet.com) to create one (free trial).
+
+## Step 3: Install the SDK
+
+Detect the framework by checking the project files:
+
+- **`package.json`** — look for `next`, `express`, `fastify`, `@nestjs/core`,
+  `@sveltejs/kit`, `hono`, `@remix-run/node`, `react-router`, `astro`,
+  `nuxt`, or check if the runtime is Bun or Deno.
+- **`pyproject.toml` / `requirements.txt`** — look for `fastapi` or `flask`.
+
+Then install the correct package:
+
+| Framework      | Install command                      |
+| -------------- | ------------------------------------ |
+| Next.js        | `npm i @arcjet/next`                 |
+| Express        | `npm i @arcjet/node @arcjet/inspect` |
+| Node.js        | `npm i @arcjet/node @arcjet/inspect` |
+| Node.js + Hono | `npm i @arcjet/node @arcjet/inspect` |
+| Fastify        | `npm i @arcjet/fastify`              |
+| NestJS         | `npm i @arcjet/nest`                 |
+| SvelteKit      | `npm i @arcjet/sveltekit @arcjet/inspect` |
+| Remix          | `npm i @arcjet/remix @arcjet/inspect`     |
+| React Router   | `npm i @arcjet/react-router @arcjet/inspect` |
+| Bun            | `bun add @arcjet/bun @arcjet/inspect`     |
+| Bun + Hono     | `bun add @arcjet/bun @arcjet/inspect`     |
+| Deno           | `deno add npm:@arcjet/deno npm:@arcjet/inspect` |
+| Nuxt           | `npx nuxt module add @arcjet/nuxt`        |
+| Astro          | `npx astro add @arcjet/astro`             |
+| Python FastAPI | `pip install arcjet` or `uv add arcjet`   |
+| Python Flask   | `pip install arcjet` or `uv add arcjet`   |
+
+## Step 4: Add protection
+
+Add Arcjet rules to protect the application. See the
+[llms.txt](/llms.txt) file for complete, copy-paste code examples for every
+framework, including the rule parameter reference and decision API.
+
+The typical setup is:
+
+1. Create an Arcjet client instance **once**, outside request handlers.
+2. Configure rules: `shield` (WAF), `detectBot`, rate limiting
+   (`tokenBucket`, `fixedWindow`, or `slidingWindow`), and optionally
+   `sensitiveInfo` or `detectPromptInjection` for AI apps.
+3. Call `protect()` inside each route handler and check `decision.isDenied()`.
+
+<Aside type="caution">
+  **Do not** create a new Arcjet instance per request — this defeats caching.
+  **Do not** call `protect()` multiple times for the same request.
+  **Do not** place Arcjet in middleware — call it in route handlers for full
+  context.
+</Aside>
+
+### Recommended rules by app type
+
+| App type               | Rules                                                                 |
+| ---------------------- | --------------------------------------------------------------------- |
+| AI / LLM chat          | `shield` + `detectBot` + `tokenBucket` + `sensitiveInfo` + `detectPromptInjection` |
+| Public API             | `shield` + `detectBot` + `fixedWindow` or `tokenBucket`              |
+| Signup / login form    | `shield` + `detectBot` + `validateEmail` + `slidingWindow`           |
+| Internal / admin route | `shield` + `filter` (country/VPN blocking)                           |
+| Any web app            | `shield` + `detectBot` (good baseline)                               |
+
+## Step 5: Verify
+
+After adding protection and starting the app:
+
+1. Send a test request to a protected route.
+2. Use the MCP `list-requests` tool to confirm requests are flowing to Arcjet.
+3. Use `get-request-details` or `explain-decision` to inspect individual
+   decisions.
+4. Check the [Arcjet dashboard](https://app.arcjet.com) for real-time request
+   monitoring.
+
+If requests are not appearing, verify that `ARCJET_KEY` and `ARCJET_ENV` are
+set correctly and that `protect()` is being called in the route handler.
+
+## Common agent prompts
+
+These prompts work well when given to an AI coding agent with the Arcjet MCP
+server connected:
+
+- **"Protect my API routes with Arcjet"** — adds shield, bot detection, and
+  rate limiting to all API routes.
+- **"Add rate limiting to my app"** — adds a token bucket or fixed window rate
+  limit.
+- **"Set up bot protection"** — blocks automated clients while allowing search
+  engines.
+- **"Add prompt injection detection to my AI chat endpoint"** — adds
+  `detectPromptInjection` with message scanning.
+- **"Block sensitive data from reaching my LLM"** — adds `sensitiveInfo` (JS)
+  or `detect_sensitive_info` (Python) to scan for PII.
+- **"Set up Arcjet security for my app. Connect to the Arcjet MCP server to get
+  my API key, then add shield, bot detection, and rate limiting."** — full
+  end-to-end setup.
+
+## Reference
+
+- <Link.Page href="/get-started">Quick start guide</Link.Page> — framework-specific setup with full code examples
+- [llms.txt](/llms.txt) — machine-readable reference with all framework examples, rule parameters, and decision API
+- <Link.Page href="/mcp-server">MCP server</Link.Page> — full MCP tool reference and client setup
+- <Link.Page href="/best-practices">Best practices</Link.Page> — recommended patterns and anti-patterns
