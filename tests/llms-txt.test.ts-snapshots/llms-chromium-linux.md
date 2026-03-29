@@ -23,14 +23,33 @@ Auth: OAuth (browser-based, automatic on first connection)
 - **Get request details** including headers, rules executed, and decision info.
 - **Explain decisions** to understand why requests were allowed or denied.
 - **Get site quota** usage and limits for the current billing window.
+- **List remote rules** configured for a site.
+- **Create remote rules** with DRY_RUN or LIVE mode — no code changes needed.
+- **Update remote rules** by replacing the full rule configuration.
+- **Delete remote rules** to immediately stop evaluation.
+- **Promote remote rules** from DRY_RUN to LIVE after verification.
 
 ### Typical workflow
 
-1. Connect to the MCP server using one of the methods below.
-2. Call `list-teams` to get available teams.
-3. Call `list-sites` with a team ID to find the site.
-4. Call `get-site-key` to retrieve the `ARCJET_KEY`.
-5. Set `ARCJET_KEY` in the project environment (e.g. `.env.local`).
+**Setup:** list-teams → list-sites (or create-site) → get-site-key → set `ARCJET_KEY` in your environment.
+
+**Investigate:** list-requests → get-request-details or explain-decision for a specific request.
+
+**Manage remote rules:** list-rules → create-rule (DRY_RUN) → verify with list-requests → promote-rule to LIVE.
+
+**Update/delete rules:** list-rules → update-rule (full replacement) or delete-rule.
+
+### Remote rules
+
+Remote rules are managed via the MCP server or dashboard — no code changes or redeployment needed. They apply globally to all requests for a site. Supported types: rate_limit, bot, shield, filter. Rules needing request body content (email, sensitive_info, prompt_injection) require the SDK.
+
+**Responding to an active attack:** The most common use case is blocking suspicious traffic immediately. For example, to block a specific country, VPN, or IP range during an attack:
+
+1. `list-requests` — investigate traffic and identify patterns.
+2. `create-rule` — add a filter rule in DRY_RUN. Examples: `ip.src.country == "XX"` (ISO 3166-1 alpha-2 code e.g. `US`, `CN`, `RU`), `ip.src.vpn`, `ip.src in { 1.2.3.0/24 }`.
+3. `list-requests` — confirm the rule matches attack traffic, not legitimate users.
+4. `promote-rule` — switch to LIVE to start blocking.
+5. `delete-rule` — remove the block once the attack subsides.
 
 ### Connect
 
