@@ -121,10 +121,10 @@ test.describe("Screenshots", () => {
           }
 
           // Giscus iframes cause inconsistent screenshots.
-          for (const el of document.querySelectorAll("div.giscus")) {
+          for (const el of document.querySelectorAll(".giscus-wrapper")) {
             el.insertAdjacentHTML(
               "afterend",
-              "<p>Giscus comments removed for screenshot test</p>",
+              "<h2>Discussion</h2><p>Giscus comments removed for screenshot test</p>",
             );
             el.remove();
           }
