@@ -10,8 +10,29 @@ extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricin
 ## MCP Server
 
 Endpoint: `https://api.arcjet.com/mcp`
-Transport: Streamable HTTP
 Auth: OAuth (browser-based, automatic on first connection)
+
+Claude Code:
+```bash
+claude mcp add arcjet --transport http https://api.arcjet.com/mcp
+```
+
+VS Code (Copilot) `.vscode/mcp.json`:
+```json
+{ "servers": { "arcjet": { "type": "http", "url": "https://api.arcjet.com/mcp" } } }
+```
+
+Cursor `.cursor/mcp.json`:
+```json
+{ "mcpServers": { "arcjet": { "type": "streamable-http", "url": "https://api.arcjet.com/mcp" } } }
+```
+
+Windsurf `mcp_config.json`:
+```json
+{ "mcpServers": { "arcjet": { "serverUrl": "https://api.arcjet.com/mcp" } } }
+```
+
+Full documentation: https://docs.arcjet.com/mcp-server
 
 ### Tools
 
@@ -51,40 +72,12 @@ Remote rules are managed via the MCP server or dashboard — no code changes or 
 4. `promote-rule` — switch to LIVE to start blocking.
 5. `delete-rule` — remove the block once the attack subsides.
 
-### Connect
-
-Any MCP client supporting the latest MCP specification (Streamable HTTP +
-OAuth) can connect to `https://api.arcjet.com/mcp`.
-
-Claude Code:
-```bash
-claude mcp add arcjet --transport http https://api.arcjet.com/mcp
-```
-
-VS Code (Copilot) `.vscode/mcp.json`:
-```json
-{ "servers": { "arcjet": { "type": "http", "url": "https://api.arcjet.com/mcp" } } }
-```
-
-Cursor `.cursor/mcp.json`:
-```json
-{ "mcpServers": { "arcjet": { "type": "streamable-http", "url": "https://api.arcjet.com/mcp" } } }
-```
-
-Windsurf `mcp_config.json`:
-```json
-{ "mcpServers": { "arcjet": { "serverUrl": "https://api.arcjet.com/mcp" } } }
-```
-
-Full documentation: https://docs.arcjet.com/mcp-server
-
 ## Quick start — choose your framework
 
 Each link below directs to the quick start guide with a framework-specific view:
 
 - [Astro quick start](https://docs.arcjet.com/get-started?f=astro)
 - [Bun quick start](https://docs.arcjet.com/get-started?f=bun)
-- [Bun + Hono quick start](https://docs.arcjet.com/get-started?f=bun-hono)
 - [Deno quick start](https://docs.arcjet.com/get-started?f=deno)
 - [Fastify quick start](https://docs.arcjet.com/get-started?f=fastify)
 - [NestJS quick start](https://docs.arcjet.com/get-started?f=nest-js)
@@ -103,24 +96,24 @@ Full docs: https://docs.arcjet.com
 
 ## SDK packages
 
-| Framework      | Package               | Import from            |
-| -------------- | --------------------- | ---------------------- |
-| Next.js        | `@arcjet/next`        | `@arcjet/next`         |
-| Node.js        | `@arcjet/node`        | `@arcjet/node`         |
-| Express        | `@arcjet/node`        | `@arcjet/node`         |
-| Hono (Node.js) | `@arcjet/node`        | `@arcjet/node`         |
-| Bun            | `@arcjet/bun`         | `@arcjet/bun`          |
-| Bun + Hono     | `@arcjet/bun`         | `@arcjet/bun`          |
-| Deno           | `@arcjet/deno`        | `npm:@arcjet/deno`     |
-| Fastify        | `@arcjet/fastify`     | `@arcjet/fastify`      |
-| NestJS         | `@arcjet/nest`        | `@arcjet/nest`         |
-| Nuxt           | `@arcjet/nuxt`        | `#arcjet`              |
-| Remix          | `@arcjet/remix`       | `@arcjet/remix`        |
-| React Router   | `@arcjet/react-router`| `@arcjet/react-router` |
-| SvelteKit      | `@arcjet/sveltekit`   | `@arcjet/sveltekit`    |
-| Astro          | `@arcjet/astro`       | `@arcjet/astro`        |
-| Python FastAPI | `arcjet`              | `arcjet`               |
-| Python Flask   | `arcjet`              | `arcjet`               |
+| Framework      | Package                | Install                                |
+| -------------- | ---------------------- | -------------------------------------- |
+| Next.js        | `@arcjet/next`         | `npm i @arcjet/next`                   |
+| Node.js        | `@arcjet/node`         | `npm i @arcjet/node`                   |
+| Express        | `@arcjet/node`         | `npm i @arcjet/node`                   |
+| Hono (Node.js) | `@arcjet/node`         | `npm i @arcjet/node @hono/node-server` |
+| Bun            | `@arcjet/bun`          | `bun add @arcjet/bun`                  |
+| Bun + Hono     | `@arcjet/bun`          | `bun add @arcjet/bun hono`             |
+| Deno           | `@arcjet/deno`         | `deno add npm:@arcjet/deno`            |
+| Fastify        | `@arcjet/fastify`      | `npm i @arcjet/fastify`                |
+| NestJS         | `@arcjet/nest`         | `npm i @arcjet/nest`                   |
+| Nuxt           | `@arcjet/nuxt`         | `npx nuxt module add @arcjet/nuxt`     |
+| Remix          | `@arcjet/remix`        | `npm i @arcjet/remix`                  |
+| React Router   | `@arcjet/react-router` | `npm i @arcjet/react-router`           |
+| SvelteKit      | `@arcjet/sveltekit`    | `npm i @arcjet/sveltekit`              |
+| Astro          | `@arcjet/astro`        | `npx astro add @arcjet/astro`          |
+| Python FastAPI | `arcjet`               | `pip install arcjet`                   |
+| Python Flask   | `arcjet`               | `pip install arcjet flask`             |
 
 ## Common setup for all frameworks
 
