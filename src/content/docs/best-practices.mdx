@@ -94,6 +94,13 @@ change the rule mode. We have an example showing how to sample traffic between
 `DRY_RUN` and `LIVE` modes in the
 <Link.Page href="/blueprints/sampling">Sampling traffic blueprint</Link.Page>.
 
+:::tip[Using the MCP server]
+If you're using the <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page>,
+call `get-dry-run-impact` to see exactly how many currently-allowed requests
+would be blocked before promoting a dry-run rule to live. You can also create and
+promote remote rules directly via MCP without code changes.
+:::
+
 ## Configure proxies and load balancers
 
 Arcjet needs to see the original client IP address to make accurate decisions.
