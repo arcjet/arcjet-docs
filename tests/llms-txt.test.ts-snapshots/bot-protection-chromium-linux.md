@@ -38,6 +38,10 @@ Arcjet reduces unwanted bot traffic and gives you more control over what reaches
 
 Combine Arcjet bot protection with other Arcjet features to improve your overall traffic management strategy, such as [rate limiting](/rate-limiting) and [filters](/filters).
 
+Using the MCP server
+
+Use the [Arcjet MCP server](/mcp-server) to monitor bot traffic in real time. Call `analyze-traffic` to see top IPs and denial rates, `get-anomalies` to detect sudden changes in bot patterns, or `get-security-briefing` for a comprehensive overview including threat landscape and recommendations.
+
 In-app bot detection vs network/CDN bot protection
 --------------------------------------------------
 

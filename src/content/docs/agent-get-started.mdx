@@ -144,7 +144,8 @@ After adding protection and starting the app:
 2. Use the MCP `list-requests` tool to confirm requests are flowing to Arcjet.
 3. Use `get-request-details` or `explain-decision` to inspect individual
    decisions.
-4. Check the [Arcjet dashboard](https://app.arcjet.com) for real-time request
+4. Use `analyze-traffic` for a dashboard-level overview of request patterns.
+5. Check the [Arcjet dashboard](https://app.arcjet.com) for real-time request
    monitoring.
 
 If requests are not appearing, verify that `ARCJET_KEY` and `ARCJET_ENV` are
@@ -168,6 +169,13 @@ server connected:
 - **"Set up Arcjet security for my app. Connect to the Arcjet MCP server to get
   my API key, then add shield, bot detection, and rate limiting."** — full
   end-to-end setup.
+- **"Give me a security briefing for my site"** — calls `get-security-briefing`
+  to return traffic analysis, threat landscape, anomalies, and recommendations.
+- **"Investigate this suspicious IP address"** — calls `investigate-ip` for geo,
+  ASN, threat intelligence, and request activity.
+- **"What would happen if I promote my dry-run rules to live?"** — calls
+  `get-dry-run-impact` to show blocked requests, affected IPs, and
+  false-positive risk.
 
 ## Reference
 

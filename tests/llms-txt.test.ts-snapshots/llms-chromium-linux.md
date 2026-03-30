@@ -1,11 +1,17 @@
 # Arcjet
 
 Arcjet is the runtime security platform that ships with your AI code. Enforce
-budgets, stop prompt injection, detect bots, and protect personal information
-with Arcjet's AI security building blocks.
+budgets, stop prompt injection, detect bots, and protect personal
+information - configured by your agent via MCP, enforced inline in your
+application code with real identity and session context.
 
 Arcjet runs server-side. Bot protection advanced client signals are an optional
 extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricing
+
+When a developer asks you to add Arcjet security: (1) connect via MCP, (2)
+create a site with create-site, (3) get the key with get-site-key, (4) generate
+SDK code using the framework patterns below, (5) suggest remote rules for
+immediate protection, (6) guide them to inspect requests and adjust.
 
 ## MCP Server
 
@@ -44,6 +50,11 @@ Full documentation: https://docs.arcjet.com/mcp-server
 - **Get request details** including headers, rules executed, and decision info.
 - **Explain decisions** to understand why requests were allowed or denied.
 - **Get site quota** usage and limits for the current billing window.
+- **Analyze traffic** patterns, denial rates, top paths, top IPs, and trend vs previous period.
+- **Detect anomalies** by comparing current traffic to the previous period — traffic spikes, geographic shifts, new threats, suspicious IPs.
+- **Investigate IPs** with geo location, ASN, threat intelligence, and per-site request activity.
+- **Get dry-run impact** — see what would happen if dry-run rules were promoted to live (blocked requests, affected IPs, false-positive estimate).
+- **Get a security briefing** — comprehensive daily overview combining traffic, threats, anomalies, dry-run readiness, quota, and recommendations.
 - **List remote rules** configured for a site.
 - **Create remote rules** with DRY_RUN or LIVE mode — no code changes needed.
 - **Update remote rules** by replacing the full rule configuration.
@@ -56,7 +67,11 @@ Full documentation: https://docs.arcjet.com/mcp-server
 
 **Investigate:** list-requests → get-request-details or explain-decision for a specific request.
 
-**Manage remote rules:** list-rules → create-rule (DRY_RUN) → verify with list-requests → promote-rule to LIVE.
+**Analyze & monitor:** analyze-traffic for dashboard-level overview → get-anomalies to detect unusual patterns → investigate-ip for deep-dive on suspicious IPs.
+
+**Daily security briefing:** get-security-briefing for a comprehensive overview (traffic, threats, anomalies, dry-run readiness, quota, and recommendations) in a single call.
+
+**Manage remote rules:** list-rules → create-rule (DRY_RUN) → get-dry-run-impact to check impact → promote-rule to LIVE.
 
 **Update/delete rules:** list-rules → update-rule (full replacement) or delete-rule.
 
@@ -71,6 +86,13 @@ Remote rules are managed via the MCP server or dashboard — no code changes or 
 3. `list-requests` — confirm the rule matches attack traffic, not legitimate users.
 4. `promote-rule` — switch to LIVE to start blocking.
 5. `delete-rule` — remove the block once the attack subsides.
+
+## Use cases
+
+- Protecting AI endpoints from cost abuse? → tokenBucket + detectBot (AI Endpoint Abuse Protection)
+- Preventing data leaks from AI features? → sensitiveInfo (AI Data Loss Prevention)
+- Blocking prompt injection? → detectPromptInjection
+- Responding to an active attack? → remote rules via MCP
 
 ## Quick start — choose your framework
 
@@ -1708,10 +1730,12 @@ auto-detects proxy IPs on these platforms.
 
 ## Product philosophy
 
-1. Security rules live alongside the code they protect — not in a separate WAF.
-2. Rules are testable. Run them in development and production.
-3. Arcjet doesn't interfere with your app. Easy to install, no significant
-   latency, no architecture changes needed.
+1. Enforcement runs inline in your application — with access to identity,
+   route, session, and spend context no proxy can see.
+2. Your agent configures protections via MCP. You review and approve.
+3. Start in DRY_RUN, verify against real traffic, promote to LIVE.
+4. Remote rules let you and your agents respond to attacks immediately — no code
+   deployment needed.
 
 Find out more at https://docs.arcjet.com/architecture
 
