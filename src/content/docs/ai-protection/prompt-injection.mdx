@@ -37,7 +37,7 @@ users paste in jailbreaks like "DAN" prompts, role-play escapes, or instruction
 overrides designed to bypass your system prompt and extract restricted
 information or cause your AI to behave in unintended ways.
 
-Arcjet prompt injection detection scores each incoming message for injection
+Arcjet prompt injection detection analyzes each incoming message for injection
 patterns inside your application before it reaches the AI provider. Detected
 attacks are blocked before the AI call is made, protecting both your
 application behavior and your AI budget.
@@ -92,8 +92,6 @@ const aj = arcjet({
     // Detect prompt injection attacks before they reach your AI model
     detectPromptInjection({
       mode: "LIVE",
-      // Confidence threshold, lower is more strict. Default = 0.5
-      // threshold: 0.5,
     }),
 
     // Block sensitive data from entering model context
@@ -157,17 +155,18 @@ default.
 
 ## Configuring prompt injection detection
 
-`threshold: 0.5` — the minimum confidence score (between `0` and `1`, exclusive)
-required to block a request. Lower values are more aggressive and catch more
-attacks but may produce false positives. The default of `0.5` is a balanced
-starting point; raise it (e.g. `0.8`) to reduce false positives, or lower it
-(e.g. `0.3`) for stricter enforcement.
-
-`detectPromptInjectionMessage` - the text to score. Pass the user's most recent
-message, or the full conversation history if you want to scan all messages.
+`detectPromptInjectionMessage` - the text to analyze. Pass the user's most
+recent message, or the full conversation history if you want to scan all
+messages.
 
 `mode: "DRY_RUN"` - logs detections without blocking. Use this to measure the
 false-positive rate in production before switching to `"LIVE"`.
+
+:::note
+The `score` and `threshold` fields have been deprecated and are no longer used.
+Detection decisions are now handled automatically by Arcjet without the need for
+manual threshold configuration.
+:::
 
 ## Combine with abuse protection
 

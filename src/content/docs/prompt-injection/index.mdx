@@ -10,7 +10,7 @@ import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "../../../components/Comments.astro";
 import { Link } from "@/components/link";
 
-Arcjet prompt injection detection scores each incoming prompt for injection
+Arcjet prompt injection detection analyzes each incoming prompt for injection
 patterns inside your application before it reaches the AI provider. Detected
 attacks are blocked before the AI call is made, protecting both your
 application behavior and your AI budget.
@@ -52,28 +52,19 @@ to prevent PII from entering model context.
 
 ## How Arcjet prompt injection detection works
 
-Arcjet scores each incoming message using a specialist prompt injection
+Arcjet analyzes each incoming message using a specialist prompt injection
 detection model:
 
-1. The prompt text is sent to the Arcjet Cloud API for scoring.
+1. The prompt text is sent to the Arcjet Cloud API for analysis.
 2. The detection model evaluates the text for injection patterns - jailbreaks,
    role-play escapes, and instruction overrides.
-3. A confidence score is returned. If the score meets or exceeds the configured
-   threshold, Arcjet returns a DENY decision.
+3. Based on the analysis, Arcjet returns an ALLOW or DENY decision.
 4. The decision is made before the AI provider call, so blocked requests never
    reach your model.
 
 This enforcement happens inside your application layer, not just at the network
 edge, so you have full access to identity, route, session, and business context
 when making the decision.
-
-### Threshold configuration
-
-`threshold: 0.5` - the minimum confidence score (between `0` and `1`,
-exclusive) required to block a request. Lower values are more aggressive and
-catch more attacks but may produce false positives. The default of `0.5` is a
-balanced starting point; raise it (e.g. `0.8`) to reduce false positives, or
-lower it (e.g. `0.3`) for stricter enforcement.
 
 ### What to return when a request is denied
 
@@ -91,6 +82,12 @@ approximately 100 ms of latency to requests.
 
 `mode: "DRY_RUN"` logs detections without blocking. Use this to measure the
 false-positive rate in production before switching to `"LIVE"`.
+
+:::note
+The `score` and `threshold` fields have been deprecated and are no longer used.
+Detection decisions are now handled automatically by Arcjet without the need for
+manual threshold configuration.
+:::
 
 ## Pricing
 

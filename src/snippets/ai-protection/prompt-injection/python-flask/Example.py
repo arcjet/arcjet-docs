@@ -46,7 +46,6 @@ aj = arcjet_sync(
         # Detect prompt injection attacks before they reach your AI model
         detect_prompt_injection(
             mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
-            # threshold=0.5,  # Confidence threshold, lower is more strict
         ),
     ],
 )
@@ -57,7 +56,7 @@ def chat():
     body = request.get_json()
     message = body.get("message", "") if body else ""
 
-    # Call protect() with the user message to score for prompt injection
+    # Call protect() with the user message to check for prompt injection
     decision = aj.protect(request, detect_prompt_injection_message=message)
 
     # Handle denied requests
