@@ -227,5 +227,6 @@ export default defineConfig({
       "/signup-protection/reference?f=sveltekit",
     "/reference/ts-js": "/reference/nodejs",
     "/bot-protection/bot-types": "/bot-protection/identifying-bots",
+    "/mcp": "/mcp-server",
   },
 });
