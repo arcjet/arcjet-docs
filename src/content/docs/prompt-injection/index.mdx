@@ -67,14 +67,6 @@ This enforcement happens inside your application layer, not just at the network
 edge, so you have full access to identity, route, session, and business context
 when making the decision.
 
-### Threshold configuration
-
-`threshold: 0.5` - the minimum confidence score (between `0` and `1`,
-exclusive) required to block a request. Lower values are more aggressive and
-catch more attacks but may produce false positives. The default of `0.5` is a
-balanced starting point; raise it (e.g. `0.8`) to reduce false positives, or
-lower it (e.g. `0.3`) for stricter enforcement.
-
 ### What to return when a request is denied
 
 Keep the response generic. Do not leak detector details or explain exactly what

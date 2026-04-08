@@ -92,8 +92,6 @@ const aj = arcjet({
     // Detect prompt injection attacks before they reach your AI model
     detectPromptInjection({
       mode: "LIVE",
-      // Confidence threshold, lower is more strict. Default = 0.5
-      // threshold: 0.5,
     }),
 
     // Block sensitive data from entering model context
@@ -156,12 +154,6 @@ what was flagged. A simple message asking the user to rephrase is the right
 default.
 
 ## Configuring prompt injection detection
-
-`threshold: 0.5` — the minimum confidence score (between `0` and `1`, exclusive)
-required to block a request. Lower values are more aggressive and catch more
-attacks but may produce false positives. The default of `0.5` is a balanced
-starting point; raise it (e.g. `0.8`) to reduce false positives, or lower it
-(e.g. `0.3`) for stricter enforcement.
 
 `detectPromptInjectionMessage` - the text to score. Pass the user's most recent
 message, or the full conversation history if you want to scan all messages.

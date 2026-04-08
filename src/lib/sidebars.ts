@@ -16,6 +16,10 @@ export const main = [
         link: "/mcp-server",
       },
       {
+        label: "Arcjet Plugin",
+        link: "/arcjet-plugin",
+      },
+      {
         label: "llms.txt",
         link: "/llms.txt",
         attrs: { target: "_blank", class: "external-link" },
