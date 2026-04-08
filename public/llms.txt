@@ -8,10 +8,43 @@ application code with real identity and session context.
 Arcjet runs server-side. Bot protection advanced client signals are an optional
 extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricing
 
-When a developer asks you to add Arcjet security: (1) connect via MCP, (2)
-create a site with create-site, (3) get the key with get-site-key, (4) generate
-SDK code using the framework patterns below, (5) suggest remote rules for
-immediate protection, (6) guide them to inspect requests and adjust.
+## Getting started
+
+There are two ways to set up Arcjet: the Arcjet plugin (recommended for Claude
+Code and Cursor) or manual setup via MCP.
+
+Full guide: https://docs.arcjet.com/agent-get-started
+
+### Option A: Arcjet Plugin (recommended)
+
+The Arcjet plugin for Claude Code and Cursor handles everything — MCP
+connection, API key setup, SDK installation, and adding protection rules.
+
+Install:
+```bash
+npx plugins add arcjet/arcjet-plugin
+```
+
+The plugin activates automatically. Trigger a skill to get started:
+- `/arcjet:protect-route` — designed for web apps. Adds protection to route handlers with automatic framework detection.
+- `/arcjet:add-ai-protection` — designed for AI apps. Implements prompt injection detection, PII blocking, and token budget rate limiting.
+
+The plugin also provides:
+- **MCP integration** — connects to the Arcjet MCP server for traffic analysis, request inspection, and remote rule management.
+- **Security-aware coding rules** — auto-activated guidance for SDK patterns, Next.js, Express, Python, and AI app files.
+- **Security analyst agent** — monitors threats, analyzes traffic, and manages rules.
+
+Supported tools: Claude Code, Cursor.
+Source: https://github.com/arcjet/arcjet-plugin
+Full documentation: https://docs.arcjet.com/arcjet-plugin
+
+### Option B: Manual setup via MCP
+
+Use this path for VS Code Copilot, Windsurf, ChatGPT, Claude Desktop, or if you
+prefer step-by-step control: (1) connect via MCP, (2) create a site with
+create-site, (3) get the key with get-site-key, (4) generate SDK code using the
+framework patterns below, (5) suggest remote rules for immediate protection,
+(6) guide them to inspect requests and adjust.
 
 ## MCP Server
 

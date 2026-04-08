@@ -11,8 +11,6 @@ const aj = arcjet({
     // Detect prompt injection attacks before they reach your AI model
     detectPromptInjection({
       mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
-      // Confidence threshold, lower is more strict. Default = 0.5
-      // threshold: 0.5,
     }),
   ],
 });
