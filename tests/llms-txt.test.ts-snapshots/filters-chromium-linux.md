@@ -1,6 +1,6 @@
 Arcjet filters let you define custom security and traffic rules inside your application code. Use filters to block unwanted traffic based on request fields, IP reputation, geography, VPN or proxy usage, and other signals.
 
-**What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime security platform that ships with your AI code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
+**What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
 
 You write expressions in a [domain-specific language](/filters/reference#expression-language) (DSL) that match against request fields. Filters can use:
 
