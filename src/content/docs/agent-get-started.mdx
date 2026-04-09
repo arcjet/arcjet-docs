@@ -1,6 +1,6 @@
 ---
 title: "Agent get started"
-description: "A step-by-step guide for AI coding agents to set up Arcjet security in any project. Connect via MCP, get your API key, install the SDK, and add protection."
+description: "A step-by-step guide for AI coding agents to set up Arcjet security in any project. Install the plugin, connect via MCP, get your API key, install the SDK, and add protection."
 prev: false
 next: false
 ---
@@ -18,16 +18,55 @@ setup flow.
   <Link.Page href="/get-started">quick start guide</Link.Page>.
 </Aside>
 
-## Step 1: Connect the MCP server
+## Option A: Arcjet Plugin (recommended)
 
-The Arcjet MCP server lets you manage your account directly from your AI
-coding tool. Connect it to retrieve your API key and verify requests.
+The <Link.Page href="/arcjet-plugin">Arcjet plugin</Link.Page> for Claude Code
+and Cursor is the fastest way to add Arcjet security. Install it with a single
+command:
+
+```bash
+npx plugins add arcjet/arcjet-plugin
+```
+
+The plugin handles everything automatically — MCP connection, API key setup, SDK
+installation, and adding protection rules. Just trigger a skill:
+
+| Skill                         | Purpose                                                                          |
+| ----------------------------- | -------------------------------------------------------------------------------- |
+| `/arcjet:protect-route`       | Designed for web apps. Adds protection to route handlers with automatic framework detection |
+| `/arcjet:add-ai-protection`   | Designed for AI apps. Implements prompt injection detection, PII blocking, and token budget rate limiting |
+
+That's it. The plugin detects your framework, connects to MCP, and walks you
+through the rest. Skip to [Common agent prompts](#common-agent-prompts) for
+usage examples, or continue below for manual setup with other tools.
+
+## Option B: Manual setup
+
+Use this path if you're working with VS Code Copilot, Windsurf, ChatGPT, Claude
+Desktop, or prefer to set things up step by step.
+
+### Step 1: Connect the MCP server
+
+The Arcjet MCP server lets you manage your account directly from your AI coding
+tool.
 
 <Tabs>
+  <TabItem label="ChatGPT">
+    1. In ChatGPT, go to **Settings**.
+    2. Navigate to **Connectors** and select **Add connection**.
+    3. Enter `https://api.arcjet.com/mcp` as the server URL.
+    4. Select **OAuth** for authentication.
+    5. Click **Create**.
+  </TabItem>
   <TabItem label="Claude Code">
     ```bash
     claude mcp add arcjet --transport http https://api.arcjet.com/mcp
     ```
+  </TabItem>
+  <TabItem label="Claude Desktop">
+    1. Open **Settings** in the sidebar.
+    2. Navigate to **Connectors** and select **Add custom connector**.
+    3. Set the **Name** to `Arcjet` and the **URL** to `https://api.arcjet.com/mcp`.
   </TabItem>
   <TabItem label="Cursor">
     Add to `.cursor/mcp.json`:
@@ -52,10 +91,10 @@ coding tool. Connect it to retrieve your API key and verify requests.
 OAuth authentication happens automatically on first connection — a browser
 window will open for the user to sign in.
 
-See the <Link.Page href="/mcp-server">MCP server docs</Link.Page> for more
-details and additional clients (ChatGPT, Claude Desktop).
+See the <Link.Page href="/mcp-server">MCP server docs</Link.Page> for the
+full tool reference.
 
-## Step 2: Get your ARCJET_KEY
+### Step 2: Get your ARCJET_KEY
 
 Use the MCP tools to retrieve your site key:
 
@@ -75,7 +114,7 @@ ARCJET_ENV=development
 If the user doesn't have an Arcjet account yet, direct them to
 [app.arcjet.com](https://app.arcjet.com) to create one (free trial).
 
-## Step 3: Install the SDK
+### Step 3: Install the SDK
 
 Detect the framework by checking the project files:
 
@@ -105,7 +144,7 @@ Then install the correct package:
 | Python FastAPI | `pip install arcjet` or `uv add arcjet`   |
 | Python Flask   | `pip install arcjet` or `uv add arcjet`   |
 
-## Step 4: Add protection
+### Step 4: Add protection
 
 Add Arcjet rules to protect the application. See the
 [llms.txt](/llms.txt) file for complete, copy-paste code examples for every
@@ -126,7 +165,7 @@ The typical setup is:
   context.
 </Aside>
 
-### Recommended rules by app type
+#### Recommended rules by app type
 
 | App type               | Rules                                                                 |
 | ---------------------- | --------------------------------------------------------------------- |
@@ -136,7 +175,7 @@ The typical setup is:
 | Internal / admin route | `shield` + `filter` (country/VPN blocking)                           |
 | Any web app            | `shield` + `detectBot` (good baseline)                               |
 
-## Step 5: Verify
+### Step 5: Verify
 
 After adding protection and starting the app:
 
@@ -153,8 +192,8 @@ set correctly and that `protect()` is being called in the route handler.
 
 ## Common agent prompts
 
-These prompts work well when given to an AI coding agent with the Arcjet MCP
-server connected:
+These prompts work well when given to an AI coding agent with the Arcjet plugin
+installed or MCP server connected:
 
 - **"Protect my API routes with Arcjet"** — adds shield, bot detection, and
   rate limiting to all API routes.
@@ -166,13 +205,12 @@ server connected:
   `detectPromptInjection` with message scanning.
 - **"Block sensitive data from reaching my LLM"** — adds `sensitiveInfo` (JS)
   or `detect_sensitive_info` (Python) to scan for PII.
-- **"Set up Arcjet security for my app. Connect to the Arcjet MCP server to get
-  my API key, then add shield, bot detection, and rate limiting."** — full
-  end-to-end setup.
+- **"Set up Arcjet security for my app"** — full end-to-end setup with shield,
+  bot detection, and rate limiting.
 - **"Give me a security briefing for my site"** — calls `get-security-briefing`
   to return traffic analysis, threat landscape, anomalies, and recommendations.
 - **"Investigate this suspicious IP address"** — calls `investigate-ip` for geo,
-  ASN, threat intelligence, and request activity.
+  threat intelligence, and request activity.
 - **"What would happen if I promote my dry-run rules to live?"** — calls
   `get-dry-run-impact` to show blocked requests, affected IPs, and
   false-positive risk.
@@ -180,6 +218,7 @@ server connected:
 ## Reference
 
 - <Link.Page href="/get-started">Quick start guide</Link.Page> — framework-specific setup with full code examples
+- <Link.Page href="/arcjet-plugin">Arcjet Plugin</Link.Page> — plugin for Claude Code and Cursor with automatic security guidance
 - [llms.txt](/llms.txt) — machine-readable reference with all framework examples, rule parameters, and decision API
 - <Link.Page href="/mcp-server">MCP server</Link.Page> — full MCP tool reference and client setup
 - <Link.Page href="/best-practices">Best practices</Link.Page> — recommended patterns and anti-patterns

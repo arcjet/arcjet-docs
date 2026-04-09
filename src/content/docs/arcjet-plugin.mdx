@@ -1,0 +1,113 @@
+---
+title: "Arcjet Plugin"
+description: "The Arcjet plugin for Claude Code and Cursor turns AI coding agents into security experts with automatic context injection, security-aware coding rules, and built-in skills."
+prev: false
+next: false
+---
+
+import { Aside, Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import Comments from "/src/components/Comments.astro";
+
+The [Arcjet plugin](https://github.com/arcjet/arcjet-plugin) turns any supported AI coding agent into a security expert. It
+pre-loads agents with knowledge of the Arcjet security platform and
+automatically injects the right guidance based on what you're working on —
+framework-specific SDK patterns, protection rules, and best practices.
+
+## Installation
+
+Install the plugin with a single command:
+
+<Tabs>
+  <TabItem label="Claude Code">
+    ```bash
+    npx plugins add arcjet/arcjet-plugin
+    ```
+  </TabItem>
+  <TabItem label="Cursor">
+    ```bash
+    npx plugins add arcjet/arcjet-plugin
+    ```
+  </TabItem>
+</Tabs>
+
+The plugin activates automatically after installation. There are no additional
+setup steps or commands to learn.
+
+### Prerequisites
+
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) or
+  [Cursor](https://www.cursor.com)
+- Node.js 18+
+- An [Arcjet account](https://app.arcjet.com) (free)
+
+## What the plugin provides
+
+The plugin includes four main components that work together to enhance your AI
+coding agent:
+
+| Component                    | Description                                                                                            |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------ |
+| **MCP integration**          | Connects to the [Arcjet MCP server](/mcp-server) for traffic analysis, request inspection, IP investigation, and remote rule management |
+| **Security-aware coding rules** | Framework-specific guidance that auto-activates when you're working in relevant files                |
+| **Skills**                   | Task-oriented workflows for implementing protection                                                    |
+| **Security analyst agent**   | Monitors threats, analyzes traffic patterns, and manages rules                                         |
+
+## How it works
+
+After installing, the plugin detects what you're working on from your tool
+calls, file paths, and project configuration, then injects the right expertise
+at the right time. You use your AI agent as you normally would and the plugin
+handles the rest.
+
+### Auto-activated rules
+
+Guidance triggers automatically in specific contexts:
+
+| Context              | File patterns                              | What it provides                                            |
+| -------------------- | ------------------------------------------ | ----------------------------------------------------------- |
+| **SDK patterns**     | `**/lib/arcjet*`                           | Single instance setup, `protect()` usage, decision handling |
+| **Next.js**          | `app/**/route.ts`, `pages/api/**`          | Import validation, handler vs. component distinctions       |
+| **Express / Node**   | `**/server.ts`                             | Adapter packages, configuration patterns                    |
+| **Python**           | `**/*.py`                                  | Snake case API conventions, async/sync client handling       |
+| **AI apps**          | `**/chat/**`, `**/api/chat*`               | Layered protection, token budgets, PII blocking             |
+
+### Skills
+
+Invoke skills directly within your AI coding agent:
+
+| Skill                         | Purpose                                                                          |
+| ----------------------------- | -------------------------------------------------------------------------------- |
+| `/arcjet:protect-route`       | Designed for web apps. Adds protection to route handlers with automatic framework detection             |
+| `/arcjet:add-ai-protection`   | Designed for AI apps. Implements prompt injection detection, PII blocking, and token budget rate limiting |
+
+### Supported frameworks
+
+The Arcjet Plugin supports all the languages and frameworks supported by the Arcjet SDKs:
+
+**JavaScript / TypeScript:** Next.js, Express, Node.js, Fastify, NestJS,
+SvelteKit, Remix, React Router, Astro, Nuxt, Hono, Bun, Deno
+
+**Python:** FastAPI, Flask
+
+## Using the plugin with MCP
+
+The plugin connects to the [Arcjet MCP server](/mcp-server) to give your agent
+access to your Arcjet account. When connected via OAuth, agents can:
+
+- Inspect requests and explain allow/deny decisions
+- Analyze traffic patterns and detect anomalies
+- Investigate suspicious IPs with geolocation and threat intelligence
+- Create and promote remote rules without code changes
+- Generate security briefings
+
+<Aside type="tip">
+  See the [MCP server docs](/mcp-server) for full tool reference and the [agent
+  get started guide](/agent-get-started) for a step-by-step setup walkthrough.
+</Aside>
+
+## Source code
+
+The plugin is open source:
+[github.com/arcjet/arcjet-plugin](https://github.com/arcjet/arcjet-plugin)
+
+<Comments />
