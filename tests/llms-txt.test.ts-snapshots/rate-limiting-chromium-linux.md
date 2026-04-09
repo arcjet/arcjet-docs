@@ -1,6 +1,6 @@
 Arcjet rate limiting lets you control how many requests a client can make to your application or API over a given period of time.
 
-**What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime security platform that ships with your AI code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
+**What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
 
 Rate limiting is the foundation of AI [Budget Control](/ai-protection/budget-control) - enforcing per-user token quotas and preventing cost explosions in AI applications. Token bucket rate limiting maps directly onto AI token consumption: deduct the estimated token cost of each request and deny when the budget is exhausted. Combined with [bot protection](/bot-protection), rate limiting gives you complete control over AI application access and spend.
 

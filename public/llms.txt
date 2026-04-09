@@ -1,9 +1,6 @@
 # Arcjet
 
-Arcjet is the runtime security platform that ships with your AI code. Enforce
-budgets, stop prompt injection, detect bots, and protect personal
-information - configured by your agent via MCP, enforced inline in your
-application code with real identity and session context.
+Arcjet is the runtime security platform that ships with your code. Install the Arcjet SDK to enforce budgets, stop prompt injection, detect bots, and protect personal information - configured by your agent via MCP, enforced inline in your application code with real identity and session context.
 
 Arcjet runs server-side. Bot protection advanced client signals are an optional
 extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricing
