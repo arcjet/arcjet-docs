@@ -8,11 +8,9 @@ next: false
 import { Aside, Code, TabItem, Tabs } from "@astrojs/starlight/components";
 import Comments from "/src/components/Comments.astro";
 
-The Arcjet MCP server lets AI assistants access your Arcjet account through the
-[Model Context Protocol (MCP)](https://modelcontextprotocol.io), an open
-standard for connecting AI tools to external services.
+[Arcjet](https://arcjet.com) is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
 
-Connect your AI coding tools to Arcjet to:
+The Arcjet MCP server gives AI coding assistants the skills of a security engineer. By connecting to the Arcjet MCP server, your AI coding tools can:
 
 - **List teams** you belong to.
 - **List sites** within a team.
@@ -24,7 +22,7 @@ Connect your AI coding tools to Arcjet to:
 - **Get site quota** usage and limits for the current billing window.
 - **Analyze traffic** patterns, denial rates, top paths, and top IPs.
 - **Detect anomalies** by comparing current traffic to the previous period.
-- **Investigate IPs** with geo, ASN, threat intelligence, and request activity.
+- **Investigate IPs** with geo, threat intelligence, and request activity.
 - **Get dry-run impact** analysis before promoting rules to live.
 - **Get a security briefing** combining traffic, threats, anomalies, and recommendations.
 - **List remote rules** configured for a site.
@@ -172,7 +170,7 @@ Once connected, the following tools are available to your AI assistant:
 - **`get-site-quota`** — Returns quota usage and limits for a site in the current billing window.
 - **`analyze-traffic`** — Analyzes request traffic over a time period. Returns total requests, denials, denial rate, top paths, top IPs, top denial reasons, and trend vs the previous period.
 - **`get-anomalies`** — Detects unusual security patterns by comparing current traffic to the previous period. Identifies traffic spikes, geographic shifts, new threat activities, new bot signatures, risk escalation, and suspicious IP patterns.
-- **`investigate-ip`** — Investigates an IP address in the context of a site. Returns geo location, ASN, threat intelligence (network type, threat activities, entity classification, risk level), and the IP's recent request activity (conclusion breakdown, denial reasons, targeted paths, daily timeline).
+- **`investigate-ip`** — Investigates an IP address in the context of a site. Returns geo location, threat intelligence (network type, threat activities, entity classification, risk level), and the IP's recent request activity (conclusion breakdown, denial reasons, targeted paths, daily timeline).
 - **`get-dry-run-impact`** — Analyzes what would happen if dry-run rules were promoted to live. Shows how many currently-allowed requests would have been blocked by each rule type, which IPs would be most affected, and a false-positive estimate.
 - **`get-security-briefing`** — Returns a comprehensive security briefing: active rules summary, traffic analysis, threat intelligence, anomaly detection, dry-run promotion readiness, quota status, and prioritized actionable recommendations. Designed for daily consumption.
 - **`list-rules`** — Lists all remote rules configured for a site with their ID, type, mode, and configuration summary.
@@ -223,7 +221,7 @@ Use the analysis tools to maintain ongoing security awareness:
   shifts, new threat activities, or suspicious IP behavior.
 - **IP investigation:** When you identify a suspicious IP (from `analyze-traffic`
   or `list-requests`), use `investigate-ip` to get full context: geo location,
-  ASN, threat intelligence, and the IP's complete request activity on your site.
+  threat intelligence, and the IP's complete request activity on your site.
 - **Dry-run validation:** Before promoting a rule from `DRY_RUN` to `LIVE`, use
   `get-dry-run-impact` to see exactly how many currently-allowed requests would
   be blocked, which IPs are most affected, and a false-positive risk estimate.

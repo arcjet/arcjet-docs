@@ -2,7 +2,7 @@ Arcjet signup form protection combines bot protection, email validation, and rat
 
 Use it to cut down on signup spam, form spam, and abusive signups before they become real accounts in your system.
 
-**What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime security platform that ships with your AI code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
+**What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
 
 When to use Arcjet signup form protection
 -----------------------------------------
