@@ -162,26 +162,24 @@ For more details, see the
 
 Once connected, the following tools are available to your AI assistant:
 
-| Tool | Description |
-| --- | --- |
-| `list-teams` | Lists teams the authenticated user belongs to. |
-| `list-sites` | Lists sites within a specified team. |
-| `create-site` | Creates a new site within a specified team. |
-| `get-site-key` | Returns the SDK key (`ARCJET_KEY`) for a specific site. |
-| `list-requests` | Lists recent requests for a site. Supports filtering by conclusion (`ALLOW`, `DENY`, `ERROR`) and pagination. |
-| `get-request-details` | Returns full details for a specific request including headers, rules executed, and decision information. |
-| `explain-decision` | Explains why Arcjet allowed or denied a specific request. Returns a natural language summary, per-rule breakdown, and suggested next steps. |
-| `get-site-quota` | Returns quota usage and limits for a site in the current billing window. |
-| `analyze-traffic` | Analyzes request traffic over a time period. Returns total requests, denials, denial rate, top paths, top IPs, top denial reasons, and trend vs the previous period. |
-| `get-anomalies` | Detects unusual security patterns by comparing current traffic to the previous period. Identifies traffic spikes, geographic shifts, new threat activities, new bot signatures, risk escalation, and suspicious IP patterns. |
-| `investigate-ip` | Investigates an IP address in the context of a site. Returns geo location, ASN, threat intelligence (network type, threat activities, entity classification, risk level), and the IP's recent request activity (conclusion breakdown, denial reasons, targeted paths, daily timeline). |
-| `get-dry-run-impact` | Analyzes what would happen if dry-run rules were promoted to live. Shows how many currently-allowed requests would have been blocked by each rule type, which IPs would be most affected, and a false-positive estimate. |
-| `get-security-briefing` | Returns a comprehensive security briefing: active rules summary, traffic analysis, threat intelligence, anomaly detection, dry-run promotion readiness, quota status, and prioritized actionable recommendations. Designed for daily consumption. |
-| `list-rules` | Lists all remote rules configured for a site with their ID, type, mode, and configuration summary. |
-| `create-rule` | Creates a new remote rule for a site. Supports rate limit, bot, shield, and filter rule types. |
-| `update-rule` | Replaces an existing remote rule configuration. All fields must be provided (full replacement). |
-| `delete-rule` | Deletes a remote rule, immediately stopping it from being evaluated. |
-| `promote-rule` | Promotes a remote rule from DRY_RUN to LIVE mode after verification. |
+- **`list-teams`** — Lists teams the authenticated user belongs to.
+- **`list-sites`** — Lists sites within a specified team.
+- **`create-site`** — Creates a new site within a specified team.
+- **`get-site-key`** — Returns the SDK key (`ARCJET_KEY`) for a specific site.
+- **`list-requests`** — Lists recent requests for a site. Supports filtering by conclusion (`ALLOW`, `DENY`, `ERROR`) and pagination.
+- **`get-request-details`** — Returns full details for a specific request including headers, rules executed, and decision information.
+- **`explain-decision`** — Explains why Arcjet allowed or denied a specific request. Returns a natural language summary, per-rule breakdown, and suggested next steps.
+- **`get-site-quota`** — Returns quota usage and limits for a site in the current billing window.
+- **`analyze-traffic`** — Analyzes request traffic over a time period. Returns total requests, denials, denial rate, top paths, top IPs, top denial reasons, and trend vs the previous period.
+- **`get-anomalies`** — Detects unusual security patterns by comparing current traffic to the previous period. Identifies traffic spikes, geographic shifts, new threat activities, new bot signatures, risk escalation, and suspicious IP patterns.
+- **`investigate-ip`** — Investigates an IP address in the context of a site. Returns geo location, ASN, threat intelligence (network type, threat activities, entity classification, risk level), and the IP's recent request activity (conclusion breakdown, denial reasons, targeted paths, daily timeline).
+- **`get-dry-run-impact`** — Analyzes what would happen if dry-run rules were promoted to live. Shows how many currently-allowed requests would have been blocked by each rule type, which IPs would be most affected, and a false-positive estimate.
+- **`get-security-briefing`** — Returns a comprehensive security briefing: active rules summary, traffic analysis, threat intelligence, anomaly detection, dry-run promotion readiness, quota status, and prioritized actionable recommendations. Designed for daily consumption.
+- **`list-rules`** — Lists all remote rules configured for a site with their ID, type, mode, and configuration summary.
+- **`create-rule`** — Creates a new remote rule for a site. Supports rate limit, bot, shield, and filter rule types.
+- **`update-rule`** — Replaces an existing remote rule configuration. All fields must be provided (full replacement).
+- **`delete-rule`** — Deletes a remote rule, immediately stopping it from being evaluated.
+- **`promote-rule`** — Promotes a remote rule from DRY_RUN to LIVE mode after verification.
 
 ### Remote rules
 
@@ -230,6 +228,41 @@ Use the analysis tools to maintain ongoing security awareness:
   `get-dry-run-impact` to see exactly how many currently-allowed requests would
   be blocked, which IPs are most affected, and a false-positive risk estimate.
 
+## Usage examples
+
+### Investigate and block suspicious traffic
+
+> "I'm seeing a spike in denied requests on my site. Can you investigate what's
+> happening and help me block the source?"
+
+The assistant will call `analyze-traffic` to identify the spike, then
+`list-requests` filtered to `DENY` to surface the top offending IPs. It uses
+`investigate-ip` to pull threat intelligence for each IP, then
+suggests a filter rule. Using `create-rule`, it creates the rule in `DRY_RUN`
+mode so you can verify the match before calling `promote-rule` to go live.
+
+### Get a daily security briefing
+
+> "Give me a security briefing for my production site."
+
+The assistant calls `list-teams` and `list-sites` to locate your production
+site, then calls `get-security-briefing`. It returns a summary covering active
+rules, traffic trends vs. the previous period, anomaly detection, threat
+intelligence highlights, dry-run promotion readiness, quota status, and
+prioritized recommendations you can act on immediately.
+
+### Set up bot protection without redeploying
+
+> "Add bot protection to my marketing site — start in dry-run mode so I can
+> check it's not blocking real users."
+
+The assistant calls `list-teams` and `list-sites` to find the site, then
+`create-rule` to add a `bot` rule with `mode: DRY_RUN` configured to block
+automated traffic. After traffic flows through, you can ask the assistant to call
+`get-dry-run-impact` to see how many requests would have been blocked and
+estimate false-positive risk, then `promote-rule` to switch the rule to `LIVE`
+when you're satisfied.
+
 ## Authentication
 
 The MCP server uses OAuth for authentication. When you first connect from any
@@ -244,5 +277,12 @@ Once authenticated, your AI assistant can securely access your account resources
   can review actions before they execute.
 - **Trusted clients only** — only connect from AI clients you trust. Connecting
   grants the AI tool the same access as your Arcjet account.
+
+## Privacy and support
+
+- **Privacy policy:** [arcjet.com/privacy](https://arcjet.com/privacy)
+- **Support:** [support@arcjet.com](mailto:support@arcjet.com) or [join our
+  Discord](https://arcjet.com/discord). See our [support page](/support) for
+  more details.
 
 <Comments />
