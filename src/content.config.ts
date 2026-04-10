@@ -1,7 +1,8 @@
 import type { Loader } from "astro/loaders";
-import { docsLoader as starlightDocsLoader } from "@astrojs/starlight/loaders";
+import { docsLoader as starlightDocsLoader, i18nLoader } from "@astrojs/starlight/loaders";
 import { docsSchema, i18nSchema } from "@astrojs/starlight/schema";
-import { defineCollection, z, type DataEntry } from "astro:content";
+import { defineCollection, type DataEntry } from "astro:content";
+import { z } from "astro/zod";
 import { sdkFromPathname, sdks } from "@/lib/sdk";
 import type { FrameworkKey } from "@/lib/prefs";
 
@@ -89,7 +90,6 @@ function loader(): Loader {
       // https://docs.astro.build/en/reference/content-loader-reference/#watcher
     },
     name: wrappedLoader.name,
-    schema: wrappedLoader.schema,
   };
 }
 
@@ -107,5 +107,5 @@ export const collections = {
       }),
     }),
   }),
-  i18n: defineCollection({ type: "data", schema: i18nSchema() }),
+  i18n: defineCollection({ loader: i18nLoader(), schema: i18nSchema() }),
 };
