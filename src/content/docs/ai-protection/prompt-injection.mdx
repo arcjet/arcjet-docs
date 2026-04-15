@@ -21,6 +21,8 @@ ajToc:
     anchor: "configuring-prompt-injection-detection"
   - text: "Combine with abuse protection"
     anchor: "combine-with-abuse-protection"
+  - text: "Protecting tool calls"
+    anchor: "protecting-tool-calls"
 ---
 
 import { Link } from "@/components/link";
@@ -195,9 +197,39 @@ const aj = arcjet({
 });
 ```
 
+## Protecting tool calls
+
+The examples above protect an HTTP endpoint — the boundary where user input enters your application. But prompt injection can also arrive through tool results: a `fetch` tool retrieves a page that contains injected instructions, which then re-enter the model context when the tool result is passed back.
+
+[Arcjet Guards](/guards) runs the same prompt injection detection inside tool handlers, without a `Request` object. Pass the text directly and get a decision back:
+
+```ts
+import { guard, detectPromptInjection } from "@arcjet/guard";
+
+const aj = guard({
+  key: process.env.ARCJET_KEY!,
+  rules: [detectPromptInjection({ mode: "LIVE" })],
+});
+
+// Inside your tool handler
+export async function fetchTool({ url }: { url: string }) {
+  const content = await fetch(url).then((r) => r.text());
+
+  const decision = await aj.protect({ fingerprint: "tool" }, { text: content });
+
+  if (decision.isDenied()) {
+    // Return a safe placeholder rather than the injected content
+    return { content: "[Content blocked: prompt injection detected]" };
+  }
+
+  return { content };
+}
+```
+
 ## Learn more
 
 - <Link.Page href="/prompt-injection">Prompt injection detection introduction</Link.Page>
 - <Link.Page href="/prompt-injection/quick-start">Prompt injection detection quick start</Link.Page>
 - <Link.Page href="/sensitive-info">Sensitive info detection introduction</Link.Page>
 - <Link.Page href="/sensitive-info/reference">Full sensitive info reference</Link.Page>
+- <Link.Page href="/guards">Arcjet Guards — prompt injection inside agent tool handlers</Link.Page>

@@ -16,6 +16,10 @@ export const main = [
         link: "/mcp-server",
       },
       {
+        label: "Arcjet Guards",
+        link: "/guards",
+      },
+      {
         label: "Arcjet Plugin",
         link: "/arcjet-plugin",
       },
