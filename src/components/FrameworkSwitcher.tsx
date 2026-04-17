@@ -93,7 +93,7 @@ const FrameworkSwitcher = forwardRef(
       // Reload the page with the new framework in the query param
       const url = new URL(window.location.toString());
       url.searchParams.set("f", val);
-      window.location.assign(url.toString());
+      window.location.replace(url.toString());
     };
 
     // Sync store with current page frontmatter
