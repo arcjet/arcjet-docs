@@ -86,15 +86,14 @@ const FrameworkSwitcher = forwardRef(
     // Select change callback
     const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
       const val = e.target.value;
-      if (!storeFramework(val)) return;
+      if (!isValidFrameworkKey(val)) return;
 
-      // Update query param for sharing selection
+      storeFramework(val);
+
+      // Reload the page with the new framework in the query param
       const url = new URL(window.location.toString());
       url.searchParams.set("f", val);
-      history.pushState({}, "", url);
-
-      // Update store
-      displayedFramework.set(val as FrameworkKey);
+      window.location.assign(url.toString());
     };
 
     // Sync store with current page frontmatter
