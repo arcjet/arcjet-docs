@@ -201,23 +201,32 @@ const aj = arcjet({
 
 The examples above protect an HTTP endpoint — the boundary where user input enters your application. But prompt injection can also arrive through tool results: a `fetch` tool retrieves a page that contains injected instructions, which then re-enter the model context when the tool result is passed back.
 
-[Arcjet Guards](/guards) runs the same prompt injection detection inside tool handlers, without a `Request` object. Pass the text directly and get a decision back:
+[Arcjet Guards](/guards) runs the same prompt injection detection inside tool handlers, without a `Request` object. Install the skill to add it automatically:
+
+```bash
+npx skill add arcjet/skills --skill add-guard-protection
+```
+
+Or wire it up manually — create a guard client once at module scope, then call `.guard()` inline in each tool handler:
 
 ```ts
-import { guard, detectPromptInjection } from "@arcjet/guard";
+import { launchArcjet, detectPromptInjection } from "@arcjet/guard";
 
-const aj = guard({
-  key: process.env.ARCJET_KEY!,
-  rules: [detectPromptInjection({ mode: "LIVE" })],
-});
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 
-// Inside your tool handler
-export async function fetchTool({ url }: { url: string }) {
+const piRule = detectPromptInjection();
+
+// Inside your fetch tool handler
+export async function fetchTool({ url }: { url: string }, userId: string) {
   const content = await fetch(url).then((r) => r.text());
 
-  const decision = await aj.protect({ fingerprint: "tool" }, { text: content });
+  const decision = await arcjet.guard({
+    label: "tools.fetch",
+    metadata: { userId },
+    rules: [piRule(content)],
+  });
 
-  if (decision.isDenied()) {
+  if (decision.conclusion === "DENY") {
     // Return a safe placeholder rather than the injected content
     return { content: "[Content blocked: prompt injection detected]" };
   }

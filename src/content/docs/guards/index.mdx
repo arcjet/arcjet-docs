@@ -4,8 +4,6 @@ description: "Security rules for AI agents and tool calls. Rate limiting, prompt
 tableOfContents: false
 ---
 
-import { TabItem, Tabs } from "@astrojs/starlight/components";
-
 Guards apply Arcjet security rules **inside AI agent tool calls** and anywhere else you process untrusted input. Pass inputs directly, get a decision back. No `Request` object needed.
 
 They are for the places HTTP middleware can't reach: inside tool handlers, between agent steps, in queue consumers, and across agentic pipelines that fan out across many services.
@@ -20,99 +18,17 @@ AI agents call tools. Tools receive untrusted input. Your HTTP middleware never 
 | **Sensitive data exposure** — a user pastes a credit card number or phone number into a prompt that gets logged or sent verbatim to a third-party model provider. | **Sensitive information detection** — Arcjet detects PII — email addresses, phone numbers, credit card numbers, and more — locally via WebAssembly. The raw text never leaves your server; only the classification result does. |
 | **Budget exhaustion** — a user floods the agent with requests, burning through your LLM token quota or per-user allowances. | **Rate limiting** — token bucket, fixed window, and sliding window algorithms. Use token bucket to model LLM token budgets directly — deduct estimated tokens before each model call and deny when the bucket is empty. |
 
-## Ready to give it a try?
+## Get started
 
-Add the [Arcjet MCP server](/mcp-server) to your coding agent, then paste the prompt below. It will explore your project, propose what to protect, and wire up the integration — starting in dry run mode.
+Install the `add-guard-protection` skill into your AI coding agent. It will detect your language, install the package, configure rules, and wire up `guard()` calls inline in your tool handlers.
 
-### 1. Add the MCP server
+Supported languages: **JavaScript / TypeScript** (`@arcjet/guard`) and **Python** (`arcjet`).
 
-<Tabs>
-  <TabItem label="VS Code">
-    [Add MCP to VS Code](https://vscode.dev/redirect/mcp/install?name=com.arcjet%2Fmcp&config=%7B%22type%22%3A%22http%22%2C%22url%22%3A%22https%3A%2F%2Fapi.arcjet.com%2Fmcp%22%7D)
-
-    Or run:
-
-    ```bash
-    code --add-mcp '{"name":"Arcjet","type":"http","url":"https://api.arcjet.com/mcp"}'
-    ```
-  </TabItem>
-  <TabItem label="Cursor">
-    [Add MCP to Cursor](https://cursor.com/en/install-mcp?name=com.arcjet%2Fmcp&config=eyJ0eXBlIjoiaHR0cCIsInVybCI6Imh0dHBzOi8vYXBpLmFyY2pldC5jb20vbWNwIn0=)
-
-    Or go to **Cursor Settings → MCP → Add new MCP Server** and use this config:
-
-    ```json
-    {
-      "servers": {
-        "Arcjet": {
-          "type": "http",
-          "url": "https://api.arcjet.com/mcp"
-        }
-      }
-    }
-    ```
-  </TabItem>
-  <TabItem label="Claude Code">
-    ```bash
-    claude mcp add Arcjet --url https://api.arcjet.com/mcp
-    ```
-  </TabItem>
-  <TabItem label="GitHub Copilot Coding Agent">
-    Add to your repository settings under **Copilot → Coding agent**:
-
-    ```json
-    {
-      "mcpServers": {
-        "Arcjet": {
-          "type": "remote",
-          "url": "https://api.arcjet.com/mcp",
-          "tools": ["*"]
-        }
-      }
-    }
-    ```
-  </TabItem>
-  <TabItem label="Other">
-    Standard config that works in most tools:
-
-    ```json
-    {
-      "servers": {
-        "Arcjet": {
-          "type": "http",
-          "url": "https://api.arcjet.com/mcp"
-        }
-      }
-    }
-    ```
-  </TabItem>
-</Tabs>
-
-### 2. Paste this prompt into your coding agent
-
-```txt
-First, confirm the Arcjet MCP server is connected and you are authenticated (use the MCP tool to verify — if not connected, stop and ask me to connect it before continuing).
-
-Next, explore the current project:
-- Identify the language and framework (JavaScript/TypeScript or Python, and which framework)
-- Find where untrusted input enters the system: AI agent tool handlers, chat message handlers, queue consumers, webhook handlers, or similar
-- Note any existing rate limiting, input validation, or security middleware already in place
-
-Then propose to me what to protect with Arcjet Guards and how:
-- If JavaScript/TypeScript: use @arcjet/guard (npm install @arcjet/guard)
-- If Python: use arcjet.guard (pip install arcjet)
-- If the language is not supported yet, say so and stop
-- List the specific files and functions you plan to change, and which guard rules make sense (prompt injection, rate limiting, sensitive information, or a combination)
-- Ask me to confirm before making any changes
-
-Once I confirm, implement the guards:
-- Configure rules at module scope (not inside the handler)
-- Start all new rules in DRY_RUN mode
-- Add guard calls at the entry point of each handler before any other logic
-- Log denied decisions with has_error() / hasError() rather than throwing immediately
-- Use the Arcjet MCP server to check for any integration errors and resolve them
-- When the integration looks correct, ask me if I want to switch from DRY_RUN to enforcement mode
+```bash
+npx skill add arcjet/skills --skill add-guard-protection
 ```
+
+Then open your AI coding agent and describe what you want to protect — for example: *"rate limit my tool calls per user and block prompt injection"* or *"secure my MCP server"* or *"protect my queue worker"*.
 
 ## Source
 
