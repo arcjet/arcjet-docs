@@ -24,6 +24,11 @@ export const main = [
         link: "/arcjet-plugin",
       },
       {
+        label: "Arcjet Skills",
+        link: "https://github.com/arcjet/skills",
+        attrs: { target: "_blank", class: "external-link" },
+      },
+      {
         label: "llms.txt",
         link: "/llms.txt",
         attrs: { target: "_blank", class: "external-link" },
@@ -459,7 +464,7 @@ export const main = [
           },
           {
             label: "Changelog",
-            link: "https://github.com/arcjet/arcjet-js/releases",
+            link: "https://blog.arcjet.com/tag/changelog/",
             attrs: { target: "_blank", class: "external-link" },
           },
         ],
