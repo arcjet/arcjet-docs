@@ -4,6 +4,8 @@ description: "Security rules for AI agents and tool calls. Rate limiting, prompt
 tableOfContents: false
 ---
 
+import { Link } from "@/components/link";
+
 Guards apply Arcjet security rules **inside AI agent tool calls** and anywhere else you process untrusted input. Pass inputs directly, get a decision back. No `Request` object needed.
 
 They are for the places HTTP middleware can't reach: inside tool handlers, between agent steps, in queue consumers, and across agentic pipelines that fan out across many services.
@@ -29,6 +31,12 @@ npx skill add arcjet/skills --skill add-guard-protection
 ```
 
 Then open your AI coding agent and describe what you want to protect — for example: *"rate limit my tool calls per user and block prompt injection"* or *"secure my MCP server"* or *"protect my queue worker"*.
+
+## Monitor and manage with MCP
+
+Once guards are in place, connect the <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page> to your AI coding tool to monitor traffic, inspect decisions, investigate IPs, and manage remote rules — all from your editor. This is optional but recommended for ongoing visibility.
+
+Alternatively, the Arcjet CLI (coming soon) will provide the same management capabilities from the command line.
 
 ## Source
 
