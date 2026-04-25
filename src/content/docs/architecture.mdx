@@ -69,6 +69,14 @@ directly from your application code. You can inspect the response in your code
 and decide how to handle it. This could be as simple as blocking the request or
 more advanced like flagging an account for review.
 
+Rules can also be configured outside of your application as
+<Link.Page href="/remote-rules">remote rules</Link.Page>, managed from the
+Arcjet dashboard or via the
+<Link.Page href="/mcp-server">Arcjet MCP server</Link.Page>. Remote rules are
+evaluated alongside SDK rules by the Cloud API and combined into a single
+decision, so you can change protection behavior for a site without editing
+code or redeploying.
+
 The SDK includes a WebAssembly module which is used to analyze requests locally
 in your own environment. Where possible, a decision is taken locally and then
 reported to Arcjet so that you can view the details in the Arcjet dashboard.

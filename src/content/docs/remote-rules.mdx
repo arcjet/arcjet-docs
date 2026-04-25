@@ -1,0 +1,132 @@
+---
+title: "Remote rules"
+description: "Manage Arcjet rules from the dashboard or MCP server without code changes or redeployment."
+---
+
+import Comments from "/src/components/Comments.astro";
+import { Link } from "@/components/link";
+
+Remote rules are Arcjet rules configured outside of your application code. They
+are stored on the Arcjet platform and evaluated by the Arcjet Cloud API
+alongside any rules you configure with the SDK, so you can change protection
+behavior for a site without editing code or redeploying.
+
+## How remote rules work
+
+Remote rules live on a per-site basis. When the SDK calls `protect()`:
+
+1. Local rules attached to the request with the SDK are evaluated first. These are the
+   rules you configure in code with the SDK.
+2. If the request passes the SDK rules, the SDK sends request metadata to the Arcjet Cloud API, which evaluates any active remote rules for the site.
+3. The results of the SDK rules and remote rules are combined into a single decision, and the SDK returns that decision to your application.
+
+Remote rules apply globally to all requests for the site that reach
+`protect()`. They do not need to be attached to a specific route — every call
+to `protect()` for that site will evaluate the active remote rules in addition
+to any SDK rules you have configured.
+
+Each remote rule has a mode:
+
+- `LIVE` — actively enforced. A `DENY` from the rule will block the request.
+- `DRY_RUN` — evaluated and logged, but the result will not change the
+  conclusion. Use this to validate a rule against real traffic before
+  enforcing it.
+
+See <Link.Page href="/best-practices#start-in-dry-run-mode">Start in dry run
+mode</Link.Page> in the best practices guide for the recommended rollout
+pattern, and the
+<Link.Page href="/mcp-server">`get-dry-run-impact` MCP tool</Link.Page> for
+measuring how a dry-run rule would behave if promoted.
+
+## When to use remote rules
+
+Remote rules are designed for situations where the speed of the change matters
+more than where the change lives in source control:
+
+- **Responding to an active attack.** Block a country, ASN, IP range, or VPN
+  pattern in seconds without waiting for a deploy.
+- **Operating Arcjet at the team level.** A security or operations team can
+  tune rules against live traffic without coordinating a code change with the
+  team that integrated the SDK.
+- **Iterating on rule shape.** Add a filter or bot rule in `DRY_RUN`, watch how
+  it matches real requests, and only promote it to `LIVE` once you are happy
+  with the impact.
+- **Temporary mitigations.** Apply a rule for the duration of an incident, then
+  delete it once the threat subsides — without leaving cleanup work in the
+  codebase.
+
+For rules that are part of your application's normal protection posture, we
+still recommend configuring them in code with the SDK. Code-defined rules live
+with the route they protect, are reviewable in pull requests, and are
+versioned with the rest of your application.
+
+## Supported rule types
+
+Remote rules support the rule types that do not require the SDK to provide
+extra information at request time. Today that is:
+
+- **Rate limit** — fixed window and sliding window algorithms. Token bucket is
+  not supported as a remote rule because it requires per-request token
+  consumption from the SDK.
+- **Bot protection** — allow and deny categories or specific bot identifiers.
+- **Filter** — allow or deny requests using expressions over request metadata
+  such as IP, country, ASN, VPN, Tor, headers, method, and path.
+- **Shield**
+
+The following rules cannot be configured remotely because they need request
+content the SDK has to pass in to `protect()`:
+
+- **Email validation** — needs the email address from the request body.
+- **Sensitive information** — needs the request body to scan for PII.
+- **Prompt injection detection** — needs the prompt content to analyze.
+
+These must be configured in code with the SDK.
+
+## Managing remote rules
+
+There are two ways to manage remote rules:
+
+- **Arcjet dashboard.** Open your site in the
+  [Arcjet dashboard](https://app.arcjet.com) and go to the **Remote rules**
+  section to list, create, update, promote, and delete rules.
+- **Arcjet MCP server.** Connect an MCP-compatible AI assistant (Claude Code,
+  Cursor, and others) to the
+  <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page> and use the
+  `list-rules`, `create-rule`, `update-rule`, `promote-rule`, and `delete-rule`
+  tools.
+
+Updates take effect immediately: creating, updating, deleting, or
+promoting a rule from `DRY_RUN` to `LIVE` applies to subsequent requests without a deploy or SDK
+restart.
+
+## Limitations
+
+Remote rules are intentionally constrained. The trade-off for being able to
+change rules without a deploy is that some things only the SDK can do:
+
+- **No request-body input.** Remote rules cannot see parsed request bodies, so
+  email, sensitive information, and prompt injection rules are SDK-only.
+- **No token bucket rate limiting.** Token bucket requires the SDK to declare
+  how many tokens each request consumes, so it is not available as a remote
+  rule. Use fixed window or sliding window remote rate limits instead, or
+  configure token bucket in code.
+- **Site-wide scope.** Remote rules apply to every `protect()` call for the
+  site.
+
+## Relationship to SDK rules
+
+Remote rules and SDK rules are evaluated together. There is no precedence
+between them — both sets of rules contribute their results, and Arcjet
+combines them into a single decision. If either a remote rule or an SDK rule
+returns `DENY` in `LIVE` mode, the request is denied.
+
+You can mix the two freely. A common pattern is:
+
+- Define the rules that are part of your application's design — for example
+  rate limits per user ID, bot protection on signup forms, or prompt
+  injection detection on AI endpoints — in code with the SDK.
+- Use remote rules for operational changes — blocking a specific country
+  during an incident, tightening a global rate limit, or temporarily denying
+  an IP range — without redeploying.
+
+<Comments />

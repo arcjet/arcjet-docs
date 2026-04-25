@@ -42,6 +42,10 @@ Using the MCP server
 
 Use the [Arcjet MCP server](/mcp-server) to monitor bot traffic in real time. Call `analyze-traffic` to see top IPs and denial rates, `get-anomalies` to detect sudden changes in bot patterns, or `get-security-briefing` for a comprehensive overview including threat landscape and recommendations.
 
+Configure without code changes
+
+Bot rules can also be configured as [remote rules](/remote-rules) from the Arcjet dashboard or via the MCP server, applied site-wide with no code changes or redeployment. This is useful for blocking a newly-spotted bot category during an incident.
+
 In-app bot detection vs network/CDN bot protection
 --------------------------------------------------
 

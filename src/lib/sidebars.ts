@@ -482,6 +482,10 @@ export const main = [
         link: "/best-practices",
       },
       {
+        label: "Remote rules",
+        link: "/remote-rules",
+      },
+      {
         label: "Environment variables",
         link: "/environment",
       },

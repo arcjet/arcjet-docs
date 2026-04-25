@@ -51,6 +51,12 @@ clients, and
 <Link.Page href="/sensitive-info">sensitive information detection</Link.Page>
 to prevent PII from entering model context.
 
+:::note[SDK-only rule]
+Prompt injection detection needs the prompt content from the request body, so
+it must be configured in code with the SDK. It is not available as a
+<Link.Page href="/remote-rules">remote rule</Link.Page>.
+:::
+
 ## How Arcjet prompt injection detection works
 
 Arcjet scores each incoming message using a specialist prompt injection
