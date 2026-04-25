@@ -19,7 +19,6 @@ Remote rules live on a per-site basis. When the SDK calls `protect()`:
    rules you configure in code with the SDK.
 2. If the request passes the SDK rules, the SDK sends request metadata to the Arcjet Cloud API, which evaluates any active remote rules for the site.
 3. The results of the SDK rules and remote rules are combined into a single decision, and the SDK returns that decision to your application.
- returned as the result of `protect()`.
 
 Remote rules apply globally to all requests for the site that reach
 `protect()`. They do not need to be attached to a specific route — every call
