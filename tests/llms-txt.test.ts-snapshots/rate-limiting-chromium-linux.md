@@ -28,6 +28,10 @@ Use Arcjet rate limiting to protect your application and APIs from abuse and exc
 
 Rate limiting is complementary to [Arcjet Shield WAF](/shield). Shield analyzes what kind of requests are made over time and blocks clients that show repeated suspicious behavior, while rate limiting focuses on controlling request volume and frequency.
 
+Configure without code changes
+
+Fixed window and sliding window rate limits can also be configured as [remote rules](/remote-rules) from the Arcjet dashboard or via the [Arcjet MCP server](/mcp-server), with no code changes or redeployment. Token bucket is SDK-only because it requires the SDK to declare how many tokens each request consumes.
+
 How Arcjet rate limiting works
 ------------------------------
 

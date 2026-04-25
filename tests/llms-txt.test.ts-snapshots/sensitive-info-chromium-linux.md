@@ -23,6 +23,10 @@ Use sensitive information detection when you want to:
 
 For email addresses specifically, you can also use [Arcjet email validation](/email-validation) to validate and verify addresses before creating accounts or sending email.
 
+SDK-only rule
+
+Sensitive information detection inspects the request body locally inside the SDK and is not available as a [remote rule](/remote-rules). Configure it in code with the SDK.
+
 How Arcjet sensitive info detection works
 -----------------------------------------
 

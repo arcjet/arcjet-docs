@@ -20,6 +20,10 @@ Use Arcjet email validation when you want to:
 
 You can combine email validation with [Arcjet rate limiting](/rate-limiting) to prevent brute-force attacks, and with [Arcjet sensitive info](/sensitive-info) to block unwanted or unsafe data.
 
+SDK-only rule
+
+Email validation needs the email address from the request body, so it must be configured in code with the SDK. It is not available as a [remote rule](/remote-rules).
+
 How Arcjet email validation works
 ---------------------------------
 

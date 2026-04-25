@@ -25,6 +25,10 @@ We recommend using Arcjet Shield WAF alongside other Arcjet features such as:
 *   [Arcjet filters](/filters) to apply custom per-request rules.
 *   [Arcjet rate limiting](/rate-limiting) to impose hard limits on request volume.
 
+Enable without code changes
+
+Shield can also be enabled as a [remote rule](/remote-rules) from the Arcjet dashboard or via the [Arcjet MCP server](/mcp-server), with no code changes or redeployment.
+
 How Arcjet Shield works
 -----------------------
 

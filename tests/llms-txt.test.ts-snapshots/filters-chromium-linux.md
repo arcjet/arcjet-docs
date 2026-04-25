@@ -33,7 +33,7 @@ See the [VPN & proxy detection blueprint](/blueprints/vpn-proxy-detection) for a
 
 Using the MCP server
 
-Filters can also be managed as remote rules via the [Arcjet MCP server](/mcp-server) — no code changes or redeployment needed. Use `investigate-ip` to look up geo, ASN, and threat intelligence for a suspicious IP, then create a filter rule to block it immediately.
+Filters can also be managed as [remote rules](/remote-rules) from the Arcjet dashboard or via the [Arcjet MCP server](/mcp-server) — no code changes or redeployment needed. Use `investigate-ip` to look up geo, ASN, and threat intelligence for a suspicious IP, then create a filter rule to block it immediately.
 
 How Arcjet filters work
 -----------------------
