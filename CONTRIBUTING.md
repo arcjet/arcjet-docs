@@ -45,14 +45,14 @@ We use screenshot testing to ensure visual consistency. If you make intentional
 changes you will likely need to update the stored screenshots. To do so run:
 
 ```sh
-npm run pw:run -- --update-snapshots changed
+npm run pw:run -- --update-snapshots=changed
 ```
 
 This will update only the screenshots for tests that have changed. On rare
 occasions you may want to update all screenshots, which you can do with:
 
 ```sh
-npm run pw:run -- --update-snapshots all
+npm run pw:run -- --update-snapshots=all
 ```
 
 ## Adding content
