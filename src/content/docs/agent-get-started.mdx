@@ -10,39 +10,69 @@ import { Link } from "@/components/link";
 
 [Arcjet](https://arcjet.com) is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
 
-This page walks AI coding agents through getting Arcjet set up in any project.
+Arcjet protects two types of entry points:
+- **Request-based** — HTTP route handlers and API endpoints. Use `protect()` with any <Link.Page href="/get-started">supported framework</Link.Page>.
+- **Guards** — tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` to pass inputs directly. See <Link.Page href="/guards">Guards</Link.Page>.
+
+Set up Arcjet in two steps: (1) install a skill that gives your agent the
+documentation to integrate the Arcjet SDK, and (2) connect to Arcjet with the
+CLI to create sites, retrieve credentials, and verify decisions.
 
 <Aside type="tip">
   This guide is designed for AI coding agents. If you are a developer, see the
   <Link.Page href="/get-started">quick start guide</Link.Page>.
 </Aside>
 
-## Option A: Arcjet Plugin (recommended)
+## Step 1: Install a skill
 
-The <Link.Page href="/arcjet-plugin">Arcjet plugin</Link.Page> for Claude Code
-and Cursor is the fastest way to add Arcjet security. Install it with a single
-command:
+Skills give your agent the documentation to detect your framework, install the
+SDK, and wire up protection rules. Install one per use case:
 
+**Request protection** (HTTP routes):
 ```bash
-npx plugins add arcjet/arcjet-plugin
+npx skills add arcjet/skills --skill add-request-protection
 ```
 
-The plugin handles everything automatically — MCP connection, API key setup, SDK
-installation, and adding protection rules. Just trigger a skill:
+**Guard protection** (tool calls, MCP servers, queues):
+```bash
+npx skills add arcjet/skills --skill add-guard-protection
+```
 
-| Skill                         | Purpose                                                                          |
-| ----------------------------- | -------------------------------------------------------------------------------- |
-| `/arcjet:protect-route`       | Designed for web apps. Adds protection to route handlers with automatic framework detection |
-| `/arcjet:add-ai-protection`   | Designed for AI apps. Implements prompt injection detection, PII blocking, and token budget rate limiting |
+Then describe what you want to protect. The skill handles the rest.
 
-That's it. The plugin detects your framework, connects to MCP, and walks you
-through the rest. Skip to [Common agent prompts](#common-agent-prompts) for
-usage examples, or continue below for manual setup with other tools.
+Source: [github.com/arcjet/skills](https://github.com/arcjet/skills)
 
-## Option B: Manual setup
+You can also use the <Link.Page href="/arcjet-plugin">Arcjet plugin</Link.Page>
+for Claude Code and Cursor, which bundles skills, MCP, and coding rules.
 
-Use this path if you're working with VS Code Copilot, Windsurf, ChatGPT, Claude
-Desktop, or prefer to set things up step by step.
+## Step 2: Connect with the CLI
+
+The [Arcjet CLI](https://www.npmjs.com/package/@arcjet/cli) lets you manage
+sites, keys, and rules from your terminal:
+
+```bash
+npm i -g @arcjet/cli
+arcjet auth login
+arcjet teams list
+arcjet sites list --team-id team_01abc123
+arcjet sites get-key --site-id site_01abc123
+```
+
+Set the key in the project environment:
+
+```ini
+# .env.local (Next.js, Astro) or .env (other frameworks)
+ARCJET_KEY=ajkey_yourkey
+```
+
+You can also use the <Link.Page href="/mcp-server">MCP server</Link.Page> to
+manage sites and keys. See [Manual setup](#manual-setup) below.
+
+## Manual setup
+
+Use this path if you prefer step-by-step control or are using a tool with
+built-in MCP support (VS Code Copilot, Windsurf, ChatGPT, Claude Code, Claude
+Desktop, Cursor).
 
 ### Step 1: Connect the MCP server
 
@@ -217,7 +247,9 @@ installed or MCP server connected:
 ## Reference
 
 - <Link.Page href="/get-started">Quick start guide</Link.Page> — framework-specific setup with full code examples
+- <Link.Page href="/guards">Guards</Link.Page> — protect tool calls, queues, and agentic pipelines without an HTTP request
 - <Link.Page href="/arcjet-plugin">Arcjet Plugin</Link.Page> — plugin for Claude Code and Cursor with automatic security guidance
+- [Arcjet CLI](https://www.npmjs.com/package/@arcjet/cli) — manage sites, keys, and rules from the terminal
 - [llms.txt](/llms.txt) — machine-readable reference with all framework examples, rule parameters, and decision API
 - <Link.Page href="/mcp-server">MCP server</Link.Page> — full MCP tool reference and client setup
 - <Link.Page href="/remote-rules">Remote rules</Link.Page> — manage rules from the dashboard or MCP server without code changes
