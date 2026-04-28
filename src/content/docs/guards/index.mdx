@@ -20,13 +20,35 @@ They are for the places HTTP middleware can't reach: inside tool handlers, betwe
 
 Install the `add-guard-protection` skill into your AI coding agent. It will detect your language, install the package, configure rules, and wire up `guard()` calls inline in your tool handlers.
 
-Supported languages: **JavaScript / TypeScript** (`@arcjet/guard`) and **Python** (`arcjet`).
+Supported languages: **JavaScript / TypeScript** (`@arcjet/guard` >= 1.4.0) and **Python** (`arcjet` >= 0.7.0).
 
 ```bash
-npx skill add arcjet/skills --skill add-guard-protection
+npx skills add arcjet/skills --skill add-guard-protection
 ```
 
 Then describe what you want to protect — for example: *"rate limit my tool calls per user and block prompt injection"* or *"secure my MCP server"* or *"protect my queue worker"*.
+
+## Choosing rules
+
+| Use case | Recommended rules |
+|---|---|
+| AI agent tool calls | `tokenBucket` + `detectPromptInjection` |
+| MCP tool handlers | `slidingWindow` or `tokenBucket` + `detectPromptInjection` |
+| Background AI task processor | `tokenBucket` + `localDetectSensitiveInfo` |
+| Queue worker with user input | `tokenBucket` + `detectPromptInjection` + `localDetectSensitiveInfo` |
+| Scanning tool results for injection | `detectPromptInjection` (scan the returned content) |
+
+<Aside type="caution">
+  **Do not** create the Arcjet client per call — it holds a persistent
+  connection. Create it once at module scope.
+
+  **Do not** configure rules inside a function — rule configs carry stable IDs
+  for server-side aggregation. Creating them per call breaks dashboard tracking
+  and rate limit state.
+
+  **Do not** forget the `key` parameter on rate limit rules — without a key,
+  Guard can't track per-user limits.
+</Aside>
 
 ## Use cases
 
