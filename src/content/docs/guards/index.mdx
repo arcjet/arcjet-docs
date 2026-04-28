@@ -1,22 +1,20 @@
 ---
 title: Arcjet Guards
 description: "Security rules for AI agents and tool calls. Rate limiting, prompt injection detection, and PII blocking that runs anywhere — inside tool handlers, queue consumers, and agentic pipelines."
-tableOfContents: false
 ---
+
+import { Aside } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
 
 Guards apply Arcjet security rules **inside AI agent tool calls** and anywhere else you process untrusted input. Pass inputs directly, get a decision back. No `Request` object needed.
 
 They are for the places HTTP middleware can't reach: inside tool handlers, between agent steps, in queue consumers, and across agentic pipelines that fan out across many services.
 
-## The problem
-
-AI agents call tools. Tools receive untrusted input. Your HTTP middleware never sees any of it — guards run inside the tool handler, before input reaches the model.
-
-| Problem | Solution |
-|---|---|
-| **Injected instructions** — a `fetch` tool or external API returns content containing instructions that re-enter the model context unchecked. | **Prompt injection detection** — Arcjet scans tool inputs _and results_ for jailbreaks, instruction overrides, and role-play escapes before they reach the model. Evaluated in the cloud so detection stays up to date without redeploying. |
-| **Sensitive data exposure** — a user pastes a credit card number or phone number into a prompt that gets logged or sent verbatim to a third-party model provider. | **Sensitive information detection** — Arcjet detects PII — email addresses, phone numbers, credit card numbers, and more — locally via WebAssembly. The raw text never leaves your server; only the classification result does. |
-| **Budget exhaustion** — a user floods the agent with requests, burning through your LLM token quota or per-user allowances. | **Rate limiting** — token bucket, fixed window, and sliding window algorithms. Use token bucket to model LLM token budgets directly — deduct estimated tokens before each model call and deny when the bucket is empty. |
+<Aside type="tip">
+  Looking to protect HTTP route handlers and API endpoints? See the
+  <Link.Page href="/get-started">quick start guide</Link.Page> for
+  request-based protection with `protect()`.
+</Aside>
 
 ## Get started
 
@@ -28,10 +26,40 @@ Supported languages: **JavaScript / TypeScript** (`@arcjet/guard`) and **Python*
 npx skill add arcjet/skills --skill add-guard-protection
 ```
 
-Then open your AI coding agent and describe what you want to protect — for example: *"rate limit my tool calls per user and block prompt injection"* or *"secure my MCP server"* or *"protect my queue worker"*.
+Then describe what you want to protect — for example: *"rate limit my tool calls per user and block prompt injection"* or *"secure my MCP server"* or *"protect my queue worker"*.
+
+## Use cases
+
+### Secure MCP server tools
+
+MCP servers expose tools that receive untrusted input from AI agents. Guard each tool handler to rate limit per user, detect prompt injection in tool arguments, and block PII before it reaches your backend.
+
+### Protect agentic pipelines
+
+Multi-step agent workflows fan out across tool calls and sub-agents. Add guards between steps to catch injected instructions before they propagate, enforce per-user budgets across the pipeline, and detect PII leaking between stages.
+
+### Rate limit queue consumers
+
+Background workers and queue consumers process messages without an HTTP request. Use guards to enforce per-user or per-tenant token budgets, preventing a single user from exhausting shared resources.
+
+### Scan tool inputs and outputs for PII
+
+Tools that fetch external content (web pages, APIs, documents) can return sensitive data. Guard the tool output to detect and block credit card numbers, email addresses, phone numbers, and other PII before it enters the model context.
+
+### Block prompt injection in tool results
+
+A `fetch` tool or external API can return content containing injected instructions that re-enter the model context. Guard the tool result to detect jailbreaks, instruction overrides, and role-play escapes before they reach the model.
+
+## What guards protect against
+
+| Problem | Solution |
+|---|---|
+| **Injected instructions** — a `fetch` tool or external API returns content containing instructions that re-enter the model context unchecked. | **Prompt injection detection** — Arcjet scans tool inputs _and results_ for jailbreaks, instruction overrides, and role-play escapes before they reach the model. Evaluated in the cloud so detection stays up to date without redeploying. |
+| **Sensitive data exposure** — a user pastes a credit card number or phone number into a prompt that gets logged or sent verbatim to a third-party model provider. | **Sensitive information detection** — Arcjet detects PII — email addresses, phone numbers, credit card numbers, and more — locally via WebAssembly. The raw text never leaves your server; only the classification result does. |
+| **Budget exhaustion** — a user floods the agent with requests, burning through your LLM token quota or per-user allowances. | **Rate limiting** — token bucket, fixed window, and sliding window algorithms. Use token bucket to model LLM token budgets directly — deduct estimated tokens before each model call and deny when the bucket is empty. |
 
 ## Source
 
-- [arcjet/skills](https://github.com/arcjet/skills) - AI coding agent skills for Arcjet
-- [arcjet/arcjet-js](https://github.com/arcjet/arcjet-js) — JavaScript / TypeScript SDK
-- [arcjet/arcjet-python](https://github.com/arcjet/arcjet-python) — Python SDK
+- [arcjet/skills](https://github.com/arcjet/skills) — AI coding agent skills for Arcjet
+- [arcjet/arcjet-js](https://github.com/arcjet/arcjet-js) — JavaScript / TypeScript SDK (`@arcjet/guard`)
+- [arcjet/arcjet-python](https://github.com/arcjet/arcjet-python) — Python SDK (`arcjet`)
