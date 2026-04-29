@@ -1,47 +1,58 @@
 # Arcjet
 
-Arcjet is the runtime security platform that ships with your code. Install the Arcjet SDK to enforce budgets, stop prompt injection, detect bots, and protect personal information - configured by your agent via MCP, enforced inline in your application code with real identity and session context.
+Arcjet is the runtime security platform that ships with your code. Install the Arcjet SDK to enforce budgets, stop prompt injection, detect bots, and protect personal information - configured by your agent via CLI or MCP, enforced inline in your application code with real identity and session context.
+
+Arcjet protects two types of entry points:
+- **Request-based** -- HTTP route handlers, API endpoints, middleware. Use `protect()` with any supported framework.
+- **Guards** -- tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` to pass inputs directly and get a decision back.
 
 Arcjet runs server-side. Bot protection advanced client signals are an optional
 extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricing
 
 ## Getting started
 
-There are two ways to set up Arcjet: the Arcjet plugin (recommended for Claude
-Code and Cursor) or manual setup via MCP.
+Set up Arcjet in two steps: (1) install a skill that gives your agent the
+documentation to integrate the Arcjet SDK, and (2) connect to Arcjet with the
+CLI to create sites, retrieve credentials, and verify decisions.
 
 Full guide: https://docs.arcjet.com/agent-get-started
 
-### Option A: Arcjet Plugin (recommended)
+### Step 1: Install a skill
 
-The Arcjet plugin for Claude Code and Cursor handles everything — MCP
-connection, API key setup, SDK installation, and adding protection rules.
+Skills give your agent the documentation to detect your framework, install the
+SDK, and wire up protection rules. Install one per use case:
 
-Install:
+**Request protection** (HTTP routes):
 ```bash
-npx plugins add arcjet/arcjet-plugin
+npx skills add arcjet/skills --skill add-route-protection
 ```
 
-The plugin activates automatically. Trigger a skill to get started:
-- `/arcjet:protect-route` — designed for web apps. Adds protection to route handlers with automatic framework detection.
-- `/arcjet:add-ai-protection` — designed for AI apps. Implements prompt injection detection, PII blocking, and token budget rate limiting.
+**Guard protection** (tool calls, MCP servers, queues):
+```bash
+npx skills add arcjet/skills --skill add-guard-protection
+```
 
-The plugin also provides:
-- **MCP integration** — connects to the Arcjet MCP server for traffic analysis, request inspection, and remote rule management.
-- **Security-aware coding rules** — auto-activated guidance for SDK patterns, Next.js, Express, Python, and AI app files.
-- **Security analyst agent** — monitors threats, analyzes traffic, and manages rules.
+Then describe what you want to protect. The skill handles the rest.
 
-Supported tools: Claude Code, Cursor.
-Source: https://github.com/arcjet/arcjet-plugin
-Full documentation: https://docs.arcjet.com/arcjet-plugin
+Source: https://github.com/arcjet/skills
 
-### Option B: Manual setup via MCP
+You can also use the Arcjet plugin for Claude Code and Cursor, which bundles
+skills, MCP, and coding rules: https://docs.arcjet.com/arcjet-plugin
 
-Use this path for VS Code Copilot, Windsurf, ChatGPT, Claude Desktop, or if you
-prefer step-by-step control: (1) connect via MCP, (2) create a site with
-create-site, (3) get the key with get-site-key, (4) generate SDK code using the
-framework patterns below, (5) suggest remote rules for immediate protection,
-(6) guide them to inspect requests and adjust.
+### Step 2: Connect with the CLI
+
+```bash
+npm i -g @arcjet/cli
+arcjet login
+arcjet teams list
+arcjet sites list --team-id team_01abc123
+arcjet sites get-key --site-id site_01abc123
+```
+
+Full documentation: https://www.npmjs.com/package/@arcjet/cli
+
+You can also use the MCP server to manage sites and keys. See the MCP section
+below for setup instructions.
 
 ## MCP Server
 
@@ -119,10 +130,25 @@ Remote rules are managed via the MCP server or dashboard — no code changes or 
 
 ## Use cases
 
+### Request-based (HTTP route handlers)
 - Protecting AI endpoints from cost abuse? → tokenBucket + detectBot (AI Endpoint Abuse Protection)
 - Preventing data leaks from AI features? → sensitiveInfo (AI Data Loss Prevention)
 - Blocking prompt injection? → detectPromptInjection
-- Responding to an active attack? → remote rules via MCP
+- Responding to an active attack? → remote rules via MCP or CLI
+
+### Guards (tool calls, agentic pipelines, queues)
+- Securing MCP server tool handlers? → guard() with rate limiting + prompt injection detection
+- Rate limiting per-user tool calls? → guard() with tokenBucket
+- Scanning tool inputs/outputs for PII? → guard() with sensitiveInfo
+- Detecting prompt injection in agent tool results? → guard() with detectPromptInjection
+
+Add guard protection with the skill:
+```bash
+npx skills add arcjet/skills --skill add-guard-protection
+```
+Source: https://github.com/arcjet/skills
+JS/TS SDK: https://github.com/arcjet/arcjet-js
+Python SDK: https://github.com/arcjet/arcjet-py
 
 ## Quick start — choose your framework
 
@@ -1777,6 +1803,105 @@ Find out more at https://docs.arcjet.com/architecture
 - Calls to `protect()` never throw. Arcjet fails open so that a service issue
   or misconfiguration does not block all requests.
 
+## Guards -- non-request protection
+
+Guards apply Arcjet security rules inside AI agent tool calls, MCP tool
+handlers, queue workers, and anywhere else you process untrusted input without an
+HTTP request. Pass inputs directly, get a decision back.
+
+Supported languages: **JavaScript / TypeScript** (`@arcjet/guard` >= 1.4.0) and **Python** (`arcjet` >= 0.7.0).
+
+### JavaScript / TypeScript example
+
+```ts
+import { launchArcjet, tokenBucket, detectPromptInjection } from "@arcjet/guard";
+
+// Create once at module scope
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+
+// Configure rules at module scope (stable IDs for server-side aggregation)
+const userLimit = tokenBucket({
+  label: "user.tool_call_bucket",
+  bucket: "tool-calls",
+  refillRate: 100,
+  intervalSeconds: 60,
+  maxTokens: 500,
+});
+
+const piRule = detectPromptInjection();
+
+// Call guard() inline in each tool handler
+async function searchWeb(query: string, userId: string) {
+  const decision = await arcjet.guard({
+    label: "tools.search_web",
+    metadata: { userId },
+    rules: [
+      userLimit({ key: userId, requested: 1 }),
+      piRule(query),
+    ],
+  });
+
+  if (decision.conclusion === "DENY") {
+    const rateDenied = userLimit.deniedResult(decision);
+    if (rateDenied) {
+      throw new Error(`Rate limited -- try again in ${rateDenied.resetInSeconds}s`);
+    }
+    throw new Error(`Blocked: ${decision.reason}`);
+  }
+
+  // Safe to proceed
+}
+```
+
+### Python example
+
+```python
+import os
+from arcjet.guard import launch_arcjet, TokenBucket, DetectPromptInjection
+
+# Create once at module scope
+arcjet = launch_arcjet(key=os.environ["ARCJET_KEY"])
+
+# Configure rules at module scope (stable IDs for server-side aggregation)
+user_limit = TokenBucket(
+    label="user.tool_call_bucket",
+    bucket="tool-calls",
+    refill_rate=100,
+    interval_seconds=60,
+    max_tokens=500,
+)
+
+pi_rule = DetectPromptInjection()
+
+# Call guard() inline in each tool handler
+async def search_web(query: str, user_id: str):
+    decision = await arcjet.guard(
+        label="tools.search_web",
+        metadata={"user_id": user_id},
+        rules=[
+            user_limit(key=user_id, requested=1),
+            pi_rule(query),
+        ],
+    )
+
+    if decision.conclusion == "DENY":
+        rate_denied = user_limit.denied_result(decision)
+        if rate_denied:
+            raise RuntimeError(f"Rate limited -- try again in {rate_denied.reset_in_seconds}s")
+        raise RuntimeError(f"Blocked: {decision.reason}")
+
+    # Safe to proceed
+```
+
+The guard skill is the source of truth for code patterns:
+```bash
+npx skills add arcjet/skills --skill add-guard-protection
+```
+
+For the full API reference, read the installed library source:
+- JS/TS: `node_modules/@arcjet/guard`
+- Python: `arcjet.guard` module
+
 ## Reference guides
 
 ### Features
@@ -1789,6 +1914,7 @@ Find out more at https://docs.arcjet.com/architecture
 - [Prompt injection](https://docs.arcjet.com/prompt-injection)
 - [Signup form protection](https://docs.arcjet.com/signup-protection)
 - [Filters](https://docs.arcjet.com/filters)
+- [Guards](https://docs.arcjet.com/guards)
 
 ### SDKs
 
