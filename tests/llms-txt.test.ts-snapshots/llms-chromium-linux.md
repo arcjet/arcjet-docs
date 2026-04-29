@@ -49,7 +49,7 @@ arcjet sites list --team-id team_01abc123
 arcjet sites get-key --site-id site_01abc123
 ```
 
-Full documentation: https://www.npmjs.com/package/@arcjet/cli
+Full documentation: https://docs.arcjet.com/cli
 
 You can also use the MCP server to manage sites and keys. See the MCP section
 below for setup instructions.
