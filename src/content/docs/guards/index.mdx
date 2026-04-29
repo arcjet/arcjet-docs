@@ -16,6 +16,12 @@ They are for the places HTTP middleware can't reach: inside tool handlers, betwe
   request-based protection with `protect()`.
 </Aside>
 
+A webpage your agent fetched contains hidden instructions telling it to email your customer list to an attacker. Guards detects the prompt injection before that content re-enters the model's context.
+
+A runaway agent loop burns $8,000 in model spend overnight. Guards enforces per-user token budgets inside the loop itself, denying calls once the bucket is empty.
+
+A background job ships support tickets to a third-party LLM for summarization. Guards blocks personally identifiable information (emails, card numbers, etc.) before the message leaves your system.
+
 ## Get started
 
 Install the `add-guard-protection` skill into your AI coding agent. It will detect your language, install the package, configure rules, and wire up `guard()` calls inline in your tool handlers.
@@ -28,39 +34,76 @@ npx skills add arcjet/skills --skill add-guard-protection
 
 Then describe what you want to protect — for example: *"rate limit my tool calls per user and block prompt injection"* or *"secure my MCP server"* or *"protect my queue worker"*.
 
-## Choosing rules
+## Examples
 
-| Use case | Recommended rules |
-|---|---|
-| AI agent tool calls | `tokenBucket` + `detectPromptInjection` |
-| MCP tool handlers | `slidingWindow` or `tokenBucket` + `detectPromptInjection` |
-| Scanning tool results for injection | `detectPromptInjection` (scan the returned content) |
+### JavaScript / TypeScript
 
-<Aside type="caution">
-  **Do not** create the Arcjet client per call — it holds a persistent
-  connection. Create it once at module scope.
+```ts
+import { launchArcjet, tokenBucket, detectPromptInjection } from "@arcjet/guard";
 
-  **Do not** configure rules inside a function — rule configs carry stable IDs
-  for server-side aggregation. Creating them per call breaks dashboard tracking
-  and rate limit state.
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 
-  **Do not** forget the `key` parameter on rate limit rules — without a key,
-  Guard can't track per-user limits.
-</Aside>
+const userLimit = tokenBucket({
+  label: "user.tool_call_bucket",
+  bucket: "tool-calls",
+  refillRate: 100,
+  intervalSeconds: 60,
+  maxTokens: 500,
+});
 
-## Use cases
+const piRule = detectPromptInjection();
 
-### Detect prompt injection in fetched content
+async function searchWeb(query: string, userId: string) {
+  const decision = await arcjet.guard({
+    label: "tools.search_web",
+    metadata: { userId },
+    rules: [
+      userLimit({ key: userId, requested: 1 }),
+      piRule(query),
+    ],
+  });
 
-A webpage your agent fetched contains hidden instructions telling it to email your customer list to an attacker. Guards detects the prompt injection before that content re-enters the model's context.
+  if (decision.conclusion === "DENY") {
+    throw new Error(`Blocked: ${decision.reason}`);
+  }
 
-### Enforce per-user token budgets
+  // Safe to proceed
+}
+```
 
-A runaway agent loop burns $8,000 in model spend overnight. Guards enforces per-user token budgets inside the loop itself, denying calls once the bucket is empty.
+### Python
 
-### Block PII before it leaves your system
+```python
+import os
+from arcjet.guard import launch_arcjet, TokenBucket, DetectPromptInjection
 
-A background job ships support tickets to a third-party LLM for summarization. Guards blocks personally identifiable information (emails, card numbers, etc.) before the message leaves your system.
+arcjet = launch_arcjet(key=os.environ["ARCJET_KEY"])
+
+user_limit = TokenBucket(
+    label="user.tool_call_bucket",
+    bucket="tool-calls",
+    refill_rate=100,
+    interval_seconds=60,
+    max_tokens=500,
+)
+
+pi_rule = DetectPromptInjection()
+
+async def search_web(query: str, user_id: str):
+    decision = await arcjet.guard(
+        label="tools.search_web",
+        metadata={"user_id": user_id},
+        rules=[
+            user_limit(key=user_id, requested=1),
+            pi_rule(query),
+        ],
+    )
+
+    if decision.conclusion == "DENY":
+        raise RuntimeError(f"Blocked: {decision.reason}")
+
+    # Safe to proceed
+```
 
 ## Source
 
