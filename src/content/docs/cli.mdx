@@ -1,0 +1,259 @@
+---
+title: "Arcjet CLI"
+description: "Manage Arcjet from the terminal. The Arcjet CLI gives AI coding agents and humans the same management-plane surface as the MCP server — teams, sites, rules, traffic, and live requests — without leaving the shell."
+prev: false
+next: false
+---
+
+import { Aside, Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+import Comments from "/src/components/Comments.astro";
+
+[Arcjet](https://arcjet.com) is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
+
+The Arcjet CLI gives AI coding agents and humans terminal access to the Arcjet management plane. It mirrors the surface of the <Link.Page href="/mcp-server">MCP server</Link.Page> — teams, sites, rules, traffic analysis, request inspection, and live monitoring — without an MCP connection or editor integration.
+
+<Aside type="tip">
+  This page is written for AI coding agents working in a terminal session or
+  editor plugin. If you are a developer setting up an Arcjet account for the
+  first time, see the <Link.Page href="/get-started">quick start guide</Link.Page>.
+</Aside>
+
+The CLI is the lowest-friction path when:
+
+- You are already in a shell (Claude Code, Codex, plugin tasks, CI).
+- You need to answer questions about the user's Arcjet environment without standing up an MCP server.
+- The user has not yet configured an MCP connection or the Arcjet plugin.
+
+See [Install](#install) for installation paths.
+
+## Install
+
+The CLI requires [Node.js](https://nodejs.org). With Node.js available, every command works with no install via `npx -y @arcjet/cli@latest <command>`.
+
+The simplest way to run the CLI is `npx`. It works on macOS, Linux, and Windows with no install step:
+
+```bash
+npx -y @arcjet/cli@latest <command>
+```
+
+For example:
+
+```bash
+npx -y @arcjet/cli@latest auth login
+npx -y @arcjet/cli@latest version
+```
+
+The rest of this page uses `arcjet` in command examples for readability. Substitute `npx -y @arcjet/cli@latest` if you have not installed the binary.
+
+For frequent or interactive use, install the binary so commands can be invoked as `arcjet`:
+
+<Tabs>
+  <TabItem label="npm">
+    ```bash
+    npm install -g @arcjet/cli
+    ```
+  </TabItem>
+  <TabItem label="Homebrew">
+    ```bash
+    brew install arcjet/tap/arcjet
+    ```
+
+    Available for macOS (Apple Silicon, Intel) and Linux (x86_64, arm64).
+  </TabItem>
+  <TabItem label="Release binary">
+    Download the latest archive for your platform from
+    [github.com/arcjet/cli/releases](https://github.com/arcjet/cli/releases),
+    extract it, and place the `arcjet` binary somewhere on your `PATH`.
+
+    Available for macOS (Apple Silicon, Intel), Linux (x86_64, arm64), and
+    Windows (x86_64, arm64).
+  </TabItem>
+</Tabs>
+
+Verify the install:
+
+```bash
+arcjet version
+```
+
+## Authentication
+
+Most users will not have `ARCJET_TOKEN` set in their shell. The default path is the browser-based device authorization flow, which works the same way as `gh auth login`, `fly auth login`, or `vercel login`:
+
+```bash
+arcjet auth login
+```
+
+The CLI prints a one-time code and opens a URL. The user confirms the code in their browser, and the CLI stores the resulting credentials locally. Subsequent commands authenticate automatically.
+
+Check the current state:
+
+```bash
+arcjet auth status
+```
+
+Sign out:
+
+```bash
+arcjet auth logout
+```
+
+<Aside type="note">
+  If `arcjet auth status` reports the user is not signed in, run
+  `arcjet auth login` and wait for confirmation in the browser before continuing.
+  Do not prompt the user for a token — the device flow is the expected path.
+</Aside>
+
+### Non-interactive authentication
+
+For CI, scripts, or non-interactive agent runs, set `ARCJET_TOKEN` instead of running `arcjet auth login`:
+
+```bash
+export ARCJET_TOKEN=<token>
+```
+
+Treat `ARCJET_TOKEN` as the headless escape hatch, not the default. In an interactive terminal session, prefer `arcjet auth login`.
+
+## Agent usage
+
+When running the CLI from an agent, two flags keep output predictable and the context window small:
+
+- **`--output json`** — emit machine-readable JSON. When stdout is not a TTY, JSON is the default, so this is rarely required from a subprocess but is safe to set explicitly.
+- **`--fields <a,b,c>`** — limit output to the listed top-level keys. Use this aggressively to avoid pulling unused fields into the conversation.
+
+```bash
+arcjet teams list --output json --fields id,name
+arcjet sites list --team-id team_01abc123 --output json --fields id,name
+arcjet requests list --site-id site_01abc123 --output json --fields id,conclusion,path
+```
+
+Site IDs use the format `site_<suffix>` and team IDs use the format `team_<suffix>` (TypeID format).
+
+Run `arcjet --help` to see all available commands, or `arcjet <command> --help` for details on a specific command.
+
+## Command reference
+
+### Authentication
+
+| Command               | Description                                         |
+| --------------------- | --------------------------------------------------- |
+| `arcjet auth login`   | Authenticate via the browser-based device flow.     |
+| `arcjet auth logout`  | Remove stored credentials.                          |
+| `arcjet auth status`  | Show the current authentication state.              |
+
+### Teams and sites
+
+| Command                                  | Description                                         |
+| ---------------------------------------- | --------------------------------------------------- |
+| `arcjet teams list`                      | List teams the authenticated user belongs to.       |
+| `arcjet sites list --team-id <id>`       | List sites within a team.                           |
+| `arcjet sites create --team-id <id>`     | Create a new site (requires `--confirm`).           |
+| `arcjet sites get-key --site-id <id>`    | Return the SDK key (`ARCJET_KEY`) for a site.       |
+
+### Remote rules
+
+| Command                                | Description                                                     |
+| -------------------------------------- | --------------------------------------------------------------- |
+| `arcjet rules list --site-id <id>`     | List remote rules configured for a site.                        |
+| `arcjet rules create --site-id <id>`   | Create a remote rule in `DRY_RUN` or `LIVE` mode (`--confirm`). |
+| `arcjet rules update --site-id <id>`   | Replace an existing remote rule's configuration (`--confirm`).  |
+| `arcjet rules delete --site-id <id>`   | Delete a remote rule (`--confirm`).                             |
+| `arcjet rules promote --site-id <id>`  | Promote a remote rule from `DRY_RUN` to `LIVE` (`--confirm`).   |
+
+Remote rules support `rate_limit`, `bot`, `shield`, and `filter` types. Rules that need parsed request body content (`email`, `sensitive_info`, `prompt_injection`) require the SDK.
+
+### Analysis
+
+| Command                                   | Description                                                              |
+| ----------------------------------------- | ------------------------------------------------------------------------ |
+| `arcjet analyze traffic --site-id <id>`   | Traffic analysis: total requests, denials, top paths, top IPs, trend.    |
+| `arcjet analyze anomalies --site-id <id>` | Detect unusual security patterns vs the previous period.                 |
+| `arcjet analyze dry-run-impact --site-id <id>` | Impact of promoting dry-run rules to live.                          |
+| `arcjet analyze ip --site-id <id> --ip <ip>` | Investigate an IP — geo, threat intelligence, recent request activity. |
+
+### Requests
+
+| Command                                                            | Description                                                  |
+| ------------------------------------------------------------------ | ------------------------------------------------------------ |
+| `arcjet requests list --site-id <id>`                              | List recent requests; filter by conclusion.                  |
+| `arcjet requests details --site-id <id> --request-id <request-id>` | Full details for a request — headers, rules, decision info.  |
+| `arcjet requests explain --site-id <id> --request-id <request-id>` | Natural-language explanation of a decision and next steps.   |
+
+### Monitoring
+
+| Command                            | Description                                                  |
+| ---------------------------------- | ------------------------------------------------------------ |
+| `arcjet briefing --site-id <id>`   | Comprehensive security briefing — traffic, threats, anomalies, dry-run readiness, quota, recommendations. |
+| `arcjet watch --site-id <id>`      | Stream live requests for a site (polls the API).             |
+
+### Skills and utilities
+
+| Command                                  | Description                                       |
+| ---------------------------------------- | ------------------------------------------------- |
+| `arcjet skills`                          | List available skill topics.                      |
+| `arcjet skills <topic>`                  | Show a detailed skill guide for a topic.          |
+| `arcjet skills install`                  | Install `ARCJET.md` into the current project.     |
+| `arcjet skills initialize`               | Guided project setup — installs the SDK and configures the application. |
+| `arcjet completion <bash\|zsh\|fish>`    | Generate shell completions.                       |
+| `arcjet version`                         | Print version information.                        |
+
+## Common workflows
+
+The CLI mirrors the MCP server's typical workflows. Each step is a single command.
+
+**Bootstrap a project:** `arcjet auth login` → `arcjet teams list` → `arcjet sites list --team-id <id>` (or `arcjet sites create`) → `arcjet sites get-key --site-id <id>` → write the returned key to the project's `.env` file as `ARCJET_KEY`.
+
+**Investigate a request:** `arcjet requests list --site-id <id>` to find the request → `arcjet requests details --site-id <id> --request-id <request-id>` for headers and rule execution → `arcjet requests explain --site-id <id> --request-id <request-id>` for a natural-language summary.
+
+**Analyse and monitor:** `arcjet analyze traffic --site-id <id>` for a dashboard-level overview → `arcjet analyze anomalies --site-id <id>` to surface unusual patterns → `arcjet analyze ip --site-id <id> --ip <ip>` for a deep dive on a suspicious IP.
+
+**Daily security briefing:** `arcjet briefing --site-id <id>` returns traffic, threats, anomalies, dry-run readiness, quota, and prioritised recommendations in a single call.
+
+**Manage remote rules:** `arcjet rules list --site-id <id>` → `arcjet rules create --site-id <id>` in `DRY_RUN` → `arcjet analyze dry-run-impact --site-id <id>` to verify → `arcjet rules promote --site-id <id>` to switch to `LIVE`.
+
+## Skills
+
+The `arcjet skills` command ships built-in documentation bundled with the binary, so it always matches the installed CLI version. Run `arcjet skills` to list the available topics and `arcjet skills <topic>` to read one — discover what is available from the help output rather than hard-coding topic names.
+
+For richer SDK integration documentation aimed at AI coding agents, install the standalone Arcjet skills package from [github.com/arcjet/skills](https://github.com/arcjet/skills):
+
+```bash
+npx skills add arcjet/skills --skill add-request-protection
+npx skills add arcjet/skills --skill add-guard-protection
+```
+
+Install `ARCJET.md` into the project so future agent turns can discover Arcjet without a docs round trip:
+
+```bash
+arcjet skills install
+```
+
+For a guided end-to-end setup that installs the SDK and wires up protection, run:
+
+```bash
+arcjet skills initialize
+```
+
+## Invariants
+
+- Always confirm with the user before write or delete operations. Mutating commands require `--confirm`.
+- Site IDs use the format `site_<suffix>` (TypeID format). Team IDs use the format `team_<suffix>`.
+- Commands and parameters are a stable API contract.
+
+## Reference
+
+- <Link.Page href="/agent-get-started">Agent get started</Link.Page> — full agent onboarding flow.
+- <Link.Page href="/mcp-server">MCP server</Link.Page> — same management-plane surface, exposed over MCP.
+- <Link.Page href="/arcjet-plugin">Arcjet Plugin</Link.Page> — Claude Code and Cursor plugin with automatic security guidance.
+- [llms.txt](/llms.txt) — machine-readable reference with framework examples and the rule parameter reference.
+- [arcjet/cli on GitHub](https://github.com/arcjet/cli) — release archives and source.
+
+## Get help
+
+Need help with anything?
+[Email us](mailto:support@arcjet.com) or
+[join our Discord](https://arcjet.com/discord) to get support from our
+engineering team.
+
+<Comments />
