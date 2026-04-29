@@ -43,7 +43,7 @@ skills, MCP, and coding rules: https://docs.arcjet.com/arcjet-plugin
 
 ```bash
 npm i -g @arcjet/cli
-arcjet login
+arcjet auth login
 arcjet teams list
 arcjet sites list --team-id team_01abc123
 arcjet sites get-key --site-id site_01abc123
