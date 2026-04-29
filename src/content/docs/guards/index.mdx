@@ -34,8 +34,6 @@ Then describe what you want to protect — for example: *"rate limit my tool cal
 |---|---|
 | AI agent tool calls | `tokenBucket` + `detectPromptInjection` |
 | MCP tool handlers | `slidingWindow` or `tokenBucket` + `detectPromptInjection` |
-| Background AI task processor | `tokenBucket` + `localDetectSensitiveInfo` |
-| Queue worker with user input | `tokenBucket` + `detectPromptInjection` + `localDetectSensitiveInfo` |
 | Scanning tool results for injection | `detectPromptInjection` (scan the returned content) |
 
 <Aside type="caution">
@@ -52,33 +50,17 @@ Then describe what you want to protect — for example: *"rate limit my tool cal
 
 ## Use cases
 
+### Secure AI agents
+
+Multi-step agent workflows fan out across tool calls and sub-agents. Add guards between steps to catch injected instructions before they propagate, enforce per-user budgets across the pipeline, and prevent a single user from exhausting shared resources.
+
+### Secure tool calls
+
+Tools that fetch external content (web pages, APIs, documents) can return content containing injected instructions that re-enter the model context. Guard tool inputs and outputs to detect jailbreaks, instruction overrides, and role-play escapes before they reach the model.
+
 ### Secure MCP server tools
 
-MCP servers expose tools that receive untrusted input from AI agents. Guard each tool handler to rate limit per user, detect prompt injection in tool arguments, and block PII before it reaches your backend.
-
-### Protect agentic pipelines
-
-Multi-step agent workflows fan out across tool calls and sub-agents. Add guards between steps to catch injected instructions before they propagate, enforce per-user budgets across the pipeline, and detect PII leaking between stages.
-
-### Rate limit queue consumers
-
-Background workers and queue consumers process messages without an HTTP request. Use guards to enforce per-user or per-tenant token budgets, preventing a single user from exhausting shared resources.
-
-### Scan tool inputs and outputs for PII
-
-Tools that fetch external content (web pages, APIs, documents) can return sensitive data. Guard the tool output to detect and block credit card numbers, email addresses, phone numbers, and other PII before it enters the model context.
-
-### Block prompt injection in tool results
-
-A `fetch` tool or external API can return content containing injected instructions that re-enter the model context. Guard the tool result to detect jailbreaks, instruction overrides, and role-play escapes before they reach the model.
-
-## What guards protect against
-
-| Problem | Solution |
-|---|---|
-| **Injected instructions** — a `fetch` tool or external API returns content containing instructions that re-enter the model context unchecked. | **Prompt injection detection** — Arcjet scans tool inputs _and results_ for jailbreaks, instruction overrides, and role-play escapes before they reach the model. Evaluated in the cloud so detection stays up to date without redeploying. |
-| **Sensitive data exposure** — a user pastes a credit card number or phone number into a prompt that gets logged or sent verbatim to a third-party model provider. | **Sensitive information detection** — Arcjet detects PII — email addresses, phone numbers, credit card numbers, and more — locally via WebAssembly. The raw text never leaves your server; only the classification result does. |
-| **Budget exhaustion** — a user floods the agent with requests, burning through your LLM token quota or per-user allowances. | **Rate limiting** — token bucket, fixed window, and sliding window algorithms. Use token bucket to model LLM token budgets directly — deduct estimated tokens before each model call and deny when the bucket is empty. |
+MCP servers expose tools that receive untrusted input from AI agents. Guard each tool handler to rate limit per user and detect prompt injection in tool arguments.
 
 ## Source
 
