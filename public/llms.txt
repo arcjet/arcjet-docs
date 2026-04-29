@@ -24,7 +24,7 @@ SDK, and wire up protection rules. Install one per use case:
 
 **Request protection** (HTTP routes):
 ```bash
-npx skills add arcjet/skills --skill add-route-protection
+npx skills add arcjet/skills --skill add-request-protection
 ```
 
 **Guard protection** (tool calls, MCP servers, queues):
@@ -43,7 +43,7 @@ skills, MCP, and coding rules: https://docs.arcjet.com/arcjet-plugin
 
 ```bash
 npm i -g @arcjet/cli
-arcjet login
+arcjet auth login
 arcjet teams list
 arcjet sites list --team-id team_01abc123
 arcjet sites get-key --site-id site_01abc123
