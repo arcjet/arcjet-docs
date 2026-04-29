@@ -16,9 +16,15 @@ They are for the places HTTP middleware can't reach: inside tool handlers, betwe
   request-based protection with `protect()`.
 </Aside>
 
+### Stop hidden instructions from hijacking your agent
+
 A webpage your agent fetched contains hidden instructions telling it to email your customer list to an attacker. Guards detects the prompt injection before that content re-enters the model's context.
 
+### Prevent runaway spend
+
 A runaway agent loop burns $8,000 in model spend overnight. Guards enforces per-user token budgets inside the loop itself, denying calls once the bucket is empty.
+
+### Keep PII off third-party models
 
 A background job ships support tickets to a third-party LLM for summarization. Guards blocks personally identifiable information (emails, card numbers, etc.) before the message leaves your system.
 
@@ -36,7 +42,7 @@ Then describe what you want to protect — for example: *"rate limit my tool cal
 
 ## Examples
 
-### JavaScript / TypeScript
+### JavaScript
 
 ```ts
 import { launchArcjet, tokenBucket, detectPromptInjection } from "@arcjet/guard";
