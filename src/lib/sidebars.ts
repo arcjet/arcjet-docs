@@ -16,6 +16,10 @@ export const main = [
         link: "/mcp-server",
       },
       {
+        label: "CLI",
+        link: "/cli",
+      },
+      {
         label: "Arcjet Guards",
         link: "/guards",
       },
