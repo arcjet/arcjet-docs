@@ -50,17 +50,17 @@ Then describe what you want to protect — for example: *"rate limit my tool cal
 
 ## Use cases
 
-### Secure AI agents
+### Detect prompt injection in fetched content
 
-Multi-step agent workflows fan out across tool calls and sub-agents. Add guards between steps to catch injected instructions before they propagate, enforce per-user budgets across the pipeline, and prevent a single user from exhausting shared resources.
+A webpage your agent fetched contains hidden instructions telling it to email your customer list to an attacker. Guards detects the prompt injection before that content re-enters the model's context.
 
-### Secure tool calls
+### Enforce per-user token budgets
 
-Tools that fetch external content (web pages, APIs, documents) can return content containing injected instructions that re-enter the model context. Guard tool inputs and outputs to detect jailbreaks, instruction overrides, and role-play escapes before they reach the model.
+A runaway agent loop burns $8,000 in model spend overnight. Guards enforces per-user token budgets inside the loop itself, denying calls once the bucket is empty.
 
-### Secure MCP server tools
+### Block PII before it leaves your system
 
-MCP servers expose tools that receive untrusted input from AI agents. Guard each tool handler to rate limit per user and detect prompt injection in tool arguments.
+A background job ships support tickets to a third-party LLM for summarization. Guards blocks personally identifiable information (emails, card numbers, etc.) before the message leaves your system.
 
 ## Source
 
