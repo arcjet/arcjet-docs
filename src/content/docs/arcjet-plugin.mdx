@@ -5,13 +5,26 @@ prev: false
 next: false
 ---
 
-import { Aside, Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import { Aside } from "@astrojs/starlight/components";
 import Comments from "/src/components/Comments.astro";
 
 [Arcjet](https://arcjet.com) is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
 
-The [Arcjet plugin](https://github.com/arcjet/arcjet-plugin) turns any supported AI coding agent into a security expert. It
-pre-loads agents with knowledge of the Arcjet security platform and
+The [Arcjet plugin](https://github.com/arcjet/arcjet-plugin) is a bundled
+experience for [Claude Code](https://docs.anthropic.com/en/docs/claude-code)
+and [Cursor](https://www.cursor.com) users who prefer a single-command install
+that wires up MCP, skills, and security-aware coding rules together.
+
+<Aside type="tip">
+  The recommended path for most agentic workflows is to install Arcjet skills
+  directly with `npx skills add arcjet/skills` and connect to the Arcjet API
+  via the [CLI](/cli) or [MCP server](/mcp-server). See
+  [Agent get started](/agent-get-started) for the canonical entry point. The
+  plugin is an alternative for users who prefer a bundled experience inside
+  Claude Code or Cursor.
+</Aside>
+
+The plugin pre-loads agents with knowledge of the Arcjet security platform and
 automatically injects the right guidance based on what you're working on —
 framework-specific SDK patterns, protection rules, and best practices.
 
@@ -19,21 +32,13 @@ framework-specific SDK patterns, protection rules, and best practices.
 
 Install the plugin with a single command:
 
-<Tabs>
-  <TabItem label="Claude Code">
-    ```bash
-    npx plugins add arcjet/arcjet-plugin
-    ```
-  </TabItem>
-  <TabItem label="Cursor">
-    ```bash
-    npx plugins add arcjet/arcjet-plugin
-    ```
-  </TabItem>
-</Tabs>
+```bash
+npx plugins add arcjet/arcjet-plugin
+```
 
-The plugin activates automatically after installation. There are no additional
-setup steps or commands to learn.
+The same command works in both Claude Code and Cursor. The plugin activates
+automatically after installation. There are no additional setup steps or
+commands to learn.
 
 ### Prerequisites
 
@@ -110,6 +115,21 @@ access to your Arcjet account. When connected via OAuth, agents can:
   See the [MCP server docs](/mcp-server) for full tool reference and the [agent
   get started guide](/agent-get-started) for a step-by-step setup walkthrough.
 </Aside>
+
+## Using the plugin with the CLI
+
+The plugin invokes the [Arcjet CLI](/cli) to stream live request activity into
+your agent's context — for example when you ask the agent to watch traffic on
+a site or investigate recent requests. The CLI exposes the same management-
+plane surface as the MCP server (teams, sites, rules, requests, analysis)
+directly from the terminal.
+
+## See also
+
+- [Agent get started](/agent-get-started) — canonical entry point for setting
+  up Arcjet in an agentic workflow.
+- [Arcjet CLI](/cli) — terminal-based management-plane access.
+- [MCP server](/mcp-server) — full MCP tool reference.
 
 ## Source code
 

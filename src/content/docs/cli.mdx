@@ -11,7 +11,7 @@ import Comments from "/src/components/Comments.astro";
 
 [Arcjet](https://arcjet.com) is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
 
-The Arcjet CLI gives AI coding agents and humans terminal access to the Arcjet management plane. It mirrors the surface of the <Link.Page href="/mcp-server">MCP server</Link.Page> — teams, sites, rules, traffic analysis, request inspection, and live monitoring — without an MCP connection or editor integration.
+The Arcjet CLI is one of two ways to connect <Link.Page href="/agent-get-started#skills">Arcjet skills</Link.Page> to the Arcjet API — the other being the <Link.Page href="/mcp-server">MCP server</Link.Page>. Both transports expose the same management-plane surface (teams, sites, rules, traffic analysis, request inspection, live monitoring); the CLI is the right choice when you are working in a terminal and the MCP server is the right choice when you are working in an online client without shell access.
 
 <Aside type="tip">
   This page is written for AI coding agents working in a terminal session or
@@ -221,19 +221,7 @@ The CLI mirrors the MCP server's typical workflows. Each step is a single comman
 
 ## Skills
 
-Arcjet's agent-facing skills live in the standalone [arcjet/skills](https://github.com/arcjet/skills) package and are installed with the [`skills`](https://www.npmjs.com/package/skills) CLI:
-
-```bash
-npx skills add arcjet/skills --skill add-request-protection
-npx skills add arcjet/skills --skill add-guard-protection
-```
-
-The two canonical skills are:
-
-- **`add-request-protection`** — protect HTTP routes and API endpoints with rate limiting, bot detection, email validation, and shield.
-- **`add-guard-protection`** — protect non-HTTP code paths (AI agent tool calls, MCP tool handlers, queue workers, background jobs) with `@arcjet/guard` (JS/TS) or `arcjet.guard` (Python).
-
-The previous skill names (`protect-route`, `add-ai-protection`) remain as deprecated aliases that emit a diagnostic on use.
+Skills are documented in <Link.Page href="/agent-get-started#skills">Agent get started</Link.Page>. The CLI is one of the transports that connects skills to the Arcjet API — it is not itself a skill surface.
 
 ## Invariants
 
