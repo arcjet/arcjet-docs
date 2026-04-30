@@ -77,10 +77,14 @@ Guidance triggers automatically in specific contexts:
 
 Invoke skills directly within your AI coding agent:
 
-| Skill                         | Purpose                                                                          |
-| ----------------------------- | -------------------------------------------------------------------------------- |
-| `/arcjet:protect-route`       | Designed for web apps. Adds protection to route handlers with automatic framework detection             |
-| `/arcjet:add-ai-protection`   | Designed for AI apps. Implements prompt injection detection, PII blocking, and token budget rate limiting |
+| Skill                              | Purpose                                                                                                                                                                  |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/arcjet:add-request-protection`   | Add protection to HTTP route handlers and API endpoints with automatic framework detection — rate limiting, bot detection, email validation, and shield.                |
+| `/arcjet:add-guard-protection`     | Add protection to non-HTTP code paths (AI agent tool calls, MCP tool handlers, queue workers, background jobs) using `@arcjet/guard` (JS/TS) or `arcjet.guard` (Python). |
+
+The previous skill names — `/arcjet:protect-route` and `/arcjet:add-ai-protection` — remain as deprecated aliases that emit a diagnostic on use. Migrate to the canonical names above.
+
+The plugin's skills track the canonical [arcjet/skills](https://github.com/arcjet/skills) package, which is the source of truth. You can install the same skills outside the plugin with `npx skills add arcjet/skills`.
 
 ### Supported frameworks
 

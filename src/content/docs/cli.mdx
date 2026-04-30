@@ -61,10 +61,21 @@ For frequent or interactive use, install the binary so commands can be invoked a
 
     Available for macOS (Apple Silicon, Intel) and Linux (x86_64, arm64).
   </TabItem>
+  <TabItem label="Install script">
+    ```bash
+    curl -sSfL https://arcjet.com/cli/install.sh | bash
+    ```
+
+    Downloads the appropriate release archive from
+    [github.com/arcjet/cli/releases](https://github.com/arcjet/cli/releases)
+    and installs the `arcjet` binary onto your `PATH`. Available for macOS
+    (Apple Silicon, Intel) and Linux (x86_64, arm64).
+  </TabItem>
   <TabItem label="Release binary">
     Download the latest archive for your platform from
     [github.com/arcjet/cli/releases](https://github.com/arcjet/cli/releases),
-    extract it, and place the `arcjet` binary somewhere on your `PATH`.
+    extract it, and place the `arcjet` binary somewhere on your `PATH`. Useful
+    for internal redistribution and air-gapped environments.
 
     Available for macOS (Apple Silicon, Intel), Linux (x86_64, arm64), and
     Windows (x86_64, arm64).
@@ -191,10 +202,9 @@ Remote rules support `rate_limit`, `bot`, `shield`, and `filter` types. Rules th
 
 | Command                                  | Description                                       |
 | ---------------------------------------- | ------------------------------------------------- |
-| `arcjet skills`                          | List available skill topics.                      |
-| `arcjet skills <topic>`                  | Show a detailed skill guide for a topic.          |
-| `arcjet skills install`                  | Install `ARCJET.md` into the current project.     |
-| `arcjet skills initialize`               | Guided project setup — installs the SDK and configures the application. |
+| `arcjet skills`                          | Print a pointer to the canonical skills package (`npx skills add arcjet/skills`). |
+| `arcjet skills install`                  | Print a pointer to the canonical skills package (`npx skills add arcjet/skills`). |
+| `arcjet skills initialize`               | Guided project setup — interactive auth, site selection, and `.env` write. Ends by printing the same skills-install recommendation. |
 | `arcjet completion <bash\|zsh\|fish>`    | Generate shell completions.                       |
 | `arcjet version`                         | Print version information.                        |
 
@@ -214,26 +224,29 @@ The CLI mirrors the MCP server's typical workflows. Each step is a single comman
 
 ## Skills
 
-The `arcjet skills` command ships built-in documentation bundled with the binary, so it always matches the installed CLI version. Run `arcjet skills` to list the available topics and `arcjet skills <topic>` to read one — discover what is available from the help output rather than hard-coding topic names.
-
-For richer SDK integration documentation aimed at AI coding agents, install the standalone Arcjet skills package from [github.com/arcjet/skills](https://github.com/arcjet/skills):
+Arcjet's agent-facing skills live in the standalone [arcjet/skills](https://github.com/arcjet/skills) package and are installed with the [`skills`](https://www.npmjs.com/package/skills) CLI:
 
 ```bash
 npx skills add arcjet/skills --skill add-request-protection
 npx skills add arcjet/skills --skill add-guard-protection
 ```
 
-Install `ARCJET.md` into the project so future agent turns can discover Arcjet without a docs round trip:
+The two canonical skills are:
 
-```bash
-arcjet skills install
-```
+- **`add-request-protection`** — protect HTTP routes and API endpoints with rate limiting, bot detection, email validation, and shield.
+- **`add-guard-protection`** — protect non-HTTP code paths (AI agent tool calls, MCP tool handlers, queue workers, background jobs) with `@arcjet/guard` (JS/TS) or `arcjet.guard` (Python).
 
-For a guided end-to-end setup that installs the SDK and wires up protection, run:
+The previous skill names (`protect-route`, `add-ai-protection`) remain as deprecated aliases that emit a diagnostic on use.
+
+`arcjet skills` and `arcjet skills install` are breadcrumbs, not file-writers: both print a recommendation pointing at `npx skills add arcjet/skills` so agents discovering the CLI can find the canonical skills package. They do not write any files into the project.
+
+For a guided end-to-end project setup — interactive auth, site selection, and writing the `ARCJET_KEY` to `.env` — run:
 
 ```bash
 arcjet skills initialize
 ```
+
+`arcjet skills initialize` ends by printing the same skills-install recommendation so the next agent turn can follow up with `npx skills add arcjet/skills`.
 
 ## Invariants
 
