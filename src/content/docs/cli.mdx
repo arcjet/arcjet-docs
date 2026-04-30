@@ -198,13 +198,10 @@ Remote rules support `rate_limit`, `bot`, `shield`, and `filter` types. Rules th
 | `arcjet briefing --site-id <id>`   | Comprehensive security briefing — traffic, threats, anomalies, dry-run readiness, quota, recommendations. |
 | `arcjet watch --site-id <id>`      | Stream live requests for a site (polls the API).             |
 
-### Skills and utilities
+### Utilities
 
 | Command                                  | Description                                       |
 | ---------------------------------------- | ------------------------------------------------- |
-| `arcjet skills`                          | Print a pointer to the canonical skills package (`npx skills add arcjet/skills`). |
-| `arcjet skills install`                  | Print a pointer to the canonical skills package (`npx skills add arcjet/skills`). |
-| `arcjet skills initialize`               | Guided project setup — interactive auth, site selection, and `.env` write. Ends by printing the same skills-install recommendation. |
 | `arcjet completion <bash\|zsh\|fish>`    | Generate shell completions.                       |
 | `arcjet version`                         | Print version information.                        |
 
@@ -237,16 +234,6 @@ The two canonical skills are:
 - **`add-guard-protection`** — protect non-HTTP code paths (AI agent tool calls, MCP tool handlers, queue workers, background jobs) with `@arcjet/guard` (JS/TS) or `arcjet.guard` (Python).
 
 The previous skill names (`protect-route`, `add-ai-protection`) remain as deprecated aliases that emit a diagnostic on use.
-
-`arcjet skills` and `arcjet skills install` are breadcrumbs, not file-writers: both print a recommendation pointing at `npx skills add arcjet/skills` so agents discovering the CLI can find the canonical skills package. They do not write any files into the project.
-
-For a guided end-to-end project setup — interactive auth, site selection, and writing the `ARCJET_KEY` to `.env` — run:
-
-```bash
-arcjet skills initialize
-```
-
-`arcjet skills initialize` ends by printing the same skills-install recommendation so the next agent turn can follow up with `npx skills add arcjet/skills`.
 
 ## Invariants
 
