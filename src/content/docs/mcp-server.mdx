@@ -5,31 +5,17 @@ prev: false
 next: false
 ---
 
-import { Aside, Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import { Aside } from "@astrojs/starlight/components";
 import Comments from "/src/components/Comments.astro";
 
 [Arcjet](https://arcjet.com) is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
 
-The Arcjet MCP server gives AI coding assistants the skills of a security engineer. By connecting to the Arcjet MCP server, your AI coding tools can:
+The Arcjet MCP server is one of two transports that connects [Arcjet skills](/agent-get-started#skills) to the Arcjet API — the other being the [Arcjet CLI](/cli). The MCP server is the right choice for AI coding tools without shell access (ChatGPT, Claude Desktop) and editors with built-in MCP support (VS Code Copilot, Windsurf, Cursor); the CLI is the right choice when you are working in a terminal session.
 
-- **List teams** you belong to.
-- **List sites** within a team.
-- **Create new sites** within a team.
-- **Get site keys** (`ARCJET_KEY`) for use in your projects.
-- **List requests** received by a site with optional filtering.
-- **Explain decisions** to understand why requests were allowed or denied.
-- **Get request details** including headers, rules executed, and decision info.
-- **Get site quota** usage and limits for the current billing window.
-- **Analyze traffic** patterns, denial rates, top paths, and top IPs.
-- **Detect anomalies** by comparing current traffic to the previous period.
-- **Investigate IPs** with geo, threat intelligence, and request activity.
-- **Get dry-run impact** analysis before promoting rules to live.
-- **Get a security briefing** combining traffic, threats, anomalies, and recommendations.
-- **List remote rules** configured for a site.
-- **Create remote rules** with DRY_RUN or LIVE mode — configure rules with no code changes needed.
-- **Update remote rules** by replacing the full rule configuration.
-- **Delete remote rules** to immediately stop evaluation.
-- **Promote remote rules** from DRY_RUN to LIVE after verification.
+Both transports expose the same management-plane surface — teams, sites,
+keys, requests, decisions, traffic analysis, anomaly detection, IP
+investigation, security briefings, and remote rule management. See
+[Available tools](#available-tools) for the full reference.
 
 The MCP server is available at:
 
@@ -279,6 +265,14 @@ Once authenticated, your AI assistant can securely access your account resources
   can review actions before they execute.
 - **Trusted clients only** — only connect from AI clients you trust. Connecting
   grants the AI tool the same access as your Arcjet account.
+
+## See also
+
+- [Agent get started](/agent-get-started) — canonical entry point for setting
+  up Arcjet in an agentic workflow.
+- [Arcjet CLI](/cli) — sibling support transport for terminal-based workflows.
+- [Arcjet Plugin](/arcjet-plugin) — bundled experience for Claude Code and
+  Cursor users that wires up MCP, skills, and coding rules together.
 
 ## Privacy and support
 

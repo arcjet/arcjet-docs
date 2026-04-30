@@ -1,11 +1,11 @@
 ---
 title: "Agent get started"
-description: "A step-by-step guide for AI coding agents to set up Arcjet security in any project. Install the plugin, connect via MCP, get your API key, install the SDK, and add protection."
+description: "A step-by-step guide for AI coding agents to set up Arcjet security in any project. Install a skill, connect to the Arcjet API via the CLI or MCP server, and add protection."
 prev: false
 next: false
 ---
 
-import { Aside, Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import { Aside } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 
 [Arcjet](https://arcjet.com) is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
@@ -14,27 +14,41 @@ Arcjet protects two types of entry points:
 - **Request-based** — HTTP route handlers and API endpoints. Use `protect()` with any <Link.Page href="/get-started">supported framework</Link.Page>.
 - **Guards** — tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` to pass inputs directly. See <Link.Page href="/guards">Guards</Link.Page>.
 
-Set up Arcjet in two steps: (1) install a skill that gives your agent the
-documentation to integrate the Arcjet SDK, and (2) connect to Arcjet with the
-CLI to create sites, retrieve credentials, and verify decisions.
+The recommended path for an agentic workflow is to install a skill that gives
+your agent the documentation to integrate the Arcjet SDK, then connect to the
+Arcjet API via the <Link.Page href="/cli">CLI</Link.Page> or
+<Link.Page href="/mcp-server">MCP server</Link.Page> to create sites, retrieve
+credentials, and verify decisions.
 
 <Aside type="tip">
   This guide is designed for AI coding agents. If you are a developer, see the
   <Link.Page href="/get-started">quick start guide</Link.Page>.
 </Aside>
 
-## Step 1: Install a skill
+## Skills
 
-Skills give your agent the documentation to detect your framework, install the
-SDK, and wire up protection rules. Install one per use case:
+Skills are the primary entry point for setting up Arcjet in an agentic
+workflow. They give your agent the documentation to detect your framework,
+install the SDK, and wire up protection rules.
 
-**Request protection** (HTTP routes):
+Install the Arcjet skills:
+
 ```bash
-npx skills add arcjet/skills --skill add-request-protection
+npx skills add arcjet/skills
 ```
 
-**Guard protection** (tool calls, MCP servers, queues):
+The two canonical skills are:
+
+- **`add-request-protection`** — protect HTTP routes and API endpoints with
+  rate limiting, bot detection, email validation, and shield.
+- **`add-guard-protection`** — protect non-HTTP code paths (AI agent tool
+  calls, MCP tool handlers, queue workers, background jobs) with
+  `@arcjet/guard` (JS/TS) or `arcjet.guard` (Python).
+
+You can also install a single skill directly:
+
 ```bash
+npx skills add arcjet/skills --skill add-request-protection
 npx skills add arcjet/skills --skill add-guard-protection
 ```
 
@@ -42,21 +56,37 @@ Then describe what you want to protect. The skill handles the rest.
 
 Source: [github.com/arcjet/skills](https://github.com/arcjet/skills)
 
-You can also use the <Link.Page href="/arcjet-plugin">Arcjet plugin</Link.Page>
-for Claude Code and Cursor, which bundles skills, MCP, and coding rules.
+## Connect to the Arcjet API
 
-## Step 2: Connect with the CLI
+Skills handle the SDK and rule integration in your code. To create sites,
+retrieve `ARCJET_KEY`, inspect requests, and manage remote rules, the agent
+needs to talk to the Arcjet API. There are two parallel support transports —
+pick whichever fits your working style:
+
+- **<Link.Page href="/cli">Arcjet CLI</Link.Page>** — for agents and humans
+  working in a terminal (Claude Code, Codex, plugin tasks, CI). No editor or
+  MCP setup required.
+- **<Link.Page href="/mcp-server">MCP server</Link.Page>** — for online clients
+  without shell access (ChatGPT, Claude Desktop) and editors with built-in MCP
+  support (VS Code Copilot, Windsurf, Cursor).
+
+Both transports expose the same management-plane surface. The sections below
+describe each path end to end.
+
+### Path A: Connect with the CLI
 
 The <Link.Page href="/cli">Arcjet CLI</Link.Page> lets you manage sites, keys,
 and rules from your terminal:
 
 ```bash
-npm i -g @arcjet/cli
-arcjet auth login
-arcjet teams list
-arcjet sites list --team-id team_01abc123
-arcjet sites get-key --site-id site_01abc123
+npx -y @arcjet/cli@latest auth login
+npx -y @arcjet/cli@latest teams list
+npx -y @arcjet/cli@latest sites list --team-id team_01abc123
+npx -y @arcjet/cli@latest sites get-key --site-id site_01abc123
 ```
+
+For frequent use, install the binary so you can run `arcjet <command>`
+directly. See <Link.Page href="/cli#install">CLI install paths</Link.Page>.
 
 Set the key in the project environment:
 
@@ -65,67 +95,22 @@ Set the key in the project environment:
 ARCJET_KEY=ajkey_yourkey
 ```
 
-You can also use the <Link.Page href="/mcp-server">MCP server</Link.Page> to
-manage sites and keys. See [Manual setup](#manual-setup) below.
+Then continue with [Install the SDK](#install-the-sdk) and
+[Add protection](#add-protection) below.
 
-## Manual setup
+### Path B: Connect with the MCP server
 
-Use this path if you prefer step-by-step control or are using a tool with
-built-in MCP support (VS Code Copilot, Windsurf, ChatGPT, Claude Code, Claude
-Desktop, Cursor).
+Use this path if you are using a tool with built-in MCP support (VS Code
+Copilot, Windsurf, ChatGPT, Claude Code, Claude Desktop, Cursor).
 
-### Step 1: Connect the MCP server
-
-The Arcjet MCP server lets you manage your account directly from your AI coding
-tool.
-
-<Tabs>
-  <TabItem label="ChatGPT">
-    1. In ChatGPT, go to **Settings**.
-    2. Navigate to **Connectors** and select **Add connection**.
-    3. Enter `https://api.arcjet.com/mcp` as the server URL.
-    4. Select **OAuth** for authentication.
-    5. Click **Create**.
-  </TabItem>
-  <TabItem label="Claude Code">
-    ```bash
-    claude mcp add arcjet --transport http https://api.arcjet.com/mcp
-    ```
-  </TabItem>
-  <TabItem label="Claude Desktop">
-    1. Open **Settings** in the sidebar.
-    2. Navigate to **Connectors** and select **Add custom connector**.
-    3. Set the **Name** to `Arcjet` and the **URL** to `https://api.arcjet.com/mcp`.
-  </TabItem>
-  <TabItem label="Cursor">
-    Add to `.cursor/mcp.json`:
-    ```json
-    { "mcpServers": { "arcjet": { "type": "streamable-http", "url": "https://api.arcjet.com/mcp" } } }
-    ```
-  </TabItem>
-  <TabItem label="VS Code (Copilot)">
-    Add to `.vscode/mcp.json`:
-    ```json
-    { "servers": { "arcjet": { "type": "http", "url": "https://api.arcjet.com/mcp" } } }
-    ```
-  </TabItem>
-  <TabItem label="Windsurf">
-    Add to `mcp_config.json`:
-    ```json
-    { "mcpServers": { "arcjet": { "serverUrl": "https://api.arcjet.com/mcp" } } }
-    ```
-  </TabItem>
-</Tabs>
+The Arcjet MCP server lets you manage your account directly from your AI
+coding tool. See <Link.Page href="/mcp-server#setup">MCP server setup</Link.Page>
+for the per-client configuration steps.
 
 OAuth authentication happens automatically on first connection — a browser
 window will open for the user to sign in.
 
-See the <Link.Page href="/mcp-server">MCP server docs</Link.Page> for the
-full tool reference.
-
-### Step 2: Get your ARCJET_KEY
-
-Use the MCP tools to retrieve your site key:
+Once connected, retrieve your site key with the MCP tools:
 
 1. Call `list-teams` to get available teams.
 2. Call `list-sites` with the team ID to find the site (or call `create-site`
@@ -140,10 +125,13 @@ ARCJET_KEY=ajkey_yourkey
 ARCJET_ENV=development
 ```
 
+`ARCJET_ENV` is read by the Arcjet SDK in your local app to switch into
+development mode. It is not used by the MCP connection itself.
+
 If the user doesn't have an Arcjet account yet, direct them to
 [app.arcjet.com](https://app.arcjet.com) to create one (free trial).
 
-### Step 3: Install the SDK
+## Install the SDK
 
 Detect the framework by checking the project files:
 
@@ -173,7 +161,7 @@ Then install the correct package:
 | Python FastAPI | `pip install arcjet` or `uv add arcjet`   |
 | Python Flask   | `pip install arcjet` or `uv add arcjet`   |
 
-### Step 4: Add protection
+## Add protection
 
 Add Arcjet rules to protect the application. See the
 [llms.txt](/llms.txt) file for complete, copy-paste code examples for every
@@ -194,7 +182,7 @@ The typical setup is:
   context.
 </Aside>
 
-#### Recommended rules by app type
+### Recommended rules by app type
 
 | App type               | Rules                                                                 |
 | ---------------------- | --------------------------------------------------------------------- |
@@ -204,15 +192,18 @@ The typical setup is:
 | Internal / admin route | `shield` + `filter` (country/VPN blocking)                           |
 | Any web app            | `shield` + `detectBot` (good baseline)                               |
 
-### Step 5: Verify
+## Verify
 
 After adding protection and starting the app:
 
 1. Send a test request to a protected route.
-2. Use the MCP `list-requests` tool to confirm requests are flowing to Arcjet.
-3. Use `get-request-details` or `explain-decision` to inspect individual
-   decisions.
-4. Use `analyze-traffic` for a dashboard-level overview of request patterns.
+2. List recent requests via the CLI (`arcjet requests list --site-id <id>`)
+   or the MCP `list-requests` tool to confirm requests are flowing to Arcjet.
+3. Inspect individual decisions via the CLI (`arcjet requests details`,
+   `arcjet requests explain`) or the MCP tools (`get-request-details`,
+   `explain-decision`).
+4. Use `arcjet analyze traffic --site-id <id>` (CLI) or `analyze-traffic` (MCP)
+   for a dashboard-level overview of request patterns.
 5. Check the [Arcjet dashboard](https://app.arcjet.com) for real-time request
    monitoring.
 
@@ -221,8 +212,10 @@ set correctly and that `protect()` is being called in the route handler.
 
 ## Common agent prompts
 
-These prompts work well when given to an AI coding agent with the Arcjet plugin
-installed or MCP server connected:
+These prompts work well when given to an AI coding agent with skills installed
+and either the CLI or MCP server connected (the
+<Link.Page href="/arcjet-plugin">Arcjet plugin</Link.Page> is a bundled
+alternative for Claude Code and Cursor users):
 
 - **"Protect my API routes with Arcjet"** — adds shield, bot detection, and
   rate limiting to all API routes.
@@ -244,13 +237,21 @@ installed or MCP server connected:
   `get-dry-run-impact` to show blocked requests, affected IPs, and
   false-positive risk.
 
+## See also
+
+- <Link.Page href="/arcjet-plugin">Arcjet Plugin</Link.Page> — bundled
+  experience for Claude Code and Cursor users who prefer a single-command
+  install that wires up MCP, skills, and coding rules together. Not the
+  recommended first step for general agentic workflows, but a convenient
+  alternative if you are already in one of those editors.
+
 ## Reference
 
 - <Link.Page href="/get-started">Quick start guide</Link.Page> — framework-specific setup with full code examples
 - <Link.Page href="/guards">Guards</Link.Page> — protect tool calls, queues, and agentic pipelines without an HTTP request
-- <Link.Page href="/arcjet-plugin">Arcjet Plugin</Link.Page> — plugin for Claude Code and Cursor with automatic security guidance
 - <Link.Page href="/cli">Arcjet CLI</Link.Page> — manage sites, keys, and rules from the terminal
-- [llms.txt](/llms.txt) — machine-readable reference with all framework examples, rule parameters, and decision API
 - <Link.Page href="/mcp-server">MCP server</Link.Page> — full MCP tool reference and client setup
+- <Link.Page href="/arcjet-plugin">Arcjet Plugin</Link.Page> — bundled experience for Claude Code and Cursor
+- [llms.txt](/llms.txt) — machine-readable reference with all framework examples, rule parameters, and decision API
 - <Link.Page href="/remote-rules">Remote rules</Link.Page> — manage rules from the dashboard or MCP server without code changes
 - <Link.Page href="/best-practices">Best practices</Link.Page> — recommended patterns and anti-patterns
