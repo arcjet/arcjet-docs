@@ -5,6 +5,7 @@ const MARKDOWN_PATHS = [
   "/email-validation.md",
   "/filters.md",
   "/llms.txt",
+  "/llms-full.txt",
   "/rate-limiting.md",
   "/reference/astro.md",
   "/reference/bun.md",
