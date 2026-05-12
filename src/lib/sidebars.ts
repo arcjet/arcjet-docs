@@ -37,6 +37,11 @@ export const main = [
         link: "/llms.txt",
         attrs: { target: "_blank", class: "external-link" },
       },
+      {
+        label: "llms-full.txt",
+        link: "/llms-full.txt",
+        attrs: { target: "_blank", class: "external-link" },
+      },
     ],
   },
   {

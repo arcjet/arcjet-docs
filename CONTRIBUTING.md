@@ -69,7 +69,7 @@ npm run pw:run -- --update-snapshots=all
 - in `src/content/docs/reference/$framework.mdx` write a reference guide
 - in `src/components/SdkReferenceLinkByFramework.mdx` and `src/lib/sidebar.ts`
   link that reference
-- in `public/llms.txt` under SDKs link that reference
+- in `public/llms-full.txt` under SDKs link that reference
 
 ### Add framework options to a page
 
