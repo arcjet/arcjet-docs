@@ -40,27 +40,69 @@ choosing between them.
    happens in code. Vercel's BotID [doesn't work with traditional HTML
    forms](https://vercel.com/docs/botid/form-submissions) whereas Arcjet can
    protect any type of request handler.
-3. **Platform independence**: Arcjet is platform-agnostic and can be used with
+3. **Agentic workloads and non-HTTP entry points**: Vercel BotID is built around
+   inbound HTTP requests — it issues a token in the browser and verifies it
+   server-side on a protected route. It has nothing to say about what happens
+   *after* a request enters your application. That blind spot is where most
+   agent damage actually occurs: a model fetches a web page and re-enters its
+   context loaded with hidden instructions; a tool call burns tokens in a
+   runaway loop; a background job ships a support ticket to a third-party LLM
+   with PII attached. None of these surface as a fresh HTTP request BotID can
+   verify. <Link.Page href="/guards">Arcjet Guards</Link.Page> applies token-bucket
+   rate limiting, prompt injection detection, and PII detection inline at the
+   points an agent actually fans out: inside MCP tool handlers, between agent
+   steps, in queue consumers, and across multi-service pipelines. You call
+   `guard()` with the input directly; no `Request` object required. JS/TS
+   via `@arcjet/guard`; Python via `arcjet`.
+4. **Platform independence**: Arcjet is platform-agnostic and can be used with
    any hosting provider or framework for JavaScript, TypeScript, and Python.
    Vercel BotID only works for JS/TS applications hosted on Vercel.
-4. **Developer experience**: Arcjet is called like any other library from your
+5. **Developer experience**: Arcjet is called like any other library from your
    codebase and provides a response with detailed analysis of each request.
    Rules are just code so can be varied dynamically based on request context
    e.g. changing rate limits based on user subscription level or allowing /
-   denying certain bots based on the type of traffic you expect. Results can be
-   inspected to understand the decision and customize the response. Vercel BotID
-   provides few configuration options and returns only minimal information about
-   the request.
-5. **Advanced client signals and filter rules**: Arcjet provides
+   denying certain bots based on the type of traffic you expect. Results can
+   be inspected to understand the decision and customize the response. For
+   operational changes that can't wait for a deploy,
+   <Link.Page href="/remote-rules">Arcjet Remote Rules</Link.Page> add
+   dashboard- or MCP-managed rate limit, bot, filter, and Shield rules that
+   take effect immediately. Vercel BotID provides few configuration options
+   and returns only minimal information about the request.
+6. **Advanced client signals and filter rules**: Arcjet provides
    <Link.Page href="/bot-protection/advanced-signals">advanced bot signals</Link.Page>,
-   a browser-based detection layer that runs a WebAssembly module in the client
-   to collect environment signals identifying headless browsers and
-   sophisticated scrapers — without CAPTCHAs or user challenges. Vercel BotID provides its own
-   client-side script for bot verification, but unlike Arcjet does not expose
-   filter rules for composing cookie, header, IP, or geo conditions in code
-   alongside your other bot and rate limiting rules. Vercel's BotID deep check
-   feature provides similuar functionality to Arcjet's advanced client signals,
-   but is very expensive.
+   a browser-based detection layer that runs a WebAssembly module on the
+   client. The module collects environment signals — headless-browser
+   markers, automation framework fingerprints, browser-quirk
+   inconsistencies, and timing patterns — sends them to the Arcjet API, and
+   stores a continue token in the `aj_signals` cookie that persists across
+   navigations. On the next server-side request, `detectBot` evaluates the
+   cookie alongside its regular server-side classification (user agent
+   matching, IP reputation, verified-bot lists) and produces a single
+   decision. A failed signals check surfaces as `ARCJET_SIGNALS` in
+   `decision.reason`, so you can branch your response per failure mode.
+   Each rule supports `LIVE` / `DRY_RUN` modes for safe rollout — shadow
+   it against real traffic, review would-be denials in the
+   [Arcjet dashboard](https://app.arcjet.com), then promote.
+
+   Because the cookie is only set after the WebAssembly module runs in a
+   real browser, its *absence* is itself a useful signal. A one-line
+   <Link.Page href="/filters">filter rule</Link.Page>
+   (`len(http.request.cookie["aj_signals"]) eq 0`) denies anything that
+   never loaded the script — catching `curl`, scripted clients, and
+   headless setups that skip JavaScript before `detectBot` is even
+   evaluated. BotID's client script issues a per-request browser token
+   instead, with no cross-request signal you can enforce as a filter, and
+   it does not expose filter rules for composing cookie, header, IP, or
+   geo conditions in code alongside your other bot and rate limiting rules.
+
+   Vercel's [BotID Deep Analysis](https://vercel.com/docs/botid#deep-analysis)
+   (powered by Kasada) provides similar in-browser bot detection to
+   Arcjet's advanced client signals, but it is Pro/Enterprise only and
+   bills $1 per 1,000 `checkBotId()` calls — at high volumes that can add
+   up quickly. Arcjet advanced signals usage maps to `detectBot` calls;
+   adding the signals script to every page (recommended, so the cookie is
+   set before the user reaches a protected route) doesn't cost anything
+   on its own.
 
 
 ## Comparison
@@ -73,9 +115,10 @@ choosing between them.
 | Integration model     | Call from code in any handler.                                                                                                                                            | Client script + server `checkBotId()`; you must list protected paths                                                                          |
 | HTML forms            | Works with native forms and any HTTP request.                                                                                                                             | Native HTML form `POST` [is not supported](https://vercel.com/docs/botid/form-submissions). You must refactor your forms.                     |
 | Configuration         | Rules-as-code; <Link.Page href="/bot-protection/identifying-bots">configure bots to allow</Link.Page> by name and category. Returns detailed context you can log/inspect. <Link.Page href="/filters">Filter rules</Link.Page> let you compose cookie, header, IP reputation, and geo conditions alongside bot and rate limiting rules using an expression DSL. | Minimal config, no ability to choose which bots to allow or deny, server API essentially returns `isBot` (boolean) with minimal detail. No filter rule language.       |
-| Advanced bot signals  | <Link.Page href="/bot-protection/advanced-signals">Browser-based WebAssembly signal collection</Link.Page> detects headless browsers and sophisticated scrapers without CAPTCHAs. | Client-side script provides bot verification signals; no equivalent filter rule language to compose with other rules in code. |
+| Advanced bot signals  | <Link.Page href="/bot-protection/advanced-signals">Browser-based WebAssembly signal collection</Link.Page>: detects headless browsers and sophisticated scrapers. Persistent `aj_signals` cookie reused across navigations. Composes with server-side bot detection, IP reputation, and a missing-cookie filter rule into a single `detectBot` decision. `LIVE` / `DRY_RUN` rollout modes. `ARCJET_SIGNALS` denial reason for inspectable responses. | [Deep Analysis](https://vercel.com/docs/botid#deep-analysis) (Pro/Enterprise, $1 per 1,000 `checkBotId()` calls): client-side ML script issues a per-request token validated server-side. No persistent browser signal you can enforce as a filter; no rollout mode equivalent to `DRY_RUN`; result is essentially boolean. |
 | AI protection         | <Link.Page href="/ai-protection">AI Runtime Protection</Link.Page>: bot + prompt injection detection for AI endpoints, per-user token budget enforcement, PII detection in AI flows — all in the same SDK. | No AI runtime protection features.                                                                                                            |
-| Pricing (bot feature) | See the [pricing page](https://arcjet.com/pricing) for details.                                                                                           | Basic analysis free within compute/request limits per plan. $1 per 1,000 Deep Analysis requests.                                              |
+| Agentic / non-HTTP    | <Link.Page href="/guards">Arcjet Guards</Link.Page>: call `guard()` directly from MCP tool handlers, between agent steps, inside queue consumers, and across multi-service pipelines. Same rule primitives (token bucket, prompt injection, PII detection) as HTTP, same `LIVE`/`DRY_RUN` modes. JS/TS via `@arcjet/guard`; Python via `arcjet`. | No equivalent. BotID is built around an inbound HTTP request and a verified browser token — it cannot see tool calls, queued jobs, or fan-out work inside the application. |
+| Pricing (bot feature) | See the [pricing page](https://arcjet.com/pricing) for details.                                                                                           | Basic analysis: free on all plans. [Deep Analysis](https://vercel.com/docs/botid#deep-analysis) (powered by Kasada): Pro and Enterprise only, $1 per 1,000 `checkBotId()` calls.                                                                                                |
 
 ## When to choose which
 
@@ -85,9 +128,11 @@ choosing between them.
   TypeScript, and/or Python), want to be able to test locally with the same
   behavior as production, need advanced client signals for headless browser
   detection without CAPTCHAs, want filter rules to compose cookie/IP/geo
-  conditions with bot and rate limiting rules in code, or are building AI
-  applications that need prompt injection detection, per-user token budgets, or
-  PII protection — all in one SDK.
+  conditions with bot and rate limiting rules in code, are building AI
+  applications that need prompt injection detection, per-user token budgets,
+  or PII protection, or are shipping an agent, MCP server, or background
+  pipeline where the risky surface is what happens *after* the HTTP request
+  enters your app — all in one SDK.
 - **Choose BotID** if you're fully on Vercel, want a quick boolean bot check,
   don't need to make any customizations, and are fine configuring rate
   limits/WAF separately in the Vercel Firewall.
@@ -99,6 +144,20 @@ choosing between them.
 No. Vercel BotID requires hosting on Vercel to function. Arcjet is
 platform-agnostic and can be used with any hosting provider or framework,
 including running locally.
+
+### What about my agent's tool calls, queue workers, and pipelines?
+
+BotID verifies an inbound HTTP request using a browser-issued token. Once a
+request is inside your application, anything an agent does next — fetching
+a web page and re-feeding it to the model, calling tools in a loop, shipping
+work onto a background queue, fanning out across services — is invisible to
+BotID. Those are the points where most agent abuse and cost-runaway happens.
+<Link.Page href="/guards">Arcjet Guards</Link.Page> applies token-bucket
+rate limiting, prompt injection detection, and PII detection inline at
+those points. You call `guard()` with the input directly (no `Request`
+needed); rules are the same shape as your HTTP rules, so policy stays
+consistent between routes and agent code. Available in JS/TS via
+`@arcjet/guard` and Python via `arcjet`.
 
 ### Can I configure which bots to allow or block?
 
