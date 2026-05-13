@@ -62,14 +62,16 @@ there are some key differences to consider when choosing between them.
    FastAPI and Flask (async and sync APIs), and other web servers. Aikido's Zen
    Firewall has a wider language surface area, with agents for Node.js, Python,
    PHP, Java, .NET, and Ruby. However, Aikido's monkey-patching approach
-   causes issues with certain frameworks, such as [not being able to use
-   custom rate limits by user ID in
+   causes issues with certain frameworks: [custom rate limits by user ID
+   aren't supported in
    Next.js](https://github.com/AikidoSec/firewall-node/blob/main/docs/next.md)
-   (because the agent's `setUser` function isn't supported in Next.js's
-   bundling), Next.js requiring `output: "standalone"`, and [problems with
-   bundlers](https://github.com/AikidoSec/firewall-node/blob/main/docs/bundler.md).
-   ESM is supported with a `--require @aikidosec/firewall/instrument`
-   preload, but [Zen cannot protect ESM
+   (the agent's `setUser` function isn't compatible with Next.js's
+   bundling), Next.js projects must use `output: "standalone"`, and there
+   are [problems with
+   bundlers](https://github.com/AikidoSec/firewall-node/blob/main/docs/bundler.md)
+   more generally. ESM is supported via a
+   `--require @aikidosec/firewall/instrument` preload, but [Zen cannot
+   protect ESM
    sub-dependencies](https://github.com/AikidoSec/firewall-node/blob/main/docs/esm.md)
    of an ESM package — the V8 engine doesn't let Node observe the
    evaluation of inner ESM packages.
