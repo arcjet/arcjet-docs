@@ -27,41 +27,52 @@ there are some key differences to consider when choosing between them.
    expression-based traffic control. Arcjet also provides
    <Link.Page href="/ai-protection">AI Runtime Protection</Link.Page>: bot
    detection and prompt injection protection for AI endpoints, per-user token
-   budget enforcement, and PII detection in AI request/response flows. Aikido's
+   budget enforcement, and PII detection in AI request/response flows, plus
+   <Link.Page href="/guards">Arcjet Guards</Link.Page>, which applies the same
+   primitives inside AI agent tool handlers, queue consumers, and multi-step
+   pipelines where there's no HTTP request. Aikido's
    Zen Firewall focuses on runtime application protection: blocking dangerous
    user input (injection, path traversal, SSRF, etc.), per-route and per-user
    rate limiting, and blocking bots, Tor traffic, known threat actors, and
    traffic by country. Aikido also offers a broader cloud security platform
    (code scanning, cloud scanning, etc.) that is not directly comparable to
    Arcjet's SDK.
-2. **Integration**: Arcjet is designed to integrate as a library directly into
-   your codebase. You define rules in code and call Arcjet alongside your
-   application logic, and it does not modify your runtime or frameworks. Arcjet
-   works with any modern JS/TS framework or bundler, and any Python application
-   (supporting both async and sync APIs) and rules can be adjusted dynamically
-   at runtime as regular code. Aikido's Zen Firewall for JS only works with
-   Node.js and [monkey-patches your
+2. **Integration**: Arcjet is designed to integrate as a library directly
+   into your codebase. You define rules in code and call Arcjet alongside
+   your application logic, and it does not modify your runtime or
+   frameworks. Arcjet works with any modern JS/TS framework or bundler, and
+   any Python application (supporting both async and sync APIs) and rules
+   can be adjusted dynamically at runtime as regular code. Aikido's Zen
+   Firewall for JS only works with Node.js and [monkey-patches your
    code](https://github.com/AikidoSec/firewall-node/blob/2f39052390e6ceff845a8f3addfefe7237b42f8d/instrumentation-wasm/src/js_transformer/helpers/insert_code.rs#L12)
    [at
    runtime](https://github.com/AikidoSec/firewall-node/blob/2f39052390e6ceff845a8f3addfefe7237b42f8d/library/agent/Agent.ts#L515)
-   to insert security checks, which can lead to unexpected behavior, latency
-   issues, and makes debugging more difficult. Configuration for Aikido is
-   handled primarily through environment variables and the Aikido dashboard
-   rather than rules-as-code inside your application.
+   to insert security checks, which can lead to unexpected behavior,
+   latency issues, and makes debugging more difficult. Configuration for
+   Aikido is handled primarily through environment variables and the
+   Aikido dashboard rather than rules-as-code inside your application.
+   Arcjet does support dashboard- and MCP-managed
+   <Link.Page href="/remote-rules">Remote Rules</Link.Page> for operational
+   changes (rate limit, bot, filter, and Shield rules without a redeploy),
+   but rules-as-code remains the default configuration model — not an
+   afterthought to a dashboard-first product.
 3. **Framework, runtime & language support:** Arcjet currently focuses on the
    JavaScript, TypeScript, and Python ecosystems, with native SDKs for JS
    platforms like Next.js, Node.js, Bun, React Router, SvelteKit, NestJS, and Python
    FastAPI and Flask (async and sync APIs), and other web servers. Aikido's Zen
    Firewall has a wider language surface area, with agents for Node.js, Python,
-   PHP, Java, .NET, and Ruby. However, Aikido's monkey-patching approach causes
-   issues with certain frameworks, such as [not being able to use custom rate
-   limits by user ID in
-   Next.js](https://github.com/AikidoSec/firewall-node/blob/2f39052390e6ceff845a8f3addfefe7237b42f8d/docs/next.md#caveats),
-   [problems with
-   bundlers](https://github.com/AikidoSec/firewall-node/blob/2f39052390e6ceff845a8f3addfefe7237b42f8d/docs/bundler.md)
-   and [Aikido's experimental ESM
-   support](https://github.com/AikidoSec/firewall-node/blob/2f39052390e6ceff845a8f3addfefe7237b42f8d/docs/esm.md)
-   requires you to start your node process with a wrapper).
+   PHP, Java, .NET, and Ruby. However, Aikido's monkey-patching approach
+   causes issues with certain frameworks, such as [not being able to use
+   custom rate limits by user ID in
+   Next.js](https://github.com/AikidoSec/firewall-node/blob/main/docs/next.md)
+   (because the agent's `setUser` function isn't supported in Next.js's
+   bundling), Next.js requiring `output: "standalone"`, and [problems with
+   bundlers](https://github.com/AikidoSec/firewall-node/blob/main/docs/bundler.md).
+   ESM is supported with a `--require @aikidosec/firewall/instrument`
+   preload, but [Zen cannot protect ESM
+   sub-dependencies](https://github.com/AikidoSec/firewall-node/blob/main/docs/esm.md)
+   of an ESM package — the V8 engine doesn't let Node observe the
+   evaluation of inner ESM packages.
 4. **Real time analysis:** Aikido uses a "local-only" approach to analyzing
    requests, meaning all decisions are made based on data available locally.
    Aikido handles bot detection [through user agent
@@ -78,25 +89,51 @@ there are some key differences to consider when choosing between them.
    protection against new threats with rule updates as they emerge.
 5. **Advanced client signals for bot detection:** Arcjet provides
    <Link.Page href="/bot-protection/advanced-signals">advanced bot signals</Link.Page>,
-   a browser-based detection layer that runs a WebAssembly module in the
-   client to collect environment signals and identify headless browsers and
-   sophisticated scrapers — without CAPTCHAs or user challenges. Aikido's bot detection remains
-   focused on user-agent signature matching and IP-based controls, with no
-   equivalent to client-side signal collection or expression-based filter rules.
+   a browser-based detection layer that runs a WebAssembly module on the
+   client to collect environment anomalies — headless markers, automation
+   framework fingerprints, browser-quirk inconsistencies — and persists a
+   continue token in the `aj_signals` cookie reused across navigations.
+   Server-side `detectBot` evaluates the signals alongside user-agent
+   classification, IP reputation, and an optional missing-cookie
+   <Link.Page href="/filters">filter rule</Link.Page>
+   (`len(http.request.cookie["aj_signals"]) eq 0`) in a single decision, so
+   you can layer client-side analysis, server-side classification, and
+   script-execution enforcement without integrating three products. Rules
+   roll out under `LIVE` / `DRY_RUN` modes, and a signals failure surfaces
+   as `ARCJET_SIGNALS` in `decision.reason` so you can branch your
+   response. Aikido's bot detection remains focused on user-agent
+   signature matching and IP-based controls, with no equivalent to
+   client-side signal collection or expression-based filter rules.
+6. **Agentic workloads and non-HTTP entry points:** Aikido's Zen Firewall
+   instruments HTTP request handling and database/library call sites to catch
+   injection-shaped attack patterns. It is built around the request-response
+   model and has no surface for inspecting an LLM tool call, a queued job,
+   or a step in a multi-agent pipeline. That blind spot is where most agent
+   damage actually occurs: a model fetches a web page and re-enters its
+   context loaded with hidden instructions; a tool call burns tokens in a
+   runaway loop; a background job ships a support ticket to a third-party
+   LLM with PII attached. <Link.Page href="/guards">Arcjet Guards</Link.Page>
+   applies token-bucket rate limiting, prompt injection detection, and PII
+   detection inline at the points an agent actually fans out: inside MCP
+   tool handlers, between agent steps, in queue consumers, and across
+   multi-service pipelines. You call `guard()` with the input directly; no
+   `Request` object required. JS/TS via `@arcjet/guard`; Python via
+   `arcjet`.
 
 ## Comparison
 
 | Area                     | Arcjet                                                                                                                                                                                                                                                    | Aikido (Zen Firewall)                                                                                                                                                                                                            |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Product scope            | In-code security SDK for Javascript, TypeScript, and Python apps: bot protection, rate limiting, WAF (Shield), email validation, signup protection, sensitive info detection & redaction, filter rules, and AI Runtime Protection (prompt injection detection, per-user token budgets, PII in AI flows). | Firewall focused on Node.js for JavaScript, with agents for other languages. No dedicated AI runtime protection features.                                                                                                        |
+| Product scope            | In-code security SDK for Javascript, TypeScript, and Python apps: bot protection, rate limiting, WAF (Shield), email validation, signup protection, sensitive info detection & redaction, filter rules, AI Runtime Protection (prompt injection, per-user token budgets, PII in AI flows), and Guards for AI agent tool calls, queue workers, and multi-step pipelines. | Firewall focused on Node.js for JavaScript, with agents for other languages. No dedicated AI runtime protection features and no equivalent for inside AI agent tool calls or queue workers.                                       |
 | Languages & platforms    | Javascript, TypeScript, and Python only. SDKs for Astro, Bun, Deno, Fastify, NestJS, Next.js, Node.js, Nuxt, React Router, Remix, SvelteKit, Python FastAPI, Flask, and other Python web servers.                                                         | Multiple languages: Python, PHP, Java, each with its own agent and framework support matrix. In the JS ecosystem Aikido only supports Node.js.                                                                                   |
 | Integration model        | Library you import and call from your handlers or middleware. Rules are written in code and can branch on any request context (user ID, plan, route, feature flags, etc.).                                                                                | Agent embeds into the runtime by monkey-patching frameworks, built-ins and libraries automatically; most behavior and policies are configured via dashboard and environment variables, not per-handler code.                     |
-| Runtime & module system  | ESM-only. Designed for modern runtimes and edge environments.                                                                                                                                                                                             | Node.js agent currently CommonJS-only; ESM is documented as experimental/limited and may require wrappers or special setup.                                                                                                      |
-| Bot protection           | Rules defined in code with rich request context (user, headers, IP, path, plan, etc.); can be combined with rate limits and other rules in a single decision. Advanced client signals (browser WebAssembly telemetry) detect headless browsers and sophisticated scrapers without CAPTCHAs. | Maintained list of bot user agent signatures plus IP-based controls (bots, known threat actors, Tor) and geo-blocking, driven from the Aikido dashboard. No client-side signal collection or filter rule language.               |
+| Runtime & module system  | ESM-only. Designed for modern runtimes and edge environments.                                                                                                                                                                                             | Node.js agent supports CommonJS natively and ESM via a `--require @aikidosec/firewall/instrument` preload; ESM sub-dependencies of ESM packages cannot be instrumented (V8 limitation).                                          |
+| Bot protection           | Rules defined in code with rich request context (user, headers, IP, path, plan, etc.); can be combined with rate limits and other rules in a single decision. <Link.Page href="/bot-protection/advanced-signals">Advanced client signals</Link.Page> (browser WebAssembly) detect headless browsers and sophisticated scrapers; persistent `aj_signals` cookie reused across navigations; missing-cookie filter rule catches non-browser clients; `LIVE` / `DRY_RUN` rollout modes. | Maintained list of bot user agent signatures plus IP-based controls (bots, known threat actors, Tor) and geo-blocking, driven from the Aikido dashboard. No client-side signal collection or filter rule language.               |
 | Rate limiting            | Rules-as-code: define per-route, per-user, per-account, or arbitrary key function; backed by Arcjet Cloud API with local caching for low latency.                                                                                                         | Route and user-centric rate limiting configured primarily via the dashboard; supports user-aware rate limiting with limitations with some frameworks e.g. Next.js, but not a general-purpose rate limiting API inside your code. |
 | WAF / attack coverage    | Shield WAF integrated into the SDK to detect and block common web attacks (SQLi, XSS, file inclusion, etc.).                                                                                                                                              | Performs in-process taint-style analysis by instrumenting code paths to detect injections, path traversal, SSRF and other common attack patterns.                                                                                |
+| Agentic / non-HTTP       | <Link.Page href="/guards">Arcjet Guards</Link.Page>: call `guard()` directly from MCP tool handlers, between agent steps, inside queue consumers, and across multi-service pipelines. Same rule primitives (token bucket, prompt injection, PII detection) as HTTP, same `LIVE`/`DRY_RUN` modes. | No equivalent. Zen Firewall is built around HTTP request handling and won't see what an agent does after a request enters your app — tool calls, queued jobs, fan-out work, or multi-step pipelines.                              |
 | Data & privacy model     | "Local-first": a WebAssembly engine runs inside your app; decisions are taken locally where possible and reported asynchronously. Some rules (rate limiting, Shield) call the Cloud API with request metadata, not full payloads, and results are cached. | "Local-only" for security checks: decisions are made inside your process. Metadata about attacks and events is reported back for dashboards and analytics.                                                                       |
-| Configuration            | Everything is code: rules, thresholds and behavior live alongside your application logic; works naturally with env-specific configs, feature flags, and tests.                                                                                            | Core behavior configured in the Aikido UI (routes, rate limits, bot/IP rules, countries) plus environment variables; less emphasis on rules-as-code and per-route custom logic in the app itself.                                |
+| Configuration            | Everything is code by default: rules, thresholds and behavior live alongside your application logic; works naturally with env-specific configs, feature flags, and tests. <Link.Page href="/remote-rules">Remote Rules</Link.Page> add dashboard- or MCP-managed rate limit, bot, filter, and Shield rules for operational changes without a redeploy. | Core behavior configured in the Aikido UI (routes, rate limits, bot/IP rules, countries) plus environment variables; less emphasis on rules-as-code and per-route custom logic in the app itself.                                |
 | Hosting / vendor lock-in | Platform-agnostic. Works wherever you can run your app (Vercel, Netlify, Fly.io, Render, Kubernetes, self-hosted, etc.).                                                                                                                                  | Also platform-agnostic, but tied to Aikido's broader appsec platform. Some limitations for certain frameworks e.g. Next.js only supported in standalone mode (inside a Docker container).                                        |
 | Local development        | Same behavior as production; you call the SDK in dev and can inspect decisions directly, including detailed reasons and metadata.                                                                                                                         | Installed like a tracing/profiling agent; runs locally with the same instrumentation model as production, with events visible in the Aikido dashboard once connected.                                                            |
 
@@ -123,15 +160,23 @@ can be the right fit**.
 
 - **You care about strong primitives beyond "firewall"** Bot protection, rate
   limiting, WAF, email verification, signup protection, PII detection/redaction,
-  filter rules, and AI Runtime Protection are all part of the Arcjet product
-  suite. You'd rather compose these into flows than sprinkle generic "block this
-  request" calls around.
+  filter rules, AI Runtime Protection, and Guards are all part of the Arcjet
+  product suite. You'd rather compose these into flows than sprinkle generic
+  "block this request" calls around.
 
 - **You're building AI applications** You need to protect AI endpoints from
   automated clients inflating token costs, detect prompt injection attacks, or
   enforce per-user token budgets. Arcjet's AI Runtime Protection covers abuse,
   budget control, and data loss prevention with the same SDK you use for
   everything else.
+
+- **You're shipping an agent, MCP server, or background pipeline** Aikido's
+  Zen Firewall is built around HTTP request handling; the risky surface in
+  agentic code is what happens *after* the request enters your app — tool
+  calls that re-enter the model with attacker-controlled content, runaway
+  loops that burn tokens, and fan-out jobs that ship PII to third-party
+  models. <Link.Page href="/guards">Arcjet Guards</Link.Page> runs the same
+  primitives inline at those points.
 
 - **You want hybrid local + cloud analysis, not just IP lists** You like the
   idea of a local WebAssembly engine plus cloud-side context (global reputation,
@@ -155,7 +200,8 @@ is the better, developer-first choice.
 
 - **You're already bought into Aikido's platform** You want Zen as another
   module in the same place you manage SAST, cloud scanning and other security
-  controls, and are happy with CommonJS-only Node.js-only monkey-patching.
+  controls, and are happy with the agent's Node.js-only runtime patching
+  (with the ESM sub-dependency limitation noted above).
 
 Aikido makes more sense when the primary constraint is "one security vendor and
 agent model across many languages" and you're happy to accept that operational

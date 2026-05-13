@@ -228,5 +228,7 @@ export default defineConfig({
     "/reference/ts-js": "/reference/nodejs",
     "/bot-protection/bot-types": "/bot-protection/identifying-bots",
     "/mcp": "/mcp-server",
+    "/comparisons/cloudflare-waf-vs-arcjet":
+      "/comparisons/cloudflare-vs-arcjet",
   },
 });

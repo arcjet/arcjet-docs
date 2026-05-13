@@ -1,0 +1,321 @@
+---
+title: "Cloudflare vs Arcjet"
+description: "Cloudflare vs Arcjet. Compare Arcjet's in-code security SDK with Cloudflare's network-edge security suite — WAF, Bot Management, rate limiting, Turnstile, AI Gateway, and Workers. Configuration model, AI protection, plan gating, agentic workloads, and when to choose each."
+---
+
+import Comments from "/src/components/Comments.astro";
+import { Link } from "@/components/link";
+
+Arcjet is an alternative to [Cloudflare](https://www.cloudflare.com/)'s
+application-security suite for protecting web applications and AI workloads from
+bots, attack traffic, abuse, and runaway cost. Cloudflare bundles multiple
+products at the network edge — [WAF](https://developers.cloudflare.com/waf/),
+[Bot Management](https://developers.cloudflare.com/bots/),
+[Rate Limiting](https://developers.cloudflare.com/waf/rate-limiting-rules/),
+[Turnstile](https://developers.cloudflare.com/turnstile/),
+[AI Gateway](https://developers.cloudflare.com/ai-gateway/), and
+[Workers](https://developers.cloudflare.com/workers/) — that overlap with
+different parts of Arcjet. Both can protect the same applications, but they
+operate at fundamentally different layers and have very different configuration
+models.
+
+## Key differences: Cloudflare vs Arcjet
+
+1. **Where security runs**: Cloudflare's security products run at the network
+   edge — rules are evaluated by Cloudflare's CDN before requests reach your
+   application. This requires routing your DNS and traffic through Cloudflare.
+   Arcjet runs inside your application as a library, called from your request
+   handlers, middleware, and — with <Link.Page href="/guards">Arcjet
+   Guards</Link.Page> — directly from inside AI agent tool handlers and queue
+   workers. Arcjet works alongside any CDN or proxy, including Cloudflare,
+   without replacing it.
+
+2. **Configuration model**: Cloudflare's security products are configured in
+   the Cloudflare dashboard or via the API and Terraform. Rules are
+   infrastructure changes that deploy globally in seconds but are separate
+   from your application codebase. Arcjet rules are written in your
+   application code, committed to your repository, reviewed in pull
+   requests, and deployed with your application. They can branch on any
+   value your application knows at runtime — user identity, subscription
+   tier, feature flags, route, or any other request context. For the
+   operational changes where dashboard speed matters — blocking a country
+   during an active attack, tightening a global rate limit, temporarily
+   denying an IP range —
+   <Link.Page href="/remote-rules">Arcjet Remote Rules</Link.Page> apply
+   without a redeploy too, from the Arcjet dashboard or the
+   <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page>. Code-defined
+   rules and remote rules evaluate together into a single decision; you
+   don't have to pick one model.
+
+3. **Bot detection**: Cloudflare offers three tiers of bot detection:
+   [Bot Fight Mode](https://developers.cloudflare.com/bots/get-started/bot-fight-mode/)
+   (all plans, a single domain-wide toggle with no configuration), Super Bot
+   Fight Mode (Pro/Business, configurable actions per bot category but no
+   per-request scoring), and Bot Management for Enterprise (full per-request
+   scoring, custom rules, per-endpoint handling). The most useful controls —
+   per-request bot scores and custom rules — are Enterprise-only. Arcjet bot
+   detection classifies known bots across categories like search engines,
+   monitors, AI crawlers, and scrapers, is configured in code, and works at
+   any plan tier. Arcjet
+   <Link.Page href="/bot-protection/advanced-signals">advanced client signals</Link.Page>
+   add browser-based WebAssembly telemetry to detect headless browsers and
+   sophisticated scrapers without CAPTCHAs.
+
+4. **Rate limiting**: Cloudflare rate limiting is heavily tiered. On Free
+   plans, only 1 rule keyed on IP is available with a maximum 10-second
+   window. Pro allows 2 rules and a window up to 1 minute; Business 5 rules
+   and up to 10 minutes; Enterprise 100 rules. Per-user or per-account rate
+   limiting (keying on headers, cookies, JSON body fields, query parameters)
+   is locked behind Enterprise with
+   [Advanced Rate Limiting](https://blog.cloudflare.com/advanced-rate-limiting/).
+   Arcjet rate limiting is configured in code and can key on any value your
+   application can compute — user ID, account, subscription, session — on
+   self-serve plans.
+
+5. **AI application protection**: Cloudflare's
+   [AI Gateway](https://developers.cloudflare.com/ai-gateway/) sits between
+   your application and model providers (OpenAI, Anthropic, Workers AI, etc.)
+   and provides caching, request-count rate limiting, retries, analytics,
+   [Guardrails](https://developers.cloudflare.com/ai-gateway/features/guardrails/)
+   for harmful content moderation (hate, violence, sexual content), and
+   [DLP](https://developers.cloudflare.com/ai-gateway/features/dlp/) for PII
+   detection on prompts and responses. What it does **not** provide is prompt
+   injection detection (jailbreaks, instruction overrides), or per-user
+   token-cost budgeting tied to your application's user identities — AI
+   Gateway rate limiting is request-count-based with no concept of your
+   users. Arcjet's
+   <Link.Page href="/ai-protection">AI Runtime Protection</Link.Page> covers
+   prompt injection, per-user token budgets, and PII detection inline in your
+   code, working with any model provider including locally hosted models. PII
+   detection runs inside your application before request bodies leave your
+   infrastructure for the model — useful when you don't want to route AI
+   traffic through Cloudflare's proxy.
+
+6. **Agentic workloads and non-HTTP entry points**: Cloudflare's security
+   products — WAF, Bot Management, Rate Limiting, AI Gateway — all sit on
+   inbound traffic. They have no surface for inspecting an LLM tool call, a
+   queued job, or a step in a multi-agent pipeline. That blind spot is where
+   most agent damage actually occurs: a model fetches a web page and re-enters
+   its context loaded with hidden instructions; a tool call burns tokens in a
+   runaway loop; a background job ships a support ticket to a third-party LLM
+   with PII attached. None of these surface as a fresh HTTP request the edge
+   can rule on. <Link.Page href="/guards">Arcjet Guards</Link.Page> applies the
+   same primitives — token-bucket rate limiting, prompt injection detection,
+   PII detection — inline at the points an agent actually fans out: inside
+   MCP tool handlers, between agent steps, in queue consumers, and across
+   multi-service pipelines. You call `guard()` with the input directly; no
+   `Request` object required. Rules and modes (`LIVE` / `DRY_RUN`) are the
+   same shape as HTTP rules, so a single policy can span your route handlers
+   and your agent code. Available in JS/TS via `@arcjet/guard` and Python via
+   `arcjet`.
+
+7. **Turnstile vs advanced signals**: Cloudflare
+   [Turnstile](https://developers.cloudflare.com/turnstile/) is a
+   CAPTCHA-replacement widget you embed in a form. It issues a token the
+   server must verify on submission, tokens expire after 300 seconds and
+   can only be validated once, and the verification call is synchronous on
+   the protected action. Arcjet's
+   <Link.Page href="/bot-protection/advanced-signals">advanced client signals</Link.Page>
+   load a WebAssembly module from `signals-cdn.arcjet.com` on any page
+   that leads into a sensitive route, collect browser-environment
+   anomalies (headless markers, automation framework fingerprints,
+   browser-quirk inconsistencies), and persist a continue token in the
+   `aj_signals` cookie that subsequent requests reuse across navigations.
+   The result is evaluated inside `detectBot` alongside server-side bot
+   classification, IP reputation, and verified-bot lookups — one decision,
+   not a per-submission token round-trip. A missing `aj_signals` cookie is
+   itself a useful signal: a one-line
+   <Link.Page href="/filters">filter rule</Link.Page> deny it. Signals also
+   covers APIs and routes where no browser-rendered form exists; Turnstile
+   does not. See the
+   <Link.Page href="/comparisons/captchas-vs-arcjet">CAPTCHAs vs Arcjet</Link.Page>
+   comparison for the full breakdown including rollout (`LIVE` /
+   `DRY_RUN`) and inspectable decision reasoning.
+
+8. **Plan gating**: Many of Cloudflare's most capable features require
+   Business or Enterprise plans. Custom rules with Log action only on
+   Enterprise. Rate limiting with non-IP keys (headers, cookies, body, user
+   identity) is Enterprise-only via Advanced Rate Limiting. Bot Management
+   with per-request scoring is Enterprise-only. Sensitive Data Detection is
+   Enterprise-only. Arcjet advanced features (bot detection with IP
+   reputation, advanced signals, AI Runtime Protection, Guards) are
+   available on self-serve plans.
+
+## Comparison
+
+| Area                  | Arcjet                                                                                                                                                                                                                                             | Cloudflare                                                                                                                                                                                                                                                |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Where it runs         | Inside your application, as a library called from handlers, middleware, and AI agent tool handlers.                                                                                                                                                | At the Cloudflare network edge, before requests reach your application. Requires routing traffic through Cloudflare.                                                                                                                                       |
+| Configuration         | Rules-as-code in your application; committed to your repo, reviewed in PRs, deployed with your app. Can branch on any runtime value. <Link.Page href="/remote-rules">Remote Rules</Link.Page> add dashboard- or MCP-managed rate limit, bot, filter, and Shield rules that take effect immediately without a redeploy. | Dashboard, API, or Terraform. Fast global propagation (~seconds). Separate from your application codebase; static rules only.                                                                                                                              |
+| Hosting               | Platform-agnostic. Works on any provider alongside any CDN, including Cloudflare.                                                                                                                                                                  | Requires DNS routed through Cloudflare. Works with any origin behind the Cloudflare proxy.                                                                                                                                                                 |
+| Languages & frameworks | JavaScript, TypeScript, and Python. Native SDKs for Next.js, Node.js, Bun, Deno, Remix, SvelteKit, NestJS, React Router, Fastify, Astro, Python FastAPI, Flask, and other Python web servers. Runs on Workers if that's your runtime.            | Any language/framework behind Cloudflare's proxy. WAF rules apply at the network layer regardless of origin stack. Workers itself is JavaScript/TypeScript on a V8 isolate runtime (no native Node.js).                                                   |
+| Bot detection         | Known bots classified by name and category (search engines, monitors, AI crawlers, scrapers, etc.) in code. Advanced client signals (browser WebAssembly telemetry) detect headless browsers without CAPTCHAs. Available on self-serve plans.    | Bot Fight Mode (all plans, single toggle, no configuration). Super Bot Fight Mode (Pro/Business, category actions, no per-request scoring). Bot Management with per-request scores and custom rules: Enterprise only.                                     |
+| AI bot blocking       | <Link.Page href="/bot-protection/identifying-bots">AI crawler category</Link.Page> (`CATEGORY:AI`) configured in code, with per-bot allow/deny.                                                                                                   | ["Block AI Bots" managed rule](https://blog.cloudflare.com/declaring-your-aindependence-block-ai-bots-scrapers-and-crawlers-with-a-single-click/) (all plans including Free; one-click toggle; no per-bot selection — the list is automatically maintained by Cloudflare).                                                                                                                                |
+| AI app protection     | <Link.Page href="/ai-protection">AI Runtime Protection</Link.Page>: prompt injection detection, per-user token budgets, PII detection inline in your code. <Link.Page href="/guards">Arcjet Guards</Link.Page> applies the same rules inside agent tool calls and queue workers. | [AI Gateway](https://developers.cloudflare.com/ai-gateway/) provides caching, request-count rate limiting, retries, analytics, [Guardrails](https://developers.cloudflare.com/ai-gateway/features/guardrails/) (harmful content moderation), and [DLP](https://developers.cloudflare.com/ai-gateway/features/dlp/) (PII detection). No prompt injection / jailbreak detection. No per-user token-cost budgeting tied to your application's users. |
+| CAPTCHA / browser     | Advanced client signals (WebAssembly): collects browser-environment anomalies, persists in the `aj_signals` cookie reused across navigations, composes with server-side bot detection + IP reputation + a missing-cookie filter rule into one `detectBot` decision. `LIVE` / `DRY_RUN` rollout. Covers APIs and any subsequent request, not just forms. | [Turnstile](https://developers.cloudflare.com/turnstile/) is a per-form CAPTCHA-alternative widget. Tokens expire after 300s and are single-use; server-side verification round-trip on every protected submission. No persistent browser signal to reuse across requests.                                                                          |
+| WAF / attack coverage | <Link.Page href="/shield">Shield WAF</Link.Page> detects SQLi, XSS, path traversal, and other common attacks.                                                                                                                                      | Cloudflare Managed Ruleset (Pro+), OWASP Core Ruleset (Pro+), Free Managed Ruleset (all plans). OWASP on Pro and above.                                                                                                                                    |
+| Rate limiting         | Rules-as-code; key on user ID, account, session, plan, or any computed value.                                                                                                                                                                      | Free: 1 rule, IP only, 10s max window. Pro: 2 rules, 1min max. Business: 5 rules, 10min max. Enterprise: 100 rules, up to ~18hr window. Non-IP keys (header, cookie, query, JSON body, JA3/JA4): Enterprise [Advanced Rate Limiting](https://blog.cloudflare.com/advanced-rate-limiting/) only.    |
+| Custom rules          | No per-project rule count limit (rules are code).                                                                                                                                                                                                  | Free: 5 rules. Pro: 20 rules. Business: 100 rules. Enterprise: 1,000 rules. Log action: Enterprise only.                                                                                                                                                   |
+| Filter rules          | <Link.Page href="/filters">Expression-based filter rules</Link.Page> in code; compose cookie, IP reputation, geo, VPN/proxy, header, and path conditions alongside bot and rate limiting rules.                                                    | Custom rules with similar condition types in the dashboard. Regex support on Business+.                                                                                                                                                                    |
+| DDoS                  | Out of scope — sits inside your application. Pair with a network-layer provider.                                                                                                                                                                   | Always-on L3/L4/L7 DDoS mitigation across all plans, including Free. One of the strongest in the industry.                                                                                                                                                 |
+| Edge / in-code option | Arcjet is natively in-code — a library you import and call. Runs on Node.js, Bun, Deno, Workers, standard Python runtimes.                                                                                                                         | [Workers](https://developers.cloudflare.com/workers/) is in-code at the edge — a full application-runtime migration to Cloudflare's Workers runtime, which supports a subset of Node.js APIs via the `nodejs_compat` flag.                                  |
+| Agentic / non-HTTP    | <Link.Page href="/guards">Arcjet Guards</Link.Page>: call `guard()` directly from MCP tool handlers, between agent steps, inside queue consumers, and across multi-service pipelines. Same rule primitives (token bucket, prompt injection, PII detection) as HTTP, same `LIVE`/`DRY_RUN` modes. JS/TS via `@arcjet/guard`; Python via `arcjet`. | No equivalent. Cloudflare's security products — WAF, Bot Management, Rate Limiting, AI Gateway — all sit on inbound HTTP at the edge and cannot see tool calls, queued jobs, or fan-out work inside the application.                                       |
+| Local development     | Same behavior as production; inspect decisions directly in code.                                                                                                                                                                                   | WAF and bot rules apply only to traffic routed through Cloudflare; local development bypasses them entirely.                                                                                                                                               |
+
+## When to choose which
+
+### Choose Arcjet if...
+
+- **You want security as code** Your security rules live in your repo, pass
+  code review, and deploy with your application. You want per-route, per-user,
+  or per-plan logic that branches on what your application knows at runtime.
+
+- **You're not routing DNS through Cloudflare** Arcjet works on any hosting
+  provider without requiring a CDN proxy in front of your application.
+
+- **You need per-user rate limiting without Enterprise** Keying rate limits on
+  user identity, account, or subscription tier is available on Arcjet
+  self-serve plans. On Cloudflare, it requires Enterprise with Advanced Rate
+  Limiting.
+
+- **You want advanced bot signals on a self-serve plan** Arcjet's browser
+  WebAssembly signal collection for headless browser detection is available on
+  self-serve plans. Cloudflare's equivalent per-request Bot Management requires
+  Enterprise.
+
+- **You're building AI applications or agents** Arcjet's AI Runtime Protection
+  covers prompt injection / jailbreak detection and per-user token budgets
+  tied to your authenticated users — neither of which Cloudflare AI Gateway
+  provides. AI Gateway adds harmful-content Guardrails and DLP PII detection
+  on top of caching, request-count rate limiting, and retries; Arcjet
+  complements that with the application-layer risks AI Gateway doesn't
+  cover, and runs inline in your code so PII detection happens before
+  request bodies leave your infrastructure.
+
+- **You're shipping an agent, MCP server, or background pipeline** Cloudflare's
+  edge products only see inbound HTTP; the risky surface in agentic code is
+  what happens *after* the request enters your app — tool calls that re-enter
+  the model with attacker-controlled content, runaway loops that burn tokens,
+  and fan-out jobs that ship PII to third-party models.
+  <Link.Page href="/guards">Arcjet Guards</Link.Page> runs the same primitives
+  inline at those points.
+
+- **You want OWASP-level WAF protection without a Pro plan** Arcjet Shield WAF
+  is available on self-serve plans. Cloudflare's OWASP Core Ruleset requires
+  Pro or above.
+
+### Choose Cloudflare if...
+
+- **You need L3/L4/L7 DDoS mitigation** Cloudflare's network-layer DDoS
+  protection is one of the strongest in the industry and is available on all
+  plans including Free. Arcjet doesn't replace this.
+
+- **You're already on Cloudflare and want zero-code network protection** If
+  your DNS is already through Cloudflare, the WAF and Bot Fight Mode are a
+  natural addition. Dashboard rules propagate in seconds without touching
+  application code.
+
+- **You want TLS fingerprinting (JA3/JA4)** Cloudflare WAF supports JA4 on
+  Business+ and JA3 on Enterprise as rule conditions, useful for blocking
+  distributed attacks sharing a TLS fingerprint.
+
+- **You want a drop-in CAPTCHA-style form widget** Turnstile is free, easy to
+  embed, and works for protecting individual form submissions.
+
+- **You need instant rollback without redeployment** WAF rule changes
+  propagate globally in seconds and can be reverted instantly from the
+  dashboard. (Arcjet has the equivalent via
+  <Link.Page href="/remote-rules">Remote Rules</Link.Page> for rate limit,
+  bot, filter, and Shield rules; Cloudflare's dashboard covers a broader
+  surface.)
+
+In short: Cloudflare and Arcjet are complementary. Cloudflare provides
+excellent network-layer DDoS protection and edge-level filtering that's
+independent of your application code. Arcjet provides application-aware
+security — per-user rules, AI protection, advanced signals, prompt injection
+and PII detection inside agent tool handlers — that operates inside your
+code. Many teams use both.
+
+## FAQs
+
+### Can I use Arcjet and Cloudflare together?
+
+Yes, and this is a common setup. Cloudflare operates at the network layer and
+Arcjet operates inside your application — they are independent layers.
+Cloudflare handles DDoS mitigation and broad network-layer rules; Arcjet
+handles application-aware rules that depend on user identity, route context,
+and business logic. Arcjet works correctly behind Cloudflare's proxy.
+
+### How does Cloudflare AI Gateway compare to Arcjet AI Runtime Protection?
+
+There is overlap, but the focus is different. AI Gateway sits between your
+application and model providers as a proxy. It caches responses, rate limits
+by request count, retries failed requests, produces analytics, moderates
+harmful content via
+[Guardrails](https://developers.cloudflare.com/ai-gateway/features/guardrails/)
+(hate, violence, sexual content), and detects PII via
+[DLP](https://developers.cloudflare.com/ai-gateway/features/dlp/). What it
+does **not** cover is prompt injection / jailbreak detection or per-user
+token-cost budgets tied to your application's user identities — AI Gateway
+rate limiting is request-count-based with no concept of authenticated users
+or subscription tiers. Arcjet's
+<Link.Page href="/ai-protection">AI Runtime Protection</Link.Page> focuses
+on those application-layer risks, and runs inline in your code so PII
+detection happens before request bodies leave your infrastructure (no proxy
+required). For agentic workloads where requests fan out across tool calls
+and queue workers with no single HTTP request,
+<Link.Page href="/guards">Arcjet Guards</Link.Page> applies the same rules
+inline. You can use AI Gateway for caching and observability while using
+Arcjet for prompt injection, per-user budgets, and Guards.
+
+### How does Cloudflare Turnstile compare to Arcjet?
+
+Turnstile is a per-form CAPTCHA-replacement widget. It issues a token the
+server must verify on each submission (tokens are single-use and expire
+after 300 seconds), and it only works on routes that embed the widget.
+Arcjet's
+<Link.Page href="/bot-protection/advanced-signals">advanced client signals</Link.Page>
+collect browser-environment signals once via a WebAssembly module and
+persist a continue token in the `aj_signals` cookie that any subsequent
+request can reuse — including pure API endpoints with no widget. Signals
+compose with server-side bot detection, IP reputation, and a
+missing-cookie filter rule into one decision rather than a per-submission
+verification round-trip. Rules support `LIVE` / `DRY_RUN` modes for shadow
+rollout, and denials surface a structured reason (`ARCJET_SIGNALS`,
+`decision.reason.isBot()`, `decision.reason.isFilter()`) so you can branch
+your response per failure mode. See the
+<Link.Page href="/comparisons/captchas-vs-arcjet">CAPTCHAs vs Arcjet</Link.Page>
+comparison for the full breakdown.
+
+### Does Cloudflare WAF support per-user rate limiting?
+
+Only on Enterprise with Advanced Rate Limiting. Cloudflare can key rate
+limits on headers, cookies, and body values — but mapping those to
+application users requires your application to emit an identifying header or
+cookie for the WAF to key on. There is no concept of authenticated users or
+subscription tiers in WAF rules. Arcjet rate limiting is configured in code
+and can key on any value your application can compute directly.
+
+### Does the Cloudflare WAF work in local development?
+
+No. Cloudflare WAF rules only apply to traffic routed through Cloudflare's
+network. Local development bypasses the WAF entirely. Arcjet behaves the
+same in local development as in production.
+
+### What about agentic workloads with no HTTP request?
+
+Cloudflare's security products — WAF, Bot Management, Rate Limiting, AI
+Gateway — all sit on inbound HTTP at the edge. Once a request is inside
+your application, anything an agent does next is invisible to them: a model
+fetching a web page and re-feeding it to its own context, a tool call
+burning tokens in a loop, a background job shipping a support ticket to a
+third-party LLM with PII attached. Those are the points where most agent
+abuse and cost-runaway happens.
+<Link.Page href="/guards">Arcjet Guards</Link.Page> applies token-bucket
+rate limiting, prompt injection detection, and PII detection inline at
+those points. You call `guard()` with the input directly (no `Request`
+needed); rules are the same shape as your HTTP rules, so policy stays
+consistent between routes and agent code. Available in JS/TS via
+`@arcjet/guard` and Python via `arcjet`.
+
+<Comments />

@@ -24,68 +24,113 @@ different layers and have different configuration models.
    about a request.
 
 2. **Configuration model**: Vercel WAF is configured entirely in the Vercel
-   dashboard and published as infrastructure changes — no library to import, no
-   code to write. Arcjet rules are written in your application code, live in
-   your repository, are reviewed in pull requests, deployed with your
-   application, and can branch on any runtime condition. Vercel does offer a
-   limited `vercel.json` code path, but it only supports `challenge` and `deny`
-   actions — logging, bypass, and redirect are dashboard-only, and there is no
-   support for per-request dynamic logic.
+   dashboard and published as infrastructure changes — no library to
+   import, no code to write. Arcjet rules are written in your application
+   code, live in your repository, are reviewed in pull requests, deployed
+   with your application, and can branch on any runtime condition. Vercel
+   does offer a limited `vercel.json` code path, but it only supports
+   `challenge` and `deny` actions — logging, bypass, and redirect are
+   dashboard-only, and there is no support for per-request dynamic logic.
+   For the operational changes where dashboard speed matters — blocking a
+   country during an attack, tightening a global rate limit, temporarily
+   denying an IP range —
+   <Link.Page href="/remote-rules">Arcjet Remote Rules</Link.Page> apply
+   without a redeploy too, from the Arcjet dashboard or the
+   <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page>. Code-defined
+   rules and remote rules evaluate together into a single decision.
 
 3. **Platform independence**: Arcjet is platform-agnostic and works wherever
    you can run a JavaScript, TypeScript, or Python application — Vercel,
    Netlify, Fly.io, Render, AWS, Kubernetes, or self-hosted. Vercel WAF only
    works for applications hosted on Vercel.
 
-4. **Bot detection**: Vercel's Bot Protection managed ruleset identifies clients
-   that violate browser-like behavior and serves a JavaScript challenge.
-   However, it is Enterprise-only, and Vercel's own documentation warns that it
-   **does not work correctly behind a reverse proxy** (Cloudflare, Azure CDN,
-   etc.) — the proxy masks detection signals, causing false positives and
-   frequent re-challenges due to rotating exit IPs. Arcjet bot detection
-   classifies known bots across 25 categories, uses real-time threat feeds for attack intelligence, and offers
-   <Link.Page href="/bot-protection/advanced-signals">advanced client signals</Link.Page>
-   which add browser-based WebAssembly telemetry to detect headless browsers and
-   sophisticated scrapers without CAPTCHAs.
+4. **Bot detection**: Vercel's
+   [Bot Protection managed ruleset](https://vercel.com/docs/bot-management)
+   identifies clients that violate browser-like behavior and serves a
+   JavaScript challenge. It is available on all plans (Hobby, Pro,
+   Enterprise). However, Vercel's own documentation warns that it
+   **does not work correctly behind a reverse proxy** (Cloudflare, Azure
+   CDN, etc.) — the proxy masks detection signals, causing false positives
+   and frequent re-challenges due to rotating exit IPs. Arcjet bot
+   detection classifies known bots by name and category and uses real-time
+   threat feeds for attack intelligence. On top of that,
+   <Link.Page href="/bot-protection/advanced-signals">Arcjet advanced client signals</Link.Page>
+   load a WebAssembly module that collects browser-environment anomalies
+   (headless markers, automation framework fingerprints, browser-quirk
+   inconsistencies) and persists a continue token in the `aj_signals`
+   cookie reused across navigations. Server-side `detectBot` evaluates
+   signals alongside user-agent classification, IP reputation, and an
+   optional missing-cookie
+   <Link.Page href="/filters">filter rule</Link.Page> in a single decision,
+   with `LIVE` / `DRY_RUN` rollout modes and an inspectable
+   `ARCJET_SIGNALS` denial reason. It runs inside your application, so
+   reverse proxies in front of your origin don't break it.
 
-5. **AI protection**: Vercel's AI Bots managed ruleset (Enterprise-only) blocks
-   AI crawlers scraping your content. Arcjet's [AI bot category](/bot-protection/identifying-bots) operates similuarly, but is available for all accounts.
-   Arcjet's <Link.Page href="/ai-protection">AI Runtime Protection</Link.Page> goes further and is
-   designed to protect AI applications themselves: blocking automated clients
-   from inflating token costs, detecting prompt injection attacks, enforcing
-   per-user token budgets, and preventing PII from leaking into AI model
-   context.
+5. **AI app protection**: Vercel's AI Bots managed ruleset (available on all
+   plans) blocks AI crawlers scraping your content with `Log` or `Deny`
+   actions. Arcjet's
+   [AI bot category](/bot-protection/identifying-bots) does the same and is
+   also available on all plans. Beyond crawler blocking, Arcjet's
+   <Link.Page href="/ai-protection">AI Runtime Protection</Link.Page> protects
+   the AI application itself: detecting prompt injection, enforcing per-user
+   token budgets, and preventing PII from leaking into model context. Vercel
+   WAF has no equivalent at the application layer.
 
-6. **Rate limiting**: Vercel WAF rate limiting is request-count based, keyed by
-   IP, JA4 fingerprint, user agent, or arbitrary header values. Per-user or
-   account-level rate limiting requires the application to pass an identifying
-   header for the WAF to key on — the WAF has no concept of your application's
-   users. Token Bucket algorithm is Enterprise-only; the maximum window on
-   Hobby and Pro is 10 minutes. Arcjet rate limiting is configured in code,
-   can be keyed on any value your application can compute (user ID, account,
-   session, plan tier), and supports Token Bucket with windows up to 24 hours.
+6. **Agentic workloads and non-HTTP entry points**: Vercel WAF only sees
+   inbound HTTP requests at the edge — it can't inspect what happens *after*
+   a request enters your application. That blind spot is where most agent
+   damage actually occurs: a model fetches a web page, then re-enters its
+   context loaded with hidden instructions; a tool call burns tokens in a
+   runaway loop; a background job ships a support ticket to a third-party
+   LLM with PII attached. None of these surface as a fresh HTTP request the
+   WAF can rule on. <Link.Page href="/guards">Arcjet Guards</Link.Page>
+   applies the same primitives — token-bucket rate limiting, prompt injection
+   detection, PII detection — inline at the points an agent actually fans
+   out: inside MCP tool handlers, between agent steps, in queue consumers,
+   and across multi-service pipelines. You call `guard()` with the input
+   directly; no `Request` object required. Rules and modes (`LIVE` /
+   `DRY_RUN`) are the same shape as HTTP rules, so a single policy can span
+   your route handlers and your agent code.
 
-7. **Plan gating**: The most capable Vercel WAF features — OWASP Core Ruleset,
-   Bot Protection, AI Bots ruleset, Token Bucket rate limiting, account-level
-   IP blocking, and JA3 fingerprint conditions — are all Enterprise-only
-   ("Contact sales"). Arcjet's advanced features (advanced bot detection, IP
-   reputation, advanced signals) are available on self-serve plans.
+7. **Rate limiting**: Vercel WAF rate limiting is request-count based. On
+   Hobby and Pro, the only counting keys are
+   [IP and JA4 Digest](https://vercel.com/docs/vercel-firewall/vercel-waf/rate-limiting#limits);
+   User Agent and arbitrary header keys are Enterprise-only. Per-user or
+   account-level rate limiting therefore requires Enterprise *and* requires
+   your application to pass an identifying header for the WAF to key on —
+   the WAF has no concept of your application's users. Token Bucket
+   algorithm is Enterprise-only; the maximum window on Hobby and Pro is 10
+   minutes (1 hour on Enterprise). Number of rate limit rules per project
+   is 1 on Hobby, 40 on Pro, 1000 on Enterprise. Arcjet rate limiting is
+   configured in code, can be keyed on any value your application can
+   compute (user ID, account, session, plan tier), and supports Token
+   Bucket with windows up to 24 hours.
+
+8. **Plan gating**: The most capable Vercel WAF features —
+   [OWASP Core Ruleset](https://vercel.com/docs/vercel-firewall/vercel-waf/managed-rulesets#configure-owasp-core-ruleset)
+   (Enterprise-only), Token Bucket rate limiting (Enterprise-only),
+   non-IP/non-JA4 rate-limit keys (Enterprise-only) — sit behind Enterprise
+   ("Contact sales"). Bot Protection and AI Bots managed rulesets are now
+   available on all plans. Arcjet's advanced features (advanced bot
+   detection, IP reputation, advanced signals, AI Runtime Protection,
+   Guards) are available on self-serve plans.
 
 ## Comparison
 
 | Area                  | Arcjet                                                                                                                                                                                                                                           | Vercel WAF                                                                                                                                                                                                          |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Where it runs         | Inside your application, as a library called from handlers and middleware.                                                                                                                                                                       | At the network/CDN edge, before requests reach your application.                                                                                                                                                    |
-| Configuration         | Rules-as-code in your application; committed to your repo, reviewed in PRs, deployed with your app. Can branch on any runtime value.                                                                                                             | Dashboard UI (publish within 300ms without redeployment). Limited `vercel.json` support for `challenge`/`deny` only — no log, bypass, or dynamic logic.                                                            |
+| Configuration         | Rules-as-code in your application; committed to your repo, reviewed in PRs, deployed with your app. Can branch on any runtime value. <Link.Page href="/remote-rules">Remote Rules</Link.Page> add dashboard- or MCP-managed rate limit, bot, filter, and Shield rules that take effect immediately without a redeploy. | Dashboard UI (publish within 300ms without redeployment). Limited `vercel.json` support for `challenge`/`deny` only — no log, bypass, or dynamic logic.                                                            |
 | Hosting               | Platform-agnostic. Works on any provider or self-hosted infrastructure.                                                                                                                                                                          | Vercel only.                                                                                                                                                                                                        |
 | Languages & frameworks | JavaScript, TypeScript, and Python. Native SDKs for Next.js, Node.js, Bun, Deno, Remix, SvelteKit, NestJS, React Router, Fastify, Astro, Python FastAPI, Flask, and other Python web servers.                                                  | Any language hosted on Vercel. WAF rules apply at the network layer regardless of framework.                                                                                                                        |
-| Bot detection         | 600+ known bots across 25 categories classified in code; browser-based WebAssembly <Link.Page href="/bot-protection/advanced-signals">advanced signals</Link.Page> detect headless browsers without CAPTCHAs. Works behind any proxy or CDN.    | Bot Protection managed ruleset (Enterprise-only) uses JS challenge; explicitly documented as broken behind reverse proxies (Cloudflare, Azure CDN, etc.).                                                           |
-| AI bot blocking       | <Link.Page href="/bot-protection/identifying-bots">AI crawler category</Link.Page> (`CATEGORY:AI`) configured in code alongside other bot rules.                                                                         | AI Bots managed ruleset (Enterprise-only); automatically maintained by Vercel. Log or Deny only.                                                                                                                    |
+| Bot detection         | Known bots classified by name and category in code; browser-based WebAssembly <Link.Page href="/bot-protection/advanced-signals">advanced signals</Link.Page> detect headless browsers without CAPTCHAs. Works behind any proxy or CDN.          | Bot Protection managed ruleset (all plans) uses JS challenge; explicitly documented as broken behind reverse proxies (Cloudflare, Azure CDN, etc.).                                                                 |
+| AI bot blocking       | <Link.Page href="/bot-protection/identifying-bots">AI crawler category</Link.Page> (`CATEGORY:AI`) configured in code alongside other bot rules.                                                                         | AI Bots managed ruleset (all plans); automatically maintained by Vercel. Log or Deny only.                                                                                                                          |
 | AI app protection     | <Link.Page href="/ai-protection">AI Runtime Protection</Link.Page>: prompt injection detection, per-user token budgets, PII detection in AI flows — protects AI application logic, not just content scraping.                                    | No protection for AI application layer (no prompt injection, no token budgets, no PII in AI flows).                                                                                                                 |
+| Agentic / non-HTTP    | <Link.Page href="/guards">Arcjet Guards</Link.Page>: call `guard()` directly from MCP tool handlers, between agent steps, inside queue consumers, and across multi-service pipelines. Same rule primitives (token bucket, prompt injection, PII detection) as HTTP, same `LIVE`/`DRY_RUN` modes. JS/TS via `@arcjet/guard`; Python via `arcjet`. | No equivalent. Vercel WAF only inspects HTTP requests transiting the edge — it cannot see tool calls, queued jobs, or fan-out work inside the application. Workers Functions and route handlers can host application logic, but the WAF doesn't gate what happens once a request lands. |
 | WAF / attack coverage | <Link.Page href="/shield">Shield WAF</Link.Page> detects and blocks common web attacks (SQLi, XSS, path traversal, etc.).                                                                                                         | OWASP Core Ruleset (Enterprise-only). Platform-level DDoS mitigation (L3/L4/L7) is automatic and free on all plans.                                                                                                |
-| Rate limiting         | Rules-as-code; key on user ID, account, session, plan, or any computed value.                                                                                                               | Dashboard-configured; keyed on IP, JA4, user agent, or header value only — no application-level user identity. Token Bucket is Enterprise-only. Max window 10 min on Hobby/Pro, 1 hour on Enterprise.             |
-| Filter rules          | <Link.Page href="/filters">Expression-based filter rules</Link.Page> in code; compose cookie, IP reputation, geo, VPN/proxy, header, and path conditions alongside bot and rate limiting rules. Powered by Rust/WebAssembly, evaluated locally. | Custom rules in dashboard with similar condition types (IP, geo, path, header, JA4, user agent). Up to 3 rules on Hobby, 40 on Pro, 1,000 on Enterprise. Logic is static — no runtime branching on app context.   |
-| IP blocking           | Via filter rules in code; compose with other rules.                                                                                                                                                                                              | Project-level IP blocking (10 Hobby / 100 Pro / custom Enterprise). Account-level blocking is Enterprise-only.                                                                                                      |
+| Rate limiting         | Rules-as-code; key on user ID, account, session, plan, or any computed value. Token Bucket on all plans.                                                                                    | Hobby/Pro: keyed on IP or JA4 Digest only. User Agent and arbitrary header keys are Enterprise-only. Token Bucket is Enterprise-only. Max window 10 min on Hobby/Pro, 1 hour on Enterprise. Rules per project: 1 (Hobby), 40 (Pro), 1000 (Enterprise). |
+| Filter rules          | <Link.Page href="/filters">Expression-based filter rules</Link.Page> in code; compose cookie, IP reputation, geo, VPN/proxy, header, and path conditions alongside bot and rate limiting rules. Powered by Rust/WebAssembly, evaluated locally. | Custom rules in dashboard with similar condition types (IP, geo, path, header, JA4 Digest, user agent). Log action is Enterprise-only. Logic is static — no runtime branching on app context.                     |
+| IP blocking           | Via filter rules in code; compose with other rules.                                                                                                                                                                                              | Project-level and account-level IP blocking are available; account-level requires the relevant permission. Specific per-plan rule counts are not publicly documented.                                                |
 | Local development     | Same behavior as production; inspect decisions directly in code.                                                                                                                                                                                 | WAF rules don't apply locally; `vercel dev` bypasses the WAF entirely.                                                                                                                                              |
 
 ## When to choose which
@@ -115,6 +160,14 @@ different layers and have different configuration models.
   automated clients, and AI Runtime Protection adds prompt injection detection,
   per-user token budgets, and PII detection in AI flows.
 
+- **You're shipping an agent, MCP server, or background pipeline** Vercel WAF
+  inspects inbound HTTP only; the risky surface in agentic code is what
+  happens *after* the request enters your app — tool calls that re-enter the
+  model with attacker-controlled content, runaway loops that burn tokens, and
+  fan-out jobs that ship PII to third-party models.
+  <Link.Page href="/guards">Arcjet Guards</Link.Page> runs the same primitives
+  inline at those points.
+
 - **You want advanced bot signals** Arcjet's browser-based WebAssembly signal
   collection detects headless browsers and sophisticated scrapers without
   CAPTCHAs, and filter rules enforce cookie presence for requests that never
@@ -136,10 +189,9 @@ different layers and have different configuration models.
   large, distributed layer-3/4 attacks on hosting infrastructure, a network-layer
   firewall is the right tool.
 
-- **You need TLS fingerprinting rules** Vercel WAF supports JA4 fingerprinting
-  as a rule condition on all plans (JA3 on Enterprise), which is useful for
-  blocking distributed attacks that rotate IPs but share a common TLS
-  fingerprint.
+- **You need TLS fingerprinting rules** Vercel WAF supports the JA4 Digest as
+  a rule condition, which is useful for blocking distributed attacks that
+  rotate IPs but share a common TLS fingerprint.
 
 In short: if your primary need is infrastructure-level DDoS protection or
 simple network-layer filtering as a quick-response tool, Vercel WAF is useful.
@@ -168,6 +220,20 @@ application logic. Arcjet's
 for this use case: blocking automated clients from exhausting AI budgets,
 detecting prompt injection attacks before they reach your model, enforcing
 per-user token quotas, and preventing PII from entering AI context.
+
+### What about my agent's tool calls, queue workers, and pipelines?
+
+Vercel WAF only sees inbound HTTP requests at the edge. Once a request is
+inside your application, anything an agent does next — fetching a web page
+and re-feeding it to the model, calling tools in a loop, shipping work onto
+a background queue, fanning out across services — is invisible to the WAF.
+Those are the points where most agent abuse and cost-runaway happens.
+<Link.Page href="/guards">Arcjet Guards</Link.Page> applies token-bucket
+rate limiting, prompt injection detection, and PII detection inline at
+those points. You call `guard()` with the input directly (no `Request`
+needed); rules are the same shape as your HTTP rules, so policy stays
+consistent between routes and agent code. Available in JS/TS via
+`@arcjet/guard` and Python via `arcjet`.
 
 ### Does Vercel WAF work in local development?
 
