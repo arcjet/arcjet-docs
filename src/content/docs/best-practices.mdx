@@ -7,6 +7,8 @@ import { Tabs, TabItem, Code } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 import Comments from "/src/components/Comments.astro";
 import ArcjetLib from "/src/snippets/best-practices/ArcjetLib.ts?raw";
+import ArcjetLibPy from "/src/snippets/best-practices/arcjet_lib.py?raw";
+import ProxiesPy from "/src/snippets/best-practices/Proxies.py?raw";
 
 Here are some recommended best practices for using Arcjet effectively in your
 applications.
@@ -19,8 +21,13 @@ configuration to improve performance. It also means the object is created
 outside of the route handler to avoid creating a new instance on every request.
 
 The pattern we recommend is to create a utility file that exports the Arcjet
-object and then import it where you need it, using `withRule` to attach rules
-specific to each route or location in your app.
+object and then import it where you need it.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+In the JS SDKs, use `withRule` to attach rules specific to each route or
+location in your app.
 
 For example, in a Next.js app you might create a file `/lib/arcjet.ts` that
 creates and exports the Arcjet instance:
@@ -61,6 +68,47 @@ export async function GET(req: Request) {
   // ... handle the request
 }
 ```
+
+</TabItem>
+<TabItem label="Python">
+
+The Python SDK's `arcjet()` / `arcjet_sync()` constructor takes the full rule
+set at creation time — there is **no** `with_rule()` chain method on the
+resulting client (that pattern only exists in the JS SDKs). To apply different
+rules to different routes, create one client per rule set and import them
+where you need them.
+
+Use `arcjet()` for async frameworks (FastAPI, Starlette) and `arcjet_sync()`
+for sync frameworks (Flask, Django).
+
+<Code code={ArcjetLibPy} lang="py" title="/lib/arcjet.py" />
+
+Then import the client you need inside each route handler and call `protect()`
+once per request:
+
+```py
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+
+from lib.arcjet import aj_read
+
+app = FastAPI()
+
+
+@app.get("/items")
+async def list_items(request: Request):
+    decision = await aj_read.protect(request)
+
+    if decision.is_denied():
+        return JSONResponse({"error": "Forbidden"}, status_code=403)
+
+    # ... handle the request
+```
+
+If you only need one rule set across the whole app, a single client is fine.
+
+</TabItem>
+</Tabs>
 
 ## Avoid Arcjet in middleware
 
@@ -129,6 +177,8 @@ You should set the `proxies` field to `["100.100.100.100"]` so Arcjet will use
 
 You can also specify CIDR ranges to match multiple IP addresses.
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 ```ts
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
@@ -139,6 +189,11 @@ const aj = arcjet({
   ],
 });
 ```
+</TabItem>
+<TabItem label="Python">
+<Code code={ProxiesPy} lang="py" />
+</TabItem>
+</Tabs>
 
 ## Implement your own error handling
 
@@ -146,9 +201,11 @@ Calls to `protect()` will not throw an error. Arcjet is designed to fail open
 so that a service issue or misconfiguration does not block all requests.
 
 If there is an error condition when processing the rule, Arcjet will return an
-`ERROR` result for that rule and you can check the message property on the
-rule's error result for more information. For example:
+`ERROR` result for that rule and you can check the error message on the rule's
+error result for more information. For example:
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 ```ts
 const decision = await aj.protect(req);
 
@@ -157,3 +214,14 @@ if (decision.isErrored()) {
   console.error("Arcjet error", decision.reason.message);
 }
 ```
+</TabItem>
+<TabItem label="Python">
+```py
+decision = await aj.protect(request)
+
+if decision.is_error():
+    # Fail open: log the error and allow the request
+    logger.error("Arcjet error: %s", decision.reason_v2.message)
+```
+</TabItem>
+</Tabs>
