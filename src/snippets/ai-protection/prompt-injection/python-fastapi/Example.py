@@ -49,7 +49,6 @@ aj = arcjet(
         # Detect prompt injection attacks before they reach your AI model
         detect_prompt_injection(
             mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
-            # threshold=0.5,  # Confidence threshold, lower is more strict
         ),
     ],
 )
@@ -57,7 +56,7 @@ aj = arcjet(
 
 @app.post("/chat")
 async def chat(request: Request, body: ChatRequest):
-    # Pass the user message so detect_prompt_injection can score it
+    # Pass the user message so detect_prompt_injection can evaluate it
     decision = await aj.protect(
         request, detect_prompt_injection_message=body.message
     )

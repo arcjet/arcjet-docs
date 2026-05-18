@@ -10,7 +10,7 @@ import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "../../../components/Comments.astro";
 import { Link } from "@/components/link";
 
-Arcjet prompt injection detection scores each incoming prompt for injection
+Arcjet prompt injection detection evaluates each incoming prompt for injection
 patterns inside your application before it reaches the AI provider. Detected
 attacks are blocked before the AI call is made, protecting both your
 application behavior and your AI budget.
@@ -59,14 +59,13 @@ it must be configured in code with the SDK. It is not available as a
 
 ## How Arcjet prompt injection detection works
 
-Arcjet scores each incoming message using a specialist prompt injection
+Arcjet evaluates each incoming message using a specialist prompt injection
 detection model:
 
-1. The prompt text is sent to the Arcjet Cloud API for scoring.
+1. The prompt text is sent to the Arcjet Cloud API for evaluation.
 2. The detection model evaluates the text for injection patterns - jailbreaks,
    role-play escapes, and instruction overrides.
-3. A confidence score is returned. If the score meets or exceeds the configured
-   threshold, Arcjet returns a DENY decision.
+3. If injection is detected, Arcjet returns a DENY decision.
 4. The decision is made before the AI provider call, so blocked requests never
    reach your model.
 

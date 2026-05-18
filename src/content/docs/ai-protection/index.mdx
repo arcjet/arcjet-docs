@@ -34,7 +34,7 @@ security inside tool handlers — where there's no `Request` object — see
 
 Block automated clients and detect prompt injection attacks before they reach
 your AI. Arcjet lets you deny all automated traffic - or selectively allow
-trusted clients - and scores incoming messages for injection patterns like
+trusted clients - and evaluates incoming messages for injection patterns like
 jailbreaks, role-play escapes, and instruction overrides.
 
 <CardGrid>
@@ -104,6 +104,28 @@ leaving your infrastructure.
     title="AI Data Loss Prevention"
     href="/ai-protection/data-loss-prevention"
     description="Detect and block PII before it enters AI model context."
+  />
+</CardGrid>
+
+## Agentic protection (no HTTP request)
+
+The pages above protect HTTP route handlers — the boundary where user input
+enters your application. Agentic workflows often have a second boundary:
+tool calls, MCP server handlers, queue consumers, and pipelines that fan out
+across services. There's no `Request` object at those sites, so the
+request-based SDKs don't apply.
+
+<Link.Page href="/guards">Arcjet Guards</Link.Page> runs the same rate
+limiting, prompt injection detection, sensitive information detection, and
+custom rules inside those code paths — pass inputs directly to `guard()`
+and get a decision back. Most AI applications combine both: request-based
+protection on the API route, plus guards at every tool / task call site.
+
+<CardGrid>
+  <Link.Card
+    title="Arcjet Guards"
+    href="/guards"
+    description="Security for AI agent tool calls, MCP servers, queue workers, and background jobs."
   />
 </CardGrid>
 

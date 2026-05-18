@@ -40,9 +40,9 @@ users paste in jailbreaks like "DAN" prompts, role-play escapes, or instruction
 overrides designed to bypass your system prompt and extract restricted
 information or cause your AI to behave in unintended ways.
 
-Arcjet prompt injection detection scores each incoming message for injection
-patterns inside your application before it reaches the AI provider. Detected
-attacks are blocked before the AI call is made, protecting both your
+Arcjet prompt injection detection evaluates each incoming message for
+injection patterns inside your application before it reaches the AI provider.
+Detected attacks are blocked before the AI call is made, protecting both your
 application behavior and your AI budget.
 
 ## Get started
@@ -252,8 +252,9 @@ default.
 
 ## Configuring prompt injection detection
 
-`detectPromptInjectionMessage` - the text to score. Pass the user's most recent
-message, or the full conversation history if you want to scan all messages.
+`detectPromptInjectionMessage` - the text to evaluate. Pass the user's most
+recent message, or the full conversation history if you want to scan all
+messages.
 
 `mode: "DRY_RUN"` - logs detections without blocking. Use this to measure the
 false-positive rate in production before switching to `"LIVE"`.

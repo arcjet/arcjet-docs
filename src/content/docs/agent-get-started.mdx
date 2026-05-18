@@ -12,7 +12,21 @@ import { Link } from "@/components/link";
 
 Arcjet protects two types of entry points:
 - **Request-based** — HTTP route handlers and API endpoints. Use `protect()` with any <Link.Page href="/get-started">supported framework</Link.Page>.
-- **Guards** — tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` to pass inputs directly. See <Link.Page href="/guards">Guards</Link.Page>.
+- **Guards** — tool calls, MCP servers, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` to pass inputs directly. See <Link.Page href="/guards">Guards</Link.Page>.
+
+Pick by what's at the protection site:
+
+|                                 | Protect (request SDKs)             | Guard (`@arcjet/guard`, `arcjet.guard`) |
+| ------------------------------- | :--------------------------------: | :-------------------------------------: |
+| Designed for                    | HTTP route handlers, API endpoints | AI tool calls, MCP servers, queue workers, background jobs |
+| Request object                  | Required                           | Not needed                              |
+| Rate limit key                  | IP or `characteristics`            | Explicit `key` string at call time      |
+| Rate Limiting / Prompt Injection / Sensitive Info | ✅            | ✅                                      |
+| Bot Protection / Shield / Email Validation / Filters / IP Analysis | ✅ | —                          |
+| Custom Rules                    | —                                  | ✅                                      |
+
+A single application can use both — request-based protection on API routes
+and guards inside tool handlers / queue workers / MCP tools.
 
 The recommended path for an agentic workflow is to install a skill that gives
 your agent the documentation to integrate the Arcjet SDK, then connect to the
@@ -40,10 +54,15 @@ npx skills add arcjet/skills
 The two canonical skills are:
 
 - **`add-request-protection`** — protect HTTP routes and API endpoints with
-  rate limiting, bot detection, email validation, and shield.
+  rate limiting, bot detection, email validation, and shield. Reads the
+  appropriate JS / Python request reference.
 - **`add-guard-protection`** — protect non-HTTP code paths (AI agent tool
   calls, MCP tool handlers, queue workers, background jobs) with
-  `@arcjet/guard` (JS/TS) or `arcjet.guard` (Python).
+  `@arcjet/guard` (JS/TS, >= 1.4.0) or `arcjet.guard` (Python, `arcjet`
+  >= 0.7.0). Reads the appropriate JS / Python guard reference, which covers
+  client-at-module-scope patterns, hardcoded `label` discipline, per-rule
+  result inspection, and key selection when no user context exists (MCP
+  stdio servers, single-tenant workers).
 
 You can also install a single skill directly:
 
@@ -193,24 +212,32 @@ The typical setup is:
 | Signup / login form    | `shield` + `detectBot` + `validateEmail` + `slidingWindow`           |
 | Internal / admin route | `shield` + `filter` (country/VPN blocking)                           |
 | Any web app            | `shield` + `detectBot` (good baseline)                               |
+| AI agent tool call (Guard) | `tokenBucket` + `detectPromptInjection` + `localDetectSensitiveInfo` |
+| MCP tool handler (Guard) | `tokenBucket` (keyed by session) + `detectPromptInjection`          |
+| Queue worker / background job (Guard) | `tokenBucket` (keyed by user) + `detectPromptInjection` + `localDetectSensitiveInfo` |
 
 ## Verify
 
 After adding protection and starting the app:
 
-1. Send a test request to a protected route.
-2. List recent requests via the CLI (`arcjet requests list --site-id <id>`)
-   or the MCP `list-requests` tool to confirm requests are flowing to Arcjet.
+1. Send a test request to a protected route — or for guards, invoke the
+   protected tool / task. The fastest way is a tiny script that imports the
+   function and calls it twice (once to allow, once to exceed a limit). For
+   MCP servers, send a tool call via the MCP client / inspector.
+2. List recent decisions via the CLI (`arcjet requests list --site-id <id>`
+   for request-based protection or `arcjet guards list --site-id <id>` for
+   guards) or the MCP tools (`list-requests`, `list-guards`).
 3. Inspect individual decisions via the CLI (`arcjet requests details`,
-   `arcjet requests explain`) or the MCP tools (`get-request-details`,
-   `explain-decision`).
+   `arcjet requests explain`, `arcjet guards details`, `arcjet guards explain`)
+   or the MCP tools (`get-request-details`, `explain-decision`,
+   `get-guard-details`).
 4. Use `arcjet analyze traffic --site-id <id>` (CLI) or `analyze-traffic` (MCP)
    for a dashboard-level overview of request patterns.
-5. Check the [Arcjet dashboard](https://app.arcjet.com) for real-time request
+5. Check the [Arcjet dashboard](https://app.arcjet.com) for real-time
    monitoring.
 
-If requests are not appearing, verify that `ARCJET_KEY` and `ARCJET_ENV` are
-set correctly and that `protect()` is being called in the route handler.
+If decisions are not appearing, verify that `ARCJET_KEY` and `ARCJET_ENV` are
+set correctly and that `protect()` / `guard()` is being called.
 
 ## Common agent prompts
 
@@ -231,6 +258,16 @@ alternative for Claude Code and Cursor users):
   or `detect_sensitive_info` (Python) to scan for PII.
 - **"Set up Arcjet security for my app"** — full end-to-end setup with shield,
   bot detection, and rate limiting.
+- **"Rate limit my AI agent tool calls per user"** — installs the guard skill
+  and wires up `tokenBucket` keyed by user inside each tool handler.
+- **"Secure my MCP server"** — installs the guard skill, adds per-tool
+  `guard()` calls with hardcoded labels and session-scoped rate limits.
+- **"Protect my queue worker from prompt injection"** — uses the sync guard
+  client (`launchArcjet` / `launch_arcjet_sync`) with prompt injection
+  detection on job payloads.
+- **"Block PII in agent tool outputs before they reach the model"** — uses
+  `localDetectSensitiveInfo` on tool *results* in a guard call so PII in
+  tool outputs doesn't leak back into the model context.
 - **"Give me a security briefing for my site"** — calls `get-security-briefing`
   to return traffic analysis, threat landscape, anomalies, and recommendations.
 - **"Investigate this suspicious IP address"** — calls `investigate-ip` for geo,
