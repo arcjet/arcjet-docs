@@ -458,11 +458,11 @@ class TopicData(TypedDict):
 
 
 class TopicBlockRule(LocalCustomRule[TopicConfig, TopicInput, TopicData]):
-    def evaluate(self, config, input):
-        if input["topic"] == config["blocked_topic"]:
+    def evaluate(self, config, payload):
+        if payload["topic"] == config["blocked_topic"]:
             return CustomEvaluateResult(
                 conclusion="DENY",
-                data={"matched": input["topic"]},
+                data={"matched": payload["topic"]},
             )
         return CustomEvaluateResult(conclusion="ALLOW")
 
@@ -518,7 +518,10 @@ if (decision.hasError()) {
 <TabItem label="Python">
 
 ```py
+import logging
 import time
+
+logger = logging.getLogger(__name__)
 
 if decision.conclusion == "DENY":
     rate_limited = user_limit.denied_result(decision)
@@ -725,6 +728,8 @@ worker.process(async (job) => {
 
 ```py
 # Celery task example — use launch_arcjet_sync for sync workers
+import os
+
 from arcjet.guard import launch_arcjet_sync, TokenBucket, DetectPromptInjection
 
 arcjet = launch_arcjet_sync(key=os.environ["ARCJET_KEY"])
