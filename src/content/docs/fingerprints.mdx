@@ -84,11 +84,22 @@ In this example we create a custom characteristic called `userId`, but you can c
 
 Then when calling the `protect` method, you would pass a value for the key:
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 ```ts
 // Pass userId as a string to identify the user. This can be any string,
 // number or boolean value. Multiple values will be combined.
 const decision = await aj.protect(req, { userId: "user123" });
 ```
+</TabItem>
+<TabItem label="Python">
+```py
+# Pass userId via the `characteristics` dict to identify the user. Values can be
+# any string, number, or boolean. Multiple values will be combined.
+decision = await aj.protect(request, characteristics={"userId": "user123"})
+```
+</TabItem>
+</Tabs>
 
 #### IP address + User ID
 
@@ -100,6 +111,8 @@ augmented clients that use different characteristics.
 
 Then when calling the `protect` method, you would pass a value for the key:
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 ```ts
 if (userIsLoggedIn) {
   // Identify logged in users by their user ID
@@ -111,6 +124,24 @@ if (userIsLoggedIn) {
   const decision = await ajForGuests.protect(req);
 }
 ```
+</TabItem>
+<TabItem label="Python">
+```py
+# The Python SDK does not have `withRule`. Define a separate client per rule
+# set (e.g. `aj_for_users` and `aj_for_guests`) at module scope, then pick the
+# one to use inside each request handler.
+if user_is_logged_in:
+    # Identify logged in users by their user ID
+    decision = await aj_for_users.protect(
+        request, characteristics={"userId": "user123"}
+    )
+else:
+    # Identify guest users by their IP address. The Arcjet SDK automatically
+    # retrieves it for you.
+    decision = await aj_for_guests.protect(request)
+```
+</TabItem>
+</Tabs>
 
 ## Per rule vs global
 

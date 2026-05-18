@@ -1,12 +1,14 @@
 ---
 title: "Bot protection reference"
-description: "Reference guide for adding Arcjet bot protection to your Next.js, NestJS, Node.js, Bun, Remix, or SvelteKit app."
+description: "Reference guide for adding Arcjet bot protection to your Next.js, NestJS, Node.js, Bun, Python, Remix, or SvelteKit app."
 frameworks:
   - bun
   - deno
   - nest-js
   - next-js
   - node-js
+  - python-fastapi
+  - python-flask
   - remix
   - sveltekit
 ajToc:
@@ -83,11 +85,7 @@ ajToc:
     framework: ["next-js"]
 ---
 
-import { Badge } from "@astrojs/starlight/components";
-import Free from "@/components/badges/Free.astro";
-import Starter from "@/components/badges/Starter.astro";
-import Business from "@/components/badges/Business.astro";
-import Enterprise from "@/components/badges/Enterprise.astro";
+import { Badge, Tabs, TabItem } from "@astrojs/starlight/components";
 import Comments from "@/components/Comments.astro";
 import { Link } from "@/components/link";
 import SlotByFramework from "@/components/SlotByFramework";
@@ -135,6 +133,20 @@ import NodeJsErrors from "@/snippets/bot-protection/reference/nodejs/Errors.mdx"
 import NodeJsFiltering from "@/snippets/bot-protection/reference/nodejs/Filtering.mdx";
 import NodeJsIdentifiedBots from "@/snippets/bot-protection/reference/nodejs/IdentifiedBots.mdx";
 
+import PythonFastapiAllowingBots from "@/snippets/bot-protection/reference/python-fastapi/AllowingBots.mdx";
+import PythonFastapiDecisionLog from "@/snippets/bot-protection/reference/python-fastapi/DecisionLog.mdx";
+import PythonFastapiDenyingBots from "@/snippets/bot-protection/reference/python-fastapi/DenyingBots.mdx";
+import PythonFastapiErrors from "@/snippets/bot-protection/reference/python-fastapi/Errors.mdx";
+import PythonFastapiFiltering from "@/snippets/bot-protection/reference/python-fastapi/Filtering.mdx";
+import PythonFastapiIdentifiedBots from "@/snippets/bot-protection/reference/python-fastapi/IdentifiedBots.mdx";
+
+import PythonFlaskAllowingBots from "@/snippets/bot-protection/reference/python-flask/AllowingBots.mdx";
+import PythonFlaskDecisionLog from "@/snippets/bot-protection/reference/python-flask/DecisionLog.mdx";
+import PythonFlaskDenyingBots from "@/snippets/bot-protection/reference/python-flask/DenyingBots.mdx";
+import PythonFlaskErrors from "@/snippets/bot-protection/reference/python-flask/Errors.mdx";
+import PythonFlaskFiltering from "@/snippets/bot-protection/reference/python-flask/Filtering.mdx";
+import PythonFlaskIdentifiedBots from "@/snippets/bot-protection/reference/python-flask/IdentifiedBots.mdx";
+
 import RemixAllowingBots from "@/snippets/bot-protection/reference/remix/AllowingBots.mdx";
 import RemixDecisionLog from "@/snippets/bot-protection/reference/remix/DecisionLog.mdx";
 import RemixDenyingBots from "@/snippets/bot-protection/reference/remix/DenyingBots.mdx";
@@ -171,6 +183,8 @@ not specified in the `deny` list.
 
 You can use only one of the following configuration definitions:
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 ```ts
 type BotOptionsAllow = {
   mode?: "LIVE" | "DRY_RUN";
@@ -187,6 +201,27 @@ type BotOptionsDeny = {
 
 The `arcjet` client is configured with one or more `detectBot` rules which take
 one or many `BotOptions`.
+</TabItem>
+<TabItem label="Python">
+```py
+# Signature for arcjet.detect_bot
+# `allow` and `deny` are mutually exclusive — pass only one.
+def detect_bot(
+    *,
+    # Mode.LIVE blocks requests; Mode.DRY_RUN logs only. Defaults to Mode.LIVE.
+    mode: Mode = Mode.LIVE,
+    # Bots to permit. All other detected bots are denied.
+    allow: Sequence[str | BotCategory] = (),
+    # Bots to block. All other detected bots are allowed.
+    deny: Sequence[str | BotCategory] = (),
+) -> BotDetection: ...
+```
+
+The `arcjet` (or `arcjet_sync`) client is configured with one or more
+`detect_bot` rules. Pass `BotCategory.<NAME>` enum values for categories and
+string identifiers like `"CURL"` for specific bots.
+</TabItem>
+</Tabs>
 
 :::note
 When specifying multiple rules, the order of the rules is ignored. Rule
@@ -214,6 +249,8 @@ bots](https://arcjet.com/bot-list) and/or
   <NestJsAllowingBots slot="nest-js" />
   <NextJsAllowingBots slot="next-js" />
   <NodeJsAllowingBots slot="node-js" />
+  <PythonFastapiAllowingBots slot="python-fastapi" />
+  <PythonFlaskAllowingBots slot="python-flask" />
   <RemixAllowingBots slot="remix" />
   <SvelteKitAllowingBots slot="sveltekit" />
 </SlotByFramework>
@@ -234,6 +271,8 @@ bots](https://arcjet.com/bot-list) and/or
   <NestJsDenyingBots slot="nest-js" />
   <NextJsDenyingBots slot="next-js" />
   <NodeJsDenyingBots slot="node-js" />
+  <PythonFastapiDenyingBots slot="python-fastapi" />
+  <PythonFlaskDenyingBots slot="python-flask" />
   <RemixDenyingBots slot="remix" />
   <SvelteKitDenyingBots slot="sveltekit" />
 </SlotByFramework>
@@ -277,16 +316,27 @@ This function returns a `Promise` that resolves to an
   client IP address. See the SDK reference for more information.
 
 You check if a deny conclusion has been returned by a bot protection rule by
-using `decision.isDenied()` and `decision.reason.isBot()` respectively.
+using `decision.isDenied()` and `decision.reason.isBot()` (JS) /
+`decision.is_denied()` and `decision.reason_v2.type == "BOT"` (Python).
 
 You can iterate through the results and check whether a bot protection rule was
 applied:
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 ```ts
 for (const result of decision.results) {
   console.log("Rule Result", result);
 }
 ```
+</TabItem>
+<TabItem label="Python">
+```py
+for result in decision.results:
+    print("Rule Result", result)
+```
+</TabItem>
+</Tabs>
 
 <SlotByFramework client:load>
   <BunDecisionLog slot="bun" />
@@ -294,6 +344,8 @@ for (const result of decision.results) {
   <NestJsDecisionLog slot="nest-js" />
   <NextJsDecisionLog slot="next-js" />
   <NodeJsDecisionLog slot="node-js" />
+  <PythonFastapiDecisionLog slot="python-fastapi" />
+  <PythonFlaskDecisionLog slot="python-flask" />
   <RemixDecisionLog slot="remix" />
   <SvelteKitDecisionLog slot="sveltekit" />
 </SlotByFramework>
@@ -312,6 +364,8 @@ properties.
   <NestJsIdentifiedBots slot="nest-js" />
   <NextJsIdentifiedBots slot="next-js" />
   <NodeJsIdentifiedBots slot="node-js" />
+  <PythonFastapiIdentifiedBots slot="python-fastapi" />
+  <PythonFlaskIdentifiedBots slot="python-flask" />
   <RemixIdentifiedBots slot="remix" />
   <SvelteKitIdentifiedBots slot="sveltekit" />
 </SlotByFramework>
@@ -345,6 +399,8 @@ See <Link.Page href="/bot-protection/reference#user-agent-header">an example of 
   <NestJsErrors slot="nest-js" />
   <NextJsErrors slot="next-js" />
   <NodeJsErrors slot="node-js" />
+  <PythonFastapiErrors slot="python-fastapi" />
+  <PythonFlaskErrors slot="python-flask" />
   <RemixErrors slot="remix" />
   <SvelteKitErrors slot="sveltekit" />
 </SlotByFramework>
@@ -361,13 +417,15 @@ their "advertising quality" bot.
   <NestJsFiltering slot="nest-js" />
   <NextJsFiltering slot="next-js" />
   <NodeJsFiltering slot="node-js" />
+  <PythonFastapiFiltering slot="python-fastapi" />
+  <PythonFlaskFiltering slot="python-flask" />
   <RemixFiltering slot="remix" />
   <SvelteKitFiltering slot="sveltekit" />
 </SlotByFramework>
 
 ## Bot verification
 
-Requests analyzed by Arcjet on <Starter /> or <Business /> plans include
+Requests analyzed by Arcjet include
 automatic bot verification. For `allow` rules, Arcjet verifies the authenticity
 of detected bots by checking IP data and performing reverse DNS lookups.
 
@@ -390,6 +448,8 @@ For example, when a request claims to be GoogleBot, Arcjet will check if the IP
 truly belongs to Google. You can check the verification status in your code and
 take actions based on the results, such as allowing all verified bots.
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 ```ts
 import { isVerifiedBot } from "@arcjet/inspect";
 
@@ -418,12 +478,45 @@ if (decision.isDenied()) {
   return new Response(null, { status: 403 });
 }
 ```
+</TabItem>
+<TabItem label="Python">
+```py
+from arcjet import arcjet, detect_bot, Mode
+
+# ...
+aj = arcjet(
+    key=os.environ["ARCJET_KEY"],
+    rules=[
+        detect_bot(mode=Mode.LIVE, allow=["CATEGORY:SEARCH_ENGINE"]),
+    ],
+)
+
+# ...
+decision = await aj.protect(request)
+# ...
+
+# Ignore other signals for verified search engine bots. The Python SDK does
+# not export an `is_verified_bot()` helper — check `reason_v2.verified` on
+# each rule result instead.
+if any(
+    r.reason_v2.type == "BOT" and r.reason_v2.verified for r in decision.results
+):
+    return JSONResponse({"message": "Hello Bot!"})
+
+# Leverage all Arcjet signals
+if decision.is_denied():
+    return JSONResponse(None, status_code=403)
+```
+</TabItem>
+</Tabs>
 
 ### Check for spoofed bots
 
 This will check if the bot is spoofed. You would usually return a 403 or similar
 response to block the request.
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 ```ts
 for (const { reason } of decision.results) {
   if (reason.isBot() && reason.isSpoofed()) {
@@ -432,11 +525,31 @@ for (const { reason } of decision.results) {
   }
 }
 ```
+</TabItem>
+<TabItem label="Python">
+```py
+from arcjet import is_spoofed_bot
+
+# Use the is_spoofed_bot() helper exported by arcjet:
+if any(is_spoofed_bot(r) for r in decision.results):
+    print("Detected spoofed bot")
+    # Return a 403 or similar response
+
+# Or inspect each rule result directly:
+for result in decision.results:
+    if result.reason_v2.type == "BOT" and result.reason_v2.spoofed:
+        print("Detected spoofed bot")
+        # Return a 403 or similar response
+```
+</TabItem>
+</Tabs>
 
 ### Check bot verification
 
 This will check if the bot is verified.
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 ```ts
 for (const { reason } of decision.results) {
   if (reason.isBot() && reason.isVerified()) {
@@ -445,6 +558,16 @@ for (const { reason } of decision.results) {
   }
 }
 ```
+</TabItem>
+<TabItem label="Python">
+```py
+for result in decision.results:
+    if result.reason_v2.type == "BOT" and result.reason_v2.verified:
+        print("Verified bot")
+        # Allow the request
+```
+</TabItem>
+</Tabs>
 
 ### `User-Agent` header
 
@@ -455,6 +578,8 @@ Most legitimate clients send it because HTTP/1.1 (RFC 7231) says it _should_ be
 sent.
 You can choose to block such requests with <Link.Page href="/filters">Arcjet Filters</Link.Page>.
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 ```ts
 filter({
   // This will deny any traffic that has no user agent:
@@ -463,11 +588,26 @@ filter({
   mode: "LIVE",
 }),
 ```
+</TabItem>
+<TabItem label="Python">
+```py
+filter_request(
+    # This will deny any traffic that has no user agent:
+    deny=['len(http.request.headers["user-agent"]) eq 0'],
+    # Block requests with `LIVE`, use `Mode.DRY_RUN` to log only.
+    mode=Mode.LIVE,
+)
+```
+</TabItem>
+</Tabs>
 
-An alternative approach is to check the rule results using the
-`isMissingUserAgent` function in
-[@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect) after the decision is
-made:
+An alternative approach is to check the rule results after the decision is made:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+Use the `isMissingUserAgent` helper from
+[@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect):
 
 ```ts
 import { isMissingUserAgent } from "@arcjet/inspect";
@@ -485,6 +625,31 @@ if (decision.results.some(isMissingUserAgent)) {
   // res.end(JSON.stringify({ error: "Bad request" }));
 }
 ```
+</TabItem>
+<TabItem label="Python">
+
+The Python SDK does not export an `is_missing_user_agent()` helper. Check the
+request headers directly or inspect the rule result `ERROR` reason message:
+
+```py
+# Option 1: check the request headers before calling protect()
+user_agent = request.headers.get("user-agent")
+if not user_agent:
+    return JSONResponse({"error": "Bad request"}, status_code=400)
+
+# Option 2: inspect the decision for an ERROR result on the bot rule
+for result in decision.results:
+    if result.reason_v2.type == "ERROR":
+        # Bot detection requires a User-Agent header — when missing it
+        # produces an ERROR result with this in the message.
+        logger.warning(
+            "request missing required user-agent header: %s",
+            result.reason_v2.message,
+        )
+        return JSONResponse({"error": "Bad request"}, status_code=400)
+```
+</TabItem>
+</Tabs>
 
 ## Testing
 

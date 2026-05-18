@@ -1,0 +1,18 @@
+import { Link } from "@/components/link";
+
+### 4. Start server
+
+Start the FastAPI dev server:
+
+```sh
+uv run uvicorn main:app --reload
+```
+
+Then make a `curl` request from your terminal. You should see a `403 Forbidden`
+response because `curl` is considered an automated client by default. See
+<Link.Page href="/bot-protection/reference">the reference guide</Link.Page> to
+learn about configuring this.
+
+```sh
+curl -I http://localhost:8000
+```

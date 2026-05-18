@@ -4,7 +4,7 @@ description: "Use Arcjet's IP analysis to detect VPNs and proxies."
 ---
 
 import { Link } from "@/components/link";
-import { Aside, Badge } from "@astrojs/starlight/components";
+import { Aside } from "@astrojs/starlight/components";
 
 Arcjet provides IP reputation information in two places:
 
@@ -26,19 +26,19 @@ Arcjet provides IP reputation information in two places:
 
 ## Available fields
 
-| Filters                | Decision         | <Badge text="Free" variant="caution" /> | <Badge text="Starter" variant="note" /> | <Badge text="Business" variant="tip" /> |
-| ---------------------- | ---------------- | --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| `ip.src.asnum.country` | `ip.asnCountry`  | 🚫                                      | ✅                                      | ✅                                      |
-| `ip.src.asnum.domain`  | `ip.asnDomain`   | 🚫                                      | ✅                                      | ✅                                      |
-| `ip.src.asnum.name`    | `ip.asnName`     | 🚫                                      | ✅                                      | ✅                                      |
-| `ip.src.asnum.type`    | `ip.asnType`     | 🚫                                      | ✅                                      | ✅                                      |
-| `ip.src.asnum`         | `ip.asn`         | 🚫                                      | ✅                                      | ✅                                      |
-| `ip.src.service`       | `ip.service`     | ✅                                      | ✅                                      | ✅                                      |
-| `ip.src.hosting`       | `ip.isHosting()` | ✅                                      | ✅                                      | ✅                                      |
-| `ip.src.proxy`         | `ip.isProxy()`   | ✅                                      | ✅                                      | ✅                                      |
-| `ip.src.relay`         | `ip.isRelay()`   | ✅                                      | ✅                                      | ✅                                      |
-| `ip.src.tor`           | `ip.isTor()`     | ✅                                      | ✅                                      | ✅                                      |
-| `ip.src.vpn`           | `ip.isVpn()`     | ✅                                      | ✅                                      | ✅                                      |
+| Filters                | Decision         |
+| ---------------------- | ---------------- |
+| `ip.src.asnum.country` | `ip.asnCountry`  |
+| `ip.src.asnum.domain`  | `ip.asnDomain`   |
+| `ip.src.asnum.name`    | `ip.asnName`     |
+| `ip.src.asnum.type`    | `ip.asnType`     |
+| `ip.src.asnum`         | `ip.asn`         |
+| `ip.src.service`       | `ip.service`     |
+| `ip.src.hosting`       | `ip.isHosting()` |
+| `ip.src.proxy`         | `ip.isProxy()`   |
+| `ip.src.relay`         | `ip.isRelay()`   |
+| `ip.src.tor`           | `ip.isTor()`     |
+| `ip.src.vpn`           | `ip.isVpn()`     |
 
 ## Checking for data
 

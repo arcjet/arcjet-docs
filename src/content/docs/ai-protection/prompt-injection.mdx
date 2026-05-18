@@ -26,6 +26,7 @@ ajToc:
 ---
 
 import { Link } from "@/components/link";
+import { Tabs, TabItem } from "@astrojs/starlight/components";
 import SlotByFramework from "@/components/SlotByFramework";
 import FrameworkLinks from "@/components/FrameworkLinks";
 import { frameworks } from "@/lib/prefs";
@@ -73,8 +74,11 @@ Combining Arcjet rules gives you layered enforcement before the model runs:
 - **Prompt injection detection** catches hostile instructions before inference
 - **Sensitive information detection** prevents PII from entering model context
 
-The following example uses the [Vercel AI SDK](https://sdk.vercel.ai/):
+The following example uses the [Vercel AI SDK](https://sdk.vercel.ai/) (JS) /
+[LangChain](https://www.langchain.com/) (Python):
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 ```ts
 import { openai } from "@ai-sdk/openai";
 import arcjet, {
@@ -150,6 +154,93 @@ export async function POST(req: Request) {
   return result.toUIMessageStreamResponse();
 }
 ```
+</TabItem>
+<TabItem label="Python">
+```py
+import logging
+import os
+
+from arcjet import (
+    Mode,
+    SensitiveInfoEntityType,
+    arcjet,
+    detect_prompt_injection,
+    detect_sensitive_info,
+    shield,
+)
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI
+from pydantic import BaseModel
+
+app = FastAPI()
+logger = logging.getLogger(__name__)
+
+llm = ChatOpenAI(model="gpt-4o", api_key=os.environ["OPENAI_API_KEY"])
+chain = ChatPromptTemplate.from_messages(
+    [("system", "You are a helpful assistant."), ("human", "{message}")]
+) | llm | StrOutputParser()
+
+
+class ChatRequest(BaseModel):
+    message: str
+
+
+aj = arcjet(
+    key=os.environ["ARCJET_KEY"],  # Get your site key from https://app.arcjet.com
+    rules=[
+        # Shield protects against common web attacks e.g. SQL injection
+        shield(mode=Mode.LIVE),
+        # Detect prompt injection attacks before they reach your AI model
+        detect_prompt_injection(mode=Mode.LIVE),
+        # Block sensitive data from entering model context
+        detect_sensitive_info(
+            mode=Mode.LIVE,
+            # Block PII types that should never appear in AI prompts.
+            # Remove types your app legitimately handles (e.g. EMAIL for a
+            # support bot).
+            deny=[
+                SensitiveInfoEntityType.CREDIT_CARD_NUMBER,
+                SensitiveInfoEntityType.EMAIL,
+            ],
+        ),
+    ],
+)
+
+
+@app.post("/chat")
+async def chat(request: Request, body: ChatRequest):
+    # Pass the user message to both scanners. Pass the full conversation if
+    # you want to scan all messages.
+    decision = await aj.protect(
+        request,
+        detect_prompt_injection_message=body.message,
+        sensitive_info_value=body.message,
+    )
+
+    if decision.is_denied():
+        if decision.reason_v2.type == "PROMPT_INJECTION":
+            logger.warning("Request blocked due to prompt injection")
+            return JSONResponse(
+                {"error": "Prompt injection detected — please rephrase your message"},
+                status_code=400,
+            )
+        if decision.reason_v2.type == "SENSITIVE_INFO":
+            logger.warning("Request blocked due to sensitive information")
+            return JSONResponse(
+                {"error": "Sensitive information detected — please remove it from your prompt"},
+                status_code=400,
+            )
+        return JSONResponse({"error": "Forbidden"}, status_code=403)
+
+    # Arcjet approved — call your AI provider
+    reply = await chain.ainvoke({"message": body.message})
+    return {"reply": reply}
+```
+</TabItem>
+</Tabs>
 
 Keep denied responses generic — do not leak detector details or explain exactly
 what was flagged. A simple message asking the user to rephrase is the right
@@ -175,6 +266,8 @@ you expose a public AI endpoint, attackers can drive up costs with automated
 traffic without needing to bypass your system prompt. Bot detection composes
 cleanly with prompt injection protection:
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 ```ts
 import arcjet, {
   detectBot,
@@ -196,6 +289,38 @@ const aj = arcjet({
   ],
 });
 ```
+</TabItem>
+<TabItem label="Python">
+```py
+import os
+from arcjet import (
+    Mode,
+    SensitiveInfoEntityType,
+    arcjet,
+    detect_bot,
+    detect_prompt_injection,
+    detect_sensitive_info,
+    shield,
+)
+
+aj = arcjet(
+    key=os.environ["ARCJET_KEY"],
+    rules=[
+        shield(mode=Mode.LIVE),
+        detect_bot(mode=Mode.LIVE, allow=[]),
+        detect_prompt_injection(mode=Mode.LIVE),
+        detect_sensitive_info(
+            mode=Mode.LIVE,
+            deny=[
+                SensitiveInfoEntityType.CREDIT_CARD_NUMBER,
+                SensitiveInfoEntityType.EMAIL,
+            ],
+        ),
+    ],
+)
+```
+</TabItem>
+</Tabs>
 
 ## Protecting tool calls
 
@@ -209,6 +334,8 @@ npx skill add arcjet/skills --skill add-guard-protection
 
 Or wire it up manually — create a guard client once at module scope, then call `.guard()` inline in each tool handler:
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 ```ts
 import { launchArcjet, detectPromptInjection } from "@arcjet/guard";
 
@@ -234,6 +361,37 @@ export async function fetchTool({ url }: { url: string }, userId: string) {
   return { content };
 }
 ```
+</TabItem>
+<TabItem label="Python">
+```py
+import os
+import httpx
+from arcjet.guard import DetectPromptInjection, launch_arcjet
+
+arcjet = launch_arcjet(key=os.environ["ARCJET_KEY"])
+
+pi_rule = DetectPromptInjection()
+
+
+# Inside your fetch tool handler
+async def fetch_tool(url: str, user_id: str) -> dict:
+    async with httpx.AsyncClient() as client:
+        content = (await client.get(url)).text
+
+    decision = await arcjet.guard(
+        label="tools.fetch",
+        metadata={"user_id": user_id},
+        rules=[pi_rule(content)],
+    )
+
+    if decision.conclusion == "DENY":
+        # Return a safe placeholder rather than the injected content
+        return {"content": "[Content blocked: prompt injection detected]"}
+
+    return {"content": content}
+```
+</TabItem>
+</Tabs>
 
 ## Learn more
 

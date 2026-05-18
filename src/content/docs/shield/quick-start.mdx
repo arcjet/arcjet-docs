@@ -6,14 +6,18 @@ titleByFramework:
   nest-js: "Shield WAF for NestJS"
   next-js: "Shield WAF for Next.js"
   node-js: "Shield WAF for Node.js"
+  python-fastapi: "Shield WAF for Python + FastAPI"
+  python-flask: "Shield WAF for Python + Flask"
   remix: "Shield WAF for Remix"
   sveltekit: "Shield WAF for SvelteKit"
-description: "Quick start guide for adding protection to your Next.js, Node.js, Bun, Remix, or SvelteKit app with Arcjet Shield WAF."
+description: "Quick start guide for adding protection to your Next.js, Node.js, Bun, Python, Remix, or SvelteKit app with Arcjet Shield WAF."
 frameworks:
   - bun
   - nest-js
   - next-js
   - node-js
+  - python-fastapi
+  - python-flask
   - remix
   - sveltekit
 ajToc:
@@ -28,7 +32,7 @@ ajToc:
         anchor: "3-protect-a-route"
       - text: 4. Start server
         anchor: "4-start-server"
-        framework: ["bun", "node-js"]
+        framework: ["bun", "node-js", "python-fastapi", "python-flask"]
       - text: 4. Start app
         anchor: "4-start-app"
         framework: ["nest-js", "next-js", "remix", "sveltekit"]
@@ -69,6 +73,16 @@ import Step1NodeJs from "@/snippets/shield/quick-start/nodejs/Step1.mdx";
 import Step3NodeJs from "@/snippets/shield/quick-start/nodejs/Step3.mdx";
 import Step4NodeJs from "@/snippets/shield/quick-start/nodejs/Step4.mdx";
 import Step5NodeJs from "@/snippets/shield/quick-start/nodejs/Step5.mdx";
+import Step1PythonFastapi from "@/snippets/shield/quick-start/python-fastapi/Step1.mdx";
+import Step2PythonFastapi from "@/snippets/shield/quick-start/python-fastapi/Step2.mdx";
+import Step3PythonFastapi from "@/snippets/shield/quick-start/python-fastapi/Step3.mdx";
+import Step4PythonFastapi from "@/snippets/shield/quick-start/python-fastapi/Step4.mdx";
+import Step5PythonFastapi from "@/snippets/shield/quick-start/python-fastapi/Step5.mdx";
+import Step1PythonFlask from "@/snippets/shield/quick-start/python-flask/Step1.mdx";
+import Step2PythonFlask from "@/snippets/shield/quick-start/python-flask/Step2.mdx";
+import Step3PythonFlask from "@/snippets/shield/quick-start/python-flask/Step3.mdx";
+import Step4PythonFlask from "@/snippets/shield/quick-start/python-flask/Step4.mdx";
+import Step5PythonFlask from "@/snippets/shield/quick-start/python-flask/Step5.mdx";
 import Step1Remix from "@/snippets/shield/quick-start/remix/Step1.mdx";
 import Step3Remix from "@/snippets/shield/quick-start/remix/Step3.mdx";
 import Step4Remix from "@/snippets/shield/quick-start/remix/Step4.mdx";
@@ -107,6 +121,8 @@ In your project root, run the following command to install the SDK:
   <Step1NestJs slot="nest-js" />
   <Step1NextJs slot="next-js" />
   <Step1NodeJs slot="node-js" />
+  <Step1PythonFastapi slot="python-fastapi" />
+  <Step1PythonFlask slot="python-flask" />
   <Step1Remix slot="remix" />
   <Step1SvelteKit slot="sveltekit" />
 </SlotByFramework>
@@ -122,6 +138,8 @@ project root.
   <Step2SetEnv slot="nest-js" />
   <Step2 slot="next-js" />
   <Step2SetEnv slot="node-js" />
+  <Step2PythonFastapi slot="python-fastapi" />
+  <Step2PythonFlask slot="python-flask" />
   <Step2 slot="remix" />
   <Step2 slot="sveltekit" />
 </SlotByFramework>
@@ -133,6 +151,8 @@ project root.
   <Step3NestJs slot="nest-js" />
   <Step3NextJs slot="next-js" />
   <Step3NodeJs slot="node-js" />
+  <Step3PythonFastapi slot="python-fastapi" />
+  <Step3PythonFlask slot="python-flask" />
   <Step3Remix slot="remix" />
   <Step3SvelteKit slot="sveltekit" />
 </SlotByFramework>
@@ -142,6 +162,8 @@ project root.
   <Step4NestJs slot="nest-js" />
   <Step4 slot="next-js" />
   <Step4NodeJs slot="node-js" />
+  <Step4PythonFastapi slot="python-fastapi" />
+  <Step4PythonFlask slot="python-flask" />
   <Step4Remix slot="remix" />
   <Step4SvelteKit slot="sveltekit" />
 </SlotByFramework>
@@ -158,6 +180,8 @@ and is a constant, so you can use it as part of your tests.
   <Step5NestJs slot="nest-js" />
   <Step5 slot="next-js" />
   <Step5NodeJs slot="node-js" />
+  <Step5PythonFastapi slot="python-fastapi" />
+  <Step5PythonFlask slot="python-flask" />
   <Step5Remix slot="remix" />
   <Step5SvelteKit slot="sveltekit" />
 </SlotByFramework>

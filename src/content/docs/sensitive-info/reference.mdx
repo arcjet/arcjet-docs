@@ -6,6 +6,8 @@ frameworks:
   - nest-js
   - next-js
   - node-js
+  - python-fastapi
+  - python-flask
   - remix
   - sveltekit
 ajToc:
@@ -59,7 +61,7 @@ ajToc:
     anchor: "testing"
 ---
 
-import { Badge } from "@astrojs/starlight/components";
+import { Badge, Tabs, TabItem } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 
 import SlotByFramework from "@/components/SlotByFramework";
@@ -79,6 +81,8 @@ import DecisionLogBun from "@/snippets/sensitive-info/reference/bun/DecisionLog.
 import DecisionLogNestJs from "@/snippets/sensitive-info/reference/nestjs/DecisionLog.mdx";
 import DecisionLogNextJs from "@/snippets/sensitive-info/reference/nextjs/DecisionLog.mdx";
 import DecisionLogNodeJs from "@/snippets/sensitive-info/reference/nodejs/DecisionLog.mdx";
+import DecisionLogPythonFastapi from "@/snippets/sensitive-info/reference/python-fastapi/DecisionLog.mdx";
+import DecisionLogPythonFlask from "@/snippets/sensitive-info/reference/python-flask/DecisionLog.mdx";
 import DecisionLogRemix from "@/snippets/sensitive-info/reference/remix/DecisionLog.mdx";
 import DecisionLogSvelteKit from "@/snippets/sensitive-info/reference/sveltekit/DecisionLog.mdx";
 
@@ -86,6 +90,8 @@ import ErrorsBun from "@/snippets/sensitive-info/reference/bun/Errors.mdx";
 import ErrorsNestJs from "@/snippets/sensitive-info/reference/nestjs/Errors.mdx";
 import ErrorsNextJs from "@/snippets/sensitive-info/reference/nextjs/Errors.mdx";
 import ErrorsNodeJs from "@/snippets/sensitive-info/reference/nodejs/Errors.mdx";
+import ErrorsPythonFastapi from "@/snippets/sensitive-info/reference/python-fastapi/Errors.mdx";
+import ErrorsPythonFlask from "@/snippets/sensitive-info/reference/python-flask/Errors.mdx";
 import ErrorsRemix from "@/snippets/sensitive-info/reference/remix/Errors.mdx";
 import ErrorsSvelteKit from "@/snippets/sensitive-info/reference/sveltekit/Errors.mdx";
 
@@ -93,6 +99,8 @@ import CustomDetectBun from "@/snippets/sensitive-info/reference/bun/CustomDetec
 import CustomDetectNestJs from "@/snippets/sensitive-info/reference/nestjs/CustomDetect.mdx";
 import CustomDetectNextJs from "@/snippets/sensitive-info/reference/nextjs/CustomDetect.mdx";
 import CustomDetectNodeJs from "@/snippets/sensitive-info/reference/nodejs/CustomDetect.mdx";
+import CustomDetectPythonFastapi from "@/snippets/sensitive-info/reference/python-fastapi/CustomDetect.mdx";
+import CustomDetectPythonFlask from "@/snippets/sensitive-info/reference/python-flask/CustomDetect.mdx";
 import CustomDetectRemix from "@/snippets/sensitive-info/reference/remix/CustomDetect.mdx";
 import CustomDetectSvelteKit from "@/snippets/sensitive-info/reference/sveltekit/CustomDetect.mdx";
 
@@ -117,11 +125,13 @@ result in an `ALLOW` decision for any detected sensitive information that is not
 specified in the `deny` list.
 
 The `arcjet` client can be configured with one or more Sensitive information
-rules, which are constructed with the
-`sensitiveInfo(options: SensitiveInfoOptionsAllow | SensitiveInfoOptionsDeny)`
-function and configured by `SensitiveInfoOptionsAllow` or
-`SensitiveInfoOptionsDeny`:
+rules. In JavaScript / TypeScript these are constructed with
+`sensitiveInfo(options: SensitiveInfoOptionsAllow | SensitiveInfoOptionsDeny)`.
+In Python they are constructed with the `detect_sensitive_info(...)` factory.
+`allow` and `deny` are mutually exclusive in both languages.
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 ```ts
 type SensitiveInfoOptionsAllow = {
   mode?: "LIVE" | "DRY_RUN";
@@ -143,6 +153,35 @@ type SensitiveInfoOptionsDeny = {
   detect?: (tokens: string[]) -> Array<SensitiveInfoType | undefined>;
 };
 ```
+</TabItem>
+<TabItem label="Python">
+```py
+# Signature for arcjet.detect_sensitive_info
+def detect_sensitive_info(
+    *,
+    # Mode.LIVE blocks requests; Mode.DRY_RUN logs only. Defaults to Mode.LIVE.
+    mode: Mode = Mode.LIVE,
+    # Entity types to allow (report only). Mutually exclusive with `deny`.
+    allow: Sequence[str | SensitiveInfoEntityType] = (),
+    # Entity types to deny. Mutually exclusive with `allow`.
+    deny: Sequence[str | SensitiveInfoEntityType] = (),
+    # Optional context window size for detection
+    context_window_size: int | None = None,
+    # You can also provide a custom detection function to detect other types
+    # of sensitive information (see below).
+    detect: Callable[[list[str]], Sequence[str | None]] | None = None,
+    # Rate-limit characteristics (see https://docs.arcjet.com/fingerprints)
+    characteristics: Sequence[str] = (),
+) -> SensitiveInfoDetection: ...
+
+# Built-in entity types (SensitiveInfoEntityType enum members):
+# - SensitiveInfoEntityType.EMAIL
+# - SensitiveInfoEntityType.PHONE_NUMBER
+# - SensitiveInfoEntityType.IP_ADDRESS
+# - SensitiveInfoEntityType.CREDIT_CARD_NUMBER
+```
+</TabItem>
+</Tabs>
 
 <DisplayType type="ArcjetSensitiveInfoType" from="arcjet" />
 
@@ -186,15 +225,26 @@ This function returns a `Promise` that resolves to an
   client IP address. See the SDK reference for more information.
 
 You check if a deny conclusion has been returned by a sensitive info rule by using
-`decision.isDenied()` and `decision.reason.isSensitiveInfo()` respectively.
+`decision.isDenied()` and `decision.reason.isSensitiveInfo()` (JS) /
+`decision.is_denied()` and `decision.reason_v2.type == "SENSITIVE_INFO"` (Python).
 
 You can iterate through the results and check whether a sensitive info rule was applied:
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 ```ts
 for (const result of decision.results) {
   console.log("Rule Result", result);
 }
 ```
+</TabItem>
+<TabItem label="Python">
+```py
+for result in decision.results:
+    print("Rule Result", result)
+```
+</TabItem>
+</Tabs>
 
 This example will log the full result as well as the sensitive info rule:
 
@@ -203,6 +253,8 @@ This example will log the full result as well as the sensitive info rule:
   <DecisionLogNestJs slot="nest-js" />
   <DecisionLogNextJs slot="next-js" />
   <DecisionLogNodeJs slot="node-js" />
+  <DecisionLogPythonFastapi slot="python-fastapi" />
+  <DecisionLogPythonFlask slot="python-flask" />
   <DecisionLogRemix slot="remix" />
   <DecisionLogSvelteKit slot="sveltekit" />
 </SlotByFramework>
@@ -273,6 +325,8 @@ this value.
   <CustomDetectNestJs slot="nest-js" />
   <CustomDetectNextJs slot="next-js" />
   <CustomDetectNodeJs slot="node-js" />
+  <CustomDetectPythonFastapi slot="python-fastapi" />
+  <CustomDetectPythonFlask slot="python-flask" />
   <CustomDetectRemix slot="remix" />
   <CustomDetectSvelteKit slot="sveltekit" />
 </SlotByFramework>
@@ -298,6 +352,8 @@ conclusion will be `ERROR`.
   <ErrorsNestJs slot="nest-js" />
   <ErrorsNextJs slot="next-js" />
   <ErrorsNodeJs slot="node-js" />
+  <ErrorsPythonFastapi slot="python-fastapi" />
+  <ErrorsPythonFlask slot="python-flask" />
   <ErrorsRemix slot="remix" />
   <ErrorsSvelteKit slot="sveltekit" />
 </SlotByFramework>

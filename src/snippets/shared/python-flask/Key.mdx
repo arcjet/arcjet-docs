@@ -1,0 +1,12 @@
+Add your key to a `.env` file in your project root. The Flask CLI loads `.env`
+automatically when [`python-dotenv`](https://github.com/theskumar/python-dotenv)
+is installed. Arcjet does not read `ARCJET_KEY` automatically — your
+application must pass it explicitly to `arcjet_sync(key=...)`.
+
+```ini title=".env"
+# Run Arcjet in development <https://docs.arcjet.com/environment#arcjet-env>.
+ARCJET_ENV=development
+# Arcjet key for your site (from <https://app.arcjet.com>).
+# More info: <https://docs.arcjet.com/environment#arcjet-key>.
+ARCJET_KEY=ajkey_yourkey
+```
