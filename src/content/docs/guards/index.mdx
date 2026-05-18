@@ -3,7 +3,7 @@ title: Arcjet Guards
 description: "Security rules for AI agents and tool calls. Rate limiting, prompt injection detection, and PII blocking that runs anywhere — inside tool handlers, queue consumers, and agentic pipelines."
 ---
 
-import { Aside } from "@astrojs/starlight/components";
+import { Aside, Tabs, TabItem } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 
 Guards apply Arcjet security rules **inside AI agent tool calls** and anywhere else you process untrusted input. Pass inputs directly, get a decision back. No `Request` object needed.
@@ -28,91 +28,755 @@ A runaway agent loop burns $8,000 in model spend overnight. Guards enforces per-
 
 A background job ships support tickets to a third-party LLM for summarization. Guards blocks personally identifiable information (emails, card numbers, etc.) before the message leaves your system.
 
+## Guard vs. Protect
+
+Arcjet has two entrypoints. Pick the one that matches the surface you need to
+secure:
+
+|                                 | Protect (request SDKs)             | Guard (`@arcjet/guard`, `arcjet.guard`) |
+| ------------------------------- | :--------------------------------: | :-------------------------------------: |
+| Designed for                    | HTTP route handlers, API endpoints | AI tool calls, MCP servers, queue workers, background jobs |
+| Request object                  | Required (`protect(request, ...)`) | Not needed — pass inputs directly       |
+| Rule binding                    | Rules configured once, input via `protect()` kwargs / options | Rules configured as classes, called with input per invocation |
+| Rate limit key                  | IP or `characteristics` dict       | Explicit `key` string at call time      |
+| Rate Limiting                   |                 ✅                  |                   ✅                    |
+| Prompt Injection Detection      |                 ✅                  |                   ✅                    |
+| Sensitive Information Detection |                 ✅                  |                   ✅                    |
+| Custom Rules                    |                 —                  |                   ✅                    |
+| Bot Protection                  |                 ✅                  |                   —                    |
+| Shield WAF                      |                 ✅                  |                   —                    |
+| Email Validation                |                 ✅                  |                   —                    |
+| Request Filters                 |                 ✅                  |                   —                    |
+| IP Analysis                     |                 ✅                  |                   —                    |
+
+A single application can use both — request-based protection on API routes and
+guards inside tool handlers / queue workers. Both share the same Arcjet account
+and dashboard.
+
+## When to use Guards
+
+Use a guard wherever an Arcjet decision is needed but no HTTP request exists:
+
+- **AI agent tool calls** — inside each tool/skill function so denied actions
+  never reach the LLM call site.
+- **MCP servers** — stdio or SSE-based MCP servers don't receive HTTP requests
+  from the LLM client. Guard each tool handler with a hardcoded `label`.
+- **Queue consumers / background jobs** — protect per-job budgets and scan job
+  payloads for prompt injection or PII before processing.
+- **Agentic pipelines** — fan-out workflows (e.g. one user prompt → many
+  downstream tool calls) need per-step enforcement that survives the boundary
+  between services.
+- **Re-checking content returned to the model** — guard prompt injection on
+  tool *results* when the tool fetches untrusted content (web pages, third
+  party APIs).
+
+If the protection site already has a `Request` object — Express, Next.js
+route handlers, FastAPI handlers, Lambda HTTP events — use the request-based
+SDKs instead. Request-based SDKs include extra signals (IP analysis, headers,
+bot fingerprinting) that guards do not.
+
 ## Get started
 
-Install the `add-guard-protection` skill into your AI coding agent. It will detect your language, install the package, configure rules, and wire up `guard()` calls inline in your tool handlers.
+Install the `add-guard-protection` skill into your AI coding agent. It will
+detect your language, install the package, configure rules, and wire up
+`guard()` calls inline in your tool handlers.
 
-Supported languages: **JavaScript / TypeScript** (`@arcjet/guard` >= 1.4.0) and **Python** (`arcjet` >= 0.7.0).
+Supported languages: **JavaScript / TypeScript** (`@arcjet/guard` >= 1.4.0) and
+**Python** (`arcjet` >= 0.7.0).
 
 ```bash
 npx skills add arcjet/skills --skill add-guard-protection
 ```
 
-Then describe what you want to protect — for example: *"rate limit my tool calls per user and block prompt injection"* or *"secure my MCP server"* or *"protect my queue worker"*.
+Then describe what you want to protect — for example: *"rate limit my tool
+calls per user and block prompt injection"* or *"secure my MCP server"* or
+*"protect my queue worker"*.
 
-## Examples
+### Manual install
 
-### JavaScript
+If you'd rather wire it up by hand:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```bash
+npm install @arcjet/guard
+```
+
+Requires Node.js / Bun / Deno and `@arcjet/guard` >= 1.4.0.
+
+</TabItem>
+<TabItem label="Python">
+
+```bash
+pip install arcjet
+# or
+uv add arcjet
+```
+
+Requires Python 3.10+ and `arcjet` >= 0.7.0. Guard ships in the `arcjet`
+package — there is no separate package to install.
+
+</TabItem>
+</Tabs>
+
+Set `ARCJET_KEY` in your environment — retrieve it from the
+[Arcjet dashboard](https://app.arcjet.com), the
+<Link.Page href="/cli">Arcjet CLI</Link.Page>, or the
+<Link.Page href="/mcp-server">MCP server</Link.Page>.
+
+## Architecture
+
+### Client at module scope
+
+The guard client holds a persistent connection to the Arcjet decision service.
+Create it **once** at module scope and reuse it for every call:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
 ```ts
-import { launchArcjet, tokenBucket, detectPromptInjection } from "@arcjet/guard";
+import { launchArcjet } from "@arcjet/guard";
 
 const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+import os
+from arcjet.guard import launch_arcjet  # launch_arcjet_sync for sync code
+
+arcjet = launch_arcjet(key=os.environ["ARCJET_KEY"])
+```
+
+Use `launch_arcjet` for async code (FastAPI handlers, agent loops with
+`AsyncOpenAI`, etc.) and `launch_arcjet_sync` for sync code (Celery tasks,
+Flask jobs).
+
+</TabItem>
+</Tabs>
+
+### Rules at module scope
+
+Rate limit state is tracked server-side by the rule's `bucket` name, so
+recreating rules per call won't break counting. However, you should still
+declare rules at module scope:
+
+- The per-rule result accessors (`userLimit.deniedResult(decision)` in JS,
+  `user_limit.denied_result(decision)` in Python) only work when you have a
+  stable reference.
+- It avoids unnecessary object allocation on every invocation.
+- It keeps rule configuration visible and centralized.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+import { tokenBucket, detectPromptInjection } from "@arcjet/guard";
 
 const userLimit = tokenBucket({
-  label: "user.tool_call_bucket",
-  bucket: "tool-calls",
-  refillRate: 100,
+  refillRate: 10,
   intervalSeconds: 60,
-  maxTokens: 500,
+  maxTokens: 100,
+  bucket: "user-tools", // name explicitly to avoid collisions across rules
 });
 
 const piRule = detectPromptInjection();
-
-async function searchWeb(query: string, userId: string) {
-  const decision = await arcjet.guard({
-    label: "tools.search_web",
-    metadata: { userId },
-    rules: [
-      userLimit({ key: userId, requested: 1 }),
-      piRule(query),
-    ],
-  });
-
-  if (decision.conclusion === "DENY") {
-    throw new Error(`Blocked: ${decision.reason}`);
-  }
-
-  // Safe to proceed
-}
 ```
 
-### Python
+</TabItem>
+<TabItem label="Python">
 
-```python
-import os
-from arcjet.guard import launch_arcjet, TokenBucket, DetectPromptInjection
-
-arcjet = launch_arcjet(key=os.environ["ARCJET_KEY"])
+```py
+from arcjet.guard import TokenBucket, DetectPromptInjection
 
 user_limit = TokenBucket(
-    label="user.tool_call_bucket",
-    bucket="tool-calls",
-    refill_rate=100,
+    refill_rate=10,
     interval_seconds=60,
-    max_tokens=500,
+    max_tokens=100,
+    bucket="user-tools",  # name explicitly to avoid collisions across rules
 )
 
 pi_rule = DetectPromptInjection()
+```
 
-async def search_web(query: str, user_id: str):
+</TabItem>
+</Tabs>
+
+### `guard()` at the operation, with a hardcoded label
+
+Call `guard()` wherever you already know exactly what operation is happening
+— usually inside the specific tool/task function. The `label` should be a
+hardcoded string literal (`"tools.get_weather"`, not `` `tools.${name}` ``).
+Hardcoded labels stay greppable and the dashboard groups by them; interpolation
+produces a sea of distinct-looking calls.
+
+Pass `metadata` whenever you have useful auditing context (`userId`,
+`requestId`, etc.) — it appears in the dashboard alongside the decision and
+makes debugging much easier.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+async function getWeather(city: string, userId: string) {
+  const decision = await arcjet.guard({
+    label: "tools.get_weather",
+    rules: [userLimit({ key: userId, requested: 1 })],
+    metadata: { userId },
+  });
+  if (decision.conclusion === "DENY") {
+    throw new Error(`Blocked: ${decision.reason}`);
+  }
+  // ... do the work
+}
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+async def get_weather(city: str, user_id: str):
     decision = await arcjet.guard(
-        label="tools.search_web",
+        label="tools.get_weather",
+        rules=[user_limit(key=user_id, requested=1)],
         metadata={"user_id": user_id},
+    )
+    if decision.conclusion == "DENY":
+        raise RuntimeError(f"Blocked: {decision.reason}")
+    # ... do the work
+```
+
+</TabItem>
+</Tabs>
+
+## Rules
+
+Every guard rule accepts `mode` (`"LIVE"` enforces, `"DRY_RUN"` logs only),
+`label` (an observability label that appears in the dashboard), and `metadata`
+(arbitrary key-value context).
+
+### Rate limiting
+
+Three algorithms are available — pick the one that matches the cost model of
+the operation you're protecting:
+
+- **Token bucket** — variable cost per call (e.g. LLM token spend). Bursts up
+  to `maxTokens`, refills at `refillRate` per `intervalSeconds`.
+- **Fixed window** — hard cap per window (e.g. 1000 tool calls per hour).
+  Resets at window boundaries.
+- **Sliding window** — smooth limit without boundary bursts (e.g. 500
+  requests per rolling 60 seconds).
+
+All three require a `key` and a `bucket` name at call time. Without a `key`,
+limits would be global across all callers.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+import { tokenBucket, fixedWindow, slidingWindow } from "@arcjet/guard";
+
+const userLimit = tokenBucket({
+  refillRate: 100,
+  intervalSeconds: 60,
+  maxTokens: 1000,
+  bucket: "user-tools",
+});
+
+const teamLimit = fixedWindow({
+  maxRequests: 1000,
+  windowSeconds: 3600,
+  bucket: "team-api",
+});
+
+const apiLimit = slidingWindow({
+  maxRequests: 500,
+  intervalSeconds: 60,
+  bucket: "public-api",
+});
+
+// At call time:
+const decision = await arcjet.guard({
+  label: "tools.weather",
+  rules: [userLimit({ key: userId, requested: 5 })],
+});
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+from arcjet.guard import TokenBucket, FixedWindow, SlidingWindow
+
+user_limit = TokenBucket(
+    refill_rate=100,
+    interval_seconds=60,
+    max_tokens=1000,
+    bucket="user-tools",
+)
+
+team_limit = FixedWindow(
+    max_requests=1000,
+    window_seconds=3600,
+    bucket="team-api",
+)
+
+api_limit = SlidingWindow(
+    max_requests=500,
+    interval_seconds=60,
+    bucket="public-api",
+)
+
+# At call time:
+decision = await arcjet.guard(
+    label="tools.weather",
+    rules=[user_limit(key=user_id, requested=5)],
+)
+```
+
+</TabItem>
+</Tabs>
+
+**Picking a `key` when there's no user:** some call sites have no per-user
+context — a stdio MCP server where the client is the only caller, or a
+single-tenant worker. Don't fake it with an empty string. Use an identifier
+that matches the scope of the limit (deployment name, hostname, the MCP
+session id if exposed) and add a comment if it's deliberately global.
+
+### Prompt injection detection
+
+Use on any untrusted text before it reaches a model or is used as a tool
+argument. Also useful on tool call *results* when the tool fetches content
+from untrusted sources (web pages, third-party APIs).
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+import { detectPromptInjection } from "@arcjet/guard";
+
+const piRule = detectPromptInjection();
+
+const decision = await arcjet.guard({
+  label: "tools.weather",
+  rules: [piRule(userMessage)],
+});
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+from arcjet.guard import DetectPromptInjection
+
+pi_rule = DetectPromptInjection()
+
+decision = await arcjet.guard(
+    label="tools.weather",
+    rules=[pi_rule(user_message)],
+)
+```
+
+</TabItem>
+</Tabs>
+
+### Sensitive information detection
+
+Detects PII (email addresses, phone numbers, IP addresses, credit card
+numbers) in text **locally via WASM** — the raw text never leaves the SDK,
+which matters for compliance. Built-in entity types: `EMAIL`, `PHONE_NUMBER`,
+`IP_ADDRESS`, `CREDIT_CARD_NUMBER`.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+import { localDetectSensitiveInfo } from "@arcjet/guard";
+
+const sensitive = localDetectSensitiveInfo({
+  deny: ["EMAIL", "CREDIT_CARD_NUMBER"],
+});
+
+const decision = await arcjet.guard({
+  label: "tools.send_email",
+  rules: [sensitive(userInput)],
+});
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+from arcjet.guard import LocalDetectSensitiveInfo
+
+sensitive = LocalDetectSensitiveInfo(deny=["EMAIL", "CREDIT_CARD_NUMBER"])
+
+decision = await arcjet.guard(
+    label="tools.send_email",
+    rules=[sensitive(user_input)],
+)
+```
+
+</TabItem>
+</Tabs>
+
+`allow` and `deny` are mutually exclusive — pass only one.
+
+### Custom rules
+
+Custom rules let you plug in arbitrary local evaluation logic with typed
+config, input, and result data. They run inside the SDK — no data leaves
+your environment.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+See the [`@arcjet/guard` README](https://github.com/arcjet/arcjet-js/tree/main/arcjet-guard#custom-rules)
+for the full TypeScript API.
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+from typing import TypedDict
+from arcjet.guard import LocalCustomRule, CustomEvaluateResult
+
+
+class TopicConfig(TypedDict):
+    blocked_topic: str
+
+
+class TopicInput(TypedDict):
+    topic: str
+
+
+class TopicData(TypedDict):
+    matched: str
+
+
+class TopicBlockRule(LocalCustomRule[TopicConfig, TopicInput, TopicData]):
+    def evaluate(self, config, input):
+        if input["topic"] == config["blocked_topic"]:
+            return CustomEvaluateResult(
+                conclusion="DENY",
+                data={"matched": input["topic"]},
+            )
+        return CustomEvaluateResult(conclusion="ALLOW")
+
+
+rule = TopicBlockRule(config={"blocked_topic": "weapons"})
+inp = rule(data={"topic": user_topic})
+decision = await arcjet.guard(label="content", rules=[inp])
+
+r = inp.result(decision)
+if r and r.conclusion == "DENY":
+    print(f"Blocked topic: {r.data['matched']}")
+```
+
+For sync code, override `evaluate` (as shown). For async code, override
+`evaluate_async` instead.
+
+</TabItem>
+</Tabs>
+
+## Decision handling
+
+`decision.conclusion` is either `"ALLOW"` or `"DENY"`. Always check before
+proceeding. For useful error messages, branch on **which rule** denied — not
+just on `DENY`. Each rule defined at module scope exposes typed result
+accessors that return rule-specific info (e.g. remaining tokens, reset time)
+for actionable error messages.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+if (decision.conclusion === "DENY") {
+  const rateLimited = userLimit.deniedResult(decision);
+  if (rateLimited) {
+    throw new Error(
+      `Rate limited — retry in ${rateLimited.resetInSeconds}s`,
+    );
+  }
+  if (decision.reason.isPromptInjection()) {
+    throw new Error("Input flagged as prompt injection");
+  }
+  throw new Error("Blocked");
+}
+
+// hasError() means a rule errored or the server reported diagnostics.
+// The SDK failed open — log it but don't block the caller.
+if (decision.hasError()) {
+  console.warn("Arcjet rule error");
+}
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+import time
+
+if decision.conclusion == "DENY":
+    rate_limited = user_limit.denied_result(decision)
+    if rate_limited:
+        retry_in = max(
+            0, rate_limited.reset_at_unix_seconds - int(time.time())
+        )
+        raise RuntimeError(f"Rate limited — retry in {retry_in}s")
+    if decision.reason == "PROMPT_INJECTION":
+        raise RuntimeError("Input flagged as prompt injection")
+    raise RuntimeError("Blocked")
+
+# has_error() means a rule errored or the server reported diagnostics.
+# The SDK failed open — log it but don't block the caller.
+if decision.has_error():
+    logger.warning("Arcjet rule error")
+```
+
+In Python, the guard's `decision.reason` is a string literal
+(`"RATE_LIMIT" | "PROMPT_INJECTION" | "SENSITIVE_INFO" | "CUSTOM" | "ERROR" | "NOT_RUN" | "UNKNOWN"`).
+Rate limit denied results expose `reset_at_unix_seconds`, `remaining_tokens`,
+`max_tokens` (token bucket) or `remaining_requests`, `max_requests` (fixed
+and sliding window).
+
+</TabItem>
+</Tabs>
+
+## DRY_RUN mode
+
+Every guard rule accepts a `mode` parameter. Use `"DRY_RUN"` to evaluate rules
+without blocking — decisions are logged in the Arcjet dashboard but the
+conclusion is always `"ALLOW"`. This lets you tune rule configuration in
+production before promoting to `"LIVE"`.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+const userLimit = tokenBucket({
+  refillRate: 10,
+  intervalSeconds: 60,
+  maxTokens: 100,
+  bucket: "user-tools",
+  mode: "DRY_RUN",
+});
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+user_limit = TokenBucket(
+    refill_rate=10,
+    interval_seconds=60,
+    max_tokens=100,
+    bucket="user-tools",
+    mode="DRY_RUN",
+)
+```
+
+</TabItem>
+</Tabs>
+
+## Common patterns
+
+### Guarding an MCP tool
+
+MCP servers don't receive HTTP requests — they're invoked by an MCP client
+over stdio or SSE. Use a guard at the tool handler with a hardcoded label
+and a `key` that matches the scope of your server (single-user, single-tenant,
+or session-based).
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+server.tool("query_database", async ({ query, sessionId }) => {
+  const decision = await arcjet.guard({
+    label: "mcp.query_database",
+    rules: [
+      queryLimit({ key: sessionId ?? "default", requested: 1 }),
+      piRule(query),
+    ],
+    metadata: { sessionId },
+  });
+
+  if (decision.conclusion === "DENY") {
+    return { content: [{ type: "text", text: "Blocked by Arcjet" }] };
+  }
+
+  // ... execute the query
+});
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+@mcp.tool()
+async def query_database(query: str, session_id: str | None = None):
+    decision = await arcjet.guard(
+        label="mcp.query_database",
         rules=[
-            user_limit(key=user_id, requested=1),
+            query_limit(key=session_id or "default", requested=1),
             pi_rule(query),
         ],
+        metadata={"session_id": session_id or ""},
     )
 
     if decision.conclusion == "DENY":
-        raise RuntimeError(f"Blocked: {decision.reason}")
+        return [{"type": "text", "text": "Blocked by Arcjet"}]
 
-    # Safe to proceed
+    # ... execute the query
 ```
 
-## Source
+</TabItem>
+</Tabs>
 
+### Guarding tool *results*
+
+Prompt injection can arrive through tool results — a `fetch` tool retrieves
+a page containing hidden instructions, which then re-enter the model context.
+Guard the result as well as the input:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+async function fetchTool({ url }: { url: string }, userId: string) {
+  const content = await fetch(url).then((r) => r.text());
+
+  const decision = await arcjet.guard({
+    label: "tools.fetch",
+    metadata: { userId },
+    rules: [piRule(content)],
+  });
+
+  if (decision.conclusion === "DENY") {
+    // Return a safe placeholder rather than the injected content
+    return { content: "[Content blocked: prompt injection detected]" };
+  }
+
+  return { content };
+}
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+import httpx
+
+async def fetch_tool(url: str, user_id: str) -> dict:
+    async with httpx.AsyncClient() as client:
+        content = (await client.get(url)).text
+
+    decision = await arcjet.guard(
+        label="tools.fetch",
+        metadata={"user_id": user_id},
+        rules=[pi_rule(content)],
+    )
+
+    if decision.conclusion == "DENY":
+        # Return a safe placeholder rather than the injected content
+        return {"content": "[Content blocked: prompt injection detected]"}
+
+    return {"content": content}
+```
+
+</TabItem>
+</Tabs>
+
+### Queue worker / background job
+
+Use the sync variant of the guard client when running inside a sync
+framework (Celery, Flask jobs). Pass the user ID from the job payload as the
+rate-limit `key`:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+// Bull / BullMQ worker example
+worker.process(async (job) => {
+  const decision = await arcjet.guard({
+    label: "queue.summarize",
+    rules: [
+      userTaskLimit({ key: job.data.userId, requested: 1 }),
+      piRule(job.data.input),
+    ],
+    metadata: { userId: job.data.userId, jobId: job.id },
+  });
+
+  if (decision.conclusion === "DENY") {
+    throw new Error("Blocked by Arcjet");
+  }
+
+  // ... process the job
+});
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+# Celery task example — use launch_arcjet_sync for sync workers
+from arcjet.guard import launch_arcjet_sync, TokenBucket, DetectPromptInjection
+
+arcjet = launch_arcjet_sync(key=os.environ["ARCJET_KEY"])
+user_task_limit = TokenBucket(
+    refill_rate=10,
+    interval_seconds=60,
+    max_tokens=100,
+    bucket="queue-tasks",
+)
+pi_rule = DetectPromptInjection()
+
+
+@celery.task
+def summarize(payload: dict):
+    decision = arcjet.guard(
+        label="queue.summarize",
+        rules=[
+            user_task_limit(key=payload["user_id"], requested=1),
+            pi_rule(payload["input"]),
+        ],
+        metadata={"user_id": payload["user_id"]},
+    )
+
+    if decision.conclusion == "DENY":
+        raise RuntimeError("Blocked by Arcjet")
+
+    # ... process the task
+```
+
+</TabItem>
+</Tabs>
+
+## Best practices
+
+- **Hardcode the `label` string.** Use `"tools.get_weather"`, not
+  `` `tools.${name}` ``. Hardcoded labels stay greppable and the dashboard
+  groups by them.
+- **Pass `metadata` for auditing.** `userId`, `sessionId`, `requestId` all
+  show up alongside the decision in the dashboard.
+- **Always set `bucket` on rate limit rules.** Default buckets share counters
+  across all rules of that type.
+- **Always pass a `key` to rate limit rules.** Without it, limits are global
+  across all callers.
+- **Branch on the denied result, not just `DENY`.** Specific error messages
+  help callers retry intelligently (e.g. "rate limited — retry in 12s" vs a
+  generic "blocked").
+- **Fail open on errors.** `decision.hasError()` (JS) / `decision.has_error()`
+  (Python) means a rule errored but the SDK didn't block. Log it; don't deny.
+
+## Reference
+
+- <Link.Page href="/reference/python#guard">Arcjet Python SDK reference: Guard</Link.Page>
 - [arcjet/skills](https://github.com/arcjet/skills) — AI coding agent skills for Arcjet
-- [arcjet/arcjet-js](https://github.com/arcjet/arcjet-js) — JavaScript / TypeScript SDK (`@arcjet/guard`)
-- [arcjet/arcjet-py](https://github.com/arcjet/arcjet-py) — Python SDK (`arcjet`) ([reference](/reference/python))
+- [arcjet/arcjet-js](https://github.com/arcjet/arcjet-js/tree/main/arcjet-guard) — JavaScript / TypeScript SDK (`@arcjet/guard`)
+- [arcjet/arcjet-py](https://github.com/arcjet/arcjet-py) — Python SDK (`arcjet`)
