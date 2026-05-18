@@ -1,4 +1,5 @@
 import os
+import time
 
 from arcjet.guard import DetectPromptInjection, TokenBucket, launch_arcjet
 
@@ -31,9 +32,8 @@ async def handle_tool_call(user_id: str, message: str) -> str:
         # Branch on which rule denied to give the caller something actionable
         rate_limited = user_limit.denied_result(decision)
         if rate_limited:
-            raise RuntimeError(
-                f"Rate limited — retry in {rate_limited.reset_in_seconds}s"
-            )
+            retry_in = max(0, rate_limited.reset_at_unix_seconds - int(time.time()))
+            raise RuntimeError(f"Rate limited — retry in {retry_in}s")
         raise RuntimeError("Blocked")
 
     # Safe to proceed with the tool call

@@ -260,15 +260,16 @@ object. The sync client returns the `ArcjetDecision` directly.
 
 All parameters are optional keyword arguments passed alongside the `request`:
 
-| Parameter                          | Type              | Used by                  |
-| ---------------------------------- | ----------------- | ------------------------ |
-| `requested`                        | `int`             | Token bucket rate limit  |
-| `characteristics`                  | `dict[str, Any]`  | Rate limiting (pass values for keys declared in rule config) |
-| `detect_prompt_injection_message`  | `str`             | Prompt injection detection |
-| `sensitive_info_value`             | `str`             | Sensitive info detection |
-| `email`                            | `str`             | Email validation         |
-| `filter_local`                     | `dict[str, str]`  | Request filters (`local.*` fields) |
-| `ip_src`                           | `str`             | Manual IP override (advanced) |
+| Parameter                          | Type                   | Used by                  |
+| ---------------------------------- | ---------------------- | ------------------------ |
+| `requested`                        | `int`                  | Token bucket rate limit  |
+| `characteristics`                  | `Mapping[str, Any]`    | Rate limiting (pass values for keys declared in rule config) |
+| `detect_prompt_injection_message`  | `str`                  | Prompt injection detection |
+| `sensitive_info_value`             | `str`                  | Sensitive info detection |
+| `email`                            | `str`                  | Email validation         |
+| `filter_local`                     | `Mapping[str, str]`    | Request filters (`local.*` fields) |
+| `extra`                            | `Mapping[str, str]`    | Forwarded verbatim to the Arcjet Decide API as custom metadata (advanced) |
+| `ip_src`                           | `str`                  | Manual IP override (advanced) |
 
 ### Decision
 
@@ -398,6 +399,10 @@ if decision.ip.is_vpn() or decision.ip.is_proxy() or decision.ip.is_tor():
     # apply your policy for anonymized traffic
     pass
 
+if decision.ip.is_abuser():
+    # IP is associated with known abuse
+    pass
+
 # Typed field access via decision.ip_details
 ip = decision.ip_details
 if ip:
@@ -406,7 +411,11 @@ if ip:
     print(ip.is_vpn, ip.is_hosting)   # reputation
 ```
 
-Available fields include:
+`decision.ip` exposes boolean helpers: `is_hosting()`, `is_vpn()`,
+`is_proxy()`, `is_tor()`, `is_abuser()`.
+
+`decision.ip_details` is an `IpDetails` dataclass (or `None`) with these
+fields:
 
 - **Geolocation**: `latitude`, `longitude`, `accuracy_radius`, `timezone`,
   `postal_code`, `city`, `region`, `country`, `country_name`, `continent`,
@@ -414,7 +423,7 @@ Available fields include:
 - **Network (ASN)**: `asn`, `asn_name`, `asn_domain`, `asn_type` (one of
   `isp`, `hosting`, `business`, `education`), `asn_country`.
 - **Reputation**: `is_vpn`, `is_proxy`, `is_tor`, `is_hosting`, `is_relay`,
-  `service` (e.g. `"Apple Private Relay"`).
+  `is_abuser`, `service` (e.g. `"Apple Private Relay"`).
 
 The IP fields may be missing — `decision.ip_details` itself may be `None`,
 and individual fields may be `None`. Geolocation accuracy varies; country is
@@ -422,7 +431,7 @@ usually reliable, but city and region can be very inaccurate. Use these fields
 for convenience (e.g. suggesting a user location) but do not rely on them
 alone.
 
-#### Example
+#### IP location example
 
 <Code code={IPLocation} title="main.py" lang="py" />
 
@@ -595,14 +604,22 @@ For useful error messages, branch on **which rule** denied — not just on
   the request. Returns `None` otherwise.
 
 ```py
+import time
+
 if decision.conclusion == "DENY":
     rate_limited = user_limit.denied_result(decision)
     if rate_limited:
-        raise TaskBlocked(
-            f"rate limited — retry in {rate_limited.reset_in_seconds}s"
+        retry_in = max(
+            0, rate_limited.reset_at_unix_seconds - int(time.time())
         )
+        raise TaskBlocked(f"rate limited — retry in {retry_in}s")
     raise TaskBlocked("blocked")
 ```
+
+For token bucket rate limits the denied result also exposes `remaining_tokens`,
+`max_tokens`, `refill_rate`, and `refill_interval_seconds`. Fixed and sliding
+window results expose `remaining_requests`, `max_requests`, and
+`reset_at_unix_seconds`.
 
 Hardcode the `label` argument to `guard()` as a string literal (e.g.
 `"tools.get_weather"`, not `f"tools.{name}"`). Hardcoded labels stay
