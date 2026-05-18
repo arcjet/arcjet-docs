@@ -1,7 +1,7 @@
 import logging
 import os
 
-from arcjet import Mode, arcjet, detect_prompt_injection, shield
+from arcjet import Mode, SensitiveInfoEntityType, arcjet, detect_sensitive_info
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from langchain_core.output_parsers import StrOutputParser
@@ -44,12 +44,15 @@ class ChatRequest(BaseModel):
 aj = arcjet(
     key=arcjet_key,  # Get your key from https://app.arcjet.com
     rules=[
-        # Shield protects against common web attacks e.g. SQL injection
-        shield(mode=Mode.LIVE),
-        # Detect prompt injection attacks before they reach your AI model
-        detect_prompt_injection(
+        detect_sensitive_info(
             mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
-            # threshold=0.5,  # Confidence threshold, lower is more strict
+            # Block PII types that should never appear in AI prompts.
+            # Remove types your app legitimately handles (e.g. EMAIL for a
+            # support bot).
+            deny=[
+                SensitiveInfoEntityType.CREDIT_CARD_NUMBER,
+                SensitiveInfoEntityType.EMAIL,
+            ],
         ),
     ],
 )
@@ -57,20 +60,16 @@ aj = arcjet(
 
 @app.post("/chat")
 async def chat(request: Request, body: ChatRequest):
-    # Pass the user message so detect_prompt_injection can score it
-    decision = await aj.protect(
-        request, detect_prompt_injection_message=body.message
-    )
+    # Scan the user message for sensitive information before it reaches the
+    # AI model. Pass the full conversation if you want to scan all messages.
+    decision = await aj.protect(request, sensitive_info_value=body.message)
 
-    if decision.is_denied():
-        if decision.reason_v2.type == "PROMPT_INJECTION":
-            logger.warning("Request blocked due to prompt injection")
-            return JSONResponse(
-                {"error": "Prompt injection detected — please rephrase your message"},
-                status_code=400,
-            )
-        # SHIELD or any other denial
-        return JSONResponse({"error": "Forbidden"}, status_code=403)
+    if decision.is_denied() and decision.reason_v2.type == "SENSITIVE_INFO":
+        logger.warning("Request blocked due to sensitive information")
+        return JSONResponse(
+            {"error": "Sensitive information detected — please remove it from your prompt"},
+            status_code=400,
+        )
 
     # Arcjet approved — call the AI model
     reply = await chain.ainvoke({"message": body.message})

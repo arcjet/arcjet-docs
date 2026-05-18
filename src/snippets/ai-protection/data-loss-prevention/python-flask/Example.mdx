@@ -2,8 +2,8 @@ import Step from "./Example.py?raw";
 import { Code } from "@astrojs/starlight/components";
 
 In this example we use [LangChain](https://www.langchain.com/) to create a
-simple AI chat server with Flask, and Arcjet to block prompt injection attacks
-before they reach the AI model. The same principles can be applied to any AI
+simple AI chat server with Flask, and Arcjet to prevent sensitive information
+from being sent to the AI model. The same principles can be applied to any AI
 application, including those built with other frameworks.
 
 Set up the environment and install dependencies (uses
@@ -37,7 +37,7 @@ And send a message to the API endpoint:
 ```shell
 curl -X POST http://localhost:5000/chat \
   -H "Content-Type: application/json" \
-  -d '{"message": "What is the capital of France?"}'
+  -d '{"message": "My email is test@example.com"}'
 ```
 
 You will see requests being processed in your [Arcjet

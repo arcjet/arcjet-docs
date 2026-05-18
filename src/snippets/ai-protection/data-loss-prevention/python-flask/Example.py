@@ -1,7 +1,12 @@
 import logging
 import os
 
-from arcjet import Mode, arcjet_sync, detect_bot, shield
+from arcjet import (
+    Mode,
+    SensitiveInfoEntityType,
+    arcjet_sync,
+    detect_sensitive_info,
+)
 from flask import Flask, jsonify, request
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
@@ -37,17 +42,14 @@ chain = prompt | llm | StrOutputParser()
 aj = arcjet_sync(
     key=arcjet_key,  # Get your key from https://app.arcjet.com
     rules=[
-        # Shield protects against common web attacks e.g. SQL injection
-        shield(mode=Mode.LIVE),
-        # Block all automated clients — bots inflate AI costs
-        detect_bot(
+        detect_sensitive_info(
             mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
-            allow=[
-                "CURL",  # Allow curl so we can test it (see README)
-                # Uncomment to allow these other common bot categories
-                # See the full list at https://arcjet.com/bot-list
-                # BotCategory.MONITOR, # Uptime monitoring services
-                # BotCategory.PREVIEW, # Link previews e.g. Slack, Discord
+            # Block PII types that should never appear in AI prompts.
+            # Remove types your app legitimately handles (e.g. EMAIL for a
+            # support bot).
+            deny=[
+                SensitiveInfoEntityType.CREDIT_CARD_NUMBER,
+                SensitiveInfoEntityType.EMAIL,
             ],
         ),
     ],
@@ -56,16 +58,20 @@ aj = arcjet_sync(
 
 @app.post("/chat")
 def chat():
-    decision = aj.protect(request)
-
-    if decision.is_denied():
-        if decision.reason_v2.type == "BOT":
-            return jsonify(error="Automated clients are not permitted"), 403
-        return jsonify(error="Forbidden"), 403
-
-    # Arcjet approved — proceed with the AI call
     body = request.get_json()
     message = body.get("message", "") if body else ""
+
+    # Scan the user message for sensitive information before it reaches the
+    # AI model. Pass the full conversation if you want to scan all messages.
+    decision = aj.protect(request, sensitive_info_value=message)
+
+    if decision.is_denied() and decision.reason_v2.type == "SENSITIVE_INFO":
+        logger.warning("Request blocked due to sensitive information")
+        return jsonify(
+            error="Sensitive information detected — please remove it from your prompt"
+        ), 400
+
+    # Arcjet approved — call the AI model
     reply = chain.invoke({"message": message})
 
     return jsonify(reply=reply)
