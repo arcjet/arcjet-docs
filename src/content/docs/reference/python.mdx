@@ -1,0 +1,622 @@
+---
+title: "Arcjet Python SDK reference"
+prev: false
+generateMarkdownRoute: true
+---
+
+import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import Comments from "/src/components/Comments.astro";
+import { Link } from "@/components/link";
+import ConfigurationAsync from "/src/snippets/reference/python/Configuration.py?raw";
+import ConfigurationSync from "/src/snippets/reference/python/ConfigurationSync.py?raw";
+import MultipleRules from "/src/snippets/reference/python/MultipleRules.py?raw";
+import Proxies from "/src/snippets/reference/python/Proxies.py?raw";
+import ProtectAsync from "/src/snippets/reference/python/Protect.py?raw";
+import ProtectSync from "/src/snippets/reference/python/ProtectSync.py?raw";
+import IPLocation from "/src/snippets/reference/python/IPLocation.py?raw";
+import ErrorLogging from "/src/snippets/reference/python/ErrorLogging.py?raw";
+import Guard from "/src/snippets/reference/python/Guard.py?raw";
+
+[![PyPI](https://img.shields.io/pypi/v/arcjet?style=flat-square&label=%E2%9C%A6Aj&labelColor=ECE6F0&color=ECE6F0)](https://pypi.org/project/arcjet/)
+
+This is the reference guide for the Arcjet Python SDK, [available on
+GitHub](https://github.com/arcjet/arcjet-py) and licensed under the Apache 2.0
+license.
+
+<WhatIsArcjet />
+
+## Installation
+
+Install [from PyPI](https://pypi.org/project/arcjet/) with your preferred
+package manager:
+
+{/* prettier-ignore */}
+<Tabs>
+<TabItem label="uv">
+```sh
+uv add arcjet
+```
+</TabItem>
+<TabItem label="pip">
+```sh
+pip install arcjet
+```
+</TabItem>
+</Tabs>
+
+### Requirements
+
+- Python 3.10 or later
+
+## Quick start
+
+Check out the <Link.ToSdk href="/get-started" sdk="python">quick start guide</Link.ToSdk>.
+
+## Protect vs. Guard
+
+The Arcjet Python SDK has two entrypoints. Pick the one that matches the surface
+you need to protect:
+
+- **[Arcjet Protect](#protect)** — `arcjet` (async) and `arcjet_sync` (sync).
+  Protect HTTP request handlers in FastAPI, Flask, Django, and other Python
+  web frameworks. You pass the framework `request` object to `protect()` and
+  get an `ArcjetDecision` back. This is what you want for route handlers and
+  API endpoints.
+- **[Arcjet Guard](#guard)** — `arcjet.guard` (with `launch_arcjet` /
+  `launch_arcjet_sync`). Apply security rules where HTTP middleware can't
+  reach: AI agent tool calls, MCP servers, queue consumers, and background
+  jobs. There is no request object — you pass inputs directly to `guard()`.
+
+| | Protect (`arcjet` / `arcjet_sync`) | Guard (`arcjet.guard`) |
+| --- | --- | --- |
+| Designed for | HTTP request protection | AI agent tool calls, background jobs |
+| Request object | Required (`protect(request, ...)`) | Not needed |
+| Rule binding | Rules configured once, input via `protect()` kwargs | Rules configured as classes, called with input per invocation |
+| Rate limit key | IP or `characteristics` dict | Explicit `key` string (SHA-256 hashed before sending) |
+| Rate limiting | ✅ | ✅ |
+| Prompt injection detection | ✅ | ✅ |
+| Sensitive information detection | ✅ | ✅ |
+| Bot protection | ✅ | — |
+| Shield WAF | ✅ | — |
+| Email validation | ✅ | — |
+| Request filters | ✅ | — |
+| IP analysis | ✅ | — |
+| Custom rules | — | ✅ |
+
+Both entrypoints ship in the `arcjet` package — no extra install is required.
+
+## Protect
+
+Use `arcjet` (async) or `arcjet_sync` (sync) to protect HTTP route handlers.
+
+### Async vs. sync client
+
+The SDK ships two clients with an identical API:
+
+- `arcjet` — async client for use with FastAPI and other async
+  frameworks. Call `await aj.protect(...)`.
+- `arcjet_sync` — sync client for use with Flask, Django, and other sync
+  frameworks. Call `aj.protect(...)`.
+
+Pick the one that matches your framework. The rest of this section shows both
+where the API differs.
+
+### Configuration
+
+Create a new Arcjet client with your API key and rules. This should be done at
+startup, outside of the request handler.
+
+The required fields are:
+
+- `key` (`str`) — Your Arcjet site key. This can be found in the SDK
+  Installation section for the site in the [Arcjet
+  Dashboard](https://app.arcjet.com).
+- `rules` — The rules to apply to the request. See the various sections of the
+  docs for how to configure these e.g.
+  <Link.Page href="/shield">shield</Link.Page>,
+  <Link.Page href="/rate-limiting">rate limiting</Link.Page>,
+  <Link.Page href="/bot-protection">bot protection</Link.Page>,
+  <Link.Page href="/email-validation">email validation</Link.Page>,
+  <Link.Page href="/prompt-injection">prompt injection detection</Link.Page>,
+  <Link.Page href="/sensitive-info">sensitive information detection</Link.Page>,
+  <Link.Page href="/filters">request filters</Link.Page>.
+
+The optional fields are:
+
+- `proxies` (`list[str]`) — A list of one or more trusted proxies. These
+  addresses will be excluded when Arcjet is determining the client IP address.
+  This is useful if you are behind a load balancer or proxy that sets the client
+  IP address in a header. See [Load balancers &
+  proxies](#load-balancers--proxies) below for an example.
+
+<Tabs>
+  <TabItem label="FastAPI (async)">
+    <Code code={ConfigurationAsync} title="main.py" lang="py" />
+  </TabItem>
+  <TabItem label="Flask (sync)">
+    <Code code={ConfigurationSync} title="main.py" lang="py" />
+  </TabItem>
+</Tabs>
+
+#### Single instance
+
+We recommend creating a single instance of the Arcjet client and reusing it
+throughout your application. This is because the SDK caches decisions and
+configuration to improve performance.
+
+```py
+# Good — one instance, created once at startup
+aj = arcjet(key=arcjet_key, rules=[...])
+
+# Bad — new instance per request wastes resources
+@app.get("/")
+async def index(request: Request):
+    aj = arcjet(key=arcjet_key, rules=[...])  # don't do this
+```
+
+#### Rule modes
+
+Each rule can be configured in either `Mode.LIVE` or `Mode.DRY_RUN`. When in
+`DRY_RUN` mode, each rule will return its decision, but the end conclusion will
+always be `ALLOW`.
+
+This allows you to run Arcjet in passive / demo mode to test rules before
+enabling them.
+
+```py
+from arcjet import Mode, detect_bot
+
+detect_bot(mode=Mode.DRY_RUN, allow=[])
+```
+
+As the top level conclusion will always be `ALLOW` in `DRY_RUN` mode, you can
+loop through each rule result to check what would have happened:
+
+```py
+for result in decision.results:
+    if result.is_denied():
+        print("Rule returned deny conclusion", result)
+```
+
+#### Multiple rules
+
+You can combine rules to create a more complex protection strategy. For example,
+you can combine rate limiting and bot protection rules to protect your API from
+automated clients.
+
+:::note
+When specifying multiple rules, the order of the rules is ignored. Rule
+execution ordering is automatically optimized for performance.
+:::
+
+<Code code={MultipleRules} title="main.py" lang="py" />
+
+#### Environment variables
+
+The Arcjet Python SDK uses several environment variables to configure its
+behavior.
+See <Link.Page href="/environment">Concepts: Environment variables</Link.Page>
+for more info.
+The `ARCJET_KEY` environment variable is not read automatically and must be
+passed explicitly via the `key` argument.
+
+#### Load balancers & proxies
+
+If your application is behind a load balancer, Arcjet will only see the IP
+address of the load balancer and not the real client IP address.
+
+To fix this, most load balancers will set the `X-Forwarded-For` header with the
+real client IP address plus a list of proxies that the request has passed
+through.
+
+The problem is that the `X-Forwarded-For` header can be spoofed by the client,
+so you should only trust it if you are sure that the load balancer is setting
+it correctly. See [the MDN
+docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For)
+for more details.
+
+You can configure Arcjet to trust IP addresses in the `X-Forwarded-For` header
+by setting the `proxies` field in the configuration. This should be a list of
+the IP addresses or the CIDR range of your load balancers to be removed, so
+that the last IP address in the list is the real client IP address.
+
+##### Example
+
+For example, if the load balancer is at `100.100.100.100` and the client IP
+address is `192.168.1.1`, the `X-Forwarded-For` header will be:
+
+```http
+X-Forwarded-For: 192.168.1.1, 100.100.100.100
+```
+
+You should set the `proxies` field to `["100.100.100.100"]` so Arcjet will use
+`192.168.1.1` as the client IP address.
+
+You can also specify CIDR ranges to match multiple IP addresses.
+
+<Code code={Proxies} lang="py" />
+
+### `protect()`
+
+Arcjet exposes a single `protect` method that is used to execute your
+protection rules. It accepts the framework `request` object as its first
+argument. Rules you add to the SDK may require additional keyword arguments,
+such as the `validate_email` rule requiring an `email` argument.
+
+The async client returns a coroutine that resolves to an `ArcjetDecision`
+object. The sync client returns the `ArcjetDecision` directly.
+
+<Tabs>
+  <TabItem label="FastAPI (async)">
+    <Code code={ProtectAsync} title="main.py" lang="py" />
+  </TabItem>
+  <TabItem label="Flask (sync)">
+    <Code code={ProtectSync} title="main.py" lang="py" />
+  </TabItem>
+</Tabs>
+
+#### Parameters
+
+All parameters are optional keyword arguments passed alongside the `request`:
+
+| Parameter                          | Type              | Used by                  |
+| ---------------------------------- | ----------------- | ------------------------ |
+| `requested`                        | `int`             | Token bucket rate limit  |
+| `characteristics`                  | `dict[str, Any]`  | Rate limiting (pass values for keys declared in rule config) |
+| `detect_prompt_injection_message`  | `str`             | Prompt injection detection |
+| `sensitive_info_value`             | `str`             | Sensitive info detection |
+| `email`                            | `str`             | Email validation         |
+| `filter_local`                     | `dict[str, str]`  | Request filters (`local.*` fields) |
+| `ip_src`                           | `str`             | Manual IP override (advanced) |
+
+### Decision
+
+The `protect` method returns an `ArcjetDecision` object. It includes the
+following properties:
+
+- `conclusion` (`"ALLOW" | "DENY" | "CHALLENGE" | "ERROR"`) — The final
+  conclusion based on evaluating each of the configured rules.
+- `reason_v2` — A typed reason object describing the conclusion. Use
+  `reason_v2.type` as a discriminator (`"BOT"`, `"RATE_LIMIT"`, `"SHIELD"`,
+  `"EMAIL"`, `"SENSITIVE_INFO"`, `"PROMPT_INJECTION"`, `"FILTER"`, or
+  `"ERROR"`) and then access type-specific fields.
+- `results` — A list of per-rule result objects. There will be one for each
+  configured rule so you can inspect the individual results.
+- `ip` / `ip_details` — Objects containing Arcjet's analysis of the
+  client IP address. See [IP analysis](#ip-analysis) below for more
+  information.
+
+#### Conclusion
+
+The `ArcjetDecision` object has the following methods that should be used to
+check the conclusion:
+
+- `is_allowed()` (`bool`) — The request should be allowed.
+- `is_denied()` (`bool`) — The request should be denied.
+- `is_error()` (`bool`) — There was an unrecoverable error.
+
+The conclusion will be the highest-severity finding when evaluating the
+configured rules. `"DENY"` is the highest severity, followed by `"CHALLENGE"`,
+then `"ERROR"`, and finally `"ALLOW"` as the lowest severity.
+
+For example, when a bot protection rule returns an error and a validate email
+rule returns a deny, the overall conclusion would be deny. To access the error
+you would have to iterate over the `results` property on the decision.
+
+#### Reason
+
+The `reason_v2` property of the `ArcjetDecision` object describes the
+conclusion. It will always reflect the highest-priority rule that produced
+that conclusion; to inspect other rules, iterate over the `results` property
+on the decision.
+
+Switch on `reason_v2.type` to map each rule kind to a response. Only branch on
+reasons that produce a different response — a branch that returns 403 for
+`SHIELD` when the default already returns 403 is dead code.
+
+```py
+if decision.is_denied():
+    if decision.reason_v2.type == "RATE_LIMIT":
+        return JSONResponse({"error": "Too many requests"}, status_code=429)
+    if decision.reason_v2.type in ("EMAIL", "SENSITIVE_INFO", "PROMPT_INJECTION"):
+        return JSONResponse({"error": "Bad request"}, status_code=400)
+    # BOT, SHIELD, FILTER, and anything else
+    return JSONResponse({"error": "Forbidden"}, status_code=403)
+```
+
+Recommended HTTP status mapping:
+
+| `reason_v2.type`     | Status |
+| -------------------- | ------ |
+| `"RATE_LIMIT"`       | 429    |
+| `"EMAIL"`            | 400    |
+| `"SENSITIVE_INFO"`   | 400    |
+| `"PROMPT_INJECTION"` | 400    |
+| `"BOT"`, `"SHIELD"`, `"FILTER"`, fallback | 403 |
+
+Each variant exposes type-specific fields:
+
+| `reason_v2.type`     | Fields                                                                 |
+| -------------------- | ---------------------------------------------------------------------- |
+| `"BOT"`              | `allowed`, `denied`, `spoofed` (`bool`), `verified` (`bool`)            |
+| `"RATE_LIMIT"`       | `max`, `remaining`, `reset_time`, `reset`, `window`                    |
+| `"SHIELD"`           | `shield_triggered` (`bool`)                                            |
+| `"EMAIL"`            | `email_types` (e.g. `["DISPOSABLE", "NO_MX_RECORDS"]`)                  |
+| `"SENSITIVE_INFO"`   | `allowed`, `denied` (each a list of `IdentifiedEntity`)                |
+| `"PROMPT_INJECTION"` | `injection_detected` (`bool`)                                          |
+| `"FILTER"`           | `matched_expressions`, `undetermined_expressions`                      |
+| `"ERROR"`            | `message` (`str`)                                                      |
+
+#### Results
+
+The `results` property contains a list of per-rule result objects. There will
+be one for each configured rule so you can inspect the individual results.
+
+```py
+for result in decision.results:
+    print("Rule Result", result)
+```
+
+Each result includes:
+
+- `conclusion` — The conclusion of the rule (`"ALLOW"`, `"DENY"`,
+  `"CHALLENGE"`, or `"ERROR"`).
+- `reason_v2` — A typed reason for this rule's conclusion (same set of types
+  as on the top-level decision).
+- `is_denied()` / `is_allowed()` / `is_error()` — convenience methods.
+
+For bot results, the SDK also exposes a top-level helper to check whether
+the request claimed to be a well-known crawler (e.g. Googlebot) but did not
+match the verified IP ranges:
+
+```py
+from arcjet import is_spoofed_bot
+
+if any(is_spoofed_bot(r) for r in decision.results):
+    return jsonify(error="Spoofed bot"), 403
+```
+
+See the
+<Link.Page href="/shield">shield</Link.Page>,
+<Link.Page href="/bot-protection">bot protection</Link.Page>,
+<Link.Page href="/rate-limiting">rate limiting</Link.Page>, and
+<Link.Page href="/email-validation">email validation</Link.Page>
+docs for what each rule's reason fields mean.
+
+### IP analysis
+
+Arcjet returns IP metadata with every decision — no extra API calls needed.
+
+```py
+# High-level helpers on decision.ip
+if decision.ip.is_hosting():
+    # likely a cloud / hosting provider — often suspicious for bots
+    pass
+
+if decision.ip.is_vpn() or decision.ip.is_proxy() or decision.ip.is_tor():
+    # apply your policy for anonymized traffic
+    pass
+
+# Typed field access via decision.ip_details
+ip = decision.ip_details
+if ip:
+    print(ip.city, ip.country_name)   # geolocation
+    print(ip.asn, ip.asn_name)        # ASN / network
+    print(ip.is_vpn, ip.is_hosting)   # reputation
+```
+
+Available fields include:
+
+- **Geolocation**: `latitude`, `longitude`, `accuracy_radius`, `timezone`,
+  `postal_code`, `city`, `region`, `country`, `country_name`, `continent`,
+  `continent_name`.
+- **Network (ASN)**: `asn`, `asn_name`, `asn_domain`, `asn_type` (one of
+  `isp`, `hosting`, `business`, `education`), `asn_country`.
+- **Reputation**: `is_vpn`, `is_proxy`, `is_tor`, `is_hosting`, `is_relay`,
+  `service` (e.g. `"Apple Private Relay"`).
+
+The IP fields may be missing — `decision.ip_details` itself may be `None`,
+and individual fields may be `None`. Geolocation accuracy varies; country is
+usually reliable, but city and region can be very inaccurate. Use these fields
+for convenience (e.g. suggesting a user location) but do not rely on them
+alone.
+
+#### Example
+
+<Code code={IPLocation} title="main.py" lang="py" />
+
+For the IP address `8.8.8.8` you might get the following response. Only the
+fields we have data for will be returned:
+
+```json
+{
+  "message": "Hello United States!",
+  "ip": {
+    "country": "US",
+    "country_name": "United States",
+    "continent": "NA",
+    "continent_name": "North America",
+    "asn": "AS15169",
+    "asn_name": "Google LLC",
+    "asn_domain": "google.com"
+  }
+}
+```
+
+Arcjet will automatically detect the IP address of the client making the
+request based on the context provided by your framework. In development
+(see <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>) we
+allow private and internal addresses so that the SDK works correctly locally.
+
+### Error handling
+
+Arcjet is designed to fail open so that a service issue or misconfiguration
+does not block all requests. If there is an error condition when processing a
+rule, Arcjet will return an `ERROR` result for that rule and you can check
+`result.reason_v2.message` for more information.
+
+If all other rules that were run returned an `ALLOW` result, then the final
+Arcjet conclusion will be `ERROR`.
+
+<Code code={ErrorLogging} title="main.py" lang="py" />
+
+You can check for errors at the top level too:
+
+```py
+decision = await aj.protect(request)
+
+if decision.is_error():
+    # Arcjet service error — fail open or apply a fallback policy
+    pass
+elif decision.is_denied():
+    return JSONResponse({"error": "Denied"}, status_code=403)
+```
+
+## Guard
+
+`arcjet.guard` is a lower-level API designed for AI agent tool calls,
+MCP servers, and background tasks where there is no HTTP request object. It
+gives you fine-grained, per-call control over rate limiting, prompt injection
+detection, sensitive information detection, and custom rules. See the
+<Link.Page href="/guards">Guards documentation</Link.Page> for the full guide.
+
+### Setup
+
+Use `launch_arcjet` for async frameworks and `launch_arcjet_sync` for sync
+frameworks. Create a single client at startup and reuse it. Configure each
+rule once, then bind input and call `guard()` per invocation.
+
+<Code code={Guard} title="main.py" lang="py" />
+
+### Rules
+
+Configure each rule once at module scope so you have a stable reference for the
+typed per-rule result accessors (e.g. `user_limit.denied_result(decision)`).
+All rules accept keyword-only arguments. Every rule accepts `mode` (`"LIVE"`
+or `"DRY_RUN"`), `label` (an observability label that appears in the
+dashboard), and `metadata` (a `dict[str, str]` of analytics context).
+
+#### Rate limiting
+
+```py
+from arcjet.guard import TokenBucket, FixedWindow, SlidingWindow
+
+user_limit = TokenBucket(
+    refill_rate=10,
+    interval_seconds=60,
+    max_tokens=100,
+    bucket="user-tools",  # name this per use case to avoid collisions
+)
+
+team_limit = FixedWindow(
+    max_requests=1000,
+    window_seconds=3600,
+    bucket="team-api",
+)
+
+api_limit = SlidingWindow(
+    max_requests=500,
+    interval_seconds=60,
+    bucket="public-api",
+)
+```
+
+Rate limit state is tracked server-side by the combination of `bucket` and
+other configuration. Set `bucket` explicitly to avoid collisions between
+different rules — two rate limit rules created with the default bucket name
+will share counters.
+
+At call time, all three accept `key=...` (the per-caller identifier — user ID,
+session ID, tenant) and `requested=N` (tokens / requests consumed; default
+`1`).
+
+#### Prompt injection detection
+
+```py
+from arcjet.guard import DetectPromptInjection
+
+prompt_scan = DetectPromptInjection()
+
+decision = await aj.guard(
+    label="tools.weather",
+    rules=[prompt_scan(user_message)],
+)
+```
+
+#### Sensitive information detection
+
+Runs locally via WASM — the raw text never leaves the SDK; only a SHA-256
+hash is sent alongside the local result. Valid entity types: `"EMAIL"`,
+`"PHONE_NUMBER"`, `"IP_ADDRESS"`, `"CREDIT_CARD_NUMBER"`.
+
+```py
+from arcjet.guard import LocalDetectSensitiveInfo
+
+sensitive = LocalDetectSensitiveInfo(
+    deny=["EMAIL", "CREDIT_CARD_NUMBER"],
+)
+```
+
+`allow` and `deny` are mutually exclusive.
+
+#### Custom rules
+
+Subclass `LocalCustomRule` and override `evaluate` (sync) or `evaluate_async`
+(async) to implement custom logic with typed `Config` / `Input` / `Data`
+shapes.
+
+### `guard()`
+
+The guard call takes a `label` identifying the invocation site, a list of
+bound rule inputs, and optional metadata:
+
+| Parameter   | Type                      | Description |
+| ----------- | ------------------------- | ----------- |
+| `label`     | `str`                     | Label identifying this guard call (required) |
+| `rules`     | `Sequence[RuleWithInput]` | Bound rule inputs (required) |
+| `metadata`  | `dict[str, str] \| None`  | Optional key-value metadata |
+
+### Guard decision
+
+The guard decision exposes:
+
+- `conclusion` — `"ALLOW"` or `"DENY"`. Always check before proceeding.
+- `has_error()` — `True` if something went wrong during rule evaluation
+  (service unreachable, rule execution failure). The SDK fails open — log it
+  but don't block the caller.
+- `results` — per-rule outcomes.
+
+For useful error messages, branch on **which rule** denied — not just on
+`DENY`. Each rule defined at module scope exposes typed result accessors:
+
+- `rule.result(decision)` — the result for this rule, or `None`.
+- `rule.denied_result(decision)` — the result, but only if the rule denied
+  the request. Returns `None` otherwise.
+
+```py
+if decision.conclusion == "DENY":
+    rate_limited = user_limit.denied_result(decision)
+    if rate_limited:
+        raise TaskBlocked(
+            f"rate limited — retry in {rate_limited.reset_in_seconds}s"
+        )
+    raise TaskBlocked("blocked")
+```
+
+Hardcode the `label` argument to `guard()` as a string literal (e.g.
+`"tools.get_weather"`, not `f"tools.{name}"`). Hardcoded labels stay
+greppable and the dashboard groups by them. Pass `metadata` whenever you
+have useful auditing context (e.g. `{"user_id": ..., "request_id": ...}`) —
+it shows up in the dashboard and makes debugging much easier later.
+
+## Version support
+
+Arcjet supports Python 3.10 and above.
+
+<Link.Page href="/support">Technical support</Link.Page> is provided for the
+current major version of the Arcjet SDK for all users and for the current and
+previous major versions for paid users. We will provide security fixes for the
+current and previous major versions.
+
+<Comments />
