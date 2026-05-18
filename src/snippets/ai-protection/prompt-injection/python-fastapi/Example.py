@@ -1,12 +1,7 @@
 import logging
 import os
 
-from arcjet import (
-    Mode,
-    arcjet,
-    detect_prompt_injection,
-    shield,
-)
+from arcjet import Mode, arcjet, detect_prompt_injection, shield
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from langchain_core.output_parsers import StrOutputParser
@@ -45,10 +40,11 @@ class ChatRequest(BaseModel):
     message: str
 
 
+# Create a single Arcjet client at startup and reuse it across requests
 aj = arcjet(
     key=arcjet_key,  # Get your key from https://app.arcjet.com
     rules=[
-        # Shield protects your app from common attacks e.g. SQL injection
+        # Shield protects against common web attacks e.g. SQL injection
         shield(mode=Mode.LIVE),
         # Detect prompt injection attacks before they reach your AI model
         detect_prompt_injection(
@@ -61,22 +57,22 @@ aj = arcjet(
 
 @app.post("/chat")
 async def chat(request: Request, body: ChatRequest):
-    # Call protect() with the user message to score for prompt injection
+    # Pass the user message so detect_prompt_injection can score it
     decision = await aj.protect(
         request, detect_prompt_injection_message=body.message
     )
 
-    # Handle denied requests
     if decision.is_denied():
-        if decision.reason.is_prompt_injection():
+        if decision.reason_v2.type == "PROMPT_INJECTION":
             logger.warning("Request blocked due to prompt injection")
             return JSONResponse(
                 {"error": "Prompt injection detected — please rephrase your message"},
-                status_code=403,
+                status_code=400,
             )
-        return JSONResponse({"error": "Denied"}, status_code=403)
+        # SHIELD or any other denial
+        return JSONResponse({"error": "Forbidden"}, status_code=403)
 
-    # All rules passed, proceed with handling the request
+    # Arcjet approved — call the AI model
     reply = await chain.ainvoke({"message": body.message})
 
     return {"reply": reply}

@@ -1,11 +1,13 @@
 ---
 title: "Email validation reference"
-description: "Reference guide for adding Arcjet email validation to your Next.js, NestJS, Node.js, Bun, Remix, or SvelteKit app."
+description: "Reference guide for adding Arcjet email validation to your Next.js, NestJS, Node.js, Bun, Python, Remix, or SvelteKit app."
 frameworks:
   - bun
   - nest-js
   - next-js
   - node-js
+  - python-fastapi
+  - python-flask
   - remix
   - sveltekit
 ajToc:
@@ -23,7 +25,7 @@ ajToc:
 ---
 
 import { Link } from "@/components/link";
-import { Aside, Badge } from "@astrojs/starlight/components";
+import { Aside, Badge, Tabs, TabItem } from "@astrojs/starlight/components";
 import SlotByFramework from "@/components/SlotByFramework";
 import TextByFramework from "@/components/TextByFramework";
 import FrameworkLinks from "@/components/FrameworkLinks";
@@ -35,18 +37,24 @@ import DecisionLogAllowBun from "@/snippets/email-validation/reference/bun/Decis
 import DecisionLogAllowNestJs from "@/snippets/email-validation/reference/nestjs/DecisionLogAllow.mdx";
 import DecisionLogAllowNextJs from "@/snippets/email-validation/reference/nextjs/DecisionLogAllow.mdx";
 import DecisionLogAllowNodeJs from "@/snippets/email-validation/reference/nodejs/DecisionLogAllow.mdx";
+import DecisionLogAllowPythonFastapi from "@/snippets/email-validation/reference/python-fastapi/DecisionLogAllow.mdx";
+import DecisionLogAllowPythonFlask from "@/snippets/email-validation/reference/python-flask/DecisionLogAllow.mdx";
 import DecisionLogAllowRemix from "@/snippets/email-validation/reference/remix/DecisionLogAllow.mdx";
 import DecisionLogAllowSvelteKit from "@/snippets/email-validation/reference/sveltekit/DecisionLogAllow.mdx";
 import DecisionLogDenyBun from "@/snippets/email-validation/reference/bun/DecisionLogDeny.mdx";
 import DecisionLogDenyNestJs from "@/snippets/email-validation/reference/nestjs/DecisionLogDeny.mdx";
 import DecisionLogDenyNextJs from "@/snippets/email-validation/reference/nextjs/DecisionLogDeny.mdx";
 import DecisionLogDenyNodeJs from "@/snippets/email-validation/reference/nodejs/DecisionLogDeny.mdx";
+import DecisionLogDenyPythonFastapi from "@/snippets/email-validation/reference/python-fastapi/DecisionLogDeny.mdx";
+import DecisionLogDenyPythonFlask from "@/snippets/email-validation/reference/python-flask/DecisionLogDeny.mdx";
 import DecisionLogDenyRemix from "@/snippets/email-validation/reference/remix/DecisionLogDeny.mdx";
 import DecisionLogDenySvelteKit from "@/snippets/email-validation/reference/sveltekit/DecisionLogDeny.mdx";
 import ErrorsBun from "@/snippets/email-validation/reference/bun/Errors.mdx";
 import ErrorsNestJs from "@/snippets/email-validation/reference/nestjs/Errors.mdx";
 import ErrorsNextJs from "@/snippets/email-validation/reference/nextjs/Errors.mdx";
 import ErrorsNodeJs from "@/snippets/email-validation/reference/nodejs/Errors.mdx";
+import ErrorsPythonFastapi from "@/snippets/email-validation/reference/python-fastapi/Errors.mdx";
+import ErrorsPythonFlask from "@/snippets/email-validation/reference/python-flask/Errors.mdx";
 import ErrorsRemix from "@/snippets/email-validation/reference/remix/Errors.mdx";
 import ErrorsSvelteKit from "@/snippets/email-validation/reference/sveltekit/Errors.mdx";
 import NextJsPagesServerActions from "@/snippets/email-validation/reference/nextjs/PagesServerActions.mdx";
@@ -221,16 +229,31 @@ This function returns a `Promise` that resolves to an
   client IP address. See the SDK reference for more information.
 
 You check if a deny conclusion has been returned by an email validation rule by
-using `decision.isDenied()` and `decision.reason.isEmail()`.
+using `decision.isDenied()` and `decision.reason.isEmail()` (JS) /
+`decision.is_denied()` and `decision.reason_v2.type == "EMAIL"` (Python).
 
 You can iterate through the results and check whether an email validation rule
 was applied:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
 ```ts
 for (const result of decision.results) {
   console.log("Rule Result", result);
 }
 ```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+for result in decision.results:
+    print("Rule Result", result)
+```
+
+</TabItem>
+</Tabs>
 
 This example will log the full result as well as the email validation rule:
 
@@ -239,6 +262,8 @@ This example will log the full result as well as the email validation rule:
   <DecisionLogDenyNestJs slot="nest-js" />
   <DecisionLogDenyNextJs slot="next-js" />
   <DecisionLogDenyNodeJs slot="node-js" />
+  <DecisionLogDenyPythonFastapi slot="python-fastapi" />
+  <DecisionLogDenyPythonFlask slot="python-flask" />
   <DecisionLogDenyRemix slot="remix" />
   <DecisionLogDenySvelteKit slot="sveltekit" />
 </SlotByFramework>
@@ -253,6 +278,8 @@ Arcjet to only allow specific email types and all other types will be blocked.
   <DecisionLogAllowNestJs slot="nest-js" />
   <DecisionLogAllowNextJs slot="next-js" />
   <DecisionLogAllowNodeJs slot="node-js" />
+  <DecisionLogAllowPythonFastapi slot="python-fastapi" />
+  <DecisionLogAllowPythonFlask slot="python-flask" />
   <DecisionLogAllowRemix slot="remix" />
   <DecisionLogAllowSvelteKit slot="sveltekit" />
 </SlotByFramework>
@@ -261,6 +288,9 @@ Arcjet to only allow specific email types and all other types will be blocked.
 
 Arcjet will return the type of email address that was verified. This will be one
 or several of the reported email types.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
 ```ts
 type ArcjetEmailType =
@@ -271,7 +301,28 @@ type ArcjetEmailType =
   | "INVALID"; // Email address that is invalid
 ```
 
-You can check the email type using the `decision.reason.emailTypes` array:
+</TabItem>
+<TabItem label="Python">
+
+```py
+from arcjet import EmailType
+
+# EmailType is a str Enum with the same values:
+# - EmailType.DISPOSABLE — Disposable email from a throwaway service
+# - EmailType.FREE — Email from a free provider (e.g. Gmail)
+# - EmailType.NO_MX_RECORDS — Domain has no MX records (undeliverable)
+# - EmailType.NO_GRAVATAR — No Gravatar profile
+# - EmailType.INVALID — Address fails syntax / format validation
+```
+
+</TabItem>
+</Tabs>
+
+You can check the email type using the `decision.reason.emailTypes` (JS) /
+`decision.reason_v2.email_types` (Python) array:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
 ```ts
 let message = "";
@@ -292,6 +343,33 @@ if (decision.reason.emailTypes.includes("DISPOSABLE")) {
 }
 ```
 
+</TabItem>
+<TabItem label="Python">
+
+```py
+message = ""
+email_types = decision.reason_v2.email_types  # only valid when reason_v2.type == "EMAIL"
+
+# You could return specific messages based on the email type, but this would
+# also reveal the validation to a spammer
+if "DISPOSABLE" in email_types:
+    message = "We do not allow disposable email addresses."
+elif "FREE" in email_types:
+    message = (
+        "We do not allow free email addresses, please use a business address."
+    )
+elif "NO_MX_RECORDS" in email_types:
+    message = "Your email domain does not have an MX record. Is there a typo?"
+elif "NO_GRAVATAR" in email_types:
+    message = "We require a Gravatar profile to sign up."
+else:
+    # This is a catch all
+    message = "Invalid email."
+```
+
+</TabItem>
+</Tabs>
+
 ## Error handling
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
@@ -311,6 +389,8 @@ conclusion will be `ERROR`.
   <ErrorsNestJs slot="nest-js" />
   <ErrorsNextJs slot="next-js" />
   <ErrorsNodeJs slot="node-js" />
+  <ErrorsPythonFastapi slot="python-fastapi" />
+  <ErrorsPythonFlask slot="python-flask" />
   <ErrorsRemix slot="remix" />
   <ErrorsSvelteKit slot="sveltekit" />
 </SlotByFramework>

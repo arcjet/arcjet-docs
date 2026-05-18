@@ -1,12 +1,7 @@
 import logging
 import os
 
-from arcjet import (
-    Mode,
-    arcjet,
-    detect_bot,
-    shield,
-)
+from arcjet import Mode, arcjet, detect_bot, shield
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from langchain_core.output_parsers import StrOutputParser
@@ -45,16 +40,15 @@ class ChatRequest(BaseModel):
     message: str
 
 
+# Create a single Arcjet client at startup and reuse it across requests
 aj = arcjet(
     key=arcjet_key,  # Get your key from https://app.arcjet.com
     rules=[
-        # Shield protects your app from common attacks e.g. SQL injection
+        # Shield protects against common web attacks e.g. SQL injection
         shield(mode=Mode.LIVE),
-        # Create a bot detection rule
+        # Block all automated clients — bots inflate AI costs
         detect_bot(
-            mode=Mode.LIVE,
-            # An empty allow list blocks all bots, which is a good default for
-            # an AI chat app
+            mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
             allow=[
                 "CURL",  # Allow curl so we can test it (see README)
                 # Uncomment to allow these other common bot categories
@@ -69,15 +63,16 @@ aj = arcjet(
 
 @app.post("/chat")
 async def chat(request: Request, body: ChatRequest):
-    # Call protect() to evaluate the request against the rules
     decision = await aj.protect(request)
 
-    # Handle denied requests
     if decision.is_denied():
-        status = 429 if decision.reason.is_rate_limit() else 403
-        return JSONResponse({"error": "Denied"}, status_code=status)
+        if decision.reason_v2.type == "BOT":
+            return JSONResponse(
+                {"error": "Automated clients are not permitted"}, status_code=403
+            )
+        return JSONResponse({"error": "Forbidden"}, status_code=403)
 
-    # All rules passed, proceed with handling the request
+    # Arcjet approved — proceed with the AI call
     reply = await chain.ainvoke({"message": body.message})
 
     return {"reply": reply}

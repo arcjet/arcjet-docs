@@ -413,17 +413,12 @@ See the [email validation documentation](/email-validation/reference?f=bun) for 
 
 [Section titled “IP analysis”](#ip-analysis)
 
-As of SDK version `1.0.0-alpha.11`, the `ArcjetDecision` object contains an `ip` property. This includes additional data about the client IP address:
+The `ArcjetDecision` object contains an `ip` property. This includes additional data about the client IP address:
 
 #### IP location
 
-The following are available on the Free plan:
-
 *   `country` (`string | undefined`): the country code the client IP address.
 *   `countryName` (`string | undefined`): the country name of the client IP address.
-
-The following are available on the Starter and Business plans:
-
 *   `latitude` (`number | undefined`): the latitude of the client IP address.
 *   `longitude` (`number | undefined`): the longitude of the client IP address.
 *   `accuracyRadius` (`number | undefined`): how accurate the location is in kilometers.
@@ -455,8 +450,6 @@ IP geolocation can be notoriously inaccurate, especially for mobile devices, sat
 This is useful for identifying the network operator of the client IP address. This is useful for understanding whether the client is likely to be automated or not, or being stricter with requests from certain networks.
 
 The IP AS fields may be `undefined`, but you can use the `hasASN()` method to check their availability. Using this method will also refine the type to remove the need for null-ish checks.
-
-The following are available on the Starter and Business plans:
 
 *   `hasASN()` (`bool`): returns whether all of the ASN fields are available.
 *   `asn` (`string | undefined`): the autonomous system (AS) number of the client IP address.

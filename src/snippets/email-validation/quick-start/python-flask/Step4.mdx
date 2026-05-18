@@ -1,0 +1,15 @@
+### 4. Start server
+
+Start the Flask dev server:
+
+```sh
+uv run flask --app main run --debug
+```
+
+Make a `curl` `POST` request from your terminal to your application with various
+emails to test the result. A disposable address will be denied with a
+`400 Bad Request`:
+
+```sh
+curl -X POST -d 'email=test@0zc7eznv3rsiswlohu.tk' http://localhost:5000/
+```

@@ -1,0 +1,36 @@
+import { Link } from "@/components/link";
+
+### 4. Start server
+
+Start the FastAPI dev server:
+
+```sh
+uv run uvicorn main:app --reload
+```
+
+Then make a `curl` `POST` request from your terminal to your application with
+various emails to test the result. A disposable address should return `400 Bad
+Request`:
+
+```sh
+curl -X POST -d 'email=test@0wnd.net' http://localhost:8000/signup
+```
+
+A valid email should be accepted:
+
+```sh
+curl -X POST -d 'email=test@arcjet.io' http://localhost:8000/signup
+```
+
+To trigger the rate limit, submit more than 5 requests within 10 minutes from
+the same IP:
+
+```sh
+for i in {1..6}; do
+  curl -X POST -d 'email=test@arcjet.io' http://localhost:8000/signup
+done
+```
+
+The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
+See <Link.Page href="/signup-protection/reference">the reference guide</Link.Page>
+to learn about configuring this further.

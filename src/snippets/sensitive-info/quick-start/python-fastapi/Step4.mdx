@@ -1,0 +1,15 @@
+Start the FastAPI dev server:
+
+```sh
+uv run uvicorn main:app --reload
+```
+
+Then send a request containing an email address from your terminal. You should
+see a `400 Bad Request` response because the request body contains sensitive
+information.
+
+```sh
+curl -v http://localhost:8000/ \
+  -H "Content-Type: application/json" \
+  --data '{"message": "My email address is test@example.com"}'
+```

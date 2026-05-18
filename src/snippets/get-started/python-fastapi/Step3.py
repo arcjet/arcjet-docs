@@ -102,12 +102,12 @@ async def chat(request: Request, body: ChatRequest):
 
     # Handle denied requests
     if decision.is_denied():
-        if decision.reason.is_prompt_injection():
+        if decision.reason_v2.type == "PROMPT_INJECTION":
             return JSONResponse(
                 {"error": "Prompt injection detected — please rephrase your message"},
                 status_code=400,
             )
-        status = 429 if decision.reason.is_rate_limit() else 403
+        status = 429 if decision.reason_v2.type == "RATE_LIMIT" else 403
         return JSONResponse({"error": "Denied"}, status_code=status)
 
     # All rules passed, proceed with handling the request

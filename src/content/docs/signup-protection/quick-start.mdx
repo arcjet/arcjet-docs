@@ -6,14 +6,18 @@ titleByFramework:
   nest-js: "Signup form protection for NestJS"
   next-js: "Signup form protection for Next.js"
   node-js: "Signup form protection for Node.js"
+  python-fastapi: "Signup form protection for Python + FastAPI"
+  python-flask: "Signup form protection for Python + Flask"
   remix: "Signup form protection for Remix"
   sveltekit: "Signup form protection for SvelteKit"
-description: "Quick start guide to protect your signup forms from abuse to your Next.js, Node.js, Bun, Remix, or SvelteKit app with Arcjet Signup form protection."
+description: "Quick start guide to protect your signup forms from abuse to your Next.js, Node.js, Bun, Python, Remix, or SvelteKit app with Arcjet Signup form protection."
 frameworks:
   - bun
   - nest-js
   - next-js
   - node-js
+  - python-fastapi
+  - python-flask
   - remix
   - sveltekit
 ajToc:
@@ -28,7 +32,7 @@ ajToc:
         anchor: "3-protect-a-form"
       - text: 4. Start server
         anchor: "4-start-server"
-        framework: ["bun", "node-js"]
+        framework: ["bun", "node-js", "python-fastapi", "python-flask"]
       - text: 4. Start app
         anchor: "4-start-app"
         framework: ["nest-js", "next-js", "remix", "sveltekit"]
@@ -53,14 +57,20 @@ import Step1Bun from "@/snippets/signup-protection/quick-start/bun/Step1.mdx";
 import Step1NestJs from "@/snippets/signup-protection/quick-start/nestjs/Step1.mdx";
 import Step1NextJs from "@/snippets/signup-protection/quick-start/nextjs/Step1.mdx";
 import Step1NodeJs from "@/snippets/signup-protection/quick-start/nodejs/Step1.mdx";
+import Step1PythonFastapi from "@/snippets/signup-protection/quick-start/python-fastapi/Step1.mdx";
+import Step1PythonFlask from "@/snippets/signup-protection/quick-start/python-flask/Step1.mdx";
 import Step1Remix from "@/snippets/signup-protection/quick-start/remix/Step1.mdx";
 import Step1SvelteKit from "@/snippets/signup-protection/quick-start/sveltekit/Step1.mdx";
 import Step2 from "@/snippets/signup-protection/quick-start/shared/Step2.mdx";
 import Step2SetEnv from "@/snippets/signup-protection/quick-start/shared/Step2SetEnv.mdx";
+import Step2PythonFastapi from "@/snippets/signup-protection/quick-start/python-fastapi/Step2.mdx";
+import Step2PythonFlask from "@/snippets/signup-protection/quick-start/python-flask/Step2.mdx";
 import Step3Bun from "@/snippets/signup-protection/quick-start/bun/Step3.mdx";
 import Step3NestJs from "@/snippets/signup-protection/quick-start/nestjs/Step3.mdx";
 import Step3NextJs from "@/snippets/signup-protection/quick-start/nextjs/Step3.mdx";
 import Step3NodeJs from "@/snippets/signup-protection/quick-start/nodejs/Step3.mdx";
+import Step3PythonFastapi from "@/snippets/signup-protection/quick-start/python-fastapi/Step3.mdx";
+import Step3PythonFlask from "@/snippets/signup-protection/quick-start/python-flask/Step3.mdx";
 import Step3Remix from "@/snippets/signup-protection/quick-start/remix/Step3.mdx";
 import Step3SvelteKit from "@/snippets/signup-protection/quick-start/sveltekit/Step3.mdx";
 import Step4 from "@/snippets/signup-protection/quick-start/nextjs/Step4.mdx";
@@ -68,6 +78,8 @@ import Step4SvelteKit from "@/snippets/signup-protection/quick-start/sveltekit/S
 import Step4Bun from "@/snippets/signup-protection/quick-start/bun/Step4.mdx";
 import Step4NodeJs from "@/snippets/signup-protection/quick-start/nodejs/Step4.mdx";
 import Step4NestJs from "@/snippets/signup-protection/quick-start/nestjs/Step4.mdx";
+import Step4PythonFastapi from "@/snippets/signup-protection/quick-start/python-fastapi/Step4.mdx";
+import Step4PythonFlask from "@/snippets/signup-protection/quick-start/python-flask/Step4.mdx";
 import Step4Remix from "@/snippets/signup-protection/quick-start/remix/Step4.mdx";
 import FAQs from "/src/components/FAQs.astro";
 import Comments from "/src/components/Comments.astro";
@@ -97,6 +109,8 @@ In your project root, run the following command to install the SDK:
   <Step1NestJs slot="nest-js" />
   <Step1NextJs slot="next-js" />
   <Step1NodeJs slot="node-js" />
+  <Step1PythonFastapi slot="python-fastapi" />
+  <Step1PythonFlask slot="python-flask" />
   <Step1Remix slot="remix" />
   <Step1SvelteKit slot="sveltekit" />
 </SlotByFramework>
@@ -111,6 +125,8 @@ instructions to add a site and get a key. Add it to a `.env.local` file in your 
   <Step2SetEnv slot="nest-js" />
   <Step2 slot="next-js" />
   <Step2SetEnv slot="node-js" />
+  <Step2PythonFastapi slot="python-fastapi" />
+  <Step2PythonFlask slot="python-flask" />
   <Step2 slot="remix" />
   <Step2 slot="sveltekit" />
 </SlotByFramework>
@@ -131,6 +147,8 @@ signup form.
   <Step3NestJs slot="nest-js" />
   <Step3NextJs slot="next-js" />
   <Step3NodeJs slot="node-js" />
+  <Step3PythonFastapi slot="python-fastapi" />
+  <Step3PythonFlask slot="python-flask" />
   <Step3Remix slot="remix" />
   <Step3SvelteKit slot="sveltekit" />
 </SlotByFramework>
@@ -140,6 +158,8 @@ signup form.
   <Step4NestJs slot="nest-js" />
   <Step4 slot="next-js" />
   <Step4NodeJs slot="node-js" />
+  <Step4PythonFastapi slot="python-fastapi" />
+  <Step4PythonFlask slot="python-flask" />
   <Step4Remix slot="remix" />
   <Step4SvelteKit slot="sveltekit" />
 </SlotByFramework>

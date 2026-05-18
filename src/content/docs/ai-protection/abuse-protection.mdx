@@ -24,6 +24,7 @@ ajToc:
 ---
 
 import { Link } from "@/components/link";
+import { Tabs, TabItem } from "@astrojs/starlight/components";
 import SlotByFramework from "@/components/SlotByFramework";
 import FrameworkLinks from "@/components/FrameworkLinks";
 import { frameworks } from "@/lib/prefs";
@@ -65,6 +66,8 @@ routes where no bot traffic is legitimate.
 To allow specific categories or named bots [from our list of known
 bots](/bot-protection/identifying-bots), add them to the allow list:
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 ```ts
 detectBot({
   mode: "LIVE",
@@ -75,6 +78,20 @@ detectBot({
   ],
 })
 ```
+</TabItem>
+<TabItem label="Python">
+```py
+detect_bot(
+    mode=Mode.LIVE,
+    allow=[
+        "CURL",  # Allow curl-based scripts
+        BotCategory.MONITOR,  # Uptime monitoring services
+        BotCategory.PREVIEW,  # Link previewers (Slack, Discord, etc.)
+    ],
+)
+```
+</TabItem>
+</Tabs>
 
 ## Budget control
 
@@ -82,6 +99,8 @@ Bot protection controls *who* can call your AI features. To also control *how
 much* each user can consume, combine it with
 [AI budget control](/ai-protection/budget-control):
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 ```ts
 rules: [
   detectBot({ mode: "LIVE", allow: [] }),
@@ -94,6 +113,23 @@ rules: [
   }),
 ]
 ```
+</TabItem>
+<TabItem label="Python">
+```py
+rules=[
+    detect_bot(mode=Mode.LIVE, allow=[]),
+    # Token bucket rate limiting is best for AI budget control
+    token_bucket(
+        mode=Mode.LIVE,
+        characteristics=["userId"],  # Link limits to users
+        refill_rate=2_000,  # Refill 2000 tokens per interval
+        interval=3_600,  # Refill interval in seconds (1 hour)
+        capacity=5_000,  # Max tokens
+    ),
+]
+```
+</TabItem>
+</Tabs>
 
 The [get started guide](/get-started) shows the combined pattern.
 

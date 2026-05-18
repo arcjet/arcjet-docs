@@ -6,14 +6,18 @@ titleByFramework:
   nest-js: "Rate limiting for NestJS"
   next-js: "Rate limiting for Next.js"
   node-js: "Rate limiting for Node.js"
+  python-fastapi: "Rate limiting for Python + FastAPI"
+  python-flask: "Rate limiting for Python + Flask"
   remix: "Rate limiting for Remix"
   sveltekit: "Rate limiting for SvelteKit"
-description: "Quick start guide for adding Arcjet rate limiting to your Next.js, NestJS, Node.js, Bun, Remix, or SvelteKit app."
+description: "Quick start guide for adding Arcjet rate limiting to your Next.js, NestJS, Node.js, Bun, Python, Remix, or SvelteKit app."
 frameworks:
   - bun
   - nest-js
   - next-js
   - node-js
+  - python-fastapi
+  - python-flask
   - remix
   - sveltekit
 ajToc:
@@ -31,7 +35,7 @@ ajToc:
         anchor: "3-add-a-rate-limit-to-a-route"
       - text: 4. Start server
         anchor: "4-start-server"
-        framework: ["bun", "node-js"]
+        framework: ["bun", "node-js", "python-fastapi", "python-flask"]
       - text: 4. Start app
         anchor: "4-start-app"
         framework: ["nest-js", "next-js", "remix", "sveltekit"]
@@ -75,6 +79,16 @@ import NodeJsStep2 from "@/snippets/rate-limiting/quick-start/nodejs/Step2.mdx";
 import NodeJsStep3 from "@/snippets/rate-limiting/quick-start/nodejs/Step3.mdx";
 import NodeJsStep4 from "@/snippets/rate-limiting/quick-start/nodejs/Step4.mdx";
 
+import PythonFastapiStep1 from "@/snippets/rate-limiting/quick-start/python-fastapi/Step1.mdx";
+import PythonFastapiStep2 from "@/snippets/rate-limiting/quick-start/python-fastapi/Step2.mdx";
+import PythonFastapiStep3 from "@/snippets/rate-limiting/quick-start/python-fastapi/Step3.mdx";
+import PythonFastapiStep4 from "@/snippets/rate-limiting/quick-start/python-fastapi/Step4.mdx";
+
+import PythonFlaskStep1 from "@/snippets/rate-limiting/quick-start/python-flask/Step1.mdx";
+import PythonFlaskStep2 from "@/snippets/rate-limiting/quick-start/python-flask/Step2.mdx";
+import PythonFlaskStep3 from "@/snippets/rate-limiting/quick-start/python-flask/Step3.mdx";
+import PythonFlaskStep4 from "@/snippets/rate-limiting/quick-start/python-flask/Step4.mdx";
+
 import RemixStep1 from "@/snippets/rate-limiting/quick-start/remix/Step1.mdx";
 import RemixStep2 from "@/snippets/rate-limiting/quick-start/remix/Step2.mdx";
 import RemixStep3 from "@/snippets/rate-limiting/quick-start/remix/Step3.mdx";
@@ -115,6 +129,8 @@ In your project root, run the following command to install the SDK:
   <NestJsStep1 slot="nest-js" />
   <NextJsStep1 slot="next-js" />
   <NodeJsStep1 slot="node-js" />
+  <PythonFastapiStep1 slot="python-fastapi" />
+  <PythonFlaskStep1 slot="python-flask" />
   <RemixStep1 slot="remix" />
   <SvelteKitStep1 slot="sveltekit" />
 </SlotByFramework>
@@ -129,6 +145,8 @@ instructions to add a site and get a key.
   <NestJsStep2 slot="nest-js" />
   <NextJsStep2 slot="next-js" />
   <NodeJsStep2 slot="node-js" />
+  <PythonFastapiStep2 slot="python-fastapi" />
+  <PythonFlaskStep2 slot="python-flask" />
   <RemixStep2 slot="remix" />
   <SvelteKitStep2 slot="sveltekit" />
 </SlotByFramework>
@@ -145,6 +163,8 @@ configured with a maximum capacity of 10 tokens and refills by 5 tokens every
   <NestJsStep3 slot="nest-js" />
   <NextJsStep3 slot="next-js" />
   <NodeJsStep3 slot="node-js" />
+  <PythonFastapiStep3 slot="python-fastapi" />
+  <PythonFlaskStep3 slot="python-flask" />
   <RemixStep3 slot="remix" />
   <SvelteKitStep3 slot="sveltekit" />
 </SlotByFramework>
@@ -154,6 +174,8 @@ configured with a maximum capacity of 10 tokens and refills by 5 tokens every
   <NestJsStep4 slot="nest-js" />
   <NextJsStep4 slot="next-js" />
   <NodeJsStep4 slot="node-js" />
+  <PythonFastapiStep4 slot="python-fastapi" />
+  <PythonFlaskStep4 slot="python-flask" />
   <RemixStep4 slot="remix" />
   <SvelteKitStep4 slot="sveltekit" />
 </SlotByFramework>

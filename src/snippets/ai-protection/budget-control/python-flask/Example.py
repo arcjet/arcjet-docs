@@ -1,11 +1,8 @@
 import logging
+import math
 import os
 
-from arcjet import (
-    Mode,
-    arcjet_sync,
-    token_bucket,
-)
+from arcjet import Mode, arcjet_sync, token_bucket
 from flask import Flask, jsonify, request
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
@@ -37,19 +34,19 @@ prompt = ChatPromptTemplate.from_messages(
 
 chain = prompt | llm | StrOutputParser()
 
+# Create a single Arcjet client at startup and reuse it across requests
 aj = arcjet_sync(
     key=arcjet_key,  # Get your key from https://app.arcjet.com
     rules=[
-        # Create a token bucket rate limit. Other algorithms are supported
+        # Token bucket rate limiting is best for AI budget control
         token_bucket(
-            # Track budgets by arbitrary characteristics of the request. Here
-            # we use user ID, but you could pass any value. Removing this will
-            # fall back to IP-based rate limiting.
+            mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
+            # Track budgets per user — replace "userId" with any stable
+            # identifier. Removing this falls back to IP-based rate limiting.
             characteristics=["userId"],
-            mode=Mode.LIVE,
-            refill_rate=5,  # Refill 5 tokens per interval
-            interval=10,  # Refill every 10 seconds
-            capacity=10,  # Bucket capacity of 10 tokens
+            refill_rate=2_000,  # Refill 2,000 tokens per interval
+            interval=3_600,  # Refill every hour (in seconds)
+            capacity=5_000,  # Maximum 5,000 tokens in the bucket
         ),
     ],
 )
@@ -57,25 +54,28 @@ aj = arcjet_sync(
 
 @app.post("/chat")
 def chat():
-    userId = "user-123"  # In a real app, identify the user from the request (e.g. auth token)
+    # Replace with your session/auth lookup to get a stable user ID
+    user_id = "user-123"
 
-    # Call protect() to evaluate the request against the rules
-    decision = aj.protect(
-        request,
-        # Deduct 5 tokens from the bucket
-        requested=5,
-        # Identify the user for rate limiting purposes
-        characteristics={"userId": userId},
-    )
-
-    # Handle denied requests
-    if decision.is_denied():
-        status = 429 if decision.reason.is_rate_limit() else 403
-        return jsonify(error="Denied"), status
-
-    # All rules passed, proceed with handling the request
     body = request.get_json()
     message = body.get("message", "") if body else ""
+
+    # Estimate token cost: ~1 token per 4 characters of text (rough heuristic).
+    # For accurate counts use https://github.com/openai/tiktoken
+    estimate = math.ceil(len(message) / 4)
+
+    # Deduct the estimated tokens from the user's budget
+    decision = aj.protect(
+        request,
+        requested=estimate,
+        characteristics={"userId": user_id},
+    )
+
+    if decision.is_denied():
+        # The token_bucket rule is the only rule configured, so the only
+        # possible denial reason is RATE_LIMIT (429).
+        return jsonify(error="AI usage limit exceeded"), 429
+
     reply = chain.invoke({"message": message})
 
     return jsonify(reply=reply)

@@ -5,7 +5,7 @@ next: false
 ---
 
 import { Link } from "@/components/link";
-import { Badge } from "@astrojs/starlight/components";
+import { Badge, Tabs, TabItem } from "@astrojs/starlight/components";
 import Comments from "/src/components/Comments.astro";
 
 Arcjet allows you to configure a list of bots to allow or deny. To construct the
@@ -13,7 +13,9 @@ list, you can specify individual bots and/or use categories to allow or deny all
 bots in a category.
 
 If you are using TypeScript, these will be shown as autocomplete values to
-`allow` or `deny` options while writing your rules.
+`allow` or `deny` options while writing your rules. In Python, the same string
+identifiers are accepted on `allow` / `deny`; categories are also available via
+the `BotCategory` enum.
 
 ## Individual bots
 
@@ -22,6 +24,9 @@ list](https://github.com/arcjet/arcjet-js/blob/main/protocol/well-known-bots.ts)
 contains a list of known bots that Arcjet can identify.
 
 For example:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
 ```ts
 detectBot({
@@ -35,6 +40,25 @@ detectBot({
    ],
 }),
 ```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+detect_bot(
+    mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
+    # Block all bots except specific Google and Bing crawlers, and curl
+    allow=[
+        "GOOGLE_CRAWLER",
+        "GOOGLE_CRAWLER_NEWS",
+        "BING_CRAWLER",
+        "CURL",
+    ],
+)
+```
+
+</TabItem>
+</Tabs>
 
 ## Bot categories
 
@@ -67,6 +91,9 @@ The [bot
 list](https://github.com/arcjet/arcjet-js/blob/main/protocol/well-known-bots.ts)
 contains a list of categories and which bots are in each category.
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
 ```ts
 detectBot({
    mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
@@ -77,6 +104,27 @@ detectBot({
    ],
 }),
 ```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+from arcjet import BotCategory, detect_bot, Mode
+
+detect_bot(
+    mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
+    # Block all bots except search engines and curl
+    allow=[
+        BotCategory.SEARCH_ENGINE,  # Google, Bing, etc
+        "CURL",  # You can allow specific bots in addition to categories
+    ],
+)
+```
+
+The Python SDK also accepts the underlying string identifiers (e.g.
+`"CATEGORY:SEARCH_ENGINE"`) if you prefer not to import the enum.
+</TabItem>
+</Tabs>
 
 Only configured categories are checked for performance reasons. Each detected
 bot must be compared to a category, so the worst case performance is
@@ -97,12 +145,8 @@ block custom bots.
 
 ## Detection
 
-For basic detection on the <Badge text="Free" variant="caution" /> plan, Arcjet
-uses the `User-Agent` header to identify specific bots.
-
 {/* prettier-ignore */}
-The Arcjet <Badge text="Starter" variant="note" /> or <Badge text="Business" variant="tip" />
-plans provides additional <Link.Page href="/bot-protection/reference#bot-verification">bot verification</Link.Page> using
+Arcjet provides additional <Link.Page href="/bot-protection/reference#bot-verification">bot verification</Link.Page> using
 IP analysis, which can help if you are under attack from bots pretending to be
 good bots e.g. clients pretending to be Google (who you usually want to allow).
 

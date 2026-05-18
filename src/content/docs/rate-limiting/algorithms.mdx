@@ -4,7 +4,7 @@ description: "Arcjet rate limiting supports fixed window, sliding window, and to
 prev: false
 ---
 
-import { Code, Aside } from "@astrojs/starlight/components";
+import { Code, Aside, Tabs, TabItem } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import FixedWindow from "/src/snippets/rate-limiting/reference/nextjs/FixedWindow.ts?raw";
 import SlidingWindow from "/src/snippets/rate-limiting/reference/nextjs/SlidingWindow.ts?raw";
@@ -126,10 +126,20 @@ tokens up to the capacity of the bucket.
 
 <Aside type="note">The requested amount must be a positive integer.</Aside>
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 ```ts
 // Deduct 1 token from the bucket
 const decision = await aj.protect(req, { requested: 1 });
 ```
+</TabItem>
+<TabItem label="Python">
+```py
+# Deduct 1 token from the bucket
+decision = await aj.protect(request, requested=1)  # use aj.protect(request, ...) for arcjet_sync
+```
+</TabItem>
+</Tabs>
 
 For example, if it is `12:00:00` and a client makes 100 requests each with 1
 token deducted, further requests will be blocked until `12:01:00` when the

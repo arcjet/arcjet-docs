@@ -3,11 +3,15 @@ title: "AI data loss prevention"
 titleByFramework:
   default: "AI data loss prevention"
   next-js: "AI data loss prevention for Next.js"
+  python-fastapi: "AI data loss prevention for Python + FastAPI"
+  python-flask: "AI data loss prevention for Python + Flask"
 description: "Stop PII from reaching your AI provider. Use Arcjet sensitive info detection to block credit card numbers, phone numbers, and other personal data in AI prompts."
 prev: true
 next: true
 frameworks:
   - next-js
+  - python-fastapi
+  - python-flask
 ajToc:
   - text: "Get started"
     anchor: "get-started"
@@ -21,6 +25,8 @@ import FrameworkLinks from "@/components/FrameworkLinks";
 import { frameworks } from "@/lib/prefs";
 
 import NextJsStep from "@/snippets/ai-protection/data-loss-prevention/nextjs/Example.mdx";
+import PythonFastapiStep from "@/snippets/ai-protection/data-loss-prevention/python-fastapi/Example.mdx";
+import PythonFlaskStep from "@/snippets/ai-protection/data-loss-prevention/python-flask/Example.mdx";
 
 Users paste sensitive data into AI prompts - credit card numbers, phone numbers,
 passwords, and other PII - often without realizing the risk. Once that data
@@ -42,25 +48,29 @@ app environment.
 
 <SlotByFramework client:load>
   <NextJsStep slot="next-js" />
+  <PythonFastapiStep slot="python-fastapi" />
+  <PythonFlaskStep slot="python-flask" />
 </SlotByFramework>
 
 ## Configuring sensitive info detection
 
-`deny: ["CREDIT_CARD_NUMBER", "EMAIL"]` - the list of PII entity types to
-block. Remove any types your application legitimately handles - for example, a
-support bot that collects phone numbers should remove `"PHONE_NUMBER"` from the
-deny list.
+`deny: ["CREDIT_CARD_NUMBER", "EMAIL"]` (Python: `deny=[SensitiveInfoEntityType.CREDIT_CARD_NUMBER, SensitiveInfoEntityType.EMAIL]`) -
+the list of PII entity types to block. Remove any types your application
+legitimately handles - for example, a support bot that collects phone numbers
+should remove `"PHONE_NUMBER"` from the deny list.
 
-Available entity types include: `CREDIT_CARD_NUMBER`, `PHONE_NUMBER`, `EMAIL`,
-`IP_ADDRESS`, `URL`. See the [full reference](/sensitive-info/reference) for the
-complete list.
+Built-in entity types: `CREDIT_CARD_NUMBER`, `PHONE_NUMBER`, `EMAIL`,
+`IP_ADDRESS`. The JS SDK additionally supports `URL`. See the [full
+reference](/sensitive-info/reference) for the complete list and for defining
+your own custom detectors.
 
-`sensitiveInfoValue` - The text to scan. Pass the user's prompt or the most
-recent message. You can also pass the full conversation history if you want to
-scan all messages, not just the latest one.
+`sensitiveInfoValue` (JS) / `sensitive_info_value` (Python) - The text to scan.
+Pass the user's prompt or the most recent message. You can also pass the full
+conversation history if you want to scan all messages, not just the latest one.
 
-`mode: "DRY_RUN"` - Logs detections without blocking. Use this to audit what PII
-appears in prompts before switching to `"LIVE"`.
+`mode: "DRY_RUN"` (JS) / `mode=Mode.DRY_RUN` (Python) - Logs detections without
+blocking. Use this to audit what PII appears in prompts before switching to
+`"LIVE"`.
 
 ## Combine with abuse protection
 

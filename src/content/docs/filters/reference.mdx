@@ -1,12 +1,14 @@
 ---
 title: "Filters reference"
-description: "Reference guide for filtering requests with Arcjet in your Next.js, Node.js, Bun, Remix, or SvelteKit app."
+description: "Reference guide for filtering requests with Arcjet in your Next.js, Node.js, Bun, Python, Remix, or SvelteKit app."
 frameworks:
   - bun
   - deno
   - nest-js
   - next-js
   - node-js
+  - python-fastapi
+  - python-flask
   - remix
   - sveltekit
 ajToc:
@@ -37,7 +39,7 @@ ajToc:
 ---
 
 import { Link } from "@/components/link";
-import { Badge } from "@astrojs/starlight/components";
+import { Badge, Tabs, TabItem } from "@astrojs/starlight/components";
 import FrameworkLinks from "@/components/FrameworkLinks";
 import DisplayType from "@/components/DisplayType.astro";
 import SlotByFramework from "@/components/SlotByFramework";
@@ -47,6 +49,8 @@ import DenoAllow from "@/snippets/filters/reference/deno/Allow.mdx";
 import NestJsAllow from "@/snippets/filters/reference/nestjs/Allow.mdx";
 import NextJsAllow from "@/snippets/filters/reference/nextjs/Allow.mdx";
 import NodeJsAllow from "@/snippets/filters/reference/nodejs/Allow.mdx";
+import PythonFastapiAllow from "@/snippets/filters/reference/python-fastapi/Allow.mdx";
+import PythonFlaskAllow from "@/snippets/filters/reference/python-flask/Allow.mdx";
 import RemixAllow from "@/snippets/filters/reference/remix/Allow.mdx";
 import SvelteKitAllow from "@/snippets/filters/reference/sveltekit/Allow.mdx";
 
@@ -76,11 +80,35 @@ Allow or deny filters are configured using one or more expressions:
   allowed.
 - These lists are mutually-exclusive, so you can only use one or the other.
 
-They are constructed with the `filters(options)` function and configured by
-`FilterOptionsAllow` or `FilterOptionsDeny`:
+In JavaScript / TypeScript they are constructed with the `filter(options)`
+function and configured by `FilterOptionsAllow` or `FilterOptionsDeny`. In
+Python they are constructed with the `filter_request(...)` factory.
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 <DisplayType from="arcjet" type="FilterOptions" />
 <DisplayType from="arcjet" type="ArcjetMode" />
+</TabItem>
+<TabItem label="Python">
+
+```py
+# Signature for arcjet.filter_request
+# `allow` and `deny` are mutually exclusive — pass only one.
+def filter_request(
+    *,
+    # Mode.LIVE blocks requests; Mode.DRY_RUN logs only. Defaults to Mode.LIVE.
+    mode: Mode = Mode.LIVE,
+    # Filter expressions that allow matching requests (others are denied).
+    allow: Sequence[str] = (),
+    # Filter expressions that deny matching requests (others are allowed).
+    deny: Sequence[str] = (),
+) -> Filter: ...
+
+# `Mode` is an enum: Mode.LIVE | Mode.DRY_RUN
+```
+
+</TabItem>
+</Tabs>
 
 :::note
 When specifying multiple rules, the order of the rules is ignored. Rule
@@ -99,6 +127,8 @@ Requests matching the expression are allowed and all others are denied.
   <NestJsAllow slot="nest-js" />
   <NextJsAllow slot="next-js" />
   <NodeJsAllow slot="node-js" />
+  <PythonFastapiAllow slot="python-fastapi" />
+  <PythonFlaskAllow slot="python-flask" />
   <RemixAllow slot="remix" />
   <SvelteKitAllow slot="sveltekit" />
 </SlotByFramework>
@@ -124,6 +154,9 @@ lower(http.request.headers["user-agent"]) matches "curl"
 To use it as a filter deny rule so that any requests matching the expression are
 denied (and all others allowed), you would configure Arcjet like this:
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
 ```ts
 filter({
   deny: [
@@ -133,8 +166,26 @@ filter({
 }),
 ```
 
+</TabItem>
+<TabItem label="Python">
+
+```py
+filter_request(
+    deny=[
+        'ip.src.vpn or ip.src.tor or lower(http.request.headers["user-agent"]) matches "curl"',
+    ],
+    mode=Mode.LIVE,
+)
+```
+
+</TabItem>
+</Tabs>
+
 You can also split the expressions within the array for readability. They will
 be combined as an `OR` operation:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
 ```ts
 filter({
@@ -147,6 +198,24 @@ filter({
   mode: "LIVE",
 }),
 ```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+filter_request(
+    deny=[
+        # Expressions will be combined with OR
+        "ip.src.vpn",
+        "ip.src.tor",
+        'lower(http.request.headers["user-agent"]) matches "curl"',
+    ],
+    mode=Mode.LIVE,
+)
+```
+
+</TabItem>
+</Tabs>
 
 To combine multiple conditions e.g. with `and`, use a single expression string.
 
@@ -161,6 +230,9 @@ ip.src.country in {"AT" "BE" "BG" "CY" "CZ" "DE" "DK" "EE" "ES" "FI" "FR" "GR" "
 To use it as a filter allow rule so that only requests matching the expression
 are allowed (and all others denied), you would configure Arcjet like this:
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
 ```ts
 filter({
   allow: [
@@ -169,6 +241,21 @@ filter({
   mode: "LIVE",
 }),
 ```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+filter_request(
+    allow=[
+        'ip.src.country in {"AT" "BE" "BG" "CY" "CZ" "DE" "DK" "EE" "ES" "FI" "FR" "GR" "HR" "HU" "IE" "IT" "LT" "LU" "LV" "MT" "NL" "PL" "PT" "RO" "SE" "SI" "SK"}',
+    ],
+    mode=Mode.LIVE,
+)
+```
+
+</TabItem>
+</Tabs>
 
 ## Fields
 
@@ -322,15 +409,30 @@ This contains the following properties:
   client IP address. See the SDK reference for more information.
 
 You check if a deny conclusion has been returned by a filter rule by using
-`decision.isDenied()` and `decision.reason.isFilterRule()` respectively.
+`decision.isDenied()` and `decision.reason.isFilterRule()` (JS) /
+`decision.is_denied()` and `decision.reason_v2.type == "FILTER"` (Python).
 
 You can iterate through the results and check whether a filter rule was applied:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
 ```ts
 for (const result of decision.results) {
   console.log("Rule Result", result);
 }
 ```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+for result in decision.results:
+    print("Rule Result", result)
+```
+
+</TabItem>
+</Tabs>
 
 ## Error handling
 

@@ -94,6 +94,9 @@ You can set the IP address to a real public IP by overriding the IP address
 field (`ip`) in the `request` object that is passed to the Arcjet `protect`
 function.
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
 ```ts
 // Override the IP address in the request object if `ip` is provided. You could
 // set this using an environment variable or some other method to ensure it is
@@ -101,6 +104,20 @@ function.
 //const ip = "8.8.8.8"; // Google's public DNS server
 const decision = await aj.protect(ip ? { ...req, ip } : req);
 ```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+# Use the `ip_src` keyword argument on `protect()` to override the client IP.
+# You could read this from an environment variable to ensure it is only set
+# in development.
+# ip = "8.8.8.8"  # Google's public DNS server
+decision = await aj.protect(request, ip_src=ip) if ip else await aj.protect(request)
+```
+
+</TabItem>
+</Tabs>
 
 ## Common errors
 
@@ -120,6 +137,9 @@ You provide the Arcjet SDK with the key when instantiating the client. For
 example in this case the key is defined in an environment variable called
 `ARCJET_KEY`:
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
 ```ts "process.env.ARCJET_KEY"
 import arcjet from "arcjet";
 
@@ -135,6 +155,27 @@ const aj = arcjet({
   ],
 });
 ```
+
+</TabItem>
+<TabItem label="Python">
+
+```py "os.environ[\"ARCJET_KEY\"]"
+import os
+from arcjet import Mode, arcjet, shield
+
+aj = arcjet(
+    # Your Arcjet key from https://app.arcjet.com
+    # Read more: <https://docs.arcjet.com/environment#arcjet-key>.
+    key=os.environ["ARCJET_KEY"],
+    rules=[
+        # Protect against common attacks with Arcjet Shield
+        shield(mode=Mode.LIVE),  # Use Mode.DRY_RUN to log only
+    ],
+)
+```
+
+</TabItem>
+</Tabs>
 
 ### [deadline_exceeded] the operation timed out
 
@@ -262,6 +303,9 @@ Check out the <Link.Page href="/shield">Shield documentation</Link.Page> to
 learn how to configure Shield rules. To restore the old behavior you can add a
 simple Shield rule:
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
 ```ts
 import arcjet, { shield } from "@arcjet/next";
 
@@ -277,6 +321,27 @@ const aj = arcjet({
   ],
 });
 ```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+import os
+from arcjet import Mode, arcjet, shield
+
+aj = arcjet(
+    # Arcjet key for your site (from <https://app.arcjet.com>).
+    # More info: <https://docs.arcjet.com/environment#arcjet-key>.
+    key=os.environ["ARCJET_KEY"],
+    rules=[
+        # Protect against common attacks with Arcjet Shield
+        shield(mode=Mode.LIVE),  # Use Mode.DRY_RUN to log only
+    ],
+)
+```
+
+</TabItem>
+</Tabs>
 
 ### The current file is a CommonJS module whose imports will produce 'require' calls
 

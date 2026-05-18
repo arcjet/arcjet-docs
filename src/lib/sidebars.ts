@@ -450,6 +450,10 @@ export const main = [
             link: "/reference/nuxt",
           },
           {
+            label: "Python",
+            link: "/reference/python",
+          },
+          {
             label: "React Router",
             link: "/reference/react-router",
           },

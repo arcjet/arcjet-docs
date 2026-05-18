@@ -1,0 +1,16 @@
+Add your key to a `.env` file in your project root. Arcjet does not read
+`ARCJET_KEY` automatically — your application must pass it explicitly to
+`arcjet(key=...)`.
+
+```ini title=".env"
+# Run Arcjet in development <https://docs.arcjet.com/environment#arcjet-env>.
+ARCJET_ENV=development
+# Arcjet key for your site (from <https://app.arcjet.com>).
+# More info: <https://docs.arcjet.com/environment#arcjet-key>.
+ARCJET_KEY=ajkey_yourkey
+```
+
+Install [`python-dotenv`](https://github.com/theskumar/python-dotenv) and call
+`load_dotenv()` before reading the environment, or use FastAPI's
+[`pydantic-settings`](https://fastapi.tiangolo.com/advanced/settings/#reading-a-env-file)
+integration which loads `.env` automatically.

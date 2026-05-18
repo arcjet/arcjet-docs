@@ -24,6 +24,7 @@ of your hosting platform in production.
 
 URL to Arcjet Cloud API (`string`, default: `"https://decide.arcjet.com"`).
 Should only be set if directed by Arcjet support.
+Read by both the JS and Python SDKs.
 See <Link.Page href="/architecture#arcjet-cloud-api">Architecture: Cloud API</Link.Page> for more info.
 
 Note that when deployed to Fly.io the default is automatically changed to
@@ -42,7 +43,8 @@ Whether the app is running in development
 (`"development" | "production"`, default: `"production"`).
 Arcjet is in development mode if either of these fields is set to `"development"`
 and production mode otherwise.
-`NODE_ENV` is a convention used in Node.js apps.
+`NODE_ENV` is a convention used in Node.js apps — the Python SDK reads
+`ARCJET_ENV` only.
 
 In development, the timeout for connecting to Cloud API is increased.
 In production, the timeout is quicker.
@@ -83,7 +85,10 @@ Select your site, select “SDK configuration”, then click to copy.
 Arcjet keys are secrets that are always prefixed with `ajkey_`.
 As this is a secret, do not commit it to source control or otherwise expose it!
 
-This value is read automatically when using the Arcjet Astro SDK.
+This value is read automatically when using the Arcjet Astro SDK. In the
+Python SDK, pass it explicitly to `arcjet(key=...)` or
+`arcjet_sync(key=...)` — typically read with
+`os.environ["ARCJET_KEY"]` or `os.environ.get("ARCJET_KEY")`.
 
 <a name="arcjet-log-level" />
 
@@ -93,6 +98,10 @@ Log level to use (`"debug" | "error" | "info" | "warn"`, default: `"warn"`).
 Setting for example `warn` will log warning _and_ error messages.
 The order of log levels from most verbose to least verbose is `debug`, `info`,
 `warn`, `error`.
+
+Read by both the JS and Python SDKs. The Python SDK applies this to the
+`arcjet` logger (`logging.getLogger("arcjet")`) and also accepts a numeric
+level like `"10"` (for `DEBUG`).
 
 <a name="firebase-config" />
 
@@ -120,6 +129,10 @@ The inferred platform affects which request headers are trusted when determining
 client IP.
 When Fly is detected, that affects the default value of `ARCJET_BASE_URL`.
 
+The Python SDK only reads `FLY_APP_NAME` (to switch the default
+`ARCJET_BASE_URL` to the Fly endpoint). It does not read `FIREBASE_CONFIG`,
+`RENDER`, or `VERCEL`.
+
 {/* TODO: link to Client IP concept when that lands. */}
 
 <a name="vercel-git-commit-sha" />
@@ -133,6 +146,7 @@ set by Vercel.
 When present in the Arcjet Next.js SDK,
 its value is sent to Arcjet Cloud API as part of the `extra` fields,
 which are displayed in the [Arcjet dashboard](https://app.arcjet.com).
+The Python SDK does not read this variable.
 
 ## How to define environment variables
 
@@ -151,6 +165,19 @@ variables from a `.env.local` file.
 ```sh
 node --env-file .env.local index.js
 ```
+
+In Python, the [`python-dotenv`](https://github.com/theskumar/python-dotenv)
+package is the standard way to load `.env` files. Call `load_dotenv()`
+before reading the variables:
+
+```py
+from dotenv import load_dotenv
+
+load_dotenv()  # Loads .env from the working directory
+```
+
+Flask and pydantic-settings load `.env` files automatically when
+`python-dotenv` is installed — see the framework-specific notes below.
 
 ### How to load `.env` files
 
@@ -176,6 +203,19 @@ In [Next.js](https://nextjs.org/docs/pages/guides/environment-variables)
 `.env` files are loaded automatically when using `loadEnvConfig` from
 `@next/env`.
 
+In [Flask](https://flask.palletsprojects.com/en/stable/cli/#environment-variables-from-dotenv)
+both `.env` and `.flaskenv` files are loaded automatically by the `flask` CLI
+when `python-dotenv` is installed. `.flaskenv` is intended for public
+variables (e.g. `FLASK_APP`); `.env` for secrets and should be added to
+`.gitignore`.
+
+In [FastAPI](https://fastapi.tiangolo.com/advanced/settings/#reading-a-env-file)
+`.env` files are loaded automatically when you use
+[`pydantic-settings`](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)
+and set `model_config = SettingsConfigDict(env_file=".env")` on your
+`BaseSettings` subclass. Otherwise call `load_dotenv()` from `python-dotenv`
+manually at module load time.
+
 ## How to read environment variables
 
 Arcjet reads most environment variables automatically.
@@ -194,10 +234,34 @@ In SvelteKit you can read environment variables from
 [`$env/dynamic/private`](https://svelte.dev/docs/kit/$env-dynamic-private) and
 the like.
 
+In Python you can read environment variables with
+[`os.environ`](https://docs.python.org/3/library/os.html#os.environ).
+Use `os.environ["ARCJET_KEY"]` to raise a `KeyError` if the variable is
+missing, or `os.environ.get("ARCJET_KEY")` to return `None`. The Arcjet
+Python SDK does not read `ARCJET_KEY` automatically — you must pass it
+explicitly:
+
+```py
+import os
+from arcjet import arcjet
+
+aj = arcjet(
+    key=os.environ["ARCJET_KEY"],
+    rules=[],
+)
+```
+
 ## `@arcjet/env`
 
-Arcjet uses [`@arcjet/env`](https://github.com/arcjet/arcjet/tree/main/packages/env) to read info from the
+The JS SDKs use [`@arcjet/env`](https://github.com/arcjet/arcjet/tree/main/packages/env) to read info from the
 environment.
-To read values in the same way as Arcjet SDKs,
+To read values in the same way as the JS SDKs,
 for example to figure out whether Arcjet is in development mode,
 you can use this package.
+
+There is no equivalent package for Python. The Python SDK reads environment
+variables directly via `os.environ` / `os.getenv` in
+[`arcjet/_client.py`](https://github.com/arcjet/arcjet-py/blob/main/src/arcjet/_client.py),
+[`arcjet/_context.py`](https://github.com/arcjet/arcjet-py/blob/main/src/arcjet/_context.py),
+and
+[`arcjet/_logging.py`](https://github.com/arcjet/arcjet-py/blob/main/src/arcjet/_logging.py).

@@ -10,7 +10,15 @@ ajToc:
       - anchor: "3-add-filters"
         text: 3. Add filters
       - anchor: "4-start-server"
-        framework: ["bun", "deno", "fastify", "node-js"]
+        framework:
+          [
+            "bun",
+            "deno",
+            "fastify",
+            "node-js",
+            "python-fastapi",
+            "python-flask",
+          ]
         text: 4. Start server
       - anchor: "4-start-app"
         framework:
@@ -24,7 +32,7 @@ ajToc:
     text: "What next?"
   - anchor: "get-help"
     text: "Get help"
-description: "Quick start guide for adding Arcjet filters to your Astro, Bun, Deno, Fastify, NestJS, Next.js, Node.js, React Router, Remix, or SvelteKit app."
+description: "Quick start guide for adding Arcjet filters to your Astro, Bun, Deno, Fastify, NestJS, Next.js, Node.js, Python, React Router, Remix, or SvelteKit app."
 frameworks:
   - astro
   - bun
@@ -33,6 +41,8 @@ frameworks:
   - nest-js
   - next-js
   - node-js
+  - python-fastapi
+  - python-flask
   - react-router
   - remix
   - sveltekit
@@ -45,6 +55,8 @@ titleByFramework:
   nest-js: "Filters for NestJS"
   next-js: "Filters for Next.js"
   node-js: "Filters for Node.js"
+  python-fastapi: "Filters for Python + FastAPI"
+  python-flask: "Filters for Python + Flask"
   react-router: "Filters for React Router"
   remix: "Filters for Remix"
   sveltekit: "Filters for SvelteKit"
@@ -89,6 +101,14 @@ import NodeJsStep1 from "@/snippets/filters/quick-start/nodejs/Step1.mdx";
 import NodeJsStep2 from "@/snippets/filters/quick-start/nodejs/Step2.mdx";
 import NodeJsStep3 from "@/snippets/filters/quick-start/nodejs/Step3.mdx";
 import NodeJsStep4 from "@/snippets/filters/quick-start/nodejs/Step4.mdx";
+import PythonFastapiStep1 from "@/snippets/filters/quick-start/python-fastapi/Step1.mdx";
+import PythonFastapiStep2 from "@/snippets/filters/quick-start/python-fastapi/Step2.mdx";
+import PythonFastapiStep3 from "@/snippets/filters/quick-start/python-fastapi/Step3.mdx";
+import PythonFastapiStep4 from "@/snippets/filters/quick-start/python-fastapi/Step4.mdx";
+import PythonFlaskStep1 from "@/snippets/filters/quick-start/python-flask/Step1.mdx";
+import PythonFlaskStep2 from "@/snippets/filters/quick-start/python-flask/Step2.mdx";
+import PythonFlaskStep3 from "@/snippets/filters/quick-start/python-flask/Step3.mdx";
+import PythonFlaskStep4 from "@/snippets/filters/quick-start/python-flask/Step4.mdx";
 import ReactRouterStep1 from "@/snippets/filters/quick-start/react-router/Step1.mdx";
 import ReactRouterStep2 from "@/snippets/filters/quick-start/react-router/Step2.mdx";
 import ReactRouterStep3 from "@/snippets/filters/quick-start/react-router/Step3.mdx";
@@ -136,6 +156,8 @@ Run the following command to install the SDK in your project:
   <NestJsStep1 slot="nest-js" />
   <NextJsStep1 slot="next-js" />
   <NodeJsStep1 slot="node-js" />
+  <PythonFastapiStep1 slot="python-fastapi" />
+  <PythonFlaskStep1 slot="python-flask" />
   <ReactRouterStep1 slot="react-router" />
   <RemixStep1 slot="remix" />
   <SvelteKitStep1 slot="sveltekit" />
@@ -154,6 +176,8 @@ instructions to add a site and get a key.
   <NestJsStep2 slot="nest-js" />
   <NextJsStep2 slot="next-js" />
   <NodeJsStep2 slot="node-js" />
+  <PythonFastapiStep2 slot="python-fastapi" />
+  <PythonFlaskStep2 slot="python-flask" />
   <ReactRouterStep2 slot="react-router" />
   <RemixStep2 slot="remix" />
   <SvelteKitStep2 slot="sveltekit" />
@@ -169,6 +193,8 @@ instructions to add a site and get a key.
   <NestJsStep3 slot="nest-js" />
   <NextJsStep3 slot="next-js" />
   <NodeJsStep3 slot="node-js" />
+  <PythonFastapiStep3 slot="python-fastapi" />
+  <PythonFlaskStep3 slot="python-flask" />
   <ReactRouterStep3 slot="react-router" />
   <RemixStep3 slot="remix" />
   <SvelteKitStep3 slot="sveltekit" />
@@ -184,6 +210,8 @@ instructions to add a site and get a key.
   <NestJsStep4 slot="nest-js" />
   <NextJsStep4 slot="next-js" />
   <NodeJsStep4 slot="node-js" />
+  <PythonFastapiStep4 slot="python-fastapi" />
+  <PythonFlaskStep4 slot="python-flask" />
   <ReactRouterStep4 slot="react-router" />
   <RemixStep4 slot="remix" />
   <SvelteKitStep4 slot="sveltekit" />
@@ -233,6 +261,20 @@ Make a `curl` request from your terminal to your app:
 
     ```sh
     curl --head http://localhost:3000
+    ```
+
+  </Fragment>
+  <Fragment slot="python-fastapi">
+
+    ```sh
+    curl --head http://localhost:8000
+    ```
+
+  </Fragment>
+  <Fragment slot="python-flask">
+
+    ```sh
+    curl --head http://localhost:5000
     ```
 
   </Fragment>
