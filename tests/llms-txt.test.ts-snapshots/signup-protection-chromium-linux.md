@@ -74,30 +74,5 @@ This helps you filter out disposable or undeliverable emails commonly used in si
 
 By combining these three protections, Arcjet signup form protection reduces signup spam, form spam, and fake accounts, while letting legitimate users sign up with minimal friction.
 
-Availability
-------------
-
-[Section titled “Availability”](#availability)
-
-Plan
-
-Availability
-
-Free
-
-🚫
-
-Starter
-
-✅ Add-on
-
-Business
-
-✅ Included
-
-Enterprise
-
-✅ Included
-
 Discussion
 ----------

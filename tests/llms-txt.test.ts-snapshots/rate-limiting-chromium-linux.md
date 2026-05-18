@@ -70,32 +70,5 @@ To ensure rate limits are applied correctly, choose fingerprint characteristics 
 
 Matching fingerprints to the right identifiers is critical to applying rate limits fairly and avoiding unintended blocking.
 
-Availability
-------------
-
-[Section titled “Availability”](#availability)
-
-Rate limiting is available on all Arcjet plans:
-
-Plan
-
-Availability
-
-Free
-
-✅
-
-Starter
-
-✅
-
-Business
-
-✅
-
-Enterprise
-
-✅
-
 Discussion
 ----------
