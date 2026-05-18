@@ -237,17 +237,21 @@ was applied:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 for (const result of decision.results) {
   console.log("Rule Result", result);
 }
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py
 for result in decision.results:
     print("Rule Result", result)
 ```
+
 </TabItem>
 </Tabs>
 
@@ -287,6 +291,7 @@ or several of the reported email types.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 type ArcjetEmailType =
   | "DISPOSABLE" // Disposable email address from a throwaway email service
@@ -295,8 +300,10 @@ type ArcjetEmailType =
   | "NO_GRAVATAR" // Email address with no Gravatar profile
   | "INVALID"; // Email address that is invalid
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py
 from arcjet import EmailType
 
@@ -307,6 +314,7 @@ from arcjet import EmailType
 # - EmailType.NO_GRAVATAR — No Gravatar profile
 # - EmailType.INVALID — Address fails syntax / format validation
 ```
+
 </TabItem>
 </Tabs>
 
@@ -315,6 +323,7 @@ You can check the email type using the `decision.reason.emailTypes` (JS) /
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 let message = "";
 // You could return specific messages based on the email type, but this would
@@ -333,8 +342,10 @@ if (decision.reason.emailTypes.includes("DISPOSABLE")) {
   message = "Invalid email.";
 }
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py
 message = ""
 email_types = decision.reason_v2.email_types  # only valid when reason_v2.type == "EMAIL"
@@ -355,6 +366,7 @@ else:
     # This is a catch all
     message = "Invalid email."
 ```
+
 </TabItem>
 </Tabs>
 

@@ -185,6 +185,7 @@ You can use only one of the following configuration definitions:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 type BotOptionsAllow = {
   mode?: "LIVE" | "DRY_RUN";
@@ -203,6 +204,7 @@ The `arcjet` client is configured with one or more `detectBot` rules which take
 one or many `BotOptions`.
 </TabItem>
 <TabItem label="Python">
+
 ```py
 # Signature for arcjet.detect_bot
 # `allow` and `deny` are mutually exclusive — pass only one.
@@ -324,17 +326,21 @@ applied:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 for (const result of decision.results) {
   console.log("Rule Result", result);
 }
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py
 for result in decision.results:
     print("Rule Result", result)
 ```
+
 </TabItem>
 </Tabs>
 
@@ -450,6 +456,7 @@ take actions based on the results, such as allowing all verified bots.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 import { isVerifiedBot } from "@arcjet/inspect";
 
@@ -478,8 +485,10 @@ if (decision.isDenied()) {
   return new Response(null, { status: 403 });
 }
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py
 from arcjet import arcjet, detect_bot, Mode
 
@@ -507,6 +516,7 @@ if any(
 if decision.is_denied():
     return JSONResponse(None, status_code=403)
 ```
+
 </TabItem>
 </Tabs>
 
@@ -517,6 +527,7 @@ response to block the request.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 for (const { reason } of decision.results) {
   if (reason.isBot() && reason.isSpoofed()) {
@@ -525,8 +536,10 @@ for (const { reason } of decision.results) {
   }
 }
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py
 from arcjet import is_spoofed_bot
 
@@ -541,6 +554,7 @@ for result in decision.results:
         print("Detected spoofed bot")
         # Return a 403 or similar response
 ```
+
 </TabItem>
 </Tabs>
 
@@ -550,6 +564,7 @@ This will check if the bot is verified.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 for (const { reason } of decision.results) {
   if (reason.isBot() && reason.isVerified()) {
@@ -558,14 +573,17 @@ for (const { reason } of decision.results) {
   }
 }
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py
 for result in decision.results:
     if result.reason_v2.type == "BOT" and result.reason_v2.verified:
         print("Verified bot")
         # Allow the request
 ```
+
 </TabItem>
 </Tabs>
 
@@ -580,6 +598,7 @@ You can choose to block such requests with <Link.Page href="/filters">Arcjet Fil
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 filter({
   // This will deny any traffic that has no user agent:
@@ -588,8 +607,10 @@ filter({
   mode: "LIVE",
 }),
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py
 filter_request(
     # This will deny any traffic that has no user agent:
@@ -598,6 +619,7 @@ filter_request(
     mode=Mode.LIVE,
 )
 ```
+
 </TabItem>
 </Tabs>
 
@@ -625,6 +647,7 @@ if (decision.results.some(isMissingUserAgent)) {
   // res.end(JSON.stringify({ error: "Bad request" }));
 }
 ```
+
 </TabItem>
 <TabItem label="Python">
 
@@ -648,6 +671,7 @@ for result in decision.results:
         )
         return JSONResponse({"error": "Bad request"}, status_code=400)
 ```
+
 </TabItem>
 </Tabs>
 

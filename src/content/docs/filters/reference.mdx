@@ -90,6 +90,7 @@ Python they are constructed with the `filter_request(...)` factory.
 <DisplayType from="arcjet" type="ArcjetMode" />
 </TabItem>
 <TabItem label="Python">
+
 ```py
 # Signature for arcjet.filter_request
 # `allow` and `deny` are mutually exclusive — pass only one.
@@ -105,6 +106,7 @@ def filter_request(
 
 # `Mode` is an enum: Mode.LIVE | Mode.DRY_RUN
 ```
+
 </TabItem>
 </Tabs>
 
@@ -154,6 +156,7 @@ denied (and all others allowed), you would configure Arcjet like this:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 filter({
   deny: [
@@ -162,8 +165,10 @@ filter({
   mode: "LIVE",
 }),
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py
 filter_request(
     deny=[
@@ -172,6 +177,7 @@ filter_request(
     mode=Mode.LIVE,
 )
 ```
+
 </TabItem>
 </Tabs>
 
@@ -180,6 +186,7 @@ be combined as an `OR` operation:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 filter({
   deny: [
@@ -191,8 +198,10 @@ filter({
   mode: "LIVE",
 }),
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py
 filter_request(
     deny=[
@@ -204,6 +213,7 @@ filter_request(
     mode=Mode.LIVE,
 )
 ```
+
 </TabItem>
 </Tabs>
 
@@ -222,6 +232,7 @@ are allowed (and all others denied), you would configure Arcjet like this:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 filter({
   allow: [
@@ -230,8 +241,10 @@ filter({
   mode: "LIVE",
 }),
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py
 filter_request(
     allow=[
@@ -240,6 +253,7 @@ filter_request(
     mode=Mode.LIVE,
 )
 ```
+
 </TabItem>
 </Tabs>
 
@@ -402,17 +416,21 @@ You can iterate through the results and check whether a filter rule was applied:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 for (const result of decision.results) {
   console.log("Rule Result", result);
 }
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py
 for result in decision.results:
     print("Rule Result", result)
 ```
+
 </TabItem>
 </Tabs>
 

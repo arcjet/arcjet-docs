@@ -132,6 +132,7 @@ In Python they are constructed with the `detect_sensitive_info(...)` factory.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 type SensitiveInfoOptionsAllow = {
   mode?: "LIVE" | "DRY_RUN";
@@ -153,8 +154,10 @@ type SensitiveInfoOptionsDeny = {
   detect?: (tokens: string[]) -> Array<SensitiveInfoType | undefined>;
 };
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py
 # Signature for arcjet.detect_sensitive_info
 def detect_sensitive_info(
@@ -180,6 +183,7 @@ def detect_sensitive_info(
 # - SensitiveInfoEntityType.IP_ADDRESS
 # - SensitiveInfoEntityType.CREDIT_CARD_NUMBER
 ```
+
 </TabItem>
 </Tabs>
 
@@ -232,17 +236,21 @@ You can iterate through the results and check whether a sensitive info rule was 
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 for (const result of decision.results) {
   console.log("Rule Result", result);
 }
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py
 for result in decision.results:
     print("Rule Result", result)
 ```
+
 </TabItem>
 </Tabs>
 

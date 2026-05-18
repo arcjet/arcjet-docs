@@ -179,6 +179,7 @@ You can also specify CIDR ranges to match multiple IP addresses.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
@@ -189,6 +190,7 @@ const aj = arcjet({
   ],
 });
 ```
+
 </TabItem>
 <TabItem label="Python">
 <Code code={ProxiesPy} lang="py" />
@@ -206,6 +208,7 @@ error result for more information. For example:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 const decision = await aj.protect(req);
 
@@ -214,8 +217,10 @@ if (decision.isErrored()) {
   console.error("Arcjet error", decision.reason.message);
 }
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py
 decision = await aj.protect(request)
 
@@ -223,5 +228,6 @@ if decision.is_error():
     # Fail open: log the error and allow the request
     logger.error("Arcjet error: %s", decision.reason_v2.message)
 ```
+
 </TabItem>
 </Tabs>

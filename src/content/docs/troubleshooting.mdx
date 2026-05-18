@@ -96,6 +96,7 @@ function.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 // Override the IP address in the request object if `ip` is provided. You could
 // set this using an environment variable or some other method to ensure it is
@@ -103,8 +104,10 @@ function.
 //const ip = "8.8.8.8"; // Google's public DNS server
 const decision = await aj.protect(ip ? { ...req, ip } : req);
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py
 # Use the `ip_src` keyword argument on `protect()` to override the client IP.
 # You could read this from an environment variable to ensure it is only set
@@ -112,6 +115,7 @@ const decision = await aj.protect(ip ? { ...req, ip } : req);
 # ip = "8.8.8.8"  # Google's public DNS server
 decision = await aj.protect(request, ip_src=ip) if ip else await aj.protect(request)
 ```
+
 </TabItem>
 </Tabs>
 
@@ -135,6 +139,7 @@ example in this case the key is defined in an environment variable called
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts "process.env.ARCJET_KEY"
 import arcjet from "arcjet";
 
@@ -150,8 +155,10 @@ const aj = arcjet({
   ],
 });
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py "os.environ[\"ARCJET_KEY\"]"
 import os
 from arcjet import Mode, arcjet, shield
@@ -166,6 +173,7 @@ aj = arcjet(
     ],
 )
 ```
+
 </TabItem>
 </Tabs>
 
@@ -297,6 +305,7 @@ simple Shield rule:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 import arcjet, { shield } from "@arcjet/next";
 
@@ -312,8 +321,10 @@ const aj = arcjet({
   ],
 });
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py
 import os
 from arcjet import Mode, arcjet, shield
@@ -328,6 +339,7 @@ aj = arcjet(
     ],
 )
 ```
+
 </TabItem>
 </Tabs>
 

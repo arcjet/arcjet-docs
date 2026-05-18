@@ -79,6 +79,7 @@ The following example uses the [Vercel AI SDK](https://sdk.vercel.ai/) (JS) /
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 import { openai } from "@ai-sdk/openai";
 import arcjet, {
@@ -154,8 +155,10 @@ export async function POST(req: Request) {
   return result.toUIMessageStreamResponse();
 }
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py
 import logging
 import os
@@ -239,6 +242,7 @@ async def chat(request: Request, body: ChatRequest):
     reply = await chain.ainvoke({"message": body.message})
     return {"reply": reply}
 ```
+
 </TabItem>
 </Tabs>
 
@@ -268,6 +272,7 @@ cleanly with prompt injection protection:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 import arcjet, {
   detectBot,
@@ -289,8 +294,10 @@ const aj = arcjet({
   ],
 });
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py
 import os
 from arcjet import (
@@ -319,6 +326,7 @@ aj = arcjet(
     ],
 )
 ```
+
 </TabItem>
 </Tabs>
 
@@ -336,6 +344,7 @@ Or wire it up manually — create a guard client once at module scope, then call
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
+
 ```ts
 import { launchArcjet, detectPromptInjection } from "@arcjet/guard";
 
@@ -361,8 +370,10 @@ export async function fetchTool({ url }: { url: string }, userId: string) {
   return { content };
 }
 ```
+
 </TabItem>
 <TabItem label="Python">
+
 ```py
 import os
 import httpx
@@ -390,6 +401,7 @@ async def fetch_tool(url: str, user_id: str) -> dict:
 
     return {"content": content}
 ```
+
 </TabItem>
 </Tabs>
 
