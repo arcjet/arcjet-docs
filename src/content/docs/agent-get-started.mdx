@@ -45,30 +45,10 @@ Skills are the primary entry point for setting up Arcjet in an agentic
 workflow. They give your agent the documentation to detect your framework,
 install the SDK, and wire up protection rules.
 
-Install the Arcjet skills:
+Install the Arcjet skill:
 
 ```bash
 npx skills add arcjet/skills
-```
-
-The two canonical skills are:
-
-- **`add-request-protection`** — protect HTTP routes and API endpoints with
-  rate limiting, bot detection, email validation, and shield. Reads the
-  appropriate JS / Python request reference.
-- **`add-guard-protection`** — protect non-HTTP code paths (AI agent tool
-  calls, MCP tool handlers, queue workers, background jobs) with
-  `@arcjet/guard` (JS/TS, >= 1.4.0) or `arcjet.guard` (Python, `arcjet`
-  >= 0.7.0). Reads the appropriate JS / Python guard reference, which covers
-  client-at-module-scope patterns, hardcoded `label` discipline, per-rule
-  result inspection, and key selection when no user context exists (MCP
-  stdio servers, single-tenant workers).
-
-You can also install a single skill directly:
-
-```bash
-npx skills add arcjet/skills --skill add-request-protection
-npx skills add arcjet/skills --skill add-guard-protection
 ```
 
 Then describe what you want to protect. The skill handles the rest.

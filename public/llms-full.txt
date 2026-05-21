@@ -17,19 +17,14 @@ CLI to create sites, retrieve credentials, and verify decisions.
 
 Full guide: https://docs.arcjet.com/agent-get-started
 
-### Step 1: Install a skill
+### Step 1: Install the skill
 
-Skills give your agent the documentation to detect your framework, install the
-SDK, and wire up protection rules. Install one per use case:
+The Arcjet skill gives your agent the documentation to detect your framework,
+install the SDK, and wire up protection rules — for HTTP routes, tool calls,
+MCP servers, queues, and more:
 
-**Request protection** (HTTP routes):
 ```bash
-npx skills add arcjet/skills --skill add-request-protection
-```
-
-**Guard protection** (tool calls, MCP servers, queues):
-```bash
-npx skills add arcjet/skills --skill add-guard-protection
+npx skills add arcjet/skills
 ```
 
 Then describe what you want to protect. The skill handles the rest.
@@ -144,7 +139,7 @@ Remote rules are managed via the MCP server or dashboard — no code changes or 
 
 Add guard protection with the skill:
 ```bash
-npx skills add arcjet/skills --skill add-guard-protection
+npx skills add arcjet/skills
 ```
 Source: https://github.com/arcjet/skills
 JS/TS SDK: https://github.com/arcjet/arcjet-js
@@ -1895,7 +1890,7 @@ async def search_web(query: str, user_id: str):
 
 The guard skill is the source of truth for code patterns:
 ```bash
-npx skills add arcjet/skills --skill add-guard-protection
+npx skills add arcjet/skills
 ```
 
 For the full API reference, read the installed library source:
