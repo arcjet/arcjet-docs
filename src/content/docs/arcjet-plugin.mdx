@@ -82,14 +82,13 @@ Guidance triggers automatically in specific contexts:
 
 Invoke skills directly within your AI coding agent:
 
-| Skill                            | Purpose                                                                                                                          |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `/arcjet:add-request-protection` | Add protection to HTTP route handlers and API endpoints — rate limiting, bot detection, email validation, and shield.            |
-| `/arcjet:add-guard-protection`   | Protect non-HTTP code paths (AI tool calls, MCP handlers, queue workers, background jobs) via `@arcjet/guard` / `arcjet.guard`.  |
+| Skill       | Purpose                                                                                                                          |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `/arcjet`   | Add protection with automatic detection of context — HTTP routes, AI tool calls, MCP handlers, queue workers, and more.          |
 
-The previous skill names — `/arcjet:protect-route` and `/arcjet:add-ai-protection` — remain as deprecated aliases that emit a diagnostic on use. Migrate to the canonical names above.
+The previous skill names — `/arcjet:protect-route` and `/arcjet:add-ai-protection` — remain as deprecated aliases that emit a diagnostic on use. Migrate to `/arcjet`.
 
-The plugin's skills track the canonical [arcjet/skills](https://github.com/arcjet/skills) package, which is the source of truth. You can install the same skills outside the plugin with `npx skills add arcjet/skills`.
+The plugin's skills track the canonical [arcjet/skills](https://github.com/arcjet/skills) package, which is the source of truth. You can install the same skill outside the plugin with `npx skills add arcjet/skills`.
 
 ### Supported frameworks
 

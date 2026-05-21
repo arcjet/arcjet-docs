@@ -14,7 +14,7 @@ extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricin
 ## Get started
 
 - [Agent get started](https://docs.arcjet.com/agent-get-started): full agent onboarding flow — install a skill, connect the CLI, add protection.
-- [Skills](https://github.com/arcjet/skills): install via `npx skills add arcjet/skills --skill <name>` to give your agent framework-aware integration docs.
+- [Skills](https://github.com/arcjet/skills): install via `npx skills add arcjet/skills` to give your agent framework-aware integration docs.
 - [Arcjet CLI](https://docs.arcjet.com/cli): create sites, retrieve keys, inspect requests, manage rules from the terminal.
 - [MCP server](https://docs.arcjet.com/mcp-server): same management surface over MCP at `https://api.arcjet.com/mcp` (OAuth).
 - [Arcjet plugin](https://docs.arcjet.com/arcjet-plugin): bundled skills + MCP + coding rules for Claude Code and Cursor.
