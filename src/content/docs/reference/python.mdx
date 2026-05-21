@@ -218,8 +218,7 @@ through the `environment=` kwarg. By design, pydantic-settings loads `.env`
 into a typed `BaseSettings` object rather than writing values back to
 `os.environ`, so the SDK — which reads `ARCJET_ENV` via `os.getenv` — won't
 pick up the value through that channel. Without the kwarg, the SDK defaults
-to production, so dev-mode behavior (loopback IP fallback, `X-Arcjet-Ip`
-header override, and the longer dev-mode request timeout) won't engage.
+to production mode.
 
 ```py
 from arcjet import arcjet

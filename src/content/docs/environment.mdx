@@ -46,14 +46,10 @@ and production mode otherwise.
 `NODE_ENV` is a convention used in Node.js apps — the Python SDK reads
 `ARCJET_ENV` only.
 
-If you load configuration with a library that doesn't propagate values into
-`os.environ` (e.g. `pydantic-settings`, which loads `.env` into a typed
-`BaseSettings` object rather than writing values back to the process
-environment), `ARCJET_ENV` won't reach the Python SDK through `os.getenv`.
-Pass the value explicitly via the `environment=` kwarg on `arcjet()` /
-`arcjet_sync()` — see the
-<Link.Page href="/reference/python#pydantic-settings-users">Python SDK reference</Link.Page>
-for an example.
+Python SDK users: if your config library doesn't propagate `.env` into
+`os.environ` (e.g. `pydantic-settings`), pass `ARCJET_ENV` via the
+`environment=` kwarg on `arcjet()` / `arcjet_sync()` — see the
+<Link.Page href="/reference/python#pydantic-settings-users">Python SDK reference</Link.Page>.
 
 In development, the timeout for connecting to Cloud API is increased.
 In production, the timeout is quicker.
