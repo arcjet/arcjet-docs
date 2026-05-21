@@ -129,13 +129,13 @@ The optional fields are:
   This is useful if you are behind a load balancer or proxy that sets the client
   IP address in a header. See [Load balancers &
   proxies](#load-balancers--proxies) below for an example.
-- `environment` (`str | None`) — Development/production mode override for
-  callers whose config library does not write to `os.environ` (e.g.
-  `pydantic-settings`). When `None` (default), the SDK falls back to reading
+- `environment` (`str | None`) — Explicit development/production mode
+  (`"development"` or `"production"`). When `None` (default), falls back to
   the
   <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>
-  environment variable. See [Pydantic-settings users](#pydantic-settings-users)
-  below.
+  environment variable. Pass this when your config library doesn't propagate
+  `.env` into `os.environ` (e.g. `pydantic-settings`). See
+  [Pydantic-settings users](#pydantic-settings-users) below.
 
 <Tabs>
   <TabItem label="FastAPI (async)">
@@ -210,19 +210,16 @@ passed explicitly via the `key` argument.
 
 #### Pydantic-settings users
 
-The SDK reads
+If you use
+[`pydantic-settings`](https://docs.pydantic.dev/latest/concepts/pydantic_settings/),
+pass
 <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>
-via `os.getenv`, but
-[`pydantic-settings`](https://docs.pydantic.dev/latest/concepts/pydantic_settings/) —
-the de-facto FastAPI config pattern — intentionally does not push `.env`
-values into `os.environ`. If you rely on it, the SDK will silently default
-to production mode: loopback IPs are dropped and (with `fail_open=True`)
-local requests return `ALLOW` with no dashboard visibility.
-
-Pass the value explicitly through the `environment` kwarg so the SDK gates
-development behavior (loopback IP fallback, `X-Arcjet-Ip` header override,
-and the longer dev-mode request timeout) on your settings object instead of
-`os.environ`:
+through the `environment=` kwarg. By design, pydantic-settings loads `.env`
+into a typed `BaseSettings` object rather than writing values back to
+`os.environ`, so the SDK — which reads `ARCJET_ENV` via `os.getenv` — won't
+pick up the value through that channel. Without the kwarg, the SDK defaults
+to production, so dev-mode behavior (loopback IP fallback, `X-Arcjet-Ip`
+header override, and the longer dev-mode request timeout) won't engage.
 
 ```py
 from arcjet import arcjet
@@ -245,10 +242,7 @@ aj = arcjet(
 )
 ```
 
-The same kwarg is accepted by `arcjet_sync()`. When `environment=None` (the
-default) the SDK falls back to `os.getenv("ARCJET_ENV")`, so existing
-callers that already set `ARCJET_ENV` in the process environment do not
-need to change.
+`arcjet_sync()` accepts the same kwarg.
 
 #### Load balancers & proxies
 
