@@ -1,10 +1,13 @@
 ---
 title: Arcjet Guards
-description: "Security rules for AI agents and tool calls. Rate limiting, prompt injection detection, and PII blocking that runs anywhere — inside tool handlers, queue consumers, and agentic pipelines."
+description: "Action-boundary security rules for AI agents and tool calls. Rate limiting, prompt injection detection, and PII blocking that runs anywhere - inside tool handlers, queue consumers, and agentic pipelines."
 ---
 
 import { Aside, Tabs, TabItem } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
+
+Guards enforce policy before agent actions, tool calls, queue jobs, file reads,
+API calls, and data exports complete.
 
 Guards apply Arcjet security rules **inside AI agent tool calls** and anywhere else you process untrusted input. Pass inputs directly, get a decision back. No `Request` object needed.
 

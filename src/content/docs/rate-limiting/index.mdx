@@ -15,13 +15,14 @@ your application or API over a given period of time.
 
 <WhatIsArcjet />
 
-Rate limiting is the foundation of AI [Budget
-Control](/ai-protection/budget-control) - enforcing per-user token quotas and
-preventing cost explosions in AI applications. Token bucket rate limiting maps
-directly onto AI token consumption: deduct the estimated token cost of each
-request and deny when the budget is exhausted. Combined with [bot
-protection](/bot-protection), rate limiting gives you complete control over AI
-application access and spend.
+Rate limiting is the foundation of
+<Link.Page href="/ai-protection/budget-control">AI Budget Control</Link.Page> -
+enforcing per-user token quotas and preventing cost explosions in AI
+applications. Token bucket rate limiting maps directly onto AI token
+consumption: deduct the estimated token cost of each request and deny when the
+budget is exhausted. Combined with
+<Link.Page href="/bot-protection">bot protection</Link.Page>, rate limiting
+gives you complete control over AI application access and spend.
 
 Application-level rate limiting is also useful to protect your server from
 overload, prevent abuse of APIs, and make brute-force login attacks expensive
@@ -72,7 +73,10 @@ Fixed window and sliding window rate limits can also be configured as
 dashboard or via the
 <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page>, with no code
 changes or redeployment. Token bucket is SDK-only because it requires the
-SDK to declare how many tokens each request consumes.
+SDK to declare how many tokens each request consumes. Developers can keep
+per-user, per-plan, or token-consumption limits in code, while SecOps can use
+remote rate limits for global throttles, incident response, and temporary
+site-wide controls.
 :::
 
 ## How Arcjet rate limiting works

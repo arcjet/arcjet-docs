@@ -30,6 +30,28 @@ Arcjet has been architected around a few key principles:
   easy to install, must not add significant latency to requests, and should not
   require changes to the application's architecture.
 
+## Why in-application enforcement matters
+
+Arcjet is designed to run behind existing WAFs, CDNs, API gateways, and bot
+defenses, adding the business context those layers cannot reliably infer. It can
+evaluate identity, session, plan, route, request body, and application workflow
+state before your code completes a protected action.
+
+## Policy ownership and remote rules
+
+Arcjet separates where enforcement runs from who operates policy. Developers add
+the SDK at the application boundary and keep app-specific rules close to the
+routes, tools, and workflows they protect. Security and operations teams can use
+<Link.Page href="/remote-rules">remote rules</Link.Page> to adjust site-wide
+rules from the Arcjet dashboard or
+<Link.Page href="/mcp-server">MCP server</Link.Page> without waiting for a code
+change.
+
+Both paths feed the same decision model. Code-defined rules carry application
+context and reviewability; remote rules provide an operational control plane for
+incident response, dry-run tuning, and temporary mitigations. The SDK returns one
+decision to your application so enforcement still happens in your runtime.
+
 ### Video: how Arcjet works
 
 <YouTube id="NDI68Dcp4Gg" title="Video: How Arcjet works" />
@@ -73,9 +95,10 @@ Rules can also be configured outside of your application as
 <Link.Page href="/remote-rules">remote rules</Link.Page>, managed from the
 Arcjet dashboard or via the
 <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page>. Remote rules are
-evaluated alongside SDK rules by the Cloud API and combined into a single
-decision, so you can change protection behavior for a site without editing
-code or redeploying.
+evaluated by the Cloud API and combined with SDK rule results into a single
+decision, so SecOps can change protection behavior for a site without editing
+code or redeploying while developers keep application-specific enforcement in
+the code path.
 
 The SDK includes a WebAssembly module which is used to analyze requests locally
 in your own environment. Where possible, a decision is taken locally and then

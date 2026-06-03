@@ -76,7 +76,7 @@ export default defineConfig({
     starlight({
       title: "Arcjet Docs",
       description:
-        "Arcjet documentation. Bot detection. Rate limiting. Email validation. Attack protection. Data redaction. A developer-first approach to security.",
+        "Arcjet documentation for runtime policy enforcement in applications and AI agents. Enforce budgets, bot protection, prompt-injection checks, sensitive-data controls, and action-level guardrails with real application context.",
       logo: {
         light: "./src/assets/logo-lockup-mark-light.svg",
         dark: "./src/assets/logo-lockup-mark-dark.svg",
