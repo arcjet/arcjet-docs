@@ -11,6 +11,11 @@ are stored on the Arcjet platform and evaluated by the Arcjet Cloud API
 alongside any rules you configure with the SDK, so you can change protection
 behavior for a site without editing code or redeploying.
 
+Remote rules are the operational side of Arcjet's policy model: developers put
+the enforcement point in the application with the SDK, while SecOps, AppSec, or
+operations teams can tune site-wide rules from the dashboard or
+<Link.Page href="/mcp-server">MCP server</Link.Page>.
+
 ## How remote rules work
 
 Remote rules live on a per-site basis. When the SDK calls `protect()`:
@@ -32,9 +37,7 @@ Each remote rule has a mode:
   conclusion. Use this to validate a rule against real traffic before
   enforcing it.
 
-See <Link.Page href="/best-practices#start-in-dry-run-mode">Start in dry run
-mode</Link.Page> in the best practices guide for the recommended rollout
-pattern, and the
+See <Link.Page href="/best-practices#start-in-dry-run-mode">Start in dry run mode</Link.Page> in the best practices guide for the recommended rollout pattern, and the
 <Link.Page href="/mcp-server">`get-dry-run-impact` MCP tool</Link.Page> for
 measuring how a dry-run rule would behave if promoted.
 
@@ -59,6 +62,19 @@ For rules that are part of your application's normal protection posture, we
 still recommend configuring them in code with the SDK. Code-defined rules live
 with the route they protect, are reviewable in pull requests, and are
 versioned with the rest of your application.
+
+## Developer and SecOps responsibilities
+
+Use code-defined SDK rules when a rule depends on application semantics: the
+current route, user ID, tenant, plan, prompt, tool call, or request body.
+Developers usually own those rules because they live beside the feature and can
+be tested and reviewed with the application.
+
+Use remote rules when the policy is operational or site-wide: blocking an ASN,
+turning on a global bot category, adding a temporary rate limit, or promoting a
+dry-run mitigation during an incident. SecOps, AppSec, or operations teams can
+own those changes because they do not require a deploy, but they still enforce
+through the same SDK decision returned to the application.
 
 ## Supported rule types
 

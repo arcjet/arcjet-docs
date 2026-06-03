@@ -137,10 +137,16 @@ each rule will return its decision, but the end conclusion will always be
 `LIVE`.
 
 As these are configured in code, you can use other mechanisms to set the mode.
-For example, you could could use an existing feature flag system to dynamically
+For example, you could use an existing feature flag system to dynamically
 change the rule mode. We have an example showing how to sample traffic between
 `DRY_RUN` and `LIVE` modes in the
 <Link.Page href="/blueprints/sampling">Sampling traffic blueprint</Link.Page>.
+
+For teams with separate security and engineering owners, keep feature-specific
+rules in code so developers can review them with the route or workflow they
+protect. Use <Link.Page href="/remote-rules">remote rules</Link.Page> for
+operational changes that SecOps needs to test, promote, or roll back against
+live traffic without waiting for an application deploy.
 
 :::tip[Using the MCP server]
 If you're using the <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page>,

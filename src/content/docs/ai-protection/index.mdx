@@ -13,6 +13,21 @@ it can invoke. Arcjet helps protect AI applications by providing guardrails
 across the entire AI lifecycle, using real application context (identity, route,
 session, cost budgets), not just prompt content.
 
+## Where Arcjet fits
+
+Arcjet enforces policy at the application boundary, where security decisions can
+use the context that WAFs, API gateways, and model gateways cannot reliably
+infer.
+
+| Question | Arcjet answer |
+| --- | --- |
+| Where is policy defined? | SDK rules in code plus <Link.Page href="/remote-rules">remote rules</Link.Page> for operational changes. |
+| Where is enforcement? | Inline in route handlers, tool calls, queue jobs, and workflow steps before the risky action runs. |
+| How does SecOps fit? | Dry-run modes, remote rules, dashboard and <Link.Page href="/mcp-server">MCP server</Link.Page> operations, and shared telemetry let security teams manage rollout while developers own implementation. |
+| How does it complement WAFs, APIs, and AI gateways? | Those layers see traffic or model I/O; Arcjet sees application context such as identity, tenant, route, quota, session, tool call, and business action. |
+
+## Patterns of security AI failures
+
 Production AI failures follow three patterns:
 
 - **Cost explosion.** Automated traffic, user abuse, and prompt attacks inflate
@@ -25,8 +40,8 @@ Production AI failures follow three patterns:
 
 Arcjet's core features map directly onto these problems. These guides cover
 HTTP middleware for web frameworks. If you're building agentic pipelines or need
-security inside tool handlers — where there's no `Request` object — see
-[Arcjet Guards](/guards).
+security inside tool handlers - where there's no `Request` object - see
+<Link.Page href="/guards">Arcjet Guards</Link.Page>.
 
 ## AI abuse protection
 
@@ -131,6 +146,4 @@ protection on the API route, plus guards at every tool / task call site.
 
 ## Quick start
 
-The fastest way to get started is the [get started guide](/get-started), which
-walks through protecting an AI chat application with bot detection and per-user
-token budgets.
+The fastest way to get started is the <Link.Page href="/get-started">get started guide</Link.Page>, which walks through protecting an AI chat application with bot detection and per-user token budgets.

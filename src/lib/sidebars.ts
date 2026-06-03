@@ -45,7 +45,7 @@ export const main = [
     ],
   },
   {
-    label: "AI app protection",
+    label: "AI runtime protection",
     collapsed: false,
     items: [
       {
@@ -67,6 +67,10 @@ export const main = [
       {
         label: "Prompt injection detection",
         link: "/ai-protection/prompt-injection",
+      },
+      {
+        label: "Arcjet Guards",
+        link: "/guards",
       },
     ],
   },
