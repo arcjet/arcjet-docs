@@ -45,6 +45,7 @@ import ProtectAppTS from "/src/snippets/reference/nextjs/ProtectApp.ts?raw";
 import ProtectPagesJS from "/src/snippets/reference/nextjs/ProtectPages.js?raw";
 import ProtectPagesTS from "/src/snippets/reference/nextjs/ProtectPages.ts?raw";
 import ProxiesTS from "/src/snippets/reference/nextjs/Proxies.ts?raw";
+import CloudflareTS from "/src/snippets/reference/nextjs/Cloudflare.ts?raw";
 import RuleModesJS from "/src/snippets/reference/nextjs/RuleModes.js?raw";
 import RuleModesTS from "/src/snippets/reference/nextjs/RuleModes.ts?raw";
 import ServerAction from "/src/snippets/reference/nextjs/ServerAction.tsx?raw";
@@ -153,11 +154,12 @@ The optional fields are:
 - `characteristics` (`string[]`) - A list of
   <Link.Page href="/fingerprints#built-in-characteristics">characteristics</Link.Page>
   to be used to uniquely identify clients.
-- `proxies` (`string[]`) - A list of one or more trusted proxies. These
-  addresses will be excluded when Arcjet is determining the client IP address.
-  This is useful if you are behind a load balancer or proxy that sets the client
-  IP address in a header. See [Load balancers &
-  proxies](#load-balancers--proxies) below for an example.
+- `proxies` (`Array<string | ProxyService>`) - A list of one or more trusted
+  proxies. These addresses will be excluded when Arcjet is determining the client
+  IP address. This is useful if you are behind a load balancer or proxy that sets
+  the client IP address in a header. You can also pass a proxy service such as
+  `cloudflare()` to read the real client IP from a service-specific header. See
+  [Load balancers & proxies](#load-balancers--proxies) below for an example.
 
 <Tabs>
   <TabItem label="TS">
@@ -314,6 +316,20 @@ You should set the `proxies` field to `["100.100.100.100"]` so Arcjet will use
 You can also specify CIDR ranges to match multiple IP addresses.
 
 <Code code={ProxiesTS} lang="ts" />
+
+#### Proxy services
+
+Some providers pass the real client IP in their own header rather than adding
+themselves to `X-Forwarded-For`. For these you can pass a proxy service in the
+`proxies` list. The `cloudflare()` helper reads the real client IP from
+Cloudflare's `CF-Connecting-IP` header when the request comes from a Cloudflare
+IP range:
+
+<Code code={CloudflareTS} lang="ts" />
+
+See the <Link.Page href="/best-practices#proxy-services-like-cloudflare">best
+practices guide</Link.Page> for more, including running Cloudflare in front of
+your app and handling a Cloudflare range the SDK doesn't know about yet.
 
 ## Protect
 
