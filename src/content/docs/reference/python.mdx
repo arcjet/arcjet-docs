@@ -129,6 +129,13 @@ The optional fields are:
   This is useful if you are behind a load balancer or proxy that sets the client
   IP address in a header. See [Load balancers &
   proxies](#load-balancers--proxies) below for an example.
+- `environment` (`str | None`) — Explicit development/production mode
+  (`"development"` or `"production"`). When `None` (default), falls back to
+  the
+  <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>
+  environment variable. Pass this when your config library doesn't propagate
+  `.env` into `os.environ` (e.g. `pydantic-settings`). See
+  [Pydantic-settings users](#pydantic-settings-users) below.
 
 <Tabs>
   <TabItem label="FastAPI (async)">
@@ -200,6 +207,41 @@ See <Link.Page href="/environment">Concepts: Environment variables</Link.Page>
 for more info.
 The `ARCJET_KEY` environment variable is not read automatically and must be
 passed explicitly via the `key` argument.
+
+#### Pydantic-settings users
+
+If you use
+[`pydantic-settings`](https://docs.pydantic.dev/latest/concepts/pydantic_settings/),
+pass
+<Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>
+through the `environment=` kwarg. By design, pydantic-settings loads `.env`
+into a typed `BaseSettings` object rather than writing values back to
+`os.environ`, so the SDK — which reads `ARCJET_ENV` via `os.getenv` — won't
+pick up the value through that channel. Without the kwarg, the SDK defaults
+to production mode.
+
+```py
+from arcjet import arcjet
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env")
+
+    ARCJET_KEY: str
+    ARCJET_ENV: str = "development"
+
+
+settings = Settings()
+
+aj = arcjet(
+    key=settings.ARCJET_KEY,
+    rules=[...],
+    environment=settings.ARCJET_ENV,
+)
+```
+
+`arcjet_sync()` accepts the same kwarg.
 
 #### Load balancers & proxies
 
