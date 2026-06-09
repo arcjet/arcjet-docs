@@ -32,6 +32,7 @@ import ProtectPageAstro from "/src/snippets/reference/astro/ProtectPage.astro?ra
 import ProtectMiddlewareJS from "/src/snippets/reference/astro/ProtectMiddleware.js?raw";
 import ProtectMiddlewareTS from "/src/snippets/reference/astro/ProtectMiddleware.ts?raw";
 import ProxiesConfigJS from "/src/snippets/reference/astro/Proxies.mjs?raw";
+import CloudflareConfigJS from "/src/snippets/reference/astro/Cloudflare.mjs?raw";
 import DecisionLogConfigJS from "/src/snippets/reference/astro/DecisionLogConfig.mjs?raw";
 import DecisionLogJS from "/src/snippets/reference/astro/DecisionLog.js?raw";
 import DecisionLogTS from "/src/snippets/reference/astro/DecisionLog.ts?raw";
@@ -138,11 +139,12 @@ The optional fields are:
 - `characteristics` (`string[]`) - A list of
   <Link.Page href="/fingerprints#built-in-characteristics">characteristics</Link.Page>
   to be used to uniquely identify clients.
-- `proxies` (`string[]`) - A list of one or more trusted proxies. These
-  addresses will be excluded when Arcjet is determining the client IP address.
-  This is useful if you are behind a load balancer or proxy that sets the client
-  IP address in a header. See [Load balancers &
-  proxies](#load-balancers--proxies) below for an example.
+- `proxies` (`Array<string | ProxyService>`) - A list of one or more trusted
+  proxies. These addresses will be excluded when Arcjet is determining the client
+  IP address. This is useful if you are behind a load balancer or proxy that sets
+  the client IP address in a header. You can also pass a proxy service such as
+  `cloudflare()` to read the real client IP from a service-specific header. See
+  [Load balancers & proxies](#load-balancers--proxies) below for an example.
 
 ### Single instance
 
@@ -253,6 +255,24 @@ You can also specify CIDR ranges to match multiple IP addresses.
   lang="js"
   title="astro.config.mjs"
 />
+
+#### Proxy services
+
+Some providers pass the real client IP in their own header rather than adding
+themselves to `X-Forwarded-For`. For these you can pass a proxy service in the
+`proxies` list. The `cloudflare()` helper reads the real client IP from
+Cloudflare's `CF-Connecting-IP` header when the request comes from a Cloudflare
+IP range:
+
+<Code
+  code={removeTSCCommentDirectives(CloudflareConfigJS)}
+  lang="js"
+  title="astro.config.mjs"
+/>
+
+See the <Link.Page href="/best-practices#proxy-services-like-cloudflare">best
+practices guide</Link.Page> for more, including running Cloudflare in front of
+your app and handling a Cloudflare range the SDK doesn't know about yet.
 
 ## Protect
 

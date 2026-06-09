@@ -9,6 +9,8 @@ import Comments from "/src/components/Comments.astro";
 import ArcjetLib from "/src/snippets/best-practices/ArcjetLib.ts?raw";
 import ArcjetLibPy from "/src/snippets/best-practices/arcjet_lib.py?raw";
 import ProxiesPy from "/src/snippets/best-practices/Proxies.py?raw";
+import CloudflareTS from "/src/snippets/best-practices/Cloudflare.ts?raw";
+import CloudflareCustomRangeTS from "/src/snippets/best-practices/CloudflareCustomRange.ts?raw";
 
 Here are some recommended best practices for using Arcjet effectively in your
 applications.
@@ -202,6 +204,45 @@ const aj = arcjet({
 <Code code={ProxiesPy} lang="py" />
 </TabItem>
 </Tabs>
+
+### Proxy services like Cloudflare
+
+Some providers don't add themselves to `X-Forwarded-For`. Instead they pass the
+real client IP in their own header — for example, Cloudflare uses
+`CF-Connecting-IP`. For these you can pass a _proxy service_ in the `proxies`
+option instead of a plain IP address.
+
+The JavaScript SDKs export a `cloudflare()` helper for this. When a request
+arrives from a known Cloudflare IP range, Arcjet reads the real client IP from
+Cloudflare's header. This is only trusted when the connecting address is within
+Cloudflare's verified IP ranges, so the header can't be spoofed by a direct
+client.
+
+<Code code={CloudflareTS} lang="ts" title="/lib/arcjet.ts" />
+
+You can combine proxy services with plain IP addresses in the same list, e.g.
+`proxies: ["100.100.100.0/24", cloudflare()]`.
+
+:::caution[Cloudflare in front of Vercel is not recommended]
+If you deploy to Vercel, Vercel
+[recommends against putting Cloudflare (or any reverse proxy) in front of your
+application](https://vercel.com/kb/guide/cloudflare-with-vercel). Doing so hides
+traffic and can cause bot challenges to misfire as
+proxy exit-node IPs rotate. Arcjet already auto-detects the proxy IPs for Vercel,
+so you don't need to configure `proxies` on Vercel unless you've added another
+proxy in front. If you do run Cloudflare in front of Vercel, add `cloudflare()`
+to `proxies` so Arcjet still sees the real client IP.
+:::
+
+#### Adding a Cloudflare range the SDK doesn't know about yet
+
+The Cloudflare IP ranges are bundled with the SDK and updated as new versions are
+released. If Cloudflare publishes a
+[new range](https://www.cloudflare.com/ips/) before the SDK has been updated, pass
+it via the `ranges` option. This **replaces** the bundled ranges rather than
+adding to them, so include the full current list plus the new range:
+
+<Code code={CloudflareCustomRangeTS} lang="ts" title="/lib/arcjet.ts" />
 
 ## Implement your own error handling
 

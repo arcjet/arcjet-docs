@@ -65,6 +65,40 @@ import IpProxies from "@/snippets/ip/proxies.ts?raw";
 
 <Code code={IpProxies} lang="ts" />
 
+### Proxy services
+
+The `proxies` option also accepts _proxy services_ alongside plain IP addresses.
+A proxy service knows the IP ranges that belong to a particular provider and the
+header that provider uses to pass through the real client IP. When a request
+arrives from one of the service's IP ranges, the real client IP is read from
+that header instead of the connecting address.
+
+This is safer than trusting a header on its own: the header is only used when the
+connecting address falls within the service's verified IP ranges, so a direct
+client cannot spoof it.
+
+#### Cloudflare
+
+The `cloudflare()` helper is the proxy service for
+[Cloudflare](https://www.cloudflare.com/). When a request comes from a Cloudflare
+IP range, `ip()` reads the real client IP from the `CF-Connecting-IP` (or
+`CF-Connecting-IPv6`) header that Cloudflare sets.
+
+import IpCloudflare from "@/snippets/ip/cloudflare.ts?raw";
+
+<Code code={IpCloudflare} lang="ts" />
+
+The Cloudflare IP ranges are bundled with `@arcjet/ip` and kept up to date as
+the package is released. If Cloudflare publishes a new range before the SDK has
+been updated, you can override the bundled ranges with the `ranges` option. This
+**replaces** the bundled list rather than adding to it, so supply the full set
+of ranges from [cloudflare.com/ips](https://www.cloudflare.com/ips/) plus any new
+range:
+
+import IpCloudflareCustomRanges from "@/snippets/ip/cloudflare-custom-ranges.ts?raw";
+
+<Code code={IpCloudflareCustomRanges} lang="ts" />
+
 ## API
 
 ### `ip(request: RequestLike, options?: Options)`
@@ -77,6 +111,17 @@ Look up an IP address in a Request-like object, such as `Request`, Node's
 <DisplayType type="RequestLike" from="@arcjet/ip" />
 <DisplayType type="Options" from="@arcjet/ip" />
 <DisplayType type="Platform" from="@arcjet/ip" />
+
+### `cloudflare(options?: CloudflareOptions)`
+
+Returns a `ProxyService` for Cloudflare that can be passed in the `proxies`
+option. Pass `ranges` to override the bundled Cloudflare IP ranges (this replaces
+the bundled list).
+
+**Types:**
+
+<DisplayType type="ProxyService" from="@arcjet/ip" />
+<DisplayType type="CloudflareOptions" from="@arcjet/ip" />
 
 ## What next?
 
