@@ -19,6 +19,7 @@ const POSTHOG_SYMBOL = Symbol.for("arcjet:posthog");
 declare global {
   interface Window {
     [POSTHOG_SYMBOL]: PostHog | undefined;
+    _hsp?: unknown[][];
   }
 }
 
@@ -42,7 +43,7 @@ export function initializePostHog() {
 
   const instance = posthog.init(PUBLIC_POSTHOG_KEY, {
     api_host: POSTHOG_PROXY_PATH,
-    cookieless_mode: "always",
+    opt_out_capturing_by_default: true,
     debug: false,
     ui_host: POSTHOG_EVENTS_UPSTREAM.toString(),
 
@@ -61,6 +62,22 @@ export function initializePostHog() {
     "✦environment": VERCEL_TARGET_ENV ?? "development",
     "✦repository": "https://github.com/arcjet/arcjet-docs",
   });
+
+  // Gate PostHog capture behind the HubSpot cookie-consent banner. The
+  // listener fires immediately with current consent state (replays for
+  // visitors who already accepted on another .arcjet.com subdomain) and
+  // again whenever consent changes.
+  const _hsp = (window._hsp = window._hsp || []);
+  _hsp.push([
+    "addPrivacyConsentListener",
+    (consent: { categories: { analytics: boolean } }) => {
+      if (consent.categories.analytics) {
+        instance.opt_in_capturing();
+      } else {
+        instance.opt_out_capturing();
+      }
+    },
+  ]);
 
   window[POSTHOG_SYMBOL] = instance;
 }
