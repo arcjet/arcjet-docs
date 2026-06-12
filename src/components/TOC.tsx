@@ -28,9 +28,9 @@ const TOC = forwardRef(
     const cls = "TOC " + styles.TOC;
 
     // The toc data
-    const [toc] = useState<CollectionEntry<"docs">["data"]["ajToc"]>(
-      astroEntry.data.ajToc,
-    );
+    const [toc] = useState<
+      NonNullable<CollectionEntry<"docs">["data"]["ajToc"]>
+    >(astroEntry.data.ajToc ?? []);
 
     // Manager the selected framework
     const $displayedFramework = useStore(displayedFramework);
@@ -198,7 +198,7 @@ TOC.displayName = "TOC";
 export default TOC;
 
 interface TOCLinkProps extends PropsWithChildren {
-  entry: CollectionEntry<"docs">["data"]["ajToc"][number];
+  entry: NonNullable<CollectionEntry<"docs">["data"]["ajToc"]>[number];
   onClick: Function;
   selected: boolean;
 }
