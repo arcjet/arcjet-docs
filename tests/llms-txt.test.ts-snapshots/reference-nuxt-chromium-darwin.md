@@ -114,7 +114,7 @@ The required fields are:
 The optional fields are:
 
 *   `characteristics` (`string[]`) - A list of [characteristics](/fingerprints#built-in-characteristics) to be used to uniquely identify clients.
-*   `proxies` (`string[]`) - A list of one or more trusted proxies. These addresses will be excluded when Arcjet is determining the client IP address. This is useful if you are behind a load balancer or proxy that sets the client IP address in a header. See [Load balancers & proxies](#load-balancers--proxies) below for an example.
+*   `proxies` (`Array<string | ProxyService>`) - A list of one or more trusted proxies. These addresses will be excluded when Arcjet is determining the client IP address. This is useful if you are behind a load balancer or proxy that sets the client IP address in a header. You can also pass a proxy service such as `cloudflare()` to read the real client IP from a service-specific header. See [Load balancers & proxies](#load-balancers--proxies) below for an example.
 
 ### Single instance
 
@@ -230,6 +230,31 @@ server/utils/arcjet.js
 1import { arcjet as arcjetNuxt } from "#arcjet";2
 3export const arcjet = arcjetNuxt({4  rules: [],5  proxies: [6    "100.100.100.100", // A single IP7    "100.100.100.0/24", // A CIDR for the range8  ],9});
 ```
+
+#### Proxy services
+
+[Section titled “Proxy services”](#proxy-services)
+
+Some providers pass the real client IP in their own header rather than adding themselves to `X-Forwarded-For`. For these you can pass a proxy service in the `proxies` list. The `cloudflare()` helper reads the real client IP from Cloudflare’s `CF-Connecting-IP` header when the request comes from a Cloudflare IP range:
+
+*   [TS](#tab-panel-XXX)
+*   [JS](#tab-panel-XXX)
+
+server/utils/arcjet.ts
+
+```
+1import { arcjet as arcjetNuxt, cloudflare } from "#arcjet";2
+3export const arcjet = arcjetNuxt({4  rules: [],5  // Read the real client IP from Cloudflare's `CF-Connecting-IP` header when6  // the request arrives from a Cloudflare IP range7  proxies: [cloudflare()],8});
+```
+
+server/utils/arcjet.js
+
+```
+1import { arcjet as arcjetNuxt, cloudflare } from "#arcjet";2
+3export const arcjet = arcjetNuxt({4  rules: [],5  // Read the real client IP from Cloudflare's `CF-Connecting-IP` header when6  // the request arrives from a Cloudflare IP range7  proxies: [cloudflare()],8});
+```
+
+See the [best practices guide](/best-practices#proxy-services-like-cloudflare) for more, including running Cloudflare in front of your app and handling a Cloudflare range the SDK doesn’t know about yet.
 
 Protect
 -------

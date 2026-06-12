@@ -82,7 +82,7 @@ The required fields are:
 The optional fields are:
 
 *   `characteristics` (`string[]`) - A list of [characteristics](/fingerprints#built-in-characteristics) to be used to uniquely identify clients.
-*   `proxies` (`string[]`) - A list of one or more trusted proxies. These addresses will be excluded when Arcjet is determining the client IP address. This is useful if you are behind a load balancer or proxy that sets the client IP address in a header. See [Load balancers & proxies](#load-balancers--proxies) below for an example.
+*   `proxies` (`Array<string | ProxyService>`) - A list of one or more trusted proxies. These addresses will be excluded when Arcjet is determining the client IP address. This is useful if you are behind a load balancer or proxy that sets the client IP address in a header. You can also pass a proxy service such as `cloudflare()` to read the real client IP from a service-specific header. See [Load balancers & proxies](#load-balancers--proxies) below for an example.
 
 *   [TS](#tab-panel-XXX)
 *   [JS](#tab-panel-XXX)
@@ -239,6 +239,19 @@ You can also specify CIDR ranges to match multiple IP addresses.
 1import arcjet from "@arcjet/next";2
 3const aj = arcjet({4  key: process.env.ARCJET_KEY!,5  rules: [],6  proxies: [7    "100.100.100.100", // A single IP8    "100.100.100.0/24", // A CIDR for the range9  ],10});
 ```
+
+#### Proxy services
+
+[Section titled “Proxy services”](#proxy-services)
+
+Some providers pass the real client IP in their own header rather than adding themselves to `X-Forwarded-For`. For these you can pass a proxy service in the `proxies` list. The `cloudflare()` helper reads the real client IP from Cloudflare’s `CF-Connecting-IP` header when the request comes from a Cloudflare IP range:
+
+```
+1import arcjet, { cloudflare } from "@arcjet/next";2
+3const aj = arcjet({4  key: process.env.ARCJET_KEY!,5  rules: [],6  // Read the real client IP from Cloudflare's `CF-Connecting-IP` header when7  // the request arrives from a Cloudflare IP range8  proxies: [cloudflare()],9});
+```
+
+See the [best practices guide](/best-practices#proxy-services-like-cloudflare) for more, including running Cloudflare in front of your app and handling a Cloudflare range the SDK doesn’t know about yet.
 
 Protect
 -------

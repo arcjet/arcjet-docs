@@ -2,7 +2,7 @@ Arcjet rate limiting lets you control how many requests a client can make to you
 
 **What is Arcjet?** [Arcjet](https://arcjet.com) is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
 
-Rate limiting is the foundation of AI [Budget Control](/ai-protection/budget-control) - enforcing per-user token quotas and preventing cost explosions in AI applications. Token bucket rate limiting maps directly onto AI token consumption: deduct the estimated token cost of each request and deny when the budget is exhausted. Combined with [bot protection](/bot-protection), rate limiting gives you complete control over AI application access and spend.
+Rate limiting is the foundation of [AI Budget Control](/ai-protection/budget-control) - enforcing per-user token quotas and preventing cost explosions in AI applications. Token bucket rate limiting maps directly onto AI token consumption: deduct the estimated token cost of each request and deny when the budget is exhausted. Combined with [bot protection](/bot-protection), rate limiting gives you complete control over AI application access and spend.
 
 Application-level rate limiting is also useful to protect your server from overload, prevent abuse of APIs, and make brute-force login attacks expensive and impractical.
 
@@ -30,7 +30,7 @@ Rate limiting is complementary to [Arcjet Shield WAF](/shield). Shield analyzes 
 
 Configure without code changes
 
-Fixed window and sliding window rate limits can also be configured as [remote rules](/remote-rules) from the Arcjet dashboard or via the [Arcjet MCP server](/mcp-server), with no code changes or redeployment. Token bucket is SDK-only because it requires the SDK to declare how many tokens each request consumes.
+Fixed window and sliding window rate limits can also be configured as [remote rules](/remote-rules) from the Arcjet dashboard or via the [Arcjet MCP server](/mcp-server), with no code changes or redeployment. Token bucket is SDK-only because it requires the SDK to declare how many tokens each request consumes. Developers can keep per-user, per-plan, or token-consumption limits in code, while SecOps can use remote rate limits for global throttles, incident response, and temporary site-wide controls.
 
 How Arcjet rate limiting works
 ------------------------------

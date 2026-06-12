@@ -104,7 +104,7 @@ The required fields are:
 The optional fields are:
 
 *   `characteristics` (`string[]`) - A list of [characteristics](/fingerprints#built-in-characteristics) to be used to uniquely identify clients.
-*   `proxies` (`string[]`) - A list of one or more trusted proxies. These addresses will be excluded when Arcjet is determining the client IP address. This is useful if you are behind a load balancer or proxy that sets the client IP address in a header. See [Load balancers & proxies](#load-balancers--proxies) below for an example.
+*   `proxies` (`Array<string | ProxyService>`) - A list of one or more trusted proxies. These addresses will be excluded when Arcjet is determining the client IP address. This is useful if you are behind a load balancer or proxy that sets the client IP address in a header. You can also pass a proxy service such as `cloudflare()` to read the real client IP from a service-specific header. See [Load balancers & proxies](#load-balancers--proxies) below for an example.
 
 ### Single instance
 
@@ -196,6 +196,21 @@ astro.config.mjs
 1import { defineConfig } from "astro/config";2import node from "@astrojs/node";3import arcjet from "@arcjet/astro";4
 5export default defineConfig({6  adapter: node({7    mode: "standalone",8  }),9  env: {10    validateSecrets: true,11  },12  integrations: [13    arcjet({14      rules: [],15      proxies: [16        "100.100.100.100", // A single IP17        "100.100.100.0/24", // A CIDR for the range18      ],19    }),20  ],21});
 ```
+
+#### Proxy services
+
+[Section titled “Proxy services”](#proxy-services)
+
+Some providers pass the real client IP in their own header rather than adding themselves to `X-Forwarded-For`. For these you can pass a proxy service in the `proxies` list. The `cloudflare()` helper reads the real client IP from Cloudflare’s `CF-Connecting-IP` header when the request comes from a Cloudflare IP range:
+
+astro.config.mjs
+
+```
+1import { defineConfig } from "astro/config";2import node from "@astrojs/node";3import arcjet, { cloudflare } from "@arcjet/astro";4
+5export default defineConfig({6  adapter: node({7    mode: "standalone",8  }),9  env: {10    validateSecrets: true,11  },12  integrations: [13    arcjet({14      rules: [],15      // Read the real client IP from Cloudflare's `CF-Connecting-IP` header when16      // the request arrives from a Cloudflare IP range17      proxies: [cloudflare()],18    }),19  ],20});
+```
+
+See the [best practices guide](/best-practices#proxy-services-like-cloudflare) for more, including running Cloudflare in front of your app and handling a Cloudflare range the SDK doesn’t know about yet.
 
 Protect
 -------
