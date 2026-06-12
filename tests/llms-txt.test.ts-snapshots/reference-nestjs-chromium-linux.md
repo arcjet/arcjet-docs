@@ -64,7 +64,7 @@ The required fields are:
 The optional fields are:
 
 *   `characteristics` (`string[]`) - A list of [characteristics](/fingerprints#built-in-characteristics) to be used to uniquely identify clients.
-*   `proxies` (`string[]`) - A list of one or more trusted proxies. These addresses will be excluded when Arcjet is determining the client IP address. This is useful if you are behind a load balancer or proxy that sets the client IP address in a header. See [Load balancers & proxies](#load-balancers--proxies) below for an example.
+*   `proxies` (`Array<string | ProxyService>`) - A list of one or more trusted proxies. These addresses will be excluded when Arcjet is determining the client IP address. This is useful if you are behind a load balancer or proxy that sets the client IP address in a header. You can also pass a proxy service such as `cloudflare()` to read the real client IP from a service-specific header. See [Load balancers & proxies](#load-balancers--proxies) below for an example.
 
 src/app.module.ts
 
@@ -151,6 +151,19 @@ You can also specify CIDR ranges to match multiple IP addresses.
 1import { ArcjetModule } from "@arcjet/nest";2import { Module } from "@nestjs/common";3import { ConfigModule } from "@nestjs/config";4
 5@Module({6  imports: [7    ConfigModule.forRoot({8      isGlobal: true,9      envFilePath: ".env.local",10    }),11    ArcjetModule.forRoot({12      isGlobal: true,13      key: process.env.ARCJET_KEY!,14      rules: [15        // Rules set here will apply to every request16      ],17      proxies: [18        "100.100.100.100", // A single IP19        "100.100.100.0/24", // A CIDR for the range20      ],21    }),22    // ... other modules23  ],24})25export class AppModule {}
 ```
+
+#### Proxy services
+
+[Section titled “Proxy services”](#proxy-services)
+
+Some providers pass the real client IP in their own header rather than adding themselves to `X-Forwarded-For`. For these you can pass a proxy service in the `proxies` list. The `cloudflare()` helper reads the real client IP from Cloudflare’s `CF-Connecting-IP` header when the request comes from a Cloudflare IP range:
+
+```
+1import { ArcjetModule, cloudflare } from "@arcjet/nest";2import { Module } from "@nestjs/common";3import { ConfigModule } from "@nestjs/config";4
+5@Module({6  imports: [7    ConfigModule.forRoot({8      isGlobal: true,9      envFilePath: ".env.local",10    }),11    ArcjetModule.forRoot({12      isGlobal: true,13      key: process.env.ARCJET_KEY!,14      rules: [15        // Rules set here will apply to every request16      ],17      // Read the real client IP from Cloudflare's `CF-Connecting-IP` header when18      // the request arrives from a Cloudflare IP range19      proxies: [cloudflare()],20    }),21    // ... other modules22  ],23})24export class AppModule {}
+```
+
+See the [best practices guide](/best-practices#proxy-services-like-cloudflare) for more, including running Cloudflare in front of your app and handling a Cloudflare range the SDK doesn’t know about yet.
 
 Decision
 --------
