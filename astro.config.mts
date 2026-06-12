@@ -102,16 +102,7 @@ export default defineConfig({
         },
         { icon: "email", label: "Email", href: "mailto:support@arcjet.com" },
       ],
-      head: [
-        {
-          tag: "script",
-          attrs: {
-            src: "https://plausible.io/js/script.js",
-            "data-domain": "arcjet.com",
-            defer: true,
-          },
-        },
-      ],
+      head: [],
       editLink: {
         baseUrl: "https://github.com/arcjet/arcjet-docs/blob/main",
       },
