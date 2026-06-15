@@ -1,5 +1,8 @@
 import type { Loader } from "astro/loaders";
-import { docsLoader as starlightDocsLoader, i18nLoader } from "@astrojs/starlight/loaders";
+import {
+  docsLoader as starlightDocsLoader,
+  i18nLoader,
+} from "@astrojs/starlight/loaders";
 import { docsSchema, i18nSchema } from "@astrojs/starlight/schema";
 import { defineCollection, type DataEntry } from "astro:content";
 import { z } from "astro/zod";
@@ -99,7 +102,7 @@ export const collections = {
     schema: docsSchema({
       extend: z.object({
         generateMarkdownRoute: z.boolean().optional().default(false),
-        ajToc: z.custom<TocNode[]>(),
+        ajToc: z.custom<TocNode[]>().optional(),
         frameworks: z.custom<FrameworkKey[]>().optional(),
         titleByFramework: z
           .custom<{ [key in FrameworkKey]: string }>()
