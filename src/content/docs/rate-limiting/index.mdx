@@ -125,6 +125,43 @@ that align with your concept of a “user”. For example:
 - IP + API key (per-client limits),
 - User ID or authentication token (per-account limits).
 
+Multiple characteristics are combined into a single fingerprint. For example,
+`["ip.src", "userId"]` creates one rate-limit bucket for each unique IP address
+and user ID pair. It does not create separate IP and user ID counters.
+
+If you need independent limits, configure separate rate-limit rules. For
+example, an authenticated API route might use one rule keyed by `userId` to
+enforce a per-account quota, and another rule keyed by `ip.src` to throttle
+traffic from any single IP address:
+
+```ts
+import arcjet, { fixedWindow } from "@arcjet/next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    fixedWindow({
+      characteristics: ["userId"],
+      mode: "LIVE",
+      window: "60s",
+      max: 100,
+    }),
+    fixedWindow({
+      characteristics: ["ip.src"],
+      mode: "LIVE",
+      window: "60s",
+      max: 20,
+    }),
+  ],
+});
+```
+
+IP-based limits are useful for anonymous traffic and broad abuse throttles, but
+IP addresses can be shared by many users or changed by an attacker. For
+authenticated traffic, prefer a stable application identifier such as a user ID,
+account ID, tenant ID, or API key, and add a separate IP-based rule only when
+you also want per-IP throttling.
+
 Matching fingerprints to the right identifiers is critical to applying rate
 limits fairly and avoiding unintended blocking.
 
