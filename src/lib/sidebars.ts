@@ -4,75 +4,8 @@ export const main = [
     link: "/get-started",
   },
   {
-    label: "For Agents",
-    collapsed: false,
-    items: [
-      {
-        label: "Agent get started",
-        link: "/agent-get-started",
-      },
-      {
-        label: "MCP Server",
-        link: "/mcp-server",
-      },
-      {
-        label: "CLI",
-        link: "/cli",
-      },
-      {
-        label: "Arcjet Guards",
-        link: "/guards",
-      },
-      {
-        label: "Arcjet Plugin",
-        link: "/arcjet-plugin",
-      },
-      {
-        label: "Arcjet Skills",
-        link: "https://github.com/arcjet/skills",
-        attrs: { target: "_blank", class: "external-link" },
-      },
-      {
-        label: "llms.txt",
-        link: "/llms.txt",
-        attrs: { target: "_blank", class: "external-link" },
-      },
-      {
-        label: "llms-full.txt",
-        link: "/llms-full.txt",
-        attrs: { target: "_blank", class: "external-link" },
-      },
-    ],
-  },
-  {
-    label: "AI runtime protection",
-    collapsed: false,
-    items: [
-      {
-        label: "Overview",
-        link: "/ai-protection",
-      },
-      {
-        label: "Abuse protection",
-        link: "/ai-protection/abuse-protection",
-      },
-      {
-        label: "Budget control",
-        link: "/ai-protection/budget-control",
-      },
-      {
-        label: "Data loss prevention",
-        link: "/ai-protection/data-loss-prevention",
-      },
-      {
-        label: "Prompt injection detection",
-        link: "/ai-protection/prompt-injection",
-      },
-      {
-        label: "Arcjet Guards",
-        link: "/guards",
-      },
-    ],
+    label: "Agent get started",
+    link: "/agent-get-started",
   },
   {
     label: "Examples",
@@ -410,6 +343,69 @@ export const main = [
           },
         ],
         label: "Filters",
+      },
+    ],
+  },
+  {
+    label: "For agents",
+    collapsed: false,
+    items: [
+      {
+        label: "Arcjet Guards",
+        link: "/guards",
+      },
+      {
+        label: "Arcjet Plugin",
+        link: "/arcjet-plugin",
+      },
+      {
+        label: "Arcjet Skills",
+        link: "https://github.com/arcjet/skills",
+        attrs: { target: "_blank", class: "external-link" },
+      },
+      {
+        label: "MCP Server",
+        link: "/mcp-server",
+      },
+      {
+        label: "CLI",
+        link: "/cli",
+      },
+      {
+        label: "llms.txt",
+        link: "/llms.txt",
+        attrs: { target: "_blank", class: "external-link" },
+      },
+      {
+        label: "llms-full.txt",
+        link: "/llms-full.txt",
+        attrs: { target: "_blank", class: "external-link" },
+      },
+    ],
+  },
+  {
+    label: "AI runtime protection",
+    collapsed: false,
+    items: [
+      {
+        label: "Overview",
+        link: "/ai-protection",
+      },
+      {
+        label: "Abuse protection",
+        link: "/ai-protection/abuse-protection",
+      },
+      {
+        label: "Budget control",
+        link: "/ai-protection/budget-control",
+      },
+      {
+        label: "Data loss prevention",
+        link: "/ai-protection/data-loss-prevention",
+      },
+      {
+        label: "Prompt injection detection",
+        link: "/ai-protection/prompt-injection",
       },
     ],
   },
