@@ -312,6 +312,7 @@ All parameters are optional keyword arguments passed alongside the `request`:
 | `filter_local`                     | `Mapping[str, str]`    | Request filters (`local.*` fields) |
 | `extra`                            | `Mapping[str, str]`    | Forwarded verbatim to the Arcjet Decide API as custom metadata (advanced) |
 | `ip_src`                           | `str`                  | Manual IP override (advanced) |
+| `correlation_id`                   | `str`                  | Correlates this decision with a guard call, workflow run, or agent trace. A dedicated, indexable field — not `extra` — and does not affect the decision or its cache key (`arcjet` >= 0.9.0) |
 
 ### Decision
 
@@ -624,19 +625,33 @@ bound rule inputs, and optional metadata:
 
 | Parameter   | Type                      | Description |
 | ----------- | ------------------------- | ----------- |
-| `label`     | `str`                     | Label identifying this guard call (required) |
+| `label`     | `str`                     | Label identifying this guard call (required). Validated server-side as a slug — lowercase letters, digits, dash (`-`), and dot (`.`) only |
 | `rules`     | `Sequence[RuleWithInput]` | Bound rule inputs (required) |
 | `metadata`  | `dict[str, str] \| None`  | Optional key-value metadata |
+| `correlation_id` | `str \| None`        | Optional ID correlating this decision with a request, workflow run, or agent trace. A dedicated field, not metadata; does not affect the decision (`arcjet` >= 0.9.0) |
 
 ### Guard decision
 
-The guard decision exposes:
+Errors and warnings mean opposite things about how much to trust a decision: an
+**error** means the security signal may be degraded (a rule couldn't be
+evaluated, so Arcjet fails open), while a **warning** means the signal is intact
+and the decision is just reporting a diagnostic. The guard decision exposes:
 
 - `conclusion` — `"ALLOW"` or `"DENY"`. Always check before proceeding.
-- `has_error()` — `True` if something went wrong during rule evaluation
-  (service unreachable, rule execution failure). The SDK fails open — log it
-  but don't block the caller.
+- `has_failed_open()` — `True` when the conclusion is `"ALLOW"` *only* because a
+  rule (or the decision itself) could not be processed — i.e. the security
+  signal was degraded and Arcjet failed open. This is the fail-closed gate: deny
+  on it where a degraded signal is unacceptable (`arcjet` >= 0.9.0).
+- `error_results()` — the errored rule results (each with a `code` / `message`)
+  for logging (`arcjet` >= 0.9.0).
+- `warnings` — diagnostics about your request that don't degrade the signal
+  (e.g. a stripped invalid metadata key). Informational only; never changes the
+  conclusion.
 - `results` — per-rule outcomes.
+
+`has_error()` is **deprecated** as of `arcjet` 0.9.0 (it conflated warnings with
+rule errors and now emits a `DeprecationWarning`). Use `has_failed_open()` for
+the fail-closed gate and `warnings` for diagnostics.
 
 For useful error messages, branch on **which rule** denied — not just on
 `DENY`. Each rule defined at module scope exposes typed result accessors:
@@ -644,6 +659,9 @@ For useful error messages, branch on **which rule** denied — not just on
 - `rule.result(decision)` — the result for this rule, or `None`.
 - `rule.denied_result(decision)` — the result, but only if the rule denied
   the request. Returns `None` otherwise.
+- `rule.error_result(decision)` — the `RuleResultError` if this specific rule
+  errored, else `None`. The mirror of `denied_result` for the fail-open case
+  (`arcjet` >= 0.9.0).
 
 ```py
 import time
@@ -664,8 +682,10 @@ window results expose `remaining_requests`, `max_requests`, and
 `reset_at_unix_seconds`.
 
 Hardcode the `label` argument to `guard()` as a string literal (e.g.
-`"tools.get_weather"`, not `f"tools.{name}"`). Hardcoded labels stay
-greppable and the dashboard groups by them. Pass `metadata` whenever you
+`"tools.get-weather"`, not `f"tools.{name}"`). Labels are validated server-side
+as slugs — lowercase letters, digits, dash (`-`), and dot (`.`) only — so
+underscores and uppercase are rejected. Hardcoded labels stay greppable and the
+dashboard groups by them. Pass `metadata` whenever you
 have useful auditing context (e.g. `{"user_id": ..., "request_id": ...}`) —
 it shows up in the dashboard and makes debugging much easier later.
 

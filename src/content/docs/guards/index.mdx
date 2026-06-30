@@ -212,7 +212,7 @@ pi_rule = DetectPromptInjection()
 
 Call `guard()` wherever you already know exactly what operation is happening
 — usually inside the specific tool/task function. The `label` should be a
-hardcoded string literal (`"tools.get_weather"`, not `` `tools.${name}` ``).
+hardcoded string literal (`"tools.get-weather"`, not `` `tools.${name}` ``).
 Hardcoded labels stay greppable and the dashboard groups by them; interpolation
 produces a sea of distinct-looking calls.
 
@@ -226,7 +226,7 @@ makes debugging much easier.
 ```ts
 async function getWeather(city: string, userId: string) {
   const decision = await arcjet.guard({
-    label: "tools.get_weather",
+    label: "tools.get-weather",
     rules: [userLimit({ key: userId, requested: 1 })],
     metadata: { userId },
   });
@@ -243,7 +243,7 @@ async function getWeather(city: string, userId: string) {
 ```py
 async def get_weather(city: str, user_id: str):
     decision = await arcjet.guard(
-        label="tools.get_weather",
+        label="tools.get-weather",
         rules=[user_limit(key=user_id, requested=1)],
         metadata={"user_id": user_id},
     )
@@ -404,7 +404,7 @@ const sensitive = localDetectSensitiveInfo({
 });
 
 const decision = await arcjet.guard({
-  label: "tools.send_email",
+  label: "tools.send-email",
   rules: [sensitive(userInput)],
 });
 ```
@@ -418,7 +418,7 @@ from arcjet.guard import LocalDetectSensitiveInfo
 sensitive = LocalDetectSensitiveInfo(deny=["EMAIL", "CREDIT_CARD_NUMBER"])
 
 decision = await arcjet.guard(
-    label="tools.send_email",
+    label="tools.send-email",
     rules=[sensitive(user_input)],
 )
 ```
@@ -427,6 +427,52 @@ decision = await arcjet.guard(
 </Tabs>
 
 `allow` and `deny` are mutually exclusive — pass only one.
+
+### Content moderation (experimental)
+
+Flags unsafe, abusive, or policy-violating text — distinct from prompt
+injection (which targets your model's instructions) and sensitive information
+(which is PII). Use it on agent inputs or tool results that will be shown to a
+user or fed back to a model.
+
+<Aside type="caution">
+  This rule is **experimental**: the name and result shape may change, and the
+  server may return an error result while the rule is experimental. Treat those
+  errors as fail-open and gate sensitive operations on `hasFailedOpen()` /
+  `has_failed_open()`. Available from **`@arcjet/guard` 1.6.0** and **`arcjet`
+  0.9.0**.
+</Aside>
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+import { experimental_moderateContent } from "@arcjet/guard";
+
+const moderate = experimental_moderateContent();
+
+const decision = await arcjet.guard({
+  label: "tools.summarize",
+  rules: [moderate(userInput)],
+});
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+from arcjet.guard import experimental_ModerateContent
+
+moderate = experimental_ModerateContent()
+
+decision = await arcjet.guard(
+    label="tools.summarize",
+    rules=[moderate(user_input)],
+)
+```
+
+</TabItem>
+</Tabs>
 
 ### Custom rules
 
@@ -500,22 +546,33 @@ for actionable error messages.
 if (decision.conclusion === "DENY") {
   const rateLimited = userLimit.deniedResult(decision);
   if (rateLimited) {
-    throw new Error(
-      `Rate limited — retry in ${rateLimited.resetInSeconds}s`,
+    const retryIn = Math.max(
+      0,
+      rateLimited.resetAtUnixSeconds - Math.floor(Date.now() / 1000),
     );
+    throw new Error(`Rate limited — retry in ${retryIn}s`);
   }
-  if (decision.reason.isPromptInjection()) {
+  if (decision.reason === "PROMPT_INJECTION") {
     throw new Error("Input flagged as prompt injection");
   }
   throw new Error("Blocked");
 }
 
-// hasError() means a rule errored or the server reported diagnostics.
-// The SDK failed open — log it but don't block the caller.
-if (decision.hasError()) {
-  console.warn("Arcjet rule error");
+// Errors fail open: a rule that can't be evaluated comes back as ALLOW, not an
+// exception. `hasFailedOpen()` is true when the decision is ALLOW *only* because
+// a rule (or the decision itself) errored — the fail-closed gate for sensitive
+// operations. `errorResults()` lists the errored rules for logging.
+if (decision.hasFailedOpen()) {
+  console.warn("Arcjet failed open", decision.errorResults());
+  // For a sensitive operation, deny here instead of allowing.
 }
 ```
+
+In `@arcjet/guard`, `decision.reason` is a string literal when `conclusion === "DENY"`
+(`"RATE_LIMIT" | "PROMPT_INJECTION" | "MODERATE_CONTENT" | "SENSITIVE_INFO" | "CUSTOM" | "ERROR" | "NOT_RUN" | "UNKNOWN"`)
+and `undefined` on ALLOW. Rate limit denied results expose `remainingTokens`,
+`maxTokens`, and `resetAtUnixSeconds` (token bucket) or `remainingRequests`,
+`maxRequests`, and `resetAtUnixSeconds` (fixed and sliding window).
 
 </TabItem>
 <TabItem label="Python">
@@ -537,17 +594,81 @@ if decision.conclusion == "DENY":
         raise RuntimeError("Input flagged as prompt injection")
     raise RuntimeError("Blocked")
 
-# has_error() means a rule errored or the server reported diagnostics.
-# The SDK failed open — log it but don't block the caller.
-if decision.has_error():
-    logger.warning("Arcjet rule error")
+# Errors fail open: a rule that can't be evaluated comes back as ALLOW, not an
+# exception. has_failed_open() is true when the decision is ALLOW *only* because
+# a rule (or the decision itself) errored — the fail-closed gate for sensitive
+# operations. error_results() lists the errored rules for logging.
+if decision.has_failed_open():
+    logger.warning("Arcjet failed open: %s", decision.error_results())
+    # For a sensitive operation, deny here instead of allowing.
 ```
 
 In Python, the guard's `decision.reason` is a string literal
-(`"RATE_LIMIT" | "PROMPT_INJECTION" | "SENSITIVE_INFO" | "CUSTOM" | "ERROR" | "NOT_RUN" | "UNKNOWN"`).
+(`"RATE_LIMIT" | "PROMPT_INJECTION" | "MODERATE_CONTENT" | "SENSITIVE_INFO" | "CUSTOM" | "ERROR" | "NOT_RUN" | "UNKNOWN"`).
 Rate limit denied results expose `reset_at_unix_seconds`, `remaining_tokens`,
 `max_tokens` (token bucket) or `remaining_requests`, `max_requests` (fixed
 and sliding window).
+
+</TabItem>
+</Tabs>
+
+### Errors and warnings
+
+A guard decision carries two diagnostics that tell you how much to trust it.
+Neither produces a `DENY` on its own, but they mean opposite things:
+
+- **Errored rules — the security signal may be degraded.** A rule (or the whole
+  decision) couldn't be evaluated, so Arcjet **fails open**: the errored rule
+  contributes `ALLOW` instead of blocking. Because the signal is incomplete, a
+  sensitive operation should consider **failing closed** instead.
+  `decision.hasFailedOpen()` / `decision.has_failed_open()` is that gate — it's
+  `true` only when the conclusion is `ALLOW` *because* something errored, so
+  deny on it where a degraded signal is unacceptable. `decision.errorResults()` /
+  `decision.error_results()` lists the errored rules, and each rule exposes a
+  per-rule `rule.errorResult(decision)` / `rule.error_result(decision)`
+  accessor — the mirror of `deniedResult` / `denied_result` — for attributing a
+  failure to one specific rule.
+- **Warnings — the security signal is intact.** The decision was evaluated
+  normally and is fully trustworthy; a warning is just a diagnostic about your
+  request (e.g. an invalid metadata key that was stripped). `decision.warnings`
+  is informational — log it to fix your config, but never block on it.
+
+<Aside type="note">
+  `decision.hasError()` (JS) / `decision.has_error()` (Python) is **deprecated**
+  — it conflated warnings with rule errors. Use `hasFailedOpen()` /
+  `has_failed_open()` for the fail-closed gate and `warnings` for diagnostics.
+  The split landed in **`@arcjet/guard` 1.6.0** and **`arcjet` 0.9.0**.
+</Aside>
+
+## Correlation IDs
+
+Pass a `correlationId` (JS) / `correlation_id` (Python) to a guard call to
+correlate the decision with a request, workflow run, or agent trace. It's a
+dedicated, indexable field — not metadata — and does not affect the decision.
+The same option is available on the request SDKs' `protect()`. Available from
+**`@arcjet/guard` 1.6.0** and **`arcjet` 0.9.0**.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+const decision = await arcjet.guard({
+  label: "tools.summarize",
+  rules: [piRule(userInput)],
+  correlationId: requestId,
+});
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+decision = await arcjet.guard(
+    label="tools.summarize",
+    rules=[pi_rule(user_input)],
+    correlation_id=request_id,
+)
+```
 
 </TabItem>
 </Tabs>
@@ -603,7 +724,7 @@ or session-based).
 ```ts
 server.tool("query_database", async ({ query, sessionId }) => {
   const decision = await arcjet.guard({
-    label: "mcp.query_database",
+    label: "mcp.query-database",
     rules: [
       queryLimit({ key: sessionId ?? "default", requested: 1 }),
       piRule(query),
@@ -626,7 +747,7 @@ server.tool("query_database", async ({ query, sessionId }) => {
 @mcp.tool()
 async def query_database(query: str, session_id: str | None = None):
     decision = await arcjet.guard(
-        label="mcp.query_database",
+        label="mcp.query-database",
         rules=[
             query_limit(key=session_id or "default", requested=1),
             pi_rule(query),
@@ -767,7 +888,7 @@ def summarize(payload: dict):
 
 ## Best practices
 
-- **Hardcode the `label` string.** Use `"tools.get_weather"`, not
+- **Hardcode the `label` string.** Use `"tools.get-weather"`, not
   `` `tools.${name}` ``. Hardcoded labels stay greppable and the dashboard
   groups by them.
 - **Pass `metadata` for auditing.** `userId`, `sessionId`, `requestId` all
@@ -779,8 +900,10 @@ def summarize(payload: dict):
 - **Branch on the denied result, not just `DENY`.** Specific error messages
   help callers retry intelligently (e.g. "rate limited — retry in 12s" vs a
   generic "blocked").
-- **Fail open on errors.** `decision.hasError()` (JS) / `decision.has_error()`
-  (Python) means a rule errored but the SDK didn't block. Log it; don't deny.
+- **Decide your fail-open posture.** Errors fail open to `ALLOW`. Log them, and
+  for sensitive operations deny when `decision.hasFailedOpen()` (JS) /
+  `decision.has_failed_open()` (Python) is `true`. (The older `hasError()` /
+  `has_error()` is deprecated.)
 
 ## Reference
 

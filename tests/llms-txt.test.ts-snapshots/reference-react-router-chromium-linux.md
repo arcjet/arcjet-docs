@@ -23,7 +23,7 @@ Requirements
 [Section titled “Requirements”](#requirements)
 
 *   React Router 7 or later
-*   Node.js 20 or later, or similar runtime
+*   Node.js 22.21.0 or later, or similar runtime
 *   ESM
 
 Install
