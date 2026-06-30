@@ -48,6 +48,11 @@ pip install arcjet
 ### Requirements
 
 - Python 3.10 or later
+- `libgcc` — needed by the bundled WebAssembly runtime (used for local bot
+  detection, sensitive information detection, and prompt injection
+  detection). Most Linux distributions include this by default, but Alpine
+  Linux does not; run `apk add libgcc` first, otherwise `import arcjet`
+  raises `OSError: Error loading shared library libgcc_s.so.1`.
 
 ## Quick start
 
