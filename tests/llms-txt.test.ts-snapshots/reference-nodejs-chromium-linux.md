@@ -37,7 +37,7 @@ yarn add @arcjet/node @arcjet/inspect
 
 [Section titled “Requirements”](#requirements)
 
-*   Node.js 20 or later
+*   Node.js 22.21.0 or later
 *   CommonJS is not supported. Arcjet is ESM only.
 
 Quick start
@@ -605,7 +605,7 @@ Version support
 
 [Section titled “Version support”](#version-support)
 
-Arcjet supports the [active and maintenance LTS versions](https://github.com/nodejs/release) of Node.js 20 or later.
+Arcjet supports the [active and maintenance LTS versions](https://github.com/nodejs/release) of Node.js 22.21.0 or later.
 
 When a Node.js version goes end of life, we will bump the major version of the Arcjet SDK. [Technical support](/support) is provided for the current major version of the Arcjet SDK for all users and for the current and previous major versions for paid users. We will provide security fixes for the current and previous major SDK versions.
 

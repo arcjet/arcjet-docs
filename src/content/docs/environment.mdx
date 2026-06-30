@@ -153,6 +153,19 @@ its value is sent to Arcjet Cloud API as part of the `extra` fields,
 which are displayed in the [Arcjet dashboard](https://app.arcjet.com).
 The Python SDK does not read this variable.
 
+<a name="http-proxy" />
+
+### `HTTP_PROXY`, `HTTPS_PROXY`, `NO_PROXY`
+
+Standard proxy environment variables (`string`). When set, Arcjet routes its
+outbound calls to the Arcjet Cloud API through the configured proxy, and
+`NO_PROXY` exempts hosts from proxying. Because the API is reached over HTTPS,
+`HTTPS_PROXY` is the relevant variable for most deployments.
+
+Honored from **`@arcjet/*` 1.6.0** (JS/TS — on runtimes that support outbound
+proxying, e.g. Node.js) and **`arcjet` 0.9.0** (Python). Avoid logging the proxy
+URL, as it may contain credentials.
+
 ## How to define environment variables
 
 Arcjet recommends using `.env.local` files in development to set environment
