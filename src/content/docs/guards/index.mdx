@@ -614,21 +614,24 @@ and sliding window).
 
 ### Errors and warnings
 
-A guard decision can carry two distinct signals — errored rules and warnings —
-that never produce a `DENY` on their own and are handled differently. (A
-decision can still be `DENY` from another rule while either is present.)
+A guard decision carries two diagnostics that tell you how much to trust it.
+Neither produces a `DENY` on its own, but they mean opposite things:
 
-- **Errored rules** — a rule (or the whole decision) couldn't be processed.
-  `decision.hasFailedOpen()` / `decision.has_failed_open()` is the fail-closed
-  gate: it's `true` only when the conclusion is `ALLOW` *because* something
-  errored, so deny on it for sensitive operations. `decision.errorResults()` /
+- **Errored rules — the security signal may be degraded.** A rule (or the whole
+  decision) couldn't be evaluated, so Arcjet **fails open**: the errored rule
+  contributes `ALLOW` instead of blocking. Because the signal is incomplete, a
+  sensitive operation should consider **failing closed** instead.
+  `decision.hasFailedOpen()` / `decision.has_failed_open()` is that gate — it's
+  `true` only when the conclusion is `ALLOW` *because* something errored, so
+  deny on it where a degraded signal is unacceptable. `decision.errorResults()` /
   `decision.error_results()` lists the errored rules, and each rule exposes a
   per-rule `rule.errorResult(decision)` / `rule.error_result(decision)`
   accessor — the mirror of `deniedResult` / `denied_result` — for attributing a
   failure to one specific rule.
-- **Warnings** — request-validation diagnostics (e.g. an invalid metadata key
-  that was stripped). `decision.warnings` is informational only; log it to fix
-  config, but never block on it.
+- **Warnings — the security signal is intact.** The decision was evaluated
+  normally and is fully trustworthy; a warning is just a diagnostic about your
+  request (e.g. an invalid metadata key that was stripped). `decision.warnings`
+  is informational — log it to fix your config, but never block on it.
 
 <Aside type="note">
   `decision.hasError()` (JS) / `decision.has_error()` (Python) is **deprecated**

@@ -632,17 +632,21 @@ bound rule inputs, and optional metadata:
 
 ### Guard decision
 
-The guard decision exposes:
+Errors and warnings mean opposite things about how much to trust a decision: an
+**error** means the security signal may be degraded (a rule couldn't be
+evaluated, so Arcjet fails open), while a **warning** means the signal is intact
+and the decision is just reporting a diagnostic. The guard decision exposes:
 
 - `conclusion` — `"ALLOW"` or `"DENY"`. Always check before proceeding.
 - `has_failed_open()` — `True` when the conclusion is `"ALLOW"` *only* because a
-  rule (or the decision itself) could not be processed. This is the fail-closed
-  gate: deny on it for sensitive operations. Errors fail open — the SDK never
-  blocks on them by itself (`arcjet` >= 0.9.0).
+  rule (or the decision itself) could not be processed — i.e. the security
+  signal was degraded and Arcjet failed open. This is the fail-closed gate: deny
+  on it where a degraded signal is unacceptable (`arcjet` >= 0.9.0).
 - `error_results()` — the errored rule results (each with a `code` / `message`)
   for logging (`arcjet` >= 0.9.0).
-- `warnings` — request-validation diagnostics (e.g. a stripped metadata key).
-  Informational only; never changes the conclusion.
+- `warnings` — diagnostics about your request that don't degrade the signal
+  (e.g. a stripped invalid metadata key). Informational only; never changes the
+  conclusion.
 - `results` — per-rule outcomes.
 
 `has_error()` is **deprecated** as of `arcjet` 0.9.0 (it conflated warnings with
