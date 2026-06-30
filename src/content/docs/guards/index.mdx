@@ -614,8 +614,9 @@ and sliding window).
 
 ### Errors and warnings
 
-A guard decision distinguishes two kinds of degradation, and the conclusion is
-never affected by either — both fail open to `ALLOW`:
+A guard decision can carry two distinct signals — errored rules and warnings —
+that never produce a `DENY` on their own and are handled differently. (A
+decision can still be `DENY` from another rule while either is present.)
 
 - **Errored rules** — a rule (or the whole decision) couldn't be processed.
   `decision.hasFailedOpen()` / `decision.has_failed_open()` is the fail-closed
