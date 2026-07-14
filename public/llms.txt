@@ -39,6 +39,7 @@ extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricin
 - [Bun](https://docs.arcjet.com/reference/bun)
 - [Deno](https://docs.arcjet.com/reference/deno)
 - [Fastify](https://docs.arcjet.com/reference/fastify)
+- [Go](https://docs.arcjet.com/reference/go)
 - [NestJS](https://docs.arcjet.com/reference/nestjs)
 - [Next.js](https://docs.arcjet.com/reference/nextjs)
 - [Node.js](https://docs.arcjet.com/reference/nodejs)
@@ -46,7 +47,7 @@ extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricin
 - [React Router](https://docs.arcjet.com/reference/react-router)
 - [Remix](https://docs.arcjet.com/reference/remix)
 - [SvelteKit](https://docs.arcjet.com/reference/sveltekit)
-- Python: FastAPI, Flask — see [Python FastAPI quick start](https://docs.arcjet.com/get-started?f=python-fastapi) and [Python Flask quick start](https://docs.arcjet.com/get-started?f=python-flask).
+- [Python](https://docs.arcjet.com/reference/python): FastAPI and Flask.
 
 ## Optional
 
