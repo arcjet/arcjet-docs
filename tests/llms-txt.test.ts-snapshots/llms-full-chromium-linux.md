@@ -103,7 +103,7 @@ Full documentation: https://docs.arcjet.com/mcp-server
 
 **Investigate:** list-requests → get-request-details or explain-decision for a specific request.
 
-**Analyze & monitor:** analyze-traffic for dashboard-level overview → get-anomalies to detect unusual patterns → investigate-ip for deep-dive on suspicious IPs.
+**Analyze & monitor:** analyze-traffic for a Console-level overview → get-anomalies to detect unusual patterns → investigate-ip for deep-dive on suspicious IPs.
 
 **Daily security briefing:** get-security-briefing for a comprehensive overview (traffic, threats, anomalies, dry-run readiness, quota, and recommendations) in a single call.
 
@@ -113,7 +113,7 @@ Full documentation: https://docs.arcjet.com/mcp-server
 
 ### Remote rules
 
-Remote rules are managed via the MCP server or dashboard — no code changes or redeployment needed. They apply globally to all requests for a site. Supported types: rate_limit, bot, shield, filter. Rules needing request body content (email, sensitive_info, prompt_injection) require the SDK.
+Remote rules are managed via the MCP server or Console — no code changes or redeployment needed. They apply globally to all requests for a site. Supported types: rate_limit, bot, shield, filter. Rules needing request body content (email, sensitive_info, prompt_injection) require the SDK.
 
 **Responding to an active attack:** The most common use case is blocking suspicious traffic immediately. For example, to block a specific country, VPN, or IP range during an attack:
 
@@ -144,6 +144,7 @@ npx skills add arcjet/skills
 Source: https://github.com/arcjet/skills
 JS/TS SDK: https://github.com/arcjet/arcjet-js
 Python SDK: https://github.com/arcjet/arcjet-py
+Go SDK: https://github.com/arcjet/arcjet-go
 
 ## Quick start — choose your framework
 
@@ -153,6 +154,7 @@ Each link below directs to the quick start guide with a framework-specific view:
 - [Bun quick start](https://docs.arcjet.com/get-started?f=bun)
 - [Deno quick start](https://docs.arcjet.com/get-started?f=deno)
 - [Fastify quick start](https://docs.arcjet.com/get-started?f=fastify)
+- [Go SDK reference](https://docs.arcjet.com/reference/go)
 - [NestJS quick start](https://docs.arcjet.com/get-started?f=nest-js)
 - [Next.js quick start](https://docs.arcjet.com/get-started?f=next-js)
 - [Node.js quick start](https://docs.arcjet.com/get-started?f=node-js)
@@ -187,6 +189,103 @@ Full docs: https://docs.arcjet.com
 | Astro          | `@arcjet/astro`        | `npx astro add @arcjet/astro`          |
 | Python FastAPI | `arcjet`               | `pip install arcjet`                   |
 | Python Flask   | `arcjet`               | `pip install arcjet flask`             |
+| Go             | `github.com/arcjet/arcjet-go` | `go get github.com/arcjet/arcjet-go@latest` |
+
+## Go SDK
+
+The Go SDK is pre-release. Version 0.1.0 requires Go 1.25 or later and supports
+`net/http` request protection plus Guard protection for non-HTTP operations.
+Create clients once at package scope and reuse them.
+
+Full reference: https://docs.arcjet.com/reference/go
+
+### Go HTTP request protection
+
+```go
+var aj = must(arcjet.NewClient(arcjet.Config{
+    Key: os.Getenv("ARCJET_KEY"),
+    Rules: []arcjet.Rule{
+        arcjet.Shield(arcjet.ShieldOptions{Mode: arcjet.ModeLive}),
+        arcjet.DetectBot(arcjet.BotOptions{
+            Mode:  arcjet.ModeLive,
+            Allow: []string{},
+        }),
+        arcjet.TokenBucket(arcjet.TokenBucketOptions{
+            Mode:            arcjet.ModeLive,
+            Characteristics: []string{"userId"},
+            RefillRate:      10,
+            Interval:        time.Minute,
+            Capacity:        10,
+        }),
+    },
+}))
+
+func handler(w http.ResponseWriter, r *http.Request) {
+    decision, err := aj.Protect(
+        r.Context(),
+        r,
+        arcjet.WithCharacteristics(map[string]string{"userId": "user_123"}),
+        arcjet.WithRequested(1),
+    )
+    if err != nil {
+        // Arcjet fails open. Log the error and apply your fallback policy.
+        log.Printf("arcjet: %v", err)
+    } else if decision.IsDenied() {
+        status := http.StatusForbidden
+        if decision.Reason.IsRateLimit() {
+            status = http.StatusTooManyRequests
+        }
+        http.Error(w, "denied", status)
+        return
+    }
+}
+
+func must[T any](value T, err error) T {
+    if err != nil {
+        panic(err)
+    }
+    return value
+}
+```
+
+Call `Protect(r.Context(), r, ...)` once inside each handler. Use
+`WithCharacteristics`, `WithRequested`, `WithDetectPromptInjectionMessage`,
+`WithSensitiveInfoValue`, and `WithCorrelationId` for dynamic inputs.
+
+### Go Guard protection
+
+```go
+var guard = must(arcjet.NewGuardClient(arcjet.GuardConfig{
+    Key: os.Getenv("ARCJET_KEY"),
+}))
+
+var promptScan = must(arcjet.GuardPromptInjection(
+    arcjet.GuardPromptInjectionOptions{Mode: arcjet.ModeLive},
+))
+
+decision, err := guard.Guard(ctx, arcjet.GuardRequest{
+    Label:         "tools.summarize",
+    CorrelationId: "trace_123",
+    Metadata:      map[string]string{"user_id": userID},
+    Rules: []arcjet.GuardRuleInput{
+        promptScan.Text(prompt),
+    },
+})
+if err != nil {
+    return err
+}
+if decision.IsDenied() {
+    return fmt.Errorf("blocked: %s", decision.Reason)
+}
+if decision.HasFailedOpen() {
+    log.Printf("guard failed open: %+v", decision.ErrorResults())
+}
+```
+
+Guard also supports rate limiting, sensitive information detection, custom
+local rules, and experimental content moderation. Labels and buckets must be
+lowercase slugs containing letters, digits, dashes, or dots. Standard
+`HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` variables configure outbound calls.
 
 ## Common setup for all frameworks
 
@@ -1742,7 +1841,7 @@ export async function GET(req: Request) {
 - Create the Arcjet client ONCE, outside the request handler, and reuse it.
 - Call `protect()` inside the route handler where you have the full request
   context.
-- Start new rules in `DRY_RUN` mode, verify in the dashboard, then switch to
+- Start new rules in `DRY_RUN` mode, verify in the Console, then switch to
   `LIVE`.
 - Handle all denial reasons explicitly (rate limit, bot, shield, etc.).
 - Use `withRule()` to attach route-specific rules to a shared base instance.
@@ -1804,7 +1903,7 @@ Guards apply Arcjet security rules inside AI agent tool calls, MCP tool
 handlers, queue workers, and anywhere else you process untrusted input without an
 HTTP request. Pass inputs directly, get a decision back.
 
-Supported languages: **JavaScript / TypeScript** (`@arcjet/guard` >= 1.4.0) and **Python** (`arcjet` >= 0.7.0).
+Supported languages: **JavaScript / TypeScript** (`@arcjet/guard` >= 1.4.0), **Python** (`arcjet` >= 0.7.0), and **Go** (`arcjet-go` >= 0.1.0, pre-release).
 
 ### JavaScript / TypeScript example
 
@@ -1917,10 +2016,12 @@ For the full API reference, read the installed library source:
 - [Bun](https://docs.arcjet.com/reference/bun)
 - [Deno](https://docs.arcjet.com/reference/deno)
 - [Fastify](https://docs.arcjet.com/reference/fastify)
+- [Go](https://docs.arcjet.com/reference/go)
 - [NestJS](https://docs.arcjet.com/reference/nestjs)
 - [Next.js](https://docs.arcjet.com/reference/nextjs)
 - [Node.js](https://docs.arcjet.com/reference/nodejs)
 - [Nuxt](https://docs.arcjet.com/reference/nuxt)
+- [Python](https://docs.arcjet.com/reference/python)
 - [React Router](https://docs.arcjet.com/reference/react-router)
 - [Remix](https://docs.arcjet.com/reference/remix)
 - [SvelteKit](https://docs.arcjet.com/reference/sveltekit)
