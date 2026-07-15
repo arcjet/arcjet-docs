@@ -47,3 +47,28 @@ Create a new API route at `/pages/api/arcjet.js`:
 />
 </div>
 </SelectableContent>
+
+The Rampart backend loads a native ONNX runtime, so mark it as a server external
+package in `next.config.js` and keep the route on the Node.js runtime (the App
+Router example sets `export const runtime = "nodejs"`):
+
+```js
+// next.config.js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  serverExternalPackages: [
+    "@arcjet/sensitive-info-rampart",
+    "@huggingface/transformers",
+    "onnxruntime-node",
+  ],
+};
+
+module.exports = nextConfig;
+```
+
+<Aside type="note">
+  Prefer the built-in engine (no native dependencies, runs on edge)? Drop the
+  `backend: rampart()` line and the `@arcjet/sensitive-info-rampart` import to
+  use it instead. See the [detection backends
+  reference](/sensitive-info/reference#detection-backends) for the trade-offs.
+</Aside>

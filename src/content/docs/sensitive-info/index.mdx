@@ -8,6 +8,7 @@ generateMarkdownRoute: true
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "../../../components/Comments.astro";
 import { Link } from "@/components/link";
+import EntityDetectionTable from "@/snippets/sensitive-info/EntityDetectionTable.mdx";
 
 Arcjet sensitive information detection lets you detect and block sensitive data
 in request bodies before it enters your application. Use it to prevent clients
@@ -21,14 +22,21 @@ layer](/ai-protection/data-loss-prevention) - stopping PII from leaking into AI
 model context, training data, or third-party tool calls made by agents. When a
 user pastes a credit card number or email address into a chat prompt, Arcjet
 catches it before it reaches your AI provider. All detection runs entirely
-locally inside the WebAssembly sandbox shipped with the Arcjet SDK. No request
-body data ever leaves your infrastructure. To apply the same detection inside
-agent tool handlers and pipelines, see [Arcjet Guards](/guards).
+locally in your own environment. No request body data ever leaves your
+infrastructure. To apply the same detection inside agent tool handlers and
+pipelines, see [Arcjet Guards](/guards).
 
-You can block common types of PII such as email addresses, card numbers, IP
-addresses, and phone numbers, as well as custom patterns you define.
+Detection runs through a pluggable
+<Link.Page href="/sensitive-info/reference#detection-backends">backend</Link.Page>.
+The built-in WebAssembly engine ships with the SDK and detects email addresses,
+card numbers, IP addresses, and phone numbers. For broader coverage, the optional
+`@arcjet/sensitive-info-rampart` package runs an on-device named-entity-recognition
+(NER) model that also detects **names, addresses, and government / financial
+identifiers** — all still local to your environment, with the model weights
+bundled so nothing is fetched at runtime. Either backend can be extended with
+custom patterns you define.
 
-Sensitive info works on the request body. To detect specific information in
+Sensitive info detection works on the request body. To detect specific information in
 headers or other request fields, use <Link.Page href="/filters">Arcjet filters</Link.Page>.
 For AI endpoints, pair sensitive info detection with
 <Link.Page href="/prompt-injection">prompt injection detection</Link.Page> to
@@ -67,28 +75,38 @@ with the SDK.
 Arcjet analyzes the body of each request locally in your application
 environment:
 
-1. The request body is split into tokens ("words").
-2. Tokens are checked against built-in detectors (for example, card numbers and
-   email addresses).
-3. Tokens are also evaluated by any user-defined `detect` functions you
-   configure.
+1. The request body is scanned by the configured
+   <Link.Page href="/sensitive-info/reference#detection-backends">detection backend</Link.Page>.
+2. The backend identifies sensitive entities — built-in structured types, and,
+   with the Rampart backend, names, addresses, and other identifiers.
+3. Any custom detection you configure (a `detect` function or a Rampart
+   recognizer) also runs.
 4. If sensitive information is found, Arcjet returns a decision so your
    application can block, sanitize, or otherwise handle the request.
 
-All of this logic runs locally with a WebAssembly sandbox that runs in-process.
-The raw request body is never sent to Arcjet.
+All of this logic runs locally and in-process. The raw request body is never
+sent to Arcjet.
 
-### Built-in entities
+### Detected entities
 
-The built-in entities include:
+Which entities are available depends on the detection backend. The built-in
+engine detects four structured types; the on-device
+<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart
+backend</Link.Page> adds names, addresses, and government / financial
+identifiers:
 
-- **Card numbers** (such as `4242424242424242`)
-- **Email addresses** (such as `alice@arcjet.com`)
-- **IP addresses** (such as `127.0.0.1`)
-- **Phone numbers** (such as `+1 (555) 555-5555`)
+<EntityDetectionTable />
 
-You can combine these with your own custom detectors to cover additional data
-types specific to your application.
+The Rampart model is compact (a ~14.7&nbsp;MB, 4-bit quantized artifact) and
+fast — around 6.6&nbsp;ms median inference on Node.js — so it runs inline on
+each request, and recalls ~98% of private terms across the seven Latin-script
+languages it supports. See the
+<Link.Page href="/sensitive-info/reference#model-accuracy-and-performance">reference</Link.Page>
+and the [model card](https://huggingface.co/nationaldesignstudio/rampart) for
+the full accuracy and latency breakdown.
+
+You can combine either backend with your own custom detectors to cover
+additional data types specific to your application.
 
 {/* Note: no section on `characteristics`/`fingerprint` needed as this rule is local. */}
 
