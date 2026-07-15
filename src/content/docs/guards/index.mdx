@@ -388,10 +388,10 @@ decision = await arcjet.guard(
 
 ### Sensitive information detection
 
-Detects PII (email addresses, phone numbers, IP addresses, credit card
-numbers) in text **locally via WASM** — the raw text never leaves the SDK,
-which matters for compliance. Built-in entity types: `EMAIL`, `PHONE_NUMBER`,
-`IP_ADDRESS`, `CREDIT_CARD_NUMBER`.
+Detects PII in text **locally** — the raw text never leaves the SDK (only a
+SHA-256 hash is sent to Arcjet), which matters for compliance. The default
+backend detects four built-in entity types with pattern matching: `EMAIL`,
+`PHONE_NUMBER`, `IP_ADDRESS`, and `CREDIT_CARD_NUMBER`.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -427,6 +427,36 @@ decision = await arcjet.guard(
 </Tabs>
 
 `allow` and `deny` are mutually exclusive — pass only one.
+
+#### Broader detection with an on-device model
+
+To detect more than the four built-in types — names, addresses, and government
+or financial identifiers — pass a `backend` to `localDetectSensitiveInfo`. The
+<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">`@arcjet/sensitive-info-rampart`</Link.Page>
+package runs an on-device NER model; detection still happens entirely locally.
+This is available in the JavaScript SDK only.
+
+```ts
+import { localDetectSensitiveInfo } from "@arcjet/guard";
+import { rampart } from "@arcjet/sensitive-info-rampart";
+
+const sensitive = localDetectSensitiveInfo({
+  // Names, addresses, and identifiers, alongside the built-in types.
+  deny: ["GIVEN_NAME", "SURNAME", "EMAIL", "SSN"],
+  backend: rampart(),
+});
+
+const decision = await arcjet.guard({
+  label: "tools.summary",
+  rules: [sensitive(userInput)],
+});
+```
+
+The Rampart backend loads a native ONNX runtime, so it needs a server runtime
+(Node.js, Bun, or Deno) and must run on the Node.js runtime on Next.js. See the
+<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart
+reference</Link.Page> for the full entity list, options, and bundler
+configuration.
 
 ### Content moderation (experimental)
 

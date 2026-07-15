@@ -297,6 +297,13 @@ directly in `allow` or `deny`:
 Without a `backend`, the rule continues to use the built-in engine — this
 package is entirely opt-in.
 
+:::note
+The same backend also works with the `localDetectSensitiveInfo` rule in
+<Link.Page href="/guards">Arcjet Guards</Link.Page> — pass `backend: rampart()`
+there too to scan text inside agent tool calls and pipelines that don't route
+through HTTP.
+:::
+
 The full set of types the backend supports is exported as `rampartEntities`,
 which is convenient when you want to deny everything it can detect:
 

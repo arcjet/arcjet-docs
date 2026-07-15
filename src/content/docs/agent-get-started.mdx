@@ -247,7 +247,8 @@ alternative for Claude Code and Cursor users):
   detection on job payloads.
 - **"Block PII in agent tool outputs before they reach the model"** — uses
   `localDetectSensitiveInfo` on tool *results* in a guard call so PII in
-  tool outputs doesn't leak back into the model context.
+  tool outputs doesn't leak back into the model context. Add the on-device
+  Rampart backend (`backend: rampart()`) to also catch names and addresses.
 - **"Give me a security briefing for my site"** — calls `get-security-briefing`
   to return traffic analysis, threat landscape, anomalies, and recommendations.
 - **"Investigate this suspicious IP address"** — calls `investigate-ip` for geo,
