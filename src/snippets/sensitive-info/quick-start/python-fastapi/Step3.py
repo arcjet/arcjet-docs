@@ -1,6 +1,7 @@
 import os
 
 from arcjet import Mode, SensitiveInfoEntityType, arcjet, detect_sensitive_info
+from arcjet_sensitive_info_rampart import rampart
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -12,12 +13,15 @@ aj = arcjet(
     rules=[
         detect_sensitive_info(
             mode=Mode.LIVE,  # Will block requests, use Mode.DRY_RUN to log only
-            # Deny these entity types. `allow` and `deny` are mutually exclusive.
+            # Detect names and email addresses. `allow` and `deny` are mutually
+            # exclusive. See the reference for the full list of entity types.
             deny=[
                 SensitiveInfoEntityType.EMAIL,
-                SensitiveInfoEntityType.PHONE_NUMBER,
-                SensitiveInfoEntityType.CREDIT_CARD_NUMBER,
+                SensitiveInfoEntityType.GIVEN_NAME,
+                SensitiveInfoEntityType.SURNAME,
             ],
+            # Use the on-device Rampart NER model instead of the built-in engine.
+            backend=rampart(),
         ),
     ],
 )
@@ -33,11 +37,9 @@ async def index(request: Request, body: Message):
     print("Arcjet decision", decision)
 
     if decision.is_denied():
-        if decision.reason_v2.type == "SENSITIVE_INFO":
-            return JSONResponse(
-                {"error": "Bad request - sensitive information detected"},
-                status_code=400,
-            )
-        return JSONResponse({"error": "Forbidden"}, status_code=403)
+        return JSONResponse(
+            {"error": "Bad request - sensitive information detected"},
+            status_code=400,
+        )
 
     return {"message": "Hello world"}

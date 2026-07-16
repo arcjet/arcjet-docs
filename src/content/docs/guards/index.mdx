@@ -442,10 +442,15 @@ decision = await arcjet.guard(
 #### Broader detection with an on-device model
 
 To detect more than the four built-in types — names, addresses, and government
-or financial identifiers — pass a `backend` to `localDetectSensitiveInfo`. The
-<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">`@arcjet/sensitive-info-rampart`</Link.Page>
+or financial identifiers — pass a `backend` to the local sensitive info rule. An
+optional
+<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart</Link.Page>
 package runs an on-device NER model; detection still happens entirely locally.
-This is available in the JavaScript SDK only.
+It ships as `@arcjet/sensitive-info-rampart` for the JavaScript SDK and as the
+`arcjet[sensitive-info-rampart]` extra for Python.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
 ```ts
 import { localDetectSensitiveInfo } from "@arcjet/guard";
@@ -463,8 +468,34 @@ const decision = await arcjet.guard({
 });
 ```
 
-The Rampart backend loads a native ONNX runtime, so it needs a server runtime
-(Node.js, Bun, or Deno) and must run on the Node.js runtime on Next.js. See the
+</TabItem>
+<TabItem label="Python">
+
+```py
+from arcjet.guard import LocalDetectSensitiveInfo
+from arcjet_sensitive_info_rampart import rampart
+
+# Names, addresses, and identifiers, alongside the built-in types.
+sensitive = LocalDetectSensitiveInfo(
+    deny=["GIVEN_NAME", "SURNAME", "EMAIL", "SSN"],
+    backend=rampart(),
+)
+
+decision = await arcjet.guard(
+    label="tools.summary",
+    rules=[sensitive(user_input)],
+)
+```
+
+Listing a backend-only type (such as `GIVEN_NAME`) without a supporting
+`backend` raises an error.
+
+</TabItem>
+</Tabs>
+
+The Rampart backend loads a native ONNX runtime, so it needs a server runtime.
+In JS that means Node.js, Bun, or Deno (and the Node.js runtime on Next.js). See
+the
 <Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart
 reference</Link.Page> for the full entity list, options, and bundler
 configuration.
