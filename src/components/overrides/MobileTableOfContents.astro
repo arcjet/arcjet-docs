@@ -1,13 +1,13 @@
 ---
-import {
-    pathnameForSdk,
-    sdk,
-    sdkFromPathname,
-    sdks,
-} from "@/lib/sdk";
 import SdkIcon from "@/components/SdkIcon.astro";
-import Default from "@astrojs/starlight/components/MobileTableOfContents.astro";
+import {
+pathnameForSdk,
+sdk,
+sdkFromPathname,
+sdks,
+} from "@/lib/sdk";
 import { Icon } from "@astrojs/starlight/components";
+import Default from "@astrojs/starlight/components/MobileTableOfContents.astro";
 
 const activeSdkKey = sdkFromPathname(Astro.url.pathname);
 const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
@@ -111,8 +111,8 @@ const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
                         border: none;
                         backdrop-filter: blur(var(--blur1));
                         background: linear-gradient(
-                            rgba(var(--colorBgRgb) / 1) 8px,
-                            rgba(var(--colorBgRgb) / 0)
+                            rgba(var(--sl-color-bg-rgb) / 1) 8px,
+                            rgba(var(--sl-color-bg-rgb) / 0)
                         );
 
                         padding: 0 var(--sl-content-pad-x) calc(var(--sp) * 3);
@@ -171,7 +171,7 @@ const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
         }
 
         .mtoc-container {
-            background-color: rgb(var(--colorBgRgb));
+            background-color: rgb(var(--sl-color-bg-rgb));
             box-sizing: border-box;
             display: flex;
             gap: calc(var(--sp) * 2);
@@ -232,16 +232,16 @@ const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
             .mtoc-container:has(mobile-starlight-toc details:not([open])) {
             backdrop-filter: blur(var(--blur1));
             background: linear-gradient(
-                rgba(var(--colorBgRgb) / 1) 8px,
-                rgba(var(--colorBgRgb) / 0)
+                rgba(var(--sl-color-bg-rgb) / 1) 8px,
+                rgba(var(--sl-color-bg-rgb) / 0)
             );
         }
 
         #mtoc-sdk[popover] {
             backdrop-filter: blur(var(--blur1));
             background: linear-gradient(
-                rgba(var(--colorBgRgb) / 1) 8px,
-                rgba(var(--colorBgRgb) / 0)
+                rgba(var(--sl-color-bg-rgb) / 1) 8px,
+                rgba(var(--sl-color-bg-rgb) / 0)
             );
             border: none;
             left: var(--mtoc-left);
