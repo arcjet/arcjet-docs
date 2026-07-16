@@ -11,12 +11,12 @@ import { Link } from "@/components/link";
 [Arcjet](https://arcjet.com) is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
 
 Arcjet protects two types of entry points:
-- **Request-based** — HTTP route handlers and API endpoints. Use `protect()` with any <Link.Page href="/get-started">supported framework</Link.Page>.
-- **Guards** — tool calls, MCP servers, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` to pass inputs directly. See <Link.Page href="/guards">Guards</Link.Page>.
+- **Request-based** — HTTP route handlers and API endpoints. Use `protect()` (or `Protect` in Go) with any <Link.Page href="/get-started">supported framework</Link.Page>.
+- **Guards** — tool calls, MCP servers, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` (or `Guard` in Go) to pass inputs directly. See <Link.Page href="/guards">Guards</Link.Page>.
 
 Pick by what's at the protection site:
 
-|                                 | Protect (request SDKs)             | Guard (`@arcjet/guard`, `arcjet.guard`) |
+|                                 | Protect (request SDKs)             | Guard (`@arcjet/guard`, `arcjet.guard`, `NewGuardClient`) |
 | ------------------------------- | :--------------------------------: | :-------------------------------------: |
 | Designed for                    | HTTP route handlers, API endpoints | AI tool calls, MCP servers, queue workers, background jobs |
 | Request object                  | Required                           | Not needed                              |
@@ -138,6 +138,8 @@ Detect the framework by checking the project files:
   `@sveltejs/kit`, `hono`, `@remix-run/node`, `react-router`, `astro`,
   `nuxt`, or check if the runtime is Bun or Deno.
 - **`pyproject.toml` / `requirements.txt`** — look for `fastapi` or `flask`.
+- **`go.mod`** — use the Go SDK with `net/http` or any router that exposes
+  `*http.Request`.
 
 Then install the correct package:
 
@@ -159,6 +161,7 @@ Then install the correct package:
 | Astro          | `npx astro add @arcjet/astro`             |
 | Python FastAPI | `pip install arcjet` or `uv add arcjet`   |
 | Python Flask   | `pip install arcjet` or `uv add arcjet`   |
+| Go             | `go get github.com/arcjet/arcjet-go@latest` |
 
 ## Add protection
 
@@ -174,7 +177,8 @@ The typical setup is:
 2. Configure rules: `shield` (WAF), `detectBot`, rate limiting
    (`tokenBucket`, `fixedWindow`, or `slidingWindow`), and optionally
    `sensitiveInfo` or `detectPromptInjection` for AI apps.
-3. Call `protect()` inside each route handler and check `decision.isDenied()`.
+3. Call `protect()` (or `Protect`) inside each route handler and check whether
+   the decision was denied.
 
 <Aside type="caution">
   **Do not** create a new Arcjet instance per request — this defeats caching.
@@ -212,12 +216,13 @@ After adding protection and starting the app:
    or the MCP tools (`get-request-details`, `explain-decision`,
    `get-guard-details`).
 4. Use `arcjet analyze traffic --site-id <id>` (CLI) or `analyze-traffic` (MCP)
-   for a dashboard-level overview of request patterns.
-5. Check the [Arcjet dashboard](https://app.arcjet.com) for real-time
+   for a Console-level overview of request patterns.
+5. Check the [Arcjet Console](https://app.arcjet.com) for real-time
    monitoring.
 
 If decisions are not appearing, verify that `ARCJET_KEY` and `ARCJET_ENV` are
-set correctly and that `protect()` / `guard()` is being called.
+set correctly and that `protect()` / `guard()` (or `Protect` / `Guard`) is
+being called.
 
 ## Common agent prompts
 
@@ -274,5 +279,5 @@ alternative for Claude Code and Cursor users):
 - <Link.Page href="/arcjet-plugin">Arcjet Plugin</Link.Page> — bundled experience for Claude Code and Cursor
 - [llms.txt](/llms.txt) — short machine-readable index for AI agents
 - [llms-full.txt](/llms-full.txt) — full machine-readable reference with all framework examples, rule parameters, and decision API
-- <Link.Page href="/remote-rules">Remote rules</Link.Page> — manage rules from the dashboard or MCP server without code changes
+- <Link.Page href="/remote-rules">Remote rules</Link.Page> — manage rules from the Console or MCP server without code changes
 - <Link.Page href="/best-practices">Best practices</Link.Page> — recommended patterns and anti-patterns

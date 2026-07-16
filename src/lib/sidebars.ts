@@ -434,6 +434,10 @@ export const main = [
             link: "/reference/fastify",
           },
           {
+            label: "Go",
+            link: "/reference/go",
+          },
+          {
             label: "NestJS",
             link: "/reference/nestjs",
           },

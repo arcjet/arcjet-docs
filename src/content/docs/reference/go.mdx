@@ -1,0 +1,216 @@
+---
+title: "Arcjet Go SDK reference"
+description: "Reference for Arcjet's Go SDK, including net/http request protection and Guard protection for non-HTTP operations."
+prev: false
+generateMarkdownRoute: true
+---
+
+import { Link } from "@/components/link";
+
+The Arcjet Go SDK protects `net/http` handlers and non-HTTP operations such as
+AI tool calls, MCP handlers, queue workers, and background jobs. It works with
+the standard library and routers that expose `*http.Request`.
+
+> **Caution:** The Go SDK is pre-release and its API may change. Version 0.1.0
+> requires Go 1.25 or later.
+
+## Install
+
+Use Go tooling so the project records a compatible version in `go.mod`:
+
+```bash
+go get github.com/arcjet/arcjet-go@latest
+```
+
+Set `ARCJET_KEY` in the environment. Retrieve it from the
+[Arcjet Console](https://app.arcjet.com), the
+<Link.Page href="/cli">Arcjet CLI</Link.Page>, or the
+<Link.Page href="/mcp-server">MCP server</Link.Page>.
+
+## Choose an API
+
+| API | Use it for |
+| --- | --- |
+| `arcjet.NewClient` and `Protect` | HTTP handlers with a `*http.Request` |
+| `arcjet.NewGuardClient` and `Guard` | Tool calls, MCP handlers, queues, background jobs, and other operations without an HTTP request |
+
+Create either client once at package scope and reuse it. Do not create a new
+client for every request or operation.
+
+## Protect HTTP handlers
+
+Configure shared rules on an `arcjet.Client`, then call `Protect` once inside
+each handler:
+
+```go
+package main
+
+import (
+	"log"
+	"net/http"
+	"os"
+	"time"
+
+	"github.com/arcjet/arcjet-go"
+)
+
+var aj = must(arcjet.NewClient(arcjet.Config{
+	Key: os.Getenv("ARCJET_KEY"),
+	Rules: []arcjet.Rule{
+		arcjet.Shield(arcjet.ShieldOptions{Mode: arcjet.ModeLive}),
+		arcjet.DetectBot(arcjet.BotOptions{
+			Mode:  arcjet.ModeLive,
+			Allow: []string{},
+		}),
+		arcjet.TokenBucket(arcjet.TokenBucketOptions{
+			Mode:            arcjet.ModeLive,
+			Characteristics: []string{"userId"},
+			RefillRate:      10,
+			Interval:        time.Minute,
+			Capacity:        10,
+		}),
+	},
+}))
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	userID := "user_123" // Replace with the authenticated user ID.
+
+	decision, err := aj.Protect(
+		r.Context(),
+		r,
+		arcjet.WithCharacteristics(map[string]string{"userId": userID}),
+		arcjet.WithRequested(1),
+	)
+	if err != nil {
+		// Arcjet fails open. Log the error and apply your fallback policy.
+		log.Printf("arcjet: %v", err)
+	} else if decision.IsDenied() {
+		status := http.StatusForbidden
+		if decision.Reason.IsRateLimit() {
+			status = http.StatusTooManyRequests
+		}
+		http.Error(w, "denied", status)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func must[T any](value T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return value
+}
+```
+
+Use `client.WithRule(...)` to derive a client with an additional route-specific
+rule. Pass dynamic inputs with `Protect` options, including:
+
+- `WithCharacteristics(...)` for rate-limit keys such as a user or tenant ID.
+- `WithRequested(...)` for the number of tokens a token bucket should consume.
+- `WithDetectPromptInjectionMessage(...)` for untrusted text.
+- `WithSensitiveInfoValue(...)` for text to scan for sensitive information.
+- `WithCorrelationId(...)` to correlate a request decision with related work.
+
+If the application is behind a trusted reverse proxy, configure `Config.Proxies`
+with the trusted proxy addresses or CIDRs so Arcjet receives the correct client
+IP.
+
+## Guard non-HTTP operations
+
+Use Guard where no `*http.Request` exists. Configure the client and reusable
+rules at package scope, then pass the inputs at the operation boundary:
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"time"
+
+	"github.com/arcjet/arcjet-go"
+)
+
+var guard = must(arcjet.NewGuardClient(arcjet.GuardConfig{
+	Key: os.Getenv("ARCJET_KEY"),
+}))
+
+var userLimit = must(arcjet.GuardTokenBucket(arcjet.GuardTokenBucketOptions{
+	Mode:       arcjet.ModeLive,
+	Label:      "tools.weather.limit",
+	Bucket:     "tools-weather",
+	RefillRate: 10,
+	Interval:   time.Minute,
+	Capacity:   10,
+}))
+
+var promptScan = must(arcjet.GuardPromptInjection(
+	arcjet.GuardPromptInjectionOptions{Mode: arcjet.ModeLive},
+))
+
+func getWeather(ctx context.Context, userID, prompt string) error {
+	decision, err := guard.Guard(ctx, arcjet.GuardRequest{
+		Label:         "tools.get-weather",
+		CorrelationId: "trace_123",
+		Metadata:      map[string]string{"user_id": userID},
+		Rules: []arcjet.GuardRuleInput{
+			userLimit.Key(userID, 1),
+			promptScan.Text(prompt),
+		},
+	})
+	if err != nil {
+		return err
+	}
+	if decision.IsDenied() {
+		return fmt.Errorf("blocked: %s", decision.Reason)
+	}
+	return nil
+}
+
+func must[T any](value T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return value
+}
+```
+
+Guard labels and rate-limit buckets are slugs: lowercase letters, digits,
+dashes, and dots, starting and ending with a letter or digit. Use a stable,
+hardcoded label for each operation and an explicit rate-limit key such as a
+user ID, session ID, or API key.
+
+Available Guard rules include rate limiting, prompt injection detection,
+sensitive information detection, and custom local rules. Content moderation
+is available as the experimental `ExperimentalGuardModerateContent` rule; its
+API and result shape may change.
+
+### Errors and warnings
+
+Guard separates enforcement decisions from processing problems:
+
+- `decision.IsDenied()` reports a policy denial.
+- `decision.HasFailedOpen()` reports that an error caused the decision to allow.
+- `decision.ErrorResults()` returns errored rule results.
+- A configured rule's `ErrorResult(decision)` attributes an error to that rule.
+- `decision.Warnings` contains diagnostics that do not change the conclusion.
+
+Choose an explicit fallback policy for sensitive operations. Arcjet fails open
+by default so a service issue does not block all work.
+
+## Outbound proxy
+
+The SDK honors the standard `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY`
+environment variables for Arcjet API calls. Proxy URLs may contain credentials,
+so do not log them.
+
+## More resources
+
+- <Link.Page href="/guards">Arcjet Guards</Link.Page>
+- <Link.Page href="/rate-limiting">Rate limiting</Link.Page>
+- <Link.Page href="/prompt-injection">Prompt injection detection</Link.Page>
+- <Link.Page href="/sensitive-info">Sensitive information detection</Link.Page>
+- [Go SDK source and examples](https://github.com/arcjet/arcjet-go)

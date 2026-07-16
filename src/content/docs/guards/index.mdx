@@ -36,7 +36,7 @@ A background job ships support tickets to a third-party LLM for summarization. G
 Arcjet has two entrypoints. Pick the one that matches the surface you need to
 secure:
 
-|                                 | Protect (request SDKs)             | Guard (`@arcjet/guard`, `arcjet.guard`) |
+|                                 | Protect (request SDKs)             | Guard (`@arcjet/guard`, `arcjet.guard`, `NewGuardClient`) |
 | ------------------------------- | :--------------------------------: | :-------------------------------------: |
 | Designed for                    | HTTP route handlers, API endpoints | AI tool calls, MCP servers, queue workers, background jobs |
 | Request object                  | Required (`protect(request, ...)`) | Not needed — pass inputs directly       |
@@ -54,7 +54,7 @@ secure:
 
 A single application can use both — request-based protection on API routes and
 guards inside tool handlers / queue workers. Both share the same Arcjet account
-and dashboard.
+and Console.
 
 ## When to use Guards
 
@@ -84,8 +84,8 @@ Install the Arcjet skill into your AI coding agent. It will
 detect your language, install the package, configure rules, and wire up
 `guard()` calls inline in your tool handlers.
 
-Supported languages: **JavaScript / TypeScript** (`@arcjet/guard` >= 1.4.0) and
-**Python** (`arcjet` >= 0.7.0).
+Supported languages: **JavaScript / TypeScript** (`@arcjet/guard` >= 1.4.0),
+**Python** (`arcjet` >= 0.7.0), and **Go** (`arcjet-go` >= 0.1.0, pre-release).
 
 ```bash
 npx skills add arcjet/skills
@@ -121,10 +121,21 @@ Requires Python 3.10+ and `arcjet` >= 0.7.0. Guard ships in the `arcjet`
 package — there is no separate package to install.
 
 </TabItem>
+<TabItem label="Go">
+
+```bash
+go get github.com/arcjet/arcjet-go@latest
+```
+
+Requires Go 1.25 or later. The Go SDK is pre-release; see the
+<Link.Page href="/reference/go#guard-non-http-operations">Go SDK reference</Link.Page>
+for its Guard API and examples.
+
+</TabItem>
 </Tabs>
 
 Set `ARCJET_KEY` in your environment — retrieve it from the
-[Arcjet dashboard](https://app.arcjet.com), the
+[Arcjet Console](https://app.arcjet.com), the
 <Link.Page href="/cli">Arcjet CLI</Link.Page>, or the
 <Link.Page href="/mcp-server">MCP server</Link.Page>.
 
@@ -213,11 +224,11 @@ pi_rule = DetectPromptInjection()
 Call `guard()` wherever you already know exactly what operation is happening
 — usually inside the specific tool/task function. The `label` should be a
 hardcoded string literal (`"tools.get-weather"`, not `` `tools.${name}` ``).
-Hardcoded labels stay greppable and the dashboard groups by them; interpolation
+Hardcoded labels stay greppable and the Console groups by them; interpolation
 produces a sea of distinct-looking calls.
 
 Pass `metadata` whenever you have useful auditing context (`userId`,
-`requestId`, etc.) — it appears in the dashboard alongside the decision and
+`requestId`, etc.) — it appears in the Console alongside the decision and
 makes debugging much easier.
 
 <Tabs syncKey="language">
@@ -258,7 +269,7 @@ async def get_weather(city: str, user_id: str):
 ## Rules
 
 Every guard rule accepts `mode` (`"LIVE"` enforces, `"DRY_RUN"` logs only),
-`label` (an observability label that appears in the dashboard), and `metadata`
+`label` (an observability label that appears in the Console), and `metadata`
 (arbitrary key-value context).
 
 ### Rate limiting
@@ -706,7 +717,7 @@ decision = await arcjet.guard(
 ## DRY_RUN mode
 
 Every guard rule accepts a `mode` parameter. Use `"DRY_RUN"` to evaluate rules
-without blocking — decisions are logged in the Arcjet dashboard but the
+without blocking — decisions are logged in the Arcjet Console but the
 conclusion is always `"ALLOW"`. This lets you tune rule configuration in
 production before promoting to `"LIVE"`.
 
@@ -919,10 +930,10 @@ def summarize(payload: dict):
 ## Best practices
 
 - **Hardcode the `label` string.** Use `"tools.get-weather"`, not
-  `` `tools.${name}` ``. Hardcoded labels stay greppable and the dashboard
+  `` `tools.${name}` ``. Hardcoded labels stay greppable and the Console
   groups by them.
 - **Pass `metadata` for auditing.** `userId`, `sessionId`, `requestId` all
-  show up alongside the decision in the dashboard.
+  show up alongside the decision in the Console.
 - **Always set `bucket` on rate limit rules.** Default buckets share counters
   across all rules of that type.
 - **Always pass a `key` to rate limit rules.** Without it, limits are global
