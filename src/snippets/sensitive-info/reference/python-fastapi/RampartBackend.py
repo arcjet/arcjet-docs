@@ -1,6 +1,6 @@
 import os
 
-from arcjet import Mode, arcjet, detect_sensitive_info
+from arcjet import Mode, SensitiveInfoEntityType, arcjet, detect_sensitive_info
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -16,7 +16,13 @@ aj = arcjet(
             mode=Mode.LIVE,  # Will block requests, use Mode.DRY_RUN to log only
             # The Rampart model detects names, addresses, and government /
             # financial identifiers in addition to the built-in types.
-            deny=["EMAIL", "GIVEN_NAME", "SURNAME", "STREET_NAME", "SSN"],
+            deny=[
+                SensitiveInfoEntityType.EMAIL,
+                SensitiveInfoEntityType.GIVEN_NAME,
+                SensitiveInfoEntityType.SURNAME,
+                SensitiveInfoEntityType.STREET_NAME,
+                SensitiveInfoEntityType.SSN,
+            ],
             # Run detection on-device with the Rampart NER model instead of the
             # default WebAssembly engine.
             backend=rampart(),
