@@ -1569,8 +1569,22 @@ Parameters:
 - `deny` and `allow` are mutually exclusive
 - `contextWindowSize` (optional): Number of tokens for detection context (default: 1)
 - `detect` (optional): Custom detection function `(tokens: string[]) => Array<SensitiveInfoType | undefined>`
+- `backend` (optional): Alternative detection backend. Defaults to the built-in
+  WebAssembly engine; pass the on-device Rampart NER model to also detect names,
+  addresses, and government/financial identifiers. All detection stays local.
 
-Valid entity types: `CREDIT_CARD_NUMBER`, `EMAIL`, `PHONE_NUMBER`, `IP_ADDRESS`
+Entity types detected by the built-in engine: `CREDIT_CARD_NUMBER`, `EMAIL`,
+`PHONE_NUMBER`, `IP_ADDRESS`. The optional Rampart backend adds `GIVEN_NAME`,
+`SURNAME`, `SSN`, `URL`, `TAX_ID`, `BANK_ACCOUNT`, `ROUTING_NUMBER`,
+`GOVERNMENT_ID`, `PASSPORT`, `DRIVERS_LICENSE`, and address parts (`BUILDING_NUMBER`,
+`STREET_NAME`, `SECONDARY_ADDRESS`, `CITY`, `STATE`, `ZIP_CODE`).
+
+Rampart is an optional package: `@arcjet/sensitive-info-rampart` for the
+JavaScript SDKs, or the `arcjet[sensitive-info-rampart]` extra for Python. Import
+`rampart` and pass it as `backend: rampart()` (JS) / `backend=rampart()` (Python).
+It loads a bundled ONNX model on first use and needs a server runtime (Node.js,
+Bun, or Deno in JS). Full reference:
+https://docs.arcjet.com/sensitive-info/reference#on-device-detection-with-rampart
 
 Python: `detect_sensitive_info(mode=Mode.LIVE, deny=[SensitiveInfoEntityType.EMAIL, SensitiveInfoEntityType.CREDIT_CARD_NUMBER])`
 At protect() time: `sensitive_info_value="text to scan"`
