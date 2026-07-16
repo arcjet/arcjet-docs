@@ -1,3 +1,11 @@
-import Install from "@/snippets/shared/python-fastapi/Install.mdx";
+In your project root, install the Arcjet Python SDK — with the optional
+`sensitive-info-rampart` extra for on-device name, address, and identifier
+detection — along with FastAPI and Uvicorn:
 
-<Install />
+```sh
+uv add "arcjet[sensitive-info-rampart]" fastapi uvicorn
+```
+
+If you don't use [uv](https://docs.astral.sh/uv/), `pip install
+"arcjet[sensitive-info-rampart]" fastapi uvicorn` (or your preferred package
+manager's equivalent) works too.

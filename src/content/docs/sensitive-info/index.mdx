@@ -29,12 +29,13 @@ pipelines, see [Arcjet Guards](/guards).
 Detection runs through a pluggable
 <Link.Page href="/sensitive-info/reference#detection-backends">backend</Link.Page>.
 The built-in WebAssembly engine ships with the SDK and detects email addresses,
-card numbers, IP addresses, and phone numbers. For broader coverage, the optional
-`@arcjet/sensitive-info-rampart` package runs an on-device named-entity-recognition
-(NER) model that also detects **names, addresses, and government / financial
-identifiers** — all still local to your environment, with the model weights
-bundled so nothing is fetched at runtime. Either backend can be extended with
-custom patterns you define.
+card numbers, IP addresses, and phone numbers. For broader coverage, an optional
+Rampart package (`@arcjet/sensitive-info-rampart` for JavaScript, the
+`arcjet[sensitive-info-rampart]` extra for Python) runs an on-device
+named-entity-recognition (NER) model that also detects **names, addresses, and
+government / financial identifiers** — all still local to your environment, with
+the model weights bundled so nothing is fetched at runtime. Either backend can be
+extended with custom patterns you define.
 
 Sensitive info detection works on the request body. To detect specific information in
 headers or other request fields, use <Link.Page href="/filters">Arcjet filters</Link.Page>.
