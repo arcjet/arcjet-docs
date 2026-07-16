@@ -124,6 +124,8 @@ import RampartBackendBun from "@/snippets/sensitive-info/reference/bun/RampartBa
 import RampartBackendNestJs from "@/snippets/sensitive-info/reference/nestjs/RampartBackend.mdx";
 import RampartBackendNextJs from "@/snippets/sensitive-info/reference/nextjs/RampartBackend.mdx";
 import RampartBackendNodeJs from "@/snippets/sensitive-info/reference/nodejs/RampartBackend.mdx";
+import RampartBackendPythonFastapi from "@/snippets/sensitive-info/reference/python-fastapi/RampartBackend.mdx";
+import RampartBackendPythonFlask from "@/snippets/sensitive-info/reference/python-flask/RampartBackend.mdx";
 import RampartBackendRemix from "@/snippets/sensitive-info/reference/remix/RampartBackend.mdx";
 import RampartBackendSvelteKit from "@/snippets/sensitive-info/reference/sveltekit/RampartBackend.mdx";
 
@@ -212,15 +214,23 @@ def detect_sensitive_info(
     # You can also provide a custom detection function to detect other types
     # of sensitive information (see below).
     detect: Callable[[list[str]], Sequence[str | None]] | None = None,
+    # Optionally swap the default WebAssembly detection engine for a custom
+    # backend, such as the on-device Rampart NER model (see below).
+    backend: SensitiveInfoBackend | None = None,
     # Rate-limit characteristics (see https://docs.arcjet.com/fingerprints)
     characteristics: Sequence[str] = (),
 ) -> SensitiveInfoDetection: ...
 
-# Built-in entity types (SensitiveInfoEntityType enum members):
+# Entity types the default (WASM) backend detects natively
+# (SensitiveInfoEntityType enum members):
 # - SensitiveInfoEntityType.EMAIL
 # - SensitiveInfoEntityType.PHONE_NUMBER
 # - SensitiveInfoEntityType.IP_ADDRESS
 # - SensitiveInfoEntityType.CREDIT_CARD_NUMBER
+#
+# The enum also defines backend-only types (GIVEN_NAME, SURNAME, SSN, URL,
+# TAX_ID, and more — see the entity detection table below). Listing one without
+# a `backend` that supports it — such as `rampart()` — raises an error.
 ```
 
 </TabItem>
@@ -261,8 +271,8 @@ own patterns.
 
 ### On-device detection with Rampart
 
-For broader coverage, the `@arcjet/sensitive-info-rampart` package provides a
-backend powered by the on-device
+For broader coverage, an optional Rampart package provides a backend powered by
+the on-device
 [Rampart](https://huggingface.co/nationaldesignstudio/rampart)
 named-entity-recognition (NER) model. It runs a ~15&nbsp;MB quantized ONNX model
 locally so the rule can detect **names, addresses, and government / financial
@@ -270,26 +280,38 @@ identifiers** in addition to the built-in structured types. Everything runs in
 your own environment — the model weights are bundled with the package, so
 nothing is fetched at runtime and no data leaves your infrastructure.
 
-:::note
-The `backend` option and the Rampart package are available in the JavaScript /
-TypeScript SDKs only. The Python SDK always uses the built-in engine.
-:::
+Install the package alongside your Arcjet SDK. In Python it ships as an optional
+extra of the `arcjet` package:
 
-Install the package alongside your Arcjet SDK:
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
 ```shell
 npm install @arcjet/sensitive-info-rampart
 ```
 
+</TabItem>
+<TabItem label="Python">
+
+```shell
+pip install "arcjet[sensitive-info-rampart]"
+```
+
+</TabItem>
+</Tabs>
+
 Then import `rampart` and pass it as the rule's `backend`. Every entity the
-model detects is a built-in `ArcjetSensitiveInfoType`, so you can list the types
-directly in `allow` or `deny`:
+model detects is a built-in sensitive info type (`ArcjetSensitiveInfoType` in
+JS, `SensitiveInfoEntityType` in Python), so you can list the types directly in
+`allow` or `deny`:
 
 <SlotByFramework client:load>
   <RampartBackendBun slot="bun" />
   <RampartBackendNestJs slot="nest-js" />
   <RampartBackendNextJs slot="next-js" />
   <RampartBackendNodeJs slot="node-js" />
+  <RampartBackendPythonFastapi slot="python-fastapi" />
+  <RampartBackendPythonFlask slot="python-flask" />
   <RampartBackendRemix slot="remix" />
   <RampartBackendSvelteKit slot="sveltekit" />
 </SlotByFramework>
@@ -298,14 +320,18 @@ Without a `backend`, the rule continues to use the built-in engine — this
 package is entirely opt-in.
 
 :::note
-The same backend also works with the `localDetectSensitiveInfo` rule in
+The same backend also works with the local sensitive info rule in
 <Link.Page href="/guards">Arcjet Guards</Link.Page> — pass `backend: rampart()`
-there too to scan text inside agent tool calls and pipelines that don't route
-through HTTP.
+(JS) / `backend=rampart()` (Python) there too to scan text inside agent tool
+calls and pipelines that don't route through HTTP.
 :::
 
-The full set of types the backend supports is exported as `rampartEntities`,
-which is convenient when you want to deny everything it can detect:
+The full set of types the backend supports is exported as `rampartEntities`
+(JS) / `rampart_entities` (Python), which is convenient when you want to deny
+everything it can detect:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
 ```ts
 import { rampart, rampartEntities } from "@arcjet/sensitive-info-rampart";
@@ -313,14 +339,28 @@ import { rampart, rampartEntities } from "@arcjet/sensitive-info-rampart";
 sensitiveInfo({ mode: "LIVE", deny: rampartEntities, backend: rampart() });
 ```
 
+</TabItem>
+<TabItem label="Python">
+
+```py
+from arcjet import Mode, detect_sensitive_info
+from arcjet_sensitive_info_rampart import rampart, rampart_entities
+
+detect_sensitive_info(mode=Mode.LIVE, deny=rampart_entities, backend=rampart())
+```
+
+</TabItem>
+</Tabs>
+
 ### Model accuracy and performance
 
 Rampart is a compact model — a ~14.7&nbsp;MB artifact (~18.5M parameters,
 quantized to 4-bit weights) with a 512-token context window — so it is fast
-enough to run inline on each request:
-
-- **~6.6&nbsp;ms** median (p50) inference on the Node.js CPU runtime.
-- **~3.9&nbsp;ms** p50 on WebGPU (set `device: "webgpu"`).
+enough to run inline on each request. On the Node.js CPU runtime, median (p50)
+inference is **~6.6&nbsp;ms**, dropping to **~3.9&nbsp;ms** p50 on WebGPU (set
+`device: "webgpu"` in the JS SDK). The Python backend runs on
+[ONNX Runtime](https://onnxruntime.ai/) and defaults to CPU execution; select a
+different accelerator with the `providers` option (see below).
 
 On the model author's held-out benchmark it recalls **~98%** of private terms
 across the seven Latin-script languages it supports (English, Spanish, French,
@@ -345,6 +385,9 @@ has the full per-language breakdown, calibration data, and limitations.
 
 The `rampart()` factory accepts an optional configuration object:
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
 ```ts
 import { defaultRecognizers, rampart } from "@arcjet/sensitive-info-rampart";
 
@@ -368,25 +411,72 @@ rampart({
 });
 ```
 
+</TabItem>
+<TabItem label="Python">
+
+The `rampart()` factory takes an optional `RampartOptions`:
+
+```py
+from arcjet_sensitive_info_rampart import (
+    RampartOptions,
+    default_recognizers,
+    rampart,
+)
+
+rampart(
+    RampartOptions(
+        # Minimum confidence score for a model token to count (default: 0.5).
+        threshold=0.6,
+        # ONNX Runtime execution providers (default: ("CPUExecutionProvider",)).
+        # Set this to use a GPU or other accelerator supported by your ONNX
+        # Runtime install.
+        providers=("CPUExecutionProvider",),
+        # Maximum number of characters scanned per request (default: 100,000).
+        # Inference runs synchronously on the request path, so input longer than
+        # this is truncated before detection to bound worst-case CPU cost.
+        max_input_chars=100_000,
+        # Deterministic recognizers to run alongside the model (default:
+        # `default_recognizers`). This is the extension point for custom
+        # detection with this backend — add a recognizer that returns matched
+        # spans. Pass () to rely on the model alone.
+        recognizers=(
+            *default_recognizers,
+            lambda value: [],  # Return a list of DetectedSpan(start, end, type).
+        ),
+        # Directory containing the model files (default: the bundled models).
+        model_path=None,
+    )
+)
+```
+
+</TabItem>
+</Tabs>
+
 The model loads once on first use and is reused for every subsequent request.
 
 :::note
-The token-based [`detect`](#custom-entity-detection) callback of the
-`sensitiveInfo` rule is **not** used by the Rampart backend, which works on
-character spans rather than tokens. Add a `recognizer` instead to perform custom
-detection.
+The token-based [`detect`](#custom-entity-detection) callback of the sensitive
+info rule is **not** used by the Rampart backend, which works on character spans
+rather than tokens. Add a `recognizer` instead to perform custom detection.
 :::
 
 ### Bundlers and runtimes
 
-The Rampart backend loads a native ONNX runtime
-(`@huggingface/transformers` / `onnxruntime-node`) and reads its bundled model
+The Rampart backend loads a native ONNX runtime and reads its bundled model
 weights from disk at runtime. As a result:
 
-- It requires a server runtime with filesystem and native-addon access —
-  Node.js, Bun, or Deno. It does **not** run on edge runtimes.
+- It requires a server runtime with filesystem and native-addon access. In JS
+  that means Node.js, Bun, or Deno — it does **not** run on edge runtimes. In
+  Python it runs anywhere the SDK does (Python 3.10+).
 - It must not be bundled by a server build, or the runtime will fail to locate
   the model weights.
+
+In Python, the backend depends on
+[ONNX Runtime](https://onnxruntime.ai/) (`onnxruntime`), which is installed for
+you by the `arcjet[sensitive-info-rampart]` extra. Model inference is
+synchronous and blocking, so its latency is added directly to each request the
+rule scans — the same is true whether you use the `arcjet()` or `arcjet_sync()`
+client.
 
 For Next.js, mark the package and its native dependencies as
 [server external packages](https://nextjs.org/docs/app/api-reference/config/next-config-js/serverExternalPackages)
