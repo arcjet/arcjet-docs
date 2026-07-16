@@ -1,0 +1,13 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import RampartBackendJS from "./RampartBackend.js?raw";
+import RampartBackendTS from "./RampartBackend.ts?raw";
+
+<SelectableContent client:load syncKey="language">
+  <div slot="TS" slotIdx="1">
+    <Code code={RampartBackendTS} lang="ts" />
+  </div>
+  <div slot="JS" slotIdx="2">
+    <Code code={RampartBackendJS} lang="js" />
+  </div>
+</SelectableContent>

@@ -1,0 +1,37 @@
+import SelectableContent from "@/components/SelectableContent";
+import { Code } from "@astrojs/starlight/components";
+import RampartBackendAppTS from "./RampartBackendApp.ts?raw";
+import RampartBackendAppJS from "./RampartBackendApp.js?raw";
+import RampartBackendPagesTS from "./RampartBackendPages.ts?raw";
+import RampartBackendPagesJS from "./RampartBackendPages.js?raw";
+
+<SelectableContent client:load syncKey="language">
+  <div slot="TS (App)" slotIdx="1">
+    <Code
+      code={RampartBackendAppTS}
+      lang="ts"
+      title="/app/api/arcjet/route.ts"
+    />
+  </div>
+  <div slot="TS (Pages)" slotIdx="2">
+    <Code
+      code={RampartBackendPagesTS}
+      lang="ts"
+      title="/pages/api/hello.ts"
+    />
+  </div>
+  <div slot="JS (App)" slotIdx="3">
+    <Code
+      code={RampartBackendAppJS}
+      lang="js"
+      title="/app/api/arcjet/route.js"
+    />
+  </div>
+  <div slot="JS (Pages)" slotIdx="4">
+    <Code
+      code={RampartBackendPagesJS}
+      lang="js"
+      title="/pages/api/hello.js"
+    />
+  </div>
+</SelectableContent>

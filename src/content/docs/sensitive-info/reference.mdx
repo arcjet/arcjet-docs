@@ -46,10 +46,26 @@ ajToc:
         anchor: "hooks"
       - text: "Avoiding double protection with hooks"
         anchor: "avoiding-double-protection-with-hooks"
+  - text: "Detection backends"
+    anchor: "detection-backends"
+    children:
+      - text: "Built-in engine"
+        anchor: "built-in-engine"
+      - text: "On-device detection with Rampart"
+        anchor: "on-device-detection-with-rampart"
+      - text: "Model accuracy and performance"
+        anchor: "model-accuracy-and-performance"
+      - text: "Rampart options"
+        anchor: "rampart-options"
+      - text: "Bundlers and runtimes"
+        anchor: "bundlers-and-runtimes"
   - text: "Decision"
     anchor: "decision"
   - text: "Entity detection"
     anchor: "entity-detection"
+    children:
+      - text: "Structured type matching"
+        anchor: "structured-type-matching"
   - text: "Custom entity detection"
     anchor: "custom-entity-detection"
   - text: "Accessing the body"
@@ -104,8 +120,21 @@ import CustomDetectPythonFlask from "@/snippets/sensitive-info/reference/python-
 import CustomDetectRemix from "@/snippets/sensitive-info/reference/remix/CustomDetect.mdx";
 import CustomDetectSvelteKit from "@/snippets/sensitive-info/reference/sveltekit/CustomDetect.mdx";
 
+import RampartBackendBun from "@/snippets/sensitive-info/reference/bun/RampartBackend.mdx";
+import RampartBackendNestJs from "@/snippets/sensitive-info/reference/nestjs/RampartBackend.mdx";
+import RampartBackendNextJs from "@/snippets/sensitive-info/reference/nextjs/RampartBackend.mdx";
+import RampartBackendNodeJs from "@/snippets/sensitive-info/reference/nodejs/RampartBackend.mdx";
+import RampartBackendRemix from "@/snippets/sensitive-info/reference/remix/RampartBackend.mdx";
+import RampartBackendSvelteKit from "@/snippets/sensitive-info/reference/sveltekit/RampartBackend.mdx";
+
+import EntityDetectionTable from "@/snippets/sensitive-info/EntityDetectionTable.mdx";
+
 Arcjet Sensitive Information Detection protects against clients sending you
-sensitive information such as PII that you do not wish to handle.
+sensitive information such as PII that you do not wish to handle. All detection
+runs locally in your own environment through a pluggable
+[detection backend](#detection-backends): a built-in WebAssembly engine (the
+default) or the on-device Rampart NER model, which detects names, addresses, and
+government / financial identifiers in addition to the structured types.
 
 <FrameworkLinks
   client:load
@@ -130,6 +159,10 @@ rules. In JavaScript / TypeScript these are constructed with
 In Python they are constructed with the `detect_sensitive_info(...)` factory.
 `allow` and `deny` are mutually exclusive in both languages.
 
+The optional `backend` selects which [detection backend](#detection-backends)
+runs — omit it to use the built-in engine, or pass `rampart()` for on-device NER
+detection.
+
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
 
@@ -141,6 +174,9 @@ type SensitiveInfoOptionsAllow = {
   // You can also provide a custom detection function to detect other types
   // of sensitive information (see below).
   detect?: (tokens: string[]) -> Array<SensitiveInfoType | undefined>;
+  // Optionally swap the default WebAssembly detection engine for a custom
+  // backend, such as the on-device Rampart NER model (see below).
+  backend?: SensitiveInfoBackend;
 };
 ```
 
@@ -152,6 +188,9 @@ type SensitiveInfoOptionsDeny = {
   // You can also provide a custom detection function to detect other types
   // of sensitive information (see below).
   detect?: (tokens: string[]) -> Array<SensitiveInfoType | undefined>;
+  // Optionally swap the default WebAssembly detection engine for a custom
+  // backend, such as the on-device Rampart NER model (see below).
+  backend?: SensitiveInfoBackend;
 };
 ```
 
@@ -201,6 +240,178 @@ execution ordering is automatically optimized for performance. See
   <NextJsPagesServerActions slot="next-js" />
   <PerRouteVsHooksSvelteKit slot="sveltekit" />
 </SlotByFramework>
+
+## Detection backends
+
+Sensitive information detection runs through a **detection backend** — the
+engine that scans the request body and identifies entities. The rest of the rule
+(`mode`, `allow`/`deny`, and the result shape) is the same whichever backend you
+choose. See [Entity detection](#entity-detection) for exactly what each backend
+detects.
+
+### Built-in engine
+
+By default — when you don't set a `backend` — the rule runs a WebAssembly engine
+that detects four structured types: email addresses, phone numbers, IP
+addresses, and credit card numbers. It runs anywhere the SDK runs, including edge
+runtimes, needs no extra dependencies, and adds negligible latency, so it's the
+right choice for most applications. Extend it with a
+[custom `detect` function](#custom-entity-detection) when you need to match your
+own patterns.
+
+### On-device detection with Rampart
+
+For broader coverage, the `@arcjet/sensitive-info-rampart` package provides a
+backend powered by the on-device
+[Rampart](https://huggingface.co/nationaldesignstudio/rampart)
+named-entity-recognition (NER) model. It runs a ~15&nbsp;MB quantized ONNX model
+locally so the rule can detect **names, addresses, and government / financial
+identifiers** in addition to the built-in structured types. Everything runs in
+your own environment — the model weights are bundled with the package, so
+nothing is fetched at runtime and no data leaves your infrastructure.
+
+:::note
+The `backend` option and the Rampart package are available in the JavaScript /
+TypeScript SDKs only. The Python SDK always uses the built-in engine.
+:::
+
+Install the package alongside your Arcjet SDK:
+
+```shell
+npm install @arcjet/sensitive-info-rampart
+```
+
+Then import `rampart` and pass it as the rule's `backend`. Every entity the
+model detects is a built-in `ArcjetSensitiveInfoType`, so you can list the types
+directly in `allow` or `deny`:
+
+<SlotByFramework client:load>
+  <RampartBackendBun slot="bun" />
+  <RampartBackendNestJs slot="nest-js" />
+  <RampartBackendNextJs slot="next-js" />
+  <RampartBackendNodeJs slot="node-js" />
+  <RampartBackendRemix slot="remix" />
+  <RampartBackendSvelteKit slot="sveltekit" />
+</SlotByFramework>
+
+Without a `backend`, the rule continues to use the built-in engine — this
+package is entirely opt-in.
+
+:::note
+The same backend also works with the `localDetectSensitiveInfo` rule in
+<Link.Page href="/guards">Arcjet Guards</Link.Page> — pass `backend: rampart()`
+there too to scan text inside agent tool calls and pipelines that don't route
+through HTTP.
+:::
+
+The full set of types the backend supports is exported as `rampartEntities`,
+which is convenient when you want to deny everything it can detect:
+
+```ts
+import { rampart, rampartEntities } from "@arcjet/sensitive-info-rampart";
+
+sensitiveInfo({ mode: "LIVE", deny: rampartEntities, backend: rampart() });
+```
+
+### Model accuracy and performance
+
+Rampart is a compact model — a ~14.7&nbsp;MB artifact (~18.5M parameters,
+quantized to 4-bit weights) with a 512-token context window — so it is fast
+enough to run inline on each request:
+
+- **~6.6&nbsp;ms** median (p50) inference on the Node.js CPU runtime.
+- **~3.9&nbsp;ms** p50 on WebGPU (set `device: "webgpu"`).
+
+On the model author's held-out benchmark it recalls **~98%** of private terms
+across the seven Latin-script languages it supports (English, Spanish, French,
+German, Italian, Portuguese, and Dutch).
+
+Accuracy varies by input, so it's worth knowing the trade-offs:
+
+- **Non-Latin scripts** (for example Chinese, Japanese, Korean, Arabic, Hindi,
+  or Cyrillic) have much lower recall — the model is trained on Latin-script
+  text.
+- **Government / financial identifiers without a checksum** (passports,
+  licences, case numbers) are recognised less reliably than the structured types
+  the deterministic recognizers validate, such as emails and card numbers.
+- Inference runs synchronously in the request path, so this latency is added to
+  each request the rule scans.
+
+These figures come from the
+[Rampart model card](https://huggingface.co/nationaldesignstudio/rampart), which
+has the full per-language breakdown, calibration data, and limitations.
+
+### Rampart options
+
+The `rampart()` factory accepts an optional configuration object:
+
+```ts
+import { defaultRecognizers, rampart } from "@arcjet/sensitive-info-rampart";
+
+rampart({
+  // Execution device (default: "cpu"). Set to "webgpu" to use a GPU when the
+  // runtime supports it.
+  device: "webgpu",
+  // Minimum confidence score for a model token to count (default: 0.5).
+  threshold: 0.6,
+  // Deterministic recognizers to run alongside the model (default:
+  // `defaultRecognizers`). This is the extension point for custom detection
+  // with this backend — add a recognizer that returns matched spans. Pass `[]`
+  // to rely on the model alone.
+  recognizers: [
+    ...defaultRecognizers,
+    (value) => {
+      // Return an array of `{ start, end, type }` spans.
+      return [];
+    },
+  ],
+});
+```
+
+The model loads once on first use and is reused for every subsequent request.
+
+:::note
+The token-based [`detect`](#custom-entity-detection) callback of the
+`sensitiveInfo` rule is **not** used by the Rampart backend, which works on
+character spans rather than tokens. Add a `recognizer` instead to perform custom
+detection.
+:::
+
+### Bundlers and runtimes
+
+The Rampart backend loads a native ONNX runtime
+(`@huggingface/transformers` / `onnxruntime-node`) and reads its bundled model
+weights from disk at runtime. As a result:
+
+- It requires a server runtime with filesystem and native-addon access —
+  Node.js, Bun, or Deno. It does **not** run on edge runtimes.
+- It must not be bundled by a server build, or the runtime will fail to locate
+  the model weights.
+
+For Next.js, mark the package and its native dependencies as
+[server external packages](https://nextjs.org/docs/app/api-reference/config/next-config-js/serverExternalPackages)
+so they are loaded from `node_modules` at runtime instead of bundled, and make
+sure any route handler that uses the backend runs on the Node.js runtime (the
+default) rather than the Edge runtime:
+
+```js
+// next.config.js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  serverExternalPackages: [
+    "@arcjet/sensitive-info-rampart",
+    "@huggingface/transformers",
+    "onnxruntime-node",
+  ],
+};
+
+module.exports = nextConfig;
+```
+
+```ts
+// app/api/arcjet/route.ts
+export const runtime = "nodejs";
+```
 
 ## Decision
 
@@ -269,13 +480,20 @@ This example will log the full result as well as the sensitive info rule:
 
 ## Entity detection
 
-Different kinds of sensitive info are detected by Arcjet itself.
-Next to these,
-it is also possible to detect custom kinds through a `detect` function.
-Custom detect functions can also be used if your needs are more strict or
-instead more loose than the defaults.
+The entity types available to `allow`/`deny` depend on the active
+[detection backend](#detection-backends). Every type below is a built-in
+`ArcjetSensitiveInfoType`, so you can list any of them regardless of backend — a
+type the active backend doesn't detect simply never matches. You can also detect
+your own types with [custom entity detection](#custom-entity-detection).
 
-### Card numbers
+<EntityDetectionTable />
+
+### Structured type matching
+
+The structured types are matched the same way by the built-in engine and by the
+Rampart recognizers.
+
+#### Card numbers
 
 Card numbers can be detected.
 The values `4242424242424242`, `4000 0566 5566 5556`, and `3782-8224-6310005`
@@ -288,7 +506,7 @@ The final digit is a [Luhn](https://en.wikipedia.org/wiki/Luhn_algorithm)
 check digit.
 Spaces and dashes are ignored because users often group digits.
 
-### Email addresses
+#### Email addresses
 
 Email addresses can be detected.
 The values `alice@example.com` and `bob.smith@subdomain.example.com` match but
@@ -296,7 +514,7 @@ The values `alice@example.com` and `bob.smith@subdomain.example.com` match but
 A dotless domain (`user@localhost`) and a domain literal (`user@[127.0.0.1]`,
 if it contains a valid IP) also match.
 
-### IP addresses
+#### IP addresses
 
 IP addresses can be detected.
 The values `127.0.0.1` and `::1` match but `012.004.002.000` does not.
@@ -304,7 +522,7 @@ IP v4 and v6 addresses are supported.
 Whether something looks like an IP address is based on whether it parses
 as [`IpAddr` from `std::net`](https://doc.rust-lang.org/std/net/enum.IpAddr.html).
 
-### Phone numbers
+#### Phone numbers
 
 Phone numbers can be detected.
 The values `+1 (555) 555-5555` and `(020) 334 4522` match but `555-1234` does not.
@@ -317,9 +535,9 @@ the next region group can be in parentheses.
 
 ## Custom entity detection
 
-When configuring Arcjet Sensitive Info you can provide a custom detect function,
-this enables you to detect entities that we don't support out of the box using
-custom logic.
+When using the [built-in engine](#built-in-engine) you can provide a custom
+`detect` function, which enables you to detect entities that Arcjet doesn't
+support out of the box using custom logic.
 
 The function will take a list of tokens and must return a list of either
 `undefined`, if the corresponding token in the input list is not sensitive, or
@@ -338,6 +556,13 @@ this value.
   <CustomDetectRemix slot="remix" />
   <CustomDetectSvelteKit slot="sveltekit" />
 </SlotByFramework>
+
+:::note
+The `detect` callback applies to the built-in engine only. With the
+[Rampart backend](#on-device-detection-with-rampart), add a
+[`recognizer`](#rampart-options) instead — it works on character spans rather
+than tokens.
+:::
 
 ## Error handling
 

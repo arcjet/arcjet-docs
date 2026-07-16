@@ -1,14 +1,16 @@
 import arcjet, { sensitiveInfo } from "@arcjet/next";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
   rules: [
-    // This allows all sensitive entities other than email addresses
     sensitiveInfo({
       mode: "LIVE", // Will block requests, use "DRY_RUN" to log only
-      // allow: ["EMAIL"], Will block all sensitive information types other than email.
-      deny: ["EMAIL"], // Will block email addresses
+      // Detect names and email addresses. See the reference for the full list.
+      deny: ["EMAIL", "GIVEN_NAME", "SURNAME"],
+      // Use the on-device Rampart NER model instead of the built-in engine.
+      backend: rampart(),
     }),
   ],
 });

@@ -5,7 +5,7 @@ titleByFramework:
   next-js: "AI data loss prevention for Next.js"
   python-fastapi: "AI data loss prevention for Python + FastAPI"
   python-flask: "AI data loss prevention for Python + Flask"
-description: "Stop PII from reaching your AI provider. Use Arcjet sensitive info detection to block credit card numbers, phone numbers, and other personal data in AI prompts."
+description: "Stop PII from reaching your AI provider. Arcjet sensitive info detection blocks card numbers, emails, names, addresses, and other personal data in AI prompts — locally, before it leaves your app."
 prev: true
 next: true
 frameworks:
@@ -15,11 +15,27 @@ frameworks:
 ajToc:
   - text: "Get started"
     anchor: "get-started"
-  - text: "Configuring sensitive info detection"
-    anchor: "configuring-sensitive-info-detection"
+  - text: "How detection works"
+    anchor: "how-detection-works"
+  - text: "Configuring detection"
+    anchor: "configuring-detection"
+    children:
+      - text: "Choose which PII to block"
+        anchor: "choose-which-pii-to-block"
+      - text: "Detect names, addresses, and IDs"
+        anchor: "detect-names-addresses-and-ids"
+      - text: "Choose what text to scan"
+        anchor: "choose-what-text-to-scan"
+      - text: "Test before you block"
+        anchor: "test-before-you-block"
+  - text: "Combine with other protections"
+    anchor: "combine-with-other-protections"
+  - text: "Learn more"
+    anchor: "learn-more"
 ---
 
 import { Link } from "@/components/link";
+import { Code } from "@astrojs/starlight/components";
 import SlotByFramework from "@/components/SlotByFramework";
 import FrameworkLinks from "@/components/FrameworkLinks";
 import { frameworks } from "@/lib/prefs";
@@ -28,14 +44,16 @@ import NextJsStep from "@/snippets/ai-protection/data-loss-prevention/nextjs/Exa
 import PythonFastapiStep from "@/snippets/ai-protection/data-loss-prevention/python-fastapi/Example.mdx";
 import PythonFlaskStep from "@/snippets/ai-protection/data-loss-prevention/python-flask/Example.mdx";
 
-Users paste sensitive data into AI prompts - credit card numbers, phone numbers,
-passwords, and other PII - often without realizing the risk. Once that data
-reaches your AI provider it may appear in logs, training pipelines, or model
-outputs.
+Users paste sensitive data into AI prompts — card numbers, phone numbers,
+home addresses, and whole résumés — often without realizing the risk. Once that
+data reaches your AI provider it can end up in logs, training pipelines, or model
+outputs, well outside your control.
 
-Arcjet sensitive info detection scans prompt content inside your application
-before it reaches the AI provider. Detected PII is blocked before it leaves your
-app environment.
+Arcjet sensitive info detection scans prompt content **inside your application**,
+before it reaches the AI provider. Detection runs locally in your own
+environment, so the raw text never leaves your app: only the decision — whether
+sensitive data was found — is reported to Arcjet. When something is detected you
+choose what happens next: block the request, strip the data, or warn the user.
 
 ## Get started
 
@@ -52,38 +70,186 @@ app environment.
   <PythonFlaskStep slot="python-flask" />
 </SlotByFramework>
 
-## Configuring sensitive info detection
+## How detection works
 
-`deny: ["CREDIT_CARD_NUMBER", "EMAIL"]` (Python: `deny=[SensitiveInfoEntityType.CREDIT_CARD_NUMBER, SensitiveInfoEntityType.EMAIL]`) -
-the list of PII entity types to block. Remove any types your application
-legitimately handles - for example, a support bot that collects phone numbers
-should remove `"PHONE_NUMBER"` from the deny list.
+Sensitive info detection runs through a
+<Link.Page href="/sensitive-info/reference#detection-backends">detection backend</Link.Page> —
+the engine that scans the text and identifies entities. There are two:
 
-Built-in entity types: `CREDIT_CARD_NUMBER`, `PHONE_NUMBER`, `EMAIL`,
-`IP_ADDRESS`. The JS SDK additionally supports `URL`. See the [full
-reference](/sensitive-info/reference) for the complete list and for defining
-your own custom detectors.
+- **Built-in engine (default).** A WebAssembly engine bundled with the SDK. It
+  detects four structured types — card numbers, email addresses, phone numbers,
+  and IP addresses — runs anywhere the SDK runs (including edge runtimes), and
+  needs no extra dependencies.
+- **Rampart backend (optional, JavaScript SDKs).** An on-device
+  named-entity-recognition (NER) model that adds the free-form PII people
+  actually paste into prompts — **names, street addresses, and government or
+  financial identifiers**. This is often the more valuable engine for AI data
+  loss prevention, because that is exactly the data a structured-pattern matcher
+  can't catch.
 
-`sensitiveInfoValue` (JS) / `sensitive_info_value` (Python) - The text to scan.
-Pass the user's prompt or the most recent message. You can also pass the full
-conversation history if you want to scan all messages, not just the latest one.
+Both engines run entirely on your own infrastructure. Nothing is sent to a
+third party for analysis, which is what makes this safe to put in front of an AI
+provider in the first place.
 
-`mode: "DRY_RUN"` (JS) / `mode=Mode.DRY_RUN` (Python) - Logs detections without
-blocking. Use this to audit what PII appears in prompts before switching to
-`"LIVE"`.
+## Configuring detection
 
-## Combine with abuse protection
+### Choose which PII to block
 
-Sensitive info detection controls *what* reaches your AI provider. To also
-block hostile instructions and jailbreak attempts, combine it with
-[prompt injection detection](/ai-protection/prompt-injection). To block
-automated clients and enforce per-user budgets, combine it with
-[AI abuse protection](/ai-protection/abuse-protection) and
-[AI budget control](/ai-protection/budget-control). For agentic pipelines
-that don't route through HTTP, [Arcjet Guards](/guards) provides the same
-PII detection directly inside tool handlers.
+Use `deny` to list the entity types to block, or `allow` to block everything
+_except_ the types you list (the two are mutually exclusive). Tune the list to
+your app — a support bot that legitimately collects phone numbers should leave
+`PHONE_NUMBER` out of `deny`:
+
+<SlotByFramework client:load>
+<div slot="next-js">
+
+```ts
+sensitiveInfo({
+  mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+  deny: ["CREDIT_CARD_NUMBER", "EMAIL"],
+});
+```
+
+</div>
+<div slot="python-fastapi">
+
+```py
+detect_sensitive_info(
+    mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
+    deny=[
+        SensitiveInfoEntityType.CREDIT_CARD_NUMBER,
+        SensitiveInfoEntityType.EMAIL,
+    ],
+)
+```
+
+</div>
+<div slot="python-flask">
+
+```py
+detect_sensitive_info(
+    mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
+    deny=[
+        SensitiveInfoEntityType.CREDIT_CARD_NUMBER,
+        SensitiveInfoEntityType.EMAIL,
+    ],
+)
+```
+
+</div>
+</SlotByFramework>
+
+The built-in engine detects `CREDIT_CARD_NUMBER`, `PHONE_NUMBER`, `EMAIL`, and
+`IP_ADDRESS`. See the
+<Link.Page href="/sensitive-info/reference#entity-detection">entity detection
+table</Link.Page> for every type each backend supports, and for defining your
+own custom detectors.
+
+### Detect names, addresses, and IDs
+
+<SlotByFramework client:load>
+<div slot="next-js">
+
+The built-in types cover structured data, but AI prompts are full of _free-form_
+PII — a pasted résumé, a shipping address, someone's full name. The optional
+<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart
+backend</Link.Page> runs an on-device NER model that detects these, plus
+government and financial identifiers (SSNs, tax IDs, passports, driver's
+licences, bank and routing numbers).
+
+Install the package and pass `rampart()` as the rule's `backend`:
+
+```shell
+npm install @arcjet/sensitive-info-rampart
+```
+
+```ts
+import arcjet, { sensitiveInfo } from "@arcjet/next";
+import { rampart } from "@arcjet/sensitive-info-rampart";
+
+// The Rampart backend loads a native ONNX runtime, so this route must run on
+// the Node.js runtime, not the Edge runtime.
+export const runtime = "nodejs";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    sensitiveInfo({
+      mode: "LIVE",
+      // Names and addresses are common in pasted résumés and personal messages.
+      deny: ["CREDIT_CARD_NUMBER", "EMAIL", "GIVEN_NAME", "SURNAME", "STREET_NAME"],
+      backend: rampart(),
+    }),
+  ],
+});
+```
+
+The model is bundled with the package (~14.7&nbsp;MB, quantized) so nothing is
+fetched at runtime, and inference is fast enough to run inline on each request
+(~6.6&nbsp;ms median on Node.js). It recalls ~98% of private terms across seven
+Latin-script languages. Because it loads a native ONNX runtime it needs a server
+runtime — Node.js, Bun, or Deno, not edge — and on Next.js you must mark it as a
+server external package. See the
+<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart
+reference</Link.Page> for the bundler configuration, options, and the full
+accuracy and latency breakdown.
+
+</div>
+<div slot="python-fastapi">
+
+:::note
+Detecting names, addresses, and other free-form PII uses the on-device Rampart
+backend, which is available in the JavaScript / TypeScript SDKs only. The Python
+SDK detects the four built-in structured types (card numbers, emails, phone
+numbers, and IP addresses). Switch the framework selector to Next.js above to
+see the Rampart configuration.
+:::
+
+</div>
+<div slot="python-flask">
+
+:::note
+Detecting names, addresses, and other free-form PII uses the on-device Rampart
+backend, which is available in the JavaScript / TypeScript SDKs only. The Python
+SDK detects the four built-in structured types (card numbers, emails, phone
+numbers, and IP addresses). Switch the framework selector to Next.js above to
+see the Rampart configuration.
+:::
+
+</div>
+</SlotByFramework>
+
+### Choose what text to scan
+
+Pass the text to scan as `sensitiveInfoValue` (JS) / `sensitive_info_value`
+(Python). For a chat endpoint this is usually the user's most recent message.
+Pass the full conversation history instead if you want to scan every message,
+not just the latest one — useful when PII may have been introduced earlier in
+the exchange.
+
+### Test before you block
+
+Set `mode` to `"DRY_RUN"` (JS) / `Mode.DRY_RUN` (Python) to log detections
+without blocking any requests. Run this in production for a while to audit what
+PII actually shows up in your prompts, then switch to `"LIVE"` once you're
+confident in the entity list.
+
+## Combine with other protections
+
+Sensitive info detection controls _what data_ reaches your AI provider. Pair it
+with the other AI protection layers for full coverage:
+
+- <Link.Page href="/ai-protection/prompt-injection">Prompt injection detection</Link.Page>
+  blocks hostile instructions and jailbreak attempts.
+- <Link.Page href="/ai-protection/abuse-protection">AI abuse protection</Link.Page> and
+  <Link.Page href="/ai-protection/budget-control">AI budget control</Link.Page>
+  block automated clients and enforce per-user token budgets.
+- <Link.Page href="/guards">Arcjet Guards</Link.Page> applies the same PII
+  detection — including the on-device Rampart backend — directly inside agent
+  tool handlers and pipelines that don't route through HTTP.
 
 ## Learn more
 
 - <Link.Page href="/sensitive-info">Sensitive info detection introduction</Link.Page>
 - <Link.Page href="/sensitive-info/reference">Full sensitive info reference</Link.Page>
+- <Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">On-device detection with Rampart</Link.Page>

@@ -1,0 +1,28 @@
+| Entity type          | Built-in engine (default) | Rampart backend         |
+| -------------------- | :-----------------------: | :---------------------- |
+| `EMAIL`              |            ✅             | ✅ Model + recognizer   |
+| `PHONE_NUMBER`       |            ✅             | ✅ Model + recognizer   |
+| `IP_ADDRESS`         |            ✅             | ✅ Recognizer           |
+| `CREDIT_CARD_NUMBER` |            ✅             | ✅ Recognizer           |
+| `URL`                |             —             | ✅ Model + recognizer   |
+| `SSN`                |             —             | ✅ Recognizer           |
+| `GIVEN_NAME`         |             —             | ✅ Model                |
+| `SURNAME`            |             —             | ✅ Model                |
+| `TAX_ID`             |             —             | ✅ Model                |
+| `BANK_ACCOUNT`       |             —             | ✅ Model                |
+| `ROUTING_NUMBER`     |             —             | ✅ Model                |
+| `GOVERNMENT_ID`      |             —             | ✅ Model                |
+| `PASSPORT`           |             —             | ✅ Model                |
+| `DRIVERS_LICENSE`    |             —             | ✅ Model                |
+| `BUILDING_NUMBER`    |             —             | ✅ Model                |
+| `STREET_NAME`        |             —             | ✅ Model                |
+| `SECONDARY_ADDRESS`  |             —             | ✅ Model                |
+| `CITY`               |             —             | ✅ Model                |
+| `STATE`              |             —             | ✅ Model                |
+| `ZIP_CODE`           |             —             | ✅ Model                |
+| Custom               |    ✅ `detect` callback   | ✅ `recognizers` option |
+
+For the Rampart backend, **Model** means the type is detected by the on-device
+NER model, and **Recognizer** means it is detected by a deterministic, validated
+pattern (mirroring Rampart's deterministic redaction layer). Where the model and
+a recognizer overlap on the same text, the recognizer wins.
