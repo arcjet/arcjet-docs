@@ -213,7 +213,7 @@ pip install "arcjet[sensitive-info-rampart]"
 ```py
 import os
 
-from arcjet import Mode, arcjet, detect_sensitive_info
+from arcjet import Mode, SensitiveInfoEntityType, arcjet, detect_sensitive_info
 from arcjet_sensitive_info_rampart import rampart
 
 aj = arcjet(
@@ -222,7 +222,13 @@ aj = arcjet(
         detect_sensitive_info(
             mode=Mode.LIVE,
             # Names and addresses are common in pasted résumés and messages.
-            deny=["CREDIT_CARD_NUMBER", "EMAIL", "GIVEN_NAME", "SURNAME", "STREET_NAME"],
+            deny=[
+                SensitiveInfoEntityType.CREDIT_CARD_NUMBER,
+                SensitiveInfoEntityType.EMAIL,
+                SensitiveInfoEntityType.GIVEN_NAME,
+                SensitiveInfoEntityType.SURNAME,
+                SensitiveInfoEntityType.STREET_NAME,
+            ],
             backend=rampart(),
         ),
     ],
@@ -257,7 +263,7 @@ pip install "arcjet[sensitive-info-rampart]"
 ```py
 import os
 
-from arcjet import Mode, arcjet_sync, detect_sensitive_info
+from arcjet import Mode, SensitiveInfoEntityType, arcjet_sync, detect_sensitive_info
 from arcjet_sensitive_info_rampart import rampart
 
 aj = arcjet_sync(
@@ -266,7 +272,13 @@ aj = arcjet_sync(
         detect_sensitive_info(
             mode=Mode.LIVE,
             # Names and addresses are common in pasted résumés and messages.
-            deny=["CREDIT_CARD_NUMBER", "EMAIL", "GIVEN_NAME", "SURNAME", "STREET_NAME"],
+            deny=[
+                SensitiveInfoEntityType.CREDIT_CARD_NUMBER,
+                SensitiveInfoEntityType.EMAIL,
+                SensitiveInfoEntityType.GIVEN_NAME,
+                SensitiveInfoEntityType.SURNAME,
+                SensitiveInfoEntityType.STREET_NAME,
+            ],
             backend=rampart(),
         ),
     ],

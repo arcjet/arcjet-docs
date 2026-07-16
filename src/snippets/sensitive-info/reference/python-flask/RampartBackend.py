@@ -1,6 +1,6 @@
 import os
 
-from arcjet import Mode, arcjet_sync, detect_sensitive_info
+from arcjet import Mode, SensitiveInfoEntityType, arcjet_sync, detect_sensitive_info
 from flask import Flask, jsonify, request
 
 # The Rampart backend ships in the optional `arcjet[sensitive-info-rampart]`
@@ -14,7 +14,13 @@ aj = arcjet_sync(
             mode=Mode.LIVE,  # Will block requests, use Mode.DRY_RUN to log only
             # The Rampart model detects names, addresses, and government /
             # financial identifiers in addition to the built-in types.
-            deny=["EMAIL", "GIVEN_NAME", "SURNAME", "STREET_NAME", "SSN"],
+            deny=[
+                SensitiveInfoEntityType.EMAIL,
+                SensitiveInfoEntityType.GIVEN_NAME,
+                SensitiveInfoEntityType.SURNAME,
+                SensitiveInfoEntityType.STREET_NAME,
+                SensitiveInfoEntityType.SSN,
+            ],
             # Run detection on-device with the Rampart NER model instead of the
             # default WebAssembly engine.
             backend=rampart(),
