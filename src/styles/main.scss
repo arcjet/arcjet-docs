@@ -64,20 +64,6 @@ code {
   }
 }
 
-[data-theme="dark"]:root {
-  body {
-    background: var(--colorBg);
-    background-color: var(--colorBg);
-  }
-}
-
-[data-theme="light"]:root {
-  body {
-    background: var(--colorBg);
-    background-color: var(--colorBg);
-  }
-}
-
 html {
   scroll-behavior: smooth;
 }
@@ -178,7 +164,7 @@ body {
 //////////////////////////////////////////////////////////////////////////////////////////
 // HEADER
 header.header {
-  background-color: var(--colorBg);
+  background-color: var(--sl-color-bg);
   border-bottom: none;
   max-width: min(100vw, var(--content-max-width));
   left: max(0px, calc((100vw - var(--content-max-width)) / 2));
@@ -186,7 +172,7 @@ header.header {
 
 @media (min-width: 72rem) {
   header.header {
-    background-color: rgba(var(--colorBgRgb) / 0.4);
+    background-color: rgba(var(--sl-color-bg-rgb) / 0.4);
     backdrop-filter: blur(var(--blur1));
   }
 }
@@ -751,7 +737,7 @@ starlight-theme-select {
 // Only for default Starlight right sidebar
 .todo-remove mobile-starlight-toc nav {
   border: none;
-  background-color: rgba(var(--colorBgRgb) / 0.4);
+  background-color: rgba(var(--sl-color-bg-rgb) / 0.4);
   backdrop-filter: blur(var(--blur1));
   top: var(--Header-height);
   padding-top: calc(var(--sp) * 3);
@@ -766,8 +752,8 @@ starlight-theme-select {
     z-index: 0;
     pointer-events: none;
     background: linear-gradient(
-      rgba(var(--colorBgRgb) / 1) 8px,
-      rgba(var(--colorBgRgb) / 0)
+      rgba(var(--sl-color-bg-rgb) / 1) 8px,
+      rgba(var(--sl-color-bg-rgb) / 0)
     );
   }
 

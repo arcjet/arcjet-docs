@@ -1,14 +1,14 @@
 ---
-import {
-    pathnameForSdk,
-    sdk,
-    sdkFromPathname,
-    sdks,
-} from "@/lib/sdk";
-import SdkIcon from "@/components/SdkIcon.astro";
-import Default from "@astrojs/starlight/components/TableOfContents.astro";
-import { Icon } from "@astrojs/starlight/components";
 import { SelectChevron } from "@/components/icons/SelectChevron";
+import SdkIcon from "@/components/SdkIcon.astro";
+import {
+pathnameForSdk,
+sdk,
+sdkFromPathname,
+sdks,
+} from "@/lib/sdk";
+import { Icon } from "@astrojs/starlight/components";
+import Default from "@astrojs/starlight/components/TableOfContents.astro";
 
 const activeSdkKey = sdkFromPathname(Astro.url.pathname);
 const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
@@ -110,8 +110,8 @@ const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
         #toc-sdk[popover] {
             backdrop-filter: blur(var(--blur1));
             background: linear-gradient(
-                rgba(var(--colorBgRgb) / 1) 8px,
-                rgba(var(--colorBgRgb) / 0)
+                rgba(var(--sl-color-bg-rgb) / 1) 8px,
+                rgba(var(--sl-color-bg-rgb) / 0)
             );
             border: 1px solid
                 rgba(var(--aj-palette-input-primary-solid-border) / 0.2);

@@ -51,24 +51,6 @@
   --aj-fontSize-xxxs: 10px;
 }
 
-// APPEARANCE
-//////////////////////////////////////////////////////////////////////////////////////////
-:root,
-:root.aj {
-  // Box background blur
-  --blur1: calc(var(--sp) * 4);
-
-  --scrollable-fade-top: linear-gradient(
-    rgba(var(--colorBgRgb) / 1),
-    rgba(var(--colorBgRgb) / 0)
-  );
-
-  --scrollable-fade-bottom: linear-gradient(
-    rgba(var(--colorBgRgb) / 0),
-    rgba(var(--colorBgRgb) / 1)
-  );
-}
-
 // ANIMATION
 //////////////////////////////////////////////////////////////////////////////////////////
 :root,
@@ -155,22 +137,9 @@
   --sl-color-gray-5: var(--aj-palette-source-neutral-04);
   --sl-color-gray-6: var(--aj-palette-source-neutral-02);
   --sl-color-gray-7: var(--aj-palette-source-black);
-  --sl-color-bg: linear-gradient(
-      rgba(var(--aj-palette-source-neutralRgb-00) / 0.4),
-      rgba(var(--aj-palette-source-neutralRgb-00) / 0.4)
-    ),
-    linear-gradient(
-      rgba(var(--aj-palette-source-blackRgb) / 1),
-      rgba(var(--aj-palette-source-blackRgb) / 1)
-    );
-  --sl-color-bg-sidebar: linear-gradient(
-      rgba(var(--aj-palette-source-neutralRgb-00) / 0.4),
-      rgba(var(--aj-palette-source-neutralRgb-00) / 0.4)
-    ),
-    linear-gradient(
-      rgba(var(--aj-palette-source-blackRgb) / 1),
-      rgba(var(--aj-palette-source-blackRgb) / 1)
-    );
+  --sl-color-bg: #070708;
+  --sl-color-bg-rgb: 7 7 8;
+  --sl-color-bg-sidebar: var(--sl-color-bg);
   --sl-color-bg-nav: linear-gradient(
       rgba(var(--aj-palette-source-neutralRgb-00) / 0.4),
       rgba(var(--aj-palette-source-neutralRgb-00) / 0.4)
@@ -181,9 +150,6 @@
     );
   --sl-color-hairline-light: var(--aj-palette-source-neutral-03);
   --sl-color-hairline-shade: var(--aj-palette-source-neutral-03);
-
-  --colorBg: #070708;
-  --colorBgRgb: 7 7 8;
 
   --sidebar-link-hoverBg: var(--aj-palette-source-neutral-01);
   --sidebar-link-activeBg: var(--aj-palette-source-neutral-02);
@@ -205,22 +171,9 @@
   --sl-color-gray-5: var(--aj-palette-source-neutral-11);
   --sl-color-gray-6: var(--aj-palette-source-neutral-15);
   --sl-color-gray-7: var(--aj-palette-source-white);
-  --sl-color-bg: linear-gradient(
-      rgba(var(--aj-palette-source-neutralRgb-15) / 0.4),
-      rgba(var(--aj-palette-source-neutralRgb-15) / 0.4)
-    ),
-    linear-gradient(
-      rgba(var(--aj-palette-source-whiteRgb) / 1),
-      rgba(var(--aj-palette-source-whiteRgb) / 1)
-    );
-  --sl-color-bg-sidebar: linear-gradient(
-      rgba(var(--aj-palette-source-neutralRgb-15) / 0.4),
-      rgba(var(--aj-palette-source-neutralRgb-15) / 0.4)
-    ),
-    linear-gradient(
-      rgba(var(--aj-palette-source-whiteRgb) / 1),
-      rgba(var(--aj-palette-source-whiteRgb) / 1)
-    );
+  --sl-color-bg: #fcfafd;
+  --sl-color-bg-rgb: 252 250 253;
+  --sl-color-bg-sidebar: var(--sl-color-bg);
   --sl-color-bg-nav: linear-gradient(
       rgba(var(--aj-palette-source-neutralRgb-15) / 0.4),
       rgba(var(--aj-palette-source-neutralRgb-15) / 0.4)
@@ -232,10 +185,25 @@
   --sl-color-hairline-light: var(--aj-palette-source-neutral-13);
   --sl-color-hairline-shade: var(--aj-palette-source-neutral-13);
 
-  --colorBg: #fcfafd;
-  --colorBgRgb: 252 250 253;
-
   --sidebar-link-hoverBg: var(--aj-palette-source-neutral-14);
   --sidebar-link-activeBg: var(--aj-palette-source-neutral-13);
   --sidebar-link-selectedBg: var(--aj-palette-source-neutral-12);
+}
+
+// APPEARANCE
+//////////////////////////////////////////////////////////////////////////////////////////
+:root,
+:root.aj {
+  // Box background blur
+  --blur1: calc(var(--sp) * 4);
+
+  --scrollable-fade-top: linear-gradient(
+    rgba(var(--sl-color-bg-rgb) / 1),
+    rgba(var(--sl-color-bg-rgb) / 0)
+  );
+
+  --scrollable-fade-bottom: linear-gradient(
+    rgba(var(--sl-color-bg-rgb) / 0),
+    rgba(var(--sl-color-bg-rgb) / 1)
+  );
 }
