@@ -9,19 +9,6 @@ import Comments from "/src/components/Comments.astro";
 No security product is perfect and Arcjet is no exception. Here are some things
 to be aware of when building your application with Arcjet.
 
-## Rate limits are scoped per region
-
-Rate limits are currently enforced per region. The SDK automatically picks the
-closest region to where your application is running, but if your code runs in
-multiple locations then the rate limits will be enforced separately.
-
-This is generally not a problem if you are using rate limits based on IP address
-because a client will typically always connect to the same region. However, if
-you are using rate limits based on a user's account ID or an API key then you
-should be aware of this limitation.
-
-We are working on an option to sync rate limits globally.
-
 ## Your application will receive traffic
 
 Network based security products block traffic before it hits your application.
