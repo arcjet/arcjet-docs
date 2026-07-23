@@ -17,19 +17,19 @@ In your project root, run the following command to install the SDK:
 
 Terminal window
 
-```
+```sh
 npm i @arcjet/nest
 ```
 
 Terminal window
 
-```
+```sh
 pnpm add @arcjet/nest
 ```
 
 Terminal window
 
-```
+```sh
 yarn add @arcjet/nest
 ```
 
@@ -68,9 +68,28 @@ The optional fields are:
 
 src/app.module.ts
 
-```
-1import { ArcjetModule } from "@arcjet/nest";2import { Module } from "@nestjs/common";3import { ConfigModule } from "@nestjs/config";4
-5@Module({6  imports: [7    ConfigModule.forRoot({8      isGlobal: true,9      envFilePath: ".env.local",10    }),11    ArcjetModule.forRoot({12      isGlobal: true,13      key: process.env.ARCJET_KEY!,14      rules: [15        // Rules set here will apply to every request16      ],17    }),18    // ... other modules19  ],20})21export class AppModule {}
+```ts
+import { ArcjetModule } from "@arcjet/nest";
+import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ".env.local",
+    }),
+    ArcjetModule.forRoot({
+      isGlobal: true,
+      key: process.env.ARCJET_KEY!,
+      rules: [
+        // Rules set here will apply to every request
+      ],
+    }),
+    // ... other modules
+  ],
+})
+export class AppModule {}
 ```
 
 ### Root instance
@@ -91,8 +110,12 @@ This allows you to run Arcjet in passive / demo mode to test rules before enabli
 
 As the top level conclusion will always be `ALLOW` in `DRY_RUN` mode, you can loop through each rule result to check what would have happened:
 
-```
-1for (const result of decision.results) {2  if (result.isDenied()) {3    console.log("Rule returned deny conclusion", result);4  }5}
+```ts
+for (const result of decision.results) {
+  if (result.isDenied()) {
+    console.log("Rule returned deny conclusion", result);
+  }
+}
 ```
 
 ### Environment variables
@@ -109,16 +132,53 @@ The Arcjet SDK can be integrated into the [NestJS logger](https://docs.nestjs.co
 
 src/app.module.ts
 
-```
-1import { ArcjetModule } from "@arcjet/nest";2import { type LoggerService, Injectable, Logger } from "@nestjs/common";3
-4// Sets up the built-in Arcjet logger to use the NestJS logger. This could go in5// a separate file e.g. src/arcjet-logger.ts See6// https://github.com/arcjet/example-nestjs/blob/main/src/arcjet-logger.ts for7// an example.8@Injectable()9export class ArcjetLogger implements LoggerService {10  private readonly logger = new Logger(ArcjetLogger.name);11
-12  log(message: any, ...optionalParams: any[]) {13    this.logger.log(message, ...optionalParams);14  }15
-16  fatal(message: any, ...optionalParams: any[]) {17    this.logger.error(message, ...optionalParams);18  }19
-20  error(message: any, ...optionalParams: any[]) {21    this.logger.error(message, ...optionalParams);22  }23
-24  warn(message: any, ...optionalParams: any[]) {25    this.logger.warn(message, ...optionalParams);26  }27
-28  debug(message: any, ...optionalParams: any[]) {29    this.logger.debug(message, ...optionalParams);30  }31
-32  info(message: any, ...optionalParams: any[]) {33    this.logger.log(message, ...optionalParams);34  }35}36
-37// Set up the root Arcjet client with the custom logger. See38// https://github.com/arcjet/example-nestjs/blob/main/src/app.module.ts for an39// example.40ArcjetModule.forRoot({41  isGlobal: true,42  key: process.env.ARCJET_KEY!,43  rules: [],44  // Configures Arcjet to use a Nest compatible logger45  log: new ArcjetLogger(),46});
+```ts
+import { ArcjetModule } from "@arcjet/nest";
+import { type LoggerService, Injectable, Logger } from "@nestjs/common";
+
+// Sets up the built-in Arcjet logger to use the NestJS logger. This could go in
+// a separate file e.g. src/arcjet-logger.ts See
+// https://github.com/arcjet/example-nestjs/blob/main/src/arcjet-logger.ts for
+// an example.
+@Injectable()
+export class ArcjetLogger implements LoggerService {
+  private readonly logger = new Logger(ArcjetLogger.name);
+
+  log(message: any, ...optionalParams: any[]) {
+    this.logger.log(message, ...optionalParams);
+  }
+
+  fatal(message: any, ...optionalParams: any[]) {
+    this.logger.error(message, ...optionalParams);
+  }
+
+  error(message: any, ...optionalParams: any[]) {
+    this.logger.error(message, ...optionalParams);
+  }
+
+  warn(message: any, ...optionalParams: any[]) {
+    this.logger.warn(message, ...optionalParams);
+  }
+
+  debug(message: any, ...optionalParams: any[]) {
+    this.logger.debug(message, ...optionalParams);
+  }
+
+  info(message: any, ...optionalParams: any[]) {
+    this.logger.log(message, ...optionalParams);
+  }
+}
+
+// Set up the root Arcjet client with the custom logger. See
+// https://github.com/arcjet/example-nestjs/blob/main/src/app.module.ts for an
+// example.
+ArcjetModule.forRoot({
+  isGlobal: true,
+  key: process.env.ARCJET_KEY!,
+  rules: [],
+  // Configures Arcjet to use a Nest compatible logger
+  log: new ArcjetLogger(),
+});
 ```
 
 ### Load balancers & proxies
@@ -139,7 +199,7 @@ You can configure Arcjet to trust IP addresses in the `X-Forwarded-For` header b
 
 For example, if the load balancer is at `100.100.100.100` and the client IP address is `192.168.1.1`, the `X-Forwarded-For` header will be:
 
-```
+```http
 X-Forwarded-For: 192.168.1.1, 100.100.100.100
 ```
 
@@ -147,9 +207,32 @@ You should set the `proxies` field to `["100.100.100.100"]` so Arcjet will use `
 
 You can also specify CIDR ranges to match multiple IP addresses.
 
-```
-1import { ArcjetModule } from "@arcjet/nest";2import { Module } from "@nestjs/common";3import { ConfigModule } from "@nestjs/config";4
-5@Module({6  imports: [7    ConfigModule.forRoot({8      isGlobal: true,9      envFilePath: ".env.local",10    }),11    ArcjetModule.forRoot({12      isGlobal: true,13      key: process.env.ARCJET_KEY!,14      rules: [15        // Rules set here will apply to every request16      ],17      proxies: [18        "100.100.100.100", // A single IP19        "100.100.100.0/24", // A CIDR for the range20      ],21    }),22    // ... other modules23  ],24})25export class AppModule {}
+```ts
+import { ArcjetModule } from "@arcjet/nest";
+import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ".env.local",
+    }),
+    ArcjetModule.forRoot({
+      isGlobal: true,
+      key: process.env.ARCJET_KEY!,
+      rules: [
+        // Rules set here will apply to every request
+      ],
+      proxies: [
+        "100.100.100.100", // A single IP
+        "100.100.100.0/24", // A CIDR for the range
+      ],
+    }),
+    // ... other modules
+  ],
+})
+export class AppModule {}
 ```
 
 #### Proxy services
@@ -158,9 +241,31 @@ You can also specify CIDR ranges to match multiple IP addresses.
 
 Some providers pass the real client IP in their own header rather than adding themselves to `X-Forwarded-For`. For these you can pass a proxy service in the `proxies` list. The `cloudflare()` helper reads the real client IP from Cloudflare’s `CF-Connecting-IP` header when the request comes from a Cloudflare IP range:
 
-```
-1import { ArcjetModule, cloudflare } from "@arcjet/nest";2import { Module } from "@nestjs/common";3import { ConfigModule } from "@nestjs/config";4
-5@Module({6  imports: [7    ConfigModule.forRoot({8      isGlobal: true,9      envFilePath: ".env.local",10    }),11    ArcjetModule.forRoot({12      isGlobal: true,13      key: process.env.ARCJET_KEY!,14      rules: [15        // Rules set here will apply to every request16      ],17      // Read the real client IP from Cloudflare's `CF-Connecting-IP` header when18      // the request arrives from a Cloudflare IP range19      proxies: [cloudflare()],20    }),21    // ... other modules22  ],23})24export class AppModule {}
+```ts
+import { ArcjetModule, cloudflare } from "@arcjet/nest";
+import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ".env.local",
+    }),
+    ArcjetModule.forRoot({
+      isGlobal: true,
+      key: process.env.ARCJET_KEY!,
+      rules: [
+        // Rules set here will apply to every request
+      ],
+      // Read the real client IP from Cloudflare's `CF-Connecting-IP` header when
+      // the request arrives from a Cloudflare IP range
+      proxies: [cloudflare()],
+    }),
+    // ... other modules
+  ],
+})
+export class AppModule {}
 ```
 
 See the [best practices guide](/best-practices#proxy-services-like-cloudflare) for more, including running Cloudflare in front of your app and handling a Cloudflare range the SDK doesn’t know about yet.
@@ -229,8 +334,10 @@ The `results` property of the `ArcjetDecision` object contains an array of `Arcj
 
 You can iterate through the results and check the conclusion for each rule.
 
-```
-1for (const result of decision.results) {2  this.logger.log("Rule Result", result);3}
+```ts
+for (const result of decision.results) {
+  this.logger.log("Rule Result", result);
+}
 ```
 
 #### Rule state
@@ -256,8 +363,8 @@ The `reason` property of the `ArcjetRuleResult` object contains an `ArcjetReason
 
 The `ArcjetReason` object for shield rules has the following properties:
 
-```
-1shieldTriggered: boolean;
+```ts
+shieldTriggered: boolean;
 ```
 
 See the [shield documentation](/shield/reference?f=remix) for more information about these properties.
@@ -268,8 +375,9 @@ See the [shield documentation](/shield/reference?f=remix) for more information a
 
 The `ArcjetReason` object for bot protection rules has the following properties:
 
-```
-1allowed: string[];2denied: string[];
+```ts
+allowed: string[];
+denied: string[];
 ```
 
 Each of the `allowed` and `denied` arrays contains the identifiers of the bots allowed or denied from our [full list of bots](https://arcjet.com/bot-list).
@@ -280,8 +388,11 @@ Each of the `allowed` and `denied` arrays contains the identifiers of the bots a
 
 The `ArcjetReason` object for rate limiting rules has the following properties:
 
-```
-1max: number;2remaining: number;3window: number;4reset: number;
+```ts
+max: number;
+remaining: number;
+window: number;
+reset: number;
 ```
 
 See the [rate limiting documentation](/rate-limiting/reference?f=node-js) for more information about these properties.
@@ -292,14 +403,14 @@ See the [rate limiting documentation](/rate-limiting/reference?f=node-js) for mo
 
 The `ArcjetReason` object for email rules has the following properties:
 
-```
-1emailTypes: ArcjetEmailType[];
+```ts
+emailTypes: ArcjetEmailType[];
 ```
 
 An `ArcjetEmailType` is one of the following strings:
 
-```
-1"DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
+```ts
+"DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
 ```
 
 See the [email validation documentation](/email-validation/reference?f=node-js) for more information about these properties.
@@ -371,21 +482,81 @@ The following are available on all pricing plans:
 
 [Section titled “Example”](#example-1)
 
-```
-1import { ARCJET, type ArcjetNest } from "@arcjet/nest";2import {3  Controller,4  Get,5  HttpException,6  HttpStatus,7  Inject,8  Injectable,9  Logger,10  Req,11} from "@nestjs/common";12import type { Request } from "express";13
-14// This would normally go in your service file e.g.15// src/page/page.service.ts16@Injectable()17export class PageService {18  message(): { message: string } {19    return {20      message: "Hello world",21    };22  }23}24
-25// This would normally go in your controller file e.g.26// src/page/page.controller.ts27@Controller("page")28// Sets up the Arcjet protection without using a guard so we can access the29// decision and use it in the controller.30export class PageController {31  // Make use of the NestJS logger: https://docs.nestjs.com/techniques/logger32  // See33  // https://github.com/arcjet/example-nestjs/blob/ec742e58c8da52d0a399327182c79e3f4edc8f3b/src/app.module.ts#L2934  // and https://github.com/arcjet/example-nestjs/blob/main/src/arcjet-logger.ts35  // for an example of how to connect Arcjet to the NestJS logger36  private readonly logger = new Logger(PageController.name);37
-38  constructor(39    private readonly pageService: PageService,40    @Inject(ARCJET) private readonly arcjet: ArcjetNest,41  ) {}42
-43  @Get()44  async index(@Req() req: Request) {45    const decision = await this.arcjet.protect(req);46
-47    if (decision.ip.hasCountry()) {48      this.logger.log("Visitor from", decision.ip.countryName);49    }50
-51    if (decision.isDenied()) {52      throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);53    }54
-55    return this.pageService.message();56  }57}
+```ts
+import { ARCJET, type ArcjetNest } from "@arcjet/nest";
+import {
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+  Req,
+} from "@nestjs/common";
+import type { Request } from "express";
+
+// This would normally go in your service file e.g.
+// src/page/page.service.ts
+@Injectable()
+export class PageService {
+  message(): { message: string } {
+    return {
+      message: "Hello world",
+    };
+  }
+}
+
+// This would normally go in your controller file e.g.
+// src/page/page.controller.ts
+@Controller("page")
+// Sets up the Arcjet protection without using a guard so we can access the
+// decision and use it in the controller.
+export class PageController {
+  // Make use of the NestJS logger: https://docs.nestjs.com/techniques/logger
+  // See
+  // https://github.com/arcjet/example-nestjs/blob/ec742e58c8da52d0a399327182c79e3f4edc8f3b/src/app.module.ts#L29
+  // and https://github.com/arcjet/example-nestjs/blob/main/src/arcjet-logger.ts
+  // for an example of how to connect Arcjet to the NestJS logger
+  private readonly logger = new Logger(PageController.name);
+
+  constructor(
+    private readonly pageService: PageService,
+    @Inject(ARCJET) private readonly arcjet: ArcjetNest,
+  ) {}
+
+  @Get()
+  async index(@Req() req: Request) {
+    const decision = await this.arcjet.protect(req);
+
+    if (decision.ip.hasCountry()) {
+      this.logger.log("Visitor from", decision.ip.countryName);
+    }
+
+    if (decision.isDenied()) {
+      throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
+    }
+
+    return this.pageService.message();
+  }
+}
 ```
 
 For the IP address `8.8.8.8` you might get the following response. Only the fields we have data for will be returned:
 
-```
-{  "name": "Hello United States!",  "ip": {    "country": "US",    "countryName": "United States",    "continent": "NA",    "continentName": "North America",    "asn": "AS15169",    "asnName": "Google LLC",    "asnDomain": "google.com"  }}
+```json
+{
+  "name": "Hello United States!",
+  "ip": {
+    "country": "US",
+    "countryName": "United States",
+    "continent": "NA",
+    "continentName": "North America",
+    "asn": "AS15169",
+    "asnName": "Google LLC",
+    "asnDomain": "google.com"
+  }
+}
 ```
 
 Error handling
@@ -401,31 +572,158 @@ If all other rules that were run returned an `ALLOW` result, then the final Arcj
 
 *   [TS](#tab-panel-XXX)
 
-```
-1import { ARCJET, type ArcjetNest, detectBot } from "@arcjet/nest";2import {3  Controller,4  Get,5  HttpException,6  HttpStatus,7  Inject,8  Injectable,9  Logger,10  Req,11} from "@nestjs/common";12import type { Request } from "express";13
-14// This would normally go in your service file e.g.15// src/page/page.service.ts16@Injectable()17export class PageService {18  message(): { message: string } {19    return {20      message: "Hello world",21    };22  }23}24
-25// This would normally go in your controller file e.g.26// src/page/page.controller.ts27@Controller("page")28// Sets up the Arcjet protection without using a guard so we can access the29// decision and use it in the controller.30export class PageController {31  // Make use of the NestJS logger: https://docs.nestjs.com/techniques/logger32  // See33  // https://github.com/arcjet/example-nestjs/blob/ec742e58c8da52d0a399327182c79e3f4edc8f3b/src/app.module.ts#L2934  // and https://github.com/arcjet/example-nestjs/blob/main/src/arcjet-logger.ts35  // for an example of how to connect Arcjet to the NestJS logger36  private readonly logger = new Logger(PageController.name);37
-38  constructor(39    private readonly pageService: PageService,40    @Inject(ARCJET) private readonly arcjet: ArcjetNest,41  ) {}42
-43  @Get()44  async index(@Req() req: Request) {45    const decision = await this.arcjet.protect(req);46
-47    for (const { reason } of decision.results) {48      if (reason.isError()) {49        // Fail open by logging the error and continuing50        this.logger.error(`Arcjet error: ${reason.message}`);51        // You could also fail closed here for very sensitive routes52        //throw new HttpException("Service unavailable", HttpStatus.SERVICE_UNAVAILABLE);53      }54    }55
-56    if (decision.isDenied()) {57      if (decision.reason.isBot()) {58        throw new HttpException("No bots allowed", HttpStatus.FORBIDDEN);59      } else {60        throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);61      }62    }63
-64    return this.pageService.message();65  }66}
+```ts
+import { ARCJET, type ArcjetNest, detectBot } from "@arcjet/nest";
+import {
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+  Req,
+} from "@nestjs/common";
+import type { Request } from "express";
+
+// This would normally go in your service file e.g.
+// src/page/page.service.ts
+@Injectable()
+export class PageService {
+  message(): { message: string } {
+    return {
+      message: "Hello world",
+    };
+  }
+}
+
+// This would normally go in your controller file e.g.
+// src/page/page.controller.ts
+@Controller("page")
+// Sets up the Arcjet protection without using a guard so we can access the
+// decision and use it in the controller.
+export class PageController {
+  // Make use of the NestJS logger: https://docs.nestjs.com/techniques/logger
+  // See
+  // https://github.com/arcjet/example-nestjs/blob/ec742e58c8da52d0a399327182c79e3f4edc8f3b/src/app.module.ts#L29
+  // and https://github.com/arcjet/example-nestjs/blob/main/src/arcjet-logger.ts
+  // for an example of how to connect Arcjet to the NestJS logger
+  private readonly logger = new Logger(PageController.name);
+
+  constructor(
+    private readonly pageService: PageService,
+    @Inject(ARCJET) private readonly arcjet: ArcjetNest,
+  ) {}
+
+  @Get()
+  async index(@Req() req: Request) {
+    const decision = await this.arcjet.protect(req);
+
+    for (const { reason } of decision.results) {
+      if (reason.isError()) {
+        // Fail open by logging the error and continuing
+        this.logger.error(`Arcjet error: ${reason.message}`);
+        // You could also fail closed here for very sensitive routes
+        //throw new HttpException("Service unavailable", HttpStatus.SERVICE_UNAVAILABLE);
+      }
+    }
+
+    if (decision.isDenied()) {
+      if (decision.reason.isBot()) {
+        throw new HttpException("No bots allowed", HttpStatus.FORBIDDEN);
+      } else {
+        throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
+      }
+    }
+
+    return this.pageService.message();
+  }
+}
 ```
 
 The [@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect) package provides utilities for dealing with common errors.
 
 *   [TS](#tab-panel-XXX)
 
-```
-1import { ARCJET, type ArcjetNest, detectBot } from "@arcjet/nest";2import { isMissingUserAgent } from "@arcjet/inspect";3import {4  Controller,5  Get,6  HttpException,7  HttpStatus,8  Inject,9  Injectable,10  Logger,11  Req,12} from "@nestjs/common";13import type { Request } from "express";14
-15// This would normally go in your service file e.g.16// src/page/page.service.ts17@Injectable()18export class PageService {19  message(): { message: string } {20    return {21      message: "Hello world",22    };23  }24}25
-26// This would normally go in your controller file e.g.27// src/page/page.controller.ts28@Controller("page")29// Sets up the Arcjet protection without using a guard so we can access the30// decision and use it in the controller.31export class PageController {32  // Make use of the NestJS logger: https://docs.nestjs.com/techniques/logger33  // See34  // https://github.com/arcjet/example-nestjs/blob/ec742e58c8da52d0a399327182c79e3f4edc8f3b/src/app.module.ts#L2935  // and https://github.com/arcjet/example-nestjs/blob/main/src/arcjet-logger.ts36  // for an example of how to connect Arcjet to the NestJS logger37  private readonly logger = new Logger(PageController.name);38
-39  constructor(40    private readonly pageService: PageService,41    @Inject(ARCJET) private readonly arcjet: ArcjetNest,42  ) {}43
-44  @Get()45  async index(@Req() req: Request) {46    const decision = await this.arcjet47      .withRule(48        detectBot({49          mode: "LIVE", // will block requests. Use "DRY_RUN" to log only50          // configured with a list of bots to allow from51          // https://arcjet.com/bot-list52          allow: [], // blocks all automated clients53        }),54      )55      .protect(req);56
-57    if (decision.isDenied()) {58      if (decision.reason.isBot()) {59        throw new HttpException("No bots allowed", HttpStatus.FORBIDDEN);60      } else {61        throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);62      }63    }64
-65    if (decision.results.some(isMissingUserAgent)) {66      // Requests without User-Agent headers might not be identified as any67      // particular bot and could be marked as an errored result. Most68      // legitimate clients send this header, so we recommend blocking requests69      // without it.70      // See https://docs.arcjet.com/bot-protection/reference#user-agent-header71      this.logger.warn("User-Agent header is missing");72
-73      throw new HttpException("Bad request", HttpStatus.BAD_REQUEST);74    }75
-76    return this.pageService.message();77  }78}
+```ts
+import { ARCJET, type ArcjetNest, detectBot } from "@arcjet/nest";
+import { isMissingUserAgent } from "@arcjet/inspect";
+import {
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+  Req,
+} from "@nestjs/common";
+import type { Request } from "express";
+
+// This would normally go in your service file e.g.
+// src/page/page.service.ts
+@Injectable()
+export class PageService {
+  message(): { message: string } {
+    return {
+      message: "Hello world",
+    };
+  }
+}
+
+// This would normally go in your controller file e.g.
+// src/page/page.controller.ts
+@Controller("page")
+// Sets up the Arcjet protection without using a guard so we can access the
+// decision and use it in the controller.
+export class PageController {
+  // Make use of the NestJS logger: https://docs.nestjs.com/techniques/logger
+  // See
+  // https://github.com/arcjet/example-nestjs/blob/ec742e58c8da52d0a399327182c79e3f4edc8f3b/src/app.module.ts#L29
+  // and https://github.com/arcjet/example-nestjs/blob/main/src/arcjet-logger.ts
+  // for an example of how to connect Arcjet to the NestJS logger
+  private readonly logger = new Logger(PageController.name);
+
+  constructor(
+    private readonly pageService: PageService,
+    @Inject(ARCJET) private readonly arcjet: ArcjetNest,
+  ) {}
+
+  @Get()
+  async index(@Req() req: Request) {
+    const decision = await this.arcjet
+      .withRule(
+        detectBot({
+          mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+          // configured with a list of bots to allow from
+          // https://arcjet.com/bot-list
+          allow: [], // blocks all automated clients
+        }),
+      )
+      .protect(req);
+
+    if (decision.isDenied()) {
+      if (decision.reason.isBot()) {
+        throw new HttpException("No bots allowed", HttpStatus.FORBIDDEN);
+      } else {
+        throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
+      }
+    }
+
+    if (decision.results.some(isMissingUserAgent)) {
+      // Requests without User-Agent headers might not be identified as any
+      // particular bot and could be marked as an errored result. Most
+      // legitimate clients send this header, so we recommend blocking requests
+      // without it.
+      // See https://docs.arcjet.com/bot-protection/reference#user-agent-header
+      this.logger.warn("User-Agent header is missing");
+
+      throw new HttpException("Bad request", HttpStatus.BAD_REQUEST);
+    }
+
+    return this.pageService.message();
+  }
+}
 ```
 
 IP address detection

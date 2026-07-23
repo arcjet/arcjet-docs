@@ -26,7 +26,7 @@ Install
 
 Terminal window
 
-```
+```sh
 deno add npm:@arcjet/deno
 ```
 
@@ -57,7 +57,7 @@ Get the Arcjet key for your site from the [Arcjet dashboard](https://app.arcjet.
 
 Terminal window
 
-```
+```sh
 ARCJET_KEY=your_site_key_here
 ```
 
@@ -73,14 +73,46 @@ The Arcjet Deno SDK uses several environment variables to configure its behavior
 
 Use the `protect` function to protect a request from Deno. Some rules, such as `validateEmail`, may need extra properties. The protect function returns a promise that resolves to a decision.
 
-```
-1import "jsr:@std/dotenv/load";2import arcjetDeno, { tokenBucket } from "npm:@arcjet/deno";3
-4const arcjetKey = Deno.env.get("ARCJET_KEY");5
-6if (!arcjetKey) {7  throw new Error("Cannot find `ARCJET_KEY` environment variable");8}9
-10const arcjet = arcjetDeno({11  key: arcjetKey,12  rules: [13    tokenBucket({14      capacity: 10,15      characteristics: ["userId"],16      interval: 10,17      mode: "LIVE",18      refillRate: 5,19    }),20  ],21});22
-23Deno.serve(24  { port: 3000 },25  arcjet.handler(async function (request) {26    // Replace `userId` with your authenticated user ID.27    const userId = "user123";28    const decision = await arcjet.protect(request, {29      requested: 5,30      userId,31    });32
-33    if (decision.isDenied()) {34      return new Response("Forbidden", { status: 403 });35    }36
-37    return new Response("Hello world");38  }),39);
+```ts
+import "jsr:@std/dotenv/load";
+import arcjetDeno, { tokenBucket } from "npm:@arcjet/deno";
+
+const arcjetKey = Deno.env.get("ARCJET_KEY");
+
+if (!arcjetKey) {
+  throw new Error("Cannot find `ARCJET_KEY` environment variable");
+}
+
+const arcjet = arcjetDeno({
+  key: arcjetKey,
+  rules: [
+    tokenBucket({
+      capacity: 10,
+      characteristics: ["userId"],
+      interval: 10,
+      mode: "LIVE",
+      refillRate: 5,
+    }),
+  ],
+});
+
+Deno.serve(
+  { port: 3000 },
+  arcjet.handler(async function (request) {
+    // Replace `userId` with your authenticated user ID.
+    const userId = "user123";
+    const decision = await arcjet.protect(request, {
+      requested: 5,
+      userId,
+    });
+
+    if (decision.isDenied()) {
+      return new Response("Forbidden", { status: 403 });
+    }
+
+    return new Response("Hello world");
+  }),
+);
 ```
 
 ### Decision
@@ -111,15 +143,40 @@ Errors
 
 Arcjet fails open so that a service issue, misconfiguration, or [network timeout](/architecture#timeout) does not block requests. Such errors should in many cases be logged but otherwise treated as `"ALLOW"` decisions. The `reason.message` field has more info on what occurred.
 
-```
-1import "jsr:@std/dotenv/load";2import arcjetDeno, { filter } from "npm:@arcjet/deno";3
-4const arcjetKey = Deno.env.get("ARCJET_KEY");5
-6if (!arcjetKey) {7  throw new Error("Cannot find `ARCJET_KEY` environment variable");8}9
-10const arcjet = arcjetDeno({11  key: arcjetKey,12  rules: [13    // This broken expression will result in an error decision:14    filter({ deny: ['ip.src.country is "'] }),15  ],16});17
-18Deno.serve(19  { port: 3000 },20  arcjet.handler(async function (request) {21    const decision = await arcjet.protect(request);22
-23    if (decision.isErrored()) {24      console.warn("Arcjet error", decision.reason.message);25    }26
-27    if (decision.isDenied()) {28      return new Response("Forbidden", { status: 403 });29    }30
-31    return new Response("Hello world");32  }),33);
+```ts
+import "jsr:@std/dotenv/load";
+import arcjetDeno, { filter } from "npm:@arcjet/deno";
+
+const arcjetKey = Deno.env.get("ARCJET_KEY");
+
+if (!arcjetKey) {
+  throw new Error("Cannot find `ARCJET_KEY` environment variable");
+}
+
+const arcjet = arcjetDeno({
+  key: arcjetKey,
+  rules: [
+    // This broken expression will result in an error decision:
+    filter({ deny: ['ip.src.country is "'] }),
+  ],
+});
+
+Deno.serve(
+  { port: 3000 },
+  arcjet.handler(async function (request) {
+    const decision = await arcjet.protect(request);
+
+    if (decision.isErrored()) {
+      console.warn("Arcjet error", decision.reason.message);
+    }
+
+    if (decision.isDenied()) {
+      return new Response("Forbidden", { status: 403 });
+    }
+
+    return new Response("Hello world");
+  }),
+);
 ```
 
 Custom logs
@@ -131,17 +188,42 @@ You can use a custom log interface matching [`pino`](https://github.com/pinojs/p
 
 Terminal window
 
-```
+```sh
 deno add npm:pino npm:pino-pretty
 ```
 
 Then, create a custom logger that will log to JSON in production and pretty print in development:
 
-```
-1import "jsr:@std/dotenv/load";2import arcjetDeno from "npm:@arcjet/deno";3import pinoPretty from "npm:pino-pretty";4import pino from "npm:pino";5
-6const arcjetKey = Deno.env.get("ARCJET_KEY");7
-8if (!arcjetKey) {9  throw new Error("Cannot find `ARCJET_KEY` environment variable");10}11
-12const arcjet = arcjetDeno({13  key: arcjetKey,14  log: pino(15    {16      // Warn in development, debug otherwise.17      level:18        Deno.env.get("ARCJET_LOG_LEVEL") ||19        (Deno.env.get("ARCJET_ENV") === "development" ? "debug" : "warn"),20    },21    // Pretty print in development, JSON otherwise.22    Deno.env.get("ARCJET_ENV") === "development"23      ? pinoPretty({ colorize: true })24      : undefined,25  ),26  rules: [27    // …28  ],29});
+```ts
+import "jsr:@std/dotenv/load";
+import arcjetDeno from "npm:@arcjet/deno";
+import pinoPretty from "npm:pino-pretty";
+import pino from "npm:pino";
+
+const arcjetKey = Deno.env.get("ARCJET_KEY");
+
+if (!arcjetKey) {
+  throw new Error("Cannot find `ARCJET_KEY` environment variable");
+}
+
+const arcjet = arcjetDeno({
+  key: arcjetKey,
+  log: pino(
+    {
+      // Warn in development, debug otherwise.
+      level:
+        Deno.env.get("ARCJET_LOG_LEVEL") ||
+        (Deno.env.get("ARCJET_ENV") === "development" ? "debug" : "warn"),
+    },
+    // Pretty print in development, JSON otherwise.
+    Deno.env.get("ARCJET_ENV") === "development"
+      ? pinoPretty({ colorize: true })
+      : undefined,
+  ),
+  rules: [
+    // …
+  ],
+});
 ```
 
 Custom client
@@ -151,11 +233,23 @@ Custom client
 
 You can pass a client to change the behavior when connecting to the Cloud API. Use `createRemoteClient` to create a client.
 
-```
-1import "jsr:@std/dotenv/load";2import arcjetDeno, { createRemoteClient } from "npm:@arcjet/deno";3
-4const arcjetKey = Deno.env.get("ARCJET_KEY");5
-6if (!arcjetKey) {7  throw new Error("Cannot find `ARCJET_KEY` environment variable");8}9
-10const arcjet = arcjetDeno({11  key: arcjetKey,12  client: createRemoteClient({ timeout: 3000 }),13  rules: [14    // …15  ],16});
+```ts
+import "jsr:@std/dotenv/load";
+import arcjetDeno, { createRemoteClient } from "npm:@arcjet/deno";
+
+const arcjetKey = Deno.env.get("ARCJET_KEY");
+
+if (!arcjetKey) {
+  throw new Error("Cannot find `ARCJET_KEY` environment variable");
+}
+
+const arcjet = arcjetDeno({
+  key: arcjetKey,
+  client: createRemoteClient({ timeout: 3000 }),
+  rules: [
+    // …
+  ],
+});
 ```
 
 * * *

@@ -17,19 +17,19 @@ In your project root, run the following command to install the SDK:
 
 Terminal window
 
-```
+```sh
 npm i @arcjet/sveltekit @arcjet/inspect
 ```
 
 Terminal window
 
-```
+```sh
 pnpm add @arcjet/sveltekit @arcjet/inspect
 ```
 
 Terminal window
 
-```
+```sh
 yarn add @arcjet/sveltekit @arcjet/inspect
 ```
 
@@ -37,7 +37,7 @@ Note
 
 If you use Bun to run your SvelteKit app, you may get an error along the lines of:
 
-```
+```txt
 Internal server error: [internal] Stream closed with error code NGHTTP2_FRAME_SIZE_ERROR
 ```
 
@@ -45,9 +45,16 @@ This happens because SvelteKit bundles for Node.js but Bun does not support all 
 
 vite.config.ts
 
-```
-1import { sveltekit } from "@sveltejs/kit/vite";2import { defineConfig } from "vite";3
-4export default defineConfig({5  plugins: [sveltekit()],6  // …7  // See: <https://vite.dev/config/ssr-options#ssr-resolve-externalconditions>.8  ssr: { resolve: { externalConditions: ["bun", "node"] } },9});
+```js
+import { sveltekit } from "@sveltejs/kit/vite";
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  plugins: [sveltekit()],
+  // …
+  // See: <https://vite.dev/config/ssr-options#ssr-resolve-externalconditions>.
+  ssr: { resolve: { externalConditions: ["bun", "node"] } },
+});
 ```
 
 ### Requirements
@@ -85,14 +92,40 @@ The optional fields are:
 *   [TS](#tab-panel-XXX)
 *   [JS](#tab-panel-XXX)
 
-```
-1import { env } from "$env/dynamic/private";2import arcjet, { shield } from "@arcjet/sveltekit";3
-4export const aj = arcjet({5  // Get your site key from https://app.arcjet.com6  // and set it as an environment variable rather than hard coding.7  // See: https://kit.svelte.dev/docs/modules#$env-dynamic-private8  key: env.ARCJET_KEY!,9  rules: [10    // Protect against common attacks with Arcjet Shield11    shield({12      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only13    }),14  ],15});
+```ts
+import { env } from "$env/dynamic/private";
+import arcjet, { shield } from "@arcjet/sveltekit";
+
+export const aj = arcjet({
+  // Get your site key from https://app.arcjet.com
+  // and set it as an environment variable rather than hard coding.
+  // See: https://kit.svelte.dev/docs/modules#$env-dynamic-private
+  key: env.ARCJET_KEY!,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
 ```
 
-```
-1import { env } from "$env/dynamic/private";2import arcjet, { shield } from "@arcjet/sveltekit";3
-4export const aj = arcjet({5  // Get your site key from https://app.arcjet.com6  // and set it as an environment variable rather than hard coding.7  // See: https://kit.svelte.dev/docs/modules#$env-dynamic-private8  key: env.ARCJET_KEY,9  rules: [10    // Protect against common attacks with Arcjet Shield11    shield({12      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only13    }),14  ],15});
+```js
+import { env } from "$env/dynamic/private";
+import arcjet, { shield } from "@arcjet/sveltekit";
+
+export const aj = arcjet({
+  // Get your site key from https://app.arcjet.com
+  // and set it as an environment variable rather than hard coding.
+  // See: https://kit.svelte.dev/docs/modules#$env-dynamic-private
+  key: env.ARCJET_KEY,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
 ```
 
 ### Single instance
@@ -111,15 +144,44 @@ Each rule can be configured in either `LIVE` or `DRY_RUN` mode. When in `DRY_RUN
 
 This allows you to run Arcjet in passive / demo mode to test rules before enabling them.
 
-```
-1import arcjet, { fixedWindow } from "@arcjet/sveltekit";2
-3const aj = arcjet({4  key: process.env.ARCJET_KEY!,5  rules: [6    fixedWindow(7      // This rule is live8      {9        mode: "LIVE",10        // Tracked by IP address by default, but this can be customized11        // See https://docs.arcjet.com/fingerprints12        //characteristics: ["ip.src"],13        window: "1h",14        max: 60,15      },16      // This rule is in dry run mode, so will log but not block17      {18        mode: "DRY_RUN",19        characteristics: ['http.request.headers["x-api-key"]'],20        window: "1h",21        // max could also be a dynamic value applied after looking up a limit22        // elsewhere e.g. in a database for the authenticated user23        max: 600,24      },25    ),26  ],27});
+```ts
+import arcjet, { fixedWindow } from "@arcjet/sveltekit";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    fixedWindow(
+      // This rule is live
+      {
+        mode: "LIVE",
+        // Tracked by IP address by default, but this can be customized
+        // See https://docs.arcjet.com/fingerprints
+        //characteristics: ["ip.src"],
+        window: "1h",
+        max: 60,
+      },
+      // This rule is in dry run mode, so will log but not block
+      {
+        mode: "DRY_RUN",
+        characteristics: ['http.request.headers["x-api-key"]'],
+        window: "1h",
+        // max could also be a dynamic value applied after looking up a limit
+        // elsewhere e.g. in a database for the authenticated user
+        max: 600,
+      },
+    ),
+  ],
+});
 ```
 
 As the top level conclusion will always be `ALLOW` in `DRY_RUN` mode, you can loop through each rule result to check what would have happened:
 
-```
-1for (const result of decision.results) {2  if (result.isDenied()) {3    console.log("Rule returned deny conclusion", result);4  }5}
+```ts
+for (const result of decision.results) {
+  if (result.isDenied()) {
+    console.log("Rule returned deny conclusion", result);
+  }
+}
 ```
 
 ### Multiple rules
@@ -137,16 +199,50 @@ When specifying multiple rules, the order of the rules is ignored. Rule executio
 
 index.ts
 
-```
-1import { env } from "$env/dynamic/private";2import arcjet, { detectBot, tokenBucket } from "@arcjet/sveltekit";3
-4// Create an Arcjet instance with multiple rules5const aj = arcjet({6  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com7  rules: [8    tokenBucket({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10      refillRate: 5, // refill 5 tokens per interval11      interval: 10, // refill every 10 seconds12      capacity: 10, // bucket maximum capacity of 10 tokens13    }),14    detectBot({15      mode: "LIVE",16      allow: [], // "allow none" will block all detected bots17    }),18  ],19});
+```ts
+import { env } from "$env/dynamic/private";
+import arcjet, { detectBot, tokenBucket } from "@arcjet/sveltekit";
+
+// Create an Arcjet instance with multiple rules
+const aj = arcjet({
+  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  rules: [
+    tokenBucket({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+      refillRate: 5, // refill 5 tokens per interval
+      interval: 10, // refill every 10 seconds
+      capacity: 10, // bucket maximum capacity of 10 tokens
+    }),
+    detectBot({
+      mode: "LIVE",
+      allow: [], // "allow none" will block all detected bots
+    }),
+  ],
+});
 ```
 
 index.js
 
-```
-1import { env } from "$env/dynamic/private";2import arcjet, { detectBot, tokenBucket } from "@arcjet/sveltekit";3
-4// Create an Arcjet instance with multiple rules5const aj = arcjet({6  key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com7  rules: [8    tokenBucket({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10      refillRate: 5, // refill 5 tokens per interval11      interval: 10, // refill every 10 seconds12      capacity: 10, // bucket maximum capacity of 10 tokens13    }),14    detectBot({15      mode: "LIVE",16      allow: [], // "allow none" will block all detected bots17    }),18  ],19});
+```js
+import { env } from "$env/dynamic/private";
+import arcjet, { detectBot, tokenBucket } from "@arcjet/sveltekit";
+
+// Create an Arcjet instance with multiple rules
+const aj = arcjet({
+  key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  rules: [
+    tokenBucket({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+      refillRate: 5, // refill 5 tokens per interval
+      interval: 10, // refill every 10 seconds
+      capacity: 10, // bucket maximum capacity of 10 tokens
+    }),
+    detectBot({
+      mode: "LIVE",
+      allow: [], // "allow none" will block all detected bots
+    }),
+  ],
+});
 ```
 
 ### Environment variables
@@ -165,7 +261,7 @@ First, install the required packages:
 
 Terminal window
 
-```
+```shell
 npm install pino pino-pretty
 ```
 
@@ -176,18 +272,72 @@ Then, create a custom logger that will log to JSON in production and pretty prin
 
 index.ts
 
-```
-1import { dev } from "$app/environment";2import { env } from "$env/dynamic/private";3import arcjet, { shield } from "@arcjet/sveltekit";4import pino, { type Logger } from "pino";5
-6const logger: Logger = !dev7  ? // JSON in production, default to warn8    pino({ level: env.ARCJET_LOG_LEVEL || "warn" })9  : // Pretty print in development, default to debug10    pino({11      transport: {12        target: "pino-pretty",13        options: {14          colorize: true,15        },16      },17      level: env.ARCJET_LOG_LEVEL || "debug",18    });19
-20const aj = arcjet({21  key: env.ARCJET_KEY!,22  rules: [23    // Protect against common attacks with Arcjet Shield24    shield({25      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only26    }),27  ],28  // Use the custom logger29  log: logger,30});
+```ts
+import { dev } from "$app/environment";
+import { env } from "$env/dynamic/private";
+import arcjet, { shield } from "@arcjet/sveltekit";
+import pino, { type Logger } from "pino";
+
+const logger: Logger = !dev
+  ? // JSON in production, default to warn
+    pino({ level: env.ARCJET_LOG_LEVEL || "warn" })
+  : // Pretty print in development, default to debug
+    pino({
+      transport: {
+        target: "pino-pretty",
+        options: {
+          colorize: true,
+        },
+      },
+      level: env.ARCJET_LOG_LEVEL || "debug",
+    });
+
+const aj = arcjet({
+  key: env.ARCJET_KEY!,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+  // Use the custom logger
+  log: logger,
+});
 ```
 
 index.js
 
-```
-1import { dev } from "$app/environment";2import { env } from "$env/dynamic/private";3import arcjet, { shield } from "@arcjet/node";4import pino from "pino";5
-6const logger = !dev7  ? // JSON in production, default to warn8    pino({ level: env.ARCJET_LOG_LEVEL || "warn" })9  : // Pretty print in development, default to debug10    pino({11      transport: {12        target: "pino-pretty",13        options: {14          colorize: true,15        },16      },17      level: env.ARCJET_LOG_LEVEL || "debug",18    });19
-20const aj = arcjet({21  key: env.ARCJET_KEY,22  rules: [23    // Protect against common attacks with Arcjet Shield24    shield({25      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only26    }),27  ],28  // Use the custom logger29  log: logger,30});
+```js
+import { dev } from "$app/environment";
+import { env } from "$env/dynamic/private";
+import arcjet, { shield } from "@arcjet/node";
+import pino from "pino";
+
+const logger = !dev
+  ? // JSON in production, default to warn
+    pino({ level: env.ARCJET_LOG_LEVEL || "warn" })
+  : // Pretty print in development, default to debug
+    pino({
+      transport: {
+        target: "pino-pretty",
+        options: {
+          colorize: true,
+        },
+      },
+      level: env.ARCJET_LOG_LEVEL || "debug",
+    });
+
+const aj = arcjet({
+  key: env.ARCJET_KEY,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+  // Use the custom logger
+  log: logger,
+});
 ```
 
 ### Load balancers & proxies
@@ -208,7 +358,7 @@ You can configure Arcjet to trust IP addresses in the `X-Forwarded-For` header b
 
 For example, if the load balancer is at `100.100.100.100` and the client IP address is `192.168.1.1`, the `X-Forwarded-For` header will be:
 
-```
+```http
 X-Forwarded-For: 192.168.1.1, 100.100.100.100
 ```
 
@@ -216,9 +366,18 @@ You should set the `proxies` field to `["100.100.100.100"]` so Arcjet will use `
 
 You can also specify CIDR ranges to match multiple IP addresses.
 
-```
-1import { env } from "$env/dynamic/private";2import arcjet from "@arcjet/sveltekit";3
-4const aj = arcjet({5  key: env.ARCJET_KEY!,6  rules: [],7  proxies: [8    "100.100.100.100", // A single IP9    "100.100.100.0/24", // A CIDR for the range10  ],11});
+```ts
+import { env } from "$env/dynamic/private";
+import arcjet from "@arcjet/sveltekit";
+
+const aj = arcjet({
+  key: env.ARCJET_KEY!,
+  rules: [],
+  proxies: [
+    "100.100.100.100", // A single IP
+    "100.100.100.0/24", // A CIDR for the range
+  ],
+});
 ```
 
 #### Proxy services
@@ -227,9 +386,17 @@ You can also specify CIDR ranges to match multiple IP addresses.
 
 Some providers pass the real client IP in their own header rather than adding themselves to `X-Forwarded-For`. For these you can pass a proxy service in the `proxies` list. The `cloudflare()` helper reads the real client IP from Cloudflare’s `CF-Connecting-IP` header when the request comes from a Cloudflare IP range:
 
-```
-1import { env } from "$env/dynamic/private";2import arcjet, { cloudflare } from "@arcjet/sveltekit";3
-4const aj = arcjet({5  key: env.ARCJET_KEY!,6  rules: [],7  // Read the real client IP from Cloudflare's `CF-Connecting-IP` header when8  // the request arrives from a Cloudflare IP range9  proxies: [cloudflare()],10});
+```ts
+import { env } from "$env/dynamic/private";
+import arcjet, { cloudflare } from "@arcjet/sveltekit";
+
+const aj = arcjet({
+  key: env.ARCJET_KEY!,
+  rules: [],
+  // Read the real client IP from Cloudflare's `CF-Connecting-IP` header when
+  // the request arrives from a Cloudflare IP range
+  proxies: [cloudflare()],
+});
 ```
 
 See the [best practices guide](/best-practices#proxy-services-like-cloudflare) for more, including running Cloudflare in front of your app and handling a Cloudflare range the SDK doesn’t know about yet.
@@ -250,22 +417,64 @@ A good place to put this is in your app’s server hooks file:
 
 /src/hooks.server.ts
 
-```
-1import { env } from "$env/dynamic/private";2import arcjet, { shield } from "@arcjet/sveltekit";3import { error, type RequestEvent } from "@sveltejs/kit";4
-5const aj = arcjet({6  key: env.ARCJET_KEY!,7  rules: [8    // Protect against common attacks with Arcjet Shield9    shield({10      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only11    }),12  ],13});14
-15export async function handle({16  event,17  resolve,18}: {19  event: RequestEvent;20  resolve: (event: RequestEvent) => Response | Promise<Response>;21}): Promise<Response> {22  const decision = await aj.protect(event);23
-24  if (decision.isDenied()) {25    return error(403, "Forbidden");26  }27
-28  return resolve(event);29}
+```ts
+import { env } from "$env/dynamic/private";
+import arcjet, { shield } from "@arcjet/sveltekit";
+import { error, type RequestEvent } from "@sveltejs/kit";
+
+const aj = arcjet({
+  key: env.ARCJET_KEY!,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
+
+export async function handle({
+  event,
+  resolve,
+}: {
+  event: RequestEvent;
+  resolve: (event: RequestEvent) => Response | Promise<Response>;
+}): Promise<Response> {
+  const decision = await aj.protect(event);
+
+  if (decision.isDenied()) {
+    return error(403, "Forbidden");
+  }
+
+  return resolve(event);
+}
 ```
 
 /src/hooks.server.js
 
-```
-1import { env } from "$env/dynamic/private";2import arcjet, { shield } from "@arcjet/sveltekit";3import { error } from "@sveltejs/kit";4
-5const aj = arcjet({6  key: env.ARCJET_KEY,7  rules: [8    // Protect against common attacks with Arcjet Shield9    shield({10      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only11    }),12  ],13});14
-15export async function handle({ event, resolve }) {16  const decision = await aj.protect(event);17
-18  if (decision.isDenied()) {19    return error(403, "Forbidden");20  }21
-22  return resolve(event);23}
+```js
+import { env } from "$env/dynamic/private";
+import arcjet, { shield } from "@arcjet/sveltekit";
+import { error } from "@sveltejs/kit";
+
+const aj = arcjet({
+  key: env.ARCJET_KEY,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
+
+export async function handle({ event, resolve }) {
+  const decision = await aj.protect(event);
+
+  if (decision.isDenied()) {
+    return error(403, "Forbidden");
+  }
+
+  return resolve(event);
+}
 ```
 
 Decision
@@ -326,8 +535,10 @@ The `results` property of the `ArcjetDecision` object contains an array of `Arcj
 
 You can iterate through the results and check the conclusion for each rule.
 
-```
-1for (const result of decision.results) {2  console.log("Rule Result", result);3}
+```ts
+for (const result of decision.results) {
+  console.log("Rule Result", result);
+}
 ```
 
 This example will log the full result as well as each rate limit rule:
@@ -337,24 +548,94 @@ This example will log the full result as well as each rate limit rule:
 
 /src/hooks.server.ts
 
-```
-1import { env } from "$env/dynamic/private";2import arcjet, { detectBot, fixedWindow } from "@arcjet/sveltekit";3import { error, type RequestEvent } from "@sveltejs/kit";4
-5const aj = arcjet({6  key: env.ARCJET_KEY!,7  rules: [8    fixedWindow({9      mode: "LIVE",10      window: "1h",11      max: 60,12    }),13    detectBot({14      mode: "LIVE",15      allow: [], // "allow none" will block all detected bots16    }),17  ],18});19
-20export async function handle({21  event,22  resolve,23}: {24  event: RequestEvent;25  resolve: (event: RequestEvent) => Response | Promise<Response>;26}): Promise<Response> {27  const decision = await aj.protect(event);28
-29  for (const result of decision.results) {30    if (result.reason.isRateLimit()) {31      console.log("Rate limit rule result", result);32    } else if (result.reason.isBot()) {33      console.log("Bot protection rule result", result);34    } else {35      console.log("Rule result", result);36    }37  }38
-39  if (decision.isDenied()) {40    return error(403, "Forbidden");41  }42
-43  return resolve(event);44}
+```ts
+import { env } from "$env/dynamic/private";
+import arcjet, { detectBot, fixedWindow } from "@arcjet/sveltekit";
+import { error, type RequestEvent } from "@sveltejs/kit";
+
+const aj = arcjet({
+  key: env.ARCJET_KEY!,
+  rules: [
+    fixedWindow({
+      mode: "LIVE",
+      window: "1h",
+      max: 60,
+    }),
+    detectBot({
+      mode: "LIVE",
+      allow: [], // "allow none" will block all detected bots
+    }),
+  ],
+});
+
+export async function handle({
+  event,
+  resolve,
+}: {
+  event: RequestEvent;
+  resolve: (event: RequestEvent) => Response | Promise<Response>;
+}): Promise<Response> {
+  const decision = await aj.protect(event);
+
+  for (const result of decision.results) {
+    if (result.reason.isRateLimit()) {
+      console.log("Rate limit rule result", result);
+    } else if (result.reason.isBot()) {
+      console.log("Bot protection rule result", result);
+    } else {
+      console.log("Rule result", result);
+    }
+  }
+
+  if (decision.isDenied()) {
+    return error(403, "Forbidden");
+  }
+
+  return resolve(event);
+}
 ```
 
 /src/hooks.server.js
 
-```
-1import { env } from "$env/dynamic/private";2import arcjet, { detectBot, fixedWindow } from "@arcjet/sveltekit";3import { error } from "@sveltejs/kit";4
-5const aj = arcjet({6  key: env.ARCJET_KEY,7  rules: [8    fixedWindow({9      mode: "LIVE",10      window: "1h",11      max: 60,12    }),13    detectBot({14      mode: "LIVE",15      allow: [], // "allow none" will block all detected bots16    }),17  ],18});19
-20export async function handle({ event, resolve }) {21  const decision = await aj.protect(event);22
-23  for (const result of decision.results) {24    if (result.reason.isRateLimit()) {25      console.log("Rate limit rule result", result);26    } else if (result.reason.isBot()) {27      console.log("Bot protection rule result", result);28    } else {29      console.log("Rule result", result);30    }31  }32
-33  if (decision.isDenied()) {34    return error(403, "Forbidden");35  }36
-37  return resolve(event);38}
+```js
+import { env } from "$env/dynamic/private";
+import arcjet, { detectBot, fixedWindow } from "@arcjet/sveltekit";
+import { error } from "@sveltejs/kit";
+
+const aj = arcjet({
+  key: env.ARCJET_KEY,
+  rules: [
+    fixedWindow({
+      mode: "LIVE",
+      window: "1h",
+      max: 60,
+    }),
+    detectBot({
+      mode: "LIVE",
+      allow: [], // "allow none" will block all detected bots
+    }),
+  ],
+});
+
+export async function handle({ event, resolve }) {
+  const decision = await aj.protect(event);
+
+  for (const result of decision.results) {
+    if (result.reason.isRateLimit()) {
+      console.log("Rate limit rule result", result);
+    } else if (result.reason.isBot()) {
+      console.log("Bot protection rule result", result);
+    } else {
+      console.log("Rule result", result);
+    }
+  }
+
+  if (decision.isDenied()) {
+    return error(403, "Forbidden");
+  }
+
+  return resolve(event);
+}
 ```
 
 #### Rule state
@@ -380,8 +661,8 @@ The `reason` property of the `ArcjetRuleResult` object contains an `ArcjetReason
 
 The `ArcjetReason` object for shield rules has the following properties:
 
-```
-1shieldTriggered: boolean;
+```ts
+shieldTriggered: boolean;
 ```
 
 See the [shield documentation](/shield/reference?f=sveltekit) for more information about these properties.
@@ -392,8 +673,9 @@ See the [shield documentation](/shield/reference?f=sveltekit) for more informati
 
 The `ArcjetReason` object for bot protection rules has the following properties:
 
-```
-1allowed: string[];2denied: string[];
+```ts
+allowed: string[];
+denied: string[];
 ```
 
 Each of the `allowed` and `denied` arrays contains the identifiers of the bots allowed or denied from our [full list of bots](https://arcjet.com/bot-list).
@@ -404,8 +686,11 @@ Each of the `allowed` and `denied` arrays contains the identifiers of the bots a
 
 The `ArcjetReason` object for rate limiting rules has the following properties:
 
-```
-1max: number;2remaining: number;3window: number;4reset: number;
+```ts
+max: number;
+remaining: number;
+window: number;
+reset: number;
 ```
 
 See the [rate limiting documentation](/rate-limiting/reference?f=sveltekit) for more information about these properties.
@@ -416,14 +701,14 @@ See the [rate limiting documentation](/rate-limiting/reference?f=sveltekit) for 
 
 The `ArcjetReason` object for email rules has the following properties:
 
-```
-1emailTypes: ArcjetEmailType[];
+```ts
+emailTypes: ArcjetEmailType[];
 ```
 
 An `ArcjetEmailType` is one of the following strings:
 
-```
-1"DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
+```ts
+"DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
 ```
 
 See the [email validation documentation](/email-validation/reference?f=sveltekit) for more information about these properties.
@@ -507,24 +792,84 @@ If all other rules that were run returned an `ALLOW` result, then the final Arcj
 
 /src/hooks.server.ts
 
-```
-1import { env } from "$env/dynamic/private";2import arcjet, { slidingWindow } from "@arcjet/sveltekit";3import { error, type RequestEvent } from "@sveltejs/kit";4
-5const aj = arcjet({6  key: env.ARCJET_KEY!,7  rules: [8    slidingWindow({9      mode: "LIVE",10      interval: "1h",11      max: 60,12    }),13  ],14});15
-16export async function handle({17  event,18  resolve,19}: {20  event: RequestEvent;21  resolve: (event: RequestEvent) => Response | Promise<Response>;22}): Promise<Response> {23  const decision = await aj.protect(event);24
-25  for (const { reason } of decision.results) {26    if (reason.isError()) {27      // Fail open by logging the error and continuing28      console.warn("Arcjet error", reason.message);29      // You could also fail closed here for very sensitive routes30      //return error(503, "Service unavailable");31    }32  }33
-34  if (decision.isDenied()) {35    return error(403, "Forbidden");36  }37
-38  return resolve(event);39}
+```ts
+import { env } from "$env/dynamic/private";
+import arcjet, { slidingWindow } from "@arcjet/sveltekit";
+import { error, type RequestEvent } from "@sveltejs/kit";
+
+const aj = arcjet({
+  key: env.ARCJET_KEY!,
+  rules: [
+    slidingWindow({
+      mode: "LIVE",
+      interval: "1h",
+      max: 60,
+    }),
+  ],
+});
+
+export async function handle({
+  event,
+  resolve,
+}: {
+  event: RequestEvent;
+  resolve: (event: RequestEvent) => Response | Promise<Response>;
+}): Promise<Response> {
+  const decision = await aj.protect(event);
+
+  for (const { reason } of decision.results) {
+    if (reason.isError()) {
+      // Fail open by logging the error and continuing
+      console.warn("Arcjet error", reason.message);
+      // You could also fail closed here for very sensitive routes
+      //return error(503, "Service unavailable");
+    }
+  }
+
+  if (decision.isDenied()) {
+    return error(403, "Forbidden");
+  }
+
+  return resolve(event);
+}
 ```
 
 /src/hooks.server.js
 
-```
-1import { env } from "$env/dynamic/private";2import arcjet, { slidingWindow } from "@arcjet/sveltekit";3import { error } from "@sveltejs/kit";4
-5const aj = arcjet({6  key: env.ARCJET_KEY,7  rules: [8    slidingWindow({9      mode: "LIVE",10      interval: "1h",11      max: 60,12    }),13  ],14});15
-16export async function handle({ event, resolve }) {17  const decision = await aj.protect(event);18
-19  for (const { reason } of decision.results) {20    if (reason.isError()) {21      // Fail open by logging the error and continuing22      console.warn("Arcjet error", reason.message);23      // You could also fail closed here for very sensitive routes24      //return error(503, "Service unavailable");25    }26  }27
-28  if (decision.isDenied()) {29    return error(403, "Forbidden");30  }31
-32  return resolve(event);33}
+```js
+import { env } from "$env/dynamic/private";
+import arcjet, { slidingWindow } from "@arcjet/sveltekit";
+import { error } from "@sveltejs/kit";
+
+const aj = arcjet({
+  key: env.ARCJET_KEY,
+  rules: [
+    slidingWindow({
+      mode: "LIVE",
+      interval: "1h",
+      max: 60,
+    }),
+  ],
+});
+
+export async function handle({ event, resolve }) {
+  const decision = await aj.protect(event);
+
+  for (const { reason } of decision.results) {
+    if (reason.isError()) {
+      // Fail open by logging the error and continuing
+      console.warn("Arcjet error", reason.message);
+      // You could also fail closed here for very sensitive routes
+      //return error(503, "Service unavailable");
+    }
+  }
+
+  if (decision.isDenied()) {
+    return error(403, "Forbidden");
+  }
+
+  return resolve(event);
+}
 ```
 
 The [@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect) package provides utilities for dealing with common errors.
@@ -532,24 +877,78 @@ The [@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect) package provides ut
 *   [TS](#tab-panel-XXX)
 *   [JS](#tab-panel-XXX)
 
-```
-1import { env } from "$env/dynamic/private";2import arcjet, { detectBot } from "@arcjet/sveltekit";3import { isMissingUserAgent } from "@arcjet/inspect";4import { error, json, type RequestEvent } from "@sveltejs/kit";5
-6const aj = arcjet({7  key: env.ARCJET_KEY!,8  rules: [9    detectBot({10      mode: "LIVE",11      allow: [],12    }),13  ],14});15
-16export async function GET(event: RequestEvent) {17  const decision = await aj.protect(event);18
-19  if (decision.isDenied()) {20    return error(403, { message: "You are a bot!" });21  }22
-23  if (decision.results.some(isMissingUserAgent)) {24    // Requests without User-Agent headers might not be identified as any25    // particular bot and could be marked as an errored result. Most legitimate26    // clients send this header, so we recommend blocking requests without it.27    // See https://docs.arcjet.com/bot-protection/reference#user-agent-header28    console.warn("User-Agent header is missing");29
-30    return error(400, { message: "Bad request" });31  }32
-33  return json({ message: "Hello world" });34}
+```ts
+import { env } from "$env/dynamic/private";
+import arcjet, { detectBot } from "@arcjet/sveltekit";
+import { isMissingUserAgent } from "@arcjet/inspect";
+import { error, json, type RequestEvent } from "@sveltejs/kit";
+
+const aj = arcjet({
+  key: env.ARCJET_KEY!,
+  rules: [
+    detectBot({
+      mode: "LIVE",
+      allow: [],
+    }),
+  ],
+});
+
+export async function GET(event: RequestEvent) {
+  const decision = await aj.protect(event);
+
+  if (decision.isDenied()) {
+    return error(403, { message: "You are a bot!" });
+  }
+
+  if (decision.results.some(isMissingUserAgent)) {
+    // Requests without User-Agent headers might not be identified as any
+    // particular bot and could be marked as an errored result. Most legitimate
+    // clients send this header, so we recommend blocking requests without it.
+    // See https://docs.arcjet.com/bot-protection/reference#user-agent-header
+    console.warn("User-Agent header is missing");
+
+    return error(400, { message: "Bad request" });
+  }
+
+  return json({ message: "Hello world" });
+}
 ```
 
-```
-1import { env } from "$env/dynamic/private";2import arcjet, { detectBot } from "@arcjet/sveltekit";3import { isMissingUserAgent } from "@arcjet/inspect";4import { error, json } from "@sveltejs/kit";5
-6const aj = arcjet({7  key: env.ARCJET_KEY,8  rules: [9    detectBot({10      mode: "LIVE",11      allow: [],12    }),13  ],14});15
-16export async function GET(event) {17  const decision = await aj.protect(event);18
-19  if (decision.isDenied()) {20    return error(403, { message: "You are a bot!" });21  }22
-23  if (decision.results.some(isMissingUserAgent)) {24    // Requests without User-Agent headers might not be identified as any25    // particular bot and could be marked as an errored result. Most legitimate26    // clients send this header, so we recommend blocking requests without it.27    // See https://docs.arcjet.com/bot-protection/reference#user-agent-header28    console.warn("User-Agent header is missing");29
-30    return error(400, { message: "Bad request" });31  }32
-33  return json({ message: "Hello world" });34}
+```js
+import { env } from "$env/dynamic/private";
+import arcjet, { detectBot } from "@arcjet/sveltekit";
+import { isMissingUserAgent } from "@arcjet/inspect";
+import { error, json } from "@sveltejs/kit";
+
+const aj = arcjet({
+  key: env.ARCJET_KEY,
+  rules: [
+    detectBot({
+      mode: "LIVE",
+      allow: [],
+    }),
+  ],
+});
+
+export async function GET(event) {
+  const decision = await aj.protect(event);
+
+  if (decision.isDenied()) {
+    return error(403, { message: "You are a bot!" });
+  }
+
+  if (decision.results.some(isMissingUserAgent)) {
+    // Requests without User-Agent headers might not be identified as any
+    // particular bot and could be marked as an errored result. Most legitimate
+    // clients send this header, so we recommend blocking requests without it.
+    // See https://docs.arcjet.com/bot-protection/reference#user-agent-header
+    console.warn("User-Agent header is missing");
+
+    return error(400, { message: "Bad request" });
+  }
+
+  return json({ message: "Hello world" });
+}
 ```
 
 Ad hoc rules
@@ -564,26 +963,114 @@ Sometimes it is useful to add additional protection via a rule based on the logi
 
 /src/routes/guests-rate-limited/+page.server.ts
 
-```
-1import { env } from "$env/dynamic/private";2import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/sveltekit";3import { error, type RequestEvent } from "@sveltejs/kit";4
-5const aj = arcjet({6  key: env.ARCJET_KEY!,7  rules: [8    // Protect against common attacks with Arcjet Shield9    shield({10      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only11    }),12  ],13});14
-15function getClient(userId?: string) {16  if (userId) {17    return aj;18  } else {19    // Only apply bot detection and rate limiting to non-authenticated users20    return (21      aj22        .withRule(23          fixedWindow({24            max: 10,25            window: "1m",26          }),27        )28        // You can chain multiple rules, or just use one29        .withRule(30          detectBot({31            mode: "LIVE", // will block requests. Use "DRY_RUN" to log only32            allow: [], // "allow none" will block all detected bots33          }),34        )35    );36  }37}38
-39export async function load(event: RequestEvent) {40  // This userId is hard coded for the example, but this is where you would do a41  // session lookup and get the user ID.42  const userId = "totoro";43
-44  const decision = await getClient(userId).protect(event);45
-46  if (decision.isDenied()) {47    return error(429, "Rate limited");48  }49
-50  return {};51}
+```ts
+import { env } from "$env/dynamic/private";
+import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/sveltekit";
+import { error, type RequestEvent } from "@sveltejs/kit";
+
+const aj = arcjet({
+  key: env.ARCJET_KEY!,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
+
+function getClient(userId?: string) {
+  if (userId) {
+    return aj;
+  } else {
+    // Only apply bot detection and rate limiting to non-authenticated users
+    return (
+      aj
+        .withRule(
+          fixedWindow({
+            max: 10,
+            window: "1m",
+          }),
+        )
+        // You can chain multiple rules, or just use one
+        .withRule(
+          detectBot({
+            mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+            allow: [], // "allow none" will block all detected bots
+          }),
+        )
+    );
+  }
+}
+
+export async function load(event: RequestEvent) {
+  // This userId is hard coded for the example, but this is where you would do a
+  // session lookup and get the user ID.
+  const userId = "totoro";
+
+  const decision = await getClient(userId).protect(event);
+
+  if (decision.isDenied()) {
+    return error(429, "Rate limited");
+  }
+
+  return {};
+}
 ```
 
 /src/routes/guests-rate-limited/+page.server.js
 
-```
-1import { env } from "$env/dynamic/private";2import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/sveltekit";3import { error } from "@sveltejs/kit";4
-5const aj = arcjet({6  key: env.ARCJET_KEY,7  rules: [8    // Protect against common attacks with Arcjet Shield9    shield({10      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only11    }),12  ],13});14
-15function getClient(userId) {16  if (userId) {17    return aj;18  } else {19    // Only apply bot detection and rate limiting to non-authenticated users20    return (21      aj22        .withRule(23          fixedWindow({24            max: 10,25            window: "1m",26          }),27        )28        // You can chain multiple rules, or just use one29        .withRule(30          detectBot({31            mode: "LIVE", // will block requests. Use "DRY_RUN" to log only32            allow: [], // "allow none" will block all detected bots33          }),34        )35    );36  }37}38
-39export async function load(event) {40  // This userId is hard coded for the example, but this is where you would do a41  // session lookup and get the user ID.42  const userId = "totoro";43
-44  const decision = await getClient(userId).protect(event);45
-46  if (decision.isDenied()) {47    return error(429, "Rate limited");48  }49
-50  return {};51}
+```js
+import { env } from "$env/dynamic/private";
+import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/sveltekit";
+import { error } from "@sveltejs/kit";
+
+const aj = arcjet({
+  key: env.ARCJET_KEY,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
+
+function getClient(userId) {
+  if (userId) {
+    return aj;
+  } else {
+    // Only apply bot detection and rate limiting to non-authenticated users
+    return (
+      aj
+        .withRule(
+          fixedWindow({
+            max: 10,
+            window: "1m",
+          }),
+        )
+        // You can chain multiple rules, or just use one
+        .withRule(
+          detectBot({
+            mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+            allow: [], // "allow none" will block all detected bots
+          }),
+        )
+    );
+  }
+}
+
+export async function load(event) {
+  // This userId is hard coded for the example, but this is where you would do a
+  // session lookup and get the user ID.
+  const userId = "totoro";
+
+  const decision = await getClient(userId).protect(event);
+
+  if (decision.isDenied()) {
+    return error(429, "Rate limited");
+  }
+
+  return {};
+}
 ```
 
 IP address detection
@@ -605,16 +1092,71 @@ The default client can be overridden. If no client is specified, a default one w
 *   [TS](#tab-panel-XXX)
 *   [JS](#tab-panel-XXX)
 
-```
-1import { env } from "$env/dynamic/private";2import arcjet, { createRemoteClient, slidingWindow } from "@arcjet/sveltekit";3import { baseUrl } from "@arcjet/env";4
-5const client = createRemoteClient({6  // baseUrl defaults to https://decide.arcjet.com and should only be changed if7  // directed by Arcjet.8  // It can also be set using the9  // [`ARCJET_BASE_URL`](https://docs.arcjet.com/environment#arcjet-base-url)10  // environment variable.11  baseUrl: baseUrl(env),12  // timeout is the maximum time to wait for a response from the server.13  // It defaults to 1000ms in development14  // (see [`ARCJET_ENV`](https://docs.arcjet.com/environment#arcjet-env))15  // and 500ms otherwise. This is a conservative limit to fail open by default.16  // In most cases, the response time will be <20-30ms.17  timeout: 500,18});19
-20const aj = arcjet({21  key: env.ARCJET_KEY!,22  rules: [23    slidingWindow({24      mode: "LIVE",25      interval: "1h",26      max: 60,27    }),28  ],29  client,30});
+```ts
+import { env } from "$env/dynamic/private";
+import arcjet, { createRemoteClient, slidingWindow } from "@arcjet/sveltekit";
+import { baseUrl } from "@arcjet/env";
+
+const client = createRemoteClient({
+  // baseUrl defaults to https://decide.arcjet.com and should only be changed if
+  // directed by Arcjet.
+  // It can also be set using the
+  // [`ARCJET_BASE_URL`](https://docs.arcjet.com/environment#arcjet-base-url)
+  // environment variable.
+  baseUrl: baseUrl(env),
+  // timeout is the maximum time to wait for a response from the server.
+  // It defaults to 1000ms in development
+  // (see [`ARCJET_ENV`](https://docs.arcjet.com/environment#arcjet-env))
+  // and 500ms otherwise. This is a conservative limit to fail open by default.
+  // In most cases, the response time will be <20-30ms.
+  timeout: 500,
+});
+
+const aj = arcjet({
+  key: env.ARCJET_KEY!,
+  rules: [
+    slidingWindow({
+      mode: "LIVE",
+      interval: "1h",
+      max: 60,
+    }),
+  ],
+  client,
+});
 ```
 
-```
-1import { env } from "$env/dynamic/private";2import arcjet, { createRemoteClient, slidingWindow } from "@arcjet/sveltekit";3import { baseUrl } from "@arcjet/env";4
-5const client = createRemoteClient({6  // baseUrl defaults to https://decide.arcjet.com and should only be changed if7  // directed by Arcjet.8  // It can also be set using the9  // [`ARCJET_BASE_URL`](https://docs.arcjet.com/environment#arcjet-base-url)10  // environment variable.11  baseUrl: baseUrl(env),12  // timeout is the maximum time to wait for a response from the server.13  // It defaults to 1000ms in development14  // (see [`ARCJET_ENV`](https://docs.arcjet.com/environment#arcjet-env))15  // and 500ms otherwise. This is a conservative limit to fail open by default.16  // In most cases, the response time will be <20-30ms.17  timeout: 500,18});19
-20const aj = arcjet({21  key: env.ARCJET_KEY,22  // Limiting by ip.src is the default if not specified23  rules: [24    slidingWindow({25      mode: "LIVE",26      interval: "1h",27      max: 60,28    }),29  ],30  client,31});
+```js
+import { env } from "$env/dynamic/private";
+import arcjet, { createRemoteClient, slidingWindow } from "@arcjet/sveltekit";
+import { baseUrl } from "@arcjet/env";
+
+const client = createRemoteClient({
+  // baseUrl defaults to https://decide.arcjet.com and should only be changed if
+  // directed by Arcjet.
+  // It can also be set using the
+  // [`ARCJET_BASE_URL`](https://docs.arcjet.com/environment#arcjet-base-url)
+  // environment variable.
+  baseUrl: baseUrl(env),
+  // timeout is the maximum time to wait for a response from the server.
+  // It defaults to 1000ms in development
+  // (see [`ARCJET_ENV`](https://docs.arcjet.com/environment#arcjet-env))
+  // and 500ms otherwise. This is a conservative limit to fail open by default.
+  // In most cases, the response time will be <20-30ms.
+  timeout: 500,
+});
+
+const aj = arcjet({
+  key: env.ARCJET_KEY,
+  // Limiting by ip.src is the default if not specified
+  rules: [
+    slidingWindow({
+      mode: "LIVE",
+      interval: "1h",
+      max: 60,
+    }),
+  ],
+  client,
+});
 ```
 
 Version support
