@@ -1541,6 +1541,14 @@ Parameters:
 Python: `sliding_window(mode=Mode.LIVE, interval=60, max=100)` — `interval`
 takes seconds as a number.
 
+Rate-limit characteristics are combined into one fingerprint. For example,
+`["ip.src", "userId"]` creates one bucket for each unique IP/user pair, not
+separate IP and user counters. Configure separate rate-limit rules when you
+need independent limits, such as one rule keyed by `userId` for an account
+quota and another keyed by `ip.src` for per-IP throttling. IP-based limits are
+useful for anonymous traffic, but IP addresses can be shared or rotated; use a
+stable user, account, tenant, or API key for authenticated traffic.
+
 ### sensitiveInfo(options)
 
 Detects and blocks requests containing sensitive information (PII).

@@ -1,6 +1,6 @@
 Terminal window
 
-```
+```sh
 ignore-me
 ```
 
@@ -59,7 +59,7 @@ Get the Arcjet key for your site from the [Arcjet dashboard](https://app.arcjet.
 
 Terminal window
 
-```
+```sh
 ARCJET_KEY=your_site_key_here
 ```
 
@@ -112,11 +112,33 @@ You can use a custom log interface matching [`pino`](https://github.com/pinojs/p
 
 Then, create a custom logger that will log to JSON in production and pretty print in development:
 
-```
-1import arcjetReactRouter from "@arcjet/react-router";2import pino from "pino";3
-4const arcjetKey = process.env.ARCJET_KEY;5
-6if (!arcjetKey) {7  throw new Error("Cannot find `ARCJET_KEY` environment variable");8}9
-10const arcjet = arcjetReactRouter({11  key: arcjetKey,12  log: pino({13    // Warn in development, debug otherwise.14    level:15      process.env.ARCJET_LOG_LEVEL ||16      (process.env.ARCJET_ENV === "development" ? "debug" : "warn"),17    // Pretty print in development, JSON otherwise.18    transport:19      process.env.ARCJET_ENV === "development"20        ? { options: { colorize: true }, target: "pino-pretty" }21        : undefined,22  }),23  rules: [24    // …25  ],26});
+```js
+import arcjetReactRouter from "@arcjet/react-router";
+import pino from "pino";
+
+const arcjetKey = process.env.ARCJET_KEY;
+
+if (!arcjetKey) {
+  throw new Error("Cannot find `ARCJET_KEY` environment variable");
+}
+
+const arcjet = arcjetReactRouter({
+  key: arcjetKey,
+  log: pino({
+    // Warn in development, debug otherwise.
+    level:
+      process.env.ARCJET_LOG_LEVEL ||
+      (process.env.ARCJET_ENV === "development" ? "debug" : "warn"),
+    // Pretty print in development, JSON otherwise.
+    transport:
+      process.env.ARCJET_ENV === "development"
+        ? { options: { colorize: true }, target: "pino-pretty" }
+        : undefined,
+  }),
+  rules: [
+    // …
+  ],
+});
 ```
 
 Custom client
@@ -126,11 +148,22 @@ Custom client
 
 You can pass a client to change the behavior when connecting to the Cloud API. Use [`createRemoteClient`](https://github.com/arcjet/arcjet-js/tree/main/arcjet-react-router#createremoteclient) to create a client.
 
-```
-1import arcjetReactRouter, { createRemoteClient } from "@arcjet/react-router";2
-3const arcjetKey = process.env.ARCJET_KEY;4
-5if (!arcjetKey) {6  throw new Error("Cannot find `ARCJET_KEY` environment variable");7}8
-9const arcjet = arcjetReactRouter({10  key: arcjetKey,11  client: createRemoteClient({ timeout: 3000 }),12  rules: [13    // …14  ],15});
+```js
+import arcjetReactRouter, { createRemoteClient } from "@arcjet/react-router";
+
+const arcjetKey = process.env.ARCJET_KEY;
+
+if (!arcjetKey) {
+  throw new Error("Cannot find `ARCJET_KEY` environment variable");
+}
+
+const arcjet = arcjetReactRouter({
+  key: arcjetKey,
+  client: createRemoteClient({ timeout: 3000 }),
+  rules: [
+    // …
+  ],
+});
 ```
 
 * * *

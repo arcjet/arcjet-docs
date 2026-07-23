@@ -17,19 +17,19 @@ In your project root, run the following command to install the SDK:
 
 Terminal window
 
-```
+```sh
 npm i @arcjet/next @arcjet/inspect
 ```
 
 Terminal window
 
-```
+```sh
 pnpm add @arcjet/next @arcjet/inspect
 ```
 
 Terminal window
 
-```
+```sh
 yarn add @arcjet/next @arcjet/inspect
 ```
 
@@ -37,7 +37,7 @@ Note
 
 If you use Bun to run your Next.js app, you may get an error along the lines of:
 
-```
+```txt
 Internal server error: [internal] Stream closed with error code NGHTTP2_FRAME_SIZE_ERROR
 ```
 
@@ -45,10 +45,23 @@ This happens because Next.js bundles for Node.js but Bun does not support all No
 
 next.config.js
 
-```
-1/**2 * @import {NextConfig} from "next"3 */4
-5/** @type {NextConfig} */6const nextConfig = {7  // …8  webpack(config) {9    // See: <https://webpack.js.org/configuration/resolve/#resolveconditionnames>10    config.resolve.conditionNames?.unshift("bun");11    return config;12  },13  // …14};15
-16export default nextConfig;
+```js
+/**
+ * @import {NextConfig} from "next"
+ */
+
+/** @type {NextConfig} */
+const nextConfig = {
+  // …
+  webpack(config) {
+    // See: <https://webpack.js.org/configuration/resolve/#resolveconditionnames>
+    config.resolve.conditionNames?.unshift("bun");
+    return config;
+  },
+  // …
+};
+
+export default nextConfig;
 ```
 
 This may require running Next.js with the `--webpack` flag. Turbopack does not support conditions.
@@ -87,14 +100,38 @@ The optional fields are:
 *   [TS](#tab-panel-XXX)
 *   [JS](#tab-panel-XXX)
 
-```
-1import arcjet, { shield } from "@arcjet/next";2
-3const aj = arcjet({4  // Get your site key from https://app.arcjet.com5  // and set it as an environment variable rather than hard coding.6  // See: https://nextjs.org/docs/app/building-your-application/configuring/environment-variables7  key: process.env.ARCJET_KEY!,8  rules: [9    // Protect against common attacks with Arcjet Shield10    shield({11      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only12    }),13  ],14});
+```ts
+import arcjet, { shield } from "@arcjet/next";
+
+const aj = arcjet({
+  // Get your site key from https://app.arcjet.com
+  // and set it as an environment variable rather than hard coding.
+  // See: https://nextjs.org/docs/app/building-your-application/configuring/environment-variables
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
 ```
 
-```
-1import arcjet, { shield } from "@arcjet/next";2
-3const aj = arcjet({4  // Get your site key from https://app.arcjet.com5  // and set it as an environment variable rather than hard coding.6  // See: https://nextjs.org/docs/app/building-your-application/configuring/environment-variables7  key: process.env.ARCJET_KEY,8  rules: [9    // Protect against common attacks with Arcjet Shield10    shield({11      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only12    }),13  ],14});
+```js
+import arcjet, { shield } from "@arcjet/next";
+
+const aj = arcjet({
+  // Get your site key from https://app.arcjet.com
+  // and set it as an environment variable rather than hard coding.
+  // See: https://nextjs.org/docs/app/building-your-application/configuring/environment-variables
+  key: process.env.ARCJET_KEY,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
 ```
 
 ### Single instance
@@ -116,20 +153,70 @@ This allows you to run Arcjet in passive / demo mode to test rules before enabli
 *   [TS](#tab-panel-XXX)
 *   [JS](#tab-panel-XXX)
 
-```
-1import arcjet, { fixedWindow } from "@arcjet/next";2
-3const aj = arcjet({4  key: process.env.ARCJET_KEY!,5  rules: [6    // This rule is live7    fixedWindow({8      mode: "LIVE",9      // Tracked by IP address by default, but this can be customized10      // See https://docs.arcjet.com/fingerprints11      //characteristics: ["ip.src"],12      window: "1h",13      max: 60,14    }),15    // This rule is in dry run mode, so will log but not block16    fixedWindow({17      mode: "DRY_RUN",18      characteristics: ['http.request.headers["x-api-key"]'],19      window: "1h",20      // max could also be a dynamic value applied after looking up a limit21      // elsewhere e.g. in a database for the authenticated user22      max: 600,23    }),24  ],25});
+```ts
+import arcjet, { fixedWindow } from "@arcjet/next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    // This rule is live
+    fixedWindow({
+      mode: "LIVE",
+      // Tracked by IP address by default, but this can be customized
+      // See https://docs.arcjet.com/fingerprints
+      //characteristics: ["ip.src"],
+      window: "1h",
+      max: 60,
+    }),
+    // This rule is in dry run mode, so will log but not block
+    fixedWindow({
+      mode: "DRY_RUN",
+      characteristics: ['http.request.headers["x-api-key"]'],
+      window: "1h",
+      // max could also be a dynamic value applied after looking up a limit
+      // elsewhere e.g. in a database for the authenticated user
+      max: 600,
+    }),
+  ],
+});
 ```
 
-```
-1import arcjet, { fixedWindow } from "@arcjet/next";2
-3const aj = arcjet({4  key: process.env.ARCJET_KEY,5  rules: [6    // This rule is live7    fixedWindow({8      mode: "LIVE",9      // Tracked by IP address by default, but this can be customized10      // See https://docs.arcjet.com/fingerprints11      //characteristics: ["ip.src"],12      window: "1h",13      max: 60,14    }),15    // This rule is in dry run mode, so will log but not block16    fixedWindow({17      mode: "DRY_RUN",18      characteristics: ['http.request.headers["x-api-key"]'],19      window: "1h",20      // max could also be a dynamic value applied after looking up a limit21      // elsewhere e.g. in a database for the authenticated user22      max: 600,23    }),24  ],25});
+```js
+import arcjet, { fixedWindow } from "@arcjet/next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY,
+  rules: [
+    // This rule is live
+    fixedWindow({
+      mode: "LIVE",
+      // Tracked by IP address by default, but this can be customized
+      // See https://docs.arcjet.com/fingerprints
+      //characteristics: ["ip.src"],
+      window: "1h",
+      max: 60,
+    }),
+    // This rule is in dry run mode, so will log but not block
+    fixedWindow({
+      mode: "DRY_RUN",
+      characteristics: ['http.request.headers["x-api-key"]'],
+      window: "1h",
+      // max could also be a dynamic value applied after looking up a limit
+      // elsewhere e.g. in a database for the authenticated user
+      max: 600,
+    }),
+  ],
+});
 ```
 
 As the top level conclusion will always be `ALLOW` in `DRY_RUN` mode, you can loop through each rule result to check what would have happened:
 
-```
-1for (const result of decision.results) {2  if (result.isDenied()) {3    console.log("Rule returned deny conclusion", result);4  }5}
+```ts
+for (const result of decision.results) {
+  if (result.isDenied()) {
+    console.log("Rule returned deny conclusion", result);
+  }
+}
 ```
 
 ### Multiple rules
@@ -147,16 +234,48 @@ When specifying multiple rules, the order of the rules is ignored. Rule executio
 
 index.ts
 
-```
-1import arcjet, { detectBot, tokenBucket } from "@arcjet/next";2
-3// Create an Arcjet instance with multiple rules4const aj = arcjet({5  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com6  rules: [7    tokenBucket({8      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only9      refillRate: 5, // refill 5 tokens per interval10      interval: 10, // refill every 10 seconds11      capacity: 10, // bucket maximum capacity of 10 tokens12    }),13    detectBot({14      mode: "LIVE",15      allow: [], // "allow none" will block all detected bots16    }),17  ],18});
+```ts
+import arcjet, { detectBot, tokenBucket } from "@arcjet/next";
+
+// Create an Arcjet instance with multiple rules
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  rules: [
+    tokenBucket({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+      refillRate: 5, // refill 5 tokens per interval
+      interval: 10, // refill every 10 seconds
+      capacity: 10, // bucket maximum capacity of 10 tokens
+    }),
+    detectBot({
+      mode: "LIVE",
+      allow: [], // "allow none" will block all detected bots
+    }),
+  ],
+});
 ```
 
 index.js
 
-```
-1import arcjet, { detectBot, tokenBucket } from "@arcjet/next";2
-3// Create an Arcjet instance with multiple rules4const aj = arcjet({5  key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com6  rules: [7    tokenBucket({8      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only9      refillRate: 5, // refill 5 tokens per interval10      interval: 10, // refill every 10 seconds11      capacity: 10, // bucket maximum capacity of 10 tokens12    }),13    detectBot({14      mode: "LIVE",15      allow: [], // "allow none" will block all detected bots16    }),17  ],18});
+```js
+import arcjet, { detectBot, tokenBucket } from "@arcjet/next";
+
+// Create an Arcjet instance with multiple rules
+const aj = arcjet({
+  key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  rules: [
+    tokenBucket({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+      refillRate: 5, // refill 5 tokens per interval
+      interval: 10, // refill every 10 seconds
+      capacity: 10, // bucket maximum capacity of 10 tokens
+    }),
+    detectBot({
+      mode: "LIVE",
+      allow: [], // "allow none" will block all detected bots
+    }),
+  ],
+});
 ```
 
 ### Environment variables
@@ -175,7 +294,7 @@ First, install the required packages:
 
 Terminal window
 
-```
+```shell
 npm install pino pino-pretty
 ```
 
@@ -186,27 +305,87 @@ Then, create a custom logger that will log to JSON in production and pretty prin
 
 /app/api/route/hello.ts
 
-```
-1import arcjet, { shield } from "@arcjet/next";2import pino, { type Logger } from "pino";3
-4const logger: Logger =5  process.env.ARCJET_ENV !== "development"6    ? // JSON in production, default to warn7      pino({ level: process.env.ARCJET_LOG_LEVEL || "warn" })8    : // Pretty print in development, default to debug9      pino({10        transport: {11          target: "pino-pretty",12          options: {13            colorize: true,14          },15        },16        level: process.env.ARCJET_LOG_LEVEL || "debug",17      });18
-19const aj = arcjet({20  key: process.env.ARCJET_KEY!,21  rules: [22    // Protect against common attacks with Arcjet Shield23    shield({24      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only25    }),26  ],27  // Use the custom logger28  log: logger,29});
+```ts
+import arcjet, { shield } from "@arcjet/next";
+import pino, { type Logger } from "pino";
+
+const logger: Logger =
+  process.env.ARCJET_ENV !== "development"
+    ? // JSON in production, default to warn
+      pino({ level: process.env.ARCJET_LOG_LEVEL || "warn" })
+    : // Pretty print in development, default to debug
+      pino({
+        transport: {
+          target: "pino-pretty",
+          options: {
+            colorize: true,
+          },
+        },
+        level: process.env.ARCJET_LOG_LEVEL || "debug",
+      });
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+  // Use the custom logger
+  log: logger,
+});
 ```
 
 /app/api/route/hello.js
 
-```
-1import arcjet, { shield } from "@arcjet/next";2import pino from "pino";3
-4const logger =5  process.env.ARCJET_ENV !== "development"6    ? // JSON in production, default to warn7      pino({ level: process.env.ARCJET_LOG_LEVEL || "warn" })8    : // Pretty print in development, default to debug9      pino({10        transport: {11          target: "pino-pretty",12          options: {13            colorize: true,14          },15        },16        level: process.env.ARCJET_LOG_LEVEL || "debug",17      });18
-19const aj = arcjet({20  key: process.env.ARCJET_KEY,21  rules: [22    // Protect against common attacks with Arcjet Shield23    shield({24      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only25    }),26  ],27  // Use the custom logger28  log: logger,29});
+```js
+import arcjet, { shield } from "@arcjet/next";
+import pino from "pino";
+
+const logger =
+  process.env.ARCJET_ENV !== "development"
+    ? // JSON in production, default to warn
+      pino({ level: process.env.ARCJET_LOG_LEVEL || "warn" })
+    : // Pretty print in development, default to debug
+      pino({
+        transport: {
+          target: "pino-pretty",
+          options: {
+            colorize: true,
+          },
+        },
+        level: process.env.ARCJET_LOG_LEVEL || "debug",
+      });
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+  // Use the custom logger
+  log: logger,
+});
 ```
 
 Finally, Next.js [requires](https://github.com/vercel/next.js/discussions/46987#discussioncomment-8464812) marking Pino as an external package in your Next.js config file:
 
 next.config.js
 
-```
-1/** @type {import('next').NextConfig} */2const nextConfig = {3  reactStrictMode: true,4  experimental: {5    // https://github.com/vercel/next.js/discussions/46987#discussioncomment-84648126    serverComponentsExternalPackages: ["pino", "pino-pretty"],7  },8};9
-10module.exports = nextConfig;
+```js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  experimental: {
+    // https://github.com/vercel/next.js/discussions/46987#discussioncomment-8464812
+    serverComponentsExternalPackages: ["pino", "pino-pretty"],
+  },
+};
+
+module.exports = nextConfig;
 ```
 
 ### Load balancers & proxies
@@ -227,7 +406,7 @@ You can configure Arcjet to trust IP addresses in the `X-Forwarded-For` header b
 
 For example, if the load balancer is at `100.100.100.100` and the client IP address is `192.168.1.1`, the `X-Forwarded-For` header will be:
 
-```
+```http
 X-Forwarded-For: 192.168.1.1, 100.100.100.100
 ```
 
@@ -235,9 +414,17 @@ You should set the `proxies` field to `["100.100.100.100"]` so Arcjet will use `
 
 You can also specify CIDR ranges to match multiple IP addresses.
 
-```
-1import arcjet from "@arcjet/next";2
-3const aj = arcjet({4  key: process.env.ARCJET_KEY!,5  rules: [],6  proxies: [7    "100.100.100.100", // A single IP8    "100.100.100.0/24", // A CIDR for the range9  ],10});
+```ts
+import arcjet from "@arcjet/next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [],
+  proxies: [
+    "100.100.100.100", // A single IP
+    "100.100.100.0/24", // A CIDR for the range
+  ],
+});
 ```
 
 #### Proxy services
@@ -246,9 +433,16 @@ You can also specify CIDR ranges to match multiple IP addresses.
 
 Some providers pass the real client IP in their own header rather than adding themselves to `X-Forwarded-For`. For these you can pass a proxy service in the `proxies` list. The `cloudflare()` helper reads the real client IP from Cloudflare’s `CF-Connecting-IP` header when the request comes from a Cloudflare IP range:
 
-```
-1import arcjet, { cloudflare } from "@arcjet/next";2
-3const aj = arcjet({4  key: process.env.ARCJET_KEY!,5  rules: [],6  // Read the real client IP from Cloudflare's `CF-Connecting-IP` header when7  // the request arrives from a Cloudflare IP range8  proxies: [cloudflare()],9});
+```ts
+import arcjet, { cloudflare } from "@arcjet/next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [],
+  // Read the real client IP from Cloudflare's `CF-Connecting-IP` header when
+  // the request arrives from a Cloudflare IP range
+  proxies: [cloudflare()],
+});
 ```
 
 See the [best practices guide](/best-practices#proxy-services-like-cloudflare) for more, including running Cloudflare in front of your app and handling a Cloudflare range the SDK doesn’t know about yet.
@@ -269,42 +463,120 @@ This function returns a `Promise` that resolves to an `ArcjetDecision` object, w
 
 /app/api/route/hello.ts
 
-```
-1import arcjet, { shield } from "@arcjet/next";2import { NextResponse } from "next/server";3
-4const aj = arcjet({5  key: process.env.ARCJET_KEY!,6  rules: [7    // Protect against common attacks with Arcjet Shield8    shield({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10    }),11  ],12});13
-14export async function POST(req: Request) {15  const decision = await aj.protect(req);16
-17  if (decision.isDenied()) {18    return NextResponse.json({ error: "Forbidden" }, { status: 403 });19  }20
-21  return NextResponse.json({22    message: "Hello world",23  });24}
+```ts
+import arcjet, { shield } from "@arcjet/next";
+import { NextResponse } from "next/server";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
+
+export async function POST(req: Request) {
+  const decision = await aj.protect(req);
+
+  if (decision.isDenied()) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  return NextResponse.json({
+    message: "Hello world",
+  });
+}
 ```
 
 /pages/api/hello.ts
 
-```
-1import arcjet, { shield } from "@arcjet/next";2import type { NextApiRequest, NextApiResponse } from "next";3
-4const aj = arcjet({5  key: process.env.ARCJET_KEY!,6  rules: [7    // Protect against common attacks with Arcjet Shield8    shield({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10    }),11  ],12});13
-14export default async function handler(15  req: NextApiRequest,16  res: NextApiResponse,17) {18  const decision = await aj.protect(req);19
-20  if (decision.isDenied()) {21    return res22      .status(403)23      .json({ error: "Forbidden", reason: decision.reason });24  }25
-26  res.status(200).json({ name: "Hello world" });27}
+```ts
+import arcjet, { shield } from "@arcjet/next";
+import type { NextApiRequest, NextApiResponse } from "next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
+  const decision = await aj.protect(req);
+
+  if (decision.isDenied()) {
+    return res
+      .status(403)
+      .json({ error: "Forbidden", reason: decision.reason });
+  }
+
+  res.status(200).json({ name: "Hello world" });
+}
 ```
 
 /app/api/route/hello.js
 
-```
-1import arcjet, { shield } from "@arcjet/next";2import { NextResponse } from "next/server";3
-4const aj = arcjet({5  key: process.env.ARCJET_KEY,6  rules: [7    // Protect against common attacks with Arcjet Shield8    shield({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10    }),11  ],12});13
-14export async function POST(req) {15  const decision = await aj.protect(req);16
-17  if (decision.isDenied()) {18    return NextResponse.json({ error: "Forbidden" }, { status: 403 });19  }20
-21  return NextResponse.json({22    message: "Hello world",23  });24}
+```js
+import arcjet, { shield } from "@arcjet/next";
+import { NextResponse } from "next/server";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
+
+export async function POST(req) {
+  const decision = await aj.protect(req);
+
+  if (decision.isDenied()) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  return NextResponse.json({
+    message: "Hello world",
+  });
+}
 ```
 
 /pages/api/hello.js
 
-```
-1import arcjet, { shield } from "@arcjet/next";2
-3const aj = arcjet({4  key: process.env.ARCJET_KEY,5  rules: [6    // Protect against common attacks with Arcjet Shield7    shield({8      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only9    }),10  ],11});12
-13export default async function handler(req, res) {14  const decision = await aj.protect(req);15
-16  if (decision.isDenied()) {17    return res18      .status(403)19      .json({ error: "Forbidden", reason: decision.reason });20  }21
-22  res.status(200).json({ name: "Hello world" });23}
+```js
+import arcjet, { shield } from "@arcjet/next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
+
+export default async function handler(req, res) {
+  const decision = await aj.protect(req);
+
+  if (decision.isDenied()) {
+    return res
+      .status(403)
+      .json({ error: "Forbidden", reason: decision.reason });
+  }
+
+  res.status(200).json({ name: "Hello world" });
+}
 ```
 
 ### Pages / Page components
@@ -315,13 +587,44 @@ Arcjet can protect Next.js pages that are server components (the default). Clien
 
 app/page.tsx
 
-```
-1// Pages are server components by default, so this is just being explicit2"use server";3
-4import arcjet, { detectBot, request } from "@arcjet/next";5
-6const aj = arcjet({7  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com8  rules: [9    // Create a bot detection rule10    detectBot({11      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only12      // Block all bots except the following13      allow: [14        "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc15        // Uncomment to allow these other common bot categories16        // See the full list at https://arcjet.com/bot-list17        //"CATEGORY:MONITOR", // Uptime monitoring services18        //"CATEGORY:PREVIEW", // Link previews e.g. Slack, Discord19      ],20    }),21  ],22});23
-24export default async function Page() {25  // Access the request object so Arcjet can analyze it26  const req = await request();27  // Call Arcjet protect28  const decision = await aj.protect(req);29
-30  if (decision.isDenied()) {31    // This will be caught by the nearest error boundary32    // See https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#error-handling33    throw new Error("Forbidden");34  }35
-36  return <h1>Hello, Home page!</h1>;37}
+```ts
+// Pages are server components by default, so this is just being explicit
+"use server";
+
+import arcjet, { detectBot, request } from "@arcjet/next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  rules: [
+    // Create a bot detection rule
+    detectBot({
+      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+      // Block all bots except the following
+      allow: [
+        "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc
+        // Uncomment to allow these other common bot categories
+        // See the full list at https://arcjet.com/bot-list
+        //"CATEGORY:MONITOR", // Uptime monitoring services
+        //"CATEGORY:PREVIEW", // Link previews e.g. Slack, Discord
+      ],
+    }),
+  ],
+});
+
+export default async function Page() {
+  // Access the request object so Arcjet can analyze it
+  const req = await request();
+  // Call Arcjet protect
+  const decision = await aj.protect(req);
+
+  if (decision.isDenied()) {
+    // This will be caught by the nearest error boundary
+    // See https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#error-handling
+    throw new Error("Forbidden");
+  }
+
+  return <h1>Hello, Home page!</h1>;
+}
 ```
 
 ### Server actions
@@ -340,29 +643,69 @@ In this example the server action is [passed as a prop to a client component](ht
 
 app/actions.ts
 
-```
-1"use server";2
-3import arcjet, { detectBot, request, shield } from "@arcjet/next";4
-5const aj = arcjet({6  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com7  rules: [8    // Shield protects your app from common attacks e.g. SQL injection9    shield({ mode: "LIVE" }),10    // Create a bot detection rule11    detectBot({12      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only13      // Block all bots. See14      // https://arcjet.com/bot-list15      allow: [],16    }),17  ],18});19
-20export async function create() {21  // Access request data that Arcjet needs when you call `protect()` similarly22  // to `await headers()` and `await cookies()` in `next/headers`23  const req = await request();24
-25  // Call Arcjet protect26  const decision = await aj.protect(req);27  console.log("Decision:", decision);28
-29  if (decision.isDenied()) {30    // This will be caught by the nearest error boundary31    // See https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#error-handling32    throw new Error("Forbidden");33  }34
-35  // mutate data36}
+```ts
+"use server";
+
+import arcjet, { detectBot, request, shield } from "@arcjet/next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  rules: [
+    // Shield protects your app from common attacks e.g. SQL injection
+    shield({ mode: "LIVE" }),
+    // Create a bot detection rule
+    detectBot({
+      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+      // Block all bots. See
+      // https://arcjet.com/bot-list
+      allow: [],
+    }),
+  ],
+});
+
+export async function create() {
+  // Access request data that Arcjet needs when you call `protect()` similarly
+  // to `await headers()` and `await cookies()` in `next/headers`
+  const req = await request();
+
+  // Call Arcjet protect
+  const decision = await aj.protect(req);
+  console.log("Decision:", decision);
+
+  if (decision.isDenied()) {
+    // This will be caught by the nearest error boundary
+    // See https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#error-handling
+    throw new Error("Forbidden");
+  }
+
+  // mutate data
+}
 ```
 
 app/ui/button.tsx
 
-```
-1"use client";2
-3import { create } from "@/app/actions";4
-5export function Button() {6  return <button onClick={() => create()}>Create</button>;7}
+```tsx
+"use client";
+
+import { create } from "@/app/actions";
+
+export function Button() {
+  return <button onClick={() => create()}>Create</button>;
+}
 ```
 
 app/page.tsx
 
-```
-1import { Button } from "./ui/button";2
-3export default function Home() {4  return (5    <div>6      <Button />7    </div>8  );9}
+```tsx
+import { Button } from "./ui/button";
+
+export default function Home() {
+  return (
+    <div>
+      <Button />
+    </div>
+  );
+}
 ```
 
 #### Form example
@@ -375,15 +718,53 @@ These examples will `throw` when there is an error ([docs](https://nextjs.org/do
 
 app/invoices/page.tsx
 
-```
-1import arcjet, { shield, request, detectBot } from "@arcjet/next";2
-3const aj = arcjet({4  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com5  rules: [6    // Shield protects your app from common attacks e.g. SQL injection7    shield({ mode: "LIVE" }),8    // Create a bot detection rule9    detectBot({10      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only11      // Block all bots. See12      // https://arcjet.com/bot-list13      allow: [],14    }),15  ],16});17
-18// A simple form handler Based on19// https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#forms20export default function Page() {21  async function createInvoice(formData: FormData) {22    "use server";23
-24    // Access the request object so Arcjet can analyze it25    const req = await request();26    // Call Arcjet protect27    const decision = await aj.protect(req);28
-29    if (decision.isDenied()) {30      // This will be caught by the nearest error boundary31      // See https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#error-handling32      throw new Error("Forbidden");33    }34
-35    const rawFormData = {36      customerId: formData.get("customerId"),37      amount: formData.get("amount"),38      status: formData.get("status"),39    };40
-41    // mutate data42    // revalidate cache43  }44
-45  return <form action={createInvoice}>...</form>;46}
+```ts
+import arcjet, { shield, request, detectBot } from "@arcjet/next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  rules: [
+    // Shield protects your app from common attacks e.g. SQL injection
+    shield({ mode: "LIVE" }),
+    // Create a bot detection rule
+    detectBot({
+      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+      // Block all bots. See
+      // https://arcjet.com/bot-list
+      allow: [],
+    }),
+  ],
+});
+
+// A simple form handler Based on
+// https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#forms
+export default function Page() {
+  async function createInvoice(formData: FormData) {
+    "use server";
+
+    // Access the request object so Arcjet can analyze it
+    const req = await request();
+    // Call Arcjet protect
+    const decision = await aj.protect(req);
+
+    if (decision.isDenied()) {
+      // This will be caught by the nearest error boundary
+      // See https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#error-handling
+      throw new Error("Forbidden");
+    }
+
+    const rawFormData = {
+      customerId: formData.get("customerId"),
+      amount: formData.get("amount"),
+      status: formData.get("status"),
+    };
+
+    // mutate data
+    // revalidate cache
+  }
+
+  return <form action={createInvoice}>...</form>;
+}
 ```
 
 Decision
@@ -444,8 +825,10 @@ The `results` property of the `ArcjetDecision` object contains an array of `Arcj
 
 You can iterate through the results and check the conclusion for each rule.
 
-```
-1for (const result of decision.results) {2  console.log("Rule Result", result);3}
+```ts
+for (const result of decision.results) {
+  console.log("Rule Result", result);
+}
 ```
 
 This example will log the full result as well as each rate limit rule:
@@ -457,54 +840,190 @@ This example will log the full result as well as each rate limit rule:
 
 /app/api/route/hello.ts
 
-```
-1import arcjet, { fixedWindow, detectBot } from "@arcjet/next";2import { NextResponse } from "next/server";3
-4const aj = arcjet({5  key: process.env.ARCJET_KEY!,6  rules: [7    fixedWindow({8      mode: "LIVE",9      window: "1h",10      max: 60,11    }),12    detectBot({13      mode: "LIVE",14      allow: [], // "allow none" will block all detected bots15    }),16  ],17});18
-19export async function POST(req: Request) {20  const decision = await aj.protect(req);21
-22  for (const result of decision.results) {23    console.log("Rule Result", result);24
-25    if (result.reason.isRateLimit()) {26      console.log("Rate limit rule", result);27    }28
-29    if (result.reason.isBot()) {30      console.log("Bot protection rule", result);31    }32  }33
-34  if (decision.isDenied()) {35    return NextResponse.json({ error: "Forbidden" }, { status: 403 });36  }37
-38  return NextResponse.json({39    message: "Hello world",40  });41}
+```ts
+import arcjet, { fixedWindow, detectBot } from "@arcjet/next";
+import { NextResponse } from "next/server";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    fixedWindow({
+      mode: "LIVE",
+      window: "1h",
+      max: 60,
+    }),
+    detectBot({
+      mode: "LIVE",
+      allow: [], // "allow none" will block all detected bots
+    }),
+  ],
+});
+
+export async function POST(req: Request) {
+  const decision = await aj.protect(req);
+
+  for (const result of decision.results) {
+    console.log("Rule Result", result);
+
+    if (result.reason.isRateLimit()) {
+      console.log("Rate limit rule", result);
+    }
+
+    if (result.reason.isBot()) {
+      console.log("Bot protection rule", result);
+    }
+  }
+
+  if (decision.isDenied()) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  return NextResponse.json({
+    message: "Hello world",
+  });
+}
 ```
 
 /pages/api/hello.ts
 
-```
-1import arcjet, { fixedWindow, detectBot } from "@arcjet/next";2import type { NextApiRequest, NextApiResponse } from "next";3
-4const aj = arcjet({5  key: process.env.ARCJET_KEY!,6  rules: [7    fixedWindow({8      mode: "LIVE",9      window: "1h",10      max: 60,11    }),12    detectBot({13      mode: "LIVE",14      allow: [], // "allow none" will block all detected bots15    }),16  ],17});18
-19export default async function handler(20  req: NextApiRequest,21  res: NextApiResponse,22) {23  const decision = await aj.protect(req);24  console.log("Decision", decision);25
-26  for (const result of decision.results) {27    console.log("Rule Result", result);28
-29    if (result.reason.isRateLimit()) {30      console.log("Rate limit rule", result);31    }32
-33    if (result.reason.isBot()) {34      console.log("Bot protection rule", result);35    }36  }37
-38  if (decision.isDenied()) {39    return res40      .status(403)41      .json({ error: "Forbidden", reason: decision.reason });42  }43
-44  res.status(200).json({ name: "Hello world" });45}
+```ts
+import arcjet, { fixedWindow, detectBot } from "@arcjet/next";
+import type { NextApiRequest, NextApiResponse } from "next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    fixedWindow({
+      mode: "LIVE",
+      window: "1h",
+      max: 60,
+    }),
+    detectBot({
+      mode: "LIVE",
+      allow: [], // "allow none" will block all detected bots
+    }),
+  ],
+});
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
+  const decision = await aj.protect(req);
+  console.log("Decision", decision);
+
+  for (const result of decision.results) {
+    console.log("Rule Result", result);
+
+    if (result.reason.isRateLimit()) {
+      console.log("Rate limit rule", result);
+    }
+
+    if (result.reason.isBot()) {
+      console.log("Bot protection rule", result);
+    }
+  }
+
+  if (decision.isDenied()) {
+    return res
+      .status(403)
+      .json({ error: "Forbidden", reason: decision.reason });
+  }
+
+  res.status(200).json({ name: "Hello world" });
+}
 ```
 
 /app/api/route/hello.js
 
-```
-1import arcjet, { fixedWindow, detectBot } from "@arcjet/next";2import { NextResponse } from "next/server";3
-4const aj = arcjet({5  key: process.env.ARCJET_KEY,6  rules: [7    fixedWindow({8      mode: "LIVE",9      window: "1h",10      max: 60,11    }),12    detectBot({13      mode: "LIVE",14      allow: [], // "allow none" will block all detected bots15    }),16  ],17});18
-19export async function POST(req) {20  const decision = await aj.protect(req);21
-22  for (const result of decision.results) {23    console.log("Rule Result", result);24
-25    if (result.reason.isRateLimit()) {26      console.log("Rate limit rule", result);27    }28
-29    if (result.reason.isBot()) {30      console.log("Bot protection rule", result);31    }32  }33
-34  if (decision.isDenied()) {35    return NextResponse.json({ error: "Forbidden" }, { status: 403 });36  }37
-38  return NextResponse.json({39    message: "Hello world",40  });41}
+```js
+import arcjet, { fixedWindow, detectBot } from "@arcjet/next";
+import { NextResponse } from "next/server";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY,
+  rules: [
+    fixedWindow({
+      mode: "LIVE",
+      window: "1h",
+      max: 60,
+    }),
+    detectBot({
+      mode: "LIVE",
+      allow: [], // "allow none" will block all detected bots
+    }),
+  ],
+});
+
+export async function POST(req) {
+  const decision = await aj.protect(req);
+
+  for (const result of decision.results) {
+    console.log("Rule Result", result);
+
+    if (result.reason.isRateLimit()) {
+      console.log("Rate limit rule", result);
+    }
+
+    if (result.reason.isBot()) {
+      console.log("Bot protection rule", result);
+    }
+  }
+
+  if (decision.isDenied()) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  return NextResponse.json({
+    message: "Hello world",
+  });
+}
 ```
 
 /pages/api/hello.js
 
-```
-1import arcjet, { fixedWindow, detectBot } from "@arcjet/next";2
-3const aj = arcjet({4  key: process.env.ARCJET_KEY,5  rules: [6    fixedWindow({7      mode: "LIVE",8      window: "1h",9      max: 60,10    }),11    detectBot({12      mode: "LIVE",13      allow: [], // "allow none" will block all detected bots14    }),15  ],16});17
-18export default async function handler(req, res) {19  const decision = await aj.protect(req);20  console.log("Decision", decision);21
-22  for (const result of decision.results) {23    console.log("Rule Result", result);24
-25    if (result.reason.isRateLimit()) {26      console.log("Rate limit rule", result);27    }28
-29    if (result.reason.isBot()) {30      console.log("Bot protection rule", result);31    }32  }33
-34  if (decision.isDenied()) {35    return res36      .status(403)37      .json({ error: "Forbidden", reason: decision.reason });38  }39
-40  res.status(200).json({ name: "Hello world" });41}
+```js
+import arcjet, { fixedWindow, detectBot } from "@arcjet/next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY,
+  rules: [
+    fixedWindow({
+      mode: "LIVE",
+      window: "1h",
+      max: 60,
+    }),
+    detectBot({
+      mode: "LIVE",
+      allow: [], // "allow none" will block all detected bots
+    }),
+  ],
+});
+
+export default async function handler(req, res) {
+  const decision = await aj.protect(req);
+  console.log("Decision", decision);
+
+  for (const result of decision.results) {
+    console.log("Rule Result", result);
+
+    if (result.reason.isRateLimit()) {
+      console.log("Rate limit rule", result);
+    }
+
+    if (result.reason.isBot()) {
+      console.log("Bot protection rule", result);
+    }
+  }
+
+  if (decision.isDenied()) {
+    return res
+      .status(403)
+      .json({ error: "Forbidden", reason: decision.reason });
+  }
+
+  res.status(200).json({ name: "Hello world" });
+}
 ```
 
 #### Rule state
@@ -530,8 +1049,8 @@ The `reason` property of the `ArcjetRuleResult` object contains an `ArcjetReason
 
 The `ArcjetReason` object for shield rules has the following properties:
 
-```
-1shieldTriggered: boolean;
+```ts
+shieldTriggered: boolean;
 ```
 
 See the [shield documentation](/shield/reference?f=next-js) for more information about these properties.
@@ -542,8 +1061,9 @@ See the [shield documentation](/shield/reference?f=next-js) for more information
 
 The `ArcjetReason` object for bot protection rules has the following properties:
 
-```
-1allowed: string[];2denied: string[];
+```ts
+allowed: string[];
+denied: string[];
 ```
 
 Each of the `allowed` and `denied` arrays contains the identifiers of the bots allowed or denied from our [full list of bots](https://arcjet.com/bot-list).
@@ -554,8 +1074,11 @@ Each of the `allowed` and `denied` arrays contains the identifiers of the bots a
 
 The `ArcjetReason` object for rate limiting rules has the following properties:
 
-```
-1max: number;2remaining: number;3window: number;4reset: number;
+```ts
+max: number;
+remaining: number;
+window: number;
+reset: number;
 ```
 
 See the [rate limiting documentation](/rate-limiting/reference?f=next-js) for more information about these properties.
@@ -566,14 +1089,14 @@ See the [rate limiting documentation](/rate-limiting/reference?f=next-js) for mo
 
 The `ArcjetReason` object for email rules has the following properties:
 
-```
-1emailTypes: ArcjetEmailType[];
+```ts
+emailTypes: ArcjetEmailType[];
 ```
 
 An `ArcjetEmailType` is one of the following strings:
 
-```
-1"DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
+```ts
+"DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
 ```
 
 See the [email validation documentation](/email-validation/reference?f=next-js) for more information about these properties.
@@ -652,52 +1175,165 @@ The following are available on all pricing plans:
 
 /app/api/route/hello.ts
 
-```
-1import arcjet, { shield } from "@arcjet/next";2import { NextResponse } from "next/server";3
-4const aj = arcjet({5  key: process.env.ARCJET_KEY!,6  rules: [7    // Protect against common attacks with Arcjet Shield8    shield({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10    }),11  ],12});13
-14export async function POST(req: Request) {15  const decision = await aj.protect(req);16
-17  if (decision.isDenied()) {18    return NextResponse.json({ error: "Forbidden" }, { status: 403 });19  }20
-21  if (decision.ip.hasCountry()) {22    return NextResponse.json({23      message: `Hello ${decision.ip.countryName}!`,24      country: decision.ip,25    });26  }27
-28  return NextResponse.json({29    message: "Hello world",30  });31}
+```ts
+import arcjet, { shield } from "@arcjet/next";
+import { NextResponse } from "next/server";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
+
+export async function POST(req: Request) {
+  const decision = await aj.protect(req);
+
+  if (decision.isDenied()) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  if (decision.ip.hasCountry()) {
+    return NextResponse.json({
+      message: `Hello ${decision.ip.countryName}!`,
+      country: decision.ip,
+    });
+  }
+
+  return NextResponse.json({
+    message: "Hello world",
+  });
+}
 ```
 
 /pages/api/hello.ts
 
-```
-1import arcjet, { shield } from "@arcjet/next";2import type { NextApiRequest, NextApiResponse } from "next";3
-4const aj = arcjet({5  key: process.env.ARCJET_KEY!,6  rules: [7    // Protect against common attacks with Arcjet Shield8    shield({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10    }),11  ],12});13
-14export default async function handler(15  req: NextApiRequest,16  res: NextApiResponse,17) {18  const decision = await aj.protect(req);19
-20  if (decision.isDenied()) {21    return res22      .status(403)23      .json({ error: "Forbidden", reason: decision.reason });24  }25
-26  if (decision.ip.hasCountry()) {27    return res.status(200).json({28      message: `Hello ${decision.ip.countryName}!`,29      country: decision.ip,30    });31  }32
-33  res.status(200).json({ name: "Hello world" });34}
+```ts
+import arcjet, { shield } from "@arcjet/next";
+import type { NextApiRequest, NextApiResponse } from "next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
+  const decision = await aj.protect(req);
+
+  if (decision.isDenied()) {
+    return res
+      .status(403)
+      .json({ error: "Forbidden", reason: decision.reason });
+  }
+
+  if (decision.ip.hasCountry()) {
+    return res.status(200).json({
+      message: `Hello ${decision.ip.countryName}!`,
+      country: decision.ip,
+    });
+  }
+
+  res.status(200).json({ name: "Hello world" });
+}
 ```
 
 /app/api/route/hello.js
 
-```
-1import arcjet, { shield } from "@arcjet/next";2import { NextResponse } from "next/server";3
-4const aj = arcjet({5  key: process.env.ARCJET_KEY,6  rules: [7    // Protect against common attacks with Arcjet Shield8    shield({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10    }),11  ],12});13
-14export async function POST(req) {15  const decision = await aj.protect(req);16
-17  if (decision.isDenied()) {18    return NextResponse.json({ error: "Forbidden" }, { status: 403 });19  }20
-21  if (decision.ip.hasCountry()) {22    return NextResponse.json({23      message: `Hello ${decision.ip.countryName}!`,24      country: decision.ip,25    });26  }27
-28  return NextResponse.json({29    message: "Hello world",30  });31}
+```js
+import arcjet, { shield } from "@arcjet/next";
+import { NextResponse } from "next/server";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
+
+export async function POST(req) {
+  const decision = await aj.protect(req);
+
+  if (decision.isDenied()) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  if (decision.ip.hasCountry()) {
+    return NextResponse.json({
+      message: `Hello ${decision.ip.countryName}!`,
+      country: decision.ip,
+    });
+  }
+
+  return NextResponse.json({
+    message: "Hello world",
+  });
+}
 ```
 
 /pages/api/hello.js
 
-```
-1import arcjet, { shield } from "@arcjet/next";2
-3const aj = arcjet({4  key: process.env.ARCJET_KEY,5  rules: [6    // Protect against common attacks with Arcjet Shield7    shield({8      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only9    }),10  ],11});12
-13export default async function handler(req, res) {14  const decision = await aj.protect(req);15
-16  if (decision.isDenied()) {17    return res18      .status(403)19      .json({ error: "Forbidden", reason: decision.reason });20  }21
-22  if (decision.ip.hasCountry()) {23    return res.status(200).json({24      message: `Hello ${decision.ip.countryName}!`,25      country: decision.ip,26    });27  }28
-29  res.status(200).json({ name: "Hello world" });30}
+```js
+import arcjet, { shield } from "@arcjet/next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
+
+export default async function handler(req, res) {
+  const decision = await aj.protect(req);
+
+  if (decision.isDenied()) {
+    return res
+      .status(403)
+      .json({ error: "Forbidden", reason: decision.reason });
+  }
+
+  if (decision.ip.hasCountry()) {
+    return res.status(200).json({
+      message: `Hello ${decision.ip.countryName}!`,
+      country: decision.ip,
+    });
+  }
+
+  res.status(200).json({ name: "Hello world" });
+}
 ```
 
 For the IP address `8.8.8.8` you might get the following response. Only the fields we have data for will be returned:
 
-```
-{  "name": "Hello United States!",  "ip": {    "country": "US",    "countryName": "United States",    "continent": "NA",    "continentName": "North America",    "asn": "AS15169",    "asnName": "Google LLC",    "asnDomain": "google.com"  }}
+```json
+{
+  "name": "Hello United States!",
+  "ip": {
+    "country": "US",
+    "countryName": "United States",
+    "continent": "NA",
+    "continentName": "North America",
+    "asn": "AS15169",
+    "asnName": "Google LLC",
+    "asnDomain": "google.com"
+  }
+}
 ```
 
 Error handling
@@ -718,46 +1354,156 @@ If all other rules that were run returned an `ALLOW` result, then the final Arcj
 
 /app/api/route/hello.ts
 
-```
-1import arcjet, { slidingWindow } from "@arcjet/next";2import { NextResponse } from "next/server";3
-4const aj = arcjet({5  key: process.env.ARCJET_KEY!,6  rules: [7    slidingWindow({8      mode: "LIVE",9      interval: "1h",10      max: 60,11    }),12  ],13});14
-15export async function GET(req: Request) {16  const decision = await aj.protect(req);17
-18  for (const { reason } of decision.results) {19    if (reason.isError()) {20      // Fail open by logging the error and continuing21      console.warn("Arcjet error", reason.message);22      // You could also fail closed here for very sensitive routes23      //return NextResponse.json({ error: "Service unavailable" }, { status: 503 });24    }25  }26
-27  if (decision.isDenied()) {28    return NextResponse.json({ error: "Too Many Requests" }, { status: 429 });29  }30
-31  return NextResponse.json({32    message: "Hello world",33  });34}
+```ts
+import arcjet, { slidingWindow } from "@arcjet/next";
+import { NextResponse } from "next/server";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    slidingWindow({
+      mode: "LIVE",
+      interval: "1h",
+      max: 60,
+    }),
+  ],
+});
+
+export async function GET(req: Request) {
+  const decision = await aj.protect(req);
+
+  for (const { reason } of decision.results) {
+    if (reason.isError()) {
+      // Fail open by logging the error and continuing
+      console.warn("Arcjet error", reason.message);
+      // You could also fail closed here for very sensitive routes
+      //return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
+    }
+  }
+
+  if (decision.isDenied()) {
+    return NextResponse.json({ error: "Too Many Requests" }, { status: 429 });
+  }
+
+  return NextResponse.json({
+    message: "Hello world",
+  });
+}
 ```
 
 /pages/api/hello.ts
 
-```
-1import arcjet, { slidingWindow } from "@arcjet/next";2import type { NextApiRequest, NextApiResponse } from "next";3
-4const aj = arcjet({5  key: process.env.ARCJET_KEY!,6  rules: [7    slidingWindow({8      mode: "LIVE",9      interval: "1h",10      max: 60,11    }),12  ],13});14
-15export default async function handler(16  req: NextApiRequest,17  res: NextApiResponse,18) {19  const decision = await aj.protect(req);20
-21  for (const { reason } of decision.results) {22    if (reason.isError()) {23      // Fail open by logging the error and continuing24      console.warn("Arcjet error", reason.message);25      // You could also fail closed here for very sensitive routes26      //return res.status(503).json({ error: "Service unavailable" });27    }28  }29
-30  if (decision.isDenied()) {31    return res.status(429).json({ error: "Too Many Requests" });32  }33
-34  res.status(200).json({ name: "Hello world" });35}
+```ts
+import arcjet, { slidingWindow } from "@arcjet/next";
+import type { NextApiRequest, NextApiResponse } from "next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    slidingWindow({
+      mode: "LIVE",
+      interval: "1h",
+      max: 60,
+    }),
+  ],
+});
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
+  const decision = await aj.protect(req);
+
+  for (const { reason } of decision.results) {
+    if (reason.isError()) {
+      // Fail open by logging the error and continuing
+      console.warn("Arcjet error", reason.message);
+      // You could also fail closed here for very sensitive routes
+      //return res.status(503).json({ error: "Service unavailable" });
+    }
+  }
+
+  if (decision.isDenied()) {
+    return res.status(429).json({ error: "Too Many Requests" });
+  }
+
+  res.status(200).json({ name: "Hello world" });
+}
 ```
 
 /app/api/route/hello.js
 
-```
-1import arcjet, { slidingWindow } from "@arcjet/next";2import { NextResponse } from "next/server";3
-4const aj = arcjet({5  key: process.env.ARCJET_KEY,6  rules: [7    slidingWindow({8      mode: "LIVE",9      interval: "1h",10      max: 60,11    }),12  ],13});14
-15export async function GET(req) {16  const decision = await aj.protect(req);17
-18  for (const { reason } of decision.results) {19    if (reason.isError()) {20      // Fail open by logging the error and continuing21      console.warn("Arcjet error", reason.message);22      // You could also fail closed here for very sensitive routes23      //return NextResponse.json({ error: "Service unavailable" }, { status: 503 });24    }25  }26
-27  if (decision.isDenied()) {28    return NextResponse.json({ error: "Too Many Requests" }, { status: 429 });29  }30
-31  return NextResponse.json({32    message: "Hello world",33  });34}
+```js
+import arcjet, { slidingWindow } from "@arcjet/next";
+import { NextResponse } from "next/server";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY,
+  rules: [
+    slidingWindow({
+      mode: "LIVE",
+      interval: "1h",
+      max: 60,
+    }),
+  ],
+});
+
+export async function GET(req) {
+  const decision = await aj.protect(req);
+
+  for (const { reason } of decision.results) {
+    if (reason.isError()) {
+      // Fail open by logging the error and continuing
+      console.warn("Arcjet error", reason.message);
+      // You could also fail closed here for very sensitive routes
+      //return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
+    }
+  }
+
+  if (decision.isDenied()) {
+    return NextResponse.json({ error: "Too Many Requests" }, { status: 429 });
+  }
+
+  return NextResponse.json({
+    message: "Hello world",
+  });
+}
 ```
 
 /pages/api/hello.js
 
-```
-1import arcjet, { slidingWindow } from "@arcjet/next";2
-3const aj = arcjet({4  key: process.env.ARCJET_KEY,5  rules: [6    slidingWindow({7      mode: "LIVE",8      interval: "1h",9      max: 60,10    }),11  ],12});13
-14export default async function handler(req, res) {15  const decision = await aj.protect(req);16
-17  for (const { reason } of decision.results) {18    if (reason.isError()) {19      // Fail open by logging the error and continuing20      console.warn("Arcjet error", reason.message);21      // You could also fail closed here for very sensitive routes22      //return res.status(503).json({ error: "Service unavailable" });23    }24  }25
-26  if (decision.isDenied()) {27    return res.status(429).json({ error: "Too Many Requests" });28  }29
-30  res.status(200).json({ name: "Hello world" });31}
+```js
+import arcjet, { slidingWindow } from "@arcjet/next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY,
+  rules: [
+    slidingWindow({
+      mode: "LIVE",
+      interval: "1h",
+      max: 60,
+    }),
+  ],
+});
+
+export default async function handler(req, res) {
+  const decision = await aj.protect(req);
+
+  for (const { reason } of decision.results) {
+    if (reason.isError()) {
+      // Fail open by logging the error and continuing
+      console.warn("Arcjet error", reason.message);
+      // You could also fail closed here for very sensitive routes
+      //return res.status(503).json({ error: "Service unavailable" });
+    }
+  }
+
+  if (decision.isDenied()) {
+    return res.status(429).json({ error: "Too Many Requests" });
+  }
+
+  res.status(200).json({ name: "Hello world" });
+}
 ```
 
 The [@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect) package provides utilities for dealing with common errors.
@@ -769,50 +1515,156 @@ The [@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect) package provides ut
 
 /app/api/route/hello.ts
 
-```
-1import arcjet, { detectBot } from "@arcjet/next";2import { isMissingUserAgent } from "@arcjet/inspect";3import { NextResponse } from "next/server";4
-5const aj = arcjet({6  key: process.env.ARCJET_KEY!,7  rules: [8    detectBot({9      mode: "LIVE",10      allow: [],11    }),12  ],13});14
-15export async function GET(req: Request) {16  const decision = await aj.protect(req);17
-18  if (decision.isDenied()) {19    return NextResponse.json({ error: "Too Many Requests" }, { status: 429 });20  }21
-22  if (decision.results.some(isMissingUserAgent)) {23    // Requests without User-Agent headers might not be identified as any24    // particular bot and could be marked as an errored result. Most legitimate25    // clients send this header, so we recommend blocking requests without it.26    // See https://docs.arcjet.com/bot-protection/reference#user-agent-header27    console.warn("User-Agent header is missing");28
-29    return NextResponse.json({ error: "Bad request" }, { status: 400 });30  }31
-32  return NextResponse.json({ message: "Hello world" });33}
+```ts
+import arcjet, { detectBot } from "@arcjet/next";
+import { isMissingUserAgent } from "@arcjet/inspect";
+import { NextResponse } from "next/server";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    detectBot({
+      mode: "LIVE",
+      allow: [],
+    }),
+  ],
+});
+
+export async function GET(req: Request) {
+  const decision = await aj.protect(req);
+
+  if (decision.isDenied()) {
+    return NextResponse.json({ error: "Too Many Requests" }, { status: 429 });
+  }
+
+  if (decision.results.some(isMissingUserAgent)) {
+    // Requests without User-Agent headers might not be identified as any
+    // particular bot and could be marked as an errored result. Most legitimate
+    // clients send this header, so we recommend blocking requests without it.
+    // See https://docs.arcjet.com/bot-protection/reference#user-agent-header
+    console.warn("User-Agent header is missing");
+
+    return NextResponse.json({ error: "Bad request" }, { status: 400 });
+  }
+
+  return NextResponse.json({ message: "Hello world" });
+}
 ```
 
 /pages/api/hello.ts
 
-```
-1import arcjet, { detectBot } from "@arcjet/next";2import { isMissingUserAgent } from "@arcjet/inspect";3import type { NextApiRequest, NextApiResponse } from "next";4
-5const aj = arcjet({6  key: process.env.ARCJET_KEY!,7  rules: [8    detectBot({9      mode: "LIVE",10      allow: [],11    }),12  ],13});14
-15export default async function handler(16  req: NextApiRequest,17  res: NextApiResponse,18) {19  const decision = await aj.protect(req);20
-21  if (decision.isDenied()) {22    return res.status(429).json({ error: "Too Many Requests" });23  }24
-25  if (decision.results.some(isMissingUserAgent)) {26    // Requests without User-Agent headers could not be identified as any27    // particular bot and might be marked as an errored result. Most legitimate28    // clients send this header, so we recommend blocking requests without it.29    // See https://docs.arcjet.com/bot-protection/reference#user-agent-header30    console.warn("User-Agent header is missing");31
-32    return res.status(400).json({ error: "Bad request" });33  }34
-35  res.status(200).json({ name: "Hello world" });36}
+```ts
+import arcjet, { detectBot } from "@arcjet/next";
+import { isMissingUserAgent } from "@arcjet/inspect";
+import type { NextApiRequest, NextApiResponse } from "next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    detectBot({
+      mode: "LIVE",
+      allow: [],
+    }),
+  ],
+});
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
+  const decision = await aj.protect(req);
+
+  if (decision.isDenied()) {
+    return res.status(429).json({ error: "Too Many Requests" });
+  }
+
+  if (decision.results.some(isMissingUserAgent)) {
+    // Requests without User-Agent headers could not be identified as any
+    // particular bot and might be marked as an errored result. Most legitimate
+    // clients send this header, so we recommend blocking requests without it.
+    // See https://docs.arcjet.com/bot-protection/reference#user-agent-header
+    console.warn("User-Agent header is missing");
+
+    return res.status(400).json({ error: "Bad request" });
+  }
+
+  res.status(200).json({ name: "Hello world" });
+}
 ```
 
 /app/api/route/hello.js
 
-```
-1import arcjet, { detectBot } from "@arcjet/next";2import { isMissingUserAgent } from "@arcjet/inspect";3import { NextResponse } from "next/server";4
-5const aj = arcjet({6  key: process.env.ARCJET_KEY,7  rules: [8    detectBot({9      mode: "LIVE",10      allow: [],11    }),12  ],13});14
-15export async function GET(req) {16  const decision = await aj.protect(req);17
-18  if (decision.isDenied()) {19    return NextResponse.json({ error: "Too Many Requests" }, { status: 429 });20  }21
-22  if (decision.results.some(isMissingUserAgent)) {23    // Requests without User-Agent headers might not be identified as any24    // particular bot and could be marked as an errored result. Most legitimate25    // clients send this header, so we recommend blocking requests without it.26    // See https://docs.arcjet.com/bot-protection/reference#user-agent-header27    console.warn("User-Agent header is missing");28
-29    return NextResponse.json({ error: "Bad request" }, { status: 400 });30  }31
-32  return NextResponse.json({ message: "Hello world" });33}
+```js
+import arcjet, { detectBot } from "@arcjet/next";
+import { isMissingUserAgent } from "@arcjet/inspect";
+import { NextResponse } from "next/server";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY,
+  rules: [
+    detectBot({
+      mode: "LIVE",
+      allow: [],
+    }),
+  ],
+});
+
+export async function GET(req) {
+  const decision = await aj.protect(req);
+
+  if (decision.isDenied()) {
+    return NextResponse.json({ error: "Too Many Requests" }, { status: 429 });
+  }
+
+  if (decision.results.some(isMissingUserAgent)) {
+    // Requests without User-Agent headers might not be identified as any
+    // particular bot and could be marked as an errored result. Most legitimate
+    // clients send this header, so we recommend blocking requests without it.
+    // See https://docs.arcjet.com/bot-protection/reference#user-agent-header
+    console.warn("User-Agent header is missing");
+
+    return NextResponse.json({ error: "Bad request" }, { status: 400 });
+  }
+
+  return NextResponse.json({ message: "Hello world" });
+}
 ```
 
 /pages/api/hello.js
 
-```
-1import arcjet, { detectBot } from "@arcjet/next";2import { isMissingUserAgent } from "@arcjet/inspect";3
-4const aj = arcjet({5  key: process.env.ARCJET_KEY,6  rules: [7    detectBot({8      mode: "LIVE",9      allow: [],10    }),11  ],12});13
-14export default async function handler(req, res) {15  const decision = await aj.protect(req);16
-17  if (decision.isDenied()) {18    return res.status(429).json({ error: "Too Many Requests" });19  }20
-21  if (decision.results.some(isMissingUserAgent)) {22    // Requests without User-Agent headers could not be identified as any23    // particular bot and might be marked as an errored result. Most legitimate24    // clients send this header, so we recommend blocking requests without it.25    // See https://docs.arcjet.com/bot-protection/reference#user-agent-header26    console.warn("User-Agent header is missing");27
-28    return res.status(400).json({ error: "Bad request" });29  }30
-31  res.status(200).json({ name: "Hello world" });32}
+```js
+import arcjet, { detectBot } from "@arcjet/next";
+import { isMissingUserAgent } from "@arcjet/inspect";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY,
+  rules: [
+    detectBot({
+      mode: "LIVE",
+      allow: [],
+    }),
+  ],
+});
+
+export default async function handler(req, res) {
+  const decision = await aj.protect(req);
+
+  if (decision.isDenied()) {
+    return res.status(429).json({ error: "Too Many Requests" });
+  }
+
+  if (decision.results.some(isMissingUserAgent)) {
+    // Requests without User-Agent headers could not be identified as any
+    // particular bot and might be marked as an errored result. Most legitimate
+    // clients send this header, so we recommend blocking requests without it.
+    // See https://docs.arcjet.com/bot-protection/reference#user-agent-header
+    console.warn("User-Agent header is missing");
+
+    return res.status(400).json({ error: "Bad request" });
+  }
+
+  res.status(200).json({ name: "Hello world" });
+}
 ```
 
 Ad hoc rules
@@ -829,50 +1681,232 @@ Sometimes it is useful to add additional protection via a rule based on the logi
 
 /app/api/route/hello.ts
 
-```
-1import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/next";2import { NextResponse } from "next/server";3
-4const aj = arcjet({5  key: process.env.ARCJET_KEY!,6  rules: [7    // Protect against common attacks with Arcjet Shield8    shield({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10    }),11  ],12});13
-14function getClient(userId?: string) {15  if (userId) {16    return aj;17  } else {18    // Only apply bot detection and rate limiting to non-authenticated users19    return (20      aj21        .withRule(22          fixedWindow({23            max: 10,24            window: "1m",25          }),26        )27        // You can chain multiple rules, or just use one28        .withRule(29          detectBot({30            mode: "LIVE", // will block requests. Use "DRY_RUN" to log only31            allow: [], // "allow none" will block all detected bots32          }),33        )34    );35  }36}37
-38export async function POST(req: Request) {39  // This userId is hard coded for the example, but this is where you would do a40  // session lookup and get the user ID.41  const userId = "totoro";42
-43  const decision = await getClient(userId).protect(req);44
-45  if (decision.isDenied()) {46    return NextResponse.json({ error: "Forbidden" }, { status: 403 });47  }48
-49  return NextResponse.json({50    message: "Hello world",51  });52}
+```ts
+import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/next";
+import { NextResponse } from "next/server";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
+
+function getClient(userId?: string) {
+  if (userId) {
+    return aj;
+  } else {
+    // Only apply bot detection and rate limiting to non-authenticated users
+    return (
+      aj
+        .withRule(
+          fixedWindow({
+            max: 10,
+            window: "1m",
+          }),
+        )
+        // You can chain multiple rules, or just use one
+        .withRule(
+          detectBot({
+            mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+            allow: [], // "allow none" will block all detected bots
+          }),
+        )
+    );
+  }
+}
+
+export async function POST(req: Request) {
+  // This userId is hard coded for the example, but this is where you would do a
+  // session lookup and get the user ID.
+  const userId = "totoro";
+
+  const decision = await getClient(userId).protect(req);
+
+  if (decision.isDenied()) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  return NextResponse.json({
+    message: "Hello world",
+  });
+}
 ```
 
 /pages/api/hello.ts
 
-```
-1import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/next";2import type { NextApiRequest, NextApiResponse } from "next";3
-4const aj = arcjet({5  key: process.env.ARCJET_KEY!,6  rules: [7    // Protect against common attacks with Arcjet Shield8    shield({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10    }),11  ],12});13
-14function getClient(userId?: string) {15  if (userId) {16    return aj;17  } else {18    // Only apply bot detection and rate limiting to non-authenticated users19    return (20      aj21        .withRule(22          fixedWindow({23            max: 10,24            window: "1m",25          }),26        )27        // You can chain multiple rules, or just use one28        .withRule(29          detectBot({30            mode: "LIVE", // will block requests. Use "DRY_RUN" to log only31            allow: [], // "allow none" will block all detected bots32          }),33        )34    );35  }36}37
-38export default async function handler(39  req: NextApiRequest,40  res: NextApiResponse,41) {42  // This userId is hard coded for the example, but this is where you would do a43  // session lookup and get the user ID.44  const userId = "totoro";45
-46  const decision = await getClient(userId).protect(req);47
-48  if (decision.isDenied()) {49    return res50      .status(403)51      .json({ error: "Forbidden", reason: decision.reason });52  }53
-54  res.status(200).json({ name: "Hello world" });55}
+```ts
+import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/next";
+import type { NextApiRequest, NextApiResponse } from "next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
+
+function getClient(userId?: string) {
+  if (userId) {
+    return aj;
+  } else {
+    // Only apply bot detection and rate limiting to non-authenticated users
+    return (
+      aj
+        .withRule(
+          fixedWindow({
+            max: 10,
+            window: "1m",
+          }),
+        )
+        // You can chain multiple rules, or just use one
+        .withRule(
+          detectBot({
+            mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+            allow: [], // "allow none" will block all detected bots
+          }),
+        )
+    );
+  }
+}
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
+  // This userId is hard coded for the example, but this is where you would do a
+  // session lookup and get the user ID.
+  const userId = "totoro";
+
+  const decision = await getClient(userId).protect(req);
+
+  if (decision.isDenied()) {
+    return res
+      .status(403)
+      .json({ error: "Forbidden", reason: decision.reason });
+  }
+
+  res.status(200).json({ name: "Hello world" });
+}
 ```
 
 /app/api/route/hello.js
 
-```
-1import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/next";2import { NextResponse } from "next/server";3
-4const aj = arcjet({5  key: process.env.ARCJET_KEY,6  rules: [7    // Protect against common attacks with Arcjet Shield8    shield({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10    }),11  ],12});13
-14function getClient(userId) {15  if (userId) {16    return aj;17  } else {18    // Only apply bot detection and rate limiting to non-authenticated users19    return (20      aj21        .withRule(22          fixedWindow({23            max: 10,24            window: "1m",25          }),26        )27        // You can chain multiple rules, or just use one28        .withRule(29          detectBot({30            mode: "LIVE", // will block requests. Use "DRY_RUN" to log only31            allow: [], // "allow none" will block all detected bots32          }),33        )34    );35  }36}37
-38export async function POST(req) {39  // This userId is hard coded for the example, but this is where you would do a40  // session lookup and get the user ID.41  const userId = "totoro";42
-43  const decision = await getClient(userId).protect(req);44
-45  if (decision.isDenied()) {46    return NextResponse.json({ error: "Forbidden" }, { status: 403 });47  }48
-49  return NextResponse.json({50    message: "Hello world",51  });52}
+```js
+import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/next";
+import { NextResponse } from "next/server";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
+
+function getClient(userId) {
+  if (userId) {
+    return aj;
+  } else {
+    // Only apply bot detection and rate limiting to non-authenticated users
+    return (
+      aj
+        .withRule(
+          fixedWindow({
+            max: 10,
+            window: "1m",
+          }),
+        )
+        // You can chain multiple rules, or just use one
+        .withRule(
+          detectBot({
+            mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+            allow: [], // "allow none" will block all detected bots
+          }),
+        )
+    );
+  }
+}
+
+export async function POST(req) {
+  // This userId is hard coded for the example, but this is where you would do a
+  // session lookup and get the user ID.
+  const userId = "totoro";
+
+  const decision = await getClient(userId).protect(req);
+
+  if (decision.isDenied()) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  return NextResponse.json({
+    message: "Hello world",
+  });
+}
 ```
 
 /pages/api/hello.js
 
-```
-1import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/next";2
-3const aj = arcjet({4  key: process.env.ARCJET_KEY,5  rules: [6    // Protect against common attacks with Arcjet Shield7    shield({8      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only9    }),10  ],11});12
-13function getClient(userId) {14  if (userId) {15    return aj;16  } else {17    // Only apply bot detection and rate limiting to non-authenticated users18    return (19      aj20        .withRule(21          fixedWindow({22            max: 10,23            window: "1m",24          }),25        )26        // You can chain multiple rules, or just use one27        .withRule(28          detectBot({29            mode: "LIVE", // will block requests. Use "DRY_RUN" to log only30            allow: [], // "allow none" will block all detected bots31          }),32        )33    );34  }35}36
-37export default async function handler(req, res) {38  // This userId is hard coded for the example, but this is where you would do a39  // session lookup and get the user ID.40  const userId = "totoro";41
-42  const decision = await getClient(userId).protect(req);43
-44  if (decision.isDenied()) {45    return res46      .status(403)47      .json({ error: "Forbidden", reason: decision.reason });48  }49
-50  res.status(200).json({ name: "Hello world" });51}
+```js
+import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/next";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY,
+  rules: [
+    // Protect against common attacks with Arcjet Shield
+    shield({
+      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+    }),
+  ],
+});
+
+function getClient(userId) {
+  if (userId) {
+    return aj;
+  } else {
+    // Only apply bot detection and rate limiting to non-authenticated users
+    return (
+      aj
+        .withRule(
+          fixedWindow({
+            max: 10,
+            window: "1m",
+          }),
+        )
+        // You can chain multiple rules, or just use one
+        .withRule(
+          detectBot({
+            mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+            allow: [], // "allow none" will block all detected bots
+          }),
+        )
+    );
+  }
+}
+
+export default async function handler(req, res) {
+  // This userId is hard coded for the example, but this is where you would do a
+  // session lookup and get the user ID.
+  const userId = "totoro";
+
+  const decision = await getClient(userId).protect(req);
+
+  if (decision.isDenied()) {
+    return res
+      .status(403)
+      .json({ error: "Forbidden", reason: decision.reason });
+  }
+
+  res.status(200).json({ name: "Hello world" });
+}
 ```
 
 IP address detection
@@ -894,16 +1928,68 @@ The default client can be overridden. If no client is specified, a default one w
 *   [TS](#tab-panel-XXX)
 *   [JS](#tab-panel-XXX)
 
-```
-1import arcjet, { createRemoteClient, slidingWindow } from "@arcjet/next";2import { baseUrl } from "@arcjet/env";3
-4const client = createRemoteClient({5  // baseUrl defaults to https://decide.arcjet.com and should only be changed if6  // directed by Arcjet.7  // It can also be set using the8  // [`ARCJET_BASE_URL`](https://docs.arcjet.com/environment#arcjet-base-url)9  // environment variable.10  baseUrl: baseUrl(process.env),11  // timeout is the maximum time to wait for a response from the server.12  // It defaults to 1000ms in development13  // (see [`ARCJET_ENV`](https://docs.arcjet.com/environment#arcjet-env))14  // and 500ms otherwise. This is a conservative limit to fail open by default.15  // In most cases, the response time will be <20-30ms.16  timeout: 500,17});18
-19const aj = arcjet({20  key: process.env.ARCJET_KEY!,21  rules: [22    slidingWindow({23      mode: "LIVE",24      interval: "1h",25      max: 60,26    }),27  ],28  client,29});
+```ts
+import arcjet, { createRemoteClient, slidingWindow } from "@arcjet/next";
+import { baseUrl } from "@arcjet/env";
+
+const client = createRemoteClient({
+  // baseUrl defaults to https://decide.arcjet.com and should only be changed if
+  // directed by Arcjet.
+  // It can also be set using the
+  // [`ARCJET_BASE_URL`](https://docs.arcjet.com/environment#arcjet-base-url)
+  // environment variable.
+  baseUrl: baseUrl(process.env),
+  // timeout is the maximum time to wait for a response from the server.
+  // It defaults to 1000ms in development
+  // (see [`ARCJET_ENV`](https://docs.arcjet.com/environment#arcjet-env))
+  // and 500ms otherwise. This is a conservative limit to fail open by default.
+  // In most cases, the response time will be <20-30ms.
+  timeout: 500,
+});
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    slidingWindow({
+      mode: "LIVE",
+      interval: "1h",
+      max: 60,
+    }),
+  ],
+  client,
+});
 ```
 
-```
-1import arcjet, { createRemoteClient, slidingWindow } from "@arcjet/next";2import { baseUrl } from "@arcjet/env";3
-4const client = createRemoteClient({5  // baseUrl defaults to https://decide.arcjet.com and should only be changed if6  // directed by Arcjet.7  // It can also be set using the8  // [`ARCJET_BASE_URL`](https://docs.arcjet.com/environment#arcjet-base-url)9  // environment variable.10  baseUrl: baseUrl(process.env),11  // timeout is the maximum time to wait for a response from the server.12  // It defaults to 1000ms in development13  // (see [`ARCJET_ENV`](https://docs.arcjet.com/environment#arcjet-env))14  // and 500ms otherwise. This is a conservative limit to fail open by default.15  // In most cases, the response time will be <20-30ms.16  timeout: 500,17});18
-19const aj = arcjet({20  key: process.env.ARCJET_KEY,21  rules: [22    slidingWindow({23      mode: "LIVE",24      interval: "1h",25      max: 60,26    }),27  ],28  client,29});
+```js
+import arcjet, { createRemoteClient, slidingWindow } from "@arcjet/next";
+import { baseUrl } from "@arcjet/env";
+
+const client = createRemoteClient({
+  // baseUrl defaults to https://decide.arcjet.com and should only be changed if
+  // directed by Arcjet.
+  // It can also be set using the
+  // [`ARCJET_BASE_URL`](https://docs.arcjet.com/environment#arcjet-base-url)
+  // environment variable.
+  baseUrl: baseUrl(process.env),
+  // timeout is the maximum time to wait for a response from the server.
+  // It defaults to 1000ms in development
+  // (see [`ARCJET_ENV`](https://docs.arcjet.com/environment#arcjet-env))
+  // and 500ms otherwise. This is a conservative limit to fail open by default.
+  // In most cases, the response time will be <20-30ms.
+  timeout: 500,
+});
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY,
+  rules: [
+    slidingWindow({
+      mode: "LIVE",
+      interval: "1h",
+      max: 60,
+    }),
+  ],
+  client,
+});
 ```
 
 Version support

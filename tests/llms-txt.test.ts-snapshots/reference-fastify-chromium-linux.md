@@ -1,6 +1,6 @@
 Terminal window
 
-```
+```sh
 ignore-me
 ```
 
@@ -60,7 +60,7 @@ Get the Arcjet key for your site from the [Arcjet dashboard](https://app.arcjet.
 
 Terminal window
 
-```
+```sh
 ARCJET_KEY=your_site_key_here
 ```
 
@@ -76,16 +76,47 @@ The Arcjet Fastify SDK uses several environment variables to configure its behav
 
 Use the `protect` function to protect a request from Fastify. Some rules, such as `validateEmail`, may need extra properties. The protect function returns a promise that resolves to a decision.
 
-```
-1import arcjetFastify, { tokenBucket } from "@arcjet/fastify";2import Fastify from "fastify";3
-4const arcjetKey = process.env.ARCJET_KEY;5
-6if (!arcjetKey) {7  throw new Error("Cannot find `ARCJET_KEY` environment variable");8}9
-10const arcjet = arcjetFastify({11  key: arcjetKey,12  rules: [13    tokenBucket({14      capacity: 10,15      characteristics: ["userId"],16      interval: 10,17      mode: "LIVE",18      refillRate: 5,19    }),20  ],21});22
-23const fastify = Fastify({ logger: true });24
-25fastify.get("/", async function (request, reply) {26  // Replace `userId` with your authenticated user ID.27  const userId = "user123";28  const decision = await arcjet.protect(request, {29    requested: 5,30    userId,31  });32
-33  if (decision.isDenied()) {34    return reply.status(403).send("Forbidden");35  }36
-37  return reply.status(200).send("Hello world");38});39
-40await fastify.listen({ port: 3000 });
+```js
+import arcjetFastify, { tokenBucket } from "@arcjet/fastify";
+import Fastify from "fastify";
+
+const arcjetKey = process.env.ARCJET_KEY;
+
+if (!arcjetKey) {
+  throw new Error("Cannot find `ARCJET_KEY` environment variable");
+}
+
+const arcjet = arcjetFastify({
+  key: arcjetKey,
+  rules: [
+    tokenBucket({
+      capacity: 10,
+      characteristics: ["userId"],
+      interval: 10,
+      mode: "LIVE",
+      refillRate: 5,
+    }),
+  ],
+});
+
+const fastify = Fastify({ logger: true });
+
+fastify.get("/", async function (request, reply) {
+  // Replace `userId` with your authenticated user ID.
+  const userId = "user123";
+  const decision = await arcjet.protect(request, {
+    requested: 5,
+    userId,
+  });
+
+  if (decision.isDenied()) {
+    return reply.status(403).send("Forbidden");
+  }
+
+  return reply.status(200).send("Hello world");
+});
+
+await fastify.listen({ port: 3000 });
 ```
 
 ### Decision
@@ -116,17 +147,41 @@ Errors
 
 Arcjet fails open so that a service issue, misconfiguration, or [network timeout](/architecture#timeout) does not block requests. Such errors should in many cases be logged but otherwise treated as `"ALLOW"` decisions. The `reason.message` field has more info on what occurred.
 
-```
-1import arcjetFastify, { filter } from "@arcjet/fastify";2import Fastify from "fastify";3
-4const arcjetKey = process.env.ARCJET_KEY;5
-6if (!arcjetKey) {7  throw new Error("Cannot find `ARCJET_KEY` environment variable");8}9
-10const arcjet = arcjetFastify({11  key: arcjetKey,12  rules: [13    // This broken expression will result in an error decision:14    filter({ deny: ['ip.src.country is "'] }),15  ],16});17
-18const fastify = Fastify({ logger: true });19
-20fastify.get("/", async function (request, reply) {21  const decision = await arcjet.protect(request);22
-23  if (decision.isErrored()) {24    console.warn("Arcjet error", decision.reason.message);25  }26
-27  if (decision.isDenied()) {28    return reply.status(403).send("Forbidden");29  }30
-31  return reply.status(200).send("Hello world");32});33
-34await fastify.listen({ port: 3000 });
+```js
+import arcjetFastify, { filter } from "@arcjet/fastify";
+import Fastify from "fastify";
+
+const arcjetKey = process.env.ARCJET_KEY;
+
+if (!arcjetKey) {
+  throw new Error("Cannot find `ARCJET_KEY` environment variable");
+}
+
+const arcjet = arcjetFastify({
+  key: arcjetKey,
+  rules: [
+    // This broken expression will result in an error decision:
+    filter({ deny: ['ip.src.country is "'] }),
+  ],
+});
+
+const fastify = Fastify({ logger: true });
+
+fastify.get("/", async function (request, reply) {
+  const decision = await arcjet.protect(request);
+
+  if (decision.isErrored()) {
+    console.warn("Arcjet error", decision.reason.message);
+  }
+
+  if (decision.isDenied()) {
+    return reply.status(403).send("Forbidden");
+  }
+
+  return reply.status(200).send("Hello world");
+});
+
+await fastify.listen({ port: 3000 });
 ```
 
 Custom logs
@@ -138,11 +193,33 @@ You can use a custom log interface matching [`pino`](https://github.com/pinojs/p
 
 Then, create a custom logger that will log to JSON in production and pretty print in development:
 
-```
-1import arcjetFastify from "@arcjet/fastify";2import pino from "pino";3
-4const arcjetKey = process.env.ARCJET_KEY;5
-6if (!arcjetKey) {7  throw new Error("Cannot find `ARCJET_KEY` environment variable");8}9
-10const arcjet = arcjetFastify({11  key: arcjetKey,12  log: pino({13    // Warn in development, debug otherwise.14    level:15      process.env.ARCJET_LOG_LEVEL ||16      (process.env.ARCJET_ENV === "development" ? "debug" : "warn"),17    // Pretty print in development, JSON otherwise.18    transport:19      process.env.ARCJET_ENV === "development"20        ? { options: { colorize: true }, target: "pino-pretty" }21        : undefined,22  }),23  rules: [24    // …25  ],26});
+```js
+import arcjetFastify from "@arcjet/fastify";
+import pino from "pino";
+
+const arcjetKey = process.env.ARCJET_KEY;
+
+if (!arcjetKey) {
+  throw new Error("Cannot find `ARCJET_KEY` environment variable");
+}
+
+const arcjet = arcjetFastify({
+  key: arcjetKey,
+  log: pino({
+    // Warn in development, debug otherwise.
+    level:
+      process.env.ARCJET_LOG_LEVEL ||
+      (process.env.ARCJET_ENV === "development" ? "debug" : "warn"),
+    // Pretty print in development, JSON otherwise.
+    transport:
+      process.env.ARCJET_ENV === "development"
+        ? { options: { colorize: true }, target: "pino-pretty" }
+        : undefined,
+  }),
+  rules: [
+    // …
+  ],
+});
 ```
 
 Custom client
@@ -152,11 +229,22 @@ Custom client
 
 You can pass a client to change the behavior when connecting to the Cloud API. Use `createRemoteClient` to create a client.
 
-```
-1import arcjetFastify, { createRemoteClient } from "@arcjet/fastify";2
-3const arcjetKey = process.env.ARCJET_KEY;4
-5if (!arcjetKey) {6  throw new Error("Cannot find `ARCJET_KEY` environment variable");7}8
-9const arcjet = arcjetFastify({10  key: arcjetKey,11  client: createRemoteClient({ timeout: 3000 }),12  rules: [13    // …14  ],15});
+```js
+import arcjetFastify, { createRemoteClient } from "@arcjet/fastify";
+
+const arcjetKey = process.env.ARCJET_KEY;
+
+if (!arcjetKey) {
+  throw new Error("Cannot find `ARCJET_KEY` environment variable");
+}
+
+const arcjet = arcjetFastify({
+  key: arcjetKey,
+  client: createRemoteClient({ timeout: 3000 }),
+  rules: [
+    // …
+  ],
+});
 ```
 
 * * *
