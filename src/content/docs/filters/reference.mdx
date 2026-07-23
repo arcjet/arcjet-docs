@@ -20,6 +20,8 @@ ajToc:
   - text: "Expression language"
     anchor: "expression-language"
     children:
+      - text: "Matching behavior"
+        anchor: "matching-behavior"
       - text: "Fields"
         anchor: "fields"
       - text: "Operators"
@@ -256,6 +258,45 @@ filter_request(
 
 </TabItem>
 </Tabs>
+
+## Matching behavior
+
+Filter expressions match request fields **literally**. String comparisons such
+as `eq`, `ne`, and `contains` are exact and **case-sensitive** byte matches, and
+Arcjet does not normalize, decode, or otherwise transform field values before
+matching (beyond the per-field decoding described below). This is intentional:
+filters give you precise, predictable control, and automatic normalization would
+silently change the meaning of exact-match rules.
+
+This has some practical consequences to keep in mind when writing filters:
+
+- **Case matters.** `http.request.uri.path contains "login"` will not match a
+  request for `/Login`. To match case-insensitively, wrap the field in
+  <Link.Page href="/filters/reference#functions">`lower()`</Link.Page> or
+  `upper()`, or use the
+  <Link.Page href="/filters/reference#operators">`matches`</Link.Page> (`~`)
+  operator with a case-insensitive regex flag, for example
+  `http.request.uri.path ~ "(?i)login"`.
+- **Some fields are decoded, some are not.** Query argument values in
+  `http.request.uri.args` are percent-decoded before matching (so
+  `?q=%2Fadmin` matches `http.request.uri.args["q"] eq "/admin"`), whereas
+  `http.request.uri.path` is matched as the raw, still-encoded path. Write your
+  expressions against the form of the value each field actually contains.
+
+### Filters are not a substitute for attack detection
+
+Filters are best suited to matching well-defined, known values such as a
+specific IP address, country, user agent, or path. Because matching is literal,
+hand-written filters are not an effective way to block injection-style attacks
+like SQL injection (SQLi) or cross-site scripting (XSS). An attacker can trivially
+vary the payload — for example, changing case (`<ScRiPt>`), adding encoding, or
+inserting comments (`union/**/select`) — to avoid a literal match.
+
+To detect and block these attacks, use
+<Link.Page href="/shield">Arcjet Shield</Link.Page>, which is purpose-built as a
+WAF. Shield performs attack-aware normalization and pattern detection to catch
+common attack payloads regardless of how they are obfuscated. Use filters
+alongside Shield for the custom allow/deny logic they are designed for.
 
 ## Fields
 
