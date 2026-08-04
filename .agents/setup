@@ -4,7 +4,7 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
-node_version="v24.19.0"
+node_version="v$(cat .node-version)"
 node_dir="$HOME/.local/share/node-$node_version"
 node_archive="node-$node_version-linux-x64.tar.xz"
 
@@ -30,18 +30,24 @@ fi
 
 export PATH="$node_dir/bin:$PATH"
 
-profile_marker="# arcjet-docs Node.js toolchain"
-if ! grep -Fqx "$profile_marker" "$HOME/.bash_profile" 2>/dev/null; then
-  cat >> "$HOME/.bash_profile" <<EOF
-
-$profile_marker
-if [[ "\${PWD}" == "$repo_root" ]]; then
-  export PATH="$node_dir/bin:\$PATH"
+profile_start="# arcjet-docs Node.js toolchain"
+profile_end="# end arcjet-docs Node.js toolchain"
+if grep -Fqx "$profile_start" "$HOME/.bash_profile" 2>/dev/null; then
+  if grep -Fqx "$profile_end" "$HOME/.bash_profile"; then
+    sed -i "\|^$profile_start$|,\|^$profile_end$|d" "$HOME/.bash_profile"
+  else
+    # Migrate the original block, which ended at its first `fi`.
+    sed -i "\|^$profile_start$|,/^fi$/d" "$HOME/.bash_profile"
+  fi
 fi
+cat >> "$HOME/.bash_profile" <<EOF
+
+$profile_start
+export PATH="$node_dir/bin:\$PATH"
+$profile_end
 EOF
-fi
 
-if [[ "$(npm --version)" != "11.14.1" ]]; then
+if ! command -v npm >/dev/null || [[ "$(npm --version)" != "11.14.1" ]]; then
   echo "Installing npm 11.14.1..."
   npm install --global npm@11.14.1
 fi
@@ -56,8 +62,22 @@ else
   echo "npm dependencies are already current."
 fi
 
-echo "Installing Playwright Chromium and system dependencies..."
-npm run pw:install
+chromium_revision="$(node -e '
+  const fs = require("node:fs");
+  const path = require("node:path");
+  const browsers = JSON.parse(
+    fs.readFileSync(
+      path.join(path.dirname(require.resolve("playwright-core/package.json")), "browsers.json"),
+    ),
+  ).browsers;
+  console.log(browsers.find(({ name }) => name === "chromium-headless-shell").revision);
+')"
+if [[ ! -d "$HOME/.cache/ms-playwright/chromium_headless_shell-$chromium_revision" ]]; then
+  echo "Installing Playwright Chromium and system dependencies..."
+  npm run pw:install
+else
+  echo "Playwright Chromium is already installed."
+fi
 
 if [[ ! -f .env.local ]]; then
   echo "Creating .env.local from .env.example..."
