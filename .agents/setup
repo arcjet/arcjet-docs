@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$repo_root"
+
+node_version="v24.19.0"
+node_dir="$HOME/.local/share/node-$node_version"
+node_archive="node-$node_version-linux-x64.tar.xz"
+
+if [[ ! -x "$node_dir/bin/node" ]]; then
+  echo "Installing Node.js $node_version..."
+  tmp_dir="$(mktemp -d)"
+  trap 'rm -rf "$tmp_dir"' EXIT
+
+  curl -fsSLo "$tmp_dir/$node_archive" \
+    "https://nodejs.org/dist/$node_version/$node_archive"
+  curl -fsSLo "$tmp_dir/SHASUMS256.txt" \
+    "https://nodejs.org/dist/$node_version/SHASUMS256.txt"
+  (
+    cd "$tmp_dir"
+    grep "  $node_archive$" SHASUMS256.txt | sha256sum --check --strict
+  )
+
+  mkdir -p "$node_dir"
+  tar -xJf "$tmp_dir/$node_archive" --strip-components=1 -C "$node_dir"
+  rm -rf "$tmp_dir"
+  trap - EXIT
+fi
+
+export PATH="$node_dir/bin:$PATH"
+
+profile_marker="# arcjet-docs Node.js toolchain"
+if ! grep -Fqx "$profile_marker" "$HOME/.bash_profile" 2>/dev/null; then
+  cat >> "$HOME/.bash_profile" <<EOF
+
+$profile_marker
+if [[ "\${PWD}" == "$repo_root" ]]; then
+  export PATH="$node_dir/bin:\$PATH"
+fi
+EOF
+fi
+
+if [[ "$(npm --version)" != "11.14.1" ]]; then
+  echo "Installing npm 11.14.1..."
+  npm install --global npm@11.14.1
+fi
+
+dependency_stamp="node_modules/.amp-dependency-hash"
+dependency_hash="$(cat package.json package-lock.json | sha256sum | awk '{print $1}')"
+if [[ ! -f "$dependency_stamp" ]] || [[ "$(cat "$dependency_stamp")" != "$dependency_hash" ]]; then
+  echo "Installing npm dependencies..."
+  npm ci
+  printf '%s\n' "$dependency_hash" > "$dependency_stamp"
+else
+  echo "npm dependencies are already current."
+fi
+
+echo "Installing Playwright Chromium and system dependencies..."
+npm run pw:install
+
+if [[ ! -f .env.local ]]; then
+  echo "Creating .env.local from .env.example..."
+  cp -- .env.example .env.local
+fi
+
+echo "Orb setup complete."
