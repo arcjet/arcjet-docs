@@ -1,6 +1,10 @@
 # Arcjet
 
-Arcjet is the runtime security platform that ships with your code. Install the Arcjet SDK to enforce budgets, stop prompt injection, detect bots, and protect personal information - configured by your agent via CLI or MCP, enforced inline in your application code with real identity and session context.
+Arcjet is the runtime security platform that ships with your code. It's a lightweight SDK that runs inside your application and enforces controls inline, with real identity and session context — configured by your agent via CLI or MCP.
+
+Arcjet's primary use case is securing the actions AI agents take in production. Agents have gone from answering questions to moving money, changing records, and shipping code, and the security or engineering leader now owns that risk. Identity and RBAC authenticate the agent but don't govern the action it's about to take, and network proxies can't see inside the workflow. Arcjet gives security and engineering teams visibility into what each agent is doing, real-time enforcement before a consequential action (prompt injection, PII, tool authorization), and an audit trail.
+
+Because it runs inside the same application code, Arcjet protects traditional entry points the same way — enforce budgets, detect bots, validate email, rate limit, and block common attacks across HTTP routes and APIs.
 
 Arcjet protects two types of entry points:
 - **Request-based** -- HTTP route handlers, API endpoints, middleware. Use `protect()` with any supported framework.
