@@ -1,0 +1,166 @@
+---
+title: "Agent guards testing and reference"
+description: "Test agent guard policies and understand inputs, decisions, availability, and fail behavior."
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+## Testing guard enforcement
+
+Test at the action boundary and assert both the decision behavior and the side
+effect. For each guarded tool, cover:
+
+| Scenario                              | Expected result                                      |
+| ------------------------------------- | ---------------------------------------------------- |
+| Allowed actor and inputs              | Tool executes once                                   |
+| Policy rule denial in `LIVE`          | Tool does not execute                                |
+| Same rule in `DRY_RUN`                | Result is recorded, but the rule does not block      |
+| Missing or wrong typed input          | Policy is incomplete; sensitive tools do not execute |
+| Guard transport or evaluation failure | Your selected fail behavior is applied               |
+| Local sensitive value                 | Raw local string is not sent as a policy input       |
+
+Use deterministic inputs for each rule: a recipient outside an allowed list,
+a string outside the configured byte-length range, known sensitive test data,
+and a clear prompt-injection fixture. Review `policyResults` /
+`policy_results` to identify the specific remote rule that matched.
+
+`DRY_RUN` is useful for evaluating a policy against real calls before enabling
+enforcement, but it does not replace a test that proves the side effect is
+skipped on a `LIVE` denial.
+
+## Direct Guard API
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+const decision = await arcjet.guard({
+  label: "email.sent",
+  actor: user.id,
+  inputs: {
+    recipient: policyInput.server.string(to),
+  },
+  rules: [],
+  metadata: { workflow: "support" },
+  correlationId: runId,
+  timeoutSeconds: 2,
+  signal,
+});
+```
+
+| Option           | Description                                                               |
+| ---------------- | ------------------------------------------------------------------------- |
+| `label`          | Required action identifier and remote-policy selector                     |
+| `actor`          | Optional trusted, application-asserted identity                           |
+| `inputs`         | Named values created with `policyInput.server.*` or `policyInput.local.*` |
+| `rules`          | Optional SDK rule submissions; an empty list still calls Guard            |
+| `metadata`       | Structured analytics and debugging context                                |
+| `correlationId`  | Identifier shared across related calls                                    |
+| `timeoutSeconds` | Guard request timeout; defaults to 2 seconds                              |
+| `signal`         | Optional cancellation signal                                              |
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+decision = await arcjet.guard(
+    label="email.sent",
+    actor=user.id,
+    inputs={"recipient": server_input.string(to)},
+    rules=[],
+    metadata={"workflow": "support"},
+    correlation_id=run_id,
+)
+```
+
+| Parameter        | Description                                                        |
+| ---------------- | ------------------------------------------------------------------ |
+| `label`          | Required action identifier and remote-policy selector              |
+| `actor`          | Optional trusted, application-asserted identity                    |
+| `inputs`         | Named values created with `server_input.*` or `local_input.*`      |
+| `rules`          | Optional SDK rule submissions; an empty sequence still calls Guard |
+| `metadata`       | Structured analytics and debugging context                         |
+| `correlation_id` | Identifier shared across related calls                             |
+
+</TabItem>
+</Tabs>
+
+## Decisions and policy results
+
+Every decision has an `id`, `conclusion`, SDK `results`, warnings, and error
+accessors. A denial also has a broad `reason`. Remote policy status and results
+are additive and may be absent when the server does not provide policy data.
+
+Remote policy data is separate from SDK-submitted rule results:
+
+- `policyResults` / `policy_results` contains keyed remote rule results with
+  policy ID, revision, rule ID, `LIVE` or `DRY_RUN` mode, `SDK` or `SERVER`
+  execution, and the typed result.
+- `results` remains the positional list for rules submitted by the SDK call.
+
+The Arcjet server combines enforced SDK and remote rules into the final
+`ALLOW` or `DENY`; the SDK does not recompute that aggregate conclusion.
+
+### Policy evaluation status
+
+`policyEvaluation` / `policy_evaluation` reports which policy revision Arcjet
+evaluated and its status:
+
+| Status           | What it means                                               | When you may see it                                      | How to handle it                                                        |
+| ---------------- | ----------------------------------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `NOT_CONFIGURED` | No published remote policy matched the guard label.         | A label intentionally has no policy, the label is wrong, or the policy has not been published. | If a policy is expected, verify the label and publish it. Otherwise handle the SDK rule decision normally. |
+| `APPLIED`        | Arcjet completely evaluated the matching remote policy.     | The supplied actor and inputs satisfy the policy contract and all required evaluation is available. | Enforce the returned `ALLOW` or `DENY` conclusion.                       |
+| `INCOMPLETE`     | A matching policy could not be completely evaluated.        | A required actor or input is missing or invalid, or required local evaluation could not complete. | Treat the security check as incomplete and apply your chosen availability behavior. |
+| `UNAVAILABLE`    | Remote policy evaluation was temporarily unavailable.       | Arcjet could not complete a required policy evaluation.  | Retry where appropriate or apply your chosen availability behavior.     |
+| `UNKNOWN`        | The SDK does not recognize the policy status from Arcjet.   | A newer server returns a status this SDK version does not understand. | Upgrade the SDK and, until then, treat the security check as incomplete. |
+
+The field may be absent when the server does not return remote-policy status.
+If your application expects a policy, inspect the decision's error results and
+verify the SDK and policy configuration.
+
+## Availability and fail behavior
+
+The direct Guard client fails open when a transport, timeout, response, local
+evaluation, or remote-policy completeness error prevents a full evaluation.
+It returns `ALLOW` with an error result instead of treating the incomplete
+check as a policy denial.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+  throw new Error("Action blocked");
+}
+```
+
+Use `decision.errorResults()` for diagnostics.
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+if decision.conclusion == "DENY" or decision.has_failed_open():
+    raise RuntimeError("Action blocked")
+```
+
+Use `decision.error_results()` for diagnostics.
+
+</TabItem>
+</Tabs>
+
+Agent framework wrappers have a stricter default: the wrapped tool does not
+execute on either a real `DENY` or unavailable evaluation. Use
+`onGuardError: "allow"` / `on_guard_error="allow"` to opt a wrapper into
+execution when the security check cannot be completed.
+
+Warnings are informational and do not mean the decision failed open. Log them
+to correct request data, but do not treat a warning alone as a denial.
+
+## Related reference
+
+- <Link.Page href="/guards/remote-policies">Remote policy inputs and supported rules</Link.Page>
+- <Link.Page href="/guards/framework-integrations">Vercel AI SDK and LangChain wrappers</Link.Page>
+- <Link.Page href="/reference/python#guard">Python Guard SDK reference</Link.Page>
+- <Link.Page href="/testing">Testing request protection</Link.Page>

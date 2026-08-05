@@ -14,6 +14,11 @@ them.
 You can also automate testing against your Arcjet-projected routes using
 standard testing libraries.
 
+If you are testing AI tool calls or other non-HTTP actions, use the
+<Link.Page href="/guards/reference#testing-guard-enforcement">Agent guards test matrix</Link.Page>.
+Guard tests should assert that a denied or unavailable decision prevents the
+side effect, not only that Arcjet returned a particular result.
+
 ## Testing using Newman
 
 [Newman](https://github.com/postmanlabs/newman) is an open source command-line
@@ -62,7 +67,8 @@ true` to trigger the shield rule on the next request.
   to get a bot detection `DENY` response is to make a request that is always
   considered a bot. With a deny rule set to `CURL` you should see a `DENY`
   response if you make a request using the `curl` command. See
-  <Link.Page href="/bot-protection/identifying-bots">Identifying Bots</Link.Page> for more information.
+  <Link.Page href="/bot-protection/identifying-bots">Identifying Bots</Link.Page>
+  for more information.
 - **Email validation:** Use an email address that has invalid syntax or does not
   match any other rules you have configured e.g. has no MX records or if from a
   disposable email service.

@@ -168,6 +168,32 @@ export const main = [
     ],
   },
   {
+    label: "Agent guards",
+    collapsed: false,
+    items: [
+      {
+        label: "Overview",
+        link: "/guards",
+      },
+      {
+        label: "Quick start",
+        link: "/guards/quick-start",
+      },
+      {
+        label: "Framework integrations",
+        link: "/guards/framework-integrations",
+      },
+      {
+        label: "Remote policies",
+        link: "/guards/remote-policies",
+      },
+      {
+        label: "Testing and reference",
+        link: "/guards/reference",
+      },
+    ],
+  },
+  {
     label: "Building blocks",
     collapsed: false,
     items: [
@@ -347,13 +373,9 @@ export const main = [
     ],
   },
   {
-    label: "For agents",
+    label: "Coding agent tools",
     collapsed: false,
     items: [
-      {
-        label: "Arcjet Guards",
-        link: "/guards",
-      },
       {
         label: "Arcjet Plugin",
         link: "/arcjet-plugin",

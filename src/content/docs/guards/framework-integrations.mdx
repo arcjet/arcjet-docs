@@ -1,0 +1,131 @@
+---
+title: "Agent guard framework integrations"
+description: "Guard Vercel AI SDK and LangChain tool calls before execution."
+---
+
+import { Aside } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+AI frameworks normally pass a model's generated arguments directly to a tool's
+`execute` or `invoke` function. Arcjet's framework integrations add a security
+checkpoint between those two steps, so the remote policy evaluates every tool
+attempt before the tool can create a side effect.
+
+Use an integration when you want to protect tools without writing decision
+handling around every function. The wrapper preserves the framework's normal
+tool definition and result flow, selects policy with a stable `label`, and maps
+the actor and relevant tool arguments into policy inputs.
+
+<Aside type="tip">
+  You choose the context each policy receives. Map only the tool arguments the
+  policy needs, and take the actor from your authenticated application context.
+  This keeps the policy contract explicit and avoids sending unrelated data.
+</Aside>
+
+## Vercel AI SDK
+
+The JavaScript integration supports Vercel AI SDK v7 through the versioned
+`@arcjet/guard/vercel-ai/v7` export.
+
+```ts
+import { launchArcjet, policyInput } from "@arcjet/guard";
+import {
+  aiToolsContext,
+  createAgentContext,
+  guardTool,
+} from "@arcjet/guard/vercel-ai/v7";
+import { generateText, tool } from "ai";
+import { z } from "zod";
+
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+
+export async function runAgent(user: { id: string }, prompt: string) {
+  const sendEmail = guardTool(
+    arcjet,
+    tool({
+      description: "Send an email",
+      inputSchema: z.object({ to: z.string(), body: z.string() }),
+      execute: ({ to, body }) => emailProvider.send({ to, body }),
+    }),
+    {
+      label: "email.sent",
+      actor: user.id,
+      inputs: ({ to, body }) => ({
+        recipient: policyInput.server.string(to),
+        body: policyInput.local.string(body),
+      }),
+    },
+  );
+
+  const tools = { sendEmail };
+  const context = createAgentContext();
+
+  return generateText({
+    model,
+    prompt,
+    tools,
+    toolsContext: aiToolsContext(context, tools),
+  });
+}
+```
+
+The wrapped tool must have an `execute` function and cannot already declare a
+`contextSchema`, because Arcjet uses that slot for agent context. On a policy
+denial, the tool does not execute and the model receives an `ArcjetDenialResult`.
+
+## LangChain
+
+The Python integration wraps synchronous or asynchronous LangChain tools.
+Install the optional dependency:
+
+```bash
+pip install "arcjet[langchain]"
+```
+
+```py
+from arcjet.guard import launch_arcjet, local_input, server_input
+from arcjet.guard.langchain import guard_tool
+from langchain_core.tools import tool
+
+arcjet = launch_arcjet(key=ARCJET_KEY)
+
+
+@tool
+async def send_email(to: str, body: str) -> str:
+    """Send an email."""
+    await email_provider.send(to=to, body=body)
+    return "sent"
+
+
+guarded_send_email = guard_tool(
+    guard=arcjet,
+    tool=send_email,
+    label="email.sent",
+    actor=lambda config: config["configurable"]["user_id"],
+    inputs=lambda arguments, _config: {
+        "recipient": server_input.string(arguments["to"]),
+        "body": local_input.string(arguments["body"]),
+    },
+)
+```
+
+Use the asynchronous Guard client with `ainvoke()` and the synchronous client
+with `invoke()`. Actor and input resolvers receive `RunnableConfig` and
+validated tool arguments. Derive `actor` only from server-controlled
+configuration. Asynchronous resolvers are supported for async tool invocations.
+
+## Denials and availability
+
+Both wrappers default to fail closed when Guard is unavailable:
+
+- Vercel AI does not execute the tool and returns a retryable denial result to
+  the model with reason `ERROR`.
+- LangChain raises `ArcjetToolUnavailableError`. A policy denial raises
+  `ArcjetToolDeniedError`, or follows the wrapped tool's `handle_tool_error`
+  behavior when configured.
+
+Set `onGuardError: "allow"` in JavaScript or `on_guard_error="allow"` in Python
+only when executing without a complete security decision is acceptable.
+
+See <Link.Page href="/guards/reference#availability-and-fail-behavior">Availability and fail behavior</Link.Page>
+for the direct client and wrapper differences.
