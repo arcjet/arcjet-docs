@@ -464,6 +464,28 @@ The IP AS fields may be `undefined`, but you can use the `hasASN()` method to ch
 *   `asnType` (`'isp' | 'hosting' | 'business' | 'education'`): the type of the AS of the client IP address. Real users are more likely to be on an ISP or business network rather than a hosting provider. Education networks often have a single or small number of IP addresses even though there are many users. A common mistake is to block a single IP because of too many requests when it is a university or company network using [NAT](https://en.wikipedia.org/wiki/Carrier-grade_NAT) (Network Address Translation) to give many users the same IP.
 *   `asnCountry` (`string | undefined`): the country code of the AS of the client IP address. This is the administrative country of the AS, not necessarily the country of the client IP address.
 
+#### IP threat intelligence
+
+When threat intelligence is available, it is exposed as `decision.ip.threat`. Always check for it because older responses and IPs without an assessment omit the property:
+
+```ts
+const threat = decision.ip.threat;
+
+if (threat && !threat.isSafe && threat.riskLevel === "critical") {
+  console.warn("High-risk IP activity", threat.activities);
+}
+```
+
+*   `riskLevel` (`string`): overall risk assessment, such as `none`, `low`, `medium`, `high`, or `critical`.
+*   `confidence` (`string`): confidence in the assessment, such as `low`, `medium`, or `high`.
+*   `reputation` (`string`): upstream reputation, such as `malicious`, `suspicious`, `known`, `safe`, `benign`, or `unknown`.
+*   `isSafe` (`boolean`): whether the IP is trusted infrastructure and should not be treated as a threat.
+*   `networkTypes` (`string[]`): network classifications, such as `hosting`, `vpn`, `proxy`, or `tor`.
+*   `activities` (`string[]`): observed behaviors, such as `brute_force`, `scanning`, or `botnet`.
+*   `entities` (`string[]`): automated entity types, such as `crawler`, `ai_crawler`, or `scanner`.
+*   `entityName` (`string | undefined`): a specific entity name, when identified.
+*   `service` (`string | undefined`): a known service or provider name, when identified.
+
 #### IP type
 
 The `service` field may be `undefined`, but you can use the `hasService()` method to check the availability. Using this method will also refine the type to remove the need for null-ish checks.
