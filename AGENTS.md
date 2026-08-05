@@ -10,6 +10,14 @@ See [Internal links](CONTRIBUTING.md#internal-links) in CONTRIBUTING.md.
 When editing MDX files, convert any plain markdown internal links to
 `<Link.Page>` or `<Link.ToSdk>`. Never split Link text across multiple lines.
 
+## Screenshot generation
+
+After making any changes, regenerate changed screenshots by running:
+
+```sh
+npm run pw:run -- --update-snapshots=changed
+```
+
 ## Dependency updates
 
 See the [Dependency updates](CONTRIBUTING.md#dependency-updates) section in
