@@ -1,6 +1,6 @@
 ---
 title: "Arcjet MCP server"
-description: "Connect AI assistants like Claude, Cursor, VS Code Copilot, and ChatGPT to your Arcjet account using the Model Context Protocol (MCP)."
+description: "Connect AI assistants like Claude, Codex, Cursor, VS Code Copilot, and ChatGPT to your Arcjet account using the Model Context Protocol (MCP)."
 prev: false
 next: false
 ---
@@ -39,6 +39,7 @@ is supported. This includes:
 
 - [ChatGPT](#chatgpt)
 - [Claude Code](#claude-code)
+- [Codex CLI](#codex-cli)
 - [Claude Desktop](#claude-desktop)
 - [Cursor](#cursor)
 - [VS Code with Copilot](#vs-code-with-copilot)
@@ -65,6 +66,15 @@ claude mcp add arcjet --transport http https://api.arcjet.com/mcp
 
 Claude Code will open a browser for OAuth authentication on first connection.
 Once authenticated, you can use the `/mcp` command to verify the connection.
+
+### Codex CLI
+
+```bash
+codex mcp add arcjet --url https://api.arcjet.com/mcp
+```
+
+Codex will prompt you to authenticate with Arcjet when it first connects to the
+server.
 
 ### Claude Desktop
 
