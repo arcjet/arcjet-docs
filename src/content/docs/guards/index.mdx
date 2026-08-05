@@ -515,6 +515,103 @@ decision = await arcjet.guard(
 </TabItem>
 </Tabs>
 
+#### Usage billing metadata
+
+Successful prompt-injection and content-moderation rule results can include the
+usage billed for that evaluation:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+const usageDecision = await arcjet.guard({
+  label: "tools.summarize",
+  rules: [piRule(userInput), moderate(userInput)],
+});
+
+const [promptResult] = piRule.results(usageDecision);
+
+if (promptResult?.billing) {
+  console.log(
+    `Prompt injection used ${promptResult.billing.count} ${promptResult.billing.unit}`,
+  );
+}
+
+const [moderationResult] = moderate.results(usageDecision);
+if (moderationResult?.billing) {
+  console.log(
+    `Moderation used ${moderationResult.billing.count} ${moderationResult.billing.unit}`,
+  );
+}
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```python
+usage_decision = await aj.guard(
+    label="tools.summarize",
+    rules=[pi_rule(user_input), moderate(user_input)],
+)
+
+prompt_result = pi_rule.result(usage_decision)
+if prompt_result and prompt_result.billing:
+    print(prompt_result.billing.count, prompt_result.billing.unit)
+
+moderation_result = moderate.result(usage_decision)
+if moderation_result and moderation_result.billing:
+    print(moderation_result.billing.count, moderation_result.billing.unit)
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+promptScan, err := arcjet.GuardPromptInjection(
+	arcjet.GuardPromptInjectionOptions{Mode: arcjet.ModeLive},
+)
+if err != nil {
+	return err
+}
+
+moderate, err := arcjet.ExperimentalGuardModerateContent(
+	arcjet.ExperimentalGuardModerateContentOptions{Mode: arcjet.ModeLive},
+)
+if err != nil {
+	return err
+}
+
+usageDecision, err := guard.Guard(ctx, arcjet.GuardRequest{
+	Label: "tools.summarize",
+	Rules: []arcjet.GuardRuleInput{
+		promptScan.Text(userInput),
+		moderate.Text(userInput),
+	},
+})
+if err != nil {
+	return err
+}
+
+if result := promptScan.Result(usageDecision); result != nil && result.Billing != nil {
+	fmt.Println(result.Billing.Count, result.Billing.Unit)
+}
+
+if result := moderate.Result(usageDecision); result != nil && result.Billing != nil {
+	fmt.Println(result.Billing.Count, result.Billing.Unit)
+}
+```
+
+</TabItem>
+</Tabs>
+
+In JavaScript and Python, `billing.unit` is `"tokens"` for prompt-injection
+detection and `"text_units"` for content moderation; `billing.count` is the
+number of those units charged. The equivalent Go fields are `Billing.Unit` and
+`Billing.Count`. Billing is optional: it is `undefined`, `None`, or `nil` when
+absent, including when evaluation failed or did not run and on responses from
+older servers. Do not use its presence to determine whether the rule succeeded;
+check the result and decision conclusion instead.
+
 ### Custom rules
 
 Custom rules let you plug in arbitrary local evaluation logic with typed
