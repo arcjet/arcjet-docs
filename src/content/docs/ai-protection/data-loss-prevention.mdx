@@ -80,7 +80,7 @@ the engine that scans the text and identifies entities. There are two:
   detects four structured types — card numbers, email addresses, phone numbers,
   and IP addresses — runs anywhere the SDK runs (including edge runtimes), and
   needs no extra dependencies.
-- **Rampart backend (optional, JavaScript SDKs).** An on-device
+- **Rampart backend (optional).** An on-device
   named-entity-recognition (NER) model that adds the free-form PII people
   actually paste into prompts — **names, street addresses, and government or
   financial identifiers**. This is often the more valuable engine for AI data
@@ -197,24 +197,102 @@ accuracy and latency breakdown.
 </div>
 <div slot="python-fastapi">
 
-:::note
-Detecting names, addresses, and other free-form PII uses the on-device Rampart
-backend, which is available in the JavaScript / TypeScript SDKs only. The Python
-SDK detects the four built-in structured types (card numbers, emails, phone
-numbers, and IP addresses). Switch the framework selector to Next.js above to
-see the Rampart configuration.
-:::
+The built-in types cover structured data, but AI prompts are full of _free-form_
+PII — a pasted résumé, a shipping address, someone's full name. The optional
+<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart
+backend</Link.Page> runs an on-device NER model that detects these, plus
+government and financial identifiers (SSNs, tax IDs, passports, driver's
+licences, bank and routing numbers).
+
+Install the optional extra and pass `rampart()` as the rule's `backend`:
+
+```shell
+pip install "arcjet[sensitive-info-rampart]"
+```
+
+```py
+import os
+
+from arcjet import Mode, SensitiveInfoEntityType, arcjet, detect_sensitive_info
+from arcjet_sensitive_info_rampart import rampart
+
+aj = arcjet(
+    key=os.environ["ARCJET_KEY"],
+    rules=[
+        detect_sensitive_info(
+            mode=Mode.LIVE,
+            # Names and addresses are common in pasted résumés and messages.
+            deny=[
+                SensitiveInfoEntityType.CREDIT_CARD_NUMBER,
+                SensitiveInfoEntityType.EMAIL,
+                SensitiveInfoEntityType.GIVEN_NAME,
+                SensitiveInfoEntityType.SURNAME,
+                SensitiveInfoEntityType.STREET_NAME,
+            ],
+            backend=rampart(),
+        ),
+    ],
+)
+```
+
+The model is bundled with the package (~14.7&nbsp;MB, quantized) so nothing is
+fetched at runtime, and inference is fast enough to run inline on each request.
+It recalls ~98% of private terms across seven Latin-script languages. It loads a
+native ONNX runtime ([ONNX Runtime](https://onnxruntime.ai/)), which the extra
+installs for you. See the
+<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart
+reference</Link.Page> for the options and the full accuracy and latency
+breakdown.
 
 </div>
 <div slot="python-flask">
 
-:::note
-Detecting names, addresses, and other free-form PII uses the on-device Rampart
-backend, which is available in the JavaScript / TypeScript SDKs only. The Python
-SDK detects the four built-in structured types (card numbers, emails, phone
-numbers, and IP addresses). Switch the framework selector to Next.js above to
-see the Rampart configuration.
-:::
+The built-in types cover structured data, but AI prompts are full of _free-form_
+PII — a pasted résumé, a shipping address, someone's full name. The optional
+<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart
+backend</Link.Page> runs an on-device NER model that detects these, plus
+government and financial identifiers (SSNs, tax IDs, passports, driver's
+licences, bank and routing numbers).
+
+Install the optional extra and pass `rampart()` as the rule's `backend`:
+
+```shell
+pip install "arcjet[sensitive-info-rampart]"
+```
+
+```py
+import os
+
+from arcjet import Mode, SensitiveInfoEntityType, arcjet_sync, detect_sensitive_info
+from arcjet_sensitive_info_rampart import rampart
+
+aj = arcjet_sync(
+    key=os.environ["ARCJET_KEY"],
+    rules=[
+        detect_sensitive_info(
+            mode=Mode.LIVE,
+            # Names and addresses are common in pasted résumés and messages.
+            deny=[
+                SensitiveInfoEntityType.CREDIT_CARD_NUMBER,
+                SensitiveInfoEntityType.EMAIL,
+                SensitiveInfoEntityType.GIVEN_NAME,
+                SensitiveInfoEntityType.SURNAME,
+                SensitiveInfoEntityType.STREET_NAME,
+            ],
+            backend=rampart(),
+        ),
+    ],
+)
+```
+
+The model is bundled with the package (~14.7&nbsp;MB, quantized) so nothing is
+fetched at runtime, and inference is fast enough to run inline on each request.
+It recalls ~98% of private terms across seven Latin-script languages. It loads a
+native ONNX runtime ([ONNX Runtime](https://onnxruntime.ai/)), which the extra
+installs for you. See the
+<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart
+reference</Link.Page> for the options and the full accuracy and latency
+breakdown.
 
 </div>
 </SlotByFramework>
