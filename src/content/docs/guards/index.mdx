@@ -524,12 +524,20 @@ usage billed for that evaluation:
 <TabItem label="JavaScript / TypeScript">
 
 ```ts
+import {
+  detectPromptInjection,
+  experimental_moderateContent,
+} from "@arcjet/guard";
+
+const piRule = detectPromptInjection();
+const moderate = experimental_moderateContent();
+
 const usageDecision = await arcjet.guard({
   label: "tools.summarize",
   rules: [piRule(userInput), moderate(userInput)],
 });
 
-const [promptResult] = piRule.results(usageDecision);
+const promptResult = piRule.result(usageDecision);
 
 if (promptResult?.billing) {
   console.log(
@@ -537,7 +545,7 @@ if (promptResult?.billing) {
   );
 }
 
-const [moderationResult] = moderate.results(usageDecision);
+const moderationResult = moderate.result(usageDecision);
 if (moderationResult?.billing) {
   console.log(
     `Moderation used ${moderationResult.billing.count} ${moderationResult.billing.unit}`,
@@ -549,6 +557,11 @@ if (moderationResult?.billing) {
 <TabItem label="Python">
 
 ```python
+from arcjet.guard import DetectPromptInjection, experimental_ModerateContent
+
+pi_rule = DetectPromptInjection()
+moderate = experimental_ModerateContent()
+
 usage_decision = await aj.guard(
     label="tools.summarize",
     rules=[pi_rule(user_input), moderate(user_input)],
