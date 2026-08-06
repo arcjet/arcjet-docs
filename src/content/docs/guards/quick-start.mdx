@@ -1,0 +1,330 @@
+---
+title: "Agent guards quick start"
+description: "Guard an AI agent tool with an Arcjet remote policy."
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+This example gives an AI agent two tools. `getClientRecord` returns account data
+that includes PII. `sendEmail` is protected by Arcjet, so the model can read the
+record but cannot send its sensitive fields outside the application. Arcjet
+checks the model-selected recipient and generated message body before the email
+provider runs.
+
+## 1. Configure the policy
+
+In the Arcjet Console, create an Agent Guard policy with the label `email.sent`.
+Add these inputs:
+
+| Input                | Exposure | Type        |
+| -------------------- | -------- | ----------- |
+| `recipient`          | `SERVER` | String      |
+| `allowed_recipients` | `SERVER` | String list |
+| `body`               | `LOCAL`  | String      |
+
+Then add:
+
+1. A **string-list membership** rule requiring `recipient` to be a member of
+   `allowed_recipients`.
+2. A **sensitive information** rule on `body` that denies
+   `BANK_ACCOUNT` and `ROUTING_NUMBER`.
+
+The examples configure the on-device Rampart backend, which detects these
+entity types locally.
+
+Publish the policy before running the example.
+
+## 2. Wrap the tool
+
+<Tabs syncKey="language">
+<TabItem label="Vercel AI SDK">
+
+```bash
+npm install @arcjet/guard @arcjet/sensitive-info-rampart ai zod
+```
+
+```ts
+import { launchArcjet, policyInput } from "@arcjet/guard";
+import { rampart } from "@arcjet/sensitive-info-rampart";
+import {
+  aiToolsContext,
+  createAgentContext,
+  guardTool,
+} from "@arcjet/guard/vercel-ai/v7";
+import { generateText, stepCountIs, tool } from "ai";
+import { z } from "zod";
+
+// Create one Arcjet client and reuse it across agent runs. Rampart detects
+// bank account and routing numbers locally.
+const arcjet = launchArcjet({
+  key: process.env.ARCJET_KEY!,
+  sensitiveInfoBackend: rampart(),
+});
+
+export async function runEmailAgent(
+  user: {
+    id: string;
+    allowedRecipients: string[];
+    record: { name: string; bankAccount: string; routingNumber: string };
+  },
+  prompt: string,
+) {
+  // This read-only tool gives the model the current customer's account data.
+  const getClientRecord = tool({
+    description: "Get the account details on file for the current customer",
+    inputSchema: z.object({}),
+    execute: () => user.record,
+  });
+
+  // guardTool checks policy before the email provider can run.
+  const sendEmail = guardTool(
+    arcjet,
+    tool({
+      description: "Send an email",
+      inputSchema: z.object({
+        recipient: z.string().email(),
+        body: z.string(),
+      }),
+      execute: ({ recipient, body }) =>
+        emailProvider.send({ to: recipient, body }),
+    }),
+    {
+      // The label selects the remote policy configured in step 1.
+      label: "email.sent",
+      // Actor and the allow list come from trusted application state.
+      actor: user.id,
+      // Map only the values the remote policy needs.
+      inputs: ({ recipient, body }) => ({
+        recipient: policyInput.server.string(recipient),
+        allowed_recipients: policyInput.server.stringList(
+          user.allowedRecipients,
+        ),
+        body: policyInput.local.string(body),
+      }),
+    },
+  );
+
+  const tools = { getClientRecord, sendEmail };
+  const context = createAgentContext();
+
+  // The model can call either tool, but sendEmail always passes through Arcjet.
+  return generateText({
+    model: "openai/gpt-4o-mini",
+    system:
+      "Use getClientRecord when the user asks for account details. " +
+      "Use sendEmail exactly once to complete the request.",
+    prompt,
+    tools,
+    toolsContext: aiToolsContext(context, tools),
+    stopWhen: stepCountIs(3),
+  });
+}
+```
+
+</TabItem>
+<TabItem label="LangChain">
+
+```bash
+pip install "arcjet[langchain,sensitive-info-rampart]" langchain langchain-openai
+```
+
+```py
+import os
+
+from arcjet.guard import launch_arcjet, local_input, server_input
+from arcjet.guard.langchain import guard_tool
+from arcjet_sensitive_info_rampart import rampart
+from langchain.agents import create_agent
+from langchain_core.tools import tool
+from langchain_openai import ChatOpenAI
+
+# Create one Arcjet client and enable local bank-detail detection.
+arcjet = launch_arcjet(
+    key=os.environ["ARCJET_KEY"],
+    sensitive_info_backend=rampart(),
+)
+
+
+@tool
+async def send_email(recipient: str, body: str) -> str:
+    """Send an email."""
+    await email_provider.send(to=recipient, body=body)
+    return "sent"
+
+
+async def run_email_agent(user, prompt: str):
+    # This read-only tool returns the current customer's account data.
+    @tool
+    async def get_client_record() -> dict:
+        """Get the account details on file for the current customer."""
+        return user.record
+
+    # guard_tool checks remote policy before send_email can run.
+    guarded_send_email = guard_tool(
+        guard=arcjet,
+        tool=send_email,
+        # The label selects the remote policy configured in step 1.
+        label="email.sent",
+        # Actor and the allow list come from trusted application state.
+        actor=user.id,
+        # Map only the values the remote policy needs.
+        inputs=lambda arguments, _config: {
+            "recipient": server_input.string(arguments["recipient"]),
+            "allowed_recipients": server_input.string_list(
+                user.allowed_recipients
+            ),
+            "body": local_input.string(arguments["body"]),
+        },
+    )
+
+    # The model can call either tool, but send_email always passes through Arcjet.
+    agent = create_agent(
+        ChatOpenAI(model="gpt-4o-mini"),
+        tools=[get_client_record, guarded_send_email],
+        system_prompt=(
+            "Use get_client_record when the user asks for account details. "
+            "Use send_email exactly once to complete the request."
+        ),
+    )
+    return await agent.ainvoke(
+        {"messages": [{"role": "user", "content": prompt}]}
+    )
+```
+
+</TabItem>
+</Tabs>
+
+## 3. Try the policy
+
+Expose a small server endpoint with two server-owned scenarios. The browser
+sends only the scenario name; the server chooses the trusted actor, allowed
+recipients, and prompt used for the agent run.
+
+<Tabs syncKey="language">
+<TabItem label="Vercel AI SDK">
+
+```ts title="app/api/agent/route.ts"
+import { runEmailAgent } from "@/lib/email-agent";
+
+// Keep identity, allowed recipients, and sensitive records on the server.
+const user = {
+  id: "customer-123",
+  allowedRecipients: ["approved@example.com"],
+  record: {
+    name: "Alex Morgan",
+    bankAccount: "0123456789",
+    routingNumber: "022000020",
+  },
+};
+
+const scenarios = {
+  allowed: "Send the message 'Your report is ready' to approved@example.com.",
+  blocked: "Send the message 'Your report is ready' to outside@example.net.",
+  pii: "Email the account details you have on file to approved@example.com.",
+} as const;
+
+export async function POST(request: Request) {
+  // The browser chooses a scenario, not the actor, prompt, or policy inputs.
+  const { scenario } = (await request.json()) as { scenario?: string };
+  if (
+    scenario !== "allowed" &&
+    scenario !== "blocked" &&
+    scenario !== "pii"
+  ) {
+    return Response.json({ error: "Unknown scenario" }, { status: 400 });
+  }
+
+  // Invoke the real agent workflow with trusted server-owned context.
+  const result = await runEmailAgent(user, scenarios[scenario]);
+  return Response.json({ output: result.text });
+}
+```
+
+</TabItem>
+<TabItem label="LangChain">
+
+```py title="app.py"
+from typing import Literal
+
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+# Keep identity, allowed recipients, and sensitive records on the server.
+user = User(
+    id="customer-123",
+    allowed_recipients=["approved@example.com"],
+    record={
+        "name": "Alex Morgan",
+        "bank_account": "0123456789",
+        "routing_number": "022000020",
+    },
+)
+scenarios = {
+    "allowed": "Send the message 'Your report is ready' to approved@example.com.",
+    "blocked": "Send the message 'Your report is ready' to outside@example.net.",
+    "pii": "Email the account details you have on file to approved@example.com.",
+}
+
+
+class AgentRequest(BaseModel):
+    scenario: Literal["allowed", "blocked", "pii"]
+
+
+@app.post("/api/agent")
+async def run_agent(request: AgentRequest):
+    # Invoke the real agent workflow with the selected server-owned prompt.
+    result = await run_email_agent(user, scenarios[request.scenario])
+    return {"output": result["messages"][-1].content}
+```
+
+</TabItem>
+</Tabs>
+
+Add a minimal page that calls the endpoint and displays the agent's response:
+
+```html title="public/index.html"
+<h1>Agent Guard policy demo</h1>
+<p>Test recipient and sensitive-information policies on the same email tool.</p>
+
+<button data-scenario="allowed">Allowed recipient</button>
+<button data-scenario="blocked">Blocked recipient</button>
+<button data-scenario="pii">Sensitive information</button>
+<pre id="output">Choose a scenario.</pre>
+
+<script>
+  // Send only the selected scenario name to the server.
+  const output = document.querySelector("#output");
+
+  for (const button of document.querySelectorAll("button")) {
+    button.addEventListener("click", async () => {
+      output.textContent = "Running agent…";
+      const response = await fetch("/api/agent", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ scenario: button.dataset.scenario }),
+      });
+      const result = await response.json();
+      output.textContent = result.output ?? result.error;
+    });
+  }
+</script>
+```
+
+Each scenario demonstrates a different result from the same guarded tool:
+
+- **Allowed recipient:** The recipient is on the allow list and the body has no
+  sensitive data, so `sendEmail` reaches the email provider.
+- **Blocked recipient:** The model calls the same tool with an external address.
+  The remote membership policy denies the call before the provider runs, and
+  the model receives the denial result.
+- **Sensitive information:** The recipient is allowed, but the agent first
+  calls `getClientRecord` and receives test bank account and routing numbers.
+  When the model includes that tool result in the email body, local sensitive
+  information policy blocks `sendEmail` before the data leaves the application.
+
+Continue to <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
+for context, denial handling, and integration options, or
+<Link.Page href="/guards/remote-policies">Remote policies</Link.Page> for the full input and rule reference.

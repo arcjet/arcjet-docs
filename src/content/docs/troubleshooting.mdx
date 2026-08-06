@@ -190,7 +190,20 @@ SDK is designed to fail open so that in the event of a network problem or
 outage, requests will be allowed.
 
 If you are seeing this error frequently, please
+
 <Link.Page href="/support">contact us</Link.Page> so we can investigate.
+
+### Agent guard returned ALLOW but the policy was unavailable
+
+The direct Agent Guard client fails open when a transport, local evaluation,
+or remote-policy completeness error prevents a full evaluation. The decision
+has conclusion `ALLOW`, but `hasFailedOpen()` (JavaScript) or
+`has_failed_open()` (Python) returns `true` and the error is available through
+`errorResults()` / `error_results()`.
+
+For sensitive actions, deny when evaluation failed open. The Vercel AI SDK and
+LangChain wrappers do this by default. See
+<Link.Page href="/guards/reference#availability-and-fail-behavior">Agent guard availability and fail behavior</Link.Page>.
 
 ### Arcjet will use 127.0.0.1 when missing public IP address in development mode
 
@@ -200,12 +213,14 @@ request is rejected to prevent spoofing.
 
 In development, private/internal addresses are common. To avoid errors, set the
 environment variable
+
 <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page> to
 `development`. This will disable the IP address validation and allow you to test
 your application without errors.
 
 This log means Arcjet is falling back to `127.0.0.1` because it's running in
 development mode. If this appears in production, check that
+
 <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page> is not
 incorrectly set to `development`.
 
@@ -383,9 +398,9 @@ instead.
 
 The `arcjet` package is a low-level package that is used to build adapters for
 different
+
 <Link.Page href="/get-started">frameworks and runtimes we support</Link.Page>.
-Unless you are doing something custom, we recommend using
-one of the adapters.
+Unless you are doing something custom, we recommend using one of the adapters.
 
 ### Error: Body already read or Body is unusable
 
@@ -400,7 +415,8 @@ and then later try to access the body again in another part of your request
 handler.
 
 To fix this with sensitive information detection, see the
-<Link.ToSdk href="/sensitive-info/reference#accessing-the-body" sdk="node">Accessing the body</Link.ToSdk> section of the reference.
+<Link.ToSdk href="/sensitive-info/reference#accessing-the-body" sdk="node">Accessing the body</Link.ToSdk>
+section of the reference.
 
 To fix this with other cases, clone the request before accessing the body:
 
@@ -420,6 +436,7 @@ const decision = await aj.protect(req, { email });
 If you see this error then you are probably running an older version of Next.js.
 Arcjet supports the [active and maintenance LTS versions of
 Next.js](https://nextjs.org/support-policy) as indicated in
+
 <Link.Page href="/reference/nextjs#requirements">the SDK reference</Link.Page>.
 Upgrade your Next.js version to the latest version to fix this error.
 

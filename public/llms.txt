@@ -35,7 +35,11 @@ extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricin
 - [Prompt injection](https://docs.arcjet.com/prompt-injection): scan user messages for jailbreak / injection attempts.
 - [Signup form protection](https://docs.arcjet.com/signup-protection): bundled email + bot + rate limiting for signup flows.
 - [Filters](https://docs.arcjet.com/filters): country / VPN / ASN allow + deny rules.
-- [Guards](https://docs.arcjet.com/guards): protect tool calls, queues, and agentic pipelines without an HTTP request.
+- [Agent guards](https://docs.arcjet.com/guards): protect tool calls and other agent actions without an HTTP request.
+- [Agent guard quick start](https://docs.arcjet.com/guards/quick-start): guard one tool call.
+- [Agent guard integrations](https://docs.arcjet.com/guards/framework-integrations): Vercel AI SDK and LangChain.
+- [Agent guard remote policies](https://docs.arcjet.com/guards/remote-policies): centrally managed action policies using labels, actors, and typed inputs.
+- [Agent guard testing and reference](https://docs.arcjet.com/guards/reference): decisions, availability, fail behavior, and testing.
 
 ## SDK reference
 

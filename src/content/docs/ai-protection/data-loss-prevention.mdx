@@ -73,8 +73,8 @@ choose what happens next: block the request, strip the data, or warn the user.
 ## How detection works
 
 Sensitive info detection runs through a
-<Link.Page href="/sensitive-info/reference#detection-backends">detection backend</Link.Page> —
-the engine that scans the text and identifies entities. There are two:
+<Link.Page href="/sensitive-info/reference#detection-backends">detection backend</Link.Page>
+— the engine that scans the text and identifies entities. There are two:
 
 - **Built-in engine (default).** A WebAssembly engine bundled with the SDK. It
   detects four structured types — card numbers, email addresses, phone numbers,
@@ -141,9 +141,9 @@ detect_sensitive_info(
 
 The built-in engine detects `CREDIT_CARD_NUMBER`, `PHONE_NUMBER`, `EMAIL`, and
 `IP_ADDRESS`. See the
-<Link.Page href="/sensitive-info/reference#entity-detection">entity detection
-table</Link.Page> for every type each backend supports, and for defining your
-own custom detectors.
+<Link.Page href="/sensitive-info/reference#entity-detection">entity detection table</Link.Page>
+for every type each backend supports, and for defining your own custom
+detectors.
 
 ### Detect names, addresses, and IDs
 
@@ -152,10 +152,10 @@ own custom detectors.
 
 The built-in types cover structured data, but AI prompts are full of _free-form_
 PII — a pasted résumé, a shipping address, someone's full name. The optional
-<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart
-backend</Link.Page> runs an on-device NER model that detects these, plus
-government and financial identifiers (SSNs, tax IDs, passports, driver's
-licences, bank and routing numbers).
+<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart backend</Link.Page>
+runs an on-device NER model that detects these, plus government and financial
+identifiers (SSNs, tax IDs, passports, driver's licences, bank and routing
+numbers).
 
 Install the package and pass `rampart()` as the rule's `backend`:
 
@@ -177,7 +177,13 @@ const aj = arcjet({
     sensitiveInfo({
       mode: "LIVE",
       // Names and addresses are common in pasted résumés and personal messages.
-      deny: ["CREDIT_CARD_NUMBER", "EMAIL", "GIVEN_NAME", "SURNAME", "STREET_NAME"],
+      deny: [
+        "CREDIT_CARD_NUMBER",
+        "EMAIL",
+        "GIVEN_NAME",
+        "SURNAME",
+        "STREET_NAME",
+      ],
       backend: rampart(),
     }),
   ],
@@ -190,9 +196,9 @@ fetched at runtime, and inference is fast enough to run inline on each request
 Latin-script languages. Because it loads a native ONNX runtime it needs a server
 runtime — Node.js, Bun, or Deno, not edge — and on Next.js you must mark it as a
 server external package. See the
-<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart
-reference</Link.Page> for the bundler configuration, options, and the full
-accuracy and latency breakdown.
+<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart reference</Link.Page>
+for the bundler configuration, options, and the full accuracy and latency
+breakdown.
 
 </div>
 <div slot="python-fastapi">
@@ -319,12 +325,14 @@ with the other AI protection layers for full coverage:
 
 - <Link.Page href="/ai-protection/prompt-injection">Prompt injection detection</Link.Page>
   blocks hostile instructions and jailbreak attempts.
-- <Link.Page href="/ai-protection/abuse-protection">AI abuse protection</Link.Page> and
+- <Link.Page href="/ai-protection/abuse-protection">AI abuse protection</Link.Page>
+  and
   <Link.Page href="/ai-protection/budget-control">AI budget control</Link.Page>
   block automated clients and enforce per-user token budgets.
-- <Link.Page href="/guards">Arcjet Guards</Link.Page> applies the same PII
-  detection — including the on-device Rampart backend — directly inside agent
-  tool handlers and pipelines that don't route through HTTP.
+- <Link.Page href="/guards">Agent guards</Link.Page> apply PII detection
+  directly inside agent tool handlers and pipelines that don't route through
+  HTTP. A <Link.Page href="/guards/remote-policies#local-inputs">local policy input</Link.Page>
+  keeps the raw string in the SDK while reporting policy evidence to Arcjet.
 
 ## Learn more
 

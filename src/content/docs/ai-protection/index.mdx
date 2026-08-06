@@ -19,12 +19,12 @@ Arcjet enforces policy at the application boundary, where security decisions can
 use the context that WAFs, API gateways, and model gateways cannot reliably
 infer.
 
-| Question | Arcjet answer |
-| --- | --- |
-| Where is policy defined? | SDK rules in code plus <Link.Page href="/remote-rules">remote rules</Link.Page> for operational changes. |
-| Where is enforcement? | Inline in route handlers, tool calls, queue jobs, and workflow steps before the risky action runs. |
-| How does SecOps fit? | Dry-run modes, remote rules, dashboard and <Link.Page href="/mcp-server">MCP server</Link.Page> operations, and shared telemetry let security teams manage rollout while developers own implementation. |
-| How does it complement WAFs, APIs, and AI gateways? | Those layers see traffic or model I/O; Arcjet sees application context such as identity, tenant, route, quota, session, tool call, and business action. |
+| Question                                            | Arcjet answer                                                                                                                                                                                           |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Where is policy defined?                            | SDK rules in code, <Link.Page href="/remote-rules">request Remote rules</Link.Page> for `protect()`, and <Link.Page href="/guards/remote-policies">Agent guard remote policies</Link.Page> selected by `guard()` labels. |
+| Where is enforcement?                               | Inline in route handlers, tool calls, queue jobs, and workflow steps before the risky action runs.                                                                                                      |
+| How does SecOps fit?                                | Dry-run modes, request Remote rules, Agent guard remote policies, dashboard and <Link.Page href="/mcp-server">MCP server</Link.Page> operations, and shared telemetry let security teams manage rollout while developers own implementation. |
+| How does it complement WAFs, APIs, and AI gateways? | Those layers see traffic or model I/O; Arcjet sees application context such as identity, tenant, route, quota, session, tool call, and business action.                                                 |
 
 ## Patterns of security AI failures
 
@@ -41,7 +41,8 @@ Production AI failures follow three patterns:
 Arcjet's core features map directly onto these problems. These guides cover
 HTTP middleware for web frameworks. If you're building agentic pipelines or need
 security inside tool handlers - where there's no `Request` object - see
-<Link.Page href="/guards">Arcjet Guards</Link.Page>.
+
+<Link.Page href="/guards">Agent guards</Link.Page>.
 
 ## AI abuse protection
 
@@ -131,17 +132,22 @@ tool calls, MCP server handlers, queue consumers, and pipelines that fan out
 across services. There's no `Request` object at those sites, so the
 request-based SDKs don't apply.
 
-<Link.Page href="/guards">Arcjet Guards</Link.Page> runs the same rate
-limiting, prompt injection detection, sensitive information detection, and
-custom rules inside those code paths — pass inputs directly to `guard()`
-and get a decision back. Most AI applications combine both: request-based
-protection on the API route, plus guards at every tool / task call site.
+<Link.Page href="/guards">Agent guards</Link.Page> run the same rate limiting,
+prompt injection detection, sensitive information detection, and custom rules
+inside those code paths — pass inputs directly to `guard()` and get a decision
+back. Most AI applications combine both: request-based protection on the API
+route, plus guards at every tool / task call site.
 
 <CardGrid>
   <Link.Card
-    title="Arcjet Guards"
-    href="/guards"
-    description="Security for AI agent tool calls, MCP servers, queue workers, and background jobs."
+    title="Agent guards quick start"
+    href="/guards/quick-start"
+    description="Guard one AI agent tool call before it executes."
+  />
+  <Link.Card
+    title="Agent guard remote policies"
+    href="/guards/remote-policies"
+    description="Manage action policy centrally using labels, actors, and typed inputs."
   />
 </CardGrid>
 
