@@ -32,6 +32,7 @@ import NodeVersions from "/src/snippets/reference/node-versions.mdx";
 import Comments from "/src/components/Comments.astro";
 import Requirements from "@/snippets/get-started/remix/Requirements.mdx";
 import IPAnalysis from "@/snippets/reference/shared/IPAnalysis.mdx";
+import ExplicitClientIP from "@/snippets/reference/shared/ExplicitClientIP.mdx";
 
 [<NpmSdkVersion packageName="@arcjet/remix" />](https://www.npmjs.com/package/@arcjet/remix)
 
@@ -262,6 +263,13 @@ made by Arcjet.
     <Code code={ProtectJS} title="/server.js" lang="js" />
   </TabItem>
 </Tabs>
+
+### Override the client IP
+
+For Remix, `requestInput` in the example below is the loader or action
+arguments.
+
+<ExplicitClientIP />
 
 ## Decision
 

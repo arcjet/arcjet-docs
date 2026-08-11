@@ -75,6 +75,23 @@ The Arcjet React Router SDK uses several environment variables to configure its 
 
 Use the [`protect`](https://github.com/arcjet/arcjet-js/tree/main/arcjet-react-router#arcjetreactrouterprotectdetails-properties) function to protect a request from React Router. Some rules, such as `validateEmail`, may need extra properties. The protect function returns a promise that resolves to a decision.
 
+#### Override the client IP
+
+[Section titled “Override the client IP”](#override-the-client-ip)
+
+For React Router, `requestInput` in the example below is the loader or action arguments.
+
+Arcjet normally detects the client IP address from the request. If your application has already determined the client IP from a trusted source, pass it as `ipSrc` in the second argument to `protect()`. In this example, `requestInput` represents the request or framework context normally passed to `protect()`:
+
+```ts
+const ipSrc = getClientIpFromTrustedSource(requestInput);
+const decision = await aj.protect(requestInput, { ipSrc });
+```
+
+A non-empty `ipSrc` takes precedence over automatic detection, including the development-only `x-arcjet-ip` header. If `ipSrc` is an empty string, Arcjet uses automatic detection instead.
+
+> **Caution:** The SDK trusts `ipSrc` without validating it. Validate the value and ensure it comes from a trusted source. Do not pass a client-controlled header directly; doing so could allow clients to choose the IP address used for fingerprinting, rate limiting, and other security checks.
+
 ### Decision
 
 [Section titled “Decision”](#decision)

@@ -112,10 +112,31 @@ rule. Pass dynamic inputs with `Protect` options, including:
 - `WithDetectPromptInjectionMessage(...)` for untrusted text.
 - `WithSensitiveInfoValue(...)` for text to scan for sensitive information.
 - `WithCorrelationId(...)` to correlate a request decision with related work.
+- `WithIPSrc(...)` to override the automatically detected client IP address.
 
 If the application is behind a trusted reverse proxy, configure `Config.Proxies`
 with the trusted proxy addresses or CIDRs so Arcjet receives the correct client
 IP.
+
+### Override the client IP
+
+Arcjet normally detects the client IP address from the request. If your
+application has already determined the client IP from a trusted source, pass
+`WithIPSrc` to `Protect`:
+
+```go
+ipSrc := getClientIPFromTrustedSource(r)
+decision, err := aj.Protect(r.Context(), r, arcjet.WithIPSrc(ipSrc))
+```
+
+A non-empty value takes precedence over automatic detection. An empty string
+does not override the automatically detected IP. `WithIPSrc` is also supported
+by `ProtectDetails`.
+
+> **Caution:** The SDK trusts the value without validating it. Validate the
+> value and ensure it comes from a trusted source. Do not pass a
+> client-controlled header directly; doing so could allow clients to choose the
+> IP address used for fingerprinting, rate limiting, and other security checks.
 
 ## Guard non-HTTP operations
 

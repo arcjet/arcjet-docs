@@ -14,6 +14,7 @@ import CustomLog from "/src/snippets/reference/fastify/custom-log.js?raw";
 import Error from "/src/snippets/reference/fastify/error.js?raw";
 import Protect from "/src/snippets/reference/fastify/protect.js?raw";
 import { Link } from "@/components/link";
+import ExplicitClientIP from "/src/snippets/reference/shared/ExplicitClientIP.mdx";
 
 {/* TODO(#526): Starlight injects the css & js as siblings of the first codeblock */}
 {/* on the page. This breaks when the first codeblock is in */}
@@ -126,6 +127,10 @@ Some rules, such as `validateEmail`, may need extra properties.
 The protect function returns a promise that resolves to a decision.
 
 <Code code={Protect} lang="js" />
+
+#### Override the client IP
+
+<ExplicitClientIP />
 
 ### Decision
 

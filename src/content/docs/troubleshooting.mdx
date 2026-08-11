@@ -90,34 +90,54 @@ features require a real IP address to work. In local
 development, Arcjet defaults to `127.0.0.1` so the IP analysis metadata will be
 empty.
 
-You can set the IP address to a real public IP by overriding the IP address
-field (`ip`) in the `request` object that is passed to the Arcjet `protect`
-function.
+You can set the IP address to a real public IP by passing an explicit client IP
+to the Arcjet `protect` function.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
 
 ```ts
-// Override the IP address in the request object if `ip` is provided. You could
-// set this using an environment variable or some other method to ensure it is
-// only set in development.
-//const ip = "8.8.8.8"; // Google's public DNS server
-const decision = await aj.protect(ip ? { ...req, ip } : req);
+// Only set this in development. Google's public DNS server is used as an
+// example public IP address.
+const decision = await aj.protect(req, { ipSrc: "8.8.8.8" });
 ```
 
 </TabItem>
 <TabItem label="Python">
 
 ```py
-# Use the `ip_src` keyword argument on `protect()` to override the client IP.
-# You could read this from an environment variable to ensure it is only set
-# in development.
-# ip = "8.8.8.8"  # Google's public DNS server
-decision = await aj.protect(request, ip_src=ip) if ip else await aj.protect(request)
+# Configure the client with automatic detection disabled. When disabled, every
+# protect() call must receive ip_src.
+aj = arcjet(
+    key=arcjet_key,
+    rules=[...],
+    disable_automatic_ip_detection=True,
+)
+
+# Only set this in development. Google's public DNS server is used as an
+# example public IP address.
+decision = await aj.protect(request, ip_src="8.8.8.8")
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+// Only set this in development. Google's public DNS server is used as an
+// example public IP address.
+decision, err := aj.Protect(
+	r.Context(),
+	r,
+	arcjet.WithIPSrc("8.8.8.8"),
+)
 ```
 
 </TabItem>
 </Tabs>
+
+Only provide an explicit IP from a trusted source. The SDKs do not validate the
+value, so passing a client-controlled header directly could undermine IP-based
+security checks.
 
 ## Common errors
 
@@ -207,16 +227,19 @@ LangChain wrappers do this by default. See
 
 ### Arcjet will use 127.0.0.1 when missing public IP address in development mode
 
-Arcjet expects a valid public IP address to enable features like geolocation and
-VPN/proxy detection. In production, if the IP is invalid (e.g. `127.0.0.1`), the
-request is rejected to prevent spoofing.
+Arcjet's automatic IP detection expects a valid public IP address to enable
+features like geolocation and VPN/proxy detection. In production, if the
+automatically detected IP is invalid (e.g. `127.0.0.1`), the request is rejected
+to prevent spoofing.
 
 In development, private/internal addresses are common. To avoid errors, set the
 environment variable
 
 <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page> to
-`development`. This will disable the IP address validation and allow you to test
-your application without errors.
+`development`. This allows automatic detection to use private/internal
+addresses so you can test your application without errors. Explicit
+application-provided IP values bypass automatic detection and remain your
+responsibility to validate.
 
 This log means Arcjet is falling back to `127.0.0.1` because it's running in
 development mode. If this appears in production, check that
@@ -226,11 +249,11 @@ incorrectly set to `development`.
 
 ### generateFingerprint: ip is empty / [failed_precondition] client IP not provided
 
-Arcjet normally detects when it is running in a local environment and uses a
-default IP address of `127.0.0.1`. However, if it can't determine whether it is
-running locally or not then it will be safe and assume it is running in
-production. In production environments we disallow private/internal addresses,
-but they are allowed in development to allow you to test locally.
+Arcjet's automatic IP detection normally detects when it is running in a local
+environment and uses a default IP address of `127.0.0.1`. However, if it can't
+determine whether it is running locally or not then it will be safe and assume
+it is running in production. Automatic detection disallows private/internal
+addresses in production, but allows them in development so you can test locally.
 
 You can force the SDK to run in development mode by setting the environment
 variable <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page> to
@@ -243,7 +266,8 @@ ARCJET_ENV=development
 Arcjet uses the client IP address as part of a fingerprint to identify where
 each request is coming from. If the IP address is not provided, or it is running
 in production and a private/internal address is provided, then Arcjet will show
-this error.
+this error. Explicit application-provided IP values bypass automatic detection
+and must be validated by your application.
 
 ### [failed_precondition] request details failed validation
 
