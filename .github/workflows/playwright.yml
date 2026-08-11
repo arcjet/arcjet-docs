@@ -27,6 +27,10 @@ jobs:
         with:
           cache: npm
           node-version: lts/*
+      # setup-node bundles whichever npm ships with Node, so install the
+      # version pinned in package.json explicitly.
+      - name: Install pinned npm
+        run: npm install -g npm@12.0.1
       - name: Install dependencies
         run: npm ci
       - name: Build
@@ -63,6 +67,8 @@ jobs:
         with:
           cache: npm
           node-version: lts/*
+      - name: Install pinned npm
+        run: npm install -g npm@12.0.1
       - name: Install dependencies
         run: npm ci
       - name: Download build output
@@ -97,6 +103,8 @@ jobs:
         with:
           cache: npm
           node-version: lts/*
+      - name: Install pinned npm
+        run: npm install -g npm@12.0.1
       - name: Install dependencies
         run: npm ci
       - name: Download blob reports
