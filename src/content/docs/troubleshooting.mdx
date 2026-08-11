@@ -119,6 +119,11 @@ aj = arcjet(
 decision = await aj.protect(request, ip_src="8.8.8.8")
 ```
 
+Unlike the JavaScript and Go SDKs, the Python SDK intentionally treats manual
+IP handling as a client mode rather than a per-call fallback. Only enable this
+mode for the client used in development, and pass `ip_src` to every
+`protect()` call made with that client.
+
 </TabItem>
 <TabItem label="Go">
 

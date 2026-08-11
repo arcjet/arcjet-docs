@@ -344,7 +344,9 @@ decision = await aj.protect(request, ip_src=ip_src)
 The sync client uses the same options without `await`. When automatic detection
 is disabled, omitting `ip_src` or passing an empty string raises an
 `ArcjetMisconfiguration`. Passing a non-empty `ip_src` while automatic detection
-is enabled also raises an `ArcjetMisconfiguration`.
+is enabled also raises an `ArcjetMisconfiguration`. With the default automatic
+detection enabled and `ip_src` omitted, Arcjet detects the IP from the framework
+request.
 
 > **Caution:** The SDK trusts `ip_src` without validating it. Validate the value
 > and ensure it comes from a trusted source. Do not pass a client-controlled
