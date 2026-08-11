@@ -139,8 +139,11 @@ The optional fields are:
   the
   <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>
   environment variable. Pass this when your config library doesn't propagate
-  `.env` into `os.environ` (e.g. `pydantic-settings`). See
-  [Pydantic-settings users](#pydantic-settings-users) below.
+  `.env` into `os.environ` (e.g. `pydantic-settings`). See <Link.Page href="/reference/python#pydantic-settings-users">Pydantic-settings users</Link.Page>
+  below.
+- `disable_automatic_ip_detection` (`bool`) — Disable automatic client IP
+  detection so the application can provide `ip_src` to every `protect()` call.
+  Defaults to `False`. This option cannot be combined with `proxies`.
 
 <Tabs>
   <TabItem label="FastAPI (async)">
@@ -305,7 +308,8 @@ object. The sync client returns the `ArcjetDecision` directly.
 
 #### Parameters
 
-All parameters are optional keyword arguments passed alongside the `request`:
+These keyword arguments are optional unless required by a configured rule or
+client mode:
 
 | Parameter                          | Type                   | Used by                  |
 | ---------------------------------- | ---------------------- | ------------------------ |
@@ -318,6 +322,36 @@ All parameters are optional keyword arguments passed alongside the `request`:
 | `extra`                            | `Mapping[str, str]`    | Forwarded verbatim to the Arcjet Decide API as custom metadata (advanced) |
 | `ip_src`                           | `str`                  | Manual IP override (advanced) |
 | `correlation_id`                   | `str`                  | Correlates this decision with a guard call, workflow run, or agent trace. A dedicated, indexable field — not `extra` — and does not affect the decision or its cache key (`arcjet` >= 0.9.0) |
+
+#### Override the client IP
+
+Arcjet normally detects the client IP address from the framework request. If
+your application has already determined the client IP from a trusted source,
+disable automatic detection when creating the client and pass `ip_src` to every
+`protect()` call:
+
+```py
+aj = arcjet(
+    key=arcjet_key,
+    rules=[...],
+    disable_automatic_ip_detection=True,
+)
+
+ip_src = get_client_ip_from_trusted_source(request)
+decision = await aj.protect(request, ip_src=ip_src)
+```
+
+The sync client uses the same options without `await`. When automatic detection
+is disabled, omitting `ip_src` or passing an empty string raises an
+`ArcjetMisconfiguration`. Passing a non-empty `ip_src` while automatic detection
+is enabled also raises an `ArcjetMisconfiguration`. With the default automatic
+detection enabled and `ip_src` omitted, Arcjet detects the IP from the framework
+request.
+
+> **Caution:** The SDK trusts `ip_src` without validating it. Validate the value
+> and ensure it comes from a trusted source. Do not pass a client-controlled
+> header directly; doing so could allow clients to choose the IP address used
+> for fingerprinting, rate limiting, and other security checks.
 
 ### Decision
 

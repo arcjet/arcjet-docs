@@ -17,6 +17,7 @@ import ProtectJsx from "/src/snippets/reference/react-router/protect.jsx?raw";
 import ProtectTsx from "/src/snippets/reference/react-router/protect.tsx?raw";
 import { removeTSCCommentDirectives as removeComments } from "@/lib/utils";
 import { Link } from "@/components/link";
+import ExplicitClientIP from "/src/snippets/reference/shared/ExplicitClientIP.mdx";
 
 {/* TODO(#526): Starlight injects the css & js as siblings of the first codeblock */}
 {/* on the page. This breaks when the first codeblock is in */}
@@ -138,6 +139,13 @@ The protect function returns a promise that resolves to a decision.
 
   </Fragment>
 </SelectableContent>
+
+#### Override the client IP
+
+For React Router, `requestInput` in the example below is the loader or action
+arguments.
+
+<ExplicitClientIP />
 
 ### Decision
 

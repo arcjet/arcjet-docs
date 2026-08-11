@@ -20,6 +20,7 @@ import ConfigurationTS from "/src/snippets/reference/nestjs/Configuration.ts?raw
 import IPLocationTS from "/src/snippets/reference/nestjs/IPLocation.ts?raw";
 import NodeVersions from "/src/snippets/reference/node-versions.mdx";
 import IPAnalysis from "/src/snippets/reference/shared/IPAnalysis.mdx";
+import ExplicitClientIP from "/src/snippets/reference/shared/ExplicitClientIP.mdx";
 
 [<NpmSdkVersion packageName="@arcjet/nest" />](https://www.npmjs.com/package/@arcjet/nest)
 
@@ -205,6 +206,14 @@ controller:
   flexibility because you can customize the rules and response. You call the
   `protect` function directly in the controller and can access the return
   `Promise` that resolves to an `ArcjetDecision` object.
+
+### Override the client IP
+
+Direct calls to `protect()` can override the automatically detected client IP.
+The global and per-route guards call `protect()` for you, so they cannot pass
+this per-request option.
+
+<ExplicitClientIP />
 
 The decision available when you call `protect` directly contains the following
 properties:

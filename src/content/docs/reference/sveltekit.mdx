@@ -37,6 +37,7 @@ import NodeVersions from "/src/snippets/reference/node-versions.mdx";
 import Comments from "/src/components/Comments.astro";
 import Requirements from "@/snippets/get-started/sveltekit/Requirements.mdx";
 import IPAnalysis from "@/snippets/reference/shared/IPAnalysis.mdx";
+import ExplicitClientIP from "@/snippets/reference/shared/ExplicitClientIP.mdx";
 
 [<NpmSdkVersion packageName="@arcjet/sveltekit" />](https://www.npmjs.com/package/@arcjet/sveltekit)
 
@@ -329,6 +330,12 @@ A good place to put this is in your app's server hooks file:
     <Code code={ProtectJS} title="/src/hooks.server.js" lang="js" />
   </TabItem>
 </Tabs>
+
+### Override the client IP
+
+For SvelteKit, `requestInput` in the example below is the `RequestEvent`.
+
+<ExplicitClientIP />
 
 ## Decision
 

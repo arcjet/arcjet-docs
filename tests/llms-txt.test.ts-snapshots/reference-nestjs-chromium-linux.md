@@ -281,6 +281,23 @@ Arcjet can be integrated into NestJS in several places using NestJS [guards](htt
 *   **Per route guard:** Allows you to configure rules per route, but requires you to add the guard to every route and has limited flexibility. The `protect` function is called for you inside the guard and you can’t access the response.
 *   **Within route:** Requires some code duplication, but allows maximum flexibility because you can customize the rules and response. You call the `protect` function directly in the controller and can access the return `Promise` that resolves to an `ArcjetDecision` object.
 
+### Override the client IP
+
+[Section titled “Override the client IP”](#override-the-client-ip)
+
+Direct calls to `protect()` can override the automatically detected client IP. The global and per-route guards call `protect()` for you, so they cannot pass this per-request option.
+
+Arcjet normally detects the client IP address from the request. If your application has already determined the client IP from a trusted source, pass it as `ipSrc` in the second argument to `protect()`. In this example, `requestInput` represents the request or framework context normally passed to `protect()`:
+
+```ts
+const ipSrc = getClientIpFromTrustedSource(requestInput);
+const decision = await aj.protect(requestInput, { ipSrc });
+```
+
+A non-empty `ipSrc` takes precedence over automatic detection, including the development-only `x-arcjet-ip` header. If `ipSrc` is an empty string, Arcjet uses automatic detection instead.
+
+> **Caution:** The SDK trusts `ipSrc` without validating it. Validate the value and ensure it comes from a trusted source. Do not pass a client-controlled header directly; doing so could allow clients to choose the IP address used for fingerprinting, rate limiting, and other security checks.
+
 The decision available when you call `protect` directly contains the following properties:
 
 *   `id` (`string`) - The unique ID for the request. This can be used to look up the request in the Arcjet dashboard. It is prefixed with `req_` for decisions involving the Arcjet cloud API. For decisions taken locally, the prefix is `lreq_`.
