@@ -65,6 +65,10 @@ export default defineConfig({
   site: "https://docs.arcjet.com",
   output: "server",
   prefetch: true,
+  markdown: {
+    // Temporary workaround for Astro 6.4 GFM table rendering regression: https://github.com/withastro/astro/issues/16971
+    gfm: true,
+  },
   // This is a fix for https://github.com/withastro/astro/issues/8297
   vite: {
     ssr: {
