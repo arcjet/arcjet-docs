@@ -126,11 +126,11 @@ Use server inputs only for values Arcjet is allowed to receive.
 
 ### LOCAL inputs
 
-The implemented local case is the sensitive-information rule over a `LOCAL
-STRING`. Its raw value remains in SDK memory. The SDK evaluates the downloaded
-policy projection locally and sends a domain-separated SHA-256 digest plus rule
-attestation. The attestation includes denied entity types and offsets, not the
-matched raw values.
+Today, `LOCAL` inputs are used by the sensitive-information rule, which operates
+on a `LOCAL STRING`. Its raw value remains in SDK memory. The SDK evaluates the
+downloaded policy projection locally and sends a domain-separated SHA-256
+digest plus rule attestation. The attestation includes denied entity types and
+offsets, not the matched raw values.
 
 <Aside type="caution">
   A local-input digest is correlation data, not anonymization. Low-entropy or
@@ -169,11 +169,12 @@ recipient to appear in the list.
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
 
+{/* prettier-ignore */}
 ```ts
 inputs: ({ recipient }) => ({
   recipient: policyInput.server.string(recipient),
   allowed_recipients: policyInput.server.stringList(user.allowedRecipients),
-});
+})
 ```
 
 </TabItem>
@@ -198,10 +199,11 @@ body locally.
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
 
+{/* prettier-ignore */}
 ```ts
 inputs: ({ body }) => ({
   body: policyInput.local.string(body),
-});
+})
 ```
 
 </TabItem>
@@ -225,10 +227,11 @@ agent run rather than from a model-generated tool argument.
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
 
+{/* prettier-ignore */}
 ```ts
 inputs: (toolInput) => ({
   incoming_message: policyInput.server.string(incomingMessage),
-});
+})
 ```
 
 </TabItem>
