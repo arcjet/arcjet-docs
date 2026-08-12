@@ -6,10 +6,43 @@ description: "Configure centrally managed policies for agent actions using label
 import { Aside, Tabs, TabItem } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 
-Agent guard remote policies let security teams change the policy applied to a
-guarded action without changing the tool implementation. Developers own the
-enforcement point and map application values into the policy contract;
-security teams own the policy selected by its `label`.
+Agent guard remote policies let authorized site members, including members of
+a security team, change the policy applied to a guarded action without changing
+the tool implementation. Developers own the enforcement point and map
+application values into the policy contract; authorized site members can
+publish the policy selected by its `label`.
+
+This page covers **Agent guard remote policies** for labeled `guard()` actions
+and tool calls. They are separate from <Link.Page href="/remote-rules">Request
+Remote rules</Link.Page>, which are site-scoped rules merged with SDK request
+rules for HTTP requests handled by `protect()`.
+
+Remote policies complement, rather than replace, SDK rules configured in code.
+For the architecture, ownership trade-offs, and vendor examples, read
+[Application-Native vs Remote Security Policies](https://arcjet.com/learn/application-native-vs-remote-security-policies).
+
+## Choose application-native rules, remote policies, or both
+
+An application-native rule is usually code-native: its semantics and change and
+release lifecycle are owned by the application, and it is authored and tested
+with the application. An SDK integration alone does not provide that policy
+model. An SDK can put enforcement inside an application while all policy
+remains configured in a remote control plane. Choose the authoring model based
+on who must change the rule and which lifecycle should govern it.
+
+|                            | Application-native (code-native) SDK rules            | Agent guard remote policies                                  |
+| -------------------------- | ----------------------------------------------------- | ------------------------------------------------------------ |
+| Primary owner              | Application engineering                               | Authorized site members, often security or platform teams    |
+| Rule authoring             | Application source code                               | Arcjet control plane                                         |
+| Change lifecycle           | Code review, tests, build, and deployment             | Publish without an application deployment                    |
+| Best fit                   | Application-specific logic and engineering invariants | Independent policy changes and rapid response                |
+| Application responsibility | Configure the rule and enforce the decision           | Define the label and typed inputs, then enforce the decision |
+| Can be used together       | Yes; submit SDK rules with the Guard call             | Yes; the matching published policy is evaluated on that call |
+
+Keep stable application invariants in code and put policy that security must
+change independently in the remote control plane. Do not duplicate a rule in
+both places unless one is an intentional defense-in-depth backstop with clear
+precedence and separate tests.
 
 ## Policy contract
 
@@ -43,14 +76,14 @@ Every policy input is named and explicitly constructed. Plain values are
 rejected; the SDK does not inspect the tool schema or automatically discover
 arguments.
 
-| Exposure | Type        | JavaScript / TypeScript                               | Python                                      | Example value                    |
-| -------- | ----------- | ----------------------------------------------------- | ------------------------------------------- | -------------------------------- |
-| `SERVER` | String      | `policyInput.server.string(value)`                    | `server_input.string(value)`                | `"customer@example.com"`         |
-| `SERVER` | Boolean     | `policyInput.server.boolean(value)`                   | `server_input.boolean(value)`               | `true`                           |
-| `SERVER` | Integer     | `policyInput.server.integer(value)`                   | `server_input.integer(value)`               | `3`                              |
-| `SERVER` | Number      | `policyInput.server.number(value)`                    | `server_input.number(value)`                | `49.95`                          |
-| `SERVER` | String list | `policyInput.server.stringList(value)`                | `server_input.string_list(value)`           | `["a@example.com", "b@example.com"]` |
-| `LOCAL`  | String      | `policyInput.local.string(value)`                     | `local_input.string(value)`                 | `"Email body to inspect"`        |
+| Exposure | Type        | JavaScript / TypeScript                | Python                            | Example value                        |
+| -------- | ----------- | -------------------------------------- | --------------------------------- | ------------------------------------ |
+| `SERVER` | String      | `policyInput.server.string(value)`     | `server_input.string(value)`      | `"customer@example.com"`             |
+| `SERVER` | Boolean     | `policyInput.server.boolean(value)`    | `server_input.boolean(value)`     | `true`                               |
+| `SERVER` | Integer     | `policyInput.server.integer(value)`    | `server_input.integer(value)`     | `3`                                  |
+| `SERVER` | Number      | `policyInput.server.number(value)`     | `server_input.number(value)`      | `49.95`                              |
+| `SERVER` | String list | `policyInput.server.stringList(value)` | `server_input.string_list(value)` | `["a@example.com", "b@example.com"]` |
+| `LOCAL`  | String      | `policyInput.local.string(value)`      | `local_input.string(value)`       | `"Email body to inspect"`            |
 
 For example, an email policy can receive a selected recipient, the trusted
 allow list to compare it with, and a message body that stays local:
@@ -93,10 +126,11 @@ Use server inputs only for values Arcjet is allowed to receive.
 
 ### LOCAL inputs
 
-The raw string remains in SDK memory. The SDK evaluates the downloaded policy
-projection locally and sends a domain-separated SHA-256 digest plus rule
-attestation. For sensitive information detection, the attestation includes
-denied entity types and offsets, not the matched raw values.
+The implemented local case is the sensitive-information rule over a `LOCAL
+STRING`. Its raw value remains in SDK memory. The SDK evaluates the downloaded
+policy projection locally and sends a domain-separated SHA-256 digest plus rule
+attestation. The attestation includes denied entity types and offsets, not the
+matched raw values.
 
 <Aside type="caution">
   A local-input digest is correlation data, not anonymization. Low-entropy or
@@ -139,7 +173,7 @@ recipient to appear in the list.
 inputs: ({ recipient }) => ({
   recipient: policyInput.server.string(recipient),
   allowed_recipients: policyInput.server.stringList(user.allowedRecipients),
-})
+});
 ```
 
 </TabItem>
@@ -167,7 +201,7 @@ body locally.
 ```ts
 inputs: ({ body }) => ({
   body: policyInput.local.string(body),
-})
+});
 ```
 
 </TabItem>
@@ -194,7 +228,7 @@ agent run rather than from a model-generated tool argument.
 ```ts
 inputs: (toolInput) => ({
   incoming_message: policyInput.server.string(incomingMessage),
-})
+});
 ```
 
 </TabItem>
