@@ -8,6 +8,7 @@ import robotsTxt from "astro-robots-txt";
 import { defineConfig, envField } from "astro/config";
 import arcjet from "@arcjet/astro";
 import starlightLinksValidator from "starlight-links-validator";
+import { comparisonAstroRedirects } from "./src/lib/comparison-redirects";
 import { main as sidebar } from "./src/lib/sidebars";
 
 /*
@@ -76,7 +77,21 @@ export default defineConfig({
     },
   },
   integrations: [
-    robotsTxt(),
+    robotsTxt({
+      transform(content) {
+        const sitemap =
+          content.match(/^Sitemap: .+$/m)?.[0] ??
+          "Sitemap: https://docs.arcjet.com/sitemap-index.xml";
+        return [
+          "User-Agent: *",
+          "Content-Signal: search=yes, ai-input=yes, ai-train=no",
+          "Allow: /",
+          "",
+          sitemap,
+          "",
+        ].join("\n");
+      },
+    }),
     starlight({
       title: "Arcjet Docs",
       description:
@@ -223,7 +238,10 @@ export default defineConfig({
     "/reference/ts-js": "/reference/nodejs",
     "/bot-protection/bot-types": "/bot-protection/identifying-bots",
     "/mcp": "/mcp-server",
-    "/comparisons/cloudflare-waf-vs-arcjet":
-      "/comparisons/cloudflare-vs-arcjet",
+    // /sitemap.xml 404s because @astrojs/sitemap emits sitemap-index.xml.
+    // Do not change SDK-scoped sitemap inclusion — those duplicates are
+    // intentional (canonical + noindex on /sdk/{framework}/ copies).
+    "/sitemap.xml": "/sitemap-index.xml",
+    ...comparisonAstroRedirects(),
   },
 });
