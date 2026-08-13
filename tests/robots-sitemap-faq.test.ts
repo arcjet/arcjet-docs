@@ -28,19 +28,11 @@ const COMPARISON_REDIRECTS = [
   },
 ] as const;
 
-const BLOCKED_AI_BOTS = [
-  "GPTBot",
-  "OAI-SearchBot",
-  "ChatGPT-User",
-  "ClaudeBot",
-  "PerplexityBot",
-];
-
 function isRedirectStatus(status: number) {
   return status === 301 || status === 302 || status === 307 || status === 308;
 }
 
-test.describe("AEO hygiene", () => {
+test.describe("robots, sitemap, redirects, and FAQ structured data", () => {
   test("robots.txt allows crawling and sets Content-Signal", async ({
     request,
   }) => {
@@ -53,12 +45,7 @@ test.describe("AEO hygiene", () => {
       "Content-Signal: search=yes, ai-input=yes, ai-train=no",
     );
     expect(body).toMatch(/^Allow: \/$/m);
-
-    for (const bot of BLOCKED_AI_BOTS) {
-      expect(body).not.toMatch(
-        new RegExp(`User-Agent:\\s*${bot}[\\s\\S]*?Disallow:\\s*/`, "i"),
-      );
-    }
+    expect(body).not.toMatch(/^Disallow:/m);
   });
 
   test("/sitemap.xml reaches the sitemap index", async ({ request }) => {

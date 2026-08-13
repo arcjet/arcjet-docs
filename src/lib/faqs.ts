@@ -5,7 +5,7 @@ export type Faq = {
 
 /**
  * Shared FAQ copy used on get-started and product quick-start pages.
- * JSON-LD is mapped from these items so questions stay in one place.
+ * Structured data is mapped from these items so questions stay in one place.
  */
 export const faqs: Faq[] = [
   {
