@@ -28,8 +28,6 @@ const PATHS_FROM_SITEMAP = [
   "/bot-protection/identifying-bots/",
   "/bot-protection/quick-start/",
   "/bot-protection/reference/",
-  "/comparisons/aikido-vs-arcjet/",
-  "/comparisons/vercel-botid-vs-arcjet/",
   "/email-validation/",
   "/email-validation/quick-start/",
   "/email-validation/reference/",

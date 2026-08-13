@@ -38,6 +38,30 @@ const jsoncStringLight = fs.readFileSync(
 );
 const ajThemeLight = ExpressiveCodeTheme.fromJSONString(jsoncStringLight);
 
+const comparisonMarketingRedirects: Record<string, string> = {
+  "/comparisons/aikido-vs-arcjet":
+    "https://arcjet.com/compare/aikido-vs-arcjet",
+  "/comparisons/captchas-vs-arcjet":
+    "https://arcjet.com/compare/captchas-vs-arcjet",
+  "/comparisons/cloudflare-vs-arcjet":
+    "https://arcjet.com/compare/cloudflare-vs-arcjet",
+  "/comparisons/cloudflare-waf-vs-arcjet":
+    "https://arcjet.com/compare/cloudflare-vs-arcjet",
+  "/comparisons/vercel-botid-vs-arcjet":
+    "https://arcjet.com/compare/vercel-botid-vs-arcjet",
+  "/comparisons/vercel-waf-vs-arcjet":
+    "https://arcjet.com/compare/vercel-waf-vs-arcjet",
+};
+
+function withSdkScopedRedirects(redirects: Record<string, string>) {
+  return Object.fromEntries(
+    Object.entries(redirects).flatMap(([from, to]) => [
+      [from, to],
+      [`/sdk/[sdk]${from}`, to],
+    ]),
+  );
+}
+
 // https://astro.build/config
 export default defineConfig({
   adapter,
@@ -76,7 +100,15 @@ export default defineConfig({
     },
   },
   integrations: [
-    robotsTxt(),
+    robotsTxt({
+      // Match marketing robots.txt: allow crawling, allow AI input, disallow training.
+      transform(content) {
+        return content.replace(
+          /User-agent: \*\nAllow: \//,
+          "User-Agent: *\nContent-Signal: search=yes, ai-input=yes, ai-train=no\nAllow: /",
+        );
+      },
+    }),
     starlight({
       title: "Arcjet Docs",
       description:
@@ -223,7 +255,8 @@ export default defineConfig({
     "/reference/ts-js": "/reference/nodejs",
     "/bot-protection/bot-types": "/bot-protection/identifying-bots",
     "/mcp": "/mcp-server",
-    "/comparisons/cloudflare-waf-vs-arcjet":
-      "/comparisons/cloudflare-vs-arcjet",
+    // Real file is sitemap-index.xml; keep /sdk/{framework}/ sitemap entries as-is.
+    "/sitemap.xml": "/sitemap-index.xml",
+    ...withSdkScopedRedirects(comparisonMarketingRedirects),
   },
 });
