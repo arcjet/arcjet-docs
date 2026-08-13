@@ -653,32 +653,6 @@ export const main = [
         link: "/support",
       },
       {
-        label: "Comparisons",
-        collapsed: true,
-        items: [
-          {
-            label: "Aikido",
-            link: "/comparisons/aikido-vs-arcjet",
-          },
-          {
-            label: "CAPTCHAs",
-            link: "/comparisons/captchas-vs-arcjet",
-          },
-          {
-            label: "Cloudflare",
-            link: "/comparisons/cloudflare-vs-arcjet",
-          },
-          {
-            label: "Vercel BotID",
-            link: "/comparisons/vercel-botid-vs-arcjet",
-          },
-          {
-            label: "Vercel WAF",
-            link: "/comparisons/vercel-waf-vs-arcjet",
-          },
-        ],
-      },
-      {
         label: "Pricing",
         link: "https://arcjet.com/pricing",
         attrs: { target: "_blank", class: "external-link" },
