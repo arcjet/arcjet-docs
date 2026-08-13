@@ -1,7 +1,10 @@
 ---
 import { faqPageJsonLd, faqs } from "@/lib/faqs";
 
-const jsonLd = JSON.stringify(faqPageJsonLd(faqs)).replaceAll("<", "\\u003c");
+const jsonLd =
+  faqs.length > 0
+    ? JSON.stringify(faqPageJsonLd(faqs)).replaceAll("<", "\\u003c")
+    : undefined;
 ---
 
 {
@@ -17,4 +20,4 @@ const jsonLd = JSON.stringify(faqPageJsonLd(faqs)).replaceAll("<", "\\u003c");
   ))
 }
 
-<script is:inline type="application/ld+json" set:html={jsonLd} />
+{jsonLd && <script is:inline type="application/ld+json" set:html={jsonLd} />}

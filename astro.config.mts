@@ -53,7 +53,7 @@ const comparisonMarketingRedirects: Record<string, string> = {
     "https://arcjet.com/compare/vercel-waf-vs-arcjet",
 };
 
-function withSdkScopedRedirects(redirects: Record<string, string>) {
+function withComparisonSdkScopes(redirects: Record<string, string>) {
   return Object.fromEntries(
     Object.entries(redirects).flatMap(([from, to]) => [
       [from, to],
@@ -103,10 +103,20 @@ export default defineConfig({
     robotsTxt({
       // Match marketing robots.txt: allow crawling, allow AI input, disallow training.
       transform(content) {
-        return content.replace(
+        const replaced = content.replace(
           /User-agent: \*\nAllow: \//,
           "User-Agent: *\nContent-Signal: search=yes, ai-input=yes, ai-train=no\nAllow: /",
         );
+        if (
+          !replaced.includes(
+            "Content-Signal: search=yes, ai-input=yes, ai-train=no",
+          )
+        ) {
+          throw new Error(
+            "robots.txt transform did not insert Content-Signal; astro-robots-txt output may have changed",
+          );
+        }
+        return replaced;
       },
     }),
     starlight({
@@ -255,8 +265,10 @@ export default defineConfig({
     "/reference/ts-js": "/reference/nodejs",
     "/bot-protection/bot-types": "/bot-protection/identifying-bots",
     "/mcp": "/mcp-server",
-    // Real file is sitemap-index.xml; keep /sdk/{framework}/ sitemap entries as-is.
+    // Duplicated in vercel.json for production. This Astro redirect covers
+    // local preview. Keep both in sync. Real file is sitemap-index.xml;
+    // do not collapse /sdk/{framework}/ sitemap entries.
     "/sitemap.xml": "/sitemap-index.xml",
-    ...withSdkScopedRedirects(comparisonMarketingRedirects),
+    ...withComparisonSdkScopes(comparisonMarketingRedirects),
   },
 });

@@ -28,8 +28,8 @@ const COMPARISON_REDIRECTS = [
   },
 ] as const;
 
-function isRedirectStatus(status: number) {
-  return status === 301 || status === 302 || status === 307 || status === 308;
+function isPermanentRedirectStatus(status: number) {
+  return status === 301 || status === 308;
 }
 
 test.describe("robots, sitemap, redirects, and FAQ structured data", () => {
@@ -52,7 +52,7 @@ test.describe("robots, sitemap, redirects, and FAQ structured data", () => {
     const response = await request.get("/sitemap.xml", { maxRedirects: 0 });
     const status = response.status();
 
-    if (isRedirectStatus(status)) {
+    if (isPermanentRedirectStatus(status)) {
       expect(response.headers().location).toMatch(/sitemap-index\.xml\/?$/);
       return;
     }
@@ -66,7 +66,7 @@ test.describe("robots, sitemap, redirects, and FAQ structured data", () => {
     for (const path of [from, `${from}/`]) {
       test(`${path} permanently redirects to ${to}`, async ({ request }) => {
         const response = await request.get(path, { maxRedirects: 0 });
-        expect(isRedirectStatus(response.status())).toBeTruthy();
+        expect(isPermanentRedirectStatus(response.status())).toBeTruthy();
         expect(response.headers().location).toBe(to);
       });
     }
