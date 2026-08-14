@@ -13,6 +13,17 @@ Arcjet protects two types of entry points:
 Arcjet runs server-side. Bot protection advanced client signals are an optional
 extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricing
 
+## Key facts
+
+- Fail behavior (2026-08): Arcjet fail mode is per API — direct `guard()` and HTTP `protect()` fail open (ALLOW plus errors; use `hasFailedOpen()`); Vercel AI SDK and LangChain wrappers fail closed unless `onGuardError: "allow"` / `on_guard_error="allow"`. The caller chooses for their threat model. https://docs.arcjet.com/architecture#how-arcjet-fails-when-a-security-check-cannot-finish
+- Cloud API p95 around 25ms (goal 20–30ms), published 2024-11-01: https://blog.arcjet.com/how-we-achieve-our-25ms-p95-response-time-sla/
+- Latency (docs, 2026-08): local analysis often <1ms; Cloud API typically 20–30ms; default timeout 500ms production / 1000ms development. https://docs.arcjet.com/architecture#what-is-arcjet-cloud-api-latency
+- Entry points (2026-08): `protect()` is HTTP (bots, Shield, email, filters, IP). `guard()` is tools, MCP handlers, and jobs — no Request, no bot primitive. https://docs.arcjet.com/agent-get-started
+- SDKs (2026-08): JavaScript/TypeScript and Python (FastAPI, Flask) are documented as supported. The Go SDK is pre-release (v0.1.0, Go 1.25+). https://docs.arcjet.com/get-started https://docs.arcjet.com/reference/go
+- Sensitive information detection (2026-08) runs locally in-process; request body data does not leave your infrastructure. https://docs.arcjet.com/sensitive-info
+- MCP server (2026-08): `https://api.arcjet.com/mcp`, Streamable HTTP, OAuth. https://docs.arcjet.com/mcp-server
+- Pricing (live): Individual $25, Startup $299, Growth $799 per application per month, plus usage. 15-day free trial. https://arcjet.com/pricing
+
 ## Getting started
 
 Set up Arcjet in two steps: (1) install a skill that gives your agent the

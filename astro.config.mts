@@ -266,6 +266,13 @@ export default defineConfig({
     "/bot-protection/bot-types": "/bot-protection/identifying-bots",
     "/mcp": "/mcp-server",
     // Duplicated in vercel.json for production. This Astro redirect covers
+    // local preview. Keep both in sync. Do not 301 /guards/framework-integrations
+    // away; these aliases point at the existing guards and MCP pages.
+    "/integrations": "/guards/framework-integrations",
+    "/integrations/vercel-ai": "/guards/framework-integrations",
+    "/integrations/langchain": "/guards/framework-integrations",
+    "/integrations/mcp": "/mcp-server",
+    // Duplicated in vercel.json for production. This Astro redirect covers
     // local preview. Keep both in sync. Real file is sitemap-index.xml;
     // do not collapse /sdk/{framework}/ sitemap entries.
     "/sitemap.xml": "/sitemap-index.xml",

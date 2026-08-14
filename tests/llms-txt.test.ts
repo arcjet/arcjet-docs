@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 const MARKDOWN_PATHS = [
+  "/agents.md",
   "/bot-protection.md",
   "/email-validation.md",
   "/filters.md",

@@ -119,12 +119,29 @@ The field may be absent when the server does not return remote-policy status.
 If your application expects a policy, inspect the decision's error results and
 verify the SDK and policy configuration.
 
-## Availability and fail behavior
+<a name="availability-and-fail-behavior" />
+
+## How Arcjet fails when a security check cannot finish
+
+Arcjet does not apply one global fail mode when a security check cannot finish;
+each API and wrapper documents its own default. Direct `guard()` fails open: it
+returns ALLOW plus error codes rather than treating an incomplete check as a
+policy denial, and `hasFailedOpen()` (or `has_failed_open()` in Python)
+identifies that case. `protect()` on HTTP routes fails open if the Cloud API is
+unreachable, so a network problem does not block all requests; that default is
+configurable (see the
+<Link.Page href="/reference/nodejs#error-handling">Node.js SDK reference</Link.Page>).
+Vercel AI SDK and LangChain wrappers fail closed unless you set
+`onGuardError: "allow"` / `on_guard_error="allow"`. A search tool and a refund
+tool should not share one global fail mode; the caller chooses for their threat
+model. Cloud API calls typically add 20–30ms, local analysis is often under
+1ms, and the default timeout is 500ms in production and 1000ms in development.
 
 The direct Guard client fails open when a transport, timeout, response, local
 evaluation, or remote-policy completeness error prevents a full evaluation.
 It returns `ALLOW` with an error result instead of treating the incomplete
-check as a policy denial.
+check as a policy denial. Use `hasFailedOpen()` / `has_failed_open()` for an
+incomplete check.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">

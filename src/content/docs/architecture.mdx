@@ -30,12 +30,52 @@ Arcjet has been architected around a few key principles:
   easy to install, must not add significant latency to requests, and should not
   require changes to the application's architecture.
 
-## Why in-application enforcement matters
+## Why does in-application enforcement matter vs a CDN WAF?
+
+Arcjet runs inside your application so it can use identity, session, plan, and
+request-body context a CDN WAF cannot reliably infer. Enforcement happens in
+your runtime, so a logged-in user or workflow state can change the decision
+before the action completes.
 
 Arcjet is designed to run behind existing WAFs, CDNs, API gateways, and bot
 defenses, adding the business context those layers cannot reliably infer. It can
 evaluate identity, session, plan, route, request body, and application workflow
 state before your code completes a protected action.
+
+### Contrast with traditional CDN security services
+
+Traditional CDN security services are typically implemented as a reverse proxy
+in front of your application. The security service is a separate entity from
+your application, rules can't be adjusted dynamically because it does not have
+access to the full context of the request, and it can't be tested locally.
+
+This can lead to false positives and false negatives as the service does not
+have the full context of the application.
+
+For example:
+
+1. A client makes an HTTP request to your application.
+2. The request is intercepted by the CDN security service.
+3. The service analyzes the request and decides to block the request.
+4. The request is blocked and the client receives an error message, but your
+   application code never sees the request. This can lead to false positives
+   where legitimate requests are blocked. If your application had seen the
+   request, it may have been able to determine that it was legitimate e.g.
+   because the client was logged in.
+5. Or, the request is allowed and your code runs, but it has no idea that the
+   request was analyzed by the CDN security service and why the request was
+   allowed.
+
+<img
+  class="dark"
+  src={ImageCDNDark.src}
+  alt="Contrast with traditional CDN security services"
+/>
+<img
+  class="light"
+  src={ImageCDNLight.src}
+  alt="Contrast with traditional CDN security services"
+/>
 
 ## Policy ownership and remote rules
 
@@ -133,41 +173,6 @@ In this example flow:
   alt="Example: Local analysis"
 />
 
-#### Contrast with traditional CDN security services
-
-Traditional CDN security services are typically implemented as a reverse proxy
-in front of your application. The security service is a separate entity from
-your application, rules can't be adjusted dynamically because it does not have
-access to the full context of the request, and it can't be tested locally.
-
-This can lead to false positives and false negatives as the service does not
-have the full context of the application.
-
-For example:
-
-1. A client makes an HTTP request to your application.
-2. The request is intercepted by the CDN security service.
-3. The service analyzes the request and decides to block the request.
-4. The request is blocked and the client receives an error message, but your
-   application code never sees the request. This can lead to false positives
-   where legitimate requests are blocked. If your application had seen the
-   request, it may have been able to determine that it was legitimate e.g.
-   because the client was logged in.
-5. Or, the request is allowed and your code runs, but it has no idea that the
-   request was analyzed by the CDN security service and why the request was
-   allowed.
-
-<img
-  class="dark"
-  src={ImageCDNDark.src}
-  alt="Contrast with traditional CDN security services"
-/>
-<img
-  class="light"
-  src={ImageCDNLight.src}
-  alt="Contrast with traditional CDN security services"
-/>
-
 ### Arcjet Cloud API
 
 In many cases, Arcjet can make a decision locally and report that decision
@@ -245,7 +250,12 @@ the local cache and return the response immediately:
   alt="Example: Rate limit rule DENY (CACHED)"
 />
 
-#### When the API is required
+## When does Arcjet call the Cloud API vs decide locally?
+
+Arcjet decides locally when request headers, email syntax, or a cached deny are
+enough, and it calls the Cloud API when a rule needs shared state or reputation
+data. Rate limiting, Shield, live bot checks, email verification, and
+`ip.src.*` filters require the Cloud API.
 
 A call to the Cloud API is required when:
 
@@ -271,7 +281,13 @@ A call to the Cloud API is required when:
   `ip.src.country`. These fields require data from our IP reputation database so
   a call to the Cloud API is required. Other fields are analyzed locally.
 
-#### API latency
+<a name="api-latency" />
+
+## What is Arcjet Cloud API latency?
+
+Arcjet Cloud API overhead is typically 20–30ms when a remote decision is
+required, and published p95 is around 25ms. Local analysis and cached decisions
+often add less than 1ms.
 
 The Arcjet SDK tries to do as much as possible asynchronously and locally to
 minimize latency for each request. This adds less than 1ms of overhead to a
@@ -281,21 +297,14 @@ When a call to the Cloud API is required there is some additional latency
 before a decision is made. The Cloud API has been designed for high performance
 and low latency, and is deployed to multiple regions around the world. The SDK
 will automatically use the closest region which means the total overhead is
-typically no more than 20-30ms, often significantly less.
+typically no more than 20-30ms, often significantly less. See
+[How we achieve our 25ms p95 response time SLA](https://blog.arcjet.com/how-we-achieve-our-25ms-p95-response-time-sla/)
+on the Arcjet blog.
 
 Arcjet only ever makes a single call to the API regardless of the number of
 rules configured.
 
-Where a decision has been cached locally e.g. blocking a client, Arcjet will
-continue to function even if the service is unavailable. In the event of a
-network problem or outage and a call to the API is needed, the Arcjet SDK
-defaults to failing open so all requests will be allowed. This is a deliberate
-design decision to ensure that your application continues to function even if
-there is a problem, but you can configure the SDK to fail closed if you prefer.
-See an example of how to handle errors and fail open or closed in the
-<Link.Page href="/reference/nodejs#error-handling">Node.js SDK reference</Link.Page>.
-
-#### Timeout
+### Timeout
 
 The total overhead when connecting to the Arcjet Cloud API is typically no more
 than 20-30ms,
@@ -329,6 +338,30 @@ For more info,
 see the post [Minimizing latency for humans &
 machines](https://blog.arcjet.com/minimizing-latency-for-humans-machines/)
 on the Arcjet blog.
+
+## Does Arcjet fail open or fail closed?
+
+Arcjet fail behavior depends on the API: HTTP `protect()` and direct `guard()`
+fail open by default, while Vercel AI SDK and LangChain wrappers fail closed.
+The Cloud API default timeout is 500ms in production; see
+<Link.Page href="/architecture#how-arcjet-fails-when-a-security-check-cannot-finish">How Arcjet fails when a security check cannot finish</Link.Page>
+for the per-API defaults and how to choose.
+
+## How Arcjet fails when a security check cannot finish
+
+Arcjet does not apply one global fail mode when a security check cannot finish;
+each API and wrapper documents its own default. Direct `guard()` fails open: it
+returns ALLOW plus error codes rather than treating an incomplete check as a
+policy denial, and `hasFailedOpen()` (or `has_failed_open()` in Python)
+identifies that case. `protect()` on HTTP routes fails open if the Cloud API is
+unreachable, so a network problem does not block all requests; that default is
+configurable (see the
+<Link.Page href="/reference/nodejs#error-handling">Node.js SDK reference</Link.Page>).
+Vercel AI SDK and LangChain wrappers fail closed unless you set
+`onGuardError: "allow"` / `on_guard_error="allow"`. A search tool and a refund
+tool should not share one global fail mode; the caller chooses for their threat
+model. Cloud API calls typically add 20–30ms, local analysis is often under
+1ms, and the default timeout is 500ms in production and 1000ms in development.
 
 ## Request analysis
 

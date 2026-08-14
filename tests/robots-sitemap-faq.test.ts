@@ -1,6 +1,25 @@
 import { expect, test } from "@playwright/test";
 import { faqs } from "../src/lib/faqs";
 
+const INTEGRATION_REDIRECTS = [
+  {
+    from: "/integrations",
+    to: "/guards/framework-integrations",
+  },
+  {
+    from: "/integrations/vercel-ai",
+    to: "/guards/framework-integrations",
+  },
+  {
+    from: "/integrations/langchain",
+    to: "/guards/framework-integrations",
+  },
+  {
+    from: "/integrations/mcp",
+    to: "/mcp-server",
+  },
+] as const;
+
 const COMPARISON_REDIRECTS = [
   {
     from: "/comparisons/aikido-vs-arcjet",
@@ -60,6 +79,34 @@ test.describe("robots, sitemap, redirects, and FAQ structured data", () => {
     expect(status).toBe(200);
     const body = await response.text();
     expect(body).toContain("sitemapindex");
+  });
+
+  for (const { from, to } of INTEGRATION_REDIRECTS) {
+    for (const path of [from, `${from}/`]) {
+      test(`${path} permanently redirects to ${to}`, async ({ request }) => {
+        const response = await request.get(path, { maxRedirects: 0 });
+        expect(isPermanentRedirectStatus(response.status())).toBeTruthy();
+        expect(response.headers().location).toMatch(
+          new RegExp(`${to.replaceAll("/", "\\/")}/?$`),
+        );
+      });
+    }
+  }
+
+  test("/.well-known/mcp.json points at the documented MCP server", async ({
+    request,
+  }) => {
+    const response = await request.get("/.well-known/mcp.json");
+    expect(response.status()).toBe(200);
+
+    const body = (await response.json()) as {
+      url?: string;
+      transport?: string;
+      authentication?: string;
+    };
+    expect(body.url).toBe("https://api.arcjet.com/mcp");
+    expect(body.transport).toBe("streamable-http");
+    expect(body.authentication).toBe("oauth");
   });
 
   for (const { from, to } of COMPARISON_REDIRECTS) {
