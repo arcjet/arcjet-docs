@@ -184,6 +184,10 @@ export const main = [
         link: "/guards/framework-integrations",
       },
       {
+        label: "Vercel Eve",
+        link: "/guards/vercel-eve",
+      },
+      {
         label: "Remote policies",
         link: "/guards/remote-policies",
       },
