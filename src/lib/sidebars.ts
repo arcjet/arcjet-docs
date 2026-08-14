@@ -184,10 +184,6 @@ export const main = [
         link: "/guards/framework-integrations",
       },
       {
-        label: "Vercel Eve",
-        link: "/guards/vercel-eve",
-      },
-      {
         label: "Remote policies",
         link: "/guards/remote-policies",
       },
@@ -632,6 +628,10 @@ export const main = [
         label: "Vercel",
         link: "https://vercel.com/integrations/arcjet",
         attrs: { target: "_blank", class: "external-link" },
+      },
+      {
+        label: "Vercel Eve",
+        link: "/guards/vercel-eve",
       },
     ],
   },
