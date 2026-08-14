@@ -5,7 +5,7 @@ description: "Screen inbound Eve messages, gate tools and connections, and obser
 
 import { Link } from "@/components/link";
 
-Vercel Eve agents call authored tools, OpenAPI connections, and MCP connections.
+[Vercel Eve](https://eve.dev/) agents call authored tools, OpenAPI connections, and MCP connections.
 Arcjet Guard sits at those boundaries so a remote policy can allow or deny the
 action before a side effect runs.
 
@@ -52,7 +52,15 @@ Never call `createAgentContext` inside an Eve callback. The session id is
 already the run identity. Use `eveAgentContext` only when you need the context
 object explicitly.
 
-The coding-agent skill for this integration is
+The Eve integration skill ships with `@arcjet/guard`. After `npm install`, copy
+or symlink it into your coding agent's skills directory:
+
+```bash
+cp -r node_modules/@arcjet/guard/skills/integrate-arcjet-guard-eve ~/.claude/skills/
+```
+
+Then ask the agent to add Arcjet Guard to this Eve project. In Claude Code, run
+`/integrate-arcjet-guard-eve`. The skill source is
 [integrate-arcjet-guard-eve](https://github.com/arcjet/arcjet-js/blob/main/arcjet-guard/skills/integrate-arcjet-guard-eve/SKILL.md).
 
 ## Inbound screening
