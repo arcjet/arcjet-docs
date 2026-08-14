@@ -9,7 +9,7 @@ import { Link } from "@/components/link";
 Arcjet Guard sits at those boundaries so a remote policy can allow or deny the
 action before a side effect runs.
 
-Use `protect()` for HTTP routes. Use the Eve helpers on this page for tools,
+Use <Link.Page href="/get-started">`protect()`</Link.Page> for HTTP routes. Use the Eve helpers on this page for tools,
 connections, inbound channel text, and lifecycle observation. Vercel AI SDK and
 LangChain wrappers are on
 <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>.
@@ -56,6 +56,7 @@ The Eve integration skill ships with `@arcjet/guard`. After `npm install`, copy
 or symlink it into your coding agent's skills directory:
 
 ```bash
+mkdir -p ~/.claude/skills
 cp -r node_modules/@arcjet/guard/skills/integrate-arcjet-guard-eve ~/.claude/skills/
 ```
 
@@ -99,6 +100,8 @@ export default defineChannel({
         });
       }
 
+      // correlationId must be stable across retries so the inbound decision
+      // correlates with the session. Do not use crypto.randomUUID() here.
       const correlationId = conversationId;
       const verdict = await guardInbound(arcjet, message, {
         rules: [detectPromptInjection()(message)],

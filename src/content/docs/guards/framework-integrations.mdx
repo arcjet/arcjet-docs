@@ -119,7 +119,7 @@ configuration. Asynchronous resolvers are supported for async tool invocations.
 Eve agents can have zero authored tools. OpenAPI and MCP connections have no
 local `execute`, so the enforcement point is `guardApproval()` on the
 connection. Screen inbound channel text with `guardInbound()` before the agent
-starts. Hooks are observe-only.
+starts. Hooks are observe-only (handlers return `void`).
 
 See the <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>
 for inbound screening, connection approvals, and lifecycle hooks.
