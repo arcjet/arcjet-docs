@@ -1,0 +1,188 @@
+---
+title: "Vercel Eve agent guard"
+description: "Screen inbound Eve messages, gate tools and connections, and observe agent lifecycle events."
+---
+
+import { Link } from "@/components/link";
+
+[Vercel Eve](https://eve.dev/) agents call authored tools, OpenAPI connections, and MCP connections.
+Arcjet Guard sits at those boundaries so a remote policy can allow or deny the
+action before a side effect runs.
+
+Use <Link.Page href="/get-started">`protect()`</Link.Page> for HTTP routes. Use the Eve helpers on this page for tools,
+connections, inbound channel text, and lifecycle observation. Vercel AI SDK and
+LangChain wrappers are on
+<Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>.
+
+## Install
+
+Install the Guard SDK and Eve:
+
+```bash
+npm install @arcjet/guard eve
+```
+
+Import helpers from the versioned path `@arcjet/guard/vercel-eve/v0`. There is
+no unversioned alias. `@arcjet/guard/vercel-eve` and
+`@arcjet/guard/vercel-eve/v1` do not resolve. Eve is pre-1.0, so the segment is
+`v0`. The Eve integration requires Node.js 24 or later.
+
+Launch one client at module scope:
+
+```ts
+import { launchArcjet } from "@arcjet/guard";
+
+export const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+```
+
+## Helpers
+
+The integration exposes four surfaces:
+
+- `guardTool()` wraps an authored tool when you need the execution outcome.
+- `guardApproval()` gates a tool or a connection before it runs.
+- `guardInbound()` screens inbound text on a channel.
+- `arcjetHooks()` observes agent lifecycle events.
+
+`guardTool()`, `guardApproval()`, and `arcjetHooks()` correlate by session id.
+`guardInbound()` runs before the session exists, so you pass an explicit
+`correlationId`.
+
+Never call `createAgentContext` inside an Eve callback. The session id is
+already the run identity. Use `eveAgentContext` only when you need the context
+object explicitly.
+
+The Eve integration skill ships with `@arcjet/guard`. After `npm install`, copy
+or symlink it into your coding agent's skills directory:
+
+```bash
+mkdir -p ~/.claude/skills
+cp -r node_modules/@arcjet/guard/skills/integrate-arcjet-guard-eve ~/.claude/skills/
+```
+
+Then ask the agent to add Arcjet Guard to this Eve project. In Claude Code, run
+`/integrate-arcjet-guard-eve`. The skill source is
+[integrate-arcjet-guard-eve](https://github.com/arcjet/arcjet-js/blob/main/arcjet-guard/skills/integrate-arcjet-guard-eve/SKILL.md).
+
+## Inbound screening
+
+`guardInbound()` on an Eve channel (`agent/channels/*.ts`) screens inbound text
+before the agent sees it. This is the only place a turn can be declined before
+it starts.
+
+On `DENY`, return an HTTP error and do not start the agent. Pass an explicit
+`correlationId`. Use a value the app already has, such as a conversation id.
+Do not generate a per-request id. Reuse that same value with `args.from()` so
+the inbound decision can join the session later.
+
+Eve helpers default to `onGuardError: "deny"`. `"allow"` is a legitimate choice
+on the channel, because failing closed there stops the agent answering during
+an outage.
+
+```ts
+import { defineChannel, POST } from "eve/channels";
+import { detectPromptInjection } from "@arcjet/guard";
+import { guardInbound } from "@arcjet/guard/vercel-eve/v0";
+import { arcjet } from "../arcjet.js";
+
+export default defineChannel({
+  routes: [
+    POST("/webhook", async (req, args) => {
+      const body = (await req.json()) as {
+        message?: string;
+        conversationId?: string;
+      };
+      const { message, conversationId } = body;
+
+      if (!message || !conversationId) {
+        return new Response(JSON.stringify({ error: "Missing fields" }), {
+          status: 400,
+        });
+      }
+
+      // correlationId must be stable across retries so the inbound decision
+      // correlates with the session. Do not use crypto.randomUUID() here.
+      const correlationId = conversationId;
+      const verdict = await guardInbound(arcjet, message, {
+        rules: [detectPromptInjection()(message)],
+        action: "message.received",
+        correlationId,
+      });
+
+      if (!verdict.allowed) {
+        return new Response(JSON.stringify({ error: verdict.message }), {
+          status: 403,
+        });
+      }
+
+      const session = await args.from(correlationId).send(message, {
+        auth: null,
+      });
+
+      return new Response(
+        JSON.stringify({ success: true, sessionId: session.id }),
+        { headers: { "Content-Type": "application/json" } },
+      );
+    }),
+  ],
+});
+```
+
+## guardApproval with no authored tools
+
+An Eve agent can have zero authored tools. OpenAPI and MCP connections
+(`agent/connections/*.ts`) have no local `execute`. The only enforcement point
+is `guardApproval()` on the connection's `approval` field. There is no
+middleware or hook alternative.
+
+On `DENY`, Eve returns a `denied` status the model can read. That differs from
+`guardTool()`, which throws. `approval` is one function. Do not compose it with
+Eve's `always()`, `once()`, or `never()`. To also require a human, use
+`onAllow: "user-approval"`.
+
+`defineDynamic` tools cannot be wrapped with `guardTool()`. Gate those with
+`guardApproval()` too.
+
+```ts
+import { defineOpenAPIConnection } from "eve/connections";
+import { tokenBucket } from "@arcjet/guard";
+import { guardApproval } from "@arcjet/guard/vercel-eve/v0";
+import { arcjet } from "../arcjet.js";
+
+const apiLimit = tokenBucket({
+  bucket: "api-access",
+  refillRate: 30,
+  intervalSeconds: 60,
+  maxTokens: 30,
+});
+
+export default defineOpenAPIConnection({
+  description: "Orders API",
+  spec: "https://api.example.com/openapi.json",
+  approval: guardApproval(arcjet, {
+    action: "orders-api.read",
+    rules: (ctx) => [apiLimit({ key: ctx.session.id, requested: 1 })],
+  }),
+  operations: {
+    allow: ["GetOrder"],
+  },
+});
+```
+
+## Why Eve hooks can’t enforce
+
+`arcjetHooks()` and Eve hooks are observe-only. Handlers return `void` and
+cannot reject a turn. If the request is to block prompt injection, the answer
+is `guardInbound` at the channel, not a hook.
+
+Hooks emit lifecycle captures joined to the session id. The
+`eve.session-started` event carries both inbound and session correlation. Use
+hooks for audit trails, not enforcement.
+
+```ts
+import { defineHook } from "eve/hooks";
+import { arcjetHooks } from "@arcjet/guard/vercel-eve/v0";
+import { arcjet } from "../arcjet.js";
+
+export default defineHook(arcjetHooks(arcjet));
+```

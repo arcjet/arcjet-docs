@@ -1,6 +1,6 @@
 ---
 title: "Agent guard framework integrations"
-description: "Guard Vercel AI SDK and LangChain tool calls before execution."
+description: "Guard Vercel AI SDK, LangChain, and Vercel Eve tools, connections, and inbound messages."
 ---
 
 import { Aside } from "@astrojs/starlight/components";
@@ -114,15 +114,27 @@ with `invoke()`. Actor and input resolvers receive `RunnableConfig` and
 validated tool arguments. Derive `actor` only from server-controlled
 configuration. Asynchronous resolvers are supported for async tool invocations.
 
+## Vercel Eve
+
+Eve agents can have zero authored tools. OpenAPI and MCP connections have no
+local `execute`, so the enforcement point is `guardApproval()` on the
+connection. Screen inbound channel text with `guardInbound()` before the agent
+starts. Hooks are observe-only (handlers return `void`).
+
+See the <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>
+for inbound screening, connection approvals, and lifecycle hooks.
+
 ## Denials and availability
 
-Both wrappers default to fail closed when Guard is unavailable:
+The wrappers default to fail closed when Guard is unavailable:
 
 - Vercel AI does not execute the tool and returns a retryable denial result to
   the model with reason `ERROR`.
 - LangChain raises `ArcjetToolUnavailableError`. A policy denial raises
   `ArcjetToolDeniedError`, or follows the wrapped tool's `handle_tool_error`
   behavior when configured.
+- Vercel Eve helpers default to `onGuardError: "deny"`. On a channel, `"allow"`
+  is a legitimate choice because failing closed stops the agent answering.
 
 Set `onGuardError: "allow"` in JavaScript or `on_guard_error="allow"` in Python
 only when executing without a complete security decision is acceptable.

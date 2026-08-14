@@ -37,7 +37,8 @@ extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricin
 - [Filters](https://docs.arcjet.com/filters): country / VPN / ASN allow + deny rules.
 - [Agent guards](https://docs.arcjet.com/guards): protect tool calls and other agent actions without an HTTP request.
 - [Agent guard quick start](https://docs.arcjet.com/guards/quick-start): guard one tool call.
-- [Agent guard integrations](https://docs.arcjet.com/guards/framework-integrations): Vercel AI SDK and LangChain.
+- [Agent guard integrations](https://docs.arcjet.com/guards/framework-integrations): Vercel AI SDK, LangChain, and Vercel Eve.
+- [Vercel Eve agent guard](https://docs.arcjet.com/guards/vercel-eve): inbound screening, connection approvals, and observe-only hooks.
 - [Agent guard remote policies](https://docs.arcjet.com/guards/remote-policies): centrally managed action policies using labels, actors, and typed inputs.
 - [Agent guard testing and reference](https://docs.arcjet.com/guards/reference): decisions, availability, fail behavior, and testing.
 

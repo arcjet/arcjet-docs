@@ -629,6 +629,10 @@ export const main = [
         link: "https://vercel.com/integrations/arcjet",
         attrs: { target: "_blank", class: "external-link" },
       },
+      {
+        label: "Vercel Eve",
+        link: "/guards/vercel-eve",
+      },
     ],
   },
   {
