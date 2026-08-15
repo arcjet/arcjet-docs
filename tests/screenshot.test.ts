@@ -38,6 +38,7 @@ const PATHS_FROM_SITEMAP = [
   "/fingerprints/",
   "/get-started/",
   "/guards/",
+  "/guards/mastra/",
   "/guards/vercel-eve/",
   "/inspect/",
   "/integrations/better-auth/",
