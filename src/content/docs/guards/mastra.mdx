@@ -72,7 +72,7 @@ run `/integrate-arcjet-guard-mastra`. The skill source is
 ## Screen inbound with guardProcessor
 
 Mastra channels already run through `processInput`. There is no `guardInbound`.
-Prompt injection belongs on `guardProcessor` in `inputProcessors`.
+Screen for prompt injection with `guardProcessor` in `inputProcessors`.
 
 On `DENY`, `processInput` / `processInputStep` call `abort()` and Mastra raises
 a tripwire. Use a separate action name for outbound text on
