@@ -184,6 +184,10 @@ export const main = [
         link: "/guards/framework-integrations",
       },
       {
+        label: "Remote policies",
+        link: "/guards/remote-policies",
+      },
+      {
         label: "Capture",
         link: "/guards/capture",
       },

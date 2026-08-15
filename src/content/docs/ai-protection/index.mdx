@@ -21,9 +21,9 @@ infer.
 
 | Question                                            | Arcjet answer                                                                                                                                                                                           |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Where is policy defined?                            | SDK rules in code, plus <Link.Page href="/remote-rules">request Remote rules</Link.Page> for `protect()`. |
+| Where is policy defined?                            | SDK rules in code, <Link.Page href="/remote-rules">request Remote rules</Link.Page> for `protect()`, and <Link.Page href="/guards/remote-policies">Agent guard remote policies</Link.Page> selected by `guard()` labels. |
 | Where is enforcement?                               | Inline in route handlers, tool calls, queue jobs, and workflow steps before the risky action runs.                                                                                                      |
-| How does SecOps fit?                                | Dry-run modes, request Remote rules, dashboard and <Link.Page href="/mcp-server">MCP server</Link.Page> operations, and shared telemetry let security teams manage rollout while developers own implementation. |
+| How does SecOps fit?                                | Dry-run modes, request Remote rules, Agent guard remote policies, dashboard and <Link.Page href="/mcp-server">MCP server</Link.Page> operations, and shared telemetry let security teams manage rollout while developers own implementation. |
 | How does it complement WAFs, APIs, and AI gateways? | Those layers see traffic or model I/O; Arcjet sees application context such as identity, tenant, route, quota, session, tool call, and business action.                                                 |
 
 ## Patterns of security AI failures
@@ -146,6 +146,11 @@ call site.
     title="Agent guards quick start"
     href="/guards/quick-start"
     description="Guard one AI agent tool call before it executes."
+  />
+  <Link.Card
+    title="Agent guard remote policies"
+    href="/guards/remote-policies"
+    description="Manage action policy centrally using labels, actors, and typed inputs."
   />
   <Link.Card
     title="Content moderation"

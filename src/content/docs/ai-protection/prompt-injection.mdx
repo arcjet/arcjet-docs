@@ -336,7 +336,9 @@ aj = arcjet(
 The examples above protect an HTTP endpoint — the boundary where user input enters your application. But prompt injection can also arrive through tool results: a `fetch` tool retrieves a page that contains injected instructions, which then re-enter the model context when the tool result is passed back.
 
 <Link.Page href="/guards">Agent guards</Link.Page> run the same prompt injection
-detection inside tool handlers, without a `Request` object.
+detection inside tool handlers, without a `Request` object. You can also use a
+<Link.Page href="/guards/remote-policies">remote policy</Link.Page>
+to apply server-side prompt injection detection to an explicitly mapped input.
 Install the skill to add an SDK guard automatically:
 
 ```bash

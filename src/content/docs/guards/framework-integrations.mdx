@@ -3,17 +3,24 @@ title: "Agent guard framework integrations"
 description: "Guard Vercel AI SDK, LangChain, Vercel Eve, and Mastra tools, processors, and inbound messages."
 ---
 
+import { Aside } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 
 AI frameworks normally pass a model's generated arguments directly to a tool's
 `execute` or `invoke` function. Arcjet's framework integrations add a security
-checkpoint between those two steps, so SDK rules evaluate every tool attempt
-before the tool can create a side effect.
+checkpoint between those two steps, so the remote policy evaluates every tool
+attempt before the tool can create a side effect.
 
 Use an integration when you want to protect tools without writing decision
 handling around every function. The wrapper preserves the framework's normal
-tool definition and result flow and calls `guard()` with a stable `label`
-before the tool executes.
+tool definition and result flow, selects policy with a stable `label`, and maps
+the actor and relevant tool arguments into policy inputs.
+
+<Aside type="tip">
+  You choose the context each policy receives. Map only the tool arguments the
+  policy needs, and take the actor from your authenticated application context.
+  This keeps the policy contract explicit and avoids sending unrelated data.
+</Aside>
 
 ## Vercel AI SDK
 
@@ -21,7 +28,7 @@ The JavaScript integration supports Vercel AI SDK v7 through the versioned
 `@arcjet/guard/vercel-ai/v7` export.
 
 ```ts
-import { launchArcjet } from "@arcjet/guard";
+import { launchArcjet, policyInput } from "@arcjet/guard";
 import {
   aiToolsContext,
   createAgentContext,
@@ -32,7 +39,7 @@ import { z } from "zod";
 
 const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 
-export async function runAgent(prompt: string) {
+export async function runAgent(user: { id: string }, prompt: string) {
   const sendEmail = guardTool(
     arcjet,
     tool({
@@ -42,6 +49,11 @@ export async function runAgent(prompt: string) {
     }),
     {
       label: "email.sent",
+      actor: user.id,
+      inputs: ({ to, body }) => ({
+        recipient: policyInput.server.string(to),
+        body: policyInput.local.string(body),
+      }),
     },
   );
 
@@ -71,7 +83,7 @@ pip install "arcjet[langchain]"
 ```
 
 ```py
-from arcjet.guard import launch_arcjet
+from arcjet.guard import launch_arcjet, local_input, server_input
 from arcjet.guard.langchain import guard_tool
 from langchain_core.tools import tool
 
@@ -89,11 +101,18 @@ guarded_send_email = guard_tool(
     guard=arcjet,
     tool=send_email,
     label="email.sent",
+    actor=lambda config: config["configurable"]["user_id"],
+    inputs=lambda arguments, _config: {
+        "recipient": server_input.string(arguments["to"]),
+        "body": local_input.string(arguments["body"]),
+    },
 )
 ```
 
 Use the asynchronous Guard client with `ainvoke()` and the synchronous client
-with `invoke()`.
+with `invoke()`. Actor and input resolvers receive `RunnableConfig` and
+validated tool arguments. Derive `actor` only from server-controlled
+configuration. Asynchronous resolvers are supported for async tool invocations.
 
 ## Vercel Eve
 
