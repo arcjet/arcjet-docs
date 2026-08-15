@@ -442,6 +442,28 @@ A non-empty `ipSrc` takes precedence over automatic detection, including the dev
 
 > **Caution:** The SDK trusts `ipSrc` without validating it. Validate the value and ensure it comes from a trusted source. Do not pass a client-controlled header directly; doing so could allow clients to choose the IP address used for fingerprinting, rate limiting, and other security checks.
 
+### Metadata
+
+[Section titled “Metadata”](#metadata)
+
+`protect()` accepts `metadata`: an object of string keys mapped to **any JSON-serializable value**, including nested objects, arrays, numbers, booleans, and `null`. It is attached to the decision for correlation and analytics and does not affect the decision or its cache key.
+
+```ts
+const decision = await aj.protect(requestInput, {
+  metadata: {
+    requestId,
+    user: { id: userId, plan: "pro" },
+    flags: { beta: true },
+  },
+});
+```
+
+Each top-level value is JSON-encoded by the SDK. Keys the SDK cannot encode (`undefined`, a function, a `BigInt`, a circular reference) are dropped with a single `AJ1017` warning naming them. A `metadata` that is not a plain object is ignored entirely. Prefer `metadata` over `extra`, which stays a flat string map.
+
+Metadata is untrusted and is not redacted — do not put secrets or PII in it. JavaScript numbers are IEEE-754 doubles, so an integer above `Number.MAX_SAFE_INTEGER` should be passed as a string.
+
+See [Guard metadata](/guards/reference#metadata) for limits, drop behavior, and language-specific notes.
+
 Decision
 --------
 
