@@ -188,6 +188,10 @@ export const main = [
         link: "/guards/remote-policies",
       },
       {
+        label: "Capture",
+        link: "/guards/capture",
+      },
+      {
         label: "Testing and reference",
         link: "/guards/reference",
       },
@@ -210,6 +214,20 @@ export const main = [
             attrs: { class: "feature prompt-injection-detection" },
             label: "Quick start",
             link: "/prompt-injection/quick-start",
+          },
+        ],
+      },
+      {
+        label: "Content moderation",
+        collapsed: true,
+        items: [
+          {
+            label: "Intro",
+            link: "/content-moderation",
+          },
+          {
+            label: "Quick start",
+            link: "/content-moderation/quick-start",
           },
         ],
       },

@@ -319,9 +319,10 @@ client mode:
 | `sensitive_info_value`             | `str`                  | Sensitive info detection |
 | `email`                            | `str`                  | Email validation         |
 | `filter_local`                     | `Mapping[str, str]`    | Request filters (`local.*` fields) |
-| `extra`                            | `Mapping[str, str]`    | Forwarded verbatim to the Arcjet Decide API as custom metadata (advanced) |
+| `extra`                            | `Mapping[str, str]`    | SDK-derived request context forwarded as a flat string map. Prefer `metadata` for application data. |
+| `metadata`                         | `Metadata \| None`     | Nested JSON for correlation and analytics. See [Metadata](#metadata). |
 | `ip_src`                           | `str`                  | Manual IP override (advanced) |
-| `correlation_id`                   | `str`                  | Correlates this decision with a guard call, workflow run, or agent trace. A dedicated, indexable field — not `extra` — and does not affect the decision or its cache key (`arcjet` >= 0.9.0) |
+| `correlation_id`                   | `str`                  | Correlates this decision with a guard call, workflow run, or agent trace. A dedicated, indexable field — not `extra` or `metadata` — and does not affect the decision or its cache key (`arcjet` >= 0.9.0) |
 
 #### Override the client IP
 
@@ -352,6 +353,26 @@ request.
 > and ensure it comes from a trusted source. Do not pass a client-controlled
 > header directly; doing so could allow clients to choose the IP address used
 > for fingerprinting, rate limiting, and other security checks.
+
+#### Metadata
+
+`protect()` accepts `metadata`: a mapping of string keys to **any
+JSON-serializable value**, including nested objects and arrays. Prefer it over
+`extra`, which stays a flat `Mapping[str, str]` of SDK-derived request context.
+
+```py
+decision = await aj.protect(
+    request,
+    metadata={
+        "request_id": request_id,
+        "user": {"id": user_id, "plan": "pro"},
+        "flags": {"beta": True},
+    },
+)
+```
+
+See [Metadata](#metadata) for limits, `AJ1017` drop warnings, and the
+difference between Guard and `protect()` warning channels.
 
 ### Decision
 
@@ -586,7 +607,7 @@ Configure each rule once at module scope so you have a stable reference for the
 typed per-rule result accessors (e.g. `user_limit.denied_result(decision)`).
 All rules accept keyword-only arguments. Every rule accepts `mode` (`"LIVE"`
 or `"DRY_RUN"`), `label` (an observability label that appears in the
-dashboard), and `metadata` (a `dict[str, str]` of analytics context).
+dashboard), and `metadata` (nested JSON — see [Metadata](#metadata)).
 
 #### Rate limiting
 
@@ -651,6 +672,13 @@ sensitive = LocalDetectSensitiveInfo(
 
 `allow` and `deny` are mutually exclusive.
 
+#### Content moderation (experimental)
+
+Python still exports `experimental_ModerateContent`. The name and result shape
+may change, and a call may return an error result and fail open. JavaScript
+and Go have graduated this rule; see
+<Link.Page href="/content-moderation">Content moderation</Link.Page>.
+
 #### Custom rules
 
 Subclass `LocalCustomRule` and override `evaluate` (sync) or `evaluate_async`
@@ -666,7 +694,7 @@ bound rule inputs, and optional metadata:
 | ----------- | ------------------------- | ----------- |
 | `label`     | `str`                     | Label identifying this guard call (required). Validated server-side as a slug — lowercase letters, digits, dash (`-`), and dot (`.`) only |
 | `rules`     | `Sequence[RuleWithInput]` | Bound rule inputs (required) |
-| `metadata`  | `dict[str, str] \| None`  | Optional key-value metadata |
+| `metadata`  | `Metadata \| None`        | Nested JSON for correlation and analytics — see [Metadata](#metadata) |
 | `correlation_id` | `str \| None`        | Optional ID correlating this decision with a request, workflow run, or agent trace. A dedicated field, not metadata; does not affect the decision (`arcjet` >= 0.9.0) |
 
 ### Guard decision
@@ -725,8 +753,83 @@ Hardcode the `label` argument to `guard()` as a string literal (e.g.
 as slugs — lowercase letters, digits, dash (`-`), and dot (`.`) only — so
 underscores and uppercase are rejected. Hardcoded labels stay greppable and the
 dashboard groups by them. Pass `metadata` whenever you
-have useful auditing context (e.g. `{"user_id": ..., "request_id": ...}`) —
-it shows up in the dashboard and makes debugging much easier later.
+have useful auditing context — nested objects and arrays are accepted, and it
+shows up in the dashboard.
+
+### Metadata
+
+`guard()`, `protect()`, and every Guard rule accept `metadata`: a mapping of
+string keys to **any JSON-serializable value**, including nested objects and
+arrays.
+
+```py
+decision = await aj.guard(
+    label="tools.weather",
+    rules=[user_limit(key=user_id)],
+    metadata={
+        "user": {"id": user_id, "plan": "pro"},
+        "tool_name": "get_weather",
+        "duration_ms": 160,
+        "success": True,
+    },
+)
+```
+
+Each top-level value is JSON-encoded by the SDK and stored verbatim, so exact
+integers survive. Server-enforced limits: 128 top-level keys, 4 KiB per
+serialized value, 10 levels of nesting, and key names limited to letters,
+digits, `-`, `.`, and `_`. Over a limit, that key is dropped.
+
+Nothing here can fail a call or change a decision. Dropped keys are reported:
+server-side drops arrive on `decision.warnings`, one per key. Keys the SDK
+cannot encode (`datetime`, a set, `NaN`, a circular reference) are collected
+into a single **`AJ1017`** warning naming them. For `protect()`, which has no
+warnings channel, that warning is logged at `WARNING` instead.
+
+Metadata is untrusted and is not redacted — do not put secrets or PII in it.
+The SDK also drops keys once one request's metadata exceeds 768 KiB in total.
+See <Link.Page href="/guards/reference#metadata">Guard metadata</Link.Page>
+for the full limit table and language-specific notes.
+
+### Recording what happened with `capture()`
+
+`guard()` decides whether something is allowed.
+<Link.Page href="/guards/capture">`capture()`</Link.Page> records that it
+happened. It never affects a decision, never raises, and is not awaited even
+on the async client.
+
+```py
+aj.capture(
+    action="refund.issued",
+    correlation_id=workflow_id,
+    decision_id=decision.id,
+    metadata={"amount_cents": 4999, "invoice": {"id": "inv_123"}},
+)
+```
+
+Call `await aj.flush()` (async) or `aj.flush()` (sync) at shutdown so the
+final batch is sent. See
+<Link.Page href="/testing#testing-guard-and-capture-calls">registering a client and the test client</Link.Page>
+when `capture()` is too deep to receive a handle.
+
+### Registering a client (optional)
+
+```py
+from arcjet.guard import launch_arcjet, register_arcjet
+
+register_arcjet(launch_arcjet(key=os.environ["ARCJET_KEY"]))
+```
+
+Free `guard()`, `capture()`, and `flush()` then reach the registered client.
+**If nothing is registered, free `guard()` fail-opens** — `ALLOW` with
+`has_failed_open()` true. `capture()` drops the event silently.
+
+`capture()` is one function for both client flavors. `guard()` / `flush()`
+must match: `await guard(...)` with `launch_arcjet()`, or `guard_sync(...)`
+with `launch_arcjet_sync()`. The wrong pair fail-opens and reports `AJ3007`.
+
+Use `arcjet.guard.testing.register_test_client()` in tests. See
+<Link.Page href="/testing#testing-guard-and-capture-calls">Testing Arcjet</Link.Page>.
 
 ## Version support
 

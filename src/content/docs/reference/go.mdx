@@ -112,6 +112,8 @@ rule. Pass dynamic inputs with `Protect` options, including:
 - `WithDetectPromptInjectionMessage(...)` for untrusted text.
 - `WithSensitiveInfoValue(...)` for text to scan for sensitive information.
 - `WithCorrelationId(...)` to correlate a request decision with related work.
+- `WithMetadata(...)` for nested JSON attached to the decision. See
+  [Metadata](#metadata).
 - `WithIPSrc(...)` to override the automatically detected client IP address.
 
 If the application is behind a trusted reverse proxy, configure `Config.Proxies`
@@ -176,7 +178,9 @@ func getWeather(ctx context.Context, userID, prompt string) error {
 	decision, err := guard.Guard(ctx, arcjet.GuardRequest{
 		Label:         "tools.get-weather",
 		CorrelationId: "trace_123",
-		Metadata:      map[string]string{"user_id": userID},
+		Metadata: arcjet.Metadata{
+			"user": map[string]any{"id": userID},
+		},
 		Rules: []arcjet.GuardRuleInput{
 			userLimit.Key(userID, 1),
 			promptScan.Text(prompt),
@@ -205,9 +209,12 @@ hardcoded label for each operation and an explicit rate-limit key such as a
 user ID, session ID, or API key.
 
 Available Guard rules include rate limiting, prompt injection detection,
-sensitive information detection, and custom local rules. Content moderation
-is available as the experimental `ExperimentalGuardModerateContent` rule; its
-API and result shape may change.
+content moderation (`GuardModerateContent`), sensitive information detection,
+and custom local rules. `ExperimentalGuardModerateContent` and the matching
+Options/Rule names remain as deprecated aliases until 1.0.
+
+Use `Capture` to record what the application did after a Guard call —
+visibility data, never a security decision. See [Capture](#capture).
 
 ### Errors and warnings
 
@@ -222,6 +229,96 @@ Guard separates enforcement decisions from processing problems:
 Choose an explicit fallback policy for sensitive operations. Arcjet fails open
 by default so a service issue does not block all work.
 
+### Content moderation
+
+```go
+moderation, err := arcjet.GuardModerateContent(arcjet.GuardModerateContentOptions{
+	Mode: arcjet.ModeLive,
+})
+
+decision, err := guard.Guard(ctx, arcjet.GuardRequest{
+	Label: "tools.generate",
+	Rules: []arcjet.GuardRuleInput{moderation.Text(userMessage)},
+})
+
+if decision.IsDenied() && decision.Reason == arcjet.ReasonModerateContent {
+	return errors.New("content flagged by moderation")
+}
+
+if result := moderation.Result(decision); result != nil && result.Billing != nil {
+	fmt.Printf("charged %d %s\n", result.Billing.Count, result.Billing.Unit)
+}
+```
+
+The result is a binary `Detected` verdict plus optional `Billing` in
+`text_units`. See <Link.Page href="/content-moderation">Content moderation</Link.Page>.
+
+### Capture
+
+Use `Capture` to record a fact about what your application did. Captures never
+affect `Guard` or `Protect` conclusions and never set `HasFailedOpen()`.
+
+```go
+guard.Capture(arcjet.CaptureEvent{
+	Action:        "refund.issued",
+	CorrelationId: runID,
+	DecisionId:    decision.ID,
+	Metadata: arcjet.Metadata{
+		"invoice":  map[string]any{"id": "inv_123", "amount": 4200},
+		"refunded": true,
+	},
+})
+```
+
+`Action` is required. An empty action drops the event. Optional fields:
+`CorrelationId`, `DecisionId`, `Metadata`, and `OccurredAt` (zero means now).
+Delivery is best-effort: a bounded queue, batched sends, no retries. Call
+`Flush` (or `Close`) on shutdown so the last batch is sent.
+
+```go
+ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+defer cancel()
+guard.Flush(ctx)
+```
+
+See <Link.Page href="/guards/capture">Capture events</Link.Page>.
+
+### Metadata
+
+`Guard`, `Protect`, and every Guard rule accept `Metadata`: an
+`arcjet.Metadata` (`map[string]any`) whose values may be **any
+JSON-serializable value**, including nested maps and slices.
+
+```go
+decision, err := guard.Guard(ctx, arcjet.GuardRequest{
+	Label: "tools.get-weather",
+	Metadata: arcjet.Metadata{
+		"user":        map[string]any{"id": userID, "plan": "pro"},
+		"toolName":    "get_weather",
+		"duration_ms": 160,
+		"success":     true,
+	},
+	Rules: []arcjet.GuardRuleInput{userLimit.Key(userID, 1)},
+})
+```
+
+On `Protect`, pass `arcjet.WithMetadata(...)`.
+
+Each top-level value is JSON-encoded by the SDK and stored verbatim, so an
+exact `int64` survives. Server-enforced limits: 128 top-level keys, 4 KiB per
+serialized value, 10 levels of nesting, and key names limited to letters,
+digits, `-`, `.`, and `_`. Over a limit, that key is dropped.
+
+Nothing here can fail a call or change a decision. Dropped keys are reported
+on `decision.Warnings`. Keys the SDK cannot encode (a channel, a func, a
+cycle, `NaN`, or a string holding invalid UTF-8) are collected into a single
+**`AJ1017`** warning naming them. Go maps have no insertion order, so keys are
+processed in sorted order.
+
+Metadata is untrusted and is not redacted — do not put secrets or PII in it.
+See <Link.Page href="/guards/reference#metadata">Guard metadata</Link.Page>
+for the full limit table.
+
 ## Outbound proxy
 
 The SDK honors the standard `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY`
@@ -231,6 +328,8 @@ so do not log them.
 ## More resources
 
 - <Link.Page href="/guards">Arcjet Guards</Link.Page>
+- <Link.Page href="/guards/capture">Capture events</Link.Page>
+- <Link.Page href="/content-moderation">Content moderation</Link.Page>
 - <Link.Page href="/rate-limiting">Rate limiting</Link.Page>
 - <Link.Page href="/prompt-injection">Prompt injection detection</Link.Page>
 - <Link.Page href="/sensitive-info">Sensitive information detection</Link.Page>

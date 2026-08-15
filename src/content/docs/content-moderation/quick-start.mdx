@@ -1,0 +1,120 @@
+---
+title: "Content moderation"
+description: "Quick start for Arcjet content moderation on Guard in JavaScript and Go."
+---
+
+import { CardGrid, Tabs, TabItem } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import Comments from "/src/components/Comments.astro";
+
+Arcjet content moderation detects harmful content in untrusted text before it
+is stored, displayed, or forwarded. It is a Guard rule — call it from
+`guard()` / `Guard`, not `protect()`.
+
+<WhatIsArcjet />
+
+Python still exports `experimental_ModerateContent`. That rule is experimental
+and may fail open; do not use it as a stable API. See
+<Link.Page href="/content-moderation#sdk-availability">SDK availability</Link.Page>.
+
+## Quick start
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```bash
+npm install @arcjet/guard
+```
+
+```ts
+import { launchArcjet, moderateContent } from "@arcjet/guard";
+
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+const moderate = moderateContent();
+
+const decision = await arcjet.guard({
+  label: "tools.chat",
+  rules: [moderate(userMessage)],
+});
+
+if (decision.conclusion === "DENY" && decision.reason === "MODERATE_CONTENT") {
+  throw new Error("Harmful content detected — please rephrase your message");
+}
+
+const result = moderate.result(decision);
+// `detected` is true when harmful content was found. Billing is undefined
+// when the service does not report usage. Content moderation uses text_units.
+console.log(result?.detected, result?.billing?.unit, result?.billing?.count);
+```
+
+`experimental_moderateContent` remains a deprecated alias of
+`moderateContent()`.
+
+</TabItem>
+<TabItem label="Go">
+
+```bash
+go get github.com/arcjet/arcjet-go@latest
+```
+
+```go
+moderation, err := arcjet.GuardModerateContent(arcjet.GuardModerateContentOptions{
+	Mode: arcjet.ModeLive,
+})
+if err != nil {
+	return err
+}
+
+decision, err := guard.Guard(ctx, arcjet.GuardRequest{
+	Label: "tools.generate",
+	Rules: []arcjet.GuardRuleInput{moderation.Text(userMessage)},
+})
+if err != nil {
+	return err
+}
+if decision.IsDenied() && decision.Reason == arcjet.ReasonModerateContent {
+	return errors.New("content flagged by moderation")
+}
+
+// Billing is optional. Content moderation usage is measured in text_units.
+if result := moderation.Result(decision); result != nil && result.Billing != nil {
+	fmt.Printf("charged %d %s\n", result.Billing.Count, result.Billing.Unit)
+}
+```
+
+`ExperimentalGuardModerateContent` and the matching Options/Rule names remain
+as deprecated aliases until 1.0.
+
+</TabItem>
+</Tabs>
+
+Keep the response generic. Do not leak detector details or explain exactly
+what was flagged.
+
+## What next?
+
+<CardGrid>
+  <Link.Card
+    title="Content moderation intro"
+    href="/content-moderation"
+    description="When to use content moderation and how the result is shaped."
+  />
+  <Link.Card
+    title="Agent guards"
+    href="/guards"
+    description="Protect tool calls and other actions without an HTTP request."
+  />
+  <Link.Card
+    title="Prompt injection detection"
+    href="/prompt-injection"
+    description="Block hostile instructions before they reach your model."
+  />
+  <Link.Card
+    title="Sensitive information"
+    href="/sensitive-info"
+    description="Detect PII locally before it leaves your application."
+  />
+</CardGrid>
+
+<Comments />
