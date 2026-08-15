@@ -616,6 +616,10 @@ export const main = [
         link: "/ai-protection/abuse-protection?f=python-fastapi",
       },
       {
+        label: "Mastra",
+        link: "/guards/mastra",
+      },
+      {
         label: "Netlify",
         link: "https://www.netlify.com/integrations/arcjet/",
         attrs: { target: "_blank", class: "external-link" },

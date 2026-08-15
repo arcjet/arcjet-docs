@@ -1,6 +1,6 @@
 ---
 title: "Agent guard framework integrations"
-description: "Guard Vercel AI SDK, LangChain, and Vercel Eve tools, connections, and inbound messages."
+description: "Guard Vercel AI SDK, LangChain, Vercel Eve, and Mastra tools, processors, and inbound messages."
 ---
 
 import { Aside } from "@astrojs/starlight/components";
@@ -124,6 +124,16 @@ starts. Hooks are observe-only (handlers return `void`).
 See the <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>
 for inbound screening, connection approvals, and lifecycle hooks.
 
+## Mastra
+
+Mastra has no `guardInbound` (channels already hit `processInput`) and no
+`guardApproval` (`requireApproval` is human HITL). Screen inbound text with
+`guardProcessor`. Gate authored tools with `guardTool`. Gate MCP/workspace
+tools you did not wrap with `guardHooks` (`beforeToolCall` can deny).
+
+See the <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>
+for processors, tools, and hooks.
+
 ## Denials and availability
 
 The wrappers default to fail closed when Guard is unavailable:
@@ -135,6 +145,9 @@ The wrappers default to fail closed when Guard is unavailable:
   behavior when configured.
 - Vercel Eve helpers default to `onGuardError: "deny"`. On a channel, `"allow"`
   is a legitimate choice because failing closed stops the agent answering.
+- Mastra helpers default to `onGuardError: "deny"`. `"allow"` is a legitimate
+  choice on the inbound processor because failing closed stops the agent
+  answering.
 
 Set `onGuardError: "allow"` in JavaScript or `on_guard_error="allow"` in Python
 only when executing without a complete security decision is acceptable.
