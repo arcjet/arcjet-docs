@@ -621,6 +621,10 @@ export const main = [
         link: "/integrations/better-auth",
       },
       {
+        label: "Claude Agent SDK",
+        link: "/guards/claude-agent-sdk",
+      },
+      {
         label: "Clerk",
         link: "/integrations/clerk",
       },
