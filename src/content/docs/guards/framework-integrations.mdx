@@ -1,6 +1,6 @@
 ---
 title: "Agent guard framework integrations"
-description: "Guard Vercel AI SDK, LangChain, Vercel Eve, and Mastra tools, processors, and inbound messages."
+description: "Guard Vercel AI SDK, LangChain, Vercel Eve, Mastra, and Claude Agent SDK tools, processors, and inbound messages."
 ---
 
 import { Aside } from "@astrojs/starlight/components";
@@ -134,6 +134,17 @@ tools you did not wrap with `guardHooks` (`beforeToolCall` can deny).
 See the <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>
 for processors, tools, and hooks.
 
+## Claude Agent SDK
+
+Claude Agent SDK agents call authored `tool()` handlers, built-in tools, and
+MCP tools. There is no `guardInbound`. Screen inbound prompts with
+`guardHooks({ inbound })` on `UserPromptSubmit`. `canUseTool` is not a policy
+gate. Use `guardTool()` for authored tools and `PreToolUse` for unwrapped
+built-ins and MCP tools.
+
+See the <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>
+for inbound screening, authored tools, and PreToolUse denials.
+
 ## Denials and availability
 
 The wrappers default to fail closed when Guard is unavailable:
@@ -148,6 +159,9 @@ The wrappers default to fail closed when Guard is unavailable:
 - Mastra helpers default to `onGuardError: "deny"`. `"allow"` is a legitimate
   choice on the inbound processor because failing closed stops the agent
   answering.
+- Claude Agent SDK helpers default to `onGuardError: "deny"`. On inbound
+  `UserPromptSubmit`, `"allow"` is a legitimate choice because failing closed
+  stops the agent answering.
 
 Set `onGuardError: "allow"` in JavaScript or `on_guard_error="allow"` in Python
 only when executing without a complete security decision is acceptable.
