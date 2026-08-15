@@ -1,6 +1,6 @@
 ---
 title: "Introduction to Arcjet Content Moderation"
-description: "Detect and block harmful content in untrusted text before it is stored, displayed, or forwarded. Guard-only content moderation for JavaScript and Go."
+description: "Detect and block harmful content in untrusted text before it is stored, displayed, or forwarded. Guard-only content moderation for JavaScript, Python, and Go."
 prev: false
 generateMarkdownRoute: true
 ---
@@ -17,8 +17,7 @@ messages, tool-call results, and model outputs at the same action boundary as
 <WhatIsArcjet />
 
 Content moderation is a Guard rule. There is no `protect()` / HTTP-request
-variant. Call it from `guard()` in JavaScript or `Guard` in Go. Python still
-exposes the rule as experimental; do not treat that name as the stable API.
+variant. Call it from `guard()` in JavaScript or Python, or `Guard` in Go.
 
 ## When to use content moderation
 
@@ -47,8 +46,8 @@ with the Guard SDK. It is not available as a
 
 ## How Arcjet content moderation works
 
-1. You configure `moderateContent()` (JavaScript) or `GuardModerateContent`
-   (Go) once and reuse the rule.
+1. You configure `moderateContent()` (JavaScript), `ModerateContent()`
+   (Python), or `GuardModerateContent` (Go) once and reuse the rule.
 2. At the action boundary, bind the untrusted text and submit it with
    `guard()` / `Guard`.
 3. Arcjet returns `ALLOW` or `DENY`. A denial has reason `MODERATE_CONTENT`.
@@ -62,8 +61,8 @@ The result shape does not include per-category scores.
 | SDK | Public API | Notes |
 | --- | --- | --- |
 | JavaScript / TypeScript | `moderateContent()` | `experimental_moderateContent` is a deprecated alias. |
+| Python | `ModerateContent()` | `experimental_ModerateContent` is a deprecated alias (`DeprecationWarning`). |
 | Go | `GuardModerateContent` | `ExperimentalGuardModerateContent*` aliases are deprecated until 1.0. |
-| Python | `experimental_ModerateContent` | Still experimental. The name and result shape may change, and a call may return an error result and fail open. |
 
 ### Dry run mode
 

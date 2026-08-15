@@ -1,6 +1,6 @@
 ---
 title: "Content moderation"
-description: "Quick start for Arcjet content moderation on Guard in JavaScript and Go."
+description: "Quick start for Arcjet content moderation on Guard in JavaScript, Python, and Go."
 ---
 
 import { CardGrid, Tabs, TabItem } from "@astrojs/starlight/components";
@@ -13,10 +13,6 @@ is stored, displayed, or forwarded. It is a Guard rule — call it from
 `guard()` / `Guard`, not `protect()`.
 
 <WhatIsArcjet />
-
-Python still exports `experimental_ModerateContent`. That rule is experimental
-and may fail open; do not use it as a stable API. See
-<Link.Page href="/content-moderation#sdk-availability">SDK availability</Link.Page>.
 
 ## Quick start
 
@@ -50,6 +46,40 @@ console.log(result?.detected, result?.billing?.unit, result?.billing?.count);
 
 `experimental_moderateContent` remains a deprecated alias of
 `moderateContent()`.
+
+</TabItem>
+<TabItem label="Python">
+
+```bash
+pip install arcjet
+```
+
+```py
+import os
+
+from arcjet.guard import ModerateContent, launch_arcjet
+
+arcjet = launch_arcjet(key=os.environ["ARCJET_KEY"])
+moderate = ModerateContent()
+
+decision = await arcjet.guard(
+    label="llm.output",
+    rules=[moderate(text)],
+)
+
+if decision.conclusion == "DENY" and decision.reason == "MODERATE_CONTENT":
+    raise RuntimeError("Harmful content detected — please rephrase your message")
+
+result = moderate.result(decision)
+# `detected` is True when harmful content was found. Billing is None
+# when the service does not report usage. Content moderation uses text_units.
+print(result.detected if result else None)
+if result and result.billing:
+    print(result.billing.unit, result.billing.count)
+```
+
+`experimental_ModerateContent` remains a deprecated alias of
+`ModerateContent()` and emits `DeprecationWarning`.
 
 </TabItem>
 <TabItem label="Go">

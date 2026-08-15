@@ -81,6 +81,7 @@ you need to protect:
 | Rate limit key | IP or `characteristics` dict | Explicit `key` string (SHA-256 hashed before sending) |
 | Rate limiting | ✅ | ✅ |
 | Prompt injection detection | ✅ | ✅ |
+| Content moderation | — | ✅ |
 | Sensitive information detection | ✅ | ✅ |
 | Bot protection | ✅ | — |
 | Shield WAF | ✅ | — |
@@ -590,14 +591,17 @@ elif decision.is_denied():
 `arcjet.guard` is a lower-level API designed for AI agent tool calls,
 MCP servers, and background tasks where there is no HTTP request object. It
 gives you fine-grained, per-call control over rate limiting, prompt injection
-detection, sensitive information detection, and custom rules. See the
+detection, content moderation, sensitive information detection, and custom
+rules. See the
 <Link.Page href="/guards">Guards documentation</Link.Page> for the full guide.
 
 ### Setup
 
 Use `launch_arcjet` for async frameworks and `launch_arcjet_sync` for sync
 frameworks. Create a single client at startup and reuse it. Configure each
-rule once, then bind input and call `guard()` per invocation.
+rule once, then bind input and call `guard()` per invocation. The client
+request timeout defaults to 2000 ms (`timeout_ms` on `launch_arcjet` /
+`launch_arcjet_sync`), matching the JavaScript Guard default.
 
 <Code code={Guard} title="main.py" lang="py" />
 
@@ -672,12 +676,35 @@ sensitive = LocalDetectSensitiveInfo(
 
 `allow` and `deny` are mutually exclusive.
 
-#### Content moderation (experimental)
+#### Content moderation
 
-Python still exports `experimental_ModerateContent`. The name and result shape
-may change, and a call may return an error result and fail open. JavaScript
-and Go have graduated this rule; see
+Guard-only. Instantiate once, then bind the untrusted text per call. The
+result reports `detected` and optional `billing` (`text_units`) — not
+per-category scores. See
 <Link.Page href="/content-moderation">Content moderation</Link.Page>.
+
+```py
+from arcjet.guard import ModerateContent
+
+moderate = ModerateContent()
+
+decision = await aj.guard(
+    label="llm.output",
+    rules=[moderate(text)],
+)
+
+if decision.conclusion == "DENY" and decision.reason == "MODERATE_CONTENT":
+    raise RuntimeError("Harmful content detected")
+
+result = moderate.result(decision)
+if result:
+    print(result.detected)
+    if result.billing:
+        print(result.billing.unit, result.billing.count)
+```
+
+`experimental_ModerateContent` remains a deprecated alias of
+`ModerateContent` and emits `DeprecationWarning`.
 
 #### Custom rules
 

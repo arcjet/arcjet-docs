@@ -141,7 +141,7 @@ Remote rules are managed via the MCP server or Console — no code changes or re
 - Scanning tool inputs/outputs for PII? → guard() with sensitiveInfo
 - Detecting prompt injection in agent tool results? → guard() with detectPromptInjection
 - Recording that an allowed action happened? → capture() / Capture (batched, best-effort)
-- Moderating untrusted text at a tool boundary? → moderateContent() (JS) or GuardModerateContent (Go). Python is still experimental_ModerateContent.
+- Moderating untrusted text at a tool boundary? → moderateContent() (JS), ModerateContent() (Python), or GuardModerateContent (Go).
 
 Add guard protection with the skill:
 ```bash
