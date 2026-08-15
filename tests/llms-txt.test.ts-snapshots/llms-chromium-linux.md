@@ -40,6 +40,7 @@ extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricin
 - [Agent guard quick start](https://docs.arcjet.com/guards/quick-start): guard one tool call.
 - [Agent guard integrations](https://docs.arcjet.com/guards/framework-integrations): Vercel AI SDK, LangChain, and Vercel Eve.
 - [Vercel Eve agent guard](https://docs.arcjet.com/guards/vercel-eve): inbound screening, connection approvals, and observe-only hooks.
+- [Agent guard remote policies](https://docs.arcjet.com/guards/remote-policies): centrally managed action policies using labels, actors, and typed inputs.
 - [Capture events](https://docs.arcjet.com/guards/capture): record that an allowed action happened; batched, best-effort, never a security decision.
 - [Agent guard testing and reference](https://docs.arcjet.com/guards/reference): decisions, availability, fail behavior, nested JSON metadata, `registerArcjet` / `register_arcjet`, and the test client. Free `guard()` fail-opens if no client is registered.
 
