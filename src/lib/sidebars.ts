@@ -184,10 +184,6 @@ export const main = [
         link: "/guards/framework-integrations",
       },
       {
-        label: "Remote policies",
-        link: "/guards/remote-policies",
-      },
-      {
         label: "Capture",
         link: "/guards/capture",
       },
@@ -228,6 +224,26 @@ export const main = [
           {
             label: "Quick start",
             link: "/content-moderation/quick-start",
+          },
+        ],
+      },
+      {
+        label: "Sensitive information",
+        collapsed: true,
+        items: [
+          {
+            attrs: { class: "feature sensitive-information" },
+            label: "Intro",
+            link: "/sensitive-info",
+          },
+          {
+            label: "Quick start",
+            link: "/sensitive-info/quick-start",
+            attrs: { class: "feature sensitive-information" },
+          },
+          {
+            label: "Reference",
+            link: "/sensitive-info/reference",
           },
         ],
       },
@@ -344,26 +360,6 @@ export const main = [
           {
             label: "Reference",
             link: "/signup-protection/reference",
-          },
-        ],
-      },
-      {
-        label: "Sensitive information",
-        collapsed: true,
-        items: [
-          {
-            attrs: { class: "feature sensitive-information" },
-            label: "Intro",
-            link: "/sensitive-info",
-          },
-          {
-            label: "Quick start",
-            link: "/sensitive-info/quick-start",
-            attrs: { class: "feature sensitive-information" },
-          },
-          {
-            label: "Reference",
-            link: "/sensitive-info/reference",
           },
         ],
       },

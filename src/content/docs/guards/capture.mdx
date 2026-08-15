@@ -32,6 +32,8 @@ arcjet.capture({
 <TabItem label="Python">
 
 ```py
+# workflow_id comes from the surrounding workflow or agent run, like `runId` above.
+workflow_id = run_id
 aj.capture(
     action="refund.issued",
     correlation_id=workflow_id,

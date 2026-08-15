@@ -1,6 +1,6 @@
 ---
 title: "Agent guards testing and reference"
-description: "Test agent guard policies and understand inputs, decisions, availability, capture, and fail behavior."
+description: "Test agent guard decisions and understand rules, availability, capture, and fail behavior."
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
@@ -13,20 +13,16 @@ effect. For each guarded tool, cover:
 
 | Scenario                              | Expected result                                      |
 | ------------------------------------- | ---------------------------------------------------- |
-| Allowed actor and inputs              | Tool executes once                                   |
-| Policy rule denial in `LIVE`          | Tool does not execute                                |
+| Allowed call                          | Tool executes once                                   |
+| SDK rule denial in `LIVE`             | Tool does not execute                                |
 | Same rule in `DRY_RUN`                | Result is recorded, but the rule does not block      |
-| Missing or wrong typed input          | Policy is incomplete; sensitive tools do not execute |
 | Guard transport or evaluation failure | Your selected fail behavior is applied               |
-| Local sensitive value                 | Raw local string is not sent as a policy input       |
 | Capture after an allowed action       | Event is recorded with the expected `action`         |
 
-Use deterministic inputs for each rule: a recipient outside an allowed list,
-a string outside the configured byte-length range, known sensitive test data,
-and a clear prompt-injection fixture. Review `policyResults` /
-`policy_results` to identify the specific remote rule that matched.
+Use deterministic fixtures for each rule: known sensitive test data, a clear
+prompt-injection string, or text that content moderation should deny.
 
-`DRY_RUN` is useful for evaluating a policy against real calls before enabling
+`DRY_RUN` is useful for evaluating a rule against real calls before enabling
 enforcement, but it does not replace a test that proves the side effect is
 skipped on a `LIVE` denial.
 
@@ -41,10 +37,6 @@ in-process Guard and capture tests, use the SDK test client below.
 ```ts
 const decision = await arcjet.guard({
   label: "email.sent",
-  actor: user.id,
-  inputs: {
-    recipient: policyInput.server.string(to),
-  },
   rules: [],
   metadata: { workflow: "support" },
   correlationId: runId,
@@ -55,9 +47,7 @@ const decision = await arcjet.guard({
 
 | Option           | Description                                                               |
 | ---------------- | ------------------------------------------------------------------------- |
-| `label`          | Required action identifier and remote-policy selector                     |
-| `actor`          | Optional trusted, application-asserted identity                           |
-| `inputs`         | Named values created with `policyInput.server.*` or `policyInput.local.*` |
+| `label`          | Required action identifier                                                |
 | `rules`          | Optional SDK rule submissions; an empty list still calls Guard            |
 | `metadata`       | Nested JSON for analytics and debugging. See [Metadata](#metadata).       |
 | `correlationId`  | Identifier shared across related calls                                    |
@@ -70,8 +60,6 @@ const decision = await arcjet.guard({
 ```py
 decision = await arcjet.guard(
     label="email.sent",
-    actor=user.id,
-    inputs={"recipient": server_input.string(to)},
     rules=[],
     metadata={"workflow": "support"},
     correlation_id=run_id,
@@ -80,9 +68,7 @@ decision = await arcjet.guard(
 
 | Parameter        | Description                                                        |
 | ---------------- | ------------------------------------------------------------------ |
-| `label`          | Required action identifier and remote-policy selector              |
-| `actor`          | Optional trusted, application-asserted identity                    |
-| `inputs`         | Named values created with `server_input.*` or `local_input.*`      |
+| `label`          | Required action identifier                                         |
 | `rules`          | Optional SDK rule submissions; an empty sequence still calls Guard |
 | `metadata`       | Nested JSON for analytics and debugging. See [Metadata](#metadata). |
 | `correlation_id` | Identifier shared across related calls                             |
@@ -92,11 +78,8 @@ decision = await arcjet.guard(
 
 ```go
 decision, err := guard.Guard(ctx, arcjet.GuardRequest{
-	Label:         "email.sent",
-	Actor:         &userID,
-	Inputs: map[string]arcjet.GuardPolicyInput{
-		"recipient": arcjet.GuardPolicyServerString(to),
-	},
+	Label: "email.sent",
+	Rules: []arcjet.GuardRuleInput{},
 	Metadata: arcjet.Metadata{
 		"workflow": "support",
 		"invoice":  map[string]any{"id": "inv_123", "amount": 4200},
@@ -107,9 +90,7 @@ decision, err := guard.Guard(ctx, arcjet.GuardRequest{
 
 | Field           | Description                                                               |
 | --------------- | ------------------------------------------------------------------------- |
-| `Label`         | Required action identifier and remote-policy selector                     |
-| `Actor`         | Optional trusted, application-asserted identity                           |
-| `Inputs`        | Named values created with `GuardPolicyServer*` or `GuardPolicyLocal*`     |
+| `Label`         | Required action identifier                                                |
 | `Rules`         | Optional SDK rule submissions; an empty list still calls Guard            |
 | `Metadata`      | Nested JSON for analytics and debugging. See [Metadata](#metadata).       |
 | `CorrelationId` | Identifier shared across related calls                                    |
@@ -179,45 +160,18 @@ are visibility data: they never change a conclusion and never set
 `hasFailedOpen()`. See <Link.Page href="/guards/capture">Capture events</Link.Page>
 for options, batching, `flush()`, and serverless `waitUntil`.
 
-## Decisions and policy results
+## Decisions
 
 Every decision has an `id`, `conclusion`, SDK `results`, warnings, and error
-accessors. A denial also has a broad `reason`. Remote policy status and results
-are additive and may be absent when the server does not provide policy data.
-
-Remote policy data is separate from SDK-submitted rule results:
-
-- `policyResults` / `policy_results` contains keyed remote rule results with
-  policy ID, revision, rule ID, `LIVE` or `DRY_RUN` mode, `SDK` or `SERVER`
-  execution, and the typed result.
-- `results` remains the positional list for rules submitted by the SDK call.
-
-The Arcjet server combines enforced SDK and remote rules into the final
-`ALLOW` or `DENY`; the SDK does not recompute that aggregate conclusion.
-
-### Policy evaluation status
-
-`policyEvaluation` / `policy_evaluation` reports which policy revision Arcjet
-evaluated and its status:
-
-| Status           | What it means                                               | When you may see it                                      | How to handle it                                                        |
-| ---------------- | ----------------------------------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `NOT_CONFIGURED` | No published remote policy matched the guard label.         | A label intentionally has no policy, the label is wrong, or the policy has not been published. | If a policy is expected, verify the label and publish it. Otherwise handle the SDK rule decision normally. |
-| `APPLIED`        | Arcjet completely evaluated the matching remote policy.     | The supplied actor and inputs satisfy the policy contract and all required evaluation is available. | Enforce the returned `ALLOW` or `DENY` conclusion.                       |
-| `INCOMPLETE`     | A matching policy could not be completely evaluated.        | A required actor or input is missing or invalid, or required local evaluation could not complete. | Treat the security check as incomplete and apply your chosen availability behavior. |
-| `UNAVAILABLE`    | Remote policy evaluation was temporarily unavailable.       | Arcjet could not complete a required policy evaluation.  | Retry where appropriate or apply your chosen availability behavior.     |
-| `UNKNOWN`        | The SDK does not recognize the policy status from Arcjet.   | A newer server returns a status this SDK version does not understand. | Upgrade the SDK and, until then, treat the security check as incomplete. |
-
-The field may be absent when the server does not return remote-policy status.
-If your application expects a policy, inspect the decision's error results and
-verify the SDK and policy configuration.
+accessors. A denial also has a broad `reason`. `results` is the positional list
+for rules submitted by the SDK call. The SDK does not recompute the aggregate
+`ALLOW` or `DENY` conclusion.
 
 ## Availability and fail behavior
 
-The direct Guard client fails open when a transport, timeout, response, local
-evaluation, or remote-policy completeness error prevents a full evaluation.
-It returns `ALLOW` with an error result instead of treating the incomplete
-check as a policy denial.
+The direct Guard client fails open when a transport, timeout, response, or
+local evaluation error prevents a full evaluation. It returns `ALLOW` with an
+error result instead of treating the incomplete check as a denial.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -360,7 +314,6 @@ for the HTTP Newman examples and a fuller walkthrough of the test client.
 
 - <Link.Page href="/guards/capture">Capture events</Link.Page>
 - <Link.Page href="/content-moderation">Content moderation</Link.Page>
-- <Link.Page href="/guards/remote-policies">Remote policy inputs and supported rules</Link.Page>
 - <Link.Page href="/guards/framework-integrations">Vercel AI SDK and LangChain wrappers</Link.Page>
 - <Link.Page href="/reference/python#guard">Python Guard SDK reference</Link.Page>
 - <Link.Page href="/reference/go#guard-non-http-operations">Go Guard SDK reference</Link.Page>

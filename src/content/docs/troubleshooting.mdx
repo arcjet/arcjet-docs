@@ -220,8 +220,8 @@ If you are seeing this error frequently, please
 
 ### Agent guard returned ALLOW but the policy was unavailable
 
-The direct Agent Guard client fails open when a transport, local evaluation,
-or remote-policy completeness error prevents a full evaluation. The decision
+The direct Agent Guard client fails open when a transport, timeout, response,
+or local evaluation error prevents a full evaluation. The decision
 has conclusion `ALLOW`, but `hasFailedOpen()` (JavaScript) or
 `has_failed_open()` (Python) returns `true` and the error is available through
 `errorResults()` / `error_results()`.

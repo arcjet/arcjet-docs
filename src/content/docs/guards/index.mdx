@@ -1,26 +1,23 @@
 ---
 title: "Agent guards"
-description: "Protect AI agent tool calls and other non-HTTP actions with policy enforcement at the action boundary."
+description: "Protect AI agent tool calls and other non-HTTP actions with SDK rules at the action boundary."
 ---
 
 import { CardGrid } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 
 AI agents turn model output into real actions: sending email, changing records,
-accessing sensitive data, and calling third-party services. Agent guards give
-security teams central control over those actions with remote policies that can
-change as risks and requirements evolve, without changing the agent's code.
+accessing sensitive data, and calling third-party services. Agent guards put an
+enforcement point immediately before those actions so SDK rules can allow or
+deny the side effect.
 
-Developers add one enforcement point immediately before a tool or action and
-map trusted application context into it. Security teams define the policy for
-that action in Arcjet using its stable `label`. Every attempted action receives
-an `ALLOW` or `DENY` decision before the side effect runs, making enforcement
-deterministic even when model behavior is not.
+Developers add one `guard()` call, or a framework wrapper, immediately before a
+tool or action. Every attempted action receives an `ALLOW` or `DENY` decision
+before the side effect runs, making enforcement deterministic even when model
+behavior is not.
 
 Agent guards work inside tool handlers and other action boundaries without an
-HTTP `Request`. This is where Arcjet can use the actor, action inputs, and
-application context that model gateways and network controls cannot reliably
-infer.
+HTTP `Request`.
 
 ```text
 ┌──────────┐  proposed call  ┌─────────────┐  ALLOW  ┌─────────────┐
@@ -37,14 +34,9 @@ infer.
 ## Where enforcement runs
 
 The enforcement point runs in your application, immediately before the side
-effect. The final decision can combine:
-
-- **SDK rules in code**, such as rate limiting or prompt injection detection.
-- **Agent guard remote policies**, selected by the guard `label` and configured
-  centrally by a security team.
-- **Local evaluation**, currently sensitive information detection over an
-  explicitly marked local string.
-- **Server evaluation** over the `actor` and explicitly marked server inputs.
+effect. The decision comes from **SDK rules in code**, such as rate limiting,
+prompt injection detection, sensitive information detection, or content
+moderation.
 
 The application owns the final enforcement point. Direct `guard()` calls return
 a decision, while framework integrations place the same check around a tool
@@ -58,8 +50,8 @@ Use the API that matches the enforcement boundary:
 | -------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------- |
 | Entry point          | `guard()`; `capture()` records what happened afterward    | `protect()`                                                                        |
 | Protects             | Tool calls, agent actions, queue jobs, workflow steps     | HTTP routes and API requests                                                       |
-| Input                | `label`, optional `actor`, typed policy inputs, SDK rules | Request and request-specific rule inputs                                           |
-| Remote configuration | <Link.Page href="/guards/remote-policies">Agent guard remote policies</Link.Page>, selected by `label` | <Link.Page href="/remote-rules">Request Remote rules</Link.Page>, scoped to a site |
+| Input                | `label`, SDK rules, optional metadata                     | Request and request-specific rule inputs                                           |
+| Remote configuration | —                                                         | <Link.Page href="/remote-rules">Request Remote rules</Link.Page>, scoped to a site |
 
 ## Next steps
 
@@ -73,11 +65,6 @@ Use the API that matches the enforcement boundary:
     title="Framework integrations"
     href="/guards/framework-integrations"
     description="Wrap Vercel AI SDK, LangChain, Vercel Eve, and Mastra agents."
-  />
-  <Link.Card
-    title="Remote policies"
-    href="/guards/remote-policies"
-    description="Configure labels, actors, typed inputs, and supported policy rules."
   />
   <Link.Card
     title="Capture events"
