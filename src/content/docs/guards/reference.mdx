@@ -1,6 +1,6 @@
 ---
 title: "Agent guards testing and reference"
-description: "Test agent guard policies and understand inputs, decisions, availability, and fail behavior."
+description: "Test agent guard policies and understand inputs, decisions, availability, capture, and fail behavior."
 ---
 
 import { Tabs, TabItem } from "@astrojs/starlight/components";
@@ -19,6 +19,7 @@ effect. For each guarded tool, cover:
 | Missing or wrong typed input          | Policy is incomplete; sensitive tools do not execute |
 | Guard transport or evaluation failure | Your selected fail behavior is applied               |
 | Local sensitive value                 | Raw local string is not sent as a policy input       |
+| Capture after an allowed action       | Event is recorded with the expected `action`         |
 
 Use deterministic inputs for each rule: a recipient outside an allowed list,
 a string outside the configured byte-length range, known sensitive test data,
@@ -28,6 +29,9 @@ and a clear prompt-injection fixture. Review `policyResults` /
 `DRY_RUN` is useful for evaluating a policy against real calls before enabling
 enforcement, but it does not replace a test that proves the side effect is
 skipped on a `LIVE` denial.
+
+For HTTP routes, see <Link.Page href="/testing">Testing Arcjet</Link.Page>. For
+in-process Guard and capture tests, use the SDK test client below.
 
 ## Direct Guard API
 
@@ -55,7 +59,7 @@ const decision = await arcjet.guard({
 | `actor`          | Optional trusted, application-asserted identity                           |
 | `inputs`         | Named values created with `policyInput.server.*` or `policyInput.local.*` |
 | `rules`          | Optional SDK rule submissions; an empty list still calls Guard            |
-| `metadata`       | Structured analytics and debugging context                                |
+| `metadata`       | Nested JSON for analytics and debugging. See [Metadata](#metadata).       |
 | `correlationId`  | Identifier shared across related calls                                    |
 | `timeoutSeconds` | Guard request timeout; defaults to 2 seconds                              |
 | `signal`         | Optional cancellation signal                                              |
@@ -80,11 +84,103 @@ decision = await arcjet.guard(
 | `actor`          | Optional trusted, application-asserted identity                    |
 | `inputs`         | Named values created with `server_input.*` or `local_input.*`      |
 | `rules`          | Optional SDK rule submissions; an empty sequence still calls Guard |
-| `metadata`       | Structured analytics and debugging context                         |
+| `metadata`       | Nested JSON for analytics and debugging. See [Metadata](#metadata). |
 | `correlation_id` | Identifier shared across related calls                             |
+
+The client request timeout is set on `launch_arcjet()` /
+`launch_arcjet_sync()` as `timeout_ms` and defaults to 2000 ms.
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+decision, err := guard.Guard(ctx, arcjet.GuardRequest{
+	Label:         "email.sent",
+	Actor:         &userID,
+	Inputs: map[string]arcjet.GuardPolicyInput{
+		"recipient": arcjet.GuardPolicyServerString(to),
+	},
+	Metadata: arcjet.Metadata{
+		"workflow": "support",
+		"invoice":  map[string]any{"id": "inv_123", "amount": 4200},
+	},
+	CorrelationId: runID,
+})
+```
+
+| Field           | Description                                                               |
+| --------------- | ------------------------------------------------------------------------- |
+| `Label`         | Required action identifier and remote-policy selector                     |
+| `Actor`         | Optional trusted, application-asserted identity                           |
+| `Inputs`        | Named values created with `GuardPolicyServer*` or `GuardPolicyLocal*`     |
+| `Rules`         | Optional SDK rule submissions; an empty list still calls Guard            |
+| `Metadata`      | Nested JSON for analytics and debugging. See [Metadata](#metadata).       |
+| `CorrelationId` | Identifier shared across related calls                                    |
 
 </TabItem>
 </Tabs>
+
+## Metadata
+
+`guard()`, `protect()`, and every Guard rule accept `metadata`: string keys
+mapped to **any JSON-serializable value**, including nested objects, arrays,
+numbers, booleans, and `null`. Each top-level value is JSON-encoded by the SDK
+and stored verbatim. Metadata is excluded from fingerprinting and from the
+decision cache key. Nothing here can fail a call or change a decision.
+
+```ts
+metadata: {
+  user: { id: userId, plan: "pro" },
+  toolName: "get_weather",
+  durationMs: 160,
+  success: true,
+}
+```
+
+Server-enforced limits. Over a limit, that key is dropped:
+
+| Limit                    | Value                              |
+| ------------------------ | ---------------------------------- |
+| Top-level keys           | 128                                |
+| Serialized bytes / value | 4 KiB                              |
+| Nesting depth / value    | 10                                 |
+| Key names                | letters, digits, `-`, `.`, `_`     |
+
+The SDK also drops keys once one request's metadata exceeds 768 KiB in total
+(keys plus JSON-encoded values, counted before compression). That ceiling
+exists so oversized metadata cannot push a request past the 1 MiB protocol
+limit, where it would be rejected and fail open.
+
+Dropped keys are reported, not silent:
+
+- Server-side drops arrive on `decision.warnings` / `decision.Warnings`, one
+  per key.
+- Keys the SDK cannot encode are collected into a single **`AJ1017`** warning
+  naming them. On Guard, that warning is added to the decision and reported to
+  the server. On `protect()`, Go surfaces it on `Decision.Warnings`; Python
+  logs it at `WARNING` because `protect()` has no warnings field; JavaScript
+  reports it to Arcjet rather than throwing.
+- A `metadata` value that is not a plain object / map is ignored entirely.
+
+What the SDK cannot encode differs by language:
+
+| Language | Dropped with `AJ1017` | Notes |
+| -------- | --------------------- | ----- |
+| JavaScript | `undefined`, functions, `BigInt`, circular references | Numbers are IEEE-754 doubles. Integers above `Number.MAX_SAFE_INTEGER` should be passed as strings. Objects with `toJSON()`, including `Date`, serialize via `toJSON()`. |
+| Python | `datetime`, sets, `NaN`, circular references | Integers are sent verbatim, including values past 2^53. Convert datetimes explicitly (`datetime.isoformat()`). |
+| Go | channels, funcs, cycles, `NaN`, invalid UTF-8 strings | Exact `int64` values survive. Keys are processed in sorted order because Go maps have no insertion order. |
+
+Rule-level metadata is merged with `guard()`-level metadata shallowly: a
+duplicate key's whole value is replaced, never deep-merged.
+
+Metadata is untrusted and is not redacted — do not put secrets or PII in it.
+
+## Capture
+
+Use `capture()` / `Capture` to record that an allowed action happened. Captures
+are visibility data: they never change a conclusion and never set
+`hasFailedOpen()`. See <Link.Page href="/guards/capture">Capture events</Link.Page>
+for options, batching, `flush()`, and serverless `waitUntil`.
 
 ## Decisions and policy results
 
@@ -158,9 +254,117 @@ execution when the security check cannot be completed.
 Warnings are informational and do not mean the decision failed open. Log them
 to correct request data, but do not treat a warning alone as a denial.
 
+## Registering a client and the test client
+
+Passing the client explicitly is the recommended path. Registration is a
+shortcut for code too deep to receive a handle, where
+<Link.Page href="/guards/capture">`capture()`</Link.Page> is often most useful.
+
+`launchArcjet()` / `launch_arcjet()` never touches global state. Registering is
+a separate, explicit call. Free `guard()`, `capture()`, and `flush()` then
+reach the registered client.
+
+**If nothing is registered, free `guard()` fail-opens.** It returns `ALLOW`
+with an error result, so `hasFailedOpen()` / `has_failed_open()` is `true`. It
+does not throw. Treat that as "policy did not run", not as a pass. Free
+`capture()` drops the event silently, and `flush()` returns immediately.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+import { launchArcjet, registerArcjet } from "@arcjet/guard";
+
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+registerArcjet(arcjet);
+```
+
+```ts
+import { capture, guard } from "@arcjet/guard";
+
+const decision = await guard({ label: "refund", rules: [limit(input)] });
+if (decision.hasFailedOpen()) {
+  // No rule was evaluated.
+}
+capture({ action: "refund.issued", metadata: { invoice: id } });
+```
+
+A second client does not displace the first (`AJ3004` on the incumbent's
+logger). `unregisterArcjet()` clears whatever is registered; libraries should
+not call it.
+
+`@arcjet/guard/testing` registers an in-memory client that records calls and
+talks to nothing:
+
+```ts
+import { registerTestClient } from "@arcjet/guard/testing";
+
+test("refund captures an event", async () => {
+  using arcjet = registerTestClient();
+
+  await refund("inv_1");
+
+  assert.equal(arcjet.captures[0]?.action, "refund.issued");
+});
+```
+
+`using` unregisters at the end of the block. On Node.js 22, call
+`arcjet.unregister()` from a `finally` instead. `registerTestClient()` throws
+if a client is already registered. Recording is synchronous — once the code
+under test reaches `capture()`, the event is there with no flushing.
+
+`guard()` on the test client records the call and returns a fail-open `ALLOW`,
+because no rule ran. Helpers that fail closed on a failed-open decision —
+`guardTool`, `guardAction` — therefore **deny** against this client.
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+from arcjet.guard import launch_arcjet, register_arcjet
+
+register_arcjet(launch_arcjet(key=os.environ["ARCJET_KEY"]))
+```
+
+`capture()` is one function for both client flavors. `guard()` and `flush()`
+come in pairs:
+
+| Registered client | Guard | Flush |
+| --- | --- | --- |
+| `launch_arcjet()` | `await guard(...)` | `await flush()` |
+| `launch_arcjet_sync()` | `guard_sync(...)` | `flush_sync()` |
+
+Calling the wrong pair fail-opens and reports `AJ3007` on the registered
+client's logger.
+
+```py
+from arcjet.guard.testing import register_test_client
+
+async def test_refund_captures_an_event():
+    with register_test_client() as arcjet:
+        await refund("inv_1")
+        assert arcjet.captures[0].action == "refund.issued"
+```
+
+The test client answers both `guard()` and `guard_sync()`. It records the call
+and returns a fail-open `ALLOW`. It is not a mock server and does not stub
+per-rule verdicts.
+
+</TabItem>
+</Tabs>
+
+Go does not have a process-wide registry. Pass the `GuardClient` explicitly
+and use `Capture` / `Flush` on that client.
+
+See <Link.Page href="/testing#testing-guard-and-capture-calls">Testing Arcjet</Link.Page>
+for the HTTP Newman examples and a fuller walkthrough of the test client.
+
 ## Related reference
 
+- <Link.Page href="/guards/capture">Capture events</Link.Page>
+- <Link.Page href="/content-moderation">Content moderation</Link.Page>
 - <Link.Page href="/guards/remote-policies">Remote policy inputs and supported rules</Link.Page>
 - <Link.Page href="/guards/framework-integrations">Vercel AI SDK and LangChain wrappers</Link.Page>
 - <Link.Page href="/reference/python#guard">Python Guard SDK reference</Link.Page>
+- <Link.Page href="/reference/go#guard-non-http-operations">Go Guard SDK reference</Link.Page>
 - <Link.Page href="/testing">Testing request protection</Link.Page>

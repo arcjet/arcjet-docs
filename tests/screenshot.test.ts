@@ -25,6 +25,7 @@ const PATHS_FROM_SITEMAP = [
   "/blueprints/sampling/",
   "/blueprints/vpn-proxy-detection/",
   "/bot-protection/",
+  "/content-moderation/",
   "/bot-protection/identifying-bots/",
   "/bot-protection/quick-start/",
   "/bot-protection/reference/",

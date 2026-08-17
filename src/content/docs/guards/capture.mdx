@@ -1,0 +1,192 @@
+---
+title: "Capture events"
+description: "Record what an application did after a Guard decision with best-effort capture events."
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+`guard()` decides whether an action is allowed. `capture()` records that the
+action happened. Use it for the facts you want in a security trace but do not
+want to gate — a refund issued, a document exported, a tool call completed.
+
+Captures are visibility data. They never change a `guard()` or `protect()`
+conclusion and never set `hasFailedOpen()` / `HasFailedOpen()`.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+arcjet.capture({
+  action: "refund.issued",
+  correlationId: runId,
+  decisionId: decision.id,
+  metadata: {
+    invoice: { id: "inv_123", amount: 4200 },
+    refunded: true,
+  },
+});
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+# workflow_id comes from the surrounding workflow or agent run, like `runId` above.
+workflow_id = run_id
+aj.capture(
+    action="refund.issued",
+    correlation_id=workflow_id,
+    decision_id=decision.id,
+    metadata={"amount_cents": 4999, "invoice": {"id": "inv_123"}},
+)
+```
+
+`capture()` returns immediately and is not awaited, even on the async client.
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+guard.Capture(arcjet.CaptureEvent{
+	Action:        "refund.issued",
+	CorrelationId: runID,
+	DecisionId:    decision.ID,
+	Metadata: arcjet.Metadata{
+		"invoice":  map[string]any{"id": "inv_123", "amount": 4200},
+		"refunded": true,
+	},
+})
+```
+
+</TabItem>
+</Tabs>
+
+`action` is required. Convention is `"resource.verb"` in the past tense. An
+event with no usable action is dropped, because it records nothing. Optional
+fields join the event to other work: a `correlationId` / `correlation_id`
+shared with `guard()` and `protect()`, a `decisionId` / `decision_id` from the
+decision that allowed the action, `metadata` with the same nested-JSON shape as
+<Link.Page href="/guards/reference#metadata">Guard metadata</Link.Page>, and
+`occurredAt` / `occurred_at` when the action happened (defaults to now). Every
+event is sent with source `"sdk"`.
+
+Do not put secrets or PII in `metadata`. It is stored as untrusted data.
+
+## Delivery
+
+Capture is best-effort and never blocks or throws into application code:
+
+- Events are queued in memory and sent in batches on size or a short delay.
+- The queue is bounded. When it is full, the newest event is dropped.
+- A failed batch is never retried. A stale visibility event is worth less than
+  the capacity a retry would consume.
+- Nothing is dropped silently. Local failures use stable `AJxxxx` diagnostics
+  on the client's logger.
+
+Typical defaults are a 1000-event queue, batches of up to 50, and a 100 ms
+delay. `flush()` / `Flush` waits for the events that were outstanding when you
+called it. The default deadline is one second. On expiry, remaining events
+belonging to that flush are dropped (`AJ3003`) and the client stays usable.
+
+There is no `close()` on the JavaScript or Python clients. Flushing is the
+only shutdown step that changes what gets delivered. The Go client also
+exposes `Close`, which flushes first and then releases local wasm.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+await arcjet.flush(); // one-second deadline by default
+await arcjet.flush(250); // custom deadline in milliseconds
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+# Async (FastAPI lifespan, or any async teardown)
+await aj.flush()
+
+# Sync (Flask teardown, atexit, or the end of a script)
+arcjet_sync_guard.flush()
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+defer cancel()
+guard.Flush(ctx) // one-second deadline if ctx has none
+_ = guard.Close(ctx)
+```
+
+</TabItem>
+</Tabs>
+
+`flush()` is optional and repeatable. Events captured while a flush is waiting
+are not its responsibility, so calling `flush()` per request in a concurrent
+server cannot discard another request's telemetry.
+
+### Serverless and edge runtimes
+
+A runtime that freezes or terminates between invocations can lose whatever is
+still batched. JavaScript `waitUntil` extends the invocation; it does not
+disable batching. Events still batch, and the hook is handed a promise that
+settles once they have been sent.
+
+```ts
+export default {
+  async fetch(request, env, ctx) {
+    arcjet.capture({
+      action: "refund.issued",
+      waitUntil: (promise) => ctx.waitUntil(promise),
+    });
+    return new Response("ok");
+  },
+};
+```
+
+Arcjet discovers Vercel's request context on its own, so `waitUntil` is not
+needed there. Every other per-invocation hook — Cloudflare's `ExecutionContext`
+included — has to be passed in, because a module-scoped client cannot reach it.
+
+Where `capture()` is called too deep to reach the platform context, `flush()`
+at the end of the handler instead:
+
+```ts
+export default {
+  async fetch(request, env, ctx) {
+    const response = await handle(request);
+    ctx.waitUntil(arcjet.flush());
+    return response;
+  },
+};
+```
+
+## Options
+
+| Field | Description |
+| ----- | ----------- |
+| `action` | Required. What happened, in customer vocabulary. Convention: `"resource.verb"`, past tense. |
+| `correlationId` / `correlation_id` | Optional identifier shared with related `guard()` and `protect()` calls. |
+| `decisionId` / `decision_id` | Optional join key for the decision that allowed the action. |
+| `metadata` | Nested JSON for correlation and analytics. Same limits as Guard metadata. |
+| `occurredAt` / `occurred_at` | Optional timestamp. Defaults to the time of the call. Pre-epoch values cannot be represented and are dropped. |
+| `waitUntil` | JavaScript only. Platform hook that keeps the invocation alive until the batch is sent. |
+
+## Calling capture without a client handle
+
+Passing the client explicitly is the recommended path. When `capture()` is
+called too deep in the application to receive a handle, register a client at
+startup and import the free `capture()` function. See
+<Link.Page href="/testing#testing-guard-and-capture-calls">registering a client and the test client</Link.Page>.
+
+## Related
+
+- <Link.Page href="/guards">Agent guards</Link.Page>
+- <Link.Page href="/guards/reference">Guard testing and reference</Link.Page>
+- <Link.Page href="/testing">Testing Arcjet</Link.Page>
+- <Link.Page href="/reference/python#recording-what-happened-with-capture">Python SDK capture</Link.Page>
+- <Link.Page href="/reference/go#capture">Go SDK capture</Link.Page>

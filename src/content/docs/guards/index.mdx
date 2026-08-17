@@ -56,7 +56,7 @@ Use the API that matches the enforcement boundary:
 
 |                      | Agent guards                                              | Request protection                                                                 |
 | -------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Entry point          | `guard()`                                                 | `protect()`                                                                        |
+| Entry point          | `guard()`; `capture()` records what happened afterward    | `protect()`                                                                        |
 | Protects             | Tool calls, agent actions, queue jobs, workflow steps     | HTTP routes and API requests                                                       |
 | Input                | `label`, optional `actor`, typed policy inputs, SDK rules | Request and request-specific rule inputs                                           |
 | Remote configuration | <Link.Page href="/guards/remote-policies">Agent guard remote policies</Link.Page>, selected by `label` | <Link.Page href="/remote-rules">Request Remote rules</Link.Page>, scoped to a site |
@@ -78,6 +78,11 @@ Use the API that matches the enforcement boundary:
     title="Remote policies"
     href="/guards/remote-policies"
     description="Configure labels, actors, typed inputs, and supported policy rules."
+  />
+  <Link.Card
+    title="Capture events"
+    href="/guards/capture"
+    description="Record that an allowed action happened, without changing the decision."
   />
   <Link.Card
     title="Testing and reference"

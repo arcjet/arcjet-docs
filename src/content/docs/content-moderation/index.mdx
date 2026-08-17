@@ -1,0 +1,78 @@
+---
+title: "Introduction to Arcjet Content Moderation"
+description: "Detect and block harmful content in untrusted text before it is stored, displayed, or forwarded. Guard-only content moderation for JavaScript, Python, and Go."
+prev: false
+generateMarkdownRoute: true
+---
+
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import Comments from "../../../components/Comments.astro";
+import { Link } from "@/components/link";
+
+Arcjet content moderation evaluates untrusted text for harmful content before
+it is stored, displayed, or forwarded to another service. Use it on user
+messages, tool-call results, and model outputs at the same action boundary as
+<Link.Page href="/guards">Agent guards</Link.Page>.
+
+<WhatIsArcjet />
+
+Content moderation is a Guard rule. There is no `protect()` / HTTP-request
+variant. Call it from `guard()` in JavaScript or Python, or `Guard` in Go.
+
+## When to use content moderation
+
+Use content moderation when you need a decision on text that is about to leave
+your control or be shown to a user, for example:
+
+- **User-facing chat and support assistants** — block harmful messages before
+  they are stored or displayed.
+- **Agent tool results and model outputs** — scan generated text before it is
+  forwarded to another tool, a customer, or a third-party API.
+- **Moderation at the action boundary** — the same `guard()` call can combine
+  content moderation with rate limiting or prompt injection detection.
+
+Content moderation answers a different question from
+<Link.Page href="/prompt-injection">prompt injection detection</Link.Page>
+(hostile instructions aimed at the model) and
+<Link.Page href="/sensitive-info">sensitive information detection</Link.Page>
+(PII and other regulated data). Combine them when a single untrusted string
+needs more than one check.
+
+:::note[Guard-only rule]
+Content moderation inspects caller-supplied text, so it is configured in code
+with the Guard SDK. It is not available as a
+<Link.Page href="/remote-rules">remote rule</Link.Page> or on `protect()`.
+:::
+
+## How Arcjet content moderation works
+
+1. You configure `moderateContent()` (JavaScript), `ModerateContent()`
+   (Python), or `GuardModerateContent` (Go) once and reuse the rule.
+2. At the action boundary, bind the untrusted text and submit it with
+   `guard()` / `Guard`.
+3. Arcjet returns `ALLOW` or `DENY`. A denial has reason `MODERATE_CONTENT`.
+4. The per-rule result is a binary `detected` / `Detected` verdict plus
+   optional billing in `text_units`.
+
+The result shape does not include per-category scores.
+
+### SDK availability
+
+| SDK | Public API | Notes |
+| --- | --- | --- |
+| JavaScript / TypeScript | `moderateContent()` | `experimental_moderateContent` is a deprecated alias. |
+| Python | `ModerateContent()` | `experimental_ModerateContent` is a deprecated alias (`DeprecationWarning`). |
+| Go | `GuardModerateContent` | `ExperimentalGuardModerateContent*` aliases are deprecated until 1.0. |
+
+### Dry run mode
+
+`mode: "DRY_RUN"` / `ModeDryRun` evaluates the rule without blocking. Use this
+to measure detections before switching to `"LIVE"`.
+
+## Pricing
+
+Content moderation is priced based on usage, measured in `text_units` when the
+service reports billing. See the [pricing page](https://arcjet.com/pricing) for
+details.
+
+<Comments />

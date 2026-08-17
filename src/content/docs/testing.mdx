@@ -15,9 +15,12 @@ You can also automate testing against your Arcjet-projected routes using
 standard testing libraries.
 
 If you are testing AI tool calls or other non-HTTP actions, use the
-<Link.Page href="/guards/reference#testing-guard-enforcement">Agent guards test matrix</Link.Page>.
-Guard tests should assert that a denied or unavailable decision prevents the
-side effect, not only that Arcjet returned a particular result.
+<Link.Page href="/guards/reference#testing-guard-enforcement">Agent guards test matrix</Link.Page>
+and the in-memory test client below. Guard tests should assert that a denied or
+unavailable decision prevents the side effect, not only that Arcjet returned a
+particular result. Capture tests — recording that an allowed action happened —
+should assert that the application recorded the expected `action` after the
+side effect ran. See <Link.Page href="/guards/capture">Capture events</Link.Page>.
 
 ## Testing using Newman
 
@@ -72,6 +75,123 @@ true` to trigger the shield rule on the next request.
 - **Email validation:** Use an email address that has invalid syntax or does not
   match any other rules you have configured e.g. has no MX records or if from a
   disposable email service.
+
+## Testing Guard and capture calls
+
+HTTP collection runners cannot reach `guard()` or `capture()`. Register an
+in-memory test client so application code that imports the free functions can
+be asserted without talking to Arcjet.
+
+Passing a client explicitly is the recommended production path.
+`launchArcjet()` / `launch_arcjet()` never registers one. Registration is a
+separate call for code too deep to receive a handle.
+
+**Free `guard()` fail-opens if no client is registered.** It returns `ALLOW`
+with an error result, so `hasFailedOpen()` / `has_failed_open()` is `true`.
+That is "policy did not run", not a pass. Free `capture()` drops the event
+silently.
+
+<Tabs>
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+import { registerTestClient } from "@arcjet/guard/testing";
+import { refund } from "./refund.ts";
+
+test("refund captures an event", async () => {
+  using arcjet = registerTestClient();
+
+  await refund("inv_1");
+
+  assert.equal(arcjet.captures[0]?.action, "refund.issued");
+});
+```
+
+`using` unregisters at the end of the block, including when the test fails.
+The `using` syntax needs Node.js 24 or a TypeScript compile step. On Node.js
+22, call `unregister()` from a `finally`:
+
+```ts
+test("refund captures an event", async () => {
+  const arcjet = registerTestClient();
+  try {
+    await refund("inv_1");
+    assert.equal(arcjet.captures[0]?.action, "refund.issued");
+  } finally {
+    arcjet.unregister();
+  }
+});
+```
+
+`registerTestClient()` throws if a client is already registered, which
+surfaces a leak from an earlier test. Each recorded capture goes through the
+same validation as a real `capture()`, so a call the real client would drop is
+not recorded. Recording is synchronous — no `flush()` is required.
+
+`guard()` on the test client records the call and returns a fail-open `ALLOW`,
+because no rule ran. It does not stub per-rule verdicts. Helpers that fail
+closed on a failed-open decision — `guardTool`, `guardAction` — therefore
+**deny** against this client.
+
+To register a real client in production:
+
+```ts
+import { launchArcjet, registerArcjet } from "@arcjet/guard";
+
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+registerArcjet(arcjet);
+```
+
+Free `guard()`, `capture()`, and `flush()` then reach that client. A second
+registration does not displace the first.
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+from arcjet.guard.testing import register_test_client
+
+async def test_refund_captures_an_event():
+    with register_test_client() as arcjet:
+        await refund("inv_1")
+        assert arcjet.captures[0].action == "refund.issued"
+```
+
+Usually this belongs in a fixture:
+
+```py
+import pytest
+from arcjet.guard.testing import register_test_client
+
+@pytest.fixture
+def arcjet():
+    with register_test_client() as client:
+        yield client
+```
+
+`register_test_client()` raises if a client is already registered. The test
+client answers both `guard()` and `guard_sync()` and returns a fail-open
+`ALLOW`. Recording is synchronous — no `flush()` is required.
+
+To register a real client in production:
+
+```py
+from arcjet.guard import launch_arcjet, register_arcjet
+
+register_arcjet(launch_arcjet(key=os.environ["ARCJET_KEY"]))
+```
+
+`capture()` is one function for both client flavors. `guard()` / `flush()`
+must match the registered client: `await guard(...)` with `launch_arcjet()`,
+or `guard_sync(...)` with `launch_arcjet_sync()`. The wrong pair fail-opens
+and reports `AJ3007`.
+
+</TabItem>
+</Tabs>
+
+See
+<Link.Page href="/guards/reference#registering-a-client-and-the-test-client">Agent guards testing and reference</Link.Page>
+for registration edge cases and the policy-denial matrix.
 
 ## Sampling
 

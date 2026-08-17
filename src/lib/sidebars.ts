@@ -188,6 +188,10 @@ export const main = [
         link: "/guards/remote-policies",
       },
       {
+        label: "Capture",
+        link: "/guards/capture",
+      },
+      {
         label: "Testing and reference",
         link: "/guards/reference",
       },
@@ -210,6 +214,40 @@ export const main = [
             attrs: { class: "feature prompt-injection-detection" },
             label: "Quick start",
             link: "/prompt-injection/quick-start",
+          },
+        ],
+      },
+      {
+        label: "Content moderation",
+        collapsed: true,
+        items: [
+          {
+            label: "Intro",
+            link: "/content-moderation",
+          },
+          {
+            label: "Quick start",
+            link: "/content-moderation/quick-start",
+          },
+        ],
+      },
+      {
+        label: "Sensitive information",
+        collapsed: true,
+        items: [
+          {
+            attrs: { class: "feature sensitive-information" },
+            label: "Intro",
+            link: "/sensitive-info",
+          },
+          {
+            label: "Quick start",
+            link: "/sensitive-info/quick-start",
+            attrs: { class: "feature sensitive-information" },
+          },
+          {
+            label: "Reference",
+            link: "/sensitive-info/reference",
           },
         ],
       },
@@ -326,26 +364,6 @@ export const main = [
           {
             label: "Reference",
             link: "/signup-protection/reference",
-          },
-        ],
-      },
-      {
-        label: "Sensitive information",
-        collapsed: true,
-        items: [
-          {
-            attrs: { class: "feature sensitive-information" },
-            label: "Intro",
-            link: "/sensitive-info",
-          },
-          {
-            label: "Quick start",
-            link: "/sensitive-info/quick-start",
-            attrs: { class: "feature sensitive-information" },
-          },
-          {
-            label: "Reference",
-            link: "/sensitive-info/reference",
           },
         ],
       },

@@ -8,7 +8,7 @@ Because it runs inside the same application code, Arcjet protects traditional en
 
 Arcjet protects two types of entry points:
 - **Request-based** -- HTTP route handlers, API endpoints, middleware. Use `protect()` with any supported framework.
-- **Guards** -- tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` to pass inputs directly and get a decision back.
+- **Guards** -- tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` to pass inputs directly and get a decision back. Use `capture()` to record that an allowed action happened (visibility only; never changes a decision).
 
 Arcjet runs server-side. Bot protection advanced client signals are an optional
 extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricing
@@ -140,6 +140,8 @@ Remote rules are managed via the MCP server or Console — no code changes or re
 - Rate limiting per-user tool calls? → guard() with tokenBucket
 - Scanning tool inputs/outputs for PII? → guard() with sensitiveInfo
 - Detecting prompt injection in agent tool results? → guard() with detectPromptInjection
+- Recording that an allowed action happened? → capture() / Capture (batched, best-effort)
+- Moderating untrusted text at a tool boundary? → moderateContent() (JS), ModerateContent() (Python), or GuardModerateContent (Go).
 
 Add guard protection with the skill:
 ```bash
@@ -270,7 +272,9 @@ var promptScan = must(arcjet.GuardPromptInjection(
 decision, err := guard.Guard(ctx, arcjet.GuardRequest{
     Label:         "tools.summarize",
     CorrelationId: "trace_123",
-    Metadata:      map[string]string{"user_id": userID},
+    Metadata: arcjet.Metadata{
+        "user": map[string]any{"id": userID},
+    },
     Rules: []arcjet.GuardRuleInput{
         promptScan.Text(prompt),
     },
@@ -287,7 +291,8 @@ if decision.HasFailedOpen() {
 ```
 
 Guard also supports rate limiting, sensitive information detection, custom
-local rules, and experimental content moderation. Labels and buckets must be
+local rules, and content moderation (`GuardModerateContent`). Use `Capture`
+to record what happened after a Guard call. Labels and buckets must be
 lowercase slugs containing letters, digits, dashes, or dots. Standard
 `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` variables configure outbound calls.
 
@@ -2032,9 +2037,11 @@ For the full API reference, read the installed library source:
 - [Email validation](https://docs.arcjet.com/email-validation)
 - [Sensitive information](https://docs.arcjet.com/sensitive-info)
 - [Prompt injection](https://docs.arcjet.com/prompt-injection)
+- [Content moderation](https://docs.arcjet.com/content-moderation)
 - [Signup form protection](https://docs.arcjet.com/signup-protection)
 - [Filters](https://docs.arcjet.com/filters)
 - [Guards](https://docs.arcjet.com/guards)
+- [Capture events](https://docs.arcjet.com/guards/capture)
 
 ### SDKs
 

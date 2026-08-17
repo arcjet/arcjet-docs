@@ -10,7 +10,7 @@ Because it runs inside the same application code, Arcjet protects traditional en
 
 Arcjet protects two types of entry points:
 - **Request-based** -- HTTP route handlers, API endpoints, middleware. Use `protect()` with any supported framework.
-- **Guards** -- tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` to pass inputs directly and get a decision back.
+- **Guards** -- tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` to pass inputs directly and get a decision back. Use `capture()` to record that an allowed action happened (visibility only; never changes a decision).
 
 Arcjet runs server-side. Bot protection advanced client signals are an optional
 extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricing
@@ -33,6 +33,7 @@ extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricin
 - [Email validation](https://docs.arcjet.com/email-validation): block disposable, invalid, no-MX, free email.
 - [Sensitive information](https://docs.arcjet.com/sensitive-info): detect PII before it reaches LLMs or logs.
 - [Prompt injection](https://docs.arcjet.com/prompt-injection): scan user messages for jailbreak / injection attempts.
+- [Content moderation](https://docs.arcjet.com/content-moderation): detect harmful content in untrusted text (Guard-only; JavaScript `moderateContent()`, Python `ModerateContent()`, Go `GuardModerateContent`).
 - [Signup form protection](https://docs.arcjet.com/signup-protection): bundled email + bot + rate limiting for signup flows.
 - [Filters](https://docs.arcjet.com/filters): country / VPN / ASN allow + deny rules.
 - [Agent guards](https://docs.arcjet.com/guards): protect tool calls and other agent actions without an HTTP request.
@@ -40,7 +41,8 @@ extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricin
 - [Agent guard integrations](https://docs.arcjet.com/guards/framework-integrations): Vercel AI SDK, LangChain, and Vercel Eve.
 - [Vercel Eve agent guard](https://docs.arcjet.com/guards/vercel-eve): inbound screening, connection approvals, and observe-only hooks.
 - [Agent guard remote policies](https://docs.arcjet.com/guards/remote-policies): centrally managed action policies using labels, actors, and typed inputs.
-- [Agent guard testing and reference](https://docs.arcjet.com/guards/reference): decisions, availability, fail behavior, and testing.
+- [Capture events](https://docs.arcjet.com/guards/capture): record that an allowed action happened; batched, best-effort, never a security decision.
+- [Agent guard testing and reference](https://docs.arcjet.com/guards/reference): decisions, availability, fail behavior, nested JSON metadata, `registerArcjet` / `register_arcjet`, and the test client. Free `guard()` fail-opens if no client is registered.
 
 ## SDK reference
 
@@ -61,6 +63,7 @@ extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricin
 ## Optional
 
 - [Best practices](https://docs.arcjet.com/best-practices)
+- [Testing](https://docs.arcjet.com/testing): Newman/HTTP for `protect()`, plus `registerTestClient` / `register_test_client` for `guard()` and `capture()`. Free `guard()` fail-opens if no client is registered.
 - [Troubleshooting](https://docs.arcjet.com/troubleshooting)
 - [Architecture](https://docs.arcjet.com/architecture)
 - [Pricing](https://arcjet.com/pricing)

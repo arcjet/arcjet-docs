@@ -133,10 +133,13 @@ across services. There's no `Request` object at those sites, so the
 request-based SDKs don't apply.
 
 <Link.Page href="/guards">Agent guards</Link.Page> run the same rate limiting,
-prompt injection detection, sensitive information detection, and custom rules
-inside those code paths — pass inputs directly to `guard()` and get a decision
-back. Most AI applications combine both: request-based protection on the API
-route, plus guards at every tool / task call site.
+prompt injection detection, sensitive information detection,
+<Link.Page href="/content-moderation">content moderation</Link.Page>, and
+custom rules inside those code paths — pass inputs directly to `guard()` and
+get a decision back. Use <Link.Page href="/guards/capture">`capture()`</Link.Page>
+to record that an allowed action happened. Most AI applications combine both:
+request-based protection on the API route, plus guards at every tool / task
+call site.
 
 <CardGrid>
   <Link.Card
@@ -148,6 +151,16 @@ route, plus guards at every tool / task call site.
     title="Agent guard remote policies"
     href="/guards/remote-policies"
     description="Manage action policy centrally using labels, actors, and typed inputs."
+  />
+  <Link.Card
+    title="Content moderation"
+    href="/content-moderation"
+    description="Detect harmful content in tool results and model outputs."
+  />
+  <Link.Card
+    title="Capture events"
+    href="/guards/capture"
+    description="Record that an allowed action happened, without changing the decision."
   />
 </CardGrid>
 
