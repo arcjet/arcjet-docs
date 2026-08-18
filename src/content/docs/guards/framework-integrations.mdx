@@ -121,18 +121,18 @@ local `execute`, so the enforcement point is `guardApproval()` on the
 connection. Screen inbound channel text with `guardInbound()` before the agent
 starts. Hooks are observe-only (handlers return `void`).
 
-See the <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>
-for inbound screening, connection approvals, and lifecycle hooks.
+For inbound screening, connection approvals, and lifecycle hooks, see the
+<Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>.
 
 ## Mastra
 
 Mastra has no `guardInbound` (channels already hit `processInput`) and no
-`guardApproval` (`requireApproval` is human HITL). Screen inbound text with
-`guardProcessor`. Gate authored tools with `guardTool`. Gate MCP/workspace
+`guardApproval` (`requireApproval` is a human-in-the-loop control). Screen inbound text with
+`guardProcessor`. Gate authored tools with `guardTool`. Gate MCP or workspace
 tools you did not wrap with `guardHooks` (`beforeToolCall` can deny).
 
-See the <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>
-for processors, tools, and hooks.
+For processors, tools, and hooks, see the <Link.Page
+href="/guards/mastra">Mastra agent guard</Link.Page>.
 
 ## Claude Agent SDK
 
@@ -142,8 +142,7 @@ MCP tools. There is no `guardInbound`. Screen inbound prompts with
 gate. Use `guardTool()` for authored tools and `PreToolUse` for unwrapped
 built-ins and MCP tools.
 
-See the <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>
-for inbound screening, authored tools, and PreToolUse denials.
+For inbound screening, authored tools, and `PreToolUse` denials, see the <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>.
 
 ## Denials and availability
 
@@ -166,5 +165,4 @@ The wrappers default to fail closed when Guard is unavailable:
 Set `onGuardError: "allow"` in JavaScript or `on_guard_error="allow"` in Python
 only when executing without a complete security decision is acceptable.
 
-See <Link.Page href="/guards/reference#availability-and-fail-behavior">Availability and fail behavior</Link.Page>
-for the direct client and wrapper differences.
+For the direct client and wrapper differences, see <Link.Page href="/guards/reference#availability-and-fail-behavior">Availability and fail behavior</Link.Page>.

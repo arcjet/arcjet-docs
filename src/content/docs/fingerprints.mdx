@@ -15,20 +15,19 @@ be detected. This is done by fingerprinting each request within your environment
 through a component within the Arcjet SDK.
 
 The fingerprint is a SHA-256 string generated based on request characteristics.
-The goal is that a single client will always generate the same fingerprint so we
-can detect suspicious requests and block the client. Behind the scenes, Arcjet
-uses this to cache decisions locally in your environment and in the Arcjet
-Cloud API.
+The goal is that a single client always generates the same fingerprint so we can
+detect suspicious requests and block the client. Behind the scenes, Arcjet uses
+this to cache decisions locally in your environment and in the Arcjet Cloud API.
 
 By default, the fingerprint is generated based on the client IP address. This
 can be configured by specifying different characteristics. Different
 configurations can be used for each supported rule and globally on the SDK root
 instance.
 
-### Built-in characteristics
+## Built-in characteristics
 
-Built-in options are managed by the SDK and are always available. If multiple
-options are provided, they will be combined.
+Built-in options are managed by the SDK and are always available. If you provide
+multiple options, Arcjet combines them.
 
 Combining characteristics creates one fingerprint from the full set of values.
 For example, `["ip.src", "http.request.headers[\"x-api-key\"]"]` identifies
@@ -53,10 +52,10 @@ For example, use a header value to limit based on a session token or authenticat
 | `http.request.uri.args["<query_param_name>"]` | Request query value  |
 | `http.request.uri.path`                       |     Request path     |
 
-### IP address detection
+## IP address detection
 
-The client IP address is a key part of the fingerprint. The IP should not be
-trusted as it can be spoofed in most cases, especially when loaded via the
+The client IP address is a key part of the fingerprint. Don't trust the IP,
+because it can be spoofed in most cases, especially when loaded through the
 `Headers` object. Each Arcjet SDK uses a native method to detect the IP address
 generally following the guidance provided by the [MDN X-Forwarded-For
 documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For).
@@ -66,12 +65,12 @@ is a valid address. However, in non-production environments, we allow
 private/internal addresses so the SDKs work correctly. See the individual SDK
 references for more details.
 
-### Custom characteristics
+## Custom characteristics
 
 You can use custom characteristics to track clients based on various attributes.
 For example, you can set up a limit for a logged in user by setting their user
-ID as the identifier. This will apply the limit to all requests made by that
-user regardless of their device and IP address.
+ID as the identifier. This applies the limit to all requests made by that user
+regardless of their device and IP address.
 
 Custom characteristics are defined with a string key when configuring the sdk.
 The value is then passed as a `string`, `number` or `boolean` when
@@ -83,7 +82,7 @@ characteristic. The value is hashed on Arcjet's servers, but we recommend agains
 sending us sensitive information.
 :::
 
-#### User ID
+### User ID
 
 In this example we create a custom characteristic called `userId`, but you can call it anything you like:
 
@@ -108,11 +107,11 @@ decision = await aj.protect(request, characteristics={"userId": "user123"})
 </TabItem>
 </Tabs>
 
-#### IP address + User ID
+### IP address + user ID
 
-If you want to be more flexible and use the user IP address for anonymous users
-and a user ID for logged in users, you can can use `withRule` to create
-augmented clients that use different characteristics.
+To be more flexible, use the client IP address for anonymous users and a user ID
+for logged in users. Use `withRule` to create augmented clients that use
+different characteristics.
 
 <Code code={FixedWindowCustomCharacteristicFingerprintRule} lang="ts" />
 
@@ -150,15 +149,14 @@ else:
 </TabItem>
 </Tabs>
 
-## Per rule vs global
+## Per rule versus global
 
 You can set the characteristics globally on the SDK root instance and per rule.
-If you set global characteristics, they will apply to all rules unless
-overridden by a specific rule.
+Global characteristics apply to all rules unless a specific rule overrides them.
 
-In this example, the bot detection rule will track requests by IP address and
-the fixed window rule will track requests by a custom user ID. This means that
-results will be tracked and cached independently.
+In this example, the bot detection rule tracks requests by IP address and the
+fixed window rule tracks requests by a custom user ID. Arcjet tracks and caches
+the results independently.
 
 <Code code={CharacteristicsGlobalRule} lang="ts" />
 

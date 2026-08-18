@@ -6,7 +6,7 @@ import { Code } from "@astrojs/starlight/components";
 import FilterRoutesJS from "./FilterRoutes.js?raw";
 import FilterRoutesTS from "./FilterRoutes.ts?raw";
 
-## Per route vs hooks
+## Per route versus hooks
 
 Bot protection rules can be configured in two ways:
 
@@ -14,7 +14,7 @@ Bot protection rules can be configured in two ways:
   you to configure the rule alongside the code it is protecting which is useful
   if you want to use the decision to add context to your own code. However, it
   means rules are not located in a single place.
-- **Hooks**: The rule is defined as a hook. This allows you to
+- **Hooks**: The rule is defined as a hook. This lets you
   configure rules in a single place or apply them globally to all routes, but
   it means the rules are not located alongside the code they are protecting.
 
@@ -26,12 +26,12 @@ This configures bot protection on a single route.
 
 ### Hooks
 
-This will run on every request to your SvelteKit app - see [the SvelteKit Hooks
+This runs on every request to your SvelteKit app – see [the SvelteKit Hooks
 docs](https://kit.svelte.dev/docs/hooks) for details.
 
 <Hooks />
 
-### Avoiding double protection with hooks
+### Avoid double protection with hooks
 
 If you use Arcjet in hooks and individual routes, you need to be careful
 that Arcjet is not running multiple times per request. This can be avoided by

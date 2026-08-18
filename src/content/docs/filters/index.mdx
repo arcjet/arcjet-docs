@@ -1,5 +1,5 @@
 ---
-title: "Introduction to Arcjet Filters"
+title: "Introduction to Arcjet filters"
 description: "Use Arcjet filters to block unwanted traffic, VPNs, proxies, and risky countries based on IP reputation and request fields, all configured directly in your code."
 prev: false
 generateMarkdownRoute: true
@@ -19,9 +19,9 @@ You write expressions in a
 <Link.Page href="/filters/reference#expression-language">domain-specific language</Link.Page>
 (DSL) that match against request fields. Filters can use:
 
-- **Literal fields** - values directly from the request, such as the
+- **Literal fields** – values directly from the request, such as the
   `user-agent` header or client IP address.
-- **Reflected fields** - derived values based on Arcjet analysis, such as the
+- **Reflected fields** – derived values based on Arcjet analysis, such as the
   client's country or whether the IP belongs to a known VPN, proxy, or relay
   service.
 
@@ -47,21 +47,19 @@ flexible conditions. For example:
   single rule.
 
 You can also access the `ip` field on an Arcjet decision and handle requests
-manually in your application code. The key difference is:
+manually in your application code. The two approaches differ as follows:
 
 - **Filters** integrate blocking with other Arcjet rules.
 - **`decision.ip` fields** are better for customizing the response, such as
   showing a specific message or challenge.
 
-See the
-<Link.Page href="/blueprints/vpn-proxy-detection">VPN & proxy detection blueprint</Link.Page>
-for a concrete example.
+For a concrete example, see the <Link.Page href="/blueprints/vpn-proxy-detection">VPN and proxy detection blueprint</Link.Page>.
 
 :::tip[Using the MCP server]
 Filters can also be managed as
 <Link.Page href="/remote-rules">remote rules</Link.Page> from the Arcjet
-dashboard or via the
-<Link.Page href="/mcp-server">Arcjet MCP server</Link.Page> — no code changes
+dashboard or through the
+<Link.Page href="/mcp-server">Arcjet MCP server</Link.Page> – no code changes
 or redeployment needed. Use `investigate-ip` to look up geo, ASN, and threat
 intelligence for a suspicious IP, then create a filter rule to block it
 immediately.
@@ -110,8 +108,8 @@ performance and low latency, and is deployed to multiple regions worldwide. The
 SDK automatically uses the closest region, so the total overhead is typically no
 more than 20-30 ms, often significantly less.
 
-See the <Link.Page href="/architecture#arcjet-cloud-api">architecture reference</Link.Page> for more
-details.
+For more details, see the <Link.Page
+href="/architecture#arcjet-cloud-api">architecture reference</Link.Page>.
 
 ### Fingerprints and your concept of "user"
 
@@ -119,12 +117,12 @@ Clients are tracked by configurable <Link.Page href="/fingerprints">fingerprints
 include IP addresses by default. This means clients sharing the same IP address
 can be blocked or limited as a group.
 
-To ensure rules are applied correctly, choose fingerprint characteristics
-that align with the fields used in your filters and match your concept of a
-"user" (for example, IP only vs IP + user ID vs IP + session).
+So that Arcjet applies rules correctly, choose fingerprint characteristics that
+align with the fields used in your filters and match your concept of a "user".
+For example, IP only, IP plus user ID, or IP plus session.
 
 ## Pricing
 
-See the [pricing page](https://arcjet.com/pricing) for details.
+For details, see the [pricing page](https://arcjet.com/pricing).
 
 <Comments />

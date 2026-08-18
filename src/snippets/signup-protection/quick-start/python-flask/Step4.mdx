@@ -9,14 +9,14 @@ uv run flask --app main run --debug
 ```
 
 Then make a `curl` `POST` request from your terminal to your application with
-various emails to test the result. A disposable address should return `400 Bad
+various emails to test the result. A disposable address returns `400 Bad
 Request`:
 
 ```sh
 curl -X POST -d 'email=test@0wnd.net' http://localhost:5000/signup
 ```
 
-A valid email should be accepted:
+A valid email is accepted:
 
 ```sh
 curl -X POST -d 'email=test@arcjet.io' http://localhost:5000/signup
@@ -31,6 +31,6 @@ for i in {1..6}; do
 done
 ```
 
-The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
-See <Link.Page href="/signup-protection/reference">the reference guide</Link.Page>
+The requests also appear in the [Arcjet dashboard](https://app.arcjet.com). See
+<Link.Page href="/signup-protection/reference">the reference guide</Link.Page>
 to learn about configuring this further.

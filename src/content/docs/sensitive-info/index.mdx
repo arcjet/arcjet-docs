@@ -1,5 +1,5 @@
 ---
-title: "Introduction to Arcjet Sensitive Info Protection"
+title: "Introduction to Arcjet sensitive information detection"
 description: "Arcjet sensitive info detection runs locally to detect and block PII in request bodies, helping you avoid storing emails, card numbers, IPs, and phone numbers."
 prev: false
 generateMarkdownRoute: true
@@ -18,7 +18,7 @@ want to handle.
 <WhatIsArcjet />
 
 Sensitive information detection is Arcjet's [AI Data Loss Prevention
-layer](/ai-protection/data-loss-prevention) - stopping PII from leaking into AI
+layer](/ai-protection/data-loss-prevention) – stopping PII from leaking into AI
 model context, training data, or third-party tool calls made by agents. When a
 user pastes a credit card number or email address into a chat prompt, Arcjet
 catches it before it reaches your AI provider. All detection runs entirely
@@ -33,7 +33,7 @@ card numbers, IP addresses, and phone numbers. For broader coverage, an optional
 Rampart package (`@arcjet/sensitive-info-rampart` for JavaScript, the
 `arcjet[sensitive-info-rampart]` extra for Python) runs an on-device
 named-entity-recognition (NER) model that also detects **names, addresses, and
-government / financial identifiers** — all still local to your environment, with
+government or financial identifiers** – all still local to your environment, with
 the model weights bundled so nothing is fetched at runtime. Either backend can be
 extended with custom patterns you define.
 
@@ -46,12 +46,12 @@ model.
 
 ## When to use Arcjet sensitive info detection
 
-Use sensitive information detection when you want to:
+Use sensitive information detection for any of the following purposes:
 
-- **Prevent PII from leaking into AI model context** — stop users from
+- **Prevent PII from leaking into AI model context** – stop users from
   accidentally (or deliberately) pasting card numbers, email addresses, or
   other regulated data into prompts sent to your AI provider.
-- **Block sensitive data from agent tool calls** — prevent PII from appearing
+- **Block sensitive data from agent tool calls** – prevent PII from appearing
   in tool arguments or responses that may be logged or forwarded to third-party
   services.
 - Reduce your compliance burden by avoiding storage of PII and other regulated
@@ -78,7 +78,7 @@ environment:
 
 1. The request body is scanned by the configured
    <Link.Page href="/sensitive-info/reference#detection-backends">detection backend</Link.Page>.
-2. The backend identifies sensitive entities — built-in structured types, and,
+2. The backend identifies sensitive entities – built-in structured types, and,
    with the Rampart backend, names, addresses, and other identifiers.
 3. Any custom detection you configure (a `detect` function or a Rampart
    recognizer) also runs.
@@ -91,15 +91,13 @@ sent to Arcjet.
 ### Detected entities
 
 Which entities are available depends on the detection backend. The built-in
-engine detects four structured types; the on-device
-<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart
-backend</Link.Page> adds names, addresses, and government / financial
-identifiers:
+engine detects four structured types; the on-device <Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart backend</Link.Page> adds names, addresses,
+and government or financial identifiers:
 
 <EntityDetectionTable />
 
 The Rampart model is compact (a ~14.7&nbsp;MB, 4-bit quantized artifact) and
-fast — around 6.6&nbsp;ms median inference on Node.js — so it runs inline on
+fast – around 6.6&nbsp;ms median inference on Node.js – so it runs inline on
 each request, and recalls ~98% of private terms across the seven Latin-script
 languages it supports. See the
 <Link.Page href="/sensitive-info/reference#model-accuracy-and-performance">reference</Link.Page>
@@ -122,6 +120,6 @@ sensitive data within your own environment.
 
 ## Pricing
 
-See the [pricing page](https://arcjet.com/pricing) for details.
+For details, see the [pricing page](https://arcjet.com/pricing).
 
 <Comments />

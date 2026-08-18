@@ -11,7 +11,7 @@ import SlidingWindow from "/src/snippets/rate-limiting/reference/nextjs/SlidingW
 import TokenBucket from "/src/snippets/rate-limiting/reference/nextjs/TokenBucket.ts?raw";
 import Comments from "/src/components/Comments.astro";
 
-Arcjet rate limiting allows you to define rules which limit the number of
+Arcjet rate limiting lets you define rules which limit the number of
 requests a client can make over a period of time. It supports 3 different rate
 limit algorithms: [fixed window](#fixed-window), [sliding
 window](#sliding-window) and [token bucket](#token-bucket).
@@ -20,20 +20,20 @@ window](#sliding-window) and [token bucket](#token-bucket).
 
 ## Fixed window
 
-This is the simplest algorithm. It tracks the number of requests made by a
-client over a fixed time window e.g. 60 seconds. If the client exceeds the
+This algorithm tracks the number of requests made by a client over a fixed time
+window, such as 60 seconds. If the client exceeds the
 limit, they are blocked until the window expires.
 
 ### When to use fixed window
 
-This algorithm is useful when you want to apply a simple fixed limit in a fixed
-time window. For example, a simple limit on the total number of requests a
-client can make.
+This algorithm is useful when you want to apply a fixed limit in a fixed time
+window. For example, a flat limit on the total number of requests a client can
+make.
 
 ### Downsides of fixed window
 
-- A burst of requests at the start of the window will exhaust the limit for
-  newer requests.
+- A burst of requests at the start of the window exhausts the limit for newer
+  requests.
 - A client can make a burst of requests at the end of the window and continue to
   burst as the window resets. This can cause request stampedes where clients
   suddenly become unblocked at the start of a new window.
@@ -46,10 +46,10 @@ of 100 requests in a 60 second window. The rule is applied to all requests to
 
 <Code code={FixedWindow} lang="ts" />
 
-If the time is `12:00:00` and a client makes a burst of 50 requests, then they
-make another 50 requests over the following 30 seconds, they will be blocked
-from making any further requests until `12:01:00`. At `12:01:00` the window
-resets and they could make another 100 requests immediately.
+Suppose the time is `12:00:00` and a client makes a burst of 50 requests, then
+another 50 requests over the following 30 seconds. Arcjet blocks any further
+requests until `12:01:00`. At `12:01:00` the window resets and they could make
+another 100 requests immediately.
 
 ## Sliding window
 
@@ -78,9 +78,9 @@ In this example, we define a sliding window rate limit which allows a maximum of
 
 <Code code={SlidingWindow} lang="ts" />
 
-If the client made 50 requests in the time period `12:00:00` to `12:01:00` and
-then made another 50 requests in the current time period as of `12:01:30` then
-we would calculate the remaining rate limit as follows:
+Suppose the client made 50 requests between `12:00:00` and `12:01:00`, then made
+another 50 requests in the current time period as of `12:01:30`. Arcjet
+calculates the remaining rate limit as follows:
 
 ```ts
 // 50 requests in the previous interval
@@ -108,9 +108,9 @@ requests and then still be able to make requests at a slower rate.
 
 ### Downsides of token bucket
 
-- The bucket can be exhausted by a burst of requests and then (depending on your
-  configured refill rate) take a long time to refill. This can cause a client to
-  be blocked for a long time.
+A burst of requests can exhaust the bucket, which then takes a long time to
+refill, depending on your configured refill rate. This can block a client for a
+long time.
 
 ### Token bucket example
 
@@ -142,11 +142,11 @@ decision = await aj.protect(request, requested=1)  # use aj.protect(request, ...
 </Tabs>
 
 For example, if it is `12:00:00` and a client makes 100 requests each with 1
-token deducted, further requests will be blocked until `12:01:00` when the
-bucket refills by 10 tokens. The client could then make 10 requests over the
-following 60 seconds. If they make no requests, the bucket will refill to 20
-tokens at `12:02:00`. If they make no requests between `12:01:00` and `12:10:00`
-then the bucket will refill to 100 tokens at `12:10:00`. No further tokens will
-be added after it reaches 100 tokens.
+token deducted, further requests are blocked until `12:01:00`, when the bucket
+refills by 10 tokens. The client could then make 10 requests over the following
+60 seconds. If they make no requests, the bucket refills to 20 tokens at
+`12:02:00`. If they make no requests between `12:01:00` and `12:10:00` then the
+bucket refills to 100 tokens at `12:10:00`. No further tokens are added after it
+reaches 100 tokens.
 
 <Comments />

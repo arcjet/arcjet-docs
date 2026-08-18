@@ -9,7 +9,7 @@ Installation
 
 [Section titled “Installation”](#installation)
 
-In your project root, run the following command to install the SDK:
+In your project root, install the SDK:
 
 *   [npm](#tab-panel-XXX)
 *   [pnpm](#tab-panel-XXX)
@@ -78,24 +78,24 @@ Quick start
 
 [Section titled “Quick start”](#quick-start)
 
-Check out the [quick start guide](/get-started?f=next-js).
+See the [quick start guide](/get-started?f=next-js).
 
 Configuration
 -------------
 
 [Section titled “Configuration”](#configuration)
 
-Create a new `Arcjet` object with your API key and rules. This should be outside of the request handler.
+Create a new `Arcjet` object with your API key and rules. Create it outside of the request handler.
 
-The required fields are:
+The following fields are required:
 
-*   `key` (`string`) - Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://app.arcjet.com).
-*   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these e.g. [shield](/shield/reference?f=next-js), [rate limiting](/rate-limiting/reference?f=next-js), [bot protection](/bot-protection/reference?f=next-js), [email validation](/email-validation/reference?f=next-js).
+*   `key` (`string`) – Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://app.arcjet.com).
+*   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these, such as [shield](/shield/reference?f=next-js), [rate limiting](/rate-limiting/reference?f=next-js), [bot protection](/bot-protection/reference?f=next-js), [email validation](/email-validation/reference?f=next-js).
 
-The optional fields are:
+The following fields are optional:
 
-*   `characteristics` (`string[]`) - A list of [characteristics](/fingerprints#built-in-characteristics) to be used to uniquely identify clients.
-*   `proxies` (`Array<string | ProxyService>`) - A list of one or more trusted proxies. These addresses will be excluded when Arcjet is determining the client IP address. This is useful if you are behind a load balancer or proxy that sets the client IP address in a header. You can also pass a proxy service such as `cloudflare()` to read the real client IP from a service-specific header. See [Load balancers & proxies](#load-balancers--proxies) below for an example.
+*   `characteristics` (`string[]`) – A list of [characteristics](/fingerprints#built-in-characteristics) to be used to uniquely identify clients.
+*   `proxies` (`Array<string | ProxyService>`) – A list of one or more trusted proxies. Arcjet excludes these addresses when it determines the client IP address. This is useful if you are behind a load balancer or proxy that sets the client IP address in a header. You can also pass a proxy service such as `cloudflare()` to read the real client IP from a service-specific header. For an example, see [Load balancers and proxies](#load-balancers-and-proxies).
 
 *   [TS](#tab-panel-XXX)
 *   [JS](#tab-panel-XXX)
@@ -140,15 +140,15 @@ const aj = arcjet({
 
 We recommend creating a single instance of the `Arcjet` object and reusing it throughout your application. This is because the SDK caches decisions and configuration to improve performance.
 
-The pattern we use is to create a utility file that exports the `Arcjet` object and then import it where you need it. See [our example Next.js app](https://github.com/arcjet/example-nextjs/blob/main/lib/arcjet.ts) for how this is done.
+The pattern we use is to create a utility file that exports the `Arcjet` object and then import it where you need it. For how this is done, see [our example Next.js app](https://github.com/arcjet/example-nextjs/blob/main/lib/arcjet.ts).
 
 ### Rule modes
 
 [Section titled “Rule modes”](#rule-modes)
 
-Each rule can be configured in either `LIVE` or `DRY_RUN` mode. When in `DRY_RUN` mode, each rule will return its decision, but the end conclusion will always be `ALLOW`.
+Each rule can be configured in either `LIVE` or `DRY_RUN` mode. When in `DRY_RUN` mode, each rule returns its decision, but the end conclusion is always `ALLOW`.
 
-This allows you to run Arcjet in passive / demo mode to test rules before enabling them.
+This lets you run Arcjet in passive or demo mode to test rules before enabling them.
 
 *   [TS](#tab-panel-XXX)
 *   [JS](#tab-panel-XXX)
@@ -209,7 +209,7 @@ const aj = arcjet({
 });
 ```
 
-As the top level conclusion will always be `ALLOW` in `DRY_RUN` mode, you can loop through each rule result to check what would have happened:
+Because the top level conclusion is always `ALLOW` in `DRY_RUN` mode, you can loop through each rule result to check what would have happened:
 
 ```ts
 for (const result of decision.results) {
@@ -282,7 +282,7 @@ const aj = arcjet({
 
 [Section titled “Environment variables”](#environment-variables)
 
-The Arcjet Next.js SDK uses several environment variables to configure its behavior. See [Concepts: Environment variables](/environment) for more info. The `ARCJET_KEY` environment variable is not read automatically and must be passed explicitly.
+The Arcjet Next.js SDK uses several environment variables to configure its behavior. For more information, see [Concepts: Environment variables](/environment). The `ARCJET_KEY` environment variable is not read automatically and must be passed explicitly.
 
 ### Custom logging
 
@@ -298,7 +298,7 @@ Terminal window
 npm install pino pino-pretty
 ```
 
-Then, create a custom logger that will log to JSON in production and pretty print in development:
+Then, create a custom logger that logs to JSON in production and pretty prints in development:
 
 *   [TS](#tab-panel-XXX)
 *   [JS](#tab-panel-XXX)
@@ -388,29 +388,29 @@ const nextConfig = {
 module.exports = nextConfig;
 ```
 
-### Load balancers & proxies
+### Load balancers and proxies
 
-[Section titled “Load balancers & proxies”](#load-balancers--proxies)
+[Section titled “Load balancers and proxies”](#load-balancers-and-proxies)
 
-If your application is behind a load balancer, Arcjet will only see the IP address of the load balancer and not the real client IP address.
+If your application is behind a load balancer, Arcjet sees only the IP address of the load balancer and not the real client IP address.
 
-To fix this, most load balancers will set the `X-Forwarded-For` header with the real client IP address plus a list of proxies that the request has passed through.
+To fix this, most load balancers set the `X-Forwarded-For` header with the real client IP address plus a list of proxies that the request has passed through.
 
-The problem with is that the `X-Forwarded-For` header can be spoofed by the client, so you should only trust it if you are sure that the load balancer is setting it correctly. See [the MDN docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For) for more details.
+The problem is that the client can spoof the `X-Forwarded-For` header, so trust it only if you are sure the load balancer sets it correctly. For more information, see the [MDN documentation for `X-Forwarded-For`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For).
 
-You can configure Arcjet to trust IP addresses in the `X-Forwarded-For` header by setting the `proxies` field in the configuration. This should be a list of the IP addresses or the CIDR range of your load balancers to be removed, so that the last IP address in the list is the real client IP address.
+You can configure Arcjet to trust IP addresses in the `X-Forwarded-For` header by setting the `proxies` field in the configuration. Set this to a list of the IP addresses or CIDR ranges of your load balancers to remove, so the last IP address in the list is the real client IP address.
 
 #### Example
 
 [Section titled “Example”](#example)
 
-For example, if the load balancer is at `100.100.100.100` and the client IP address is `192.168.1.1`, the `X-Forwarded-For` header will be:
+For example, if the load balancer is at `203.0.113.100` and the client IP address is `198.51.100.1`, the `X-Forwarded-For` header is:
 
 ```http
-X-Forwarded-For: 192.168.1.1, 100.100.100.100
+X-Forwarded-For: 198.51.100.1, 203.0.113.100
 ```
 
-You should set the `proxies` field to `["100.100.100.100"]` so Arcjet will use `192.168.1.1` as the client IP address.
+Set the `proxies` field to `["203.0.113.100"]` so Arcjet uses `198.51.100.1` as the client IP address.
 
 You can also specify CIDR ranges to match multiple IP addresses.
 
@@ -421,8 +421,8 @@ const aj = arcjet({
   key: process.env.ARCJET_KEY!,
   rules: [],
   proxies: [
-    "100.100.100.100", // A single IP
-    "100.100.100.0/24", // A CIDR for the range
+    "203.0.113.100", // A single IP
+    "203.0.113.0/24", // A CIDR for the range
   ],
 });
 ```
@@ -612,13 +612,13 @@ const decision = await aj.protect(requestInput, {
 
 Each top-level value is JSON-encoded by the SDK. Keys the SDK cannot encode (`undefined`, a function, a `BigInt`, a circular reference) are dropped with a single `AJ1017` warning naming them. A `metadata` that is not a plain object is ignored entirely. Prefer `metadata` over `extra`, which stays a flat string map.
 
-Metadata is untrusted and is not redacted — do not put secrets or PII in it. JavaScript numbers are IEEE-754 doubles, so an integer above `Number.MAX_SAFE_INTEGER` should be passed as a string.
+Metadata is untrusted and is not redacted – do not put secrets or PII in it. JavaScript numbers are IEEE-754 doubles, so pass an integer above `Number.MAX_SAFE_INTEGER` as a string.
 
-See [Guard metadata](/guards/reference#metadata) for limits, drop behavior, and language-specific notes.
+For limits, drop behavior, and language-specific notes, see [Guard metadata](/guards/reference#metadata).
 
-### Pages / Page components
+### Pages and page components
 
-[Section titled “Pages / Page components”](#pages--page-components)
+[Section titled “Pages and page components”](#pages-and-page-components)
 
 Arcjet can protect Next.js pages that are server components (the default). Client components cannot be protected because they run on the client side and do not have access to the request object.
 
@@ -751,7 +751,7 @@ export default function Home() {
 
 In this example the server action is handling a form submission, based on [the Next.js example form handler](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#forms).
 
-These examples will `throw` when there is an error ([docs](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#error-handling)), but you can use [`useFormState`](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#server-side-form-validation) to return errors to the form. If you are using React 19, use [`useActionState`](https://react.dev/reference/react/useActionState) instead.
+These examples `throw` when there is an error, as described in the [Next.js error handling documentation](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#error-handling), but you can use [`useFormState`](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#server-side-form-validation) to return errors to the form. If you are using React 19, use [`useActionState`](https://react.dev/reference/react/useActionState) instead.
 
 app/invoices/page.tsx
 
@@ -811,24 +811,24 @@ Decision
 
 The `protect` function function returns a `Promise` that resolves to an `ArcjetDecision` object. This contains the following properties:
 
-*   `id` (`string`) - The unique ID for the request. This can be used to look up the request in the Arcjet dashboard. It is prefixed with `req_` for decisions involving the Arcjet cloud API. For decisions taken locally, the prefix is `lreq_`.
-*   `conclusion` (`"ALLOW" | "DENY" | "CHALLENGE" | "ERROR"`) - The final conclusion based on evaluating each of the configured rules. If you wish to accept Arcjet’s recommended action based on the configured rules then you can use this property.
-*   `reason` (`ArcjetReason`) - An object containing more detailed information about the conclusion.
-*   `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects containing the results of each rule that was executed.
-*   `ttl` (`uint32`) - The time-to-live for the decision in seconds. This is the time that the decision is valid for. After this time, the decision will be re-evaluated. The SDK automatically caches `DENY` decisions for the length of the TTL.
-*   `ip` (`ArcjetIpDetails`) - An object containing Arcjet’s analysis of the client IP address. See IP analysis below for more information.
+*   `id` (`string`) – The unique ID for the request. This can be used to look up the request in the Arcjet dashboard. It is prefixed with `req_` for decisions involving the Arcjet cloud API. For decisions taken locally, the prefix is `lreq_`.
+*   `conclusion` (`"ALLOW" | "DENY" | "CHALLENGE" | "ERROR"`) – The final conclusion based on evaluating each of the configured rules. If you wish to accept Arcjet’s recommended action based on the configured rules then you can use this property.
+*   `reason` (`ArcjetReason`) – An object containing more detailed information about the conclusion.
+*   `results` (`ArcjetRuleResult[]`) – An array of `ArcjetRuleResult` objects containing the results of each rule that was executed.
+*   `ttl` (`uint32`) – The time-to-live for the decision in seconds. This is the time that the decision is valid for. After this time, Arcjet re-evaluates the decision. The SDK automatically caches `DENY` decisions for the length of the TTL.
+*   `ip` (`ArcjetIpDetails`) – An object containing Arcjet’s analysis of the client IP address. For more information, see IP analysis.
 
 ### Conclusion
 
 [Section titled “Conclusion”](#conclusion)
 
-The `ArcjetDecision` object has the following methods that should be used to check the conclusion:
+Use the following `ArcjetDecision` methods to check the conclusion:
 
-*   `isAllowed()` (`bool`) - The request should be allowed.
-*   `isDenied()` (`bool`) - The request should be denied.
-*   `isErrored()` (`bool`) - There was an unrecoverable error.
+*   `isAllowed()` (`bool`) – Arcjet concluded that the request is allowed.
+*   `isDenied()` (`bool`) – Arcjet concluded that the request is denied.
+*   `isErrored()` (`bool`) – There was an unrecoverable error.
 
-The conclusion will be the highest-severity finding when evaluating the configured rules. `"DENY"` is the highest severity, followed by `"CHALLENGE"`, then `"ERROR"` and finally `"ALLOW"` as the lowest severity.
+The conclusion is the highest-severity finding from the configured rules. `"DENY"` is the highest severity, followed by `"CHALLENGE"`, then `"ERROR"` and finally `"ALLOW"` as the lowest severity.
 
 For example, when a bot protection rule returns an error and a validate email rule returns a deny, the overall conclusion would be deny. To access the error you would have to use the `results` property on the decision.
 
@@ -840,25 +840,25 @@ The `reason` property of the `ArcjetDecision` object contains an `ArcjetReason` 
 
 The `ArcjetReason` object has the following methods that can be used to check which rule caused the conclusion:
 
-It will always be the highest-priority rule that produced that conclusion, to inspect other rules consider iterating over the `results` property on the decision.
+It is always the highest-priority rule that produced that conclusion; to inspect other rules, iterate over the `results` property on the decision.
 
-*   `isBot()` (`bool`) - Returns `true` if the bot protection rules have been applied and the request was considered to have been made by a bot.
-*   `isEmail()` (`bool`) - Returns `true` if the email rules have been applied and the email address has a problem.
-*   `isRateLimit()` (`bool`) - Returns `true` if the rate limit rules have been applied and the request has exceeded the rate limit.
-*   `isSensitiveInfo()` (`bool`) - Returns `true` if sensitive info rules have been applied and sensitive info has been detected.
-*   `isShield()` (`bool`) - Returns `true` if the shield rules have been applied and the request is suspicious based on analysis by Arcjet Shield WAF.
-*   `isError()` (`bool`) - Returns `true` if there was an error processing the request.
+*   `isBot()` (`bool`) – Returns `true` if the bot protection rules have been applied and the request was considered to have been made by a bot.
+*   `isEmail()` (`bool`) – Returns `true` if the email rules have been applied and the email address has a problem.
+*   `isRateLimit()` (`bool`) – Returns `true` if the rate limit rules have been applied and the request has exceeded the rate limit.
+*   `isSensitiveInfo()` (`bool`) – Returns `true` if sensitive info rules have been applied and sensitive info has been detected.
+*   `isShield()` (`bool`) – Returns `true` if the shield rules have been applied and the request is suspicious based on analysis by Arcjet Shield WAF.
+*   `isError()` (`bool`) – Returns `true` if there was an error processing the request.
 
 ### Results
 
 [Section titled “Results”](#results)
 
-The `results` property of the `ArcjetDecision` object contains an array of `ArcjetRuleResult` objects. There will be one for each configured rule so you can inspect the individual results:
+The `results` property of the `ArcjetDecision` object contains an array of `ArcjetRuleResult` objects. There is one for each configured rule, so you can inspect the individual results:
 
-*   `id` (`string`) - The ID of the rule result. Not yet implemented.
-*   `state` (`ArcjetRuleState`) - Whether the rule was executed or not.
-*   `conclusion` (`ArcjetConclusion`) - The conclusion of the rule. This will be one of the above conclusions: `ALLOW`, `DENY`, `CHALLENGE`, or `ERROR`.
-*   `reason` (`ArcjetReason`) - An object containing more detailed information about the conclusion for this rule. Each rule type has its own reason object with different properties.
+*   `id` (`string`) – The ID of the rule result. Not yet implemented.
+*   `state` (`ArcjetRuleState`) – Whether the rule was executed or not.
+*   `conclusion` (`ArcjetConclusion`) – The conclusion of the rule. This is one of the preceding conclusions: `ALLOW`, `DENY`, `CHALLENGE`, or `ERROR`.
+*   `reason` (`ArcjetReason`) – An object containing more detailed information about the conclusion for this rule. Each rule type has its own reason object with different properties.
 
 You can iterate through the results and check the conclusion for each rule.
 
@@ -868,7 +868,7 @@ for (const result of decision.results) {
 }
 ```
 
-This example will log the full result as well as each rate limit rule:
+This example logs the full result as well as each rate limit rule:
 
 *   [TS (App)](#tab-panel-XXX)
 *   [TS (Pages)](#tab-panel-XXX)
@@ -1071,8 +1071,8 @@ The `state` property of the `ArcjetRuleResult` object is an `ArcjetRuleState`. E
 
 *   `DRY_RUN` - The rule was executed in dry run mode. This means that the rule was executed but the conclusion was not applied to the request. This is useful for testing rules before enabling them.
 *   `RUN` - The rule was executed and the conclusion was applied to the request.
-*   `NOT_RUN` - The rule was not executed. This can happen if another rule has already reached a conclusion that applies to the request. For example, if a rate limit rule is configured then these are evaluated before all other rules. If the client has reached the maximum number of requests then other rules will not be evaluated.
-*   `CACHED` - The rule was not executed because the previous result was cached. Results are cached when the decision conclusion is `DENY`. Subsequent requests from the same client will not be evaluated against the rule until the cache expires.
+*   `NOT_RUN` - The rule was not executed. This can happen if another rule has already reached a conclusion that applies to the request. For example, if a rate limit rule is configured then these are evaluated before all other rules. If the client has reached the maximum number of requests then Arcjet doesn’t evaluate the other rules.
+*   `CACHED` - The rule was not executed because the previous result was cached. Results are cached when the decision conclusion is `DENY`. Arcjet doesn’t evaluate subsequent requests from the same client against the rule until the cache expires.
 
 #### Rule reason
 
@@ -1090,7 +1090,7 @@ The `ArcjetReason` object for shield rules has the following properties:
 shieldTriggered: boolean;
 ```
 
-See the [shield documentation](/shield/reference?f=next-js) for more information about these properties.
+For more information about these properties, see the [shield documentation](/shield/reference?f=next-js).
 
 ##### Bot protection
 
@@ -1118,11 +1118,11 @@ window: number;
 reset: number;
 ```
 
-See the [rate limiting documentation](/rate-limiting/reference?f=next-js) for more information about these properties.
+For more information about these properties, see the [rate limiting documentation](/rate-limiting/reference?f=next-js).
 
-##### Email validation & verification
+##### Email validation and verification
 
-[Section titled “Email validation & verification”](#email-validation--verification)
+[Section titled “Email validation and verification”](#email-validation-and-verification)
 
 The `ArcjetReason` object for email rules has the following properties:
 
@@ -1136,7 +1136,7 @@ An `ArcjetEmailType` is one of the following strings:
 "DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
 ```
 
-See the [email validation documentation](/email-validation/reference?f=next-js) for more information about these properties.
+For more information about these properties, see the [email validation documentation](/email-validation/reference?f=next-js).
 
 ### IP analysis
 
@@ -1158,7 +1158,7 @@ The `ArcjetDecision` object contains an `ip` property. This includes additional 
 *   `continent` (`string | undefined`): the continent code of the client IP address.
 *   `continentName` (`string | undefined`): the continent name of the client IP address.
 
-The IP location fields may be `undefined`, but you can use various methods to check their availability. Using the methods will also refine the type to remove the need for null or undefined checks.
+The IP location fields may be `undefined`, but you can use various methods to check their availability. These methods also refine the type, which removes the need for null or undefined checks.
 
 *   `hasLatitude()` (`bool`): returns whether the `latitude` and `accuracyRadius` fields are available.
 *   `hasLongitude()` (`bool`): returns whether the `longitude` and `accuracyRadius` fields are available.
@@ -1172,13 +1172,13 @@ The IP location fields may be `undefined`, but you can use various methods to ch
 
 ##### Location accuracy
 
-IP geolocation can be notoriously inaccurate, especially for mobile devices, satellite internet providers, and even just normal users. Likewise with the specific fields like `city` and `region`, which can be very inaccurate. Country is usually accurate, but there are often cases where IP addresses are mislocated. These fields are provided for convenience e.g. suggesting a user location, but should not be relied upon by themselves.
+IP geolocation can be notoriously inaccurate, especially for mobile devices, satellite internet providers, and even ordinary users. Likewise with the specific fields like `city` and `region`, which can be very inaccurate. Country is usually accurate, but there are often cases where IP addresses are mislocated. These fields are provided for convenience, such as suggesting a user location, but don’t rely on them alone.
 
-#### IP AS
+#### IP autonomous system
 
 This is useful for identifying the network operator of the client IP address. This is useful for understanding whether the client is likely to be automated or not, or being stricter with requests from certain networks.
 
-The IP AS fields may be `undefined`, but you can use the `hasASN()` method to check their availability. Using this method will also refine the type to remove the need for null-ish checks.
+The IP AS fields may be `undefined`, but you can use the `hasASN()` method to check their availability. This method also refines the type, which removes the need for null-ish checks.
 
 *   `hasASN()` (`bool`): returns whether all of the ASN fields are available.
 *   `asn` (`string | undefined`): the autonomous system (AS) number of the client IP address.
@@ -1202,7 +1202,7 @@ if (threat && !threat.isSafe && threat.riskLevel === "critical") {
 *   `riskLevel` (`string`): overall risk assessment, such as `none`, `low`, `medium`, `high`, or `critical`.
 *   `confidence` (`string`): confidence in the assessment, such as `low`, `medium`, or `high`.
 *   `reputation` (`string`): upstream reputation, such as `malicious`, `suspicious`, `known`, `safe`, `benign`, or `unknown`.
-*   `isSafe` (`boolean`): whether the IP is trusted infrastructure and should not be treated as a threat.
+*   `isSafe` (`boolean`): whether the IP is trusted infrastructure rather than a threat.
 *   `networkTypes` (`string[]`): network classifications, such as `hosting`, `vpn`, `proxy`, or `tor`.
 *   `activities` (`string[]`): observed behaviors, such as `brute_force`, `scanning`, or `botnet`.
 *   `entities` (`string[]`): automated entity types, such as `crawler`, `ai_crawler`, or `scanner`.
@@ -1211,12 +1211,12 @@ if (threat && !threat.isSafe && threat.riskLevel === "critical") {
 
 #### IP type
 
-The `service` field may be `undefined`, but you can use the `hasService()` method to check the availability. Using this method will also refine the type to remove the need for null-ish checks.
+The `service` field may be `undefined`, but you can use the `hasService()` method to check the availability. This method also refines the type, which removes the need for null-ish checks.
 
 The following are available on all pricing plans:
 
 *   `hasService()` (`bool`): whether the `service` field is available.
-*   `service` (`string | undefined`): the name of the service associated with the IP address - e.g. `Apple Private Relay`.
+*   `service` (`string | undefined`): the name of the service associated with the IP address, such as `Apple Private Relay`.
 *   `isHosting()` (`bool`): returns whether the IP address of the client is owned by a hosting provider. Requests originating from a hosting provider IP significantly increase the likelihood that this is an automated client.
 *   `isVpn()` (`bool`): returns whether the IP address of the client is owned by a VPN provider. Many people use VPNs for privacy or work purposes, so by itself this is not an indicator of the client being automated. However, it does increase the risk score of the client and depending on your use case it may be a characteristic you wish to restrict.
 *   `isProxy()` (`bool`): returns whether the IP address of the client is owned by a proxy provider. Similar to `isVpn()`, but proxies are more likely to involve automated traffic.
@@ -1378,7 +1378,7 @@ export default async function handler(req, res) {
 }
 ```
 
-For the IP address `8.8.8.8` you might get the following response. Only the fields we have data for will be returned:
+For the IP address `8.8.8.8` you might get the following response. Arcjet returns only the fields it has data for:
 
 ```json
 {
@@ -1400,11 +1400,11 @@ Error handling
 
 [Section titled “Error handling”](#error-handling)
 
-Arcjet is designed to fail open so that a service issue or misconfiguration does not block all requests. The SDK will also time out and fail open after 1000ms in development (see [`ARCJET_ENV`](/environment#arcjet-env)) and 500ms otherwise. However, in most cases, the response time will be less than 20-30ms.
+Arcjet is designed to fail open so that a service issue or misconfiguration does not block all requests. The SDK also times out and fails open after 1000 ms in development (see [`ARCJET_ENV`](/environment#arcjet-env)) and 500 ms otherwise. However, in most cases, the response time is less than 20 ms to 30 ms.
 
-If there is an error condition when processing the rule, Arcjet will return an `ERROR` result for that rule and you can check the `message` property on the rule’s error result for more information.
+If there is an error condition when processing the rule, Arcjet returns an `ERROR` result for that rule and you can check the `message` property on the rule’s error result for more information.
 
-If all other rules that were run returned an `ALLOW` result, then the final Arcjet conclusion will be `ERROR`.
+If all other rules that were run returned an `ALLOW` result, then the final Arcjet conclusion is `ERROR`.
 
 *   [TS (App)](#tab-panel-XXX)
 *   [TS (Pages)](#tab-panel-XXX)
@@ -1731,7 +1731,7 @@ Ad hoc rules
 
 [Section titled “Ad hoc rules”](#ad-hoc-rules)
 
-Sometimes it is useful to add additional protection via a rule based on the logic in your handler; however, you usually want to inherit the rules, cache, and other configuration from our primary SDK. This can be achieved using the `withRule` function which accepts an ad-hoc rule and can be chained to add multiple rules. It returns an augmented client with the specialized `protect` function.
+Sometimes it is useful to add extra protection with a rule based on the logic in your handler; however, you usually want to inherit the rules, cache, and other configuration from our primary SDK. This can be achieved using the `withRule` function which accepts an ad-hoc rule and can be chained to add multiple rules. It returns an augmented client with the specialized `protect` function.
 
 *   [TS (App)](#tab-panel-XXX)
 *   [TS (Pages)](#tab-panel-XXX)
@@ -1973,7 +1973,7 @@ IP address detection
 
 [Section titled “IP address detection”](#ip-address-detection)
 
-Arcjet will automatically detect the IP address of the client making the request based on the context provided. The implementation is open source in our [@arcjet/ip package](https://github.com/arcjet/arcjet-js/blob/main/ip).
+Arcjet automatically detects the IP address of the client making the request based on the context provided. The implementation is open source in our [@arcjet/ip package](https://github.com/arcjet/arcjet-js/blob/main/ip).
 
 in development (see [`ARCJET_ENV`](/environment#arcjet-env)), we allow private/internal addresses so that the SDKs work correctly locally.
 
@@ -1982,7 +1982,7 @@ Client override
 
 [Section titled “Client override”](#client-override)
 
-The default client can be overridden. If no client is specified, a default one will be used. Generally you should not need to provide a client - the Arcjet Next.js SDK will automatically handle this for you, including when using the [Edge Runtime](https://edge-runtime.vercel.app).
+You can override the default client. If you don’t specify a client, Arcjet uses a default one. You don’t usually need to provide a client – the Arcjet Next.js SDK handles this for you, including when you use the [Edge Runtime](https://edge-runtime.vercel.app).
 
 *   [TS](#tab-panel-XXX)
 *   [JS](#tab-panel-XXX)
@@ -2062,19 +2062,19 @@ Version support
 
 Arcjet supports the [active and maintenance LTS versions](https://github.com/nodejs/release) of Node.js 22.21.0 or later.
 
-When a Node.js version goes end of life, we will bump the major version of the Arcjet SDK. [Technical support](/support) is provided for the current major version of the Arcjet SDK for all users and for the current and previous major versions for paid users. We will provide security fixes for the current and previous major SDK versions.
+When a Node.js version goes end of life, we bump the major version of the Arcjet SDK. [Technical support](/support) is provided for the current major version of the Arcjet SDK for all users and for the current and previous major versions for paid users. We provide security fixes for the current and previous major SDK versions.
 
 ### Next.js
 
 [Section titled “Next.js”](#nextjs)
 
-Arcjet supports the [active and maintenance LTS versions of Next.js](https://nextjs.org/support-policy) for both the app router and pages router. When a new major version of Next.js is released, we will bump the major version of the Arcjet SDK.
+Arcjet supports the [active and maintenance LTS versions of Next.js](https://nextjs.org/support-policy) for both the app router and pages router. When a new major version of Next.js is released, we bump the major version of the Arcjet SDK.
 
 Maintenance LTS: Next.js 15.x Active LTS: Next.js 16.x
 
-The pages router will be supported for as long as Next.js supports it.
+The pages router is supported for as long as Next.js supports it.
 
-[Technical support](/support) is provided for the current major version of the Arcjet SDK for all users and for the current and previous major versions for paid users. We will provide security fixes for the current and previous major versions.
+[Technical support](/support) is provided for the current major version of the Arcjet SDK for all users and for the current and previous major versions for paid users. We provide security fixes for the current and previous major versions.
 
 Discussion
 ----------

@@ -8,7 +8,7 @@ import { Link } from "@/components/link";
 
 `guard()` decides whether an action is allowed. `capture()` records that the
 action happened. Use it for the facts you want in a security trace but do not
-want to gate — a refund issued, a document exported, a tool call completed.
+want to gate – a refund issued, a document exported, a tool call completed.
 
 Captures are visibility data. They never change a `guard()` or `protect()`
 conclusion and never set `hasFailedOpen()` / `HasFailedOpen()`.
@@ -149,8 +149,8 @@ export default {
 ```
 
 Arcjet discovers Vercel's request context on its own, so `waitUntil` is not
-needed there. Every other per-invocation hook — Cloudflare's `ExecutionContext`
-included — has to be passed in, because a module-scoped client cannot reach it.
+needed there. Every other per-invocation hook – Cloudflare's `ExecutionContext`
+included – has to be passed in, because a module-scoped client cannot reach it.
 
 Where `capture()` is called too deep to reach the platform context, `flush()`
 at the end of the handler instead:
@@ -176,17 +176,16 @@ export default {
 | `occurredAt` / `occurred_at` | Optional timestamp. Defaults to the time of the call. Pre-epoch values cannot be represented and are dropped. |
 | `waitUntil` | JavaScript only. Platform hook that keeps the invocation alive until the batch is sent. |
 
-## Calling capture without a client handle
+## Call `capture()` without a client handle
 
 Passing the client explicitly is the recommended path. When `capture()` is
 called too deep in the application to receive a handle, register a client at
-startup and import the free `capture()` function. See
-<Link.Page href="/testing#testing-guard-and-capture-calls">registering a client and the test client</Link.Page>.
+startup and import the free `capture()` function. See <Link.Page href="/testing#test-guard-and-capture-calls">registering a client and the test client</Link.Page>.
 
 ## Related
 
 - <Link.Page href="/guards">Agent guards</Link.Page>
 - <Link.Page href="/guards/reference">Guard testing and reference</Link.Page>
 - <Link.Page href="/testing">Testing Arcjet</Link.Page>
-- <Link.Page href="/reference/python#recording-what-happened-with-capture">Python SDK capture</Link.Page>
+- <Link.Page href="/reference/python#record-what-happened-with-capture">Python SDK capture</Link.Page>
 - <Link.Page href="/reference/go#capture">Go SDK capture</Link.Page>

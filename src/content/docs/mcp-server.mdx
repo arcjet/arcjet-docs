@@ -10,12 +10,17 @@ import Comments from "/src/components/Comments.astro";
 
 [Arcjet](https://arcjet.com) is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
 
-The Arcjet MCP server is one of two transports that connects [Arcjet skills](/agent-get-started#skills) to the Arcjet API — the other being the [Arcjet CLI](/cli). The MCP server is the right choice for AI coding tools without shell access (ChatGPT, Claude Desktop) and editors with built-in MCP support (VS Code Copilot, Windsurf, Cursor); the CLI is the right choice when you are working in a terminal session.
+The Arcjet MCP server is one of two transports that connect [Arcjet
+skills](/agent-get-started#skills) to the Arcjet API. The other is the [Arcjet
+CLI](/cli). Use the MCP server with AI coding tools that have no shell access,
+such as ChatGPT and Claude Desktop. It also works with editors that have
+built-in MCP support, such as VS Code Copilot, Windsurf, and Cursor. Use the CLI
+when you are working in a terminal session.
 
-Both transports expose the same management-plane surface — teams, sites,
-keys, requests, decisions, traffic analysis, anomaly detection, IP
-investigation, security briefings, and remote rule management. See
-[Available tools](#available-tools) for the full reference.
+Both transports expose the same management-plane surface – teams, sites, keys,
+requests, decisions, traffic analysis, anomaly detection, IP investigation,
+security briefings, and remote rule management. For the full reference, see
+[Available tools](#available-tools).
 
 The MCP server is available at:
 
@@ -23,15 +28,15 @@ The MCP server is available at:
 https://api.arcjet.com/mcp
 ```
 
-It implements the latest
+It implements the 2025-06-18 revision of the
 [MCP Authorization](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization)
 and
 [Streamable HTTP](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#streamable-http)
-specifications with OAuth-based authentication.
+specifications, with OAuth-based authentication.
 
 ## Supported clients
 
-Any client that supports the latest [MCP
+Any client that supports the 2025-06-18 [MCP
 specification](https://modelcontextprotocol.io/specification/2025-06-18) with
 [Streamable HTTP transport](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#streamable-http)
 and [OAuth authorization](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization)
@@ -64,8 +69,8 @@ ChatGPT handles the OAuth flow automatically.
 claude mcp add arcjet --transport http https://api.arcjet.com/mcp
 ```
 
-Claude Code will open a browser for OAuth authentication on first connection.
-Once authenticated, you can use the `/mcp` command to verify the connection.
+Claude Code opens a browser for OAuth authentication on first connection. Once
+authenticated, you can use the `/mcp` command to verify the connection.
 
 ### Codex CLI
 
@@ -73,7 +78,7 @@ Once authenticated, you can use the `/mcp` command to verify the connection.
 codex mcp add arcjet --url https://api.arcjet.com/mcp
 ```
 
-Codex will prompt you to authenticate with Arcjet when it first connects to the
+Codex prompts you to authenticate with Arcjet when it first connects to the
 server.
 
 ### Claude Desktop
@@ -105,7 +110,7 @@ Add to `.cursor/mcp.json` in your project:
 }
 ```
 
-After adding the server, Cursor will show a **Needs login** prompt. Click it to
+After you add the server, Cursor shows a **Needs login** prompt. Click it to
 authorize Cursor to access your Arcjet account.
 
 ### VS Code with Copilot
@@ -123,7 +128,7 @@ Add to your `.vscode/mcp.json` in your project or user settings:
 }
 ```
 
-Or add it via the command palette:
+Or add it from the command palette:
 
 1. Open the Command Palette (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> on
    Windows/Linux or <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> on macOS).
@@ -133,7 +138,7 @@ Or add it via the command palette:
 5. Enter the name: `Arcjet`
 6. Select **Workspace** or **User** depending on your preference.
 
-VS Code will prompt you to authenticate via OAuth on first use.
+VS Code prompts you to authenticate with OAuth on first use.
 
 ### Windsurf
 
@@ -156,28 +161,28 @@ For more details, see the
 
 Once connected, the following tools are available to your AI assistant:
 
-- **`list-teams`** — Lists teams the authenticated user belongs to.
-- **`list-sites`** — Lists sites within a specified team.
-- **`create-site`** — Creates a new site within a specified team.
-- **`get-site-key`** — Returns the SDK key (`ARCJET_KEY`) for a specific site.
-- **`list-requests`** — Lists recent requests for a site. Supports filtering by conclusion (`ALLOW`, `DENY`, `ERROR`) and pagination.
-- **`get-request-details`** — Returns full details for a specific request including headers, rules executed, and decision information.
-- **`explain-decision`** — Explains why Arcjet allowed or denied a specific request. Returns a natural language summary, per-rule breakdown, and suggested next steps.
-- **`get-site-quota`** — Returns quota usage and limits for a site in the current billing window.
-- **`analyze-traffic`** — Analyzes request traffic over a time period. Returns total requests, denials, denial rate, top paths, top IPs, top denial reasons, and trend vs the previous period.
-- **`get-anomalies`** — Detects unusual security patterns by comparing current traffic to the previous period. Identifies traffic spikes, geographic shifts, new threat activities, new bot signatures, risk escalation, and suspicious IP patterns.
-- **`investigate-ip`** — Investigates an IP address in the context of a site. Returns geo location, threat intelligence (network type, threat activities, entity classification, risk level), and the IP's recent request activity (conclusion breakdown, denial reasons, targeted paths, daily timeline).
-- **`get-dry-run-impact`** — Analyzes what would happen if dry-run rules were promoted to live. Shows how many currently-allowed requests would have been blocked by each rule type, which IPs would be most affected, and a false-positive estimate.
-- **`get-security-briefing`** — Returns a comprehensive security briefing: active rules summary, traffic analysis, threat intelligence, anomaly detection, dry-run promotion readiness, quota status, and prioritized actionable recommendations. Designed for daily consumption.
-- **`list-rules`** — Lists all remote rules configured for a site with their ID, type, mode, and configuration summary.
-- **`create-rule`** — Creates a new remote rule for a site. Supports rate limit, bot, shield, and filter rule types.
-- **`update-rule`** — Replaces an existing remote rule configuration. All fields must be provided (full replacement).
-- **`delete-rule`** — Deletes a remote rule, immediately stopping it from being evaluated.
-- **`promote-rule`** — Promotes a remote rule from DRY_RUN to LIVE mode after verification.
+- **`list-teams`** – Lists teams the authenticated user belongs to.
+- **`list-sites`** – Lists sites within a specified team.
+- **`create-site`** – Creates a new site within a specified team.
+- **`get-site-key`** – Returns the SDK key (`ARCJET_KEY`) for a specific site.
+- **`list-requests`** – Lists recent requests for a site. Supports filtering by conclusion (`ALLOW`, `DENY`, `ERROR`) and pagination.
+- **`get-request-details`** – Returns full details for a specific request including headers, rules executed, and decision information.
+- **`explain-decision`** – Explains why Arcjet allowed or denied a specific request. Returns a natural language summary, per-rule breakdown, and suggested next steps.
+- **`get-site-quota`** – Returns quota usage and limits for a site in the current billing window.
+- **`analyze-traffic`** – Analyzes request traffic over a time period. Returns total requests, denials, denial rate, top paths, top IPs, top denial reasons, and trend compared with the previous period.
+- **`get-anomalies`** – Detects unusual security patterns by comparing current traffic to the previous period. Identifies traffic spikes, geographic shifts, new threat activities, new bot signatures, risk escalation, and suspicious IP patterns.
+- **`investigate-ip`** – Investigates an IP address in the context of a site. Returns geo location, threat intelligence (network type, threat activities, entity classification, risk level), and the IP's recent request activity (conclusion breakdown, denial reasons, targeted paths, daily timeline).
+- **`get-dry-run-impact`** – Analyzes what would happen if dry-run rules were promoted to live. Shows how many currently-allowed requests would have been blocked by each rule type, which IPs would be most affected, and a false-positive estimate.
+- **`get-security-briefing`** – Returns a comprehensive security briefing: active rules summary, traffic analysis, threat intelligence, anomaly detection, dry-run promotion readiness, quota status, and prioritized actionable recommendations. Designed for daily consumption.
+- **`list-rules`** – Lists all remote rules configured for a site with their ID, type, mode, and configuration summary.
+- **`create-rule`** – Creates a new remote rule for a site. Supports rate limit, bot, shield, and filter rule types.
+- **`update-rule`** – Replaces an existing remote rule configuration. All fields must be provided (full replacement).
+- **`delete-rule`** – Deletes a remote rule, immediately stopping it from being evaluated.
+- **`promote-rule`** – Promotes a remote rule from `DRY_RUN` to `LIVE` mode after verification.
 
 ### Remote rules
 
-Remote rules are managed through the MCP server or the Arcjet dashboard — no
+Remote rules are managed through the MCP server or the Arcjet dashboard – no
 code changes or redeployment needed. They apply globally to all requests for a
 site. Only `rate_limit`, `bot`, `shield`, and `filter` rule types are supported
 as remote rules. Rules that need parsed request body content (`email`,
@@ -193,11 +198,11 @@ address, you can create a filter rule to block it immediately without deploying
 new code:
 
 1. Use `list-requests` to investigate the suspicious traffic and identify
-   patterns (e.g. a specific country, IP range, or VPN usage).
+   patterns (for example, a specific country, IP range, or VPN usage).
 2. Use `create-rule` to add a filter rule in `DRY_RUN` mode to verify it
    matches the right traffic. For example, block a specific country:
-   `ip.src.country == "XX"` (ISO 3166-1 alpha-2 country code e.g. `US`, `CN`,
-   `RU`), block VPN traffic: `ip.src.vpn`, or block an IP range:
+   `ip.src.country == "XX"` (ISO 3166-1 alpha-2 country code, such as `US`,
+   `CN`, or `RU`), block VPN traffic: `ip.src.vpn`, or block an IP range:
    `ip.src in { 1.2.3.0/24 }`.
 3. Use `list-requests` again to confirm the rule is matching the expected
    traffic without blocking legitimate users.
@@ -209,15 +214,15 @@ new code:
 
 Use the analysis tools to maintain ongoing security awareness:
 
-- **Daily briefing:** Call `get-security-briefing` periodically to get a
-  comprehensive overview of your site's security posture — traffic trends,
-  threat landscape, anomalies, dry-run readiness, quota status, and prioritized
-  recommendations — all in a single call.
+- **Daily briefing:** Call `get-security-briefing` periodically for a
+  comprehensive overview of your site's security posture in a single call. It
+  covers traffic trends, threat landscape, anomalies, dry-run readiness, quota
+  status, and prioritized recommendations.
 - **Traffic analysis:** Use `analyze-traffic` to understand request patterns,
   denial rates, top paths, and top IPs. This provides the same data as the
   Arcjet dashboard analytics.
 - **Anomaly detection:** Use `get-anomalies` to detect unusual patterns by
-  comparing current traffic to the previous period — traffic spikes, geographic
+  comparing current traffic to the previous period – traffic spikes, geographic
   shifts, new threat activities, or suspicious IP behavior.
 - **IP investigation:** When you identify a suspicious IP (from `analyze-traffic`
   or `list-requests`), use `investigate-ip` to get full context: geo location,
@@ -233,11 +238,11 @@ Use the analysis tools to maintain ongoing security awareness:
 > "I'm seeing a spike in denied requests on my site. Can you investigate what's
 > happening and help me block the source?"
 
-The assistant will call `analyze-traffic` to identify the spike, then
+The assistant calls `analyze-traffic` to identify the spike, then
 `list-requests` filtered to `DENY` to surface the top offending IPs. It uses
-`investigate-ip` to pull threat intelligence for each IP, then
-suggests a filter rule. Using `create-rule`, it creates the rule in `DRY_RUN`
-mode so you can verify the match before calling `promote-rule` to go live.
+`investigate-ip` to pull threat intelligence for each IP, then suggests a filter
+rule. Using `create-rule`, it creates the rule in `DRY_RUN` mode so you can
+verify the match before calling `promote-rule` to go live.
 
 ### Get a daily security briefing
 
@@ -245,50 +250,50 @@ mode so you can verify the match before calling `promote-rule` to go live.
 
 The assistant calls `list-teams` and `list-sites` to locate your production
 site, then calls `get-security-briefing`. It returns a summary covering active
-rules, traffic trends vs. the previous period, anomaly detection, threat
+rules, traffic trends compared with the previous period, anomaly detection, threat
 intelligence highlights, dry-run promotion readiness, quota status, and
 prioritized recommendations you can act on immediately.
 
 ### Set up bot protection without redeploying
 
-> "Add bot protection to my marketing site — start in dry-run mode so I can
+> "Add bot protection to my marketing site – start in dry-run mode so I can
 > check it's not blocking real users."
 
 The assistant calls `list-teams` and `list-sites` to find the site, then
 `create-rule` to add a `bot` rule with `mode: DRY_RUN` configured to block
-automated traffic. After traffic flows through, you can ask the assistant to call
-`get-dry-run-impact` to see how many requests would have been blocked and
-estimate false-positive risk, then `promote-rule` to switch the rule to `LIVE`
-when you're satisfied.
+automated traffic. After traffic flows through, ask the assistant to call
+`get-dry-run-impact` to see how many requests would have been blocked and to
+estimate false-positive risk. When you're satisfied, ask it to call
+`promote-rule` to switch the rule to `LIVE`.
 
 ## Authentication
 
 The MCP server uses OAuth for authentication. When you first connect from any
-supported client, you will be redirected to sign in with your Arcjet account.
-Once authenticated, your AI assistant can securely access your account resources.
+supported client, Arcjet redirects you to sign in with your Arcjet account. Once
+authenticated, your AI assistant can securely access your account resources.
 
 ## Security
 
-- **Verify the endpoint** — always confirm you are connecting to
+- **Verify the endpoint** – always confirm you are connecting to
   `https://api.arcjet.com/mcp`.
-- **Review tool calls** — enable confirmation prompts in your AI client so you
+- **Review tool calls** – enable confirmation prompts in your AI client so you
   can review actions before they execute.
-- **Trusted clients only** — only connect from AI clients you trust. Connecting
+- **Trusted clients only** – only connect from AI clients you trust. Connecting
   grants the AI tool the same access as your Arcjet account.
 
 ## See also
 
-- [Agent get started](/agent-get-started) — canonical entry point for setting
+- [Agent get started](/agent-get-started) – canonical entry point for setting
   up Arcjet in an agentic workflow.
-- [Arcjet CLI](/cli) — sibling support transport for terminal-based workflows.
-- [Arcjet Plugin](/arcjet-plugin) — bundled experience for Claude Code and
+- [Arcjet CLI](/cli) – sibling support transport for terminal-based workflows.
+- [Arcjet Plugin](/arcjet-plugin) – bundled experience for Claude Code and
   Cursor users that wires up MCP, skills, and coding rules together.
 
 ## Privacy and support
 
-- **Privacy policy:** [arcjet.com/privacy](https://arcjet.com/privacy)
+- **Privacy policy:** [arcjet.com/privacy](https://arcjet.com/privacy).
 - **Support:** [support@arcjet.com](mailto:support@arcjet.com) or [join our
-  Discord](https://arcjet.com/discord). See our [support page](/support) for
-  more details.
+  Discord](https://arcjet.com/discord). For more information, see the
+  [support page](/support).
 
 <Comments />

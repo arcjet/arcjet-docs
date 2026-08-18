@@ -8,14 +8,14 @@ import { Link } from "@/components/link";
 import { Badge, Tabs, TabItem } from "@astrojs/starlight/components";
 import Comments from "/src/components/Comments.astro";
 
-Arcjet allows you to configure a list of bots to allow or deny. To construct the
-list, you can specify individual bots and/or use categories to allow or deny all
-bots in a category.
+Arcjet lets you configure a list of bots to allow or deny. To construct the
+list, you can specify individual bots, use categories to allow or deny all bots
+in a category, or both.
 
-If you are using TypeScript, these will be shown as autocomplete values to
-`allow` or `deny` options while writing your rules. In Python, the same string
-identifiers are accepted on `allow` / `deny`; categories are also available via
-the `BotCategory` enum.
+If you are using TypeScript, these appear as autocomplete values for the `allow`
+or `deny` options while writing your rules. In Python, the same string
+identifiers are accepted on `allow` / `deny`; categories are also available
+through the `BotCategory` enum.
 
 ## Individual bots
 
@@ -77,14 +77,14 @@ We provide the following categories:
 - `CATEGORY:MONITOR`: Interact for monitoring purposes
 - `CATEGORY:OPTIMIZER`: Interact for optimization purposes
 - `CATEGORY:PREVIEW`: Request data for image and URL previews
-- `CATEGORY:PROGRAMMATIC`: Interact via programming language libraries
+- `CATEGORY:PROGRAMMATIC`: Interact through programming language libraries
 - `CATEGORY:SEARCH_ENGINE`: Index data for search engines
 - `CATEGORY:SLACK`: Scrape data for Slack products and services
 - `CATEGORY:SOCIAL`: Scrape data for social media products and services
-- `CATEGORY:TOOL`: Interact via command line and GUI tools
-- `CATEGORY:UNKNOWN`: Known bots that cannot be classified.
+- `CATEGORY:TOOL`: Interact through command line and GUI tools
+- `CATEGORY:UNKNOWN`: Known bots that cannot be classified
 - `CATEGORY:VERCEL`: Scrape data for Vercel products and services
-- `CATEGORY:WEBHOOK`: Automated HTTP notifications for events e.g. Stripe payments
+- `CATEGORY:WEBHOOK`: Automated HTTP notifications for events, such as Stripe payments
 - `CATEGORY:YAHOO`: Scrape data for Yahoo products and services
 
 The [bot
@@ -121,7 +121,7 @@ detect_bot(
 )
 ```
 
-The Python SDK also accepts the underlying string identifiers (e.g.
+The Python SDK also accepts the underlying string identifiers (for example,
 `"CATEGORY:SEARCH_ENGINE"`) if you prefer not to import the enum.
 </TabItem>
 </Tabs>
@@ -130,25 +130,23 @@ Only configured categories are checked for performance reasons. Each detected
 bot must be compared to a category, so the worst case performance is
 `count(detectedBot) * count(configuredCategories)`.
 
-We're continuously evaluating bots to decide if things should be reclassified.
-If we determine enough bots exist for a new category, we'll consider adding new
-ones. Please open an issue on our
-[arcjet/well-known-bots](https://github.com/arcjet/well-known-bots) repository
-if you need a specific category.
+We're continuously evaluating bots to decide whether any need reclassifying. If
+we determine enough bots exist for a new category, we'll consider adding new
+ones. If you need a specific category, open an issue on the
+[arcjet/well-known-bots](https://github.com/arcjet/well-known-bots) repository.
 
 ## Custom bots
 
-To block a particular bot that is not on our list,
-you can use <Link.Page href="/filters">Arcjet Filters</Link.Page>.
-See the <Link.Page href="/blueprints/malicious-traffic">Malicious traffic</Link.Page> blueprint for how to
-block custom bots.
+To block a particular bot that is not on our list, you can use <Link.Page href="/filters">Arcjet Filters</Link.Page>. For how to
+block custom bots, see the <Link.Page href="/blueprints/malicious-traffic">Malicious traffic</Link.Page> blueprint.
 
 ## Detection
 
 {/* prettier-ignore */}
 Arcjet provides additional <Link.Page href="/bot-protection/reference#bot-verification">bot verification</Link.Page> using
 IP analysis, which can help if you are under attack from bots pretending to be
-good bots e.g. clients pretending to be Google (who you usually want to allow).
+good bots, such as clients pretending to be Google (whom you usually want to
+allow).
 
 :::note
 Requests without `User-Agent` headers might not be identified as any particular
@@ -168,28 +166,28 @@ owner and any variations.
 We welcome contributions to the
 [arcjet/well-known-bots](https://github.com/arcjet/well-known-bots) repository,
 whether you're adding new bots or updating detection patterns. Once merged, the
-updates will be included in the next SDK release. Since bot detection is handled
+updates are included in the next SDK release. Because bot detection is handled
 within the Arcjet WebAssembly module bundled with the SDK, new patterns must be
 compiled into the module as part of the release process.
 
-Please read the repository's [README.md](https://github.com/arcjet/well-known-bots/blob/main/README.md)
-for specific instructions on how to contribute to our bot detection.
+For instructions on how to contribute to our bot detection, read the
+repository's [README.md](https://github.com/arcjet/well-known-bots/blob/main/README.md).
 
 ### Unknown bots
 
-If a bot is detected but cannot be identified as a known bot, it will be labeled
-as `UNKNOWN_BOT`. This is separate from the `CATEGORY:UNKNOWN` category, which
-is for bots that cannot be classified into any category but can still be
-identified as a specific bot. You can see a list of these named, but
-unclassified bots in the [bot
+If a bot is detected but cannot be identified as a known bot, Arcjet labels it
+`UNKNOWN_BOT`. This is separate from the `CATEGORY:UNKNOWN` category, which is
+for bots that cannot be classified into any category but can still be identified
+as a specific bot. You can see a list of these named, but unclassified bots in
+the [bot
 list](https://github.com/arcjet/arcjet-js/blob/24d2ee3139f277499ef3cb65f1f1eab998647819/protocol/well-known-bots.ts#L990).
 
 Detections returned as `UNKNOWN_BOT` happen if the bot is new or hides itself.
 It's a bot with no name. Arcjet uses various techniques to detect these bots,
 including analyzing request patterns and tracking IP addresses.
 
-If you configure an `allow` rule and do not include `UNKNOWN_BOT`, then detected
-bots that cannot be identified will be blocked. This is the default behavior to
+If you configure an `allow` rule and do not include `UNKNOWN_BOT`, then Arcjet
+blocks detected bots that it cannot identify. This is the default behavior to
 protect against new and rapidly evolving bots.
 
 If you want to be more permissive and only block known, named bots, you can

@@ -2,22 +2,22 @@ Full documentation content: https://docs.arcjet.com/llms-full.txt
 
 # Arcjet
 
-Arcjet is the runtime security platform that ships with your code. It's a lightweight SDK that runs inside your application and enforces controls inline, with real identity and session context — configured by your agent via CLI or MCP.
+Arcjet is the runtime security platform that ships with your code. It's a lightweight SDK that runs inside your application and enforces controls inline, with real identity and session context – configured by your agent with the CLI or MCP server.
 
 Arcjet's primary use case is securing the actions AI agents take in production. Agents have gone from answering questions to moving money, changing records, and shipping code, and the security or engineering leader now owns that risk. Identity and RBAC authenticate the agent but don't govern the action it's about to take, and network proxies can't see inside the workflow. Arcjet gives security and engineering teams visibility into what each agent is doing, real-time enforcement before a consequential action (prompt injection, PII, tool authorization), and an audit trail.
 
-Because it runs inside the same application code, Arcjet protects traditional entry points the same way — enforce budgets, detect bots, validate email, rate limit, and block common attacks across HTTP routes and APIs.
+Because it runs inside the same application code, Arcjet protects traditional entry points the same way – enforce budgets, detect bots, validate email, rate limit, and block common attacks across HTTP routes and APIs.
 
 Arcjet protects two types of entry points:
-- **Request-based** -- HTTP route handlers, API endpoints, middleware. Use `protect()` with any supported framework.
-- **Guards** -- tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` to pass inputs directly and get a decision back. Use `capture()` to record that an allowed action happened (visibility only; never changes a decision).
+- **Request-based** – HTTP route handlers, API endpoints, middleware. Use `protect()` with any supported framework.
+- **Guards** – tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` to pass inputs directly and get a decision back. Use `capture()` to record that an allowed action happened (visibility only; never changes a decision).
 
 Arcjet runs server-side. Bot protection advanced client signals are an optional
 extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricing
 
 ## Get started
 
-- [Agent get started](https://docs.arcjet.com/agent-get-started): full agent onboarding flow — install a skill, connect the CLI, add protection.
+- [Agent get started](https://docs.arcjet.com/agent-get-started): full agent onboarding flow – install a skill, connect the CLI, add protection.
 - [Skills](https://github.com/arcjet/skills): install via `npx skills add arcjet/skills` to give your agent framework-aware integration docs.
 - [Arcjet CLI](https://docs.arcjet.com/cli): create sites, retrieve keys, inspect requests, manage rules from the terminal.
 - [MCP server](https://docs.arcjet.com/mcp-server): same management surface over MCP at `https://api.arcjet.com/mcp` (OAuth).
@@ -27,7 +27,7 @@ extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricin
 
 ## Features
 
-- [Shield](https://docs.arcjet.com/shield): WAF — blocks common attacks (SQLi, XSS, path traversal).
+- [Shield](https://docs.arcjet.com/shield): WAF – blocks common attacks (SQLi, XSS, path traversal).
 - [Rate limiting](https://docs.arcjet.com/rate-limiting): token bucket, fixed window, sliding window.
 - [Bot protection](https://docs.arcjet.com/bot-protection): allow or deny by category. Bot list: https://arcjet.com/bot-list.
 - [Email validation](https://docs.arcjet.com/email-validation): block disposable, invalid, no-MX, free email.

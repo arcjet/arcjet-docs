@@ -50,9 +50,8 @@ The integration exposes three surfaces:
   `options.sessionId`. It never mints an id. Subagent `agent_id` is metadata
   only.
 
-There is no `guardInbound`. Screen prompt injection on
-`guardHooks({ inbound })` via `UserPromptSubmit`. There is no
-`guardCanUseTool` and no `guardApproval`.
+There is no `guardInbound`. Screen prompt injection on `guardHooks({ inbound })`
+in `UserPromptSubmit`. There is no `guardCanUseTool` and no `guardApproval`.
 
 Never call `createAgentContext` inside a Claude callback. Do not also wrap
 these tools with `@arcjet/guard/vercel-ai/v7`.
@@ -69,11 +68,11 @@ Then ask the agent to add Arcjet Guard to this Claude Agent SDK project. In
 Claude Code, run `/integrate-arcjet-guard-claude-agent-sdk`. The skill source is
 [integrate-arcjet-guard-claude-agent-sdk](https://github.com/arcjet/arcjet-js/blob/7af2b36e/arcjet-guard/skills/integrate-arcjet-guard-claude-agent-sdk/SKILL.md).
 
-## Screen inbound with UserPromptSubmit
+## Screen inbound with `UserPromptSubmit`
 
-There is no `guardInbound`. Screen prompt injection on
-`guardHooks({ inbound })` via `UserPromptSubmit`. This is the only place a
-turn can be declined before the model sees the prompt.
+There is no `guardInbound`. Screen prompt injection on `guardHooks({ inbound })`
+in `UserPromptSubmit`. This is the only place a turn can be declined before the
+model sees the prompt.
 
 On `DENY`, `UserPromptSubmit` returns `{ decision: "block", reason }` and
 Claude Code erases the prompt. The model never sees it.
@@ -107,7 +106,7 @@ for await (const message of query({
 }
 ```
 
-## canUseTool is not a policy gate
+## `canUseTool` is not a policy gate
 
 Claude's `canUseTool` is skipped by `allowedTools`, allow rules, and
 `bypassPermissions` / `acceptEdits`. That is the same trap as Eve approval and
@@ -117,11 +116,10 @@ skip it.
 There is no `guardCanUseTool`. Do not put Arcjet policy on `canUseTool`. Use
 `guardTool` for authored tools or `PreToolUse` for unwrapped ones.
 
-On `DENY` the tool's handler never runs. The model receives a
-`CallToolResult` with `isError: true`. Scan free-text args (a note, reason, or
-body). An opaque `orderId` will not trip email / phone / card / IP, so do not
-pass it to `localDetectSensitiveInfo`. That helper runs on a local ML model
-backend.
+On `DENY` the tool's handler never runs. The model receives a `CallToolResult`
+with `isError: true`. Scan free-text args (a note, reason, or body). An opaque
+`orderId` doesn't trip email, phone, card, or IP detection, so do not pass it to
+`localDetectSensitiveInfo`. That helper runs on a local ML model backend.
 
 ```ts
 import { tool } from "@anthropic-ai/claude-agent-sdk";
@@ -162,7 +160,7 @@ export const lookupOrder = guardTool(
 );
 ```
 
-## PreToolUse is the only deny for unwrapped tools
+## `PreToolUse` is the only deny for unwrapped tools
 
 Built-ins (Bash, Write, …) and MCP tools not passed through `guardTool` are
 gated here. `PreToolUse` returns `permissionDecision: "deny"`. Timeout already
@@ -213,7 +211,7 @@ already fail-closes the prompt (Claude Code v2.1.208+).
 Set `options.sessionId` on `query()` to a conversation identity you already
 have. `claudeAgentContext` reads hook `session_id` first, then
 `options.sessionId`. It never calls `createAgentContext`. If neither is a
-valid 1–256 printable-ASCII string, the call is uncorrelated rather than
+valid 1-256 printable-ASCII string, the call is uncorrelated rather than
 joined to a generated id. Subagent `agent_id` is metadata only.
 
 ```ts
@@ -229,8 +227,8 @@ for await (const message of query({
 
 ## What not to use
 
-- There is no `guardInbound`. Screen prompt injection on
-  `guardHooks({ inbound })` via `UserPromptSubmit`.
+- There is no `guardInbound`. Screen prompt injection on `guardHooks({ inbound
+  })` in `UserPromptSubmit`.
 - There is no `guardCanUseTool`. `canUseTool` is not a policy gate.
 - There is no `guardApproval`.
 - Do not call `createAgentContext` inside a Claude callback.

@@ -24,7 +24,7 @@ frameworks:
   - sveltekit
 ajToc:
   - text: "When to use signals"
-    anchor: "when-to-use-signals"
+    anchor: "when-to-use-advanced-signals"
   - text: "How it works"
     anchor: "how-it-works"
   - text: "Pricing"
@@ -120,15 +120,15 @@ Advanced signals is ideal for detecting bots that execute JavaScript and interac
 like a real user, such as headless browsers and sophisticated scrapers. It can identify
 automation that mimics human behavior and evades simpler bot detection methods.
 
-Arcjet advanced bot signals is most effective on sensitive routes where you want to be 
-sure the request comes from a real browser, such as form `POST` handlers, login and signup 
-endpoints, and other routes that are common targets for abuse.
+Arcjet advanced bot signals works best on sensitive routes where you want to be
+sure the request comes from a real browser. Examples include form `POST`
+handlers, login and signup endpoints, and other routes that are common targets
+for abuse.
 
-It works by setting a cookie to identify the browser with analysis results stored on 
-Arcjet's cloud. The client-side signals are then linked when server-side bot detection 
-rules are evaluated. This approach provides robust bot detection without relying on 
-CAPTCHAs or user challenges, creating a seamless experience for legitimate users 
-while effectively blocking bots.
+It sets a cookie to identify the browser, and stores the analysis results in
+Arcjet's cloud. Arcjet then links the client-side signals when it evaluates
+server-side bot detection rules. This approach helps detect bots without relying
+on CAPTCHAs or user challenges, so legitimate users are not interrupted.
 
 ## How it works
 
@@ -158,9 +158,9 @@ Arcjet advanced bot signals are charged based on usage. For details, see the [pr
   title="Choose a framework"
 />
 
-Load the signals script on every page that might lead into a sensitive route e.g. a lead or signup form. This ensures the `aj_signals` cookie is set before the user reaches the protected endpoint e.g. via the form submissions.
+Load the signals script on every page that might lead into a sensitive route, such as a lead or signup form. That way, the `aj_signals` cookie is set before the user reaches the protected endpoint through a form submission.
 
-We recommend adding the script to every page. Usage billing is based on when you call the `detectBot` rule, not on when the script runs, so you won't be charged for simply loading the script.
+We recommend adding the script to every page. Usage billing is based on when you call the `detectBot` rule, not on when the script runs, so you aren't charged for loading the script.
 
 <SlotByFramework client:load>
   <BunAddScript slot="bun" />
@@ -180,12 +180,12 @@ which is then read server-side by `detectBot`.
 ### Step 2: Configure bot detection
 
 Use a [`detectBot` rule](/bot-protection/quick-start) to act on signals results. Signals is most useful on sensitive
-routes such as form `POST` handlers, login, and signup endpoints — routes where
+routes such as form `POST` handlers, login, and signup endpoints – routes where
 you care whether the request comes from a real browser.
 
 #### Block when signals fails (recommended for sensitive routes)
 
-With an empty `allow` list, all detected bots are denied — including requests
+With an empty `allow` list, all detected bots are denied – including requests
 that fail signals evaluation. This is the recommended configuration for
 high-sensitivity endpoints:
 
@@ -208,7 +208,7 @@ in the denial reason. You can see this in your logs and in the [Arcjet dashboard
 
 To block signals failures alongside other specific identifiers, add
 `ARCJET_SIGNALS` to the `deny` list. With a `deny` list, only the listed
-identifiers are blocked — any bot not in the list is allowed:
+identifiers are blocked – any bot not in the list is allowed:
 
 <SlotByFramework client:load>
   <BunDenySignals slot="bun" />
@@ -239,12 +239,12 @@ list. Signals are still evaluated but the result does not affect the decision:
   <PythonFlaskMonitorSignals slot="python-flask" />
 </SlotByFramework>
 
-## Step 3: Enforce with a filter rule
+### Step 3: Enforce with a filter rule
 
 Once you install the signals script, the `aj_signals` cookie is set for any
-browser that loads it. This means that if a request is missing the cookie,
-it's a strong signal that the client is not a real browser — for example, a
-bot that doesn't execute JavaScript or a scraper that targets your API directly.
+browser that loads it. If a request is missing the cookie, that is a strong
+signal that the client is not a real browser. Examples include a bot that
+doesn't execute JavaScript and a scraper that targets your API directly.
 
 You can enforce the cookie by using a [filter rule](/filters) to block any request.
 
@@ -265,13 +265,13 @@ request where the cookie is missing or empty, and the `deny` list causes
 those requests to be blocked before `detectBot` is even evaluated. You can
 combine this with a `detectBot` rule to layer both checks on the same route.
 
-### Handling the filter decision
+### Handle the filter decision
 
 When a filter rule denies a request, `decision.reason.isFilter()` returns
-`true`. This lets you distinguish a missing-cookie denial from a bot
-detection denial and return a more helpful response — for example, redirecting
-the user to an error page that explains cookies are required rather than
-returning a silent 403:
+`true`. This lets you distinguish a missing-cookie denial from a bot detection
+denial and return a more helpful response. For example, you can redirect the user
+to an error page that explains cookies are required, rather than returning a
+silent 403:
 
 <SlotByFramework client:load>
   <BunFilterDecision slot="bun" />
@@ -298,7 +298,7 @@ directives to allow the signals script to load and run:
 | `connect-src`| `https://signals.arcjet.com`                              | Sends collected signals to the Arcjet API                         |
 | `frame-src`  | `https://signals-cdn.arcjet.com`                          | Allows collecting signals from different contexts |
 
-### Using nosecone
+### Use Nosecone
 
 [Nosecone](/nosecone/quick-start) is a library for setting secure HTTP
 headers, including CSP, in Next.js middleware and other frameworks. If you're

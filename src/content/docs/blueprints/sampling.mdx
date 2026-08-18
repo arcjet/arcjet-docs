@@ -8,14 +8,15 @@ import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
 import SamplingMiddlewareJS from "/src/snippets/blueprints/SamplingMiddleware.js?raw";
 import SamplingMiddlewareTS from "/src/snippets/blueprints/SamplingMiddleware.ts?raw";
 
-Arcjet is designed to run on every request. When <Link.Page href="/testing">testing your rules</Link.Page>,
-you can use `DRY_RUN` mode to see how your rules would behave without actually
-enforcing them. The result will be logged, but all requests will be allowed.
-This is useful for testing your rules without affecting your users.
+Arcjet is designed to run on every request. When <Link.Page
+href="/testing">testing your rules</Link.Page>, you can use `DRY_RUN` mode to
+see how your rules would behave without actually enforcing them. Arcjet logs the
+result, but allows all requests. This is useful for testing your rules without
+affecting your users.
 
-You can also write a simple sampling function to set the Arcjet rules using
-`withRule` based on a desired sample rate. This allows you to test your rules on
-a subset of your traffic.
+You can also write a sampling function to set the Arcjet rules using `withRule`
+based on a desired sample rate. This lets you test your rules on a subset of
+your traffic.
 
 This Next.js middleware example shows how to trigger Arcjet Shield WAF and bot
 detection rules in live mode on 10% of your traffic.

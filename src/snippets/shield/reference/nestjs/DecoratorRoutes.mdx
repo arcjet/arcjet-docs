@@ -11,10 +11,10 @@ Arcjet can be integrated into NestJS in several places using NestJS
 [guards](https://docs.nestjs.com/guards) or directly within the route
 controller:
 
-- **Global guard:** Applies Arcjet rules on every request, but does not allow
-  you to configure rules per route.
-- **Per route guard:** Allows you to configure rules per route, but requires you
-  to add the guard to every route and has limited flexibility.
+- **Global guard:** Applies Arcjet rules on every request, but doesn't let you
+  configure rules per route.
+- **Per route guard:** Lets you configure rules per route, but requires you to
+  add the guard to every route and has limited flexibility.
 - **Within route:** Requires some code duplication, but allows maximum
   flexibility because you can customize the rules and response.
 
@@ -46,7 +46,7 @@ A per route guard can be configured in the controller for each route you wish to
 protect with specific Arcjet rules. The client created in `src/app.module.ts`
 is automatically passed to the guard.
 
-The rules will be applied and a generic error returned if the result is `DENY`.
+Arcjet applies the rules and returns a generic error if the result is `DENY`.
 
 <SelectableContent client:load syncKey="language">
   <div slot="TS" slotIdx="1">

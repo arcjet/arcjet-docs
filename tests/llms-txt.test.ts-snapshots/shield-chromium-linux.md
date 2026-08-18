@@ -19,7 +19,7 @@ Shield is most effective for requests that seem innocent when taken individually
 *   Scans for backup files, configuration files, or version control directories.
 *   Probing for injection vulnerabilities using crafted query strings or payloads.
 
-We recommend using Arcjet Shield WAF alongside other Arcjet features such as:
+We recommend using Arcjet Shield WAF alongside other Arcjet features, including the following:
 
 *   [Arcjet bot protection](/bot-protection) to detect and control bot traffic.
 *   [Arcjet filters](/filters) to apply custom per-request rules.
@@ -27,7 +27,7 @@ We recommend using Arcjet Shield WAF alongside other Arcjet features such as:
 
 Enable without code changes
 
-Shield can also be enabled as a [remote rule](/remote-rules) from the Arcjet dashboard or via the [Arcjet MCP server](/mcp-server), with no code changes or redeployment.
+Shield can also be enabled as a [remote rule](/remote-rules) from the Arcjet dashboard or through the [Arcjet MCP server](/mcp-server), with no code changes or redeployment.
 
 How Arcjet Shield works
 -----------------------
@@ -42,7 +42,7 @@ Tracking happens in the Arcjet Cloud API and does not require any additional inf
 
 [Section titled “Rules and the OWASP Core Rule Set”](#rules-and-the-owasp-core-rule-set)
 
-Shield includes the latest rules from the [OWASP Core Rule Set](https://coreruleset.org/), which protect against common attack categories such as:
+Shield includes rules from the [OWASP Core Rule Set](https://coreruleset.org/), which protect against the following common attack categories:
 
 *   SQL injection (SQLi)
 *   Cross-site scripting (XSS)
@@ -71,17 +71,17 @@ To ensure Shield behaves correctly, choose fingerprint characteristics that matc
 
 Aligning fingerprints with the right identifiers avoids blocking the wrong users and makes Shield’s decisions more meaningful.
 
-### Responding to suspicious requests
+### Respond to suspicious requests
 
-[Section titled “Responding to suspicious requests”](#responding-to-suspicious-requests)
+[Section titled “Respond to suspicious requests”](#respond-to-suspicious-requests)
 
-When a request is blocked by Arcjet Shield WAF, the Arcjet SDK includes detailed information in the decision returned to your application. You can simply accept the default and block the client, or customize the response.
+When a request is blocked by Arcjet Shield WAF, the Arcjet SDK includes detailed information in the decision returned to your application. You can accept the default and block the client, or customize the response.
 
 For example:
 
 *   On user-facing pages, you might return a friendly error page.
 *   In an API, you might return a structured error that fits your JSON or XML schema.
-*   In critical flows such as checkout or sensitive account actions, you might log the request context, flag the account for review, or require additional verification in case the request came from a legitimate user.
+*   In critical flows such as checkout or sensitive account actions, you might log the request context, flag the account for review, or require extra verification. That way, a legitimate user still has a path forward.
 
 Generic, network-level protections are often insufficient for modern applications where context and sensitivity vary across routes and features. Arcjet Shield gives developers request-level security with application context, without sacrificing usability.
 
@@ -96,7 +96,7 @@ Traditional WAFs, however, have several problems:
 
 1.  They are often slow, adding significant latency to every request.
 2.  They sit in front of your production application and are hard to run locally or in test environments. Turning them on or changing rules can be risky because you cannot test them properly.
-3.  They are separate systems with no context about your application, so their decisions cannot easily be used as part of your application logic (for example, customizing errors or flagging accounts instead of just blocking).
+3.  They are separate systems with no context about your application, so their decisions are difficult to use as part of your application logic (for example, customizing errors or flagging accounts instead of just blocking).
 4.  They have a high false positive rate, blocking legitimate users and frustrating customers.
 
 Arcjet Shield solves these problems by being part of the Arcjet SDK, integrated into your application while running analysis on the Arcjet platform so it consumes no resources from your app. The threshold-based approach helps reduce false positives.
@@ -108,7 +108,7 @@ Pricing
 
 [Section titled “Pricing”](#pricing)
 
-See the [pricing page](https://arcjet.com/pricing) for details.
+For details, see the [pricing page](https://arcjet.com/pricing).
 
 Discussion
 ----------

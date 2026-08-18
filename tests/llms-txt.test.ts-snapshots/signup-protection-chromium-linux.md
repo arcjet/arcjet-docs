@@ -27,13 +27,13 @@ How Arcjet signup form protection works
 
 Signup form protection is a pre-built product that combines Arcjet primitives which you can also use individually. It comes with Arcjet’s recommended defaults for common signup and form spam scenarios.
 
-This saves you time and lets you get protection against signup spam and account fraud with just a few lines of code.
+This saves you time and lets you get protection against signup spam and account fraud with a few lines of code.
 
 The product combines three key components:
 
-### 1\. Rate limiting - control signup velocity
+### Rate limiting: control signup velocity
 
-[Section titled “1. Rate limiting - control signup velocity”](#1-rate-limiting---control-signup-velocity)
+[Section titled “Rate limiting: control signup velocity”](#rate-limiting-control-signup-velocity)
 
 [Rate limiting](/rate-limiting) prevents bots and abusive clients from submitting your signup or lead forms too many times in a short period.
 
@@ -45,9 +45,9 @@ Examples:
 
 Legitimate users typically submit a signup form only once or a few times within a short time window, so bursts of submissions are a strong indicator of signup spam or automated abuse.
 
-### 2\. Bot protection - block automated signup bots
+### Bot protection: block automated signup bots
 
-[Section titled “2. Bot protection - block automated signup bots”](#2-bot-protection---block-automated-signup-bots)
+[Section titled “Bot protection: block automated signup bots”](#bot-protection-block-automated-signup-bots)
 
 [Bot protection](/bot-protection) helps stop automated signup bots and form spam tools that try to create accounts at scale.
 
@@ -59,18 +59,18 @@ For typical signup and lead forms, you expect human users, not bots. Any automat
 
 Where you do have legitimate automated clients (for example, monitoring or synthetic tests), you can explicitly allow them while still blocking unknown bots and suspicious automation.
 
-### 3\. Email validation - verify email quality
+### Email validation: verify email quality
 
-[Section titled “3. Email validation - verify email quality”](#3-email-validation---verify-email-quality)
+[Section titled “Email validation: verify email quality”](#email-validation-verify-email-quality)
 
-[Email validation](/email-validation) validates and verifies email addresses used in signups and lead forms so you can:
+[Email validation](/email-validation) validates and verifies email addresses used in signups and lead forms, so you can do the following:
 
 *   Confirm that the address is syntactically valid.
 *   Check that the domain can receive email (MX records).
-*   Identify disposable / temporary email providers.
+*   Identify disposable or temporary email providers.
 *   Improve the quality of accounts and leads you accept.
 
-This helps you filter out disposable or undeliverable emails commonly used in signup fraud and lead form spam, and ensures important messages such as verification and onboarding emails actually reach users.
+This helps you filter out disposable or undeliverable emails commonly used in signup fraud and lead form spam, and helps important messages such as verification and onboarding emails reach users.
 
 By combining these three protections, Arcjet signup form protection reduces signup spam, form spam, and fake accounts, while letting legitimate users sign up with minimal friction.
 

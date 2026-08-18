@@ -25,8 +25,8 @@ import WrapPagesEdgeJS from "./WrapPagesEdge.js?raw";
 
 ### Rate limit by IP address
 
-The example below shows how to configure a rate limit on a single API route. It
-applies a limit of 60 requests per hour per IP address. If the limit is
+The following example shows how to configure a rate limit on a single API route.
+It applies a limit of 60 requests per hour per IP address. If the limit is
 exceeded, the client is blocked for 10 minutes before being able to make any
 further requests.
 
@@ -50,8 +50,8 @@ Applying a rate limit by IP address is the default if no
 
 ### Rate limit by IP address with custom response
 
-The example below is the same as the one above. However this example also shows
-a customized response rather than the default.
+The following example is the same as the preceding one. However this example
+also shows a customized response rather than the default.
 
 <SelectableContent client:load syncKey="language">
   <div slot="TS (App)" slotIdx="1">
@@ -89,13 +89,13 @@ a customized response rather than the default.
 If you are building an AI application you may be more interested in the number
 of AI tokens rather than the number of HTTP requests. Popular AI APIs such as
 OpenAI are billed based on the number of tokens consumed and the number of
-tokens is variable depending on the request e.g. conversation length or image
+tokens is variable depending on the request, such as conversation length or image
 size.
 
 The token bucket algorithm is a good fit for this use case because you can vary
 the number of tokens withdrawn from the bucket with every request.
 
-The example below configures a token bucket rate limit using the
+The following example configures a token bucket rate limit using the
 [openai-chat-tokens library](https://github.com/hmarr/openai-chat-tokens) to
 track the number of tokens used by a `gpt-3.5-turbo` AI chatbot. It sets a limit
 of `2,000` tokens per hour with a maximum of `5,000` tokens in the bucket. This
@@ -110,19 +110,19 @@ Next.js](https://github.com/arcjet/arcjet-js/tree/main/examples/nextjs-openai).
     <Code code={AIChatBotAppTS} title="/app/api/chat/route.ts" lang="ts" />
   </div>
   <div slot="TS (Pages)" slotIdx="2">
-    The Next.js pages router does not support streaming responses so you should
-    use the app router for this example. You can still use the `pages/`
-    directory for the rest of your application. See the [Next.js AI docs for
-    details](https://sdk.vercel.ai/docs/guides/frameworks/nextjs-pages).
+    The Next.js pages router does not support streaming responses, so use the
+    app router for this example. You can still use the `pages/` directory for
+    the rest of your application. For details, see the [Next.js AI
+    docs](https://sdk.vercel.ai/docs/guides/frameworks/nextjs-pages).
   </div>
   <div slot="JS (App)" slotIdx="3">
     <Code code={AIChatBotAppJS} title="/app/api/chat/route.ts" lang="js" />
   </div>
   <div slot="JS (Pages)" slotIdx="4">
-    The Next.js pages router does not support streaming responses so you should
-    use the app router for this example. You can still use the `pages/`
-    directory for the rest of your application. See the [Next.js AI docs for
-    details](https://sdk.vercel.ai/docs/guides/frameworks/nextjs-pages).
+    The Next.js pages router does not support streaming responses, so use the
+    app router for this example. You can still use the `pages/` directory for
+    the rest of your application. For details, see the [Next.js AI
+    docs](https://sdk.vercel.ai/docs/guides/frameworks/nextjs-pages).
   </div>
 </SelectableContent>
 
@@ -130,12 +130,12 @@ Next.js](https://github.com/arcjet/arcjet-js/tree/main/examples/nextjs-openai).
 
 APIs are commonly protected by keys. You may wish to apply a rate limit based on
 the key, regardless of which IPs the requests come from. To achieve this, you
-can specify the characteristics Arcjet will use to track the limit.
+can specify the characteristics Arcjet uses to track the limit.
 
-The example below shows how to configure a rate limit on a single API route. It
-applies a limit of 60 requests per hour per API key, where the key is provided
-in a custom header called `x-api-key`. If the limit is exceeded, the client is
-blocked for 10 minutes before being able to make any further requests.
+The following example shows how to configure a rate limit on a single API route.
+It applies a limit of 60 requests per hour per API key, where the key is
+provided in a custom header called `x-api-key`. If the limit is exceeded, the
+client is blocked for 10 minutes before being able to make any further requests.
 
 :::caution
 If you specify different characteristics and do not include `ip.src`, you may
@@ -151,7 +151,7 @@ narrowly identify each client, such as an API key as shown here.
 
 ### Global rate limit
 
-Using Next.js middleware allows you to set a rate limit that applies to every
+Using Next.js middleware lets you set a rate limit that applies to every
 route:
 
 :::note

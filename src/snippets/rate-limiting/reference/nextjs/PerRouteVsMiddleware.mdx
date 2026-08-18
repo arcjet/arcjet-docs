@@ -4,32 +4,32 @@ import MiddlewareMatchingPaths from "./MiddlewareMatchingPaths.mdx";
 import MiddlewareAllRoutes from "./MiddlewareAllRoutes.mdx";
 import MiddlewareMatcher from "./MiddlewareMatcher.mdx";
 
-## Per route vs middleware
+## Per route versus middleware
 
 Rate limit rules can be configured in two ways:
 
 - **Route handlers**: The rule is defined in the route handler (previously known
-  as an API route) itself. This allows you to configure the rule alongside the
+  as an API route) itself. This lets you configure the rule alongside the
   code it is protecting which is useful if you want to use the decision to add
   context to your own code. However, it means rules are not automatically
   applied to every request.
 - **Middleware/Proxy**: The rule is defined in the middleware (renamed to proxy
-  in Next.js 16). This allows you to configure rules in a single place or apply
+  in Next.js 16). This lets you configure rules in a single place or apply
   them globally to all routes, but it means the rules are not located alongside
   the code they are protecting and can miss route specific context .
 
 :::note
 If you use a platform that performs health checks or liveness probes, ensure
-that Arcjet is not enabled for those routes. These requests will not have all
-of the metadata that Arcjet requires to make security decisions.
+that Arcjet is not enabled for those routes. These requests don't have all of
+the metadata that Arcjet requires to make security decisions.
 :::
 
 ### Per route
 
 If you define your rate limit within an API route Arcjet assumes that the limit
-applies only to that route. If you define your rate limit in middleware, you
-should either use the Next.js `matcher` config to choose which paths to execute
-the middleware for, or use `request.nextUrl.pathname.startsWith`.
+applies only to that route. If you define your rate limit in middleware, either
+use the Next.js `matcher` config to choose which paths to execute the middleware
+for, or use `request.nextUrl.pathname.startsWith`.
 
 #### Rate limit only on `/api/*`
 
@@ -45,7 +45,7 @@ You can use conditionals in your Next.js middleware to match multiple paths.
   <MiddlewareAllRoutes slot="next-js" />
 </SlotByFramework>
 
-### Avoiding double protection
+### Avoid double protection
 
 If you use Arcjet in middleware/proxy and individual routes, you need to be
 careful that Arcjet is not running multiple times per request. This can be

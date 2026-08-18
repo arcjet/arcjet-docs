@@ -22,13 +22,13 @@ import { Link } from "@/components/link";
 Arcjet has been architected around a few key principles:
 
 - Proper security protections need the full context of the application, which is
-  why security rules and protections should be located alongside the code they
-  are protecting.
-- Security rules should be easy to test. You should be able to run them in
+  why security rules and protections belong alongside the code they are
+  protecting.
+- Security rules must be easy to test. You must be able to run them in
   development as well as production.
-- Arcjet should not interfere with the rest of the application. It should be
-  easy to install, must not add significant latency to requests, and should not
-  require changes to the application's architecture.
+- Arcjet must not interfere with the rest of the application. It must be easy to
+  install, must not add significant latency to requests, and must not require
+  changes to the application's architecture.
 
 ## Why in-application enforcement matters
 
@@ -64,16 +64,16 @@ pre-configured product.
 
 ### Core primitives
 
-- **<Link.Page href="/shield">Shield</Link.Page>** - Protect against common attacks.
-- **<Link.Page href="/rate-limiting">Rate limiting</Link.Page>** - Limit the number of requests
+- **<Link.Page href="/shield">Shield</Link.Page>** – Protect against common attacks.
+- **<Link.Page href="/rate-limiting">Rate limiting</Link.Page>** – Limit the number of requests
   from a client over a period of time.
-- **<Link.Page href="/bot-protection">Bot protection</Link.Page>** - Detect and block automated
+- **<Link.Page href="/bot-protection">Bot protection</Link.Page>** – Detect and block automated
   clients.
-- **<Link.Page href="/email-validation">Email validation</Link.Page>** - Check
+- **<Link.Page href="/email-validation">Email validation</Link.Page>** – Check
   that an email address is valid.
-- **<Link.Page href="/sensitive-info">Sensitive information</Link.Page>** - Protect against
+- **<Link.Page href="/sensitive-info">Sensitive information</Link.Page>** – Protect against
   clients sending you PII that you do not wish to handle.
-- **<Link.Page href="/filters">Filters</Link.Page>** - Block requests using expressions over
+- **<Link.Page href="/filters">Filters</Link.Page>** – Block requests using expressions over
   request metadata.
 
 ## Components
@@ -88,12 +88,12 @@ Arcjet has two components:
 The SDK integrates Arcjet into your application. Security rules are configured
 in your code using the SDK and they execute either through a middleware layer or
 directly from your application code. You can inspect the response in your code
-and decide how to handle it. This could be as simple as blocking the request or
-more advanced like flagging an account for review.
+and decide how to handle it. This could be as straightforward as blocking the
+request or more advanced like flagging an account for review.
 
 Rules can also be configured outside of your application as
 <Link.Page href="/remote-rules">remote rules</Link.Page>, managed from the
-Arcjet dashboard or via the
+Arcjet dashboard or through the
 <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page>. Remote rules are
 evaluated by the Cloud API and combined with SDK rule results into a single
 decision, so SecOps can change protection behavior for a site without editing
@@ -113,7 +113,8 @@ In this example flow:
 2. Your platform applies standard DDoS protection through their network
    firewall. Most platforms provide DDoS protection transparently and out of the
    box for no extra cost.
-3. Your server (container, serverless function, VM, etc) receives the request.
+3. Your server, such as a container, serverless function, or VM, receives the
+   request.
 4. The Arcjet SDK is configured as middleware so it intercepts the request
    before it reaches your application code. Arcjet analyzes the request locally
    based on the rules you configured, then decides to allow the request.
@@ -151,8 +152,8 @@ For example:
 4. The request is blocked and the client receives an error message, but your
    application code never sees the request. This can lead to false positives
    where legitimate requests are blocked. If your application had seen the
-   request, it may have been able to determine that it was legitimate e.g.
-   because the client was logged in.
+   request, it may have been able to determine that it was legitimate, for
+   example because the client was logged in.
 5. Or, the request is allowed and your code runs, but it has no idea that the
    request was analyzed by the CDN security service and why the request was
    allowed.
@@ -178,18 +179,18 @@ For example, if you are want to enforce a rate limit, the number of requests for
 each client must be tracked. This means you typically need to manage something
 like Redis or another database, something that is particularly tricky in
 serverless environments. If you are using Arcjet, this is managed for you with
-no additional infrastructure. The Arcjet SDK will make a call to the Cloud API
-to get the current rate limit for the client.
+no additional infrastructure. The Arcjet SDK calls the Cloud API to get the
+current rate limit for the client.
 
 The API has been designed for high performance and low latency, and combines all
 security functionality in one request. This means it typically outperforms other
-similar solutions. Arcjet will also attempt to cache decisions locally using an
-in-memory cache. In many cases, the total latency will be less than 1ms.
+similar solutions. Arcjet also attempts to cache decisions locally using an
+in-memory cache. In many cases, the total latency is less than 1&nbsp;ms.
 
 #### Example: Rate limit rule (allow)
 
 1. A client makes an HTTP request to your application. It passes through the
-   network level DDoS protection as described above then reaches your server.
+   network level DDoS protection as described earlier then reaches your server.
 2. The Arcjet SDK is configured with a rate limit rule on an API route. The SDK
    passes the request context through to the Cloud API which checks the rate
    limit for that client and then returns an allow decision.
@@ -231,8 +232,8 @@ This time when the request is received, the rate limit has been exceeded.
   alt="Example: Rate limit rule DENY"
 />
 
-This means that if the same client makes another request, the SDK will read from
-the local cache and return the response immediately:
+This means that if the same client makes another request, the SDK reads from the
+local cache and returns the response immediately:
 
 <img
   class="dark"
@@ -260,12 +261,12 @@ A call to the Cloud API is required when:
   decision. Local analysis is limited to the request headers whereas the Arcjet
   API also checks a live database of known bots, IP addresses, VPNs, proxies,
   Tor nodes, and other relays.
-- An <Link.Page href="/email-validation">Email validation</Link.Page> rule is configured and the
-  email address syntax is valid. The Arcjet SDK analyzes the email address
-  locally to check the syntax. If it is invalid, the SDK will return a decision
-  immediately. If it is valid, the SDK will make a call to the Cloud API to
-  verify the email address e.g. does it have a valid MX record or is it a
-  disposable email address.
+- An <Link.Page href="/email-validation">Email validation</Link.Page> rule is
+  configured and the email address syntax is valid. The Arcjet SDK analyzes the
+  email address locally to check the syntax. If it is invalid, the SDK returns a
+  decision immediately. If it is valid, the SDK calls the Cloud API to verify
+  the email address: does it have a valid MX record, and is it a disposable
+  email address?
 - A <Link.Page href="/filters">Filter</Link.Page> rule is configured that inspects `ip.src.*` IP
   address fields such as `ip.src.vpn`, `ip.src.asnum.domain`, or
   `ip.src.country`. These fields require data from our IP reputation database so
@@ -274,36 +275,36 @@ A call to the Cloud API is required when:
 #### API latency
 
 The Arcjet SDK tries to do as much as possible asynchronously and locally to
-minimize latency for each request. This adds less than 1ms of overhead to a
+minimize latency for each request. This adds less than 1&nbsp;ms of overhead to a
 typical request.
 
-When a call to the Cloud API is required there is some additional latency
-before a decision is made. The Cloud API has been designed for high performance
-and low latency, and is deployed to multiple regions around the world. The SDK
-will automatically use the closest region which means the total overhead is
-typically no more than 20-30ms, often significantly less.
+When a call to the Cloud API is required there is some additional latency before
+a decision is made. The Cloud API has been designed for high performance and low
+latency, and is deployed to multiple regions around the world. The SDK
+automatically uses the closest region, which means the total overhead is
+typically no more than 20&nbsp;ms to 30&nbsp;ms, often significantly less.
 
 Arcjet only ever makes a single call to the API regardless of the number of
 rules configured.
 
-Where a decision has been cached locally e.g. blocking a client, Arcjet will
-continue to function even if the service is unavailable. In the event of a
+Where a decision has been cached locally, such as blocking a client, Arcjet
+continues to function even if the service is unavailable. In the event of a
 network problem or outage and a call to the API is needed, the Arcjet SDK
-defaults to failing open so all requests will be allowed. This is a deliberate
-design decision to ensure that your application continues to function even if
-there is a problem, but you can configure the SDK to fail closed if you prefer.
-See an example of how to handle errors and fail open or closed in the
-<Link.Page href="/reference/nodejs#error-handling">Node.js SDK reference</Link.Page>.
+defaults to failing open, so it allows all requests. This is a deliberate design
+decision to ensure that your application continues to function even if there is
+a problem, but you can configure the SDK to fail closed if you prefer. See an
+example of how to handle errors and fail open or closed in the <Link.Page
+href="/reference/nodejs#error-handling">Node.js SDK reference</Link.Page>.
 
 #### Timeout
 
 The total overhead when connecting to the Arcjet Cloud API is typically no more
-than 20-30ms,
+than 20&nbsp;ms to 30&nbsp;ms,
 often significantly less.
 There is a timeout in place to prevent waiting for a response indefinitely in
 case of problems.
 This value is configurable in the SDK.
-The default is 500ms in production and 1000ms in development.
+The default is 500&nbsp;ms in production and 1000&nbsp;ms in development.
 
 The reason for this difference is that in production your app usually runs on a
 server close to the Cloud API.
@@ -339,8 +340,8 @@ whether to deny or allow requests, or to take other actions.
 Post-request analysis is also performed by the Arcjet platform. This allows
 Arcjet to detect other types of attacks, such as SQL injection or other
 suspicious activity. This is threshold-based to avoid false positives. Once a
-client reaches a threshold of suspicious activity, Arcjet will issue a deny
-decision for that client for a period of time.
+client reaches a threshold of suspicious activity, Arcjet issues a deny decision
+for that client for a period of time.
 
 This threshold is dynamic and regularly updated based on the latest attack
 patterns. This protection is automatic and does not require any configuration.
@@ -351,7 +352,7 @@ The results of this analysis are used regardless of the rules configured. This
 means Arcjet is continuously analyzing requests to your application and
 protecting it from attacks.
 
-In the example below, the results of the post-request analysis from previous
+In the following example, the results of the post-request analysis from previous
 requests are used to inform the decision for the current request.
 
 1. A client makes an HTTP request to your application.
@@ -361,7 +362,7 @@ requests are used to inform the decision for the current request.
 4. The result is also reported to the Cloud API for post-request analysis. This
    is used to inform future decisions for that client.
 5. The client makes another request and the result of the post-request analysis
-   is used to inform the decision. This will be applied if you have configured a
+   is used to inform the decision. Arcjet applies this if you have configured a
    <Link.Page href="/shield">Shield</Link.Page> rule.
 
 <img class="dark" src={ImageRequestAnalysisDark.src} alt="Request analysis" />

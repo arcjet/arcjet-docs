@@ -18,11 +18,11 @@ ajToc:
   - text: "Protect a production chat endpoint"
     anchor: "protect-a-production-chat-endpoint"
   - text: "Configuring prompt injection detection"
-    anchor: "configuring-prompt-injection-detection"
+    anchor: "configure-prompt-injection-detection"
   - text: "Combine with abuse protection"
     anchor: "combine-with-abuse-protection"
   - text: "Protecting tool calls"
-    anchor: "protecting-tool-calls"
+    anchor: "protect-tool-calls"
 ---
 
 import { Link } from "@/components/link";
@@ -35,10 +35,10 @@ import NextJsStep from "@/snippets/ai-protection/prompt-injection/nextjs/Example
 import PythonFastapiStep from "@/snippets/ai-protection/prompt-injection/python-fastapi/Example.mdx";
 import PythonFlaskStep from "@/snippets/ai-protection/prompt-injection/python-flask/Example.mdx";
 
-Prompt injection attacks trick AI models into ignoring their instructions —
-users paste in jailbreaks like "DAN" prompts, role-play escapes, or instruction
-overrides designed to bypass your system prompt and extract restricted
-information or cause your AI to behave in unintended ways.
+Prompt injection attacks trick AI models into ignoring their instructions. Users
+paste in jailbreaks such as "DAN" prompts, role-play escapes, or instruction
+overrides designed to bypass your system prompt, extract restricted information,
+or make your AI behave in unintended ways.
 
 Arcjet prompt injection detection evaluates each incoming message for
 injection patterns inside your application before it reaches the AI provider.
@@ -246,11 +246,11 @@ async def chat(request: Request, body: ChatRequest):
 </TabItem>
 </Tabs>
 
-Keep denied responses generic — do not leak detector details or explain exactly
-what was flagged. A simple message asking the user to rephrase is the right
+Keep denied responses generic – do not leak detector details or explain exactly
+what was flagged. A generic message asking the user to rephrase is the right
 default.
 
-## Configuring prompt injection detection
+## Configure prompt injection detection
 
 `detectPromptInjectionMessage` - the text to evaluate. Pass the user's most
 recent message, or the full conversation history if you want to scan all
@@ -266,7 +266,7 @@ automated clients and enforce per-user budgets, combine it with
 <Link.Page href="/ai-protection/abuse-protection">AI abuse protection</Link.Page>
 and <Link.Page href="/ai-protection/budget-control">AI budget control</Link.Page>.
 
-Prompt injection is one class of AI abuse. Automated traffic is another — if
+Prompt injection is one class of AI abuse. Automated traffic is another – if
 you expose a public AI endpoint, attackers can drive up costs with automated
 traffic without needing to bypass your system prompt. Bot detection composes
 cleanly with prompt injection protection:
@@ -331,9 +331,12 @@ aj = arcjet(
 </TabItem>
 </Tabs>
 
-## Protecting tool calls
+## Protect tool calls
 
-The examples above protect an HTTP endpoint — the boundary where user input enters your application. But prompt injection can also arrive through tool results: a `fetch` tool retrieves a page that contains injected instructions, which then re-enter the model context when the tool result is passed back.
+The preceding examples protect an HTTP endpoint – the boundary where user input
+enters your application. But prompt injection can also arrive through tool
+results: a `fetch` tool retrieves a page that contains injected instructions,
+which then re-enter the model context when the tool result is passed back.
 
 <Link.Page href="/guards">Agent guards</Link.Page> run the same prompt injection
 detection inside tool handlers, without a `Request` object. You can also use a
@@ -345,7 +348,7 @@ Install the skill to add an SDK guard automatically:
 npx skills add arcjet/skills
 ```
 
-Or wire it up manually — create a guard client once at module scope, then call `.guard()` inline in each tool handler:
+Or wire it up manually – create a guard client once at module scope, then call `.guard()` inline in each tool handler:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -416,5 +419,5 @@ async def fetch_tool(url: str, user_id: str) -> dict:
 - <Link.Page href="/prompt-injection/quick-start">Prompt injection detection quick start</Link.Page>
 - <Link.Page href="/sensitive-info">Sensitive info detection introduction</Link.Page>
 - <Link.Page href="/sensitive-info/reference">Full sensitive info reference</Link.Page>
-- <Link.Page href="/guards/quick-start">Agent guards — guard one tool call</Link.Page>
+- <Link.Page href="/guards/quick-start">Agent guards – guard one tool call</Link.Page>
 - <Link.Page href="/guards/framework-integrations">Vercel AI SDK and LangChain tool integrations</Link.Page>

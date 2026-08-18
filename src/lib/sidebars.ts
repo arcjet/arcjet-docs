@@ -75,7 +75,7 @@ export const main = [
             collapsed: true,
             items: [
               {
-                label: "Next.js Form Protection",
+                label: "Next.js form protection",
                 link: "https://github.com/arcjet/example-nextjs-form",
                 attrs: { target: "_blank", class: "external-link" },
               },
@@ -148,7 +148,7 @@ export const main = [
             link: "/blueprints/malicious-traffic",
           },
           {
-            label: "Per user quotas / limits",
+            label: "Per user quotas and limits",
             link: "/blueprints/per-user-quotas",
           },
           {
@@ -160,7 +160,7 @@ export const main = [
             link: "/blueprints/sampling",
           },
           {
-            label: "VPN & proxy",
+            label: "VPN and proxy",
             link: "/blueprints/vpn-proxy-detection",
           },
         ],
@@ -395,16 +395,16 @@ export const main = [
     collapsed: false,
     items: [
       {
-        label: "Arcjet Plugin",
+        label: "Arcjet plugin",
         link: "/arcjet-plugin",
       },
       {
-        label: "Arcjet Skills",
+        label: "Arcjet skills",
         link: "https://github.com/arcjet/skills",
         attrs: { target: "_blank", class: "external-link" },
       },
       {
-        label: "MCP Server",
+        label: "MCP server",
         link: "/mcp-server",
       },
       {

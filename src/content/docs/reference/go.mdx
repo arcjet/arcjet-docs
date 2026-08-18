@@ -105,10 +105,10 @@ func must[T any](value T, err error) T {
 ```
 
 Use `client.WithRule(...)` to derive a client with an additional route-specific
-rule. Pass dynamic inputs with `Protect` options, including:
+rule. Pass dynamic inputs with the following `Protect` options:
 
 - `WithCharacteristics(...)` for rate-limit keys such as a user or tenant ID.
-- `WithRequested(...)` for the number of tokens a token bucket should consume.
+- `WithRequested(...)` for the number of tokens a token bucket consumes.
 - `WithDetectPromptInjectionMessage(...)` for untrusted text.
 - `WithSensitiveInfoValue(...)` for text to scan for sensitive information.
 - `WithCorrelationId(...)` to correlate a request decision with related work.
@@ -213,7 +213,7 @@ content moderation (`GuardModerateContent`), sensitive information detection,
 and custom local rules. `ExperimentalGuardModerateContent` and the matching
 Options/Rule names remain as deprecated aliases until 1.0.
 
-Use `Capture` to record what the application did after a Guard call —
+Use `Capture` to record what the application did after a Guard call –
 visibility data, never a security decision. See [Capture](#capture).
 
 ### Errors and warnings
@@ -315,9 +315,8 @@ cycle, `NaN`, or a string holding invalid UTF-8) are collected into a single
 **`AJ1017`** warning naming them. Go maps have no insertion order, so keys are
 processed in sorted order.
 
-Metadata is untrusted and is not redacted — do not put secrets or PII in it.
-See <Link.Page href="/guards/reference#metadata">Guard metadata</Link.Page>
-for the full limit table.
+Metadata is untrusted and is not redacted – do not put secrets or PII in it. For
+the full limit table, see <Link.Page href="/guards/reference#metadata">Guard metadata</Link.Page>.
 
 ## Outbound proxy
 

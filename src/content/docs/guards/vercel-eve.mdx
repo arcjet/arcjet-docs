@@ -128,7 +128,7 @@ export default defineChannel({
 });
 ```
 
-## guardApproval with no authored tools
+## `guardApproval` with no authored tools
 
 An Eve agent can have zero authored tools. OpenAPI and MCP connections
 (`agent/connections/*.ts`) have no local `execute`. The only enforcement point
@@ -169,7 +169,7 @@ export default defineOpenAPIConnection({
 });
 ```
 
-## Why Eve hooks can’t enforce
+## Why Eve hooks can't enforce
 
 `arcjetHooks()` and Eve hooks are observe-only. Handlers return `void` and
 cannot reject a turn. If the request is to block prompt injection, the answer

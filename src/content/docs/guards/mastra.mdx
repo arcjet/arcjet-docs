@@ -45,7 +45,7 @@ The integration exposes four surfaces:
   `abort()` (tripwire). `processInputStep` screens later agentic steps so tool
   continuations cannot skip the inbound gate.
 - `guardHooks()` provides `beforeToolCall` / `afterToolCall` for MCP /
-  workspace / toolset tools that were not authored through `guardTool`.
+  workspace or toolset tools that were not authored through `guardTool`.
   `beforeToolCall` can return `{ proceed: false, output }` on `DENY`.
   `afterToolCall` is observe-only.
 - `mastraAgentContext()` reads `MASTRA_THREAD_ID_KEY`, then resource, then
@@ -69,7 +69,7 @@ Then ask the agent to add Arcjet Guard to this Mastra project. In Claude Code,
 run `/integrate-arcjet-guard-mastra`. The skill source is
 [integrate-arcjet-guard-mastra](https://github.com/arcjet/arcjet-js/blob/main/arcjet-guard/skills/integrate-arcjet-guard-mastra/SKILL.md).
 
-## Screen inbound with guardProcessor
+## Screen inbound with `guardProcessor`
 
 Mastra channels already run through `processInput`. There is no `guardInbound`.
 Screen for prompt injection with `guardProcessor` in `inputProcessors`.
@@ -108,15 +108,15 @@ export const agent = new Agent({
 });
 ```
 
-## requireApproval is not a policy gate
+## `requireApproval` is not a policy gate
 
 Mastra `requireApproval` pauses for a human. It is not a remote policy. Use
 `guardTool` for authored tools or `guardHooks` for unwrapped tools.
 
-On `DENY` the tool's `execute` never runs. The model receives
-`{ arcjetDenied: true, reason, message, retryable }`. Scan free-text args (a
-note, reason, or body). An opaque `orderId` will not trip email / phone / card
-/ IP, so do not pass it to `localDetectSensitiveInfo`.
+On `DENY` the tool's `execute` never runs. The model receives `{ arcjetDenied:
+true, reason, message, retryable }`. Scan free-text args (a note, reason, or
+body). An opaque `orderId` doesn't trip email, phone, card, or IP detection, so do not
+pass it to `localDetectSensitiveInfo`.
 
 ```ts
 import { createTool } from "@mastra/core/tools";
@@ -160,7 +160,7 @@ export const lookupOrder = guardTool(
 ## Hooks can deny unwrapped tools
 
 Unlike Eve (observe-only hooks), Mastra `beforeToolCall` can stop a call. Use
-`guardHooks` for MCP / workspace / toolset tools you did not pass through
+`guardHooks` for MCP, workspace, or toolset tools you did not pass through
 `guardTool`. Applying both to the same authored tool double-calls the guard.
 
 `beforeToolCall` returns `{ proceed: false, output }` on `DENY` so those tools
@@ -198,7 +198,7 @@ stops the agent answering during an outage.
 Set `MASTRA_THREAD_ID_KEY` / `MASTRA_RESOURCE_ID_KEY` on `RequestContext`
 before `generate` / `stream`. `mastraAgentContext()` reads them. It never
 calls `createAgentContext`. Preference order is thread, then resource, then
-`workflow.runId`. If none is a valid 1–256 printable-ASCII string, the call is
+`workflow.runId`. If none is a valid 1-256 printable-ASCII string, the call is
 uncorrelated rather than joined to a generated id.
 
 ```ts

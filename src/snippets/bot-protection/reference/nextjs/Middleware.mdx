@@ -7,7 +7,7 @@ import CustomizedMiddlewareTS from "./CustomizedMiddleware.ts?raw";
 import MiddlewareMatcher from "./MiddlewareMatcher.ts?raw";
 
 <SelectableContent client:load syncKey="language">
-  This will run on every request to your Next.js app, except for static assets
+  This runs on every request to your Next.js app, except for static assets
   (configured in the `matcher` - see [the Next.js
   docs](https://nextjs.org/docs/app/api-reference/file-conventions/proxy#matcher)
   for details).
@@ -19,8 +19,8 @@ import MiddlewareMatcher from "./MiddlewareMatcher.ts?raw";
 <Code code={MiddlewareTS} lang="ts" title="/proxy.ts" mark={["ARCJET_KEY"]} />
 
 You can also customize the response depending on the decision. In this case we
-will return a 403 Forbidden response only if we detect a hosting provider IP
-address for the bot detection rule result:
+return a 403 Forbidden response only if we detect a hosting provider IP address
+for the bot detection rule result:
 
 <Code code={CustomizedMiddlewareTS} lang="ts" title="/proxy.ts" />
   </div>
@@ -31,14 +31,14 @@ address for the bot detection rule result:
 <Code code={MiddlewareJS} lang="js" title="/proxy.js" mark={["ARCJET_KEY"]} />
 
 You can also customize the response depending on the decision. In this case we
-will return a 403 Forbidden response only if we detect a hosting provider IP
-address for the bot detection rule result:
+return a 403 Forbidden response only if we detect a hosting provider IP address
+for the bot detection rule result:
 
 <Code code={CustomizedMiddlewareJS} lang="js" title="/proxy.js" />
   </div>
 </SelectableContent>
 
-### Avoiding double protection
+### Avoid double protection
 
 If you use Arcjet in middleware/proxy and individual routes, you need to be careful
 that Arcjet is not running multiple times per request. This can be avoided by

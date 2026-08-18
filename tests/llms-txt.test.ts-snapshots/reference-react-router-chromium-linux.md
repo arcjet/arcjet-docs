@@ -48,10 +48,10 @@ Build Arcjet clients as few times as possible. That means _outside_ request hand
 
 [Section titled “Options”](#options)
 
-The main way to configure Arcjet is to pass options to the `arcjet` function. The required fields are:
+The main way to configure Arcjet is to pass options to the `arcjet` function. The following fields are required:
 
-*   `key` (`string`) — API key to identify the site in Arcjet (typically through `process.env.ARCJET_KEY`)
-*   `rules` (`Array<ArcjetRule>`) — rules to use (order insensitive)
+*   `key` (`string`) – API key to identify the site in Arcjet (typically through `process.env.ARCJET_KEY`)
+*   `rules` (`Array<ArcjetRule>`) – rules to use (order insensitive)
 
 For all available fields, see [`ArcjetOptions` in the readme](https://github.com/arcjet/arcjet-js/tree/main/arcjet-react-router#arcjetoptions).
 
@@ -67,7 +67,7 @@ ARCJET_KEY=your_site_key_here
 
 [Section titled “Environment variables”](#environment-variables)
 
-The Arcjet React Router SDK uses several environment variables to configure its behavior. See [Concepts: Environment variables](/environment) for more info. The `ARCJET_KEY` environment variable is not read automatically and must be passed explicitly.
+The Arcjet React Router SDK uses several environment variables to configure its behavior. For more information, see [Concepts: Environment variables](/environment). The `ARCJET_KEY` environment variable is not read automatically and must be passed explicitly.
 
 ### Protect
 
@@ -79,7 +79,7 @@ Use the [`protect`](https://github.com/arcjet/arcjet-js/tree/main/arcjet-react-r
 
 [Section titled “Override the client IP”](#override-the-client-ip)
 
-For React Router, `requestInput` in the example below is the loader or action arguments.
+For React Router, `requestInput` in the following example is the loader or action arguments.
 
 Arcjet normally detects the client IP address from the request. If your application has already determined the client IP from a trusted source, pass it as `ipSrc` in the second argument to `protect()`. In this example, `requestInput` represents the request or framework context normally passed to `protect()`:
 
@@ -110,9 +110,9 @@ const decision = await aj.protect(requestInput, {
 
 Each top-level value is JSON-encoded by the SDK. Keys the SDK cannot encode (`undefined`, a function, a `BigInt`, a circular reference) are dropped with a single `AJ1017` warning naming them. A `metadata` that is not a plain object is ignored entirely. Prefer `metadata` over `extra`, which stays a flat string map.
 
-Metadata is untrusted and is not redacted — do not put secrets or PII in it. JavaScript numbers are IEEE-754 doubles, so an integer above `Number.MAX_SAFE_INTEGER` should be passed as a string.
+Metadata is untrusted and is not redacted – do not put secrets or PII in it. JavaScript numbers are IEEE-754 doubles, so pass an integer above `Number.MAX_SAFE_INTEGER` as a string.
 
-See [Guard metadata](/guards/reference#metadata) for limits, drop behavior, and language-specific notes.
+For limits, drop behavior, and language-specific notes, see [Guard metadata](/guards/reference#metadata).
 
 ### Decision
 
@@ -120,27 +120,27 @@ See [Guard metadata](/guards/reference#metadata) for limits, drop behavior, and 
 
 The `ArcjetDecision` that `protect` resolves to has the following fields:
 
-*   `conclusion` (`"ALLOW"`, `"DENY"`, or `"ERROR"`) — what to do with the request
-*   `id` (`string`) — ID for the request; local decisions start with `lreq_` and remote ones with `req_`
-*   `ip` (`ArcjetIpDetails`) — analysis of the client IP address
-*   `reason` (`ArcjetReason`) — more info about the conclusion
-*   `results` (`Array<ArcjetRuleResult>`) — results of each rule
-*   `ttl` (`number`) — time-to-live for the decision in seconds; `"DENY"` decisions are cached by `@arcjet/react-router` for this duration
+*   `conclusion` (`"ALLOW"`, `"DENY"`, or `"ERROR"`) – what to do with the request
+*   `id` (`string`) – ID for the request; local decisions start with `lreq_` and remote ones with `req_`
+*   `ip` (`ArcjetIpDetails`) – analysis of the client IP address
+*   `reason` (`ArcjetReason`) – more info about the conclusion
+*   `results` (`Array<ArcjetRuleResult>`) – results of each rule
+*   `ttl` (`number`) – time-to-live for the decision in seconds; `"DENY"` decisions are cached by `@arcjet/react-router` for this duration
 
-This top-level decision takes the results from each `"LIVE"` rule into account. If one of them is `"DENY"` then the overall conclusion will be `"DENY"`. Otherwise, if one of them is `"ERROR"`, then `"ERROR"`. Otherwise, it will be `"ALLOW"`. The `reason` and `ttl` fields reflect this conclusion.
+This top-level decision takes the results from each `"LIVE"` rule into account. If one of them is `"DENY"`, then the overall conclusion is `"DENY"`. Otherwise, if one of them is `"ERROR"`, then `"ERROR"`. Otherwise, it is `"ALLOW"`. The `reason` and `ttl` fields reflect this conclusion.
 
 To illustrate, when a bot rule returns an error and a validate email rule returns a deny, the overall conclusion is `"DENY"`, while the `"ERROR"` is available in the results.
 
 The results of `"DRY_RUN"` rules do not affect this overall decision, but are included in `results`.
 
-The `ip` field is available when the Cloud API was called and contains IP geolocation and reputation info. You can use this field to customize responses or you can use [Arcjet Filters](/filters) to make decisions based on it. See the [IP geolocation](/blueprints/ip-geolocation) and [IP reputation](/blueprints/vpn-proxy-detection) blueprints for more info.
+The `ip` field is available when the Cloud API was called and contains IP geolocation and reputation info. You can use this field to customize responses or you can use [Arcjet Filters](/filters) to make decisions based on it. For more information, see the [IP geolocation](/blueprints/ip-geolocation) and [IP reputation](/blueprints/vpn-proxy-detection) blueprints.
 
 Errors
 ------
 
 [Section titled “Errors”](#errors)
 
-Arcjet fails open so that a service issue, misconfiguration, or [network timeout](/architecture#timeout) does not block requests. Such errors should in many cases be logged but otherwise treated as `"ALLOW"` decisions. The `reason.message` field has more info on what occurred.
+Arcjet fails open so that a service issue, misconfiguration, or [network timeout](/architecture#timeout) does not block requests. In many cases, log such errors but otherwise treat them as `"ALLOW"` decisions. The `reason.message` field describes what occurred.
 
 Custom logs
 -----------
@@ -149,7 +149,7 @@ Custom logs
 
 You can use a custom log interface matching [`pino`](https://github.com/pinojs/pino) to change the default behavior. Using `pino-pretty` as an example:
 
-Then, create a custom logger that will log to JSON in production and pretty print in development:
+Then, create a custom logger that logs to JSON in production and pretty prints in development:
 
 ```js
 import arcjetReactRouter from "@arcjet/react-router";
