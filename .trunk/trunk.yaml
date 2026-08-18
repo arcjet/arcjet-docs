@@ -44,6 +44,10 @@ lint:
       paths:
         # Ignore playwright snapshots
         - "**/*-snapshots/**"
+        # Vendored skill. Kept byte-identical to its upstream copy so that the
+        # skills-lock.json hash stays meaningful and re-syncs diff cleanly;
+        # formatting it here would rewrite every line on the next sync.
+        - ".claude/skills/**"
 actions:
   enabled:
     - trunk-announce
