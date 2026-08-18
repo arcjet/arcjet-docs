@@ -137,7 +137,7 @@ plain markdown internal links (e.g. `[text](/path)`) should be converted to
 
 ## Dependency updates
 
-We maintain a 30 day cooldown period for dependency versions to mitigate supply
+We maintain a 7 day cooldown period for dependency versions to mitigate supply
 chain risks. This cooldown period does not include Arcjet maintained packages or
 security updates.
 
@@ -151,11 +151,11 @@ npm up arcjet "@arcjet/*" nosecone "@nosecone/*" --workspaces
 ### Update all dependencies to their cooldown minor versions
 
 ```sh
-npx --no -- npm-check-updates --interactive --workspaces --cooldown 30 --target minor
+npx --no -- npm-check-updates --interactive --workspaces --cooldown 7 --target minor
 ```
 
 ### Update all dependencies to their cooldown major versions
 
 ```sh
-npx --no -- npm-check-updates --interactive --workspaces --cooldown 30 --target @latest
+npx --no -- npm-check-updates --interactive --workspaces --cooldown 7 --target @latest
 ```
