@@ -23,8 +23,8 @@ ajToc:
         anchor: "per-route-guard"
       - text: "Within route"
         anchor: "within-route"
-  - text: "Per route vs middleware"
-    anchor: "per-route-vs-middleware"
+  - text: "Per route versus middleware"
+    anchor: "per-route-versus-middleware"
     framework: ["next-js"]
     children:
       - text: "Per route"
@@ -32,18 +32,18 @@ ajToc:
       - text: "Middleware"
         anchor: "middleware"
       - text: "Avoiding double protection with middleware"
-        anchor: "avoiding-double-protection-with-middleware"
-  - text: "Pages & server actions"
-    anchor: "pages--server-actions"
+        anchor: "avoid-double-protection-with-middleware"
+  - text: "Pages and server actions"
+    anchor: "pages-and-server-actions"
     framework: ["next-js"]
-  - text: "Loader vs action"
-    anchor: "loader-vs-action"
+  - text: "Loader versus action"
+    anchor: "loader-versus-action"
     framework: ["remix"]
     children:
       - text: "Action"
         anchor: "action"
-  - text: "Per route vs hooks"
-    anchor: "per-route-vs-hooks"
+  - text: "Per route versus hooks"
+    anchor: "per-route-versus-hooks"
     framework: ["sveltekit"]
     children:
       - text: "Per route"
@@ -51,7 +51,7 @@ ajToc:
       - text: "Hooks"
         anchor: "hooks"
       - text: "Avoiding double protection with hooks"
-        anchor: "avoiding-double-protection-with-hooks"
+        anchor: "avoid-double-protection-with-hooks"
   - text: "Decision"
     anchor: "decision"
   - text: "Error handling"
@@ -117,8 +117,8 @@ constructed with the `shield(options: ShieldOptions)` function and configured by
 
 :::note
 When specifying multiple rules, the order of the rules is ignored. Rule
-execution ordering is automatically optimized for performance. See
-[decision](#decision) below for details of examining the execution results.
+execution ordering is automatically optimized for performance. For details of
+examining the execution results, see [decision](#decision).
 :::
 
 <SlotByFramework client:load>
@@ -142,21 +142,21 @@ context as passed to the request handler.
 This function returns a `Promise` that resolves to an
 `ArcjetDecision` object. This contains the following properties:
 
-- `id` (`string`) - The unique ID for the request. This can be used to look up
+- `id` (`string`) – The unique ID for the request. This can be used to look up
   the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
   involving the Arcjet cloud API. For decisions taken locally, the prefix is
   `lreq_`.
-- `conclusion` (`ArcjetConclusion`) - The final conclusion based on evaluating
+- `conclusion` (`ArcjetConclusion`) – The final conclusion based on evaluating
   each of the configured rules. If you wish to accept Arcjet's recommended
   action based on the configured rules then you can use this property.
-- `reason` (`ArcjetReason`) - An object containing more detailed
+- `reason` (`ArcjetReason`) – An object containing more detailed
   information about the conclusion.
-- `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
+- `results` (`ArcjetRuleResult[]`) – An array of `ArcjetRuleResult` objects
   containing the results of each rule that was executed.
-- `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
-  client IP address. See the SDK reference for more information.
+- `ip` (`ArcjetIpDetails`) – An object containing Arcjet's analysis of the
+  client IP address. For more information, see the SDK reference.
 
-You check if a deny conclusion has been returned by a shield rule by using
+To check whether a shield rule returned a deny conclusion, use
 `decision.isDenied()` and `decision.reason.isShield()` (JS) /
 `decision.is_denied()` and `decision.reason_v2.type == "SHIELD"` (Python).
 
@@ -178,7 +178,7 @@ for result in decision.results:
 </TabItem>
 </Tabs>
 
-This example will log the full result as well as the shield rule:
+This example logs the full result as well as the shield rule:
 
 <SlotByFramework client:load>
   <DecisionLogBun slot="bun" />
@@ -194,16 +194,18 @@ This example will log the full result as well as the shield rule:
 ## Error handling
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
-not block all requests. The SDK will also time out and fail open after 1000ms in
-development (see <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>) and 500ms
-otherwise. However, in most cases, the response time will be less than 20-30ms.
+not block all requests. The SDK also times out and fails open after 1000&nbsp;ms
+in development (see <Link.Page
+href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>) and 500&nbsp;ms
+otherwise. However, in most cases, the response time is less than 20&nbsp;ms to
+30&nbsp;ms.
 
-If there is an error condition when processing the rule, Arcjet will return an
-`ERROR` result for that rule and you can check the `message` property on the rule's
-error result for more information.
+If there is an error condition when processing the rule, Arcjet returns an
+`ERROR` result for that rule and you can check the `message` property on the
+rule's error result for more information.
 
-If all other rules that were run returned an `ALLOW` result, then the final Arcjet
-conclusion will be `ERROR`.
+If all other rules that were run returned an `ALLOW` result, then the final
+Arcjet conclusion is `ERROR`.
 
 <SlotByFramework client:load>
   <ErrorsBun slot="bun" />
@@ -225,5 +227,5 @@ blocking any requests.
 We have an example test framework you can use to automatically test your rules.
 Arcjet can also be triggered based using a sample of your traffic.
 
-See the <Link.Page href="/testing">Testing</Link.Page> section of the docs for
-details.
+For details, see the <Link.Page href="/testing">Testing</Link.Page> section of
+the docs.

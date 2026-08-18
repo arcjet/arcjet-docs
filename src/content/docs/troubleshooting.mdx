@@ -21,21 +21,21 @@ If you are seeing multiple decisions for the same request, it is likely that
 Arcjet is running in multiple places in your application. This can happen if you
 are using a middleware and also calling the Arcjet SDK in a route handler.
 
-You can fix this by ensuring that Arcjet is only called once per request. You
-can combine multiple rules into a single client configuration and/or you can
-exclude routes from your middleware.
+To fix this, call Arcjet only once per request. You can combine multiple rules
+into a single client configuration, exclude routes from your middleware, or
+both.
 
 ### Decision errors from platform liveness or health checks when using Arcjet as a middleware
 
-Platforms like Kubernetes have support for automatic liveness and health
-check probes. These requests do not come from a browser and do not have all
-the same metadata that browsers do (and will not include important headers
-like `X-Real-Ip` or `X-Forwarded-For`). This will cause Arcjet to reject these
-probes, which will make the platform think your app is either not alive or
-unhealthy. This can manifest in CrashLoopBackoff errors in Kubernetes or your
-platform of choice restarting your app constantly.
+Platforms like Kubernetes have support for automatic liveness and health check
+probes. These requests do not come from a browser and do not have all the same
+metadata that browsers do (and don't include important headers such as
+`X-Real-Ip` or `X-Forwarded-For`). This causes Arcjet to reject these probes,
+which makes the platform think your app is either not alive or unhealthy. This
+can manifest in CrashLoopBackoff errors in Kubernetes or your platform of choice
+restarting your app constantly.
 
-In order to fix this, omit your healthcheck route from your Arcjet middleware.
+To fix this, omit your health check route from your Arcjet middleware.
 
 #### Next.js
 
@@ -53,8 +53,8 @@ route:
 ```
 
 :::note
-Do not include the leading slash in the match that you add. That will cause
-the regex to match on `//healthz`, which is almost certainly not what you want.
+Do not include the leading slash in the match that you add. That causes the
+regex to match on `//healthz`, which is almost certainly not what you want.
 :::
 
 <Tabs>
@@ -80,14 +80,12 @@ Then create an API route at `/pages/healthz.js`:
 </TabItem>
 </Tabs>
 
-When you deploy your app next, Arcjet should not trigger on this route.
+When you next deploy your app, Arcjet doesn't trigger on this route.
 
 ### Override development IP
 
-Arcjet's <Link.Page href="/blueprints/ip-geolocation">IP geolocation</Link.Page>
-and <Link.Page href="/blueprints/vpn-proxy-detection">VPN & proxy detection</Link.Page>
-features require a real IP address to work. In local
-development, Arcjet defaults to `127.0.0.1` so the IP analysis metadata will be
+Arcjet's <Link.Page href="/blueprints/ip-geolocation">IP geolocation</Link.Page> and <Link.Page href="/blueprints/vpn-proxy-detection">VPN and proxy detection</Link.Page> features require a real IP address to work. In local
+development, Arcjet defaults to `127.0.0.1` so the IP analysis metadata is
 empty.
 
 You can set the IP address to a real public IP by passing an explicit client IP
@@ -212,10 +210,9 @@ ConnectError: [deadline_exceeded] the operation timed out
 This error means that the Arcjet SDK was unable to connect to the Cloud API
 within the short timeout period. This is usually caused by a network issue. The
 SDK is designed to fail open so that in the event of a network problem or
-outage, requests will be allowed.
+outage, it allows requests.
 
-If you are seeing this error frequently, please
-
+If you see this error frequently,
 <Link.Page href="/support">contact us</Link.Page> so we can investigate.
 
 ### Agent guard returned ALLOW but the policy was unavailable
@@ -230,11 +227,12 @@ For sensitive actions, deny when evaluation failed open. The Vercel AI SDK and
 LangChain wrappers do this by default. See
 <Link.Page href="/guards/reference#availability-and-fail-behavior">Agent guard availability and fail behavior</Link.Page>.
 
-### Arcjet will use 127.0.0.1 when missing public IP address in development mode
+### Arcjet uses 127.0.0.1 when the public IP address is missing in development mode
 
 Arcjet's automatic IP detection expects a valid public IP address to enable
 features like geolocation and VPN/proxy detection. In production, if the
-automatically detected IP is invalid (e.g. `127.0.0.1`), the request is rejected
+automatically detected IP is invalid (for example, `127.0.0.1`), the request is
+rejected
 to prevent spoofing.
 
 In development, private/internal addresses are common. To avoid errors, set the
@@ -256,9 +254,10 @@ incorrectly set to `development`.
 
 Arcjet's automatic IP detection normally detects when it is running in a local
 environment and uses a default IP address of `127.0.0.1`. However, if it can't
-determine whether it is running locally or not then it will be safe and assume
-it is running in production. Automatic detection disallows private/internal
-addresses in production, but allows them in development so you can test locally.
+determine whether it is running locally or not then it errs on the safe side and
+assumes it is running in production. Automatic detection disallows
+private/internal addresses in production, but allows them in development so you
+can test locally.
 
 You can force the SDK to run in development mode by setting the environment
 variable <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page> to
@@ -270,18 +269,17 @@ ARCJET_ENV=development
 
 Arcjet uses the client IP address as part of a fingerprint to identify where
 each request is coming from. If the IP address is not provided, or it is running
-in production and a private/internal address is provided, then Arcjet will show
-this error. Explicit application-provided IP values bypass automatic detection
-and must be validated by your application.
+in production and a private/internal address is provided, then Arcjet shows this
+error. Explicit application-provided IP values bypass automatic detection and
+must be validated by your application.
 
 ### [failed_precondition] request details failed validation
 
 Arcjet expects certain fields to exist on the object used to analyze each
 request. This is normally handled by the SDK for the framework you are using,
-but if you are doing something custom then you will need to provide the correct
-fields:
+but if you are doing something custom, then provide the correct fields:
 
-The required fields are:
+The following fields are required:
 
 - `ip` - The client IP address. Internally our SDKs use our [`@arcjet/ip`
   package](https://github.com/arcjet/arcjet-js/tree/main/ip#example) to detect
@@ -308,7 +306,7 @@ and the version of the Arcjet SDK. You have several options for fixing this:
 
 1. Update the Arcjet SDK to the latest version and update your version of
    Next.js to the latest version. We try to keep the SDK up to date with the
-   latest Next.js releases so they should generally match.
+   latest Next.js releases, so they generally match.
 2. Add a [resolution
    override](https://docs.npmjs.com/cli/v10/configuring-npm/package-json#overrides)
    to your `package.json` to force the SDK to use the same version of Next.js.
@@ -337,15 +335,15 @@ Calling `protect()` with no rules is deprecated. Did you mean to configure the S
 
 Prior to the JS SDK release `v1.0.0-alpha.12` we allowed empty rules and
 automatically configured a Shield rule for you. From `v1.0.0-alpha.12` onwards
-you must explicitly configure the Shield rule. This allows you to choose if you
-want to block suspicious requests or not. We are maintaining the old behavior
-for a while to give you time to update your code, which is why this is warning
-you. Shield is still configured automatically but you should now migrate to
-explicitly configuring it.
+you must explicitly configure the Shield rule. This lets you choose if you want
+to block suspicious requests or not. We are maintaining the old behavior for a
+while to give you time to update your code, which is why this is warning you.
+Shield is still configured automatically, but we recommend migrating to
+configuring it explicitly.
 
-Check out the <Link.Page href="/shield">Shield documentation</Link.Page> to
-learn how to configure Shield rules. To restore the old behavior you can add a
-simple Shield rule:
+See the <Link.Page href="/shield">Shield documentation</Link.Page> to learn how
+to configure Shield rules. To restore the old behavior you can add a simple
+Shield rule:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -387,7 +385,7 @@ aj = arcjet(
 </TabItem>
 </Tabs>
 
-### The current file is a CommonJS module whose imports will produce 'require' calls
+### The current file is a CommonJS module whose imports produce 'require' calls
 
 When using the Arcjet SDK you may see a warning like this:
 
@@ -405,8 +403,8 @@ The Arcjet SDK does not support CJS. You can fix this by changing your
 application to use ESM. This is usually done by adding `"type": "module"` to
 your `package.json`.
 
-Alternatively, you can rename the files where you are using the Arcjet SDK to use
-the `.mjs` or `.mts` extension. This will tell Node.js to treat the file as an
+Alternatively, you can rename the files where you are using the Arcjet SDK to
+use the `.mjs` or `.mts` extension. This tells Node.js to treat the file as an
 ESM file.
 
 ### Error: Log is required / Error: Client is required
@@ -444,7 +442,7 @@ and then later try to access the body again in another part of your request
 handler.
 
 To fix this with sensitive information detection, see the
-<Link.ToSdk href="/sensitive-info/reference#accessing-the-body" sdk="node">Accessing the body</Link.ToSdk>
+<Link.ToSdk href="/sensitive-info/reference#access-the-body" sdk="node">Accessing the body</Link.ToSdk>
 section of the reference.
 
 To fix this with other cases, clone the request before accessing the body:
@@ -467,7 +465,7 @@ Arcjet supports the [active and maintenance LTS versions of
 Next.js](https://nextjs.org/support-policy) as indicated in
 
 <Link.Page href="/reference/nextjs#requirements">the SDK reference</Link.Page>.
-Upgrade your Next.js version to the latest version to fix this error.
+Upgrade Next.js to the latest version to fix this error.
 
 ### http2.connect is not implemented yet!
 

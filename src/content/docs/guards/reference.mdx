@@ -6,7 +6,7 @@ description: "Test agent guard policies and understand inputs, decisions, availa
 import { Tabs, TabItem } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 
-## Testing guard enforcement
+## Test guard enforcement
 
 Test at the action boundary and assert both the decision behavior and the side
 effect. For each guarded tool, cover:
@@ -31,7 +31,7 @@ enforcement, but it does not replace a test that proves the side effect is
 skipped on a `LIVE` denial.
 
 For HTTP routes, see <Link.Page href="/testing">Testing Arcjet</Link.Page>. For
-in-process Guard and capture tests, use the SDK test client below.
+in-process Guard and capture tests, use the SDK test client.
 
 ## Direct Guard API
 
@@ -78,14 +78,14 @@ decision = await arcjet.guard(
 )
 ```
 
-| Parameter        | Description                                                        |
-| ---------------- | ------------------------------------------------------------------ |
-| `label`          | Required action identifier and remote-policy selector              |
-| `actor`          | Optional trusted, application-asserted identity                    |
-| `inputs`         | Named values created with `server_input.*` or `local_input.*`      |
-| `rules`          | Optional SDK rule submissions; an empty sequence still calls Guard |
+| Parameter        | Description                                                         |
+| ---------------- | ------------------------------------------------------------------- |
+| `label`          | Required action identifier and remote-policy selector               |
+| `actor`          | Optional trusted, application-asserted identity                     |
+| `inputs`         | Named values created with `server_input.*` or `local_input.*`       |
+| `rules`          | Optional SDK rule submissions; an empty sequence still calls Guard  |
 | `metadata`       | Nested JSON for analytics and debugging. See [Metadata](#metadata). |
-| `correlation_id` | Identifier shared across related calls                             |
+| `correlation_id` | Identifier shared across related calls                              |
 
 The client request timeout is set on `launch_arcjet()` /
 `launch_arcjet_sync()` as `timeout_ms` and defaults to 2000 ms.
@@ -108,14 +108,14 @@ decision, err := guard.Guard(ctx, arcjet.GuardRequest{
 })
 ```
 
-| Field           | Description                                                               |
-| --------------- | ------------------------------------------------------------------------- |
-| `Label`         | Required action identifier and remote-policy selector                     |
-| `Actor`         | Optional trusted, application-asserted identity                           |
-| `Inputs`        | Named values created with `GuardPolicyServer*` or `GuardPolicyLocal*`     |
-| `Rules`         | Optional SDK rule submissions; an empty list still calls Guard            |
-| `Metadata`      | Nested JSON for analytics and debugging. See [Metadata](#metadata).       |
-| `CorrelationId` | Identifier shared across related calls                                    |
+| Field           | Description                                                           |
+| --------------- | --------------------------------------------------------------------- |
+| `Label`         | Required action identifier and remote-policy selector                 |
+| `Actor`         | Optional trusted, application-asserted identity                       |
+| `Inputs`        | Named values created with `GuardPolicyServer*` or `GuardPolicyLocal*` |
+| `Rules`         | Optional SDK rule submissions; an empty list still calls Guard        |
+| `Metadata`      | Nested JSON for analytics and debugging. See [Metadata](#metadata).   |
+| `CorrelationId` | Identifier shared across related calls                                |
 
 </TabItem>
 </Tabs>
@@ -139,12 +139,12 @@ metadata: {
 
 Server-enforced limits. Over a limit, that key is dropped:
 
-| Limit                    | Value                              |
-| ------------------------ | ---------------------------------- |
-| Top-level keys           | 128                                |
-| Serialized bytes / value | 4 KiB                              |
-| Nesting depth / value    | 10                                 |
-| Key names                | letters, digits, `-`, `.`, `_`     |
+| Limit                      | Value                          |
+| -------------------------- | ------------------------------ |
+| Top-level keys             | 128                            |
+| Serialized bytes per value | 4 KiB                          |
+| Nesting depth per value    | 10                             |
+| Key names                  | letters, digits, `-`, `.`, `_` |
 
 The SDK also drops keys once one request's metadata exceeds 768 KiB in total
 (keys plus JSON-encoded values, counted before compression). That ceiling
@@ -160,27 +160,27 @@ Dropped keys are reported, not silent:
   the server. On `protect()`, Go surfaces it on `Decision.Warnings`; Python
   logs it at `WARNING` because `protect()` has no warnings field; JavaScript
   reports it to Arcjet rather than throwing.
-- A `metadata` value that is not a plain object / map is ignored entirely.
+- A `metadata` value that is not a plain object or map is ignored entirely.
 
 What the SDK cannot encode differs by language:
 
-| Language | Dropped with `AJ1017` | Notes |
-| -------- | --------------------- | ----- |
-| JavaScript | `undefined`, functions, `BigInt`, circular references | Numbers are IEEE-754 doubles. Integers above `Number.MAX_SAFE_INTEGER` should be passed as strings. Objects with `toJSON()`, including `Date`, serialize via `toJSON()`. |
-| Python | `datetime`, sets, `NaN`, circular references | Integers are sent verbatim, including values past 2^53. Convert datetimes explicitly (`datetime.isoformat()`). |
-| Go | channels, funcs, cycles, `NaN`, invalid UTF-8 strings | Exact `int64` values survive. Keys are processed in sorted order because Go maps have no insertion order. |
+| Language   | Dropped with `AJ1017`                                 | Notes                                                                                                                                                            |
+| ---------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| JavaScript | `undefined`, functions, `BigInt`, circular references | Numbers are IEEE-754 doubles. Pass integers above `Number.MAX_SAFE_INTEGER` as strings. Objects with `toJSON()`, including `Date`, serialize through `toJSON()`. |
+| Python     | `datetime`, sets, `NaN`, circular references          | Integers are sent verbatim, including values past 2^53. Convert datetimes explicitly (`datetime.isoformat()`).                                                   |
+| Go         | channels, funcs, cycles, `NaN`, invalid UTF-8 strings | Exact `int64` values survive. Keys are processed in sorted order because Go maps have no insertion order.                                                        |
 
 Rule-level metadata is merged with `guard()`-level metadata shallowly: a
 duplicate key's whole value is replaced, never deep-merged.
 
-Metadata is untrusted and is not redacted — do not put secrets or PII in it.
+Metadata is untrusted and is not redacted – do not put secrets or PII in it.
 
 ## Capture
 
 Use `capture()` / `Capture` to record that an allowed action happened. Captures
 are visibility data: they never change a conclusion and never set
-`hasFailedOpen()`. See <Link.Page href="/guards/capture">Capture events</Link.Page>
-for options, batching, `flush()`, and serverless `waitUntil`.
+`hasFailedOpen()`. For options, batching, `flush()`, and serverless `waitUntil`,
+see <Link.Page href="/guards/capture">Capture events</Link.Page>.
 
 ## Decisions and policy results
 
@@ -203,13 +203,13 @@ The Arcjet server combines enforced SDK and remote rules into the final
 `policyEvaluation` / `policy_evaluation` reports which policy revision Arcjet
 evaluated and its status:
 
-| Status           | What it means                                               | When you may see it                                      | How to handle it                                                        |
-| ---------------- | ----------------------------------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `NOT_CONFIGURED` | No published remote policy matched the guard label.         | A label intentionally has no policy, the label is wrong, or the policy has not been published. | If a policy is expected, verify the label and publish it. Otherwise handle the SDK rule decision normally. |
-| `APPLIED`        | Arcjet completely evaluated the matching remote policy.     | The supplied actor and inputs satisfy the policy contract and all required evaluation is available. | Enforce the returned `ALLOW` or `DENY` conclusion.                       |
-| `INCOMPLETE`     | A matching policy could not be completely evaluated.        | A required actor or input is missing or invalid, or required local evaluation could not complete. | Treat the security check as incomplete and apply your chosen availability behavior. |
-| `UNAVAILABLE`    | Remote policy evaluation was temporarily unavailable.       | Arcjet could not complete a required policy evaluation.  | Retry where appropriate or apply your chosen availability behavior.     |
-| `UNKNOWN`        | The SDK does not recognize the policy status from Arcjet.   | A newer server returns a status this SDK version does not understand. | Upgrade the SDK and, until then, treat the security check as incomplete. |
+| Status           | What it means                                             | When you may see it                                                                                 | How to handle it                                                                                           |
+| ---------------- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `NOT_CONFIGURED` | No published remote policy matched the guard label.       | A label intentionally has no policy, the label is wrong, or the policy has not been published.      | If a policy is expected, verify the label and publish it. Otherwise handle the SDK rule decision normally. |
+| `APPLIED`        | Arcjet completely evaluated the matching remote policy.   | The supplied actor and inputs satisfy the policy contract and all required evaluation is available. | Enforce the returned `ALLOW` or `DENY` conclusion.                                                         |
+| `INCOMPLETE`     | A matching policy could not be completely evaluated.      | A required actor or input is missing or invalid, or required local evaluation could not complete.   | Treat the security check as incomplete and apply your chosen availability behavior.                        |
+| `UNAVAILABLE`    | Remote policy evaluation was temporarily unavailable.     | Arcjet could not complete a required policy evaluation.                                             | Retry where appropriate or apply your chosen availability behavior.                                        |
+| `UNKNOWN`        | The SDK does not recognize the policy status from Arcjet. | A newer server returns a status this SDK version does not understand.                               | Upgrade the SDK and, until then, treat the security check as incomplete.                                   |
 
 The field may be absent when the server does not return remote-policy status.
 If your application expects a policy, inspect the decision's error results and
@@ -254,7 +254,7 @@ execution when the security check cannot be completed.
 Warnings are informational and do not mean the decision failed open. Log them
 to correct request data, but do not treat a warning alone as a denial.
 
-## Registering a client and the test client
+## Register a client and the test client
 
 Passing the client explicitly is the recommended path. Registration is a
 shortcut for code too deep to receive a handle, where
@@ -290,8 +290,8 @@ capture({ action: "refund.issued", metadata: { invoice: id } });
 ```
 
 A second client does not displace the first (`AJ3004` on the incumbent's
-logger). `unregisterArcjet()` clears whatever is registered; libraries should
-not call it.
+logger). `unregisterArcjet()` clears whatever is registered; libraries must not
+call it.
 
 `@arcjet/guard/testing` registers an in-memory client that records calls and
 talks to nothing:
@@ -310,12 +310,12 @@ test("refund captures an event", async () => {
 
 `using` unregisters at the end of the block. On Node.js 22, call
 `arcjet.unregister()` from a `finally` instead. `registerTestClient()` throws
-if a client is already registered. Recording is synchronous — once the code
+if a client is already registered. Recording is synchronous – once the code
 under test reaches `capture()`, the event is there with no flushing.
 
 `guard()` on the test client records the call and returns a fail-open `ALLOW`,
-because no rule ran. Helpers that fail closed on a failed-open decision —
-`guardTool`, `guardAction` — therefore **deny** against this client.
+because no rule ran. Helpers that fail closed on a failed-open decision –
+`guardTool`, `guardAction` – therefore **deny** against this client.
 
 </TabItem>
 <TabItem label="Python">
@@ -329,10 +329,10 @@ register_arcjet(launch_arcjet(key=os.environ["ARCJET_KEY"]))
 `capture()` is one function for both client flavors. `guard()` and `flush()`
 come in pairs:
 
-| Registered client | Guard | Flush |
-| --- | --- | --- |
-| `launch_arcjet()` | `await guard(...)` | `await flush()` |
-| `launch_arcjet_sync()` | `guard_sync(...)` | `flush_sync()` |
+| Registered client      | Guard              | Flush           |
+| ---------------------- | ------------------ | --------------- |
+| `launch_arcjet()`      | `await guard(...)` | `await flush()` |
+| `launch_arcjet_sync()` | `guard_sync(...)`  | `flush_sync()`  |
 
 Calling the wrong pair fail-opens and reports `AJ3007` on the registered
 client's logger.
@@ -356,8 +356,8 @@ per-rule verdicts.
 Go does not have a process-wide registry. Pass the `GuardClient` explicitly
 and use `Capture` / `Flush` on that client.
 
-See <Link.Page href="/testing#testing-guard-and-capture-calls">Testing Arcjet</Link.Page>
-for the HTTP Newman examples and a fuller walkthrough of the test client.
+For the HTTP Newman examples and a fuller walkthrough of the test client, see
+<Link.Page href="/testing#test-guard-and-capture-calls">Testing Arcjet</Link.Page>.
 
 ## Related reference
 

@@ -16,9 +16,9 @@ ajToc:
     anchor: "configuration"
     children:
       - text: "Allowing specific bots"
-        anchor: "allowing-specific-bots"
+        anchor: "allow-specific-bots"
       - text: "Denying specific bots"
-        anchor: "denying-specific-bots"
+        anchor: "deny-specific-bots"
   - text: "Guards and routes"
     anchor: "guards-and-routes"
     framework: ["nest-js"]
@@ -29,8 +29,8 @@ ajToc:
         anchor: "per-route-guard"
       - text: "Within route"
         anchor: "within-route"
-  - text: "Per route vs middleware"
-    anchor: "per-route-vs-middleware"
+  - text: "Per route versus middleware"
+    anchor: "per-route-versus-middleware"
     framework: ["next-js"]
     children:
       - text: "Per route"
@@ -38,18 +38,18 @@ ajToc:
       - text: "Middleware"
         anchor: "middleware"
       - text: "Avoiding double protection with middleware"
-        anchor: "avoiding-double-protection-with-middleware"
-  - text: "Pages & server actions"
-    anchor: "pages--server-actions"
+        anchor: "avoid-double-protection-with-middleware"
+  - text: "Pages and server actions"
+    anchor: "pages-and-server-actions"
     framework: ["next-js"]
-  - text: "Loader vs action"
-    anchor: "loader-vs-action"
+  - text: "Loader versus action"
+    anchor: "loader-versus-action"
     framework: ["remix"]
     children:
       - text: "Action"
         anchor: "action"
-  - text: "Per route vs hooks"
-    anchor: "per-route-vs-hooks"
+  - text: "Per route versus hooks"
+    anchor: "per-route-versus-hooks"
     framework: ["sveltekit"]
     children:
       - text: "Per route"
@@ -57,7 +57,7 @@ ajToc:
       - text: "Hooks"
         anchor: "hooks"
       - text: "Avoiding double protection with hooks"
-        anchor: "avoiding-double-protection-with-hooks"
+        anchor: "avoid-double-protection-with-hooks"
   - text: "Decision"
     anchor: "decision"
     children:
@@ -66,7 +66,7 @@ ajToc:
   - text: "Error handling"
     anchor: "error-handling"
   - text: "Filtering categories"
-    anchor: "filtering-categories"
+    anchor: "filter-categories"
   - text: "Bot verification"
     anchor: "bot-verification"
     children:
@@ -163,7 +163,7 @@ import SvelteKitFiltering from "@/snippets/bot-protection/reference/sveltekit/Fi
 import SvelteKitIdentifiedBots from "@/snippets/bot-protection/reference/sveltekit/IdentifiedBots.mdx";
 import SvelteKitPerRouteVsHooks from "@/snippets/bot-protection/reference/sveltekit/PerRouteVsHooks.mdx";
 
-Arcjet bot detection allows you to manage traffic by automated clients and bots.
+Arcjet bot detection lets you manage traffic by automated clients and bots.
 
 <FrameworkLinks
   client:load
@@ -176,10 +176,9 @@ Arcjet bot detection allows you to manage traffic by automated clients and bots.
 ## Configuration
 
 Bot detection is configured by allowing or denying a subset of bots. The `allow`
-and `deny` lists are mutually-exclusive, such that using `allow` will result in
-a `DENY` decision for any detected bot that is not specified in the `allow` list
-and using `deny` will result in an `ALLOW` decision for any detected bot that is
-not specified in the `deny` list.
+and `deny` lists are mutually exclusive. With `allow`, Arcjet denies any
+detected bot that the list does not name. With `deny`, Arcjet allows any
+detected bot that the list does not name.
 
 You can use only one of the following configuration definitions:
 
@@ -227,11 +226,11 @@ string identifiers like `"CURL"` for specific bots.
 
 :::note
 When specifying multiple rules, the order of the rules is ignored. Rule
-execution ordering is automatically optimized for performance. See below for
+execution ordering is automatically optimized for performance. For
 how to examine the execution results.
 :::
 
-### Allowing specific bots
+### Allow specific bots
 
 Most applications want to block almost all bots. However, it is common to allow
 some bots to access your system, such as bots for search indexing or API
@@ -241,9 +240,8 @@ When allowing specific bots we recommend that you also [check the verification
 status](#bot-verification) after an allow decision is returned to ensure that the bots are who they
 say they are.
 
-This behavior is configured with an `allow` list from our [full list of
-bots](https://arcjet.com/bot-list) and/or
-<Link.Page href="/bot-protection/identifying-bots#bot-categories">bot categories</Link.Page>.
+Configure this behavior with an `allow` list drawn from the [full list of
+bots](https://arcjet.com/bot-list), from <Link.Page href="/bot-protection/identifying-bots#bot-categories">bot categories</Link.Page>, or from both.
 
 <SlotByFramework client:load>
   <BunAllowingBots slot="bun" />
@@ -257,15 +255,14 @@ bots](https://arcjet.com/bot-list) and/or
   <SvelteKitAllowingBots slot="sveltekit" />
 </SlotByFramework>
 
-### Denying specific bots
+### Deny specific bots
 
 Some applications may only want to block a small subset of bots, while allowing
 the majority continued access. This may be due to many reasons, such as
 misconfigured or high-traffic bots.
 
-This behavior is configured with a `deny` list from our [full list of
-bots](https://arcjet.com/bot-list) and/or
-<Link.Page href="/bot-protection/identifying-bots#bot-categories">bot categories</Link.Page>.
+Configure this behavior with a `deny` list drawn from the [full list of
+bots](https://arcjet.com/bot-list), from <Link.Page href="/bot-protection/identifying-bots#bot-categories">bot categories</Link.Page>, or from both.
 
 <SlotByFramework client:load>
   <BunDenyingBots slot="bun" />
@@ -289,8 +286,8 @@ bots](https://arcjet.com/bot-list) and/or
 
 ## Decision
 
-The <Link.Page href="/bot-protection/quick-start">quick start example</Link.Page> will deny requests that
-match the bot detection rules, immediately returning a response to the client.
+The <Link.Page href="/bot-protection/quick-start">quick start example</Link.Page> denies requests that match the bot detection rules, immediately
+returning a response to the client.
 
 Arcjet provides a single `protect` function that is used to execute your
 protection rules. This requires a `request` argument which is the request
@@ -303,22 +300,22 @@ context as passed to the request handler.
 This function returns a `Promise` that resolves to an
 `ArcjetDecision` object. This contains the following properties:
 
-- `id` (`string`) - The unique ID for the request. This can be used to look up
+- `id` (`string`) – The unique ID for the request. This can be used to look up
   the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
   involving the Arcjet cloud API. For decisions taken locally, the prefix is
   `lreq_`.
-- `conclusion` (`ArcjetConclusion`) - The final conclusion based on evaluating
+- `conclusion` (`ArcjetConclusion`) – The final conclusion based on evaluating
   each of the configured rules. If you wish to accept Arcjet's recommended
   action based on the configured rules then you can use this property.
-- `reason` (`ArcjetReason`) - An object containing more detailed
+- `reason` (`ArcjetReason`) – An object containing more detailed
   information about the conclusion.
-- `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
+- `results` (`ArcjetRuleResult[]`) – An array of `ArcjetRuleResult` objects
   containing the results of each rule that was executed.
-- `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
-  client IP address. See the SDK reference for more information.
+- `ip` (`ArcjetIpDetails`) – An object containing Arcjet's analysis of the
+  client IP address. For more information, see the SDK reference.
 
-You check if a deny conclusion has been returned by a bot protection rule by
-using `decision.isDenied()` and `decision.reason.isBot()` (JS) /
+To check whether a bot protection rule returned a deny conclusion, use
+`decision.isDenied()` and `decision.reason.isBot()` (JS) /
 `decision.is_denied()` and `decision.reason_v2.type == "BOT"` (Python).
 
 You can iterate through the results and check whether a bot protection rule was
@@ -358,11 +355,9 @@ for result in decision.results:
 
 ### Identified bots
 
-The decision also contains all of the
-<Link.Page href="/bot-protection/identifying-bots">identified bots and matched categories</Link.Page> detected from the
-request. A request may be identified as zero, one, or more bots/categories-all
-of which will be available on the `decision.allowed` and `decision.denied`
-properties.
+The decision also contains all of the <Link.Page href="/bot-protection/identifying-bots">identified bots and matched categories</Link.Page> detected from the request. A request
+may be identified as zero, one, or more bots/categories-all of which are
+available on the `decision.allowed` and `decision.denied` properties.
 
 <SlotByFramework client:load>
   <BunIdentifiedBots slot="bun" />
@@ -379,16 +374,18 @@ properties.
 ## Error handling
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
-not block all requests. The SDK will also time out and fail open after 1000ms
-in development (see <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>) and 500ms
-otherwise. However, in most cases, the response time will be less than 20-30ms.
+not block all requests. The SDK also times out and fails open after 1000&nbsp;ms
+in development (see <Link.Page
+href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>) and 500&nbsp;ms
+otherwise. However, in most cases, the response time is less than 20&nbsp;ms to
+30&nbsp;ms.
 
-If there is an error condition when processing the rule, Arcjet will return an
-`ERROR` result for that rule and you can check the `message` property on the rule's
-error result for more information.
+If there is an error condition when processing the rule, Arcjet returns an
+`ERROR` result for that rule and you can check the `message` property on the
+rule's error result for more information.
 
-If all other rules that were run returned an `ALLOW` result, then the final Arcjet
-conclusion will be `ERROR`.
+If all other rules that were run returned an `ALLOW` result, then the final
+Arcjet conclusion is `ERROR`.
 
 :::note
 Requests without `User-Agent` headers might not be identified as any particular
@@ -411,7 +408,7 @@ See <Link.Page href="/bot-protection/reference#user-agent-header">an example of 
   <SvelteKitErrors slot="sveltekit" />
 </SlotByFramework>
 
-## Filtering categories
+## Filter categories
 
 All categories are also provided as enumerations, which allows for programmatic
 access. For example, you may want to allow most of `CATEGORY:GOOGLE` except
@@ -440,17 +437,19 @@ else.
 
 :::note
 Because verification is only helpful when you want to specifically `allow`
-certain bots, any `deny` rules bypass verification and simply block bots
-matching the `deny` list.
+certain bots, any `deny` rules bypass verification and block bots matching the
+`deny` list.
 :::
 
 ### Example: Allowing verified bots
 
 Well-behaved bots, such as search engine indexers, are often desirable traffic.
-The companies that operate these bots will make them verifiable so application
-developers can choose to avoid <Link.Page href="/bot-protection/advanced-signals">additional signals</Link.Page> about the request.
+The companies that operate these bots make them verifiable so application
+developers can choose to avoid <Link.Page
+href="/bot-protection/advanced-signals">additional signals</Link.Page> about the
+request.
 
-For example, when a request claims to be GoogleBot, Arcjet will check if the IP
+For example, when a request claims to be GoogleBot, Arcjet checks whether the IP
 truly belongs to Google. You can check the verification status in your code and
 take actions based on the results, such as allowing all verified bots.
 
@@ -522,8 +521,8 @@ if decision.is_denied():
 
 ### Check for spoofed bots
 
-This will check if the bot is spoofed. You would usually return a 403 or similar
-response to block the request.
+This checks whether the bot is spoofed. You would usually return a 403 or
+similar response to block the request.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -560,7 +559,7 @@ for result in decision.results:
 
 ### Check bot verification
 
-This will check if the bot is verified.
+This checks whether the bot is verified.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -684,7 +683,8 @@ blocking any requests.
 We have an example test framework you can use to automatically test your rules.
 Arcjet can also be triggered based using a sample of your traffic.
 
-See the <Link.Page href="/testing">Testing</Link.Page> section of the docs for details.
+For details, see the <Link.Page href="/testing">Testing</Link.Page> section of
+the docs.
 
 <SlotByFramework client:load>
   <NextJsExamples slot="next-js" />

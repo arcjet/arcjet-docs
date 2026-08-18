@@ -11,21 +11,21 @@ Arcjet can help you protect your payment form from fraudulent credit card
 transactions. The goal is to block high risk transactions before they are
 submitted to your credit card processor to save you money on chargeback fees.
 
-Credit card processors are able to use other signals to detect fraud once they
-have the full transaction details, so we recommend using this as a first defense
-to block the most obvious fraud attempts.
+Credit card processors can use other signals to detect fraud once they have the
+full transaction details. We recommend using Arcjet as a first defense to block
+the most obvious fraud attempts.
 
 ## Pre-checkout protection
 
 A common approach for handling payments is to generate a unique payment or
-checkout link e.g. [Stripe
+checkout link, such as [Stripe
 Checkout](https://docs.stripe.com/checkout/quickstart?lang=node&client=next).
 This avoids having to collect credit card details on your own servers.
 
-In this example, Arcjet will analyze the user request before checkout. If the
-request is high risk, the user will be blocked. If the request is considered
-safe, you can then proceed to generate the payment link and redirect the user to
-the payment processor.
+In this example, Arcjet analyzes the user request before checkout. If the
+request is high risk, Arcjet blocks the user. If the request is considered safe,
+you can then proceed to generate the payment link and redirect the user to the
+payment processor.
 
 ### Rules
 
@@ -76,7 +76,7 @@ const aj = arcjet({
 
 If the base rules pass then you can use
 <Link.Page href="/blueprints/ip-geolocation">IP geolocation</Link.Page> and
-<Link.Page href="/blueprints/vpn-proxy-detection">VPN & proxy detection</Link.Page> checks to further validate the
+<Link.Page href="/blueprints/vpn-proxy-detection">VPN and proxy detection</Link.Page> checks to further validate the
 transaction.
 
 This example only allows users from the US and UK, and blocks users from hosting
@@ -160,15 +160,15 @@ console.info("Arcjet checks passed", decision.id);
 
 ### Next.js example
 
-This example shows a form component which implements the above rules. It uses
-the Next.js app router and [shadcn/ui](https://ui.shadcn.com/).
+This example shows a form component which implements the preceding rules. It
+uses the Next.js app router and [shadcn/ui](https://ui.shadcn.com/).
 
 ```sh
 # Install shadcn components from https://ui.shadcn.com/docs/installation/next
 npx shadcn@latest add button card input label toast use-toast
 ```
 
-This will install the following components:
+This installs the following components:
 
 ```shell
   - components/ui/button.tsx
@@ -180,8 +180,8 @@ This will install the following components:
   - hooks/use-toast.ts
 ```
 
-The payment form component is shown below. If the form passes the Arcjet checks,
-it will redirect the user to the link for the payment processor.
+The following example is the payment form component. If the form passes the
+Arcjet checks, it redirects the user to the link for the payment processor.
 
 ```tsx title="/app/components/Form.tsx"
 "use client";

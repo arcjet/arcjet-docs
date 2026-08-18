@@ -7,8 +7,8 @@ const request = new Request("/your-route");
 // You can also pass a list of trusted proxies to ignore
 const proxyExcludedPublicIp = ip(request, {
   proxies: [
-    "100.100.100.100", // A single IP
-    "100.100.100.0/24", // A CIDR for the range
+    "203.0.113.100", // A single IP
+    "203.0.113.0/24", // A CIDR for the range
   ],
 });
 console.log(proxyExcludedPublicIp);

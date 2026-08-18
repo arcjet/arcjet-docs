@@ -20,9 +20,9 @@ Each top-level value is JSON-encoded by the SDK. Keys the SDK cannot encode
 single `AJ1017` warning naming them. A `metadata` that is not a plain object is
 ignored entirely. Prefer `metadata` over `extra`, which stays a flat string map.
 
-Metadata is untrusted and is not redacted — do not put secrets or PII in it.
-JavaScript numbers are IEEE-754 doubles, so an integer above
-`Number.MAX_SAFE_INTEGER` should be passed as a string.
+Metadata is untrusted and is not redacted – do not put secrets or PII in it.
+JavaScript numbers are IEEE-754 doubles, so pass an integer above
+`Number.MAX_SAFE_INTEGER` as a string.
 
-See <Link.Page href="/guards/reference#metadata">Guard metadata</Link.Page> for
-limits, drop behavior, and language-specific notes.
+For limits, drop behavior, and language-specific notes, see <Link.Page
+href="/guards/reference#metadata">Guard metadata</Link.Page>.

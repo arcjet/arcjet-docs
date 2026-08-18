@@ -7,13 +7,13 @@ bun run --hot index.ts
 ```
 
 :::note
-Bun's `--hot` flag will reload the runtime when changes are made to your `.ts`
-files, but not your `.env.local` file. If you change your `.env.local` file,
-you need to restart the command manually.
+Bun's `--hot` flag reloads the runtime when you change your `.ts` files, but not
+your `.env.local` file. If you change your `.env.local` file, you need to
+restart the command manually.
 :::
 
 Visit [`http://localhost:3000`](http://localhost:3000) in your browser and
-refresh a few times to hit the rate limit. You may see 2 requests - one for the
+refresh a few times to hit the rate limit. You may see 2 requests – one for the
 page and one for a favicon.
 
 Wait 10 seconds, then run:
@@ -25,5 +25,5 @@ curl -v http://localhost:3000
 The wait is necessary because the decision is cached for your IP based on the
 `interval` rate limit configuration.
 
-You should see a `403` response because `curl` is considered a bot by default
+You get a `403` response because `curl` is considered a bot by default
 (<Link.Page href="/bot-protection/identifying-bots">customizable</Link.Page>).

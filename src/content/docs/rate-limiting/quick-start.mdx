@@ -99,7 +99,7 @@ import SvelteKitStep2 from "@/snippets/rate-limiting/quick-start/sveltekit/Step2
 import SvelteKitStep3 from "@/snippets/rate-limiting/quick-start/sveltekit/Step3.mdx";
 import SvelteKitStep4 from "@/snippets/rate-limiting/quick-start/sveltekit/Step4.mdx";
 
-Arcjet rate limiting allows you to define rules which limit the number of
+Arcjet rate limiting lets you define rules which limit the number of
 requests a client can make over a period of time.
 
 <WhatIsArcjet />
@@ -118,11 +118,12 @@ requests a client can make over a period of time.
 
 ## Quick start
 
-This guide will show you how to add a simple rate limit to your <FrameworkName client:load /> app.
+This guide shows you how to add a basic rate limit to your <FrameworkName
+client:load /> app.
 
 ### 1. Install Arcjet
 
-In your project root, run the following command to install the SDK:
+In your project root, install the SDK:
 
 <SlotByFramework client:load>
   <BunStep1 slot="bun" />
@@ -153,10 +154,10 @@ instructions to add a site and get a key.
 
 ### 3. Add a rate limit to a route
 
-The example below applies a token bucket rate limit rule to a route where we
-identify the user based on their ID e.g. if they are logged in. The bucket is
-configured with a maximum capacity of 10 tokens and refills by 5 tokens every
-10 seconds. Each request consumes 5 tokens.
+The following example applies a token bucket rate limit rule to a route where we
+identify the user based on their ID, for example when they're logged in. The
+bucket is configured with a maximum capacity of 10 tokens and refills by 5
+tokens every 10 seconds. Each request consumes 5 tokens.
 
 <SlotByFramework client:load>
   <BunStep3 slot="bun" />
@@ -180,7 +181,7 @@ configured with a maximum capacity of 10 tokens and refills by 5 tokens every
   <SvelteKitStep4 slot="sveltekit" />
 </SlotByFramework>
 
-The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
+The requests also appear in the [Arcjet dashboard](https://app.arcjet.com).
 
 ## FAQs
 
@@ -209,14 +210,14 @@ The requests will also show in the [Arcjet dashboard](https://app.arcjet.com).
 ### Explore
 
 Arcjet can be used with specific rules on individual routes or as general
-protection on your entire application. You can setup bot protection,
-minimize fraudulent registrations with the signup form protection and more.
+protection on your entire application. You can set up bot protection, minimize
+fraudulent registrations with the signup form protection and more.
 
 <CardGrid>
   <Link.Card
     title="Example apps"
     href="https://github.com/arcjet/arcjet-js/tree/main/examples"
-    description="Check out the examples."
+    description="See the example apps."
   />
   <Link.Card
     title="Learn how Arcjet works"

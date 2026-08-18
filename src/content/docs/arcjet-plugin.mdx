@@ -1,5 +1,5 @@
 ---
-title: "Arcjet Plugin"
+title: "Arcjet plugin"
 description: "The Arcjet plugin for Claude Code and Cursor turns AI coding agents into security experts with automatic context injection, security-aware coding rules, and built-in skills."
 prev: false
 next: false
@@ -18,14 +18,14 @@ that wires up MCP, skills, and security-aware coding rules together.
 <Aside type="tip">
   The recommended path for most agentic workflows is to install Arcjet skills
   directly with `npx skills add arcjet/skills` and connect to the Arcjet API
-  via the [CLI](/cli) or [MCP server](/mcp-server). See
-  [Agent get started](/agent-get-started) for the canonical entry point. The
-  plugin is an alternative for users who prefer a bundled experience inside
-  Claude Code or Cursor.
+  with the [CLI](/cli) or [MCP server](/mcp-server). For the canonical entry
+  point, see [Agent get started](/agent-get-started). The plugin is an
+  alternative for users who prefer a bundled experience inside Claude Code or
+  Cursor.
 </Aside>
 
 The plugin pre-loads agents with knowledge of the Arcjet security platform and
-automatically injects the right guidance based on what you're working on —
+automatically injects the right guidance based on what you're working on –
 framework-specific SDK patterns, protection rules, and best practices.
 
 ## Installation
@@ -52,12 +52,12 @@ commands to learn.
 The plugin includes four main components that work together to enhance your AI
 coding agent:
 
-| Component                    | Description                                                                                            |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------ |
-| **MCP integration**          | Connects to the [Arcjet MCP server](/mcp-server) for traffic analysis, request inspection, IP investigation, and remote rule management |
-| **Security-aware coding rules** | Framework-specific guidance that auto-activates when you're working in relevant files                |
-| **Skills**                   | Task-oriented workflows for implementing protection                                                    |
-| **Security analyst agent**   | Monitors threats, analyzes traffic patterns, and manages rules                                         |
+| Component                       | Description                                                                                                                             |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP integration**             | Connects to the [Arcjet MCP server](/mcp-server) for traffic analysis, request inspection, IP investigation, and remote rule management |
+| **Security-aware coding rules** | Framework-specific guidance that auto-activates when you're working in relevant files                                                   |
+| **Skills**                      | Task-oriented workflows for implementing protection                                                                                     |
+| **Security analyst agent**      | Monitors threats, analyzes traffic patterns, and manages rules                                                                          |
 
 ## How it works
 
@@ -70,39 +70,40 @@ handles the rest.
 
 Guidance triggers automatically in specific contexts:
 
-| Context              | File patterns                              | What it provides                                            |
-| -------------------- | ------------------------------------------ | ----------------------------------------------------------- |
-| **SDK patterns**     | `**/lib/arcjet*`                           | Single instance setup, `protect()` usage, decision handling |
-| **Next.js**          | `app/**/route.ts`, `pages/api/**`          | Import validation, handler vs. component distinctions       |
-| **Express / Node**   | `**/server.ts`                             | Adapter packages, configuration patterns                    |
-| **Python**           | `**/*.py`                                  | Snake case API conventions, async/sync client handling       |
-| **AI apps**          | `**/chat/**`, `**/api/chat*`               | Layered protection, token budgets, PII blocking             |
+| Context                | File patterns                     | What it provides                                            |
+| ---------------------- | --------------------------------- | ----------------------------------------------------------- |
+| **SDK patterns**       | `**/lib/arcjet*`                  | Single instance setup, `protect()` usage, decision handling |
+| **Next.js**            | `app/**/route.ts`, `pages/api/**` | Import validation, handler versus component distinctions    |
+| **Express or Node.js** | `**/server.ts`                    | Adapter packages, configuration patterns                    |
+| **Python**             | `**/*.py`                         | Snake case API conventions, async/sync client handling      |
+| **AI apps**            | `**/chat/**`, `**/api/chat*`      | Layered protection, token budgets, PII blocking             |
 
 ### Skills
 
 Invoke skills directly within your AI coding agent:
 
-| Skill       | Purpose                                                                                                                          |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `/arcjet`   | Add protection with automatic detection of context — HTTP routes, AI tool calls, MCP handlers, queue workers, and more.          |
+| Skill     | Purpose                                                                                                                 |
+| --------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `/arcjet` | Add protection with automatic detection of context – HTTP routes, AI tool calls, MCP handlers, queue workers, and more. |
 
-The previous skill names — `/arcjet:protect-route` and `/arcjet:add-ai-protection` — remain as deprecated aliases that emit a diagnostic on use. Migrate to `/arcjet`.
+The previous skill names – `/arcjet:protect-route` and `/arcjet:add-ai-protection` – remain as deprecated aliases that emit a diagnostic on use. Migrate to `/arcjet`.
 
 The plugin's skills track the canonical [arcjet/skills](https://github.com/arcjet/skills) package, which is the source of truth. You can install the same skill outside the plugin with `npx skills add arcjet/skills`.
 
 ### Supported frameworks
 
-The Arcjet Plugin supports all the languages and frameworks supported by the Arcjet SDKs:
+The Arcjet plugin supports all the languages and frameworks that the Arcjet SDKs support:
 
 **JavaScript / TypeScript:** Next.js, Express, Node.js, Fastify, NestJS,
 SvelteKit, Remix, React Router, Astro, Nuxt, Hono, Bun, Deno
 
 **Python:** FastAPI, Flask
 
-## Using the plugin with MCP
+## Use the plugin with MCP
 
 The plugin connects to the [Arcjet MCP server](/mcp-server) to give your agent
-access to your Arcjet account. When connected via OAuth, agents can:
+access to your Arcjet account. When connected through OAuth, agents can do the
+following:
 
 - Inspect requests and explain allow/deny decisions
 - Analyze traffic patterns and detect anomalies
@@ -115,20 +116,20 @@ access to your Arcjet account. When connected via OAuth, agents can:
   get started guide](/agent-get-started) for a step-by-step setup walkthrough.
 </Aside>
 
-## Using the plugin with the CLI
+## Use the plugin with the CLI
 
 The plugin invokes the [Arcjet CLI](/cli) to stream live request activity into
-your agent's context — for example when you ask the agent to watch traffic on
+your agent's context – for example when you ask the agent to watch traffic on
 a site or investigate recent requests. The CLI exposes the same management-
 plane surface as the MCP server (teams, sites, rules, requests, analysis)
 directly from the terminal.
 
 ## See also
 
-- [Agent get started](/agent-get-started) — canonical entry point for setting
+- [Agent get started](/agent-get-started) – canonical entry point for setting
   up Arcjet in an agentic workflow.
-- [Arcjet CLI](/cli) — terminal-based management-plane access.
-- [MCP server](/mcp-server) — full MCP tool reference.
+- [Arcjet CLI](/cli) – terminal-based management-plane access.
+- [MCP server](/mcp-server) – full MCP tool reference.
 
 ## Source code
 

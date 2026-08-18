@@ -9,7 +9,8 @@ import { Aside } from "@astrojs/starlight/components";
 Arcjet provides IP geolocation information in two places:
 
 - Decisions after calling `protect()` include IP address analysis fields. You
-  can use this to customize responses. See the SDK reference for details e.g.
+  can use this to customize responses. For details, see the SDK reference for
+  your framework, such as
   <Link.Page href="/reference/nextjs#ip-analysis">Next.js</Link.Page>.
 - <Link.Page href="/filters">Arcjet Filters</Link.Page> have access to IP
   address analysis. You can use this to block traffic.
@@ -32,14 +33,14 @@ Arcjet provides IP geolocation information in two places:
 
 <Aside type="caution">
   IP geolocation can be notoriously inaccurate, especially for mobile devices,
-  satellite internet providers, and even just normal users. Likewise with the
+  satellite internet providers, and even ordinary users. Likewise with the
   specific fields like `city` and `region`, which can be very inaccurate.
   Country is usually accurate, but there are often cases where IP addresses are
-  mislocated. These fields are provided for convenience e.g. suggesting a user
-  location, but should not be relied upon by themselves.
+  mislocated. These fields are provided for convenience, such as suggesting a
+  user location, but don't rely on them alone.
 </Aside>
 
-## Checking for data
+## Check for data
 
 The IP location fields may be `undefined`, but you can use various methods to
 check their availability:

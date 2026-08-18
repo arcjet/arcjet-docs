@@ -9,37 +9,36 @@ import Comments from "/src/components/Comments.astro";
 No security product is perfect and Arcjet is no exception. Here are some things
 to be aware of when building your application with Arcjet.
 
-## Your application will receive traffic
+## Your application receives traffic
 
-Network based security products block traffic before it hits your application.
-This works well for high volume network attacks so those are best handled by the
-DDoS protection built into your hosting platform.
+Network-based security products block traffic before it hits your application.
+This works well for high-volume network attacks, so leave those to the DDoS
+protection built into your hosting platform.
 
 Arcjet is designed to integrate into your application and understand more about
-the request context. This allows the right rules to be applied and allows you to
-customize the response based on the signals provided by Arcjet. You can also
+the request context. This lets Arcjet apply the right rules, and lets you
+customize the response based on the signals that Arcjet provides. You can also
 show useful error messages rather than returning generic status codes.
 
 For example, it is difficult for network based security products to distinguish
-between a free user making excessive API calls vs your largest paying customer
+between a free user making excessive API calls and your largest paying customer
 performing important queries. Likewise, you may want to manually review users
 signing up from behind a proxy who have disposable email addresses, but allow
 those with business emails to sign up instantly.
 
-We believe application context is critical and so this where Arcjet shines.
-However, it also means that your application will receive more traffic than if
-it were simply blocked on the network.
+We believe application context is critical, and that is what Arcjet is designed
+for. It also means that your application receives more traffic than if the
+network had blocked it.
 
 ## Shield analysis does not use the request body
 
-<Link.Page href="/shield">Arcjet Shield</Link.Page> analysis is currently
-based on the request headers and query parameters. To minimize false positives
+<Link.Page href="/shield">Arcjet Shield</Link.Page> analysis is based on the
+request headers and query parameters. To minimize false positives
 and achieve low-latency responses, Shield analysis happens in the background on
 the Arcjet platform after a request has been reported to our API. For
 <Link.Page href="/privacy">privacy</Link.Page> we do not send the request body
 to our API, so it cannot be used for analysis.
 
-In the future we intend to support local request body analysis as part of
-Shield.
+Local request body analysis is on the Arcjet roadmap for Shield.
 
 <Comments />

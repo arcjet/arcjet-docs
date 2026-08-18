@@ -13,9 +13,8 @@ application values into the policy contract; authorized site members can
 publish the policy selected by its `label`.
 
 This page covers **Agent guard remote policies** for labeled `guard()` actions
-and tool calls. They are separate from <Link.Page href="/remote-rules">Request
-Remote rules</Link.Page>, which are site-scoped rules merged with SDK request
-rules for HTTP requests handled by `protect()`.
+and tool calls. They are separate from <Link.Page href="/remote-rules">Request Remote rules</Link.Page>, which are site-scoped rules merged
+with SDK request rules for HTTP requests handled by `protect()`.
 
 Remote policies complement, rather than replace, SDK rules configured in code.
 For the architecture, ownership trade-offs, and vendor examples, read
@@ -26,9 +25,9 @@ For the architecture, ownership trade-offs, and vendor examples, read
 An application-native rule is usually code-native: its semantics and change and
 release lifecycle are owned by the application, and it is authored and tested
 with the application. An SDK integration alone does not provide that policy
-model. An SDK can put enforcement inside an application while all policy
-remains configured in a remote control plane. Choose the authoring model based
-on who must change the rule and which lifecycle should govern it.
+model. An SDK can put enforcement inside an application while all policy remains
+configured in a remote control plane. Choose the authoring model based on who
+must change the rule and which lifecycle governs it.
 
 |                            | Application-native (code-native) SDK rules            | Agent guard remote policies                                  |
 | -------------------------- | ----------------------------------------------------- | ------------------------------------------------------------ |
@@ -140,7 +139,7 @@ offsets, not the matched raw values.
 
 ## Supported rules
 
-Agent guard remote policies currently support:
+Agent guard remote policies support the following rules:
 
 | Rule                   | Execution | What it evaluates                                                   |
 | ---------------------- | --------- | ------------------------------------------------------------------- |
@@ -155,15 +154,15 @@ Each rule can be `LIVE`, where a denial contributes to the final decision, or
 `DRY_RUN`, where it is evaluated and reported without blocking.
 
 Generic URL allow/deny rules, command or shell rules, remote custom rules, and
-remote rate limits are not currently supported. SDK rules configured in code
+remote rate limits aren't supported. SDK rules configured in code
 remain available and can be submitted alongside a remote policy.
 
 ## Policy examples
 
 ### Restrict a tool to approved recipients
 
-Configure two `SERVER` inputs—a string named `recipient` and a string list
-named `allowed_recipients`—then add a string-list membership rule requiring the
+Configure two `SERVER` inputs – a string named `recipient` and a string list
+named `allowed_recipients` – then add a string-list membership rule requiring the
 recipient to appear in the list.
 
 <Tabs syncKey="language">
@@ -248,7 +247,7 @@ inputs=lambda _arguments, _config: {
 
 ### Combine policies in an agent workflow
 
-One `email.sent` policy can combine all three rules above. The integration maps
+One `email.sent` policy can combine all three of the preceding rules. The integration maps
 the current agent run and generated tool arguments into the policy before the
 framework executes the tool:
 
@@ -314,7 +313,7 @@ context. Only `recipient` and `body` come from the model's validated tool call.
 If any `LIVE` rule denies, the integration prevents `sendEmailTool` from
 executing.
 
-## Remote rules vs. policies
+## Remote rules versus policies
 
 Arcjet has two separate remote configuration systems:
 

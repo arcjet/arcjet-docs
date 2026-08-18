@@ -9,12 +9,12 @@ import { Link } from "@/components/link";
 import Comments from "/src/components/Comments.astro";
 
 Our philosophy around major SDK version upgrades is to avoid breaking changes
-where possible. When they are necessary, we will deprecate rather than break,
-and provide a clear migration path that will remain supported for some time.
+where possible. When they are necessary, we deprecate rather than break, and
+provide a clear migration path that remains supported for some time.
 
 This page documents breaking changes and migrations between SDK releases.
 
-## Arcjet JS SDK 1.0.0 - 1.4.0
+## Arcjet JS SDK 1.0.0 – 1.4.0
 
 There have been no breaking changes.
 
@@ -22,13 +22,13 @@ There have been no breaking changes.
 
 The
 [`1.0.0`](https://github.com/arcjet/arcjet-js/releases/tag/v1.0.0)
-version of the Arcjet JS SDK was released on 2026-01-22. No migrations are required from the last `1.0.0-beta-18` release.
+version of the Arcjet JS SDK was released on January 22, 2026. No migrations are required from the last `1.0.0-beta-18` release.
 
 ## Arcjet JS SDK 1.0.0 beta 18
 
 The
 [`1.0.0-beta-18`](https://github.com/arcjet/arcjet-js/releases/tag/v1.0.0-beta.18)
-version of the Arcjet JS SDK was released on 2026-01-22 and includes the
+version of the Arcjet JS SDK was released on January 22, 2026 and includes the
 following breaking changes.
 
 ### Deprecate automatic body reading
@@ -42,13 +42,13 @@ const decision = await arcjet.protect(request, { sensitiveInfoValue: "..." });
 
 This value is processed locally and is not sent to the Arcjet cloud API.
 
-If you use tools that patch `request.body` e.g. [`body-parser`](https://www.npmjs.com/package/body-parser) you are not affected and can continue to use them.
+If you use tools that patch `request.body`, such as [`body-parser`](https://www.npmjs.com/package/body-parser), you are not affected and can continue to use them.
 
 ## Arcjet JS SDK 1.0.0 beta 17
 
 The
 [`1.0.0-beta-17`](https://github.com/arcjet/arcjet-js/releases/tag/v1.0.0-beta.17)
-version of the Arcjet JS SDK was released on 2026-01-13 and includes the
+version of the Arcjet JS SDK was released on January 13, 2026 and includes the
 following breaking changes.
 
 ### Remove `block` field in `validateEmail` rule config
@@ -65,7 +65,7 @@ validateEmail({ deny: ["DISPOSABLE"], mode: "LIVE" });
 
 The
 [`1.0.0-beta-1`](https://github.com/arcjet/arcjet-js/releases/tag/v1.0.0-beta.1)
-version of the Arcjet JS SDK was released on 2025-01-15 and includes the
+version of the Arcjet JS SDK was released on January 15, 2025 and includes the
 following breaking changes.
 
 ### `block` is now `deny` for `validateEmail` rules
@@ -82,8 +82,8 @@ validateEmail({
 });
 ```
 
-It is now also possible to configure email types to allow. In the example below,
-only email addresses from free email providers will be allowed.
+It is now also possible to configure email types to allow. In the following
+example, Arcjet allows only email addresses from free email providers.
 
 ```ts
 validateEmail({
@@ -92,15 +92,14 @@ validateEmail({
 });
 ```
 
-The old options will continue to work, but have been flagged as deprecated.
+The old options continue to work, but are flagged as deprecated.
 
 ### `ArcjetEnum` objects are now deprecated
 
 In earlier versions of the SDK we provided enum objects for configuring your
 rules. These have been deprecated in favor of string-type enums.
 
-The table below shows which enums you should replace and their equivalent
-strings.
+The following table shows which enums to replace and their equivalent strings.
 
 | alpha                                        | beta                   |
 | -------------------------------------------- | ---------------------- |
@@ -136,12 +135,12 @@ strings.
 | `ArcjetRuleType.LOCAL`                       | `"LOCAL"`              |
 | `ArcjetRuleType.REMOTE`                      | `"REMOTE"`             |
 
-### Handling of url-encoded data in sensitive info detection
+### URL-encoded data in sensitive info detection
 
 <Link.Page href="/sensitive-info">Arcjet Sensitive info detection</Link.Page> and
 <Link.Page href="/redact/quick-start">`@arcjet/redact`</Link.Page> features
-now handle both raw and URL-encoded data simultaneously. This dual processing
-approach ensures comprehensive detection, particularly for content containing
+handle both raw and URL-encoded data simultaneously. This dual processing
+approach improves detection, particularly for content containing
 the + character, which serves both as a literal plus sign (common in phone
 numbers) and as an encoded space in URLs.
 
@@ -164,15 +163,14 @@ For example:
 ### Wasm loading has moved to `@arcjet/analyze-wasm`
 
 We have moved the responsibility for loading Wasm on your target platform from
-`@arcjet/analyze` to `@arcjet/analyze-wasm`. This should not affect users who
-were using the SDK through the high level framework adapters e.g.
-`@arcjet/next`.
+`@arcjet/analyze` to `@arcjet/analyze-wasm`. This does not affect users who were
+using the SDK through the high level framework adapters, such as `@arcjet/next`.
 
 ## Arcjet JS SDK 1.0.0-alpha.24
 
 The
 [`1.0.0-alpha-24`](https://github.com/arcjet/arcjet-js/releases/tag/v1.0.0-alpha.24)
-version of the Arcjet JS SDK was released on 2024-09-05 and includes the
+version of the Arcjet JS SDK was released on September 5, 2024 and includes the
 following breaking changes.
 
 ### `add` and `remove` replaced with `allow` and `deny` in `detectBot` rule

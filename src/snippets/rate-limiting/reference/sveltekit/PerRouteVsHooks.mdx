@@ -4,7 +4,7 @@ import HookMatchingPaths from "./HookMatchingPaths.mdx";
 import HookAllRoutes from "./HookAllRoutes.mdx";
 import HookMatcher from "./HookMatcher.mdx";
 
-## Per route vs hooks
+## Per route versus hooks
 
 Rate limit rules can be configured in two ways:
 
@@ -12,15 +12,15 @@ Rate limit rules can be configured in two ways:
   you to configure the rule alongside the code it is protecting which is useful
   if you want to use the decision to add context to your own code. However, it
   means rules are not located in a single place.
-- **Hooks**: The rule is defined as a hook. This allows you to
+- **Hooks**: The rule is defined as a hook. This lets you
   configure rules in a single place or apply them globally to all routes, but
   it means the rules are not located alongside the code they are protecting.
 
 ### Per route
 
 If you define your rate limit within an API route Arcjet assumes that the limit
-applies only to that route. If you define your rate limit in hooks, you should
-use `event.url.pathname.startsWith`.
+applies only to that route. If you define your rate limit in hooks, use
+`event.url.pathname.startsWith`.
 
 #### Rate limit only on `/api/*`
 
@@ -30,7 +30,7 @@ use `event.url.pathname.startsWith`.
 
 <HookAllRoutes />
 
-### Avoiding double protection with hooks
+### Avoid double protection with hooks
 
 If you use Arcjet in hooks and individual routes, you need to be careful
 that Arcjet is not running multiple times per request. This can be avoided by

@@ -1,5 +1,5 @@
 ---
-title: "AI Runtime Protection"
+title: "AI runtime protection"
 description: "Arcjet is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks."
 prev: false
 next: true
@@ -40,7 +40,7 @@ Production AI failures follow three patterns:
 
 Arcjet's core features map directly onto these problems. These guides cover
 HTTP middleware for web frameworks. If you're building agentic pipelines or need
-security inside tool handlers - where there's no `Request` object - see
+security inside tool handlers – where there's no `Request` object – see
 
 <Link.Page href="/guards">Agent guards</Link.Page>.
 
@@ -49,8 +49,8 @@ security inside tool handlers - where there's no `Request` object - see
 **Building blocks:** Bot detection, prompt injection detection
 
 Block automated clients and detect prompt injection attacks before they reach
-your AI. Arcjet lets you deny all automated traffic - or selectively allow
-trusted clients - and evaluates incoming messages for injection patterns like
+your AI. Arcjet lets you deny all automated traffic – or selectively allow
+trusted clients – and evaluates incoming messages for injection patterns like
 jailbreaks, role-play escapes, and instruction overrides.
 
 <CardGrid>
@@ -112,8 +112,8 @@ quotas to rate limits tracked by tokens.
 
 Prevent PII and sensitive data from leaking into AI model context, logs, or
 third-party tool calls. Arcjet detects card numbers, email addresses, phone
-numbers, and custom patterns in request bodies - and, with the optional
-on-device NER backend, names, addresses, and government / financial identifiers -
+numbers, and custom patterns in request bodies – and, with the optional
+on-device NER backend, names, addresses, and government or financial identifiers -
 entirely locally, with no data leaving your infrastructure.
 
 <CardGrid>
@@ -126,19 +126,19 @@ entirely locally, with no data leaving your infrastructure.
 
 ## Agentic protection (no HTTP request)
 
-The pages above protect HTTP route handlers — the boundary where user input
-enters your application. Agentic workflows often have a second boundary:
-tool calls, MCP server handlers, queue consumers, and pipelines that fan out
-across services. There's no `Request` object at those sites, so the
-request-based SDKs don't apply.
+The preceding pages protect HTTP route handlers – the boundary where user input
+enters your application. Agentic workflows often have a second boundary: tool
+calls, MCP server handlers, queue consumers, and pipelines that fan out across
+services. There's no `Request` object at those sites, so the request-based SDKs
+don't apply.
 
 <Link.Page href="/guards">Agent guards</Link.Page> run the same rate limiting,
 prompt injection detection, sensitive information detection,
 <Link.Page href="/content-moderation">content moderation</Link.Page>, and
-custom rules inside those code paths — pass inputs directly to `guard()` and
-get a decision back. Use <Link.Page href="/guards/capture">`capture()`</Link.Page>
+custom rules inside those code paths. Pass inputs directly to `guard()` and get
+a decision back. Use <Link.Page href="/guards/capture">`capture()`</Link.Page>
 to record that an allowed action happened. Most AI applications combine both:
-request-based protection on the API route, plus guards at every tool / task
+request-based protection on the API route, plus guards at every tool or task
 call site.
 
 <CardGrid>
@@ -166,4 +166,5 @@ call site.
 
 ## Quick start
 
-The fastest way to get started is the <Link.Page href="/get-started">get started guide</Link.Page>, which walks through protecting an AI chat application with bot detection and per-user token budgets.
+To get started, follow the <Link.Page href="/get-started">get started guide</Link.Page>, which walks through protecting an AI chat
+application with bot detection and per-user token budgets.

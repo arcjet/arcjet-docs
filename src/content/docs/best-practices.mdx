@@ -12,7 +12,7 @@ import ProxiesPy from "/src/snippets/best-practices/Proxies.py?raw";
 import CloudflareTS from "/src/snippets/best-practices/Cloudflare.ts?raw";
 import CloudflareCustomRangeTS from "/src/snippets/best-practices/CloudflareCustomRange.ts?raw";
 
-Here are some recommended best practices for using Arcjet effectively in your
+The following sections describe how to use Arcjet effectively in your
 applications.
 
 ## Single client instance
@@ -75,7 +75,7 @@ export async function GET(req: Request) {
 <TabItem label="Python">
 
 The Python SDK's `arcjet()` / `arcjet_sync()` constructor takes the full rule
-set at creation time — there is **no** `with_rule()` chain method on the
+set at creation time – there is **no** `with_rule()` chain method on the
 resulting client (that pattern only exists in the JS SDKs). To apply different
 rules to different routes, create one client per rule set and import them
 where you need them.
@@ -119,24 +119,22 @@ the context of the route handler, making it difficult to apply route-specific
 rules or customize responses based on the request.
 
 Our recommendation is to call `protect()` in each route handler where you need
-it. This offers most flexibility and allows you to customize the behavior for
+it. This offers the most flexibility and lets you customize the behavior for
 each route.
 
 ## Call `protect()` once per request
 
-The Arcjet `protect()` function should be called only once per request.
+Call the Arcjet `protect()` function only once per request.
 
-This is only usually a problem if you are using Arcjet both in middleware and in
-route handlers. We do not recommend using middleware, but if you are using it
-then use a middleware helper to scope the call to Arcjet only to routes that
-need it.
+This is usually only a problem if you use Arcjet both in middleware and in route
+handlers. We do not recommend using middleware, but if you are using it then use
+a middleware helper to scope the call to Arcjet only to routes that need it.
 
 ## Start in dry run mode
 
 We recommend starting each new rule in `DRY_RUN` mode. When configured this way,
-each rule will return its decision, but the end conclusion will always be
-`ALLOW`. This is useful for testing and tuning your rules before switching to
-`LIVE`.
+each rule returns its decision, but the end conclusion is always `ALLOW`. This
+is useful for testing and tuning your rules before switching to `LIVE`.
 
 As these are configured in code, you can use other mechanisms to set the mode.
 For example, you could use an existing feature flag system to dynamically
@@ -153,35 +151,34 @@ live traffic without waiting for an application deploy.
 :::tip[Using the MCP server]
 If you're using the <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page>,
 call `get-dry-run-impact` to see exactly how many currently-allowed requests
-would be blocked before promoting a dry-run rule to live. You can also create and
-promote <Link.Page href="/remote-rules">remote rules</Link.Page> directly via MCP
-without code changes.
+would be blocked before promoting a dry-run rule to live. You can also create
+and promote <Link.Page href="/remote-rules">remote rules</Link.Page> directly
+through MCP without code changes.
 :::
 
 ## Configure proxies and load balancers
 
 Arcjet needs to see the original client IP address to make accurate decisions.
-If your application is behind a proxy or load balancer, you need to ensure that
-Arcjet can access the original IP address.
+If your application is behind a proxy or load balancer, make sure that Arcjet
+can access the original IP address.
 
 Most proxies and load balancers add an `X-Forwarded-For` header to requests that
-contains the original client IP address. You need to ensure that this header is
-passed to your application and that Arcjet is configured to ignore the proxy IP
-addresses.
+contains the original client IP address. Make sure that this header reaches your
+application and that you configure Arcjet to ignore the proxy IP addresses.
 
-This is not necessary on platforms like Firebase, Netlify, Fly.io, or Vercel
+This is not necessary on platforms such as Firebase, Netlify, Fly.io, or Vercel
 because Arcjet can auto-detect the proxy IPs for these platforms.
 
 For other platforms, configure the `proxies` option when creating the Arcjet
-instance. For example, if the load balancer is at `100.100.100.100` and the client IP
-address is `192.168.1.1`, the `X-Forwarded-For` header will be:
+instance. For example, if the load balancer is at `203.0.113.100` and the
+client IP address is `198.51.100.1`, the `X-Forwarded-For` header is:
 
 ```http
-X-Forwarded-For: 192.168.1.1, 100.100.100.100
+X-Forwarded-For: 198.51.100.1, 203.0.113.100
 ```
 
-You should set the `proxies` field to `["100.100.100.100"]` so Arcjet will use
-`192.168.1.1` as the client IP address.
+Set the `proxies` field to `["203.0.113.100"]` so Arcjet uses `198.51.100.1` as
+the client IP address.
 
 You can also specify CIDR ranges to match multiple IP addresses.
 
@@ -193,8 +190,8 @@ const aj = arcjet({
   key: process.env.ARCJET_KEY!,
   rules: [],
   proxies: [
-    "100.100.100.100", // A single IP
-    "100.100.100.0/24", // A CIDR for the range
+    "203.0.113.100", // A single IP
+    "203.0.113.0/24", // A CIDR for the range
   ],
 });
 ```
@@ -208,7 +205,7 @@ const aj = arcjet({
 ### Proxy services like Cloudflare
 
 Some providers don't add themselves to `X-Forwarded-For`. Instead they pass the
-real client IP in their own header — for example, Cloudflare uses
+real client IP in their own header – for example, Cloudflare uses
 `CF-Connecting-IP`. For these you can pass a _proxy service_ in the `proxies`
 option instead of a plain IP address.
 
@@ -220,8 +217,8 @@ client.
 
 <Code code={CloudflareTS} lang="ts" title="/lib/arcjet.ts" />
 
-You can combine proxy services with plain IP addresses in the same list, e.g.
-`proxies: ["100.100.100.0/24", cloudflare()]`.
+You can combine proxy services with plain IP addresses in the same list, such as
+`proxies: ["203.0.113.0/24", cloudflare()]`.
 
 :::caution[Cloudflare in front of Vercel is not recommended]
 If you deploy to Vercel, Vercel
@@ -234,22 +231,22 @@ proxy in front. If you do run Cloudflare in front of Vercel, add `cloudflare()`
 to `proxies` so Arcjet still sees the real client IP.
 :::
 
-#### Adding a Cloudflare range the SDK doesn't know about yet
+#### Add a Cloudflare range the SDK doesn't recognize
 
-The Cloudflare IP ranges are bundled with the SDK and updated as new versions are
-released. If Cloudflare publishes a
-[new range](https://www.cloudflare.com/ips/) before the SDK has been updated, pass
-it via the `ranges` option. This **replaces** the bundled ranges rather than
+The Cloudflare IP ranges are bundled with the SDK and updated as new versions
+are released. If Cloudflare publishes a [new
+range](https://www.cloudflare.com/ips/) before the SDK has been updated, pass it
+with the `ranges` option. This **replaces** the bundled ranges rather than
 adding to them, so include the full current list plus the new range:
 
 <Code code={CloudflareCustomRangeTS} lang="ts" title="/lib/arcjet.ts" />
 
 ## Implement your own error handling
 
-Calls to `protect()` will not throw an error. Arcjet is designed to fail open
-so that a service issue or misconfiguration does not block all requests.
+Calls to `protect()` don't throw an error. Arcjet is designed to fail open so
+that a service issue or misconfiguration does not block all requests.
 
-If there is an error condition when processing the rule, Arcjet will return an
+If there is an error condition when processing the rule, Arcjet returns an
 `ERROR` result for that rule and you can check the error message on the rule's
 error result for more information. For example:
 

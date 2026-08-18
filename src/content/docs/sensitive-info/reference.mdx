@@ -23,8 +23,8 @@ ajToc:
         anchor: "per-route-guard"
       - text: "Within route"
         anchor: "within-route"
-  - text: "Per route vs middleware"
-    anchor: "per-route-vs-middleware"
+  - text: "Per route versus middleware"
+    anchor: "per-route-versus-middleware"
     framework: ["next-js"]
     children:
       - text: "Per route"
@@ -32,12 +32,12 @@ ajToc:
       - text: "Middleware"
         anchor: "middleware"
       - text: "Avoiding double protection with middleware"
-        anchor: "avoiding-double-protection-with-middleware"
-  - text: "Pages & server actions"
-    anchor: "pages--server-actions"
+        anchor: "avoid-double-protection-with-middleware"
+  - text: "Pages and server actions"
+    anchor: "pages-and-server-actions"
     framework: ["next-js"]
-  - text: "Per route vs hooks"
-    anchor: "per-route-vs-hooks"
+  - text: "Per route versus hooks"
+    anchor: "per-route-versus-hooks"
     framework: ["sveltekit"]
     children:
       - text: "Per route"
@@ -45,7 +45,7 @@ ajToc:
       - text: "Hooks"
         anchor: "hooks"
       - text: "Avoiding double protection with hooks"
-        anchor: "avoiding-double-protection-with-hooks"
+        anchor: "avoid-double-protection-with-hooks"
   - text: "Detection backends"
     anchor: "detection-backends"
     children:
@@ -69,7 +69,7 @@ ajToc:
   - text: "Custom entity detection"
     anchor: "custom-entity-detection"
   - text: "Accessing the body"
-    anchor: "accessing-the-body"
+    anchor: "access-the-body"
     framework: ["node-js"]
   - text: "Error handling"
     anchor: "error-handling"
@@ -136,7 +136,7 @@ sensitive information such as PII that you do not wish to handle. All detection
 runs locally in your own environment through a pluggable
 [detection backend](#detection-backends): a built-in WebAssembly engine (the
 default) or the on-device Rampart NER model, which detects names, addresses, and
-government / financial identifiers in addition to the structured types.
+government or financial identifiers in addition to the structured types.
 
 <FrameworkLinks
   client:load
@@ -149,11 +149,10 @@ government / financial identifiers in addition to the structured types.
 ## Configuration
 
 Sensitive information detection is configured by allowing or denying a subset of
-sensitive information. The `allow` and `deny` lists are mutually-exclusive, such
-that using `allow` will result in a `DENY` decision for any detected sensitive
-information that is not specified in the `allow` list and using `deny` will
-result in an `ALLOW` decision for any detected sensitive information that is not
-specified in the `deny` list.
+sensitive information. The `allow` and `deny` lists are mutually exclusive. With
+`allow`, Arcjet denies any detected sensitive information that the list does not
+name. With `deny`, Arcjet allows any detected sensitive information that the
+list does not name.
 
 The `arcjet` client can be configured with one or more Sensitive information
 rules. In JavaScript / TypeScript these are constructed with
@@ -162,7 +161,7 @@ In Python they are constructed with the `detect_sensitive_info(...)` factory.
 `allow` and `deny` are mutually exclusive in both languages.
 
 The optional `backend` selects which [detection backend](#detection-backends)
-runs — omit it to use the built-in engine, or pass `rampart()` for on-device NER
+runs – omit it to use the built-in engine, or pass `rampart()` for on-device NER
 detection.
 
 <Tabs syncKey="language">
@@ -240,8 +239,8 @@ def detect_sensitive_info(
 
 :::note
 When specifying multiple rules, the order of the rules is ignored. Rule
-execution ordering is automatically optimized for performance. See
-[decision](#decision) below for details of examining the execution results.
+execution ordering is automatically optimized for performance. For details of
+examining the execution results, see [decision](#decision).
 :::
 
 <SlotByFramework client:load>
@@ -253,15 +252,15 @@ execution ordering is automatically optimized for performance. See
 
 ## Detection backends
 
-Sensitive information detection runs through a **detection backend** — the
+Sensitive information detection runs through a **detection backend** – the
 engine that scans the request body and identifies entities. The rest of the rule
 (`mode`, `allow`/`deny`, and the result shape) is the same whichever backend you
-choose. See [Entity detection](#entity-detection) for exactly what each backend
-detects.
+choose. For exactly what each backend detects, see [Entity
+detection](#entity-detection).
 
 ### Built-in engine
 
-By default — when you don't set a `backend` — the rule runs a WebAssembly engine
+By default – when you don't set a `backend` – the rule runs a WebAssembly engine
 that detects four structured types: email addresses, phone numbers, IP
 addresses, and credit card numbers. It runs anywhere the SDK runs, including edge
 runtimes, needs no extra dependencies, and adds negligible latency, so it's the
@@ -275,9 +274,9 @@ For broader coverage, an optional Rampart package provides a backend powered by
 the on-device
 [Rampart](https://huggingface.co/nationaldesignstudio/rampart)
 named-entity-recognition (NER) model. It runs a ~15&nbsp;MB quantized ONNX model
-locally so the rule can detect **names, addresses, and government / financial
+locally so the rule can detect **names, addresses, and government or financial
 identifiers** in addition to the built-in structured types. Everything runs in
-your own environment — the model weights are bundled with the package, so
+your own environment – the model weights are bundled with the package, so
 nothing is fetched at runtime and no data leaves your infrastructure.
 
 Install the package alongside your Arcjet SDK. In Python it ships as an optional
@@ -316,12 +315,12 @@ JS, `SensitiveInfoEntityType` in Python), so you can list the types directly in
   <RampartBackendSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
-Without a `backend`, the rule continues to use the built-in engine — this
+Without a `backend`, the rule continues to use the built-in engine – this
 package is entirely opt-in.
 
 :::note
 The same backend also works with the local sensitive info rule in
-<Link.Page href="/guards">Arcjet Guards</Link.Page> — pass `backend: rampart()`
+<Link.Page href="/guards">Arcjet Guards</Link.Page> – pass `backend: rampart()`
 (JS) / `backend=rampart()` (Python) there too to scan text inside agent tool
 calls and pipelines that don't route through HTTP.
 :::
@@ -354,13 +353,14 @@ detect_sensitive_info(mode=Mode.LIVE, deny=rampart_entities, backend=rampart())
 
 ### Model accuracy and performance
 
-Rampart is a compact model — a ~14.7&nbsp;MB artifact (~18.5M parameters,
-quantized to 4-bit weights) with a 512-token context window — so it is fast
+Rampart is a compact model – a ~14.7&nbsp;MB artifact (~18.5M parameters,
+quantized to 4-bit weights) with a 512-token context window – so it is fast
 enough to run inline on each request. On the Node.js CPU runtime, median (p50)
 inference is **~6.6&nbsp;ms**, dropping to **~3.9&nbsp;ms** p50 on WebGPU (set
-`device: "webgpu"` in the JS SDK). The Python backend runs on
-[ONNX Runtime](https://onnxruntime.ai/) and defaults to CPU execution; select a
-different accelerator with the `providers` option (see below).
+`device: "webgpu"` in the JS SDK). The Python backend runs on [ONNX
+Runtime](https://onnxruntime.ai/) and defaults to CPU execution; select a
+different accelerator with the `providers` option (described later on this
+page).
 
 On the model author's held-out benchmark it recalls **~98%** of private terms
 across the seven Latin-script languages it supports (English, Spanish, French,
@@ -369,10 +369,10 @@ German, Italian, Portuguese, and Dutch).
 Accuracy varies by input, so it's worth knowing the trade-offs:
 
 - **Non-Latin scripts** (for example Chinese, Japanese, Korean, Arabic, Hindi,
-  or Cyrillic) have much lower recall — the model is trained on Latin-script
+  or Cyrillic) have much lower recall – the model is trained on Latin-script
   text.
-- **Government / financial identifiers without a checksum** (passports,
-  licences, case numbers) are recognised less reliably than the structured types
+- **Government or financial identifiers without a checksum** (passports,
+  licenses, case numbers) are recognized less reliably than the structured types
   the deterministic recognizers validate, such as emails and card numbers.
 - Inference runs synchronously in the request path, so this latency is added to
   each request the rule scans.
@@ -466,23 +466,23 @@ The Rampart backend loads a native ONNX runtime and reads its bundled model
 weights from disk at runtime. As a result:
 
 - It requires a server runtime with filesystem and native-addon access. In JS
-  that means Node.js, Bun, or Deno — it does **not** run on edge runtimes. In
+  that means Node.js, Bun, or Deno – it does **not** run on edge runtimes. In
   Python it runs anywhere the SDK does (Python 3.10+).
-- It must not be bundled by a server build, or the runtime will fail to locate
-  the model weights.
+- A server build must not bundle it, or the runtime fails to locate the model
+  weights.
 
 In Python, the backend depends on
 [ONNX Runtime](https://onnxruntime.ai/) (`onnxruntime`), which is installed for
 you by the `arcjet[sensitive-info-rampart]` extra. Model inference is
 synchronous and blocking, so its latency is added directly to each request the
-rule scans — the same is true whether you use the `arcjet()` or `arcjet_sync()`
+rule scans – the same is true whether you use the `arcjet()` or `arcjet_sync()`
 client.
 
 For Next.js, mark the package and its native dependencies as
 [server external packages](https://nextjs.org/docs/app/api-reference/config/next-config-js/serverExternalPackages)
-so they are loaded from `node_modules` at runtime instead of bundled, and make
-sure any route handler that uses the backend runs on the Node.js runtime (the
-default) rather than the Edge runtime:
+so that Next.js loads them from `node_modules` at runtime instead of bundling
+them. Also make sure any route handler that uses the backend runs on the Node.js
+runtime (the default) rather than the Edge runtime:
 
 ```js
 // next.config.js
@@ -515,23 +515,24 @@ protection rules.
 This function returns a `Promise` that resolves to an
 `ArcjetDecision` object. This contains the following properties:
 
-- `id` (`string`) - The unique ID for the request. This can be used to look up
+- `id` (`string`) – The unique ID for the request. This can be used to look up
   the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
   involving the Arcjet cloud API. For decisions taken locally, the prefix is
   `lreq_`.
-- `conclusion` (`ArcjetConclusion`) - The final conclusion based on evaluating
+- `conclusion` (`ArcjetConclusion`) – The final conclusion based on evaluating
   each of the configured rules. If you wish to accept Arcjet's recommended
   action based on the configured rules then you can use this property.
-- `reason` (`ArcjetReason`) - An object containing more detailed
+- `reason` (`ArcjetReason`) – An object containing more detailed
   information about the conclusion.
-- `results` (`ArcjetRuleResult[]`) - An array of `ArcjetRuleResult` objects
+- `results` (`ArcjetRuleResult[]`) – An array of `ArcjetRuleResult` objects
   containing the results of each rule that was executed.
-- `ip` (`ArcjetIpDetails`) - An object containing Arcjet's analysis of the
-  client IP address. See the SDK reference for more information.
+- `ip` (`ArcjetIpDetails`) – An object containing Arcjet's analysis of the
+  client IP address. For more information, see the SDK reference.
 
-You check if a deny conclusion has been returned by a sensitive info rule by using
+To check whether a sensitive info rule returned a deny conclusion, use
 `decision.isDenied()` and `decision.reason.isSensitiveInfo()` (JS) /
-`decision.is_denied()` and `decision.reason_v2.type == "SENSITIVE_INFO"` (Python).
+`decision.is_denied()` and `decision.reason_v2.type == "SENSITIVE_INFO"`
+(Python).
 
 You can iterate through the results and check whether a sensitive info rule was applied:
 
@@ -555,7 +556,7 @@ for result in decision.results:
 </TabItem>
 </Tabs>
 
-This example will log the full result as well as the sensitive info rule:
+This example logs the full result as well as the sensitive info rule:
 
 <SlotByFramework client:load>
   <DecisionLogBun slot="bun" />
@@ -570,10 +571,10 @@ This example will log the full result as well as the sensitive info rule:
 
 ## Entity detection
 
-The entity types available to `allow`/`deny` depend on the active
-[detection backend](#detection-backends). Every type below is a built-in
-`ArcjetSensitiveInfoType`, so you can list any of them regardless of backend — a
-type the active backend doesn't detect simply never matches. You can also detect
+The entity types available to `allow`/`deny` depend on the active [detection
+backend](#detection-backends). Every type in the following list is a built-in
+`ArcjetSensitiveInfoType`, so you can list any of them regardless of backend – a
+type that the active backend doesn't detect never matches. You can also detect
 your own types with [custom entity detection](#custom-entity-detection).
 
 <EntityDetectionTable />
@@ -626,15 +627,15 @@ the next region group can be in parentheses.
 ## Custom entity detection
 
 When using the [built-in engine](#built-in-engine) you can provide a custom
-`detect` function, which enables you to detect entities that Arcjet doesn't
-support out of the box using custom logic.
+`detect` function, which lets you detect entities that Arcjet doesn't support
+out of the box using custom logic.
 
-The function will take a list of tokens and must return a list of either
-`undefined`, if the corresponding token in the input list is not sensitive, or
-the name of the entity if it does match. The number of tokens that are provided
-to the function is controlled by the `contextWindowSize` option, which defaults
-to 1. If you need additional context to perform detections then you can increase
-this value.
+The function takes a list of tokens and must return a list of the same length.
+Each element is `undefined` if the corresponding token is not sensitive, or the
+name of the entity if it matches. The number of tokens that are provided to the
+function is controlled by the `contextWindowSize` option, which defaults to 1.
+If you need additional context to perform detections then you can increase this
+value.
 
 <SlotByFramework client:load>
   <CustomDetectBun slot="bun" />
@@ -650,25 +651,25 @@ this value.
 :::note
 The `detect` callback applies to the built-in engine only. With the
 [Rampart backend](#on-device-detection-with-rampart), add a
-[`recognizer`](#rampart-options) instead — it works on character spans rather
+[`recognizer`](#rampart-options) instead – it works on character spans rather
 than tokens.
 :::
 
 ## Error handling
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
-not block all requests. The SDK will also time out and fail open after 1000ms in
+not block all requests. The SDK also times out and fails open after 1000&nbsp;ms in
 development (see
 <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>)
-and 500ms otherwise. However, in most cases, the response time will be less than
-20-30ms.
+and 500&nbsp;ms otherwise. However, in most cases, the response time is less than
+20&nbsp;ms to 30&nbsp;ms.
 
-If there is an error condition when processing the rule, Arcjet will return an
-`ERROR` result for that rule and you can check the `message` property on the rule's
-error result for more information.
+If there is an error condition when processing the rule, Arcjet returns an
+`ERROR` result for that rule and you can check the `message` property on the
+rule's error result for more information.
 
-If all other rules that were run returned an `ALLOW` result, then the final Arcjet
-conclusion will be `ERROR`.
+If all other rules that were run returned an `ALLOW` result, then the final
+Arcjet conclusion is `ERROR`.
 
 <SlotByFramework client:load>
   <ErrorsBun slot="bun" />
@@ -690,5 +691,5 @@ blocking any requests.
 We have an example test framework you can use to automatically test your rules.
 Arcjet can also be triggered based using a sample of your traffic.
 
-See the <Link.Page href="/testing">Testing</Link.Page> section of the docs for
-details.
+For details, see the <Link.Page href="/testing">Testing</Link.Page> section of
+the docs.

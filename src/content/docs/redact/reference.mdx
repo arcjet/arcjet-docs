@@ -11,8 +11,7 @@ import CustomRedact from "/src/snippets/redact/CustomRedact.ts?raw";
 import QuickStartUnredact from "/src/snippets/redact/QuickStartUnredact.ts?raw";
 import Comments from "/src/components/Comments.astro";
 
-The Arcjet Redaction library makes it easy to redact sensitive information
-locally.
+The Arcjet Redaction library helps you redact sensitive information locally.
 
 <WhatAreArcjetUtilities />
 
@@ -34,17 +33,17 @@ type RedactOptions = {
   `ip-address`, '`credit-card`, or any string returned from `detect`.
 - `contextWindowSize` - How many tokens to pass to the `detect` function at a
   time. Setting this to a higher value allows for more context to be used when
-  determining if a token is sensitive or not. For best performance this should be
-  set to as low a number as possible to provide the context that you need.
-- `detect` - An optional function that allows you to detect custom entities. It
-  will be passed a list of tokens as big as `contextWindowSize` and should
-  return a list of detected entities of the same length.
-- `replace` - An optional function that allows you to define your own
-  replacements for detected entities. It is passed a string with the type of
-  entity detected and it should either return a replacement for that entity type
-  or `undefined`.
+  determining if a token is sensitive or not. For best performance, set this to
+  the lowest number that provides the context that you need.
+- `detect` - An optional function that lets you detect custom entities. Arcjet
+  passes it a list of tokens as big as `contextWindowSize`, and it must return a
+  list of detected entities of the same length.
+- `replace` - An optional function that lets you define your own replacements
+  for detected entities. Arcjet passes it a string with the type of entity
+  detected, and it must return either a replacement for that entity type or
+  `undefined`.
 
-## Redacting and Unredacting
+## Redact and unredact text
 
 The Arcjet Redaction library can be used to both redact and unredact text. First
 you redact using the `redact()` function which returns both the redacted text
@@ -56,15 +55,15 @@ later on to replace redacted entities with their originals.
 ## Custom entity detection
 
 When configuring a redaction you can provide a custom entity detect function,
-this enables you to detect entities that we don't support out of the box using
+which lets you detect entities that Arcjet doesn't support out of the box using
 custom logic.
 
-The function will take a list of tokens and must return a list of either
-`undefined`, if the corresponding token in the input list is not sensitive, or
-the name of the entity if it does match. The number of tokens that are provided
-to the function is controlled by the `contextWindowSize` option, which defaults
-to 1. If you need additional context to perform detections then you can increase
-this value.
+The function takes a list of tokens and must return a list of the same length.
+Each element is `undefined` if the corresponding token is not sensitive, or the
+name of the entity if it matches. The number of tokens that are provided to the
+function is controlled by the `contextWindowSize` option, which defaults to 1.
+If you need additional context to perform detections then you can increase this
+value.
 
 In cases of a conflict the first identified entity type is used.
 
@@ -78,8 +77,9 @@ library such as [faker.js](https://fakerjs.dev/) to generate redacted entities
 that look exactly like the real ones.
 
 :::note
-If you are using `unredact()` it is important that each redacted entity is unique. If many
-pieces of sensitive info are replaced by the same string then unredaction won't work correctly.
+If you are using `unredact()` it is important that each redacted entity is
+unique. If the same string replaces many pieces of sensitive info, then
+unredaction doesn't work correctly.
 :::
 
 <Code code={CustomRedact} lang="ts" />

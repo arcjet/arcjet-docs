@@ -1,5 +1,5 @@
 ---
-title: "Introduction to Arcjet Rate Limiting"
+title: "Introduction to Arcjet rate limiting"
 description: "Arcjet rate limiting lets you control request volume in your app or API, stop abuse and brute-force attacks, and enforce per-user or per-plan quotas without Redis."
 prev: false
 generateMarkdownRoute: true
@@ -70,7 +70,7 @@ volume and frequency.
 :::tip[Configure without code changes]
 Fixed window and sliding window rate limits can also be configured as
 <Link.Page href="/remote-rules">remote rules</Link.Page> from the Arcjet
-dashboard or via the
+dashboard or through the
 <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page>, with no code
 changes or redeployment. Token bucket is SDK-only because it requires the
 SDK to declare how many tokens each request consumes. Developers can keep
@@ -119,11 +119,11 @@ addresses by default. This means clients using the same IP address
 are counted and limited together.
 
 To ensure rate limits are applied correctly, choose fingerprint characteristics
-that align with your concept of a “user”. For example:
+that align with your concept of a "user". For example:
 
-- IP address only (per-IP limits),
-- IP + API key (per-client limits),
-- User ID or authentication token (per-account limits).
+- IP address only, for per-IP limits.
+- IP address plus API key, for per-client limits.
+- User ID or authentication token, for per-account limits.
 
 Multiple characteristics are combined into a single fingerprint. For example,
 `["ip.src", "userId"]` creates one rate-limit bucket for each unique IP address

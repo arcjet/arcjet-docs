@@ -23,8 +23,8 @@ property. This includes additional data about the client IP address:
   address.
 
 The IP location fields may be `undefined`, but you can use various methods to
-check their availability. Using the methods will also refine the type to remove
-the need for null or undefined checks.
+check their availability. These methods also refine the type, which removes the
+need for null or undefined checks.
 
 - `hasLatitude()` (`bool`): returns whether the `latitude` and `accuracyRadius`
   fields are available.
@@ -45,21 +45,21 @@ the need for null or undefined checks.
 ##### Location accuracy
 
 IP geolocation can be notoriously inaccurate, especially for mobile devices,
-satellite internet providers, and even just normal users. Likewise with the
+satellite internet providers, and even ordinary users. Likewise with the
 specific fields like `city` and `region`, which can be very inaccurate. Country
 is usually accurate, but there are often cases where IP addresses are
-mislocated. These fields are provided for convenience e.g. suggesting a user
-location, but should not be relied upon by themselves.
+mislocated. These fields are provided for convenience, such as suggesting a user
+location, but don't rely on them alone.
 
-#### IP AS
+#### IP autonomous system
 
 This is useful for identifying the network operator of the client IP address.
 This is useful for understanding whether the client is likely to be automated or
 not, or being stricter with requests from certain networks.
 
 The IP AS fields may be `undefined`, but you can use the `hasASN()` method to
-check their availability. Using this method will also refine the type to remove
-the need for null-ish checks.
+check their availability. This method also refines the type, which removes the
+need for null-ish checks.
 
 - `hasASN()` (`bool`): returns whether all of the ASN fields are available.
 - `asn` (`string | undefined`): the autonomous system (AS) number of the client
@@ -99,8 +99,8 @@ if (threat && !threat.isSafe && threat.riskLevel === "critical") {
   `medium`, or `high`.
 - `reputation` (`string`): upstream reputation, such as `malicious`,
   `suspicious`, `known`, `safe`, `benign`, or `unknown`.
-- `isSafe` (`boolean`): whether the IP is trusted infrastructure and should not
-  be treated as a threat.
+- `isSafe` (`boolean`): whether the IP is trusted infrastructure rather than a
+  threat.
 - `networkTypes` (`string[]`): network classifications, such as `hosting`,
   `vpn`, `proxy`, or `tor`.
 - `activities` (`string[]`): observed behaviors, such as `brute_force`,
@@ -114,14 +114,14 @@ if (threat && !threat.isSafe && threat.riskLevel === "critical") {
 #### IP type
 
 The `service` field may be `undefined`, but you can use the `hasService()`
-method to check the availability. Using this method will also refine the type to
-remove the need for null-ish checks.
+method to check the availability. This method also refines the type, which
+removes the need for null-ish checks.
 
 The following are available on all pricing plans:
 
 - `hasService()` (`bool`): whether the `service` field is available.
 - `service` (`string | undefined`): the name of the service associated with the
-  IP address - e.g. `Apple Private Relay`.
+  IP address, such as `Apple Private Relay`.
 - `isHosting()` (`bool`): returns whether the IP address of the client is owned
   by a hosting provider. Requests originating from a hosting provider IP
   significantly increase the likelihood that this is an automated client.
