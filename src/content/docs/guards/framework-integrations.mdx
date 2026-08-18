@@ -1,6 +1,6 @@
 ---
 title: "Agent guard framework integrations"
-description: "Guard Vercel AI SDK, LangChain, Vercel Eve, Mastra, and Claude Agent SDK tools, processors, and inbound messages."
+description: "Guard Vercel AI SDK, LangChain, LangGraph, Vercel Eve, Mastra, and Claude Agent SDK tools, processors, and inbound messages."
 ---
 
 import { Aside } from "@astrojs/starlight/components";
@@ -114,6 +114,22 @@ with `invoke()`. Actor and input resolvers receive `RunnableConfig` and
 validated tool arguments. Derive `actor` only from server-controlled
 configuration. Asynchronous resolvers are supported for async tool invocations.
 
+## LangGraph JS
+
+LangGraph Graph API agents (`StateGraph` + `ToolNode`) call authored tools and
+ToolNode / MCP tools. There is no `guardInbound`. Screen inbound text with a
+direct `guard()` call before `graph.invoke`, or in the first graph node.
+`interrupt()` is human HITL, not policy. There is no `guardInterrupt` and no
+`guardApproval`. Use `guardTool()` for authored `tool()` / `StructuredTool`
+handlers and `guardToolNode()` for unwrapped and MCP tools that execute inside
+`ToolNode`.
+
+This is not the Python LangChain `guard_tool` wrapper above. It is not LangChain
+`createAgent` / `wrapToolCall`.
+
+See the <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>
+for inbound screening, authored tools, and ToolNode denials.
+
 ## Vercel Eve
 
 Eve agents can have zero authored tools. OpenAPI and MCP connections have no
@@ -161,6 +177,9 @@ The wrappers default to fail closed when Guard is unavailable:
 - Claude Agent SDK helpers default to `onGuardError: "deny"`. On inbound
   `UserPromptSubmit`, `"allow"` is a legitimate choice because failing closed
   stops the agent answering.
+- LangGraph helpers default to `onGuardError: "deny"`. On the inbound `guard()`
+  before `invoke`, `"allow"` is a legitimate choice because failing closed
+  stops the graph running.
 
 Set `onGuardError: "allow"` in JavaScript or `on_guard_error="allow"` in Python
 only when executing without a complete security decision is acceptable.

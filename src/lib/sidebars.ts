@@ -638,6 +638,10 @@ export const main = [
         link: "/ai-protection/abuse-protection?f=python-fastapi",
       },
       {
+        label: "LangGraph",
+        link: "/guards/langgraph",
+      },
+      {
         label: "Mastra",
         link: "/guards/mastra",
       },
