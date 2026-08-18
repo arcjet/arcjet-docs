@@ -122,7 +122,13 @@ direct `guard()` call before `graph.invoke`, or in the first graph node.
 `interrupt()` is human HITL, not policy. There is no `guardInterrupt` and no
 `guardApproval`. Use `guardTool()` for authored `tool()` / `StructuredTool`
 handlers and `guardToolNode()` for unwrapped and MCP tools that execute inside
-`ToolNode`.
+`ToolNode`. `guardToolNode` guards the node's tools in place and returns the
+same node. On `DENY`, `guardTool` returns a plain `ArcjetDenialResult`
+(`arcjetDenied: true`). It does not throw. `ToolNode` wraps that object into a
+real `ToolMessage` whose `status` is `success` — the denial rides in the
+payload, not the envelope. `langgraphAgentContext` reads
+`configurable.thread_id`, then the run id, then
+`configurable.checkpoint_ns`. It never mints an id.
 
 This is not the Python LangChain `guard_tool` wrapper above. It is not LangChain
 `createAgent` / `wrapToolCall`.
