@@ -141,13 +141,15 @@ On request-time `DENY`, Eve returns `{ type: "denied", reason }` the model can
 read. That differs from `guardTool()`, which throws. Human-in-the-loop (HITL)
 clients answer a parked request with `cancel`, not `deny`.
 
-`approval` is one field. It can be a function or `{ request, response }`. Omit
-`response` and `guardApproval()` returns Eve's function form
-(`ApprovalPolicy`). Set `response` and it returns `{ request, response }`
-(`ApprovalConfiguration`). Don't compose the returned value with Eve's
-`always()`, `once()`, or `never()`. To also require a human after the
-request-time gate, use `onAllow: "user-approval"`. The `response` policy
-authorizes the responder.
+`approval` is one field. It can be a function or `{ request, response }`.
+Request-time options live on `GuardApprovalPolicy`: `action`, plus optional
+`rules`, `metadata`, `onGuardError`, `onAllow`, and `onDeny`. Omit `response`
+and `guardApproval()` returns Eve's function form (`ApprovalPolicy`). Set
+`response` and it returns `{ request, response }` (`ApprovalConfiguration`),
+where `request` is Eve's `ApprovalPolicy` function. Don't compose the
+returned value with Eve's `always()`, `once()`, or `never()`. To also
+require a human after the request-time gate, use `onAllow: "user-approval"`.
+The `response` policy authorizes the responder.
 
 `defineDynamic` tools cannot be wrapped with `guardTool()`. Gate those with
 `guardApproval()` too.
@@ -188,9 +190,11 @@ against Eve's `ApprovalResponseContext`, which includes `responder`,
 `request.toolName`, `request.toolInput`, `request.callId`,
 `request.requestId`, and `session`.
 
-Response-time `ALLOW` returns `{ status: "allowed" }`. `DENY`, or unavailable
-with `onGuardError: "deny"`, returns `{ status: "rejected", reason }`. A
-rejection leaves the HITL approval pending. It does not deny the tool.
+Response-time `ALLOW` returns `{ status: "allowed" }`. If the response policy
+denies the responder, or if Arcjet is unreachable and `onGuardError` is
+`"deny"` (the default), the response policy returns
+`{ status: "rejected", reason }` and the approval stays pending. A rejection
+does not deny the tool.
 
 The following example parks the call for a human after the request-time gate,
 then rate limits the responder:
@@ -201,8 +205,15 @@ import { tokenBucket } from "@arcjet/guard";
 import { guardApproval } from "@arcjet/guard/vercel-eve/v0";
 import { arcjet } from "../arcjet.js";
 
-const callLimit = tokenBucket({
-  bucket: "weather-access",
+const sessionLimit = tokenBucket({
+  bucket: "weather-session",
+  refillRate: 5,
+  intervalSeconds: 60,
+  maxTokens: 5,
+});
+
+const approverLimit = tokenBucket({
+  bucket: "weather-approver",
   refillRate: 5,
   intervalSeconds: 60,
   maxTokens: 5,
@@ -213,12 +224,12 @@ export default defineOpenAPIConnection({
   spec: "https://api.example.com/openapi.json",
   approval: guardApproval(arcjet, {
     action: "weather.fetched",
-    rules: (ctx) => [callLimit({ key: ctx.session.id, requested: 1 })],
+    rules: (ctx) => [sessionLimit({ key: ctx.session.id, requested: 1 })],
     onAllow: "user-approval",
     response: {
       action: "weather.approved",
       rules: (ctx) => [
-        callLimit({ key: ctx.responder.principalId, requested: 1 }),
+        approverLimit({ key: ctx.responder.principalId, requested: 1 }),
       ],
     },
   }),
