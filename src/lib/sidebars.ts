@@ -637,7 +637,7 @@ export const main = [
       },
       {
         label: "LangChain",
-        link: "/ai-protection/abuse-protection?f=python-fastapi",
+        link: "/guards/langchain",
       },
       {
         label: "LangGraph",
