@@ -120,6 +120,14 @@ decision, err := guard.Guard(ctx, arcjet.GuardRequest{
 </TabItem>
 </Tabs>
 
+Rules in one `guard()` call are all evaluated. A denial from one rule still
+spends a rate limit in the same `rules` array. A request that trips
+`localDetectSensitiveInfo` also consumes a token from a `tokenBucket` in
+that array. The rate-limit result is a `TOKEN_BUCKET` `ALLOW` with a
+decremented `remaining` on a decision whose conclusion is `DENY`. Split the
+rules across two `guard()` calls if a false positive must not drain that
+budget.
+
 ## Metadata
 
 `guard()`, `protect()`, and every Guard rule accept `metadata`: string keys
@@ -185,8 +193,12 @@ see <Link.Page href="/guards/capture">Capture events</Link.Page>.
 ## Decisions and policy results
 
 Every decision has an `id`, `conclusion`, SDK `results`, warnings, and error
-accessors. A denial also has a broad `reason`. Remote policy status and results
-are additive and may be absent when the server does not provide policy data.
+accessors. In JavaScript, `reason` is typed `Reason | undefined`: a broad
+category such as `RATE_LIMIT` on `DENY`, and `undefined` on `ALLOW`. Check
+`conclusion` before you treat `reason` as a string. In a `strict` TypeScript
+build, assigning `decision.reason` to a `string` fails because the value is
+`undefined` on `ALLOW`. Remote policy status and results are additive and
+may be absent when the server does not provide policy data.
 
 Remote policy data is separate from SDK-submitted rule results:
 

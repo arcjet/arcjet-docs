@@ -130,6 +130,11 @@ export default defineChannel({
 });
 ```
 
+`verdict.allowed` and `verdict.message` are enough to accept or reject the
+turn. If you inspect the denial further, `reason` is `"DENY"` or
+`"UNAVAILABLE"` (policy denial vs outage), not the rule category. The
+category is on `verdict.decision?.reason`.
+
 ## `guardApproval` with no authored tools
 
 An Eve agent can have zero authored tools. OpenAPI and MCP connections

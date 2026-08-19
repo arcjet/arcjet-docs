@@ -82,17 +82,18 @@ inbound, because failing closed there stops the agent answering during an
 outage. Timeout already fail-closes the prompt (Claude Code v2.1.208+).
 
 ```ts
+import { randomUUID } from "node:crypto";
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { guardHooks } from "@arcjet/guard/claude-agent-sdk/v0";
 import { detectPromptInjection } from "@arcjet/guard";
 import { arcjet } from "./arcjet.js";
 
-const sessionId = conversationId;
+const sessionId = randomUUID();
 
 for await (const message of query({
   prompt: userText,
   options: {
-    sessionId,
+    sessionId, // later turns: `resume: sessionId` instead
     hooks: guardHooks(arcjet, {
       sessionId,
       inbound: {
@@ -137,6 +138,11 @@ const lookupLimit = tokenBucket({
 // Factory then text — same shape as `detectPromptInjection()(text)`.
 const detectPii = localDetectSensitiveInfo();
 
+// Key the budget on the authenticated caller, not on a model-supplied
+// object id. An object-keyed budget resets when the agent varies the id,
+// and unrelated callers share one bucket.
+const userId = authenticatedUserId;
+
 export const lookupOrder = guardTool(
   arcjet,
   tool(
@@ -153,7 +159,7 @@ export const lookupOrder = guardTool(
   {
     action: "order.looked-up",
     rules: (input) => [
-      lookupLimit({ key: input.orderId, requested: 1 }),
+      lookupLimit({ key: userId, requested: 1 }),
       detectPii(input.note),
     ],
   },
@@ -173,6 +179,7 @@ Do not apply `guardTool` and `PreToolUse` to the same authored tool. That
 double-calls the guard.
 
 ```ts
+import { randomUUID } from "node:crypto";
 import { guardHooks } from "@arcjet/guard/claude-agent-sdk/v0";
 import { detectPromptInjection, tokenBucket } from "@arcjet/guard";
 import { arcjet } from "./arcjet.js";
@@ -184,8 +191,10 @@ const mcpLimit = tokenBucket({
   maxTokens: 20,
 });
 
+const sessionId = randomUUID();
+
 export const hooks = guardHooks(arcjet, {
-  sessionId: conversationId,
+  sessionId,
   action: ({ toolName }) => `${toolName}.invoked`,
   rules: ({ toolName }) => [mcpLimit({ key: toolName, requested: 1 })],
   inbound: {
@@ -208,14 +217,24 @@ already fail-closes the prompt (Claude Code v2.1.208+).
 
 ## Correlation
 
-Set `options.sessionId` on `query()` to a conversation identity you already
-have. `claudeAgentContext` reads hook `session_id` first, then
-`options.sessionId`. It never calls `createAgentContext`. If neither is a
-valid 1-256 printable-ASCII string, the call is uncorrelated rather than
-joined to a generated id. Subagent `agent_id` is metadata only.
+The Claude Agent SDK CLI requires `options.sessionId` to be a UUID, and you
+can create that id only once. A non-UUID value exits the CLI with
+`Invalid session ID. Must be a valid UUID.` Passing the same id to a second
+`query()` call exits with `Session ID … is already in use.`
+
+Mint one UUID per conversation. On later turns, pass `resume: sessionId`
+instead of `sessionId`. `claudeAgentContext` then reads the hook's
+`session_id` and joins those turns to the same conversation.
+
+`claudeAgentContext` never calls `createAgentContext`. If neither hook
+`session_id` nor `options.sessionId` is a valid 1-256 printable-ASCII
+string, the call is uncorrelated rather than joined to a generated id.
+Subagent `agent_id` is metadata only.
 
 ```ts
-const sessionId = conversationId;
+import { randomUUID } from "node:crypto";
+
+const sessionId = randomUUID();
 
 for await (const message of query({
   prompt: userText,
@@ -227,13 +246,14 @@ for await (const message of query({
 
 ## What not to use
 
-- There is no `guardInbound`. Screen prompt injection on `guardHooks({ inbound
-  })` in `UserPromptSubmit`.
+- There is no `guardInbound`. Screen prompt injection on
+  `guardHooks({ inbound })` in `UserPromptSubmit`.
 - There is no `guardCanUseTool`. `canUseTool` is not a policy gate.
 - There is no `guardApproval`.
 - Do not call `createAgentContext` inside a Claude callback.
 - Do not also wrap these tools with `@arcjet/guard/vercel-ai/v7`.
 - Do not apply `guardTool` and `PreToolUse` to the same authored tool.
+- Do not mint a new `sessionId` on every turn. Continue with `options.resume`.
 - Do not import `@arcjet/guard/claude-agent-sdk`. The path is
   `@arcjet/guard/claude-agent-sdk/v0`.
 
