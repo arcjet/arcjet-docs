@@ -222,10 +222,12 @@ export const main = [
         collapsed: true,
         items: [
           {
+            attrs: { class: "feature content-moderation" },
             label: "Intro",
             link: "/content-moderation",
           },
           {
+            attrs: { class: "feature content-moderation" },
             label: "Quick start",
             link: "/content-moderation/quick-start",
           },
