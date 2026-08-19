@@ -75,44 +75,36 @@ denial, the tool does not execute and the model receives an `ArcjetDenialResult`
 
 ## LangChain
 
-The Python integration wraps synchronous or asynchronous LangChain tools.
-Install the optional dependency:
+LangChain tools and `create_agent` agents call authored tools. The Python
+SDK sits at those boundaries. This is not the JavaScript LangGraph Graph
+API adapter.
 
-```bash
-pip install "arcjet[langchain]"
-```
+Pick the surface that matches what you hold when the effect runs:
+
+- Any Python callable: `guard_action` / `guard_action_sync` in core
+  `arcjet.guard`. No extra.
+- A LangChain `BaseTool` you call yourself: `guard_tool`
+  (`arcjet[langchain]`, `langchain-core>=1.2.5,<2`).
+- An agent from `create_agent`: `ArcjetMiddleware` + `ToolPolicy`
+  (`arcjet[langchain-agents]`, `langchain>=1.3,<2`, `langgraph>=1.2,<2`).
+- Observe only: `ArcjetCaptureHandler` / `ArcjetAsyncCaptureHandler`.
+  These cannot deny a call. LangChain ignores callback return values.
 
 ```py
-from arcjet.guard import launch_arcjet, local_input, server_input
-from arcjet.guard.langchain import guard_tool
-from langchain_core.tools import tool
-
-arcjet = launch_arcjet(key=ARCJET_KEY)
-
-
-@tool
-async def send_email(to: str, body: str) -> str:
-    """Send an email."""
-    await email_provider.send(to=to, body=body)
-    return "sent"
-
-
-guarded_send_email = guard_tool(
-    guard=arcjet,
-    tool=send_email,
-    label="email.sent",
-    actor=lambda config: config["configurable"]["user_id"],
-    inputs=lambda arguments, _config: {
-        "recipient": server_input.string(arguments["to"]),
-        "body": local_input.string(arguments["body"]),
-    },
+from arcjet.guard.langchain import (
+    ArcjetCaptureHandler,
+    ArcjetMiddleware,
+    ToolPolicy,
+    guard_tool,
 )
 ```
 
-Use the asynchronous Guard client with `ainvoke()` and the synchronous client
-with `invoke()`. Actor and input resolvers receive `RunnableConfig` and
-validated tool arguments. Derive `actor` only from server-controlled
-configuration. Asynchronous resolvers are supported for async tool invocations.
+Importing `arcjet.guard.langchain` does not load LangGraph.
+`ArcjetMiddleware` and `ToolPolicy` raise `ImportError` unless you
+installed the agents extra.
+
+See the <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
+for install, helpers, fail-closed behavior, and correlation.
 
 ## LangGraph JS
 
@@ -124,8 +116,9 @@ direct `guard()` call before `graph.invoke`, or in the first graph node.
 handlers and `guardToolNode()` for unwrapped and MCP tools that execute inside
 `ToolNode`.
 
-This is not the Python LangChain `guard_tool` wrapper above. It is not LangChain
-`createAgent` / `wrapToolCall`.
+This is not the Python
+<Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>. It is
+not LangChain `createAgent` / `wrapToolCall`.
 
 See the <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>
 for inbound screening, authored tools, and ToolNode denials.
@@ -166,9 +159,11 @@ The wrappers default to fail closed when Guard is unavailable:
 
 - Vercel AI does not execute the tool and returns a retryable denial result to
   the model with reason `ERROR`.
-- LangChain raises `ArcjetToolUnavailableError`. A policy denial raises
-  `ArcjetToolDeniedError`, or follows the wrapped tool's `handle_tool_error`
-  behavior when configured.
+- LangChain `guard_tool` raises `ArcjetToolUnavailableError`. A policy
+  denial raises `ArcjetToolDeniedError`, or follows the wrapped tool's
+  `handle_tool_error` behavior when configured. `guard_action` and
+  `ArcjetMiddleware` raise `ArcjetUnavailableError` /
+  `ArcjetDeniedError`.
 - Vercel Eve helpers default to `onGuardError: "deny"`. On a channel, `"allow"`
   is a legitimate choice because failing closed stops the agent answering.
 - Mastra helpers default to `onGuardError: "deny"`. `"allow"` is a legitimate

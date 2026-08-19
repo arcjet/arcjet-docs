@@ -596,6 +596,26 @@ request timeout defaults to 2000 ms (`timeout_ms` on `launch_arcjet` /
 
 <Code code={Guard} title="main.py" lang="py" />
 
+### Checkpoint helpers
+
+To wrap an effect instead of handling the decision yourself, use the
+checkpoint helpers. They fail closed by default
+(`on_guard_error="deny"`). A `DENY` raises `ArcjetDeniedError` or
+`ArcjetToolDeniedError`. Unavailability raises
+`ArcjetUnavailableError` or `ArcjetToolUnavailableError`.
+
+- **Any Python callable** – `guard_action` / `guard_action_sync` in
+  `arcjet.guard`. No extra.
+- **A LangChain `BaseTool` you call yourself** – `guard_tool`
+  (`arcjet[langchain]`).
+- **An agent from `create_agent`** – `ArcjetMiddleware` + `ToolPolicy`
+  (`arcjet[langchain-agents]`).
+- **Observe only** – `ArcjetCaptureHandler` /
+  `ArcjetAsyncCaptureHandler`. These cannot deny a call.
+
+For install, examples, correlation, and the configure-before-wrap rule,
+see the <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
+
 ### Rules
 
 Configure each rule once at module scope so you have a stable reference for the

@@ -1,0 +1,329 @@
+---
+title: "LangChain agent guard"
+description: "Guard Python callables, wrap LangChain tools you call yourself, enforce agent tool calls, and observe chains without blocking."
+---
+
+import { Aside } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+[LangChain](https://docs.langchain.com/oss/python/langchain/overview) tools and
+`create_agent` agents call authored tools. Arcjet Guard sits at those
+boundaries so a policy can allow or deny the action before a side effect runs.
+
+Use <Link.Page href="/get-started">`protect()`</Link.Page> for HTTP routes. Use
+the helpers on this page for Python callables, LangChain tools, and
+`create_agent` tool calls. Vercel AI SDK, LangGraph JS, Eve, Mastra, and
+Claude Agent SDK wrappers are on
+<Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>.
+
+This is the Python SDK. It is not the JavaScript LangGraph Graph API adapter
+(`StateGraph` + `ToolNode`).
+
+## Install
+
+`guard_action` and `guard_action_sync` ship in core `arcjet.guard`. They need
+no extra.
+
+Install an extra only for the LangChain surfaces you use:
+
+```bash
+pip install "arcjet[langchain]"
+```
+
+`arcjet[langchain]` provides `guard_tool`, `ArcjetCaptureHandler`, and
+`ArcjetAsyncCaptureHandler`. It depends on `langchain-core>=1.2.5,<2`.
+
+```bash
+pip install "arcjet[langchain-agents]"
+```
+
+`arcjet[langchain-agents]` adds `ArcjetMiddleware` and `ToolPolicy`. It
+depends on `langchain>=1.3,<2` and `langgraph>=1.2,<2`.
+
+Import LangChain helpers from one path:
+
+```py
+from arcjet.guard.langchain import (
+    ArcjetCaptureHandler,
+    ArcjetMiddleware,
+    ToolPolicy,
+    guard_tool,
+)
+```
+
+Importing `arcjet.guard.langchain` does not load LangGraph. `ArcjetMiddleware`
+and `ToolPolicy` raise `ImportError` unless you installed
+`arcjet[langchain-agents]`.
+
+Launch one client at module scope:
+
+```py
+from arcjet.guard import launch_arcjet
+
+arcjet = launch_arcjet(key=ARCJET_KEY)
+```
+
+Use `launch_arcjet_sync` with Flask, Django, or other sync code.
+
+## Helpers
+
+Pick the surface that matches what you hold when the effect runs:
+
+| You have | Use | Needs | Blocks a call? |
+| --- | --- | --- | --- |
+| Any Python callable | `guard_action` / `guard_action_sync` | `arcjet` | Yes |
+| A LangChain `BaseTool` you call yourself | `guard_tool` | `arcjet[langchain]` | Yes |
+| An agent from `create_agent` | `ArcjetMiddleware` + `ToolPolicy` | `arcjet[langchain-agents]` | Yes |
+| A chain or agent you want to observe | `ArcjetCaptureHandler` / `ArcjetAsyncCaptureHandler` | `arcjet[langchain]` | No |
+
+If you can name the tool at wiring time, `guard_tool` is the smaller change.
+It returns something that is the tool, so nothing downstream changes. If the
+model picks the tool and you want one policy per tool name, use the
+middleware. They compose: a guarded tool called from a guarded agent
+evaluates once per policy.
+
+`ArcjetCaptureHandler` never blocks a call. LangChain ignores callback return
+values, so a handler cannot deny anything.
+
+## Guard any Python callable
+
+`guard_action` wraps a no-argument async callable. `guard_action_sync` wraps
+a no-argument sync callable. Neither extra is required.
+
+On `DENY` the callable does not run and the helper raises
+`ArcjetDeniedError`. If Guard cannot be evaluated, the default
+`on_guard_error="deny"` raises `ArcjetUnavailableError`.
+
+```py
+from arcjet.guard import (
+    DetectPromptInjection,
+    TokenBucket,
+    guard_action,
+    launch_arcjet,
+)
+
+arcjet = launch_arcjet(key=ARCJET_KEY)
+job_limit = TokenBucket(
+    refill_rate=10,
+    interval_seconds=60,
+    max_tokens=10,
+    bucket="jobs",
+)
+inbound = DetectPromptInjection()
+
+
+async def process_job(user_id: str, message: str) -> str:
+    return await guard_action(
+        lambda: run_job(message),
+        guard=arcjet,
+        action="job.processed",
+        rules=[
+            job_limit(key=user_id, requested=1),
+            inbound(message),
+        ],
+    )
+```
+
+## Wrap a LangChain tool you call yourself
+
+`guard_tool` wraps a synchronous or asynchronous `BaseTool`. Use it when
+your code calls the tool. Use the async Guard client with `ainvoke()` and
+the sync client with `invoke()`.
+
+On `DENY` the wrapped tool does not run. The helper raises
+`ArcjetToolDeniedError`, or follows the tool's `handle_tool_error` behavior
+when you configured that on the tool before wrapping. If Guard cannot be
+evaluated, the default raises `ArcjetToolUnavailableError`.
+
+Configure and narrow the tool before you call `guard_tool()`. Changes to
+`args_schema`, `handle_tool_error`, `callbacks`, or `response_format` after
+wrapping do not reach the wrapped tool.
+
+```py
+from arcjet.guard import TokenBucket, launch_arcjet
+from arcjet.guard.langchain import guard_tool
+from langchain_core.tools import tool
+
+arcjet = launch_arcjet(key=ARCJET_KEY)
+lookup_limit = TokenBucket(
+    refill_rate=10,
+    interval_seconds=60,
+    max_tokens=10,
+    bucket="lookups",
+)
+
+
+@tool
+async def lookup_order(order_id: str, note: str) -> dict:
+    """Look up an order by ID."""
+    return {"order_id": order_id, "note": note, "status": "shipped"}
+
+
+guarded_lookup_order = guard_tool(
+    guard=arcjet,
+    tool=lookup_order,
+    action="order.looked-up",
+    rules=[lookup_limit(key="orders", requested=1)],
+)
+```
+
+To hide an argument from the model, narrow `args_schema` on the tool first,
+then wrap it:
+
+```py
+from pydantic import BaseModel, ConfigDict
+
+
+class PublicEmailArgs(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    to: str
+
+
+send_email.args_schema = PublicEmailArgs
+guarded_send_email = guard_tool(
+    guard=arcjet,
+    tool=send_email,
+    action="email.sent",
+)
+```
+
+<Aside type="caution">
+  Pickle executes code as it loads. Load a pickled tool only from a source
+  you control. Guarding does not protect `unpickle`.
+</Aside>
+
+## Guard an agent's tool calls
+
+When the model chooses the tool, give `create_agent` `ArcjetMiddleware`.
+Match each consequential tool name to a `ToolPolicy`. Tools with no policy
+pass through unguarded.
+
+Pass `tools=` the same sequence you gave `create_agent`. A policy is matched
+by tool name, so a typo or a renamed `@tool` function otherwise leaves that
+tool unguarded. Given the tools, a key that names none of them is refused.
+
+The client is optional. Without `guard=`, the checkpoint uses the client
+registered with `register_arcjet()`.
+
+On `DENY` the tool does not run and the middleware raises
+`ArcjetDeniedError`. If Guard cannot be evaluated, the default raises
+`ArcjetUnavailableError`.
+
+```py
+from langchain.agents import create_agent
+
+from arcjet.guard import TokenBucket, launch_arcjet
+from arcjet.guard.langchain import ArcjetMiddleware, ToolPolicy
+
+arcjet = launch_arcjet(key=ARCJET_KEY)
+
+send_limit = TokenBucket(
+    refill_rate=5,
+    interval_seconds=60,
+    max_tokens=5,
+    bucket="email",
+)
+
+agent = create_agent(
+    model="openai:gpt-4o",
+    tools=[send_email, search_orders],
+    middleware=[
+        ArcjetMiddleware(
+            guard=arcjet,
+            policies={
+                "send_email": ToolPolicy(
+                    action="email.sent",
+                    rules=[send_limit(key="email", requested=1)],
+                )
+            },
+            tools=[send_email, search_orders],
+        )
+    ],
+)
+```
+
+## Observe a chain without blocking
+
+`ArcjetCaptureHandler` and `ArcjetAsyncCaptureHandler` record chain, model,
+and tool lifecycle events. They cannot deny a call. LangChain ignores
+callback return values.
+
+Use a handler only for visibility. Put enforcement on `guard_tool` or
+`ArcjetMiddleware`.
+
+```py
+from arcjet.guard.langchain import ArcjetCaptureHandler
+
+await agent.ainvoke(
+    {"messages": [{"role": "user", "content": prompt}]},
+    config={"callbacks": [ArcjetCaptureHandler()]},
+)
+```
+
+## Fail-closed default
+
+Checkpoint surfaces default to `on_guard_error="deny"`:
+
+- `guard_action` / `guard_action_sync`
+- `guard_tool`
+- `ArcjetMiddleware`
+
+If Guard cannot be evaluated, the action does not run. Set
+`on_guard_error="allow"` only when executing without a complete security
+decision is acceptable. A value other than `"allow"` or `"deny"` is refused.
+
+A `DENY` conclusion always blocks, regardless of `on_guard_error`. The
+errors are distinct: a denial means policy evaluated and said no
+(`ArcjetDeniedError` / `ArcjetToolDeniedError`). Unavailability means the
+check never happened (`ArcjetUnavailableError` /
+`ArcjetToolUnavailableError`).
+
+The core `guard()` call still fails open. It returns `ALLOW` with
+`has_failed_open()` true. The wrappers that sit around an effect fail
+closed.
+
+## Correlation
+
+Pass one correlation ID into `ainvoke` so middleware and guarded tools share
+one Sequence. Do not mint a new ID per turn.
+
+```py
+await agent.ainvoke(
+    {"messages": [{"role": "user", "content": prompt}]},
+    config={"configurable": {"arcjet_correlation_id": session_id}},
+)
+```
+
+The helpers read `configurable.arcjet_correlation_id`, then
+`metadata.arcjet_correlation_id`, then an enclosing `arcjet_sequence`. They
+do not use LangChain's `run_id`.
+
+```py
+from arcjet.guard import arcjet_sequence
+
+with arcjet_sequence(correlation_id=session_id):
+    await agent.ainvoke({"messages": [{"role": "user", "content": prompt}]})
+```
+
+Derive the ID from a session the caller already has. A generated ID still
+joins this run's events, but it builds a Sequence that nobody searches for.
+
+## What not to use
+
+- Do not use `ArcjetCaptureHandler` or `ArcjetAsyncCaptureHandler` to deny
+  a call. Callbacks cannot block.
+- Do not change `args_schema`, `handle_tool_error`, `callbacks`, or
+  `response_format` on a tool after `guard_tool()`.
+- Do not import `ArcjetMiddleware` or `ToolPolicy` unless you installed
+  `arcjet[langchain-agents]`.
+- Do not use these helpers with the JavaScript LangGraph Graph API adapter.
+- Do not mint a new `arcjet_correlation_id` per turn.
+
+## Related
+
+- <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
+- <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>
+- <Link.Page href="/reference/python#guard">Python Guard SDK reference</Link.Page>
+- <Link.Page href="/guards">Agent guards</Link.Page>
+- Example:
+  [examples/fastapi-langchain-guard](https://github.com/arcjet/arcjet-py/tree/main/examples/fastapi-langchain-guard)

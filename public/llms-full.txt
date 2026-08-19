@@ -2041,6 +2041,7 @@ For the full API reference, read the installed library source:
 - [Signup form protection](https://docs.arcjet.com/signup-protection)
 - [Filters](https://docs.arcjet.com/filters)
 - [Guards](https://docs.arcjet.com/guards)
+- [LangChain agent guard](https://docs.arcjet.com/guards/langchain)
 - [Capture events](https://docs.arcjet.com/guards/capture)
 
 ### SDKs
