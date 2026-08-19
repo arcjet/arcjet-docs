@@ -1,8 +1,10 @@
-Full documentation content: https://docs.arcjet.com/llms-full.txt
-
 # Arcjet
 
-Arcjet is the runtime security platform that ships with your code. It's a lightweight SDK that runs inside your application and enforces controls inline, with real identity and session context – configured by your agent with the CLI or MCP server.
+> Arcjet is the runtime security platform that ships in your AI code. Detect prompt injection, authorize agent tool calls, redact sensitive data, and block bots and abuse. Real-time security building blocks you call inside your app, before an action happens.
+
+Full documentation content: https://docs.arcjet.com/llms-full.txt
+
+Arcjet is a lightweight SDK that enforces controls inline, with real identity and session context – configured by your agent with the CLI or MCP server.
 
 Arcjet's primary use case is securing the actions AI agents take in production. Agents have gone from answering questions to moving money, changing records, and shipping code, and the security or engineering leader now owns that risk. Identity and RBAC authenticate the agent but don't govern the action it's about to take, and network proxies can't see inside the workflow. Arcjet gives security and engineering teams visibility into what each agent is doing, real-time enforcement before a consequential action (prompt injection, PII, tool authorization), and an audit trail.
 
