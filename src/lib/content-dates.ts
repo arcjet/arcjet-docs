@@ -13,6 +13,9 @@
 
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+// Relative rather than aliased: this module is imported by `astro.config.mts`.
+// `sdk.ts` only imports a type, so nothing browser-facing comes with it.
+import { isSdkKey } from "./sdk";
 
 /**
  * Project root, resolved from this file's own location rather than the process
@@ -23,8 +26,26 @@ const PROJECT_ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const DOCS_DIR = "src/content/docs";
 const PAGE_EXTENSIONS = [".md", ".mdx"];
 
-/** Matches the `/sdk/<sdk>` prefix on SDK-scoped routes. */
-const SDK_PREFIX = /^\/sdk\/[a-z-]+/;
+/**
+ * Captures the first path segment under `/sdk/`, bounded by a slash or the end
+ * of the path so only a whole segment can match.
+ */
+const SDK_SEGMENT = /^\/sdk\/([^/]+)(?=\/|$)/;
+
+/**
+ * Removes the `/sdk/<sdk>` scope from a pathname.
+ *
+ * The segment is checked against the real SDK key list rather than a character
+ * pattern, so a slug containing digits is handled if one is ever added, and a
+ * docs page that merely happens to live under `/sdk/` is left alone instead of
+ * being given another page's date.
+ */
+function stripSdkScope(pathname: string): string {
+  const match = pathname.match(SDK_SEGMENT);
+  if (!match || !isSdkKey(match[1])) return pathname;
+
+  return pathname.slice(match[0].length) || "/";
+}
 
 /**
  * Converts a repository-relative docs file path to the route it renders at.
@@ -61,16 +82,19 @@ export function routeForSitemapUrl(url: string): string | undefined {
     return undefined;
   }
 
-  const route = pathname.replace(SDK_PREFIX, "") || "/";
+  const route = stripSdkScope(pathname);
   return route.endsWith("/") ? route : `${route}/`;
 }
+
+const WARNING_PREFIX = "[content-dates]";
 
 /**
  * Reads the newest commit date for every docs page in one `git log` pass.
  *
  * Returns an empty map when git is unavailable — a shallow clone or an export
- * with no history should degrade to a sitemap without `<lastmod>` rather than
- * fail the build.
+ * with no history degrades to a sitemap without `<lastmod>` rather than failing
+ * the build. That case is warned about loudly, because losing every `<lastmod>`
+ * is otherwise invisible: the build stays green and the sitemap still validates.
  */
 export function docsRouteDates(): Map<string, Date> {
   const newest = new Map<string, number>();
@@ -94,7 +118,14 @@ export function docsRouteDates(): Map<string, Date> {
     },
   );
 
-  if (gitLog.error || gitLog.status !== 0) return new Map();
+  if (gitLog.error || gitLog.status !== 0) {
+    console.warn(
+      `${WARNING_PREFIX} could not read git history for ${DOCS_DIR}, so the ` +
+        `sitemap will have no <lastmod> dates. Check that the build has git ` +
+        `available and a non-shallow clone.`,
+    );
+    return new Map();
+  }
 
   let commitDate = 0;
 
@@ -117,6 +148,14 @@ export function docsRouteDates(): Map<string, Date> {
     // commit dates non-monotonic. This matches how Starlight picks the date for
     // its "Last updated" footer, so the two agree.
     newest.set(route, Math.max(newest.get(route) ?? 0, commitDate));
+  }
+
+  if (newest.size === 0) {
+    console.warn(
+      `${WARNING_PREFIX} git history contained no commits touching ` +
+        `${DOCS_DIR}, so the sitemap will have no <lastmod> dates. This ` +
+        `usually means the build is running against a shallow clone.`,
+    );
   }
 
   return new Map(
