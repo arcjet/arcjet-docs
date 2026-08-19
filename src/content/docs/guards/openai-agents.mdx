@@ -26,10 +26,13 @@ Install the Guard SDK and the OpenAI Agents SDK:
 npm install @arcjet/guard @openai/agents
 ```
 
-Import helpers from `@arcjet/guard/openai-agents/v0`. That export is
-unpublished. It is not an npm package you can install by that path. There is
-no unversioned alias. `@openai/agents` (`>=0.17.0 <1`) is a peer. The SDK is
-pre-1.0, so the segment is `v0`. The integration requires Node.js 22 or later.
+Import helpers from the versioned path `@arcjet/guard/openai-agents/v0`.
+There is no unversioned alias. `@arcjet/guard/openai-agents` does not
+resolve. The SDK is pre-1.0, so the segment is `v0`. `@openai/agents`
+(`>=0.17.0 <1`) is an optional peer. The integration requires Node.js 22
+or later. Until `@arcjet/guard/openai-agents/v0` is published, the import
+is on [arcjet-js main](https://github.com/arcjet/arcjet-js/pull/6233), not
+on npm.
 
 Launch one client at module scope:
 
@@ -83,7 +86,7 @@ cp -r node_modules/@arcjet/guard/skills/integrate-arcjet-guard-openai-agents ~/.
 Then ask the agent to add Arcjet Guard to this OpenAI Agents project. In
 Claude Code, run `/integrate-arcjet-guard-openai-agents`. Until
 `@arcjet/guard/openai-agents/v0` is published, the skill source is
-[integrate-arcjet-guard-openai-agents](https://github.com/arcjet/arcjet-js/blob/891bc92eb9b028b1ae54370987dafe7140940ee1/arcjet-guard/skills/integrate-arcjet-guard-openai-agents/SKILL.md).
+[integrate-arcjet-guard-openai-agents](https://github.com/arcjet/arcjet-js/pull/6233).
 
 ## Screen user text before `run()` — there is no inbound hook. `inputGuardrails` / `callModelInputFilter` are not Guard.
 
@@ -254,4 +257,4 @@ await run(agent, userText, { context: appContext });
 - <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>
 - <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>
 - <Link.Page href="/guards">Agent guards</Link.Page>
-- Adapter: [arcjet/arcjet-js@891bc92](https://github.com/arcjet/arcjet-js/commit/891bc92eb9b028b1ae54370987dafe7140940ee1)
+- Adapter: [arcjet/arcjet-js#6233](https://github.com/arcjet/arcjet-js/pull/6233)
