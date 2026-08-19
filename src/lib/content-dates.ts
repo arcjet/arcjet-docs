@@ -89,6 +89,25 @@ export function routeForSitemapUrl(url: string): string | undefined {
 const WARNING_PREFIX = "[content-dates]";
 
 /**
+ * Whether the build is running against a shallow clone.
+ *
+ * This matters more than it looks. `git log` still succeeds in a shallow clone,
+ * but every file reports the single fetched commit, so each page would claim to
+ * have been modified at build time. That is worse than having no dates at all:
+ * a sitemap where all 1,248 entries change their `<lastmod>` on every deploy
+ * tells crawlers the whole site was rewritten, which is exactly the opposite of
+ * the signal this is meant to send.
+ */
+export function isShallowRepository(): boolean {
+  const result = spawnSync("git", ["rev-parse", "--is-shallow-repository"], {
+    cwd: PROJECT_ROOT,
+    encoding: "utf-8",
+  });
+
+  return result.stdout?.trim() === "true";
+}
+
+/**
  * Reads the newest commit date for every docs page in one `git log` pass.
  *
  * Returns an empty map when git is unavailable — a shallow clone or an export
@@ -98,6 +117,16 @@ const WARNING_PREFIX = "[content-dates]";
  */
 export function docsRouteDates(): Map<string, Date> {
   const newest = new Map<string, number>();
+
+  if (isShallowRepository()) {
+    console.warn(
+      `${WARNING_PREFIX} the repository is a shallow clone, so per-page commit ` +
+        `dates are not available and the sitemap will have no <lastmod> dates. ` +
+        `Fetch full history (git fetch --unshallow, or fetch-depth: 0 in CI) to ` +
+        `restore them.`,
+    );
+    return new Map();
+  }
 
   const gitLog = spawnSync(
     "git",

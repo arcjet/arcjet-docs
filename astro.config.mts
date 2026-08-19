@@ -9,7 +9,10 @@ import robotsTxt from "astro-robots-txt";
 import { defineConfig, envField } from "astro/config";
 import arcjet from "@arcjet/astro";
 import starlightLinksValidator from "starlight-links-validator";
-import { sitemapLastmodSerializer } from "./src/lib/content-dates";
+import {
+  isShallowRepository,
+  sitemapLastmodSerializer,
+} from "./src/lib/content-dates";
 import { main as sidebar } from "./src/lib/sidebars";
 
 /*
@@ -134,7 +137,11 @@ export default defineConfig({
       // Derives each page's date from git history. Shows a "Last updated" line
       // in the page footer and feeds `dateModified` into the structured data in
       // ./src/routeData.ts, which AI search engines use as a freshness signal.
-      lastUpdated: true,
+      //
+      // Disabled on a shallow clone. Starlight would otherwise date every page
+      // to the checkout commit, publishing a freshness signal that says the
+      // entire site changed at build time. No date is better than a wrong one.
+      lastUpdated: !isShallowRepository(),
       social: [
         { icon: "github", label: "GitHub", href: "https://github.com/arcjet" },
         {

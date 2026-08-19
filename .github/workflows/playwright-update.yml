@@ -57,6 +57,10 @@ jobs:
           # so the final step can push the regenerated snapshots back to the
           # branch.
           persist-credentials: true
+          # This job builds the site, so it needs the same full history as the
+          # build in ./playwright.yml. A shallow clone would date every page to
+          # the checkout commit and bake that into the regenerated snapshots.
+          fetch-depth: 0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           cache: npm
