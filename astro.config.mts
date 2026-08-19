@@ -1,6 +1,7 @@
 import type { AstroUserConfig } from "astro";
 import fs from "node:fs";
 import react from "@astrojs/react";
+import sitemap from "@astrojs/sitemap";
 import starlight from "@astrojs/starlight";
 import vercelAdapter from "@astrojs/vercel";
 import { ExpressiveCodeTheme } from "astro-expressive-code";
@@ -8,6 +9,7 @@ import robotsTxt from "astro-robots-txt";
 import { defineConfig, envField } from "astro/config";
 import arcjet from "@arcjet/astro";
 import starlightLinksValidator from "starlight-links-validator";
+import { sitemapLastmodSerializer } from "./src/lib/content-dates";
 import { main as sidebar } from "./src/lib/sidebars";
 
 /*
@@ -129,6 +131,10 @@ export default defineConfig({
         replacesTitle: true,
       },
       favicon: "favicon.png",
+      // Derives each page's date from git history. Shows a "Last updated" line
+      // in the page footer and feeds `dateModified` into the structured data in
+      // ./src/routeData.ts, which AI search engines use as a freshness signal.
+      lastUpdated: true,
       social: [
         { icon: "github", label: "GitHub", href: "https://github.com/arcjet" },
         {
@@ -171,6 +177,7 @@ export default defineConfig({
       components: {
         Header: "./src/components/overrides/Header.astro",
         Hero: "./src/components/overrides/Hero.astro",
+        LastUpdated: "./src/components/overrides/LastUpdated.astro",
         MobileTableOfContents:
           "./src/components/overrides/MobileTableOfContents.astro",
         PageFrame: "./src/components/overrides/PageFrame.astro",
@@ -195,6 +202,19 @@ export default defineConfig({
           lang: "en",
         },
       },
+    }),
+    /*
+     * Starlight adds `@astrojs/sitemap` itself unless the integration is already
+     * present, so registering it here replaces Starlight's copy. That is
+     * deliberate: it lets us add `<lastmod>` from git history as a freshness
+     * signal for search engines and AI crawlers.
+     *
+     * Starlight's version also sets the `i18n` option, but only for
+     * multilingual sites. If locales are ever added beyond `root`, that option
+     * needs adding here too.
+     */
+    sitemap({
+      serialize: sitemapLastmodSerializer(),
     }),
     react(),
     arcjet(),
