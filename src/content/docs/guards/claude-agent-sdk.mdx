@@ -83,15 +83,19 @@ outage. Timeout already fail-closes the prompt (Claude Code v2.1.208+).
 
 ```ts
 import { query } from "@anthropic-ai/claude-agent-sdk";
+import { randomUUID } from "node:crypto";
 import { guardHooks } from "@arcjet/guard/claude-agent-sdk/v0";
 import { detectPromptInjection } from "@arcjet/guard";
 import { arcjet } from "./arcjet.js";
 
-const sessionId = conversationId;
+// `options.sessionId` must be a UUID and can only be created once, so mint one
+// per conversation and store it. See Correlation below.
+const sessionId = conversationId ?? randomUUID();
 
 for await (const message of query({
   prompt: userText,
   options: {
+    // First turn only. Later turns: `resume: sessionId`.
     sessionId,
     hooks: guardHooks(arcjet, {
       sessionId,
@@ -188,6 +192,8 @@ export const hooks = guardHooks(arcjet, {
   sessionId: conversationId,
   action: ({ toolName }) => `${toolName}.invoked`,
   rules: ({ toolName }) => [mcpLimit({ key: toolName, requested: 1 })],
+  // Tools already wrapped with `guardTool` guard themselves.
+  exclude: [{ server: "support", name: "lookup_order" }],
   inbound: {
     action: "message.received",
     rules: ({ prompt }) => [detectPromptInjection()(prompt)],
@@ -197,6 +203,20 @@ export const hooks = guardHooks(arcjet, {
 
 Pass `hooks` to `query({ options.hooks })`. Use this for tools you did not
 pass through `guardTool`.
+
+`PreToolUse` fires for **every** tool and its input carries only a name, never
+the Arcjet marker `guardTool` applies — so list your wrapped tools in `exclude`
+or each one is guarded twice per invocation, costing two round trips and two
+quota units.
+
+Entries match the reported name **exactly**. An authored tool arrives as
+`mcp__<server>__<tool>`, so pass `{ server, name }` and the qualified name is
+built for you; a bare string matches as-is, which is what you want for a
+built-in such as `"Bash"`. A bare authored name deliberately does not match
+every server's tool of that name: two servers can expose the same name with
+only one of them wrapped, and a loose match would drop the gate on the
+unprotected one. Excluding a tool stops the gate, not the `PostToolUse`
+capture.
 
 ## Fail-closed default
 
@@ -208,22 +228,48 @@ already fail-closes the prompt (Claude Code v2.1.208+).
 
 ## Correlation
 
-Set `options.sessionId` on `query()` to a conversation identity you already
-have. `claudeAgentContext` reads hook `session_id` first, then
-`options.sessionId`. It never calls `createAgentContext`. If neither is a
-valid 1-256 printable-ASCII string, the call is uncorrelated rather than
-joined to a generated id. Subagent `agent_id` is metadata only.
+`claudeAgentContext` reads hook `session_id` first, then `options.sessionId`. It
+never calls `createAgentContext`. If neither is a valid 1-256 printable-ASCII
+string, the call is uncorrelated rather than joined to a generated id. Subagent
+`agent_id` is metadata only.
+
+Two Claude Agent SDK constraints decide what you can pass, and neither is
+Arcjet's:
+
+1. **`options.sessionId` must be a UUID.** Anything else exits the CLI with
+   `Error: Invalid session ID. Must be a valid UUID.`
+2. **A session id can only be created once.** Passing the same id to a second
+   `query()` exits with `Error: Session ID <id> is already in use.` Continue an
+   existing conversation with `options.resume`.
+
+So mint one UUID per conversation and resume it on later turns. That is also
+what keeps a multi-turn conversation on a single Sequence: because
+`claudeAgentContext` prefers the hook's `session_id`, a fresh UUID per turn
+splits correlation silently instead of erroring.
 
 ```ts
-const sessionId = conversationId;
+import { randomUUID } from "node:crypto";
 
-for await (const message of query({
-  prompt: userText,
-  options: { sessionId, hooks: guardHooks(arcjet, { sessionId }) },
-})) {
-  void message;
+// Store this with the conversation. Do not generate one per turn.
+const sessionId = conversationId ?? randomUUID();
+
+async function turn(userText: string, firstTurn: boolean) {
+  for await (const message of query({
+    prompt: userText,
+    options: {
+      ...(firstTurn ? { sessionId } : { resume: sessionId }),
+      hooks: guardHooks(arcjet, { sessionId }),
+    },
+  })) {
+    void message;
+  }
 }
 ```
+
+Pass `sessionId` to `guardHooks` either way: a resumed turn reports the same id
+on hook input, and the policy value is the fallback for when it does not. A
+single `query()` with a streaming-input prompt is the other supported multi-turn
+shape, and needs no `resume`.
 
 ## What not to use
 

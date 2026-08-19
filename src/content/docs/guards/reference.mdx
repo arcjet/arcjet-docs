@@ -198,6 +198,14 @@ Remote policy data is separate from SDK-submitted rule results:
 The Arcjet server combines enforced SDK and remote rules into the final
 `ALLOW` or `DENY`; the SDK does not recompute that aggregate conclusion.
 
+Every rule in a call is evaluated, so **a denial by one rule still consumes
+another's budget**. A call that trips `detectSensitiveInfo` also spends a token
+from a `tokenBucket` in the same `rules` array — the decision reads `DENY`
+overall while its `TOKEN_BUCKET` result reads `ALLOW` with a decremented
+`remaining`. That is usually what you want, since a caller sending PII is one
+you are happy to slow down. Split the rules across two guard calls when a false
+positive must not drain a legitimate caller's budget.
+
 ### Policy evaluation status
 
 `policyEvaluation` / `policy_evaluation` reports which policy revision Arcjet
