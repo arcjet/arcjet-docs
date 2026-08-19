@@ -112,9 +112,20 @@ export default defineChannel({
       });
 
       if (!verdict.allowed) {
-        return new Response(JSON.stringify({ error: verdict.message }), {
-          status: 403,
-        });
+        // `verdict.outcome` is "DENY" | "UNAVAILABLE" — a policy denial versus
+        // an Arcjet outage. Answer them differently: a denial is the caller's
+        // problem (403), an outage is ours (503, which is also retryable).
+        // The rule category that fired lives on `verdict.decision?.reason`,
+        // the same place as every other Arcjet surface. `verdict.reason` is a
+        // deprecated alias for `outcome`.
+        return new Response(
+          JSON.stringify({
+            error: verdict.message,
+            outcome: verdict.outcome,
+            reason: verdict.decision?.reason ?? "UNKNOWN",
+          }),
+          { status: verdict.outcome === "UNAVAILABLE" ? 503 : 403 },
+        );
       }
 
       const session = await args.from(correlationId).send(message, {
