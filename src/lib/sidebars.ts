@@ -184,10 +184,6 @@ export const main = [
         link: "/guards/framework-integrations",
       },
       {
-        label: "LangChain",
-        link: "/guards/langchain",
-      },
-      {
         label: "Remote policies",
         link: "/guards/remote-policies",
       },
@@ -639,7 +635,7 @@ export const main = [
         link: "https://fly.io/docs/reference/arcjet/",
         attrs: { target: "_blank", class: "external-link" },
       },
-        {
+      {
         label: "LangChain",
         link: "/guards/langchain",
       },
