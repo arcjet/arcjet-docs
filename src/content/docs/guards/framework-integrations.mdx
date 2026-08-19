@@ -1,6 +1,6 @@
 ---
 title: "Agent guard framework integrations"
-description: "Guard Vercel AI SDK, LangChain, LangGraph, Vercel Eve, Mastra, and Claude Agent SDK tools, processors, and inbound messages."
+description: "Guard Vercel AI SDK, LangChain, LangGraph, OpenAI Agents, Vercel Eve, Mastra, and Claude Agent SDK tools, processors, and inbound messages."
 ---
 
 import { Aside } from "@astrojs/starlight/components";
@@ -123,6 +123,22 @@ not LangChain `createAgent` / `wrapToolCall`.
 See the <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>
 for inbound screening, authored tools, and ToolNode denials.
 
+## OpenAI Agents
+
+OpenAI Agents text `Agent` workflows (`run()` + authored `tool()`) have no
+`guardInbound`. Screen user text with a direct `guard()` call before
+`run()`. `needsApproval` and hosted `requireApproval` are human HITL, not
+policy. There is no `guardApproval`, no `guardToolNode`, and no
+`guardHooks`. Use `guardTool()` to wrap `FunctionTool.invoke` after
+`tool({ execute })`. Hosted tools, handoffs, and Runner `agent_tool_start`
+are not deny points.
+
+This is not Realtime, Sandbox, hosted tools, MCP, `agent.asTool()`, or
+computer/shell.
+
+See the <Link.Page href="/guards/openai-agents">OpenAI Agents agent guard</Link.Page>
+for inbound screening, authored tools, and execute denials.
+
 ## Vercel Eve
 
 Eve agents can have zero authored tools. OpenAPI and MCP connections have no
@@ -175,6 +191,11 @@ The wrappers default to fail closed when Guard is unavailable:
 - LangGraph helpers default to `onGuardError: "deny"`. On the inbound `guard()`
   before `invoke`, `"allow"` is a legitimate choice because failing closed
   stops the graph running.
+- OpenAI Agents helpers default to `onGuardError: "deny"`. `guardTool`
+  returns a plain `ArcjetDenialResult` and does not throw. The runner
+  stringifies it onto a `function_call_result` with `status: "completed"`.
+  On the inbound `guard()` before `run()`, `"allow"` is a legitimate
+  choice because failing closed stops the agent running.
 
 Set `onGuardError: "allow"` in JavaScript or `on_guard_error="allow"` in Python
 only when executing without a complete security decision is acceptable.
