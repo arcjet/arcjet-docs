@@ -21,8 +21,8 @@ This is the Python SDK. It is not the JavaScript LangGraph Graph API adapter
 
 ## Install
 
-`guard_action` and `guard_action_sync` ship in core `arcjet.guard`. They need
-no extra.
+`guard_action` and `guard_action_sync` ship in the core `arcjet.guard`
+package, so they need no extra.
 
 Install an extra only for the LangChain surfaces you use:
 
@@ -52,7 +52,7 @@ from arcjet.guard.langchain import (
 ```
 
 Importing `arcjet.guard.langchain` does not load LangGraph. `ArcjetMiddleware`
-and `ToolPolicy` raise `ImportError` unless you installed
+and `ToolPolicy` raise `ImportError` if you haven't installed
 `arcjet[langchain-agents]`.
 
 Launch one client at module scope:
@@ -77,13 +77,10 @@ Pick the surface that matches what you hold when the effect runs:
 | A chain or agent you want to observe | `ArcjetCaptureHandler` / `ArcjetAsyncCaptureHandler` | `arcjet[langchain]` | No |
 
 If you can name the tool at wiring time, `guard_tool` is the smaller change.
-It returns something that is the tool, so nothing downstream changes. If the
-model picks the tool and you want one policy per tool name, use the
-middleware. They compose: a guarded tool called from a guarded agent
+It returns a drop-in replacement for the tool, so nothing downstream
+changes. If the model picks the tool and you want one policy per tool name,
+use the middleware. They compose: a guarded tool called from a guarded agent
 evaluates once per policy.
-
-`ArcjetCaptureHandler` never blocks a call. LangChain ignores callback return
-values, so a handler cannot deny anything.
 
 ## Guard any Python callable
 
@@ -188,19 +185,21 @@ guarded_send_email = guard_tool(
 ```
 
 <Aside type="caution">
-  Pickle executes code as it loads. Load a pickled tool only from a source
-  you control. Guarding does not protect `unpickle`.
+  The `pickle` module executes code as it loads. Load a pickled tool only
+  from a source you control. Guarding the tool doesn't protect the
+  unpickling step.
 </Aside>
 
 ## Guard an agent's tool calls
 
-When the model chooses the tool, give `create_agent` `ArcjetMiddleware`.
+When the model chooses the tool, pass `ArcjetMiddleware` to `create_agent`.
 Match each consequential tool name to a `ToolPolicy`. Tools with no policy
 pass through unguarded.
 
-Pass `tools=` the same sequence you gave `create_agent`. A policy is matched
-by tool name, so a typo or a renamed `@tool` function otherwise leaves that
-tool unguarded. Given the tools, a key that names none of them is refused.
+Pass `tools=` the same sequence you gave `create_agent`. The middleware
+matches each policy by tool name, so a typo or a renamed `@tool` function
+leaves that tool unguarded. When you pass the tools, the middleware rejects a
+policy key that names none of them.
 
 The client is optional. Without `guard=`, the checkpoint uses the client
 registered with `register_arcjet()`.
@@ -269,8 +268,8 @@ Checkpoint surfaces default to `on_guard_error="deny"`:
 - `ArcjetMiddleware`
 
 If Guard cannot be evaluated, the action does not run. Set
-`on_guard_error="allow"` only when executing without a complete security
-decision is acceptable. A value other than `"allow"` or `"deny"` is refused.
+`on_guard_error="allow"` only when you can accept running the action without
+a complete security decision. The helpers reject any other value.
 
 A `DENY` conclusion always blocks, regardless of `on_guard_error`. The
 errors are distinct: a denial means policy evaluated and said no
@@ -278,14 +277,14 @@ errors are distinct: a denial means policy evaluated and said no
 check never happened (`ArcjetUnavailableError` /
 `ArcjetToolUnavailableError`).
 
-The core `guard()` call still fails open. It returns `ALLOW` with
-`has_failed_open()` true. The wrappers that sit around an effect fail
-closed.
+The core `guard()` call still fails open. It returns `ALLOW`, and
+`has_failed_open()` returns `True`. The wrappers that sit around an effect
+fail closed.
 
 ## Correlation
 
-Pass one correlation ID into `ainvoke` so middleware and guarded tools share
-one Sequence. Do not mint a new ID per turn.
+Pass one correlation ID into `ainvoke()` so middleware and guarded tools
+share one Sequence. Do not mint a new ID per turn.
 
 ```py
 await agent.ainvoke(
