@@ -657,6 +657,10 @@ export const main = [
         link: "/ai-protection/abuse-protection?f=next-js",
       },
       {
+        label: "OpenAI Agents",
+        link: "/guards/openai-agents",
+      },
+      {
         label: "Vercel",
         link: "https://vercel.com/integrations/arcjet",
         attrs: { target: "_blank", class: "external-link" },
