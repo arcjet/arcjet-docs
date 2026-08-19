@@ -54,7 +54,13 @@ The integration exposes two surfaces:
   (`{ arcjetDenied, reason, message, retryable, retryAfterSeconds? }`).
   It does not throw. The runner stringifies that object onto a
   `function_call_result` with `status: "completed"`. The denial rides in
-  the payload (`arcjetDenied: true`), not the envelope.
+  the payload (`arcjetDenied: true`), not the envelope. Because the
+  runner treats that return as the tool's output, `timeoutMs` races the
+  guard round trip as well as `execute`, and `outputGuardrails` /
+  `customDataExtractor` receive the denial object. Keep `timeoutMs` wide
+  enough for a guard call. `guardTool` warns if `invoke` is handed
+  neither a string nor an object: the runner passes a JSON string, so
+  another shape means no arguments were scanned.
 - `openaiAgentsContext()` reads a field you put on
   `runContext.context`: `correlationId`, then `sessionId`, then
   `conversationId`, then `groupId`. Then it reads envelope copies
@@ -99,13 +105,11 @@ prompt-injection (and other inbound rules) in the application before
 `callModelInputFilter` are OpenAI SDK surfaces. They are not Arcjet.
 
 Direct `client.guard({ label, rules, ...openaiAgentsContext(...) })` is the
-inbound pattern.
+inbound pattern. Act on that decision. Direct `guard()` fails open, so an
+`ALLOW` is not proof the rules ran. Gate on `decision.hasFailedOpen()` if
+this call site must fail closed. `guardTool` already defaults to that.
 
 On `DENY`, do not call `run()`.
-
-Helpers default to `onGuardError: "deny"`. `"allow"` is a legitimate choice
-on the inbound `guard()` before `run()`, because failing closed there stops
-the agent running during an outage.
 
 ```ts
 import { detectPromptInjection } from "@arcjet/guard";
@@ -122,7 +126,7 @@ const decision = await arcjet.guard({
   ...openaiAgentsContext({ context: appContext, conversationId }),
 });
 
-if (decision.conclusion === "DENY") {
+if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
   throw new Error("message blocked");
 }
 
@@ -146,7 +150,9 @@ It does not throw. The runner stringifies that object onto a
 `function_call_result` with `status: "completed"`. Do not throw from
 `execute` to signal a denial: the SDK `errorFunction` would turn a throw
 into a model-visible string (or `ToolCallError` when `outputSchema` is
-set). Scan free-text args (a note, reason, or body). An opaque
+set). `timeoutMs` races the guard round trip, and
+`outputGuardrails` / `customDataExtractor` receive the denial object.
+Scan free-text args (a note, reason, or body). An opaque
 `orderNumber` or tool-call id will not trip email / phone / card / IP, so
 do not pass it to `localDetectSensitiveInfo`. That helper runs on a local
 ML model backend.
