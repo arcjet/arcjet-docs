@@ -79,8 +79,11 @@ const TextByFramework = forwardRef(
       );
     }, [selectedFramework, defaultText]);
 
-    // Loading handling
-    const [loading, setLoading] = useState(true);
+    // Loading handling. When a default is provided we can render it right away,
+    // including during SSR, so crawlers and no-JS clients get real text instead
+    // of a skeleton. The effect above swaps in the stored framework after
+    // hydration.
+    const [loading, setLoading] = useState(defaultText === undefined);
 
     useEffect(() => {
       if (selectedFramework || defaultText !== undefined) setLoading(false);

@@ -1,0 +1,24 @@
+---
+/**
+ * Override to the default Starlight LastUpdated component.
+ *
+ * Identical output, except the date carries `data-playwright-mask` so the
+ * screenshot tests ignore it. Without the mask every content edit would change
+ * that page's git date and therefore its screenshot snapshot.
+ */
+const { lang, lastUpdated } = Astro.locals.starlightRoute;
+---
+
+{
+  lastUpdated && (
+    <p>
+      {Astro.locals.t("page.lastUpdated")}{" "}
+      <time datetime={lastUpdated.toISOString()} data-playwright-mask>
+        {lastUpdated.toLocaleDateString(lang, {
+          dateStyle: "medium",
+          timeZone: "UTC",
+        })}
+      </time>
+    </p>
+  )
+}
