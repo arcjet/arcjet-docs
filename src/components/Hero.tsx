@@ -12,7 +12,7 @@ import { ReactRouter as IconReactRouter } from "@/components/icons/tech/ReactRou
 import { Remix as IconRemix } from "@/components/icons/tech/Remix";
 import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
 import type { ForwardedRef, HTMLProps, ReactNode } from "react";
-import { forwardRef, Fragment, memo, useEffect, useState } from "react";
+import { forwardRef, Fragment, memo, useMemo } from "react";
 import type { StarlightRouteData } from "@astrojs/starlight/route-data";
 
 import styles from "./Hero.module.scss";
@@ -64,27 +64,21 @@ const Hero = forwardRef(
     { className, astroEntry, ...props }: Props,
     ref: ForwardedRef<HTMLDivElement>,
   ) => {
-    const [title, setTitle] = useState<string>();
-    const [actions, setActions] = useState<HeroConfig["actions"]>();
-    const [actionSections, setActionSections] =
-      useState<HeroConfig["actions"][]>();
-    const [image, setImage] = useState<HeroConfig["image"]>();
-    const [tagline, setTagline] = useState<HeroConfig["tagline"]>();
+    // Everything the hero renders comes from the `astroEntry` prop, so derive it
+    // during render rather than in an effect. Deriving it means the title,
+    // tagline, image, and actions are all present in the server-rendered HTML —
+    // crawlers that do not execute JavaScript would otherwise see an empty `h1`.
 
-    useEffect(() => {
-      setTitle(astroEntry.data.title);
+    // NOTE: HeroConfig and StarlightRouteData typing mismatch for actions
+    //       and image. Each array includes a possible `undefined` value.
 
-      const hero = astroEntry.data.hero;
+    const title = astroEntry.data.title;
+    const hero = astroEntry.data.hero;
+    const actions = hero?.actions as HeroConfig["actions"];
+    const tagline = hero?.tagline;
+    const image = hero?.image as HeroConfig["image"];
 
-      // NOTE: HeroConfig and StarlightRouteData typing mismatch for actions
-      //       and image. Each array includes a possible `undefined` value.
-
-      setActions(hero?.actions as HeroConfig["actions"]);
-      setTagline(hero?.tagline);
-      setImage(hero?.image as HeroConfig["image"]);
-    }, [astroEntry]);
-
-    useEffect(() => {
+    const actionSections = useMemo(() => {
       const groups: HeroConfig["actions"][] = [];
       actions &&
         actions.map((action) => {
@@ -98,7 +92,7 @@ const Hero = forwardRef(
             groups[groupIdx].push(action);
           }
         });
-      setActionSections(groups);
+      return groups;
     }, [actions]);
 
     const Action = memo(({ action }: any) => {
