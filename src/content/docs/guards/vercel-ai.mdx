@@ -255,6 +255,7 @@ import {
   ArcjetDeniedError,
   ArcjetGuardUnavailableError,
   captureAction,
+  createAgentContext,
   guardAction,
   securityMetadata,
 } from "@arcjet/guard/vercel-ai/v7";
@@ -268,42 +269,53 @@ const submitLimit = tokenBucket({
   maxTokens: 5,
 });
 
-try {
-  await guardAction(
-    arcjet,
-    context,
-    {
-      action: "review.submitted",
-      rules: [submitLimit({ key: repoId, requested: 1 })],
-      metadata: securityMetadata({
-        destination: "github",
-        reversibility: "compensable",
-      }),
-    },
-    () =>
-      github.pulls.createReview({
-        owner,
-        repo,
-        pull_number: prNumber,
-        body: reviewText,
-      }),
-  );
-} catch (error) {
-  if (error instanceof ArcjetDeniedError) {
-    // A rule denied the call. Tell the user why. Don't retry.
-    console.warn("denied:", error.decision.reason);
-  } else if (error instanceof ArcjetGuardUnavailableError) {
-    // Policy could not be evaluated. Alert on this separately from a DENY.
-    console.warn("policy unavailable for:", error.action);
-  } else {
-    throw error;
+export async function submitGithubReview(
+  context: ReturnType<typeof createAgentContext>,
+  review: {
+    repoId: string;
+    owner: string;
+    repo: string;
+    prNumber: number;
+    reviewText: string;
+  },
+) {
+  try {
+    await guardAction(
+      arcjet,
+      context,
+      {
+        action: "review.submitted",
+        rules: [submitLimit({ key: review.repoId, requested: 1 })],
+        metadata: securityMetadata({
+          destination: "github",
+          reversibility: "compensable",
+        }),
+      },
+      () =>
+        github.pulls.createReview({
+          owner: review.owner,
+          repo: review.repo,
+          pull_number: review.prNumber,
+          body: review.reviewText,
+        }),
+    );
+  } catch (error) {
+    if (error instanceof ArcjetDeniedError) {
+      // A rule denied the call. Tell the user why. Don't retry.
+      console.warn("denied:", error.decision.reason);
+    } else if (error instanceof ArcjetGuardUnavailableError) {
+      // Policy could not be evaluated. Alert on this separately from a DENY.
+      console.warn("policy unavailable for:", error.action);
+    } else {
+      throw error;
+    }
   }
-}
 
-captureAction(arcjet, context, {
-  action: "notification.sent",
-  metadata: securityMetadata({ destination: "slack" }),
-});
+  captureAction(arcjet, context, {
+    action: "notification.sent",
+    metadata: securityMetadata({ destination: "slack" }),
+  });
+}
 ```
 
 Use `captureAction` when you want a record and no decision. Omit `rules` on

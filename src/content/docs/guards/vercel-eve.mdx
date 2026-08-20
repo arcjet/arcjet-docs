@@ -200,7 +200,8 @@ export default defineChannel({
 An Eve agent can have zero authored tools. OpenAPI and MCP connections
 (`agent/connections/*.ts`) have no local `execute`. The only enforcement point
 is `guardApproval()` on the connection's `approval` field. There is no
-middleware or hook alternative.
+middleware or hook alternative. `defineDynamic` tools also have no wrappable
+`execute`. Gate those with `guardApproval()` on the tool's `approval` field.
 
 On request-time `DENY`, Eve returns `{ type: "denied", reason }` the model can
 read. That differs from `guardTool()`, which throws. Human-in-the-loop (HITL)

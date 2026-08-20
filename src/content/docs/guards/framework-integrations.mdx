@@ -73,32 +73,34 @@ import { z } from "zod";
 
 const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 
-const sendEmail = guardTool(
-  arcjet,
-  tool({
-    description: "Send an email",
-    inputSchema: z.object({ to: z.string(), body: z.string() }),
-    execute: ({ to, body }) => emailProvider.send({ to, body }),
-  }),
-  {
-    action: "email.sent",
-    actor: user.id,
-    inputs: ({ to, body }) => ({
-      recipient: policyInput.server.string(to),
-      body: policyInput.local.string(body),
+export async function runAgent(user: { id: string }, prompt: string) {
+  const sendEmail = guardTool(
+    arcjet,
+    tool({
+      description: "Send an email",
+      inputSchema: z.object({ to: z.string(), body: z.string() }),
+      execute: ({ to, body }) => emailProvider.send({ to, body }),
     }),
-  },
-);
+    {
+      action: "email.sent",
+      actor: user.id,
+      inputs: ({ to, body }) => ({
+        recipient: policyInput.server.string(to),
+        body: policyInput.local.string(body),
+      }),
+    },
+  );
 
-const tools = { sendEmail };
-const context = createAgentContext({ correlationId: user.id });
+  const tools = { sendEmail };
+  const context = createAgentContext({ correlationId: user.id });
 
-await generateText({
-  model,
-  prompt,
-  tools,
-  toolsContext: aiToolsContext(context, tools),
-});
+  return generateText({
+    model: "openai/gpt-4o-mini",
+    prompt,
+    tools,
+    toolsContext: aiToolsContext(context, tools),
+  });
+}
 ```
 
 On a policy denial the tool does not execute and the model receives an
