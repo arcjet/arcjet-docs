@@ -156,13 +156,15 @@ Genkit JS flows (`ai.generate()` / `chat.send()` plus authored
 `guard()` call before `generate()` or `send()`. Middleware `model` is not
 Guard. `interrupt()` / `defineInterrupt` / `@genkit-ai/middleware`
 `toolApproval` / `restartTool` are human HITL confirmation, not policy.
-There is no `guardApproval`. Use `guardTool()` inside `ai.defineTool` and
-`guardMiddleware()` as a `generateMiddleware` `tool` hook. Don't also wrap
-these tools with `@arcjet/guard/vercel-ai/v7`.
+There is no `guardApproval`. Use `guardTool()` on the returned
+`ToolAction` and `guardMiddleware()` as a `{ name, instantiate }`
+`generateMiddleware` `tool` hook. Don't also wrap these tools with
+`@arcjet/guard/vercel-ai/v7`. This is not Go or Python Genkit.
 
-Don't turn a deny into `ToolInterruptError` or
-`finishReason: 'interrupted'`. For more information about inbound
-screening, authored tools, and `generate()`-wide denials, see the
+`guardTool` returns `{ arcjetDenied: true, … }` as completed
+`toolResponse.output`. Don't throw. Don't call `interrupt()`. For more
+information about inbound screening, authored tools, and
+`generate()`-wide denials, see the
 <Link.Page href="/guards/genkit">Genkit agent guard</Link.Page>.
 
 ## OpenAI Agents
@@ -231,7 +233,7 @@ in a different way:
 | AI SDK / Mastra | Return `{ arcjetDenied: true, … }` as the tool result | A throw becomes a generic tool error and drops the fields |
 | OpenAI Agents | Return `{ arcjetDenied: true, … }` from `invoke` | A throw hits `errorFunction` or `ToolCallError` and can kill the run |
 | LangGraph | Return `{ arcjetDenied: true, … }`. `ToolNode` wraps a `ToolMessage` with `status: "success"` | Fabricating a `ToolMessage` to force `status: "error"` crashes the graph reducer |
-| Genkit | Return a structured `arcjetDenied` object if it survives `outputSchema` | `ToolInterruptError` / `finishReason: 'interrupted'` is HITL, not a policy deny |
+| Genkit | Return `{ arcjetDenied: true, … }` as completed `toolResponse.output` | A throw / `interrupt()` is HITL and the wrong envelope |
 | Claude Agent SDK | MCP `CallToolResult` with `isError: true` and the payload on `structuredContent` | A throw is a raw exception. Omitting `isError` looks like success |
 | Vercel Eve | Throw `ArcjetDeniedError`. Opt in to a returned payload with `onDeny: "result"` | Eve projects a throw as a failed `action.result`. A silent return can violate `outputSchema` |
 
@@ -284,11 +286,11 @@ The wrappers default to fail closed when Guard is unavailable:
   plain payload. `ToolNode` wraps a `ToolMessage` whose `status` is
   `success`. Direct `guard()` before `invoke` fails open. Check
   `decision.hasFailedOpen()` when that call site must fail closed.
-- Genkit helpers default to `onGuardError: "deny"`. Return a structured
-  `arcjetDenied` object if it survives `outputSchema`. Don't turn a deny
-  into `ToolInterruptError` or `finishReason: 'interrupted'`. Direct
-  `guard()` before `generate()` / `send()` fails open. Check
-  `decision.hasFailedOpen()` when that call site must fail closed.
+- Genkit helpers default to `onGuardError: "deny"`. `guardTool` returns
+  `{ arcjetDenied: true, … }` as completed `toolResponse.output`. Don't
+  throw. Don't call `interrupt()`. Direct `guard()` before
+  `generate()` / `send()` fails open. Check `decision.hasFailedOpen()`
+  when that call site must fail closed.
 - OpenAI Agents helpers default to `onGuardError: "deny"`. `guardTool`
   returns a plain `ArcjetDenialResult` and does not throw. A throw hits
   `ToolCallError` and drops the fields. The runner stringifies the payload

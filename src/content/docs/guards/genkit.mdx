@@ -1,14 +1,15 @@
 ---
 title: "Genkit agent guard"
-description: "Screen user text before the model runs, wrap authored tool handlers, and treat approval pauses as human-in-the-loop confirmation, not policy."
+description: "Screen user text before the model runs, wrap authored tool actions, and treat approval pauses as human-in-the-loop confirmation, not policy."
 ---
 
 import { Link } from "@/components/link";
 import FrameworkPrimer from "@/snippets/guards/FrameworkPrimer.mdx";
 
-[Genkit](https://genkit.dev/) flows call `ai.generate()` / `chat.send()` and
-authored `ai.defineTool` handlers. Arcjet Guard sits at those boundaries so a
-remote policy can allow or deny the action before a side effect runs.
+[Genkit](https://genkit.dev/) JS flows call `ai.generate()` / `chat.send()`
+and authored `ai.defineTool` actions. Arcjet Guard sits at those
+boundaries so a remote policy can allow or deny the action before a side
+effect runs.
 
 <FrameworkPrimer />
 
@@ -16,9 +17,10 @@ Vercel AI SDK, Python LangChain, Eve, Mastra, LangGraph, OpenAI Agents, and
 Claude wrappers are on
 <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>.
 
-This adapter is Genkit JS `generate()` / `chat.send()` plus authored
-`ai.defineTool`. There is no inbound hook. Middleware `model` is not Guard.
-Don't also wrap these tools with `@arcjet/guard/vercel-ai/v7`.
+This adapter is Genkit JS `genkit()` plus `ai.defineTool` plus
+`ai.generate()`. It is not Go or Python Genkit. There is no inbound hook.
+Middleware `model` is not Guard. Don't also wrap these tools with
+`@arcjet/guard/vercel-ai/v7`.
 
 ## Install
 
@@ -30,10 +32,12 @@ npm install @arcjet/guard genkit
 
 Import helpers from the versioned path `@arcjet/guard/genkit/v1`. There is
 no unversioned alias. `@arcjet/guard/genkit` does not resolve. The version
-segment is Genkit's major. `genkit` (`>=1.0 <2`) is an optional peer. The
-integration requires Node.js 22 or later. Until `@arcjet/guard/genkit/v1` is
-published, the import lives on the unpublished Guard adapter branch, not in
-the published `@arcjet/guard` package on npm.
+segment is Genkit's major. `genkit` (`>=1.0.0 <2`) is an optional peer.
+`guardMiddleware` needs the `generateMiddleware` `tool` hook (Genkit >=
+1.33). Verified against Genkit 1.41.0. The integration requires Node.js 22
+or later. Until `@arcjet/guard/genkit/v1` is published, the import lives
+on [`f7619e4c`](https://github.com/arcjet/arcjet-js/commit/f7619e4c1c2a4f48a3342b7f8ab74a928ceb7309),
+not in the published `@arcjet/guard` package on npm.
 
 Launch one client at module scope:
 
@@ -45,36 +49,51 @@ export const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 
 ## Helpers
 
-The integration exposes three surfaces:
+The integration exposes three surfaces. Facts match
+[`f7619e4c`](https://github.com/arcjet/arcjet-js/commit/f7619e4c1c2a4f48a3342b7f8ab74a928ceb7309).
 
-- `guardTool()` wraps an authored `ai.defineTool` action. On `DENY` the
-  original handler never runs, so the tool never runs a side effect. Return
-  a structured `arcjetDenied` object if that object survives `outputSchema`.
-  Don't turn a deny into `ToolInterruptError` or
-  `finishReason: 'interrupted'`.
-- `guardMiddleware()` is a `generateMiddleware` `tool` hook. Pass it on
-  `ai.generate()` so `generate()`-wide tool attempts hit Guard. MCP and
-  filesystem-injected tools skip an unwrapped handler. Hosted or injected
-  tools are not a `defineTool` deny.
+- `guardTool()` wraps the `ToolAction` that `ai.defineTool` returns. It
+  replaces that callable and `.run`. It does not wrap the inner
+  `defineTool` handler. `outputSchema` validation runs inside
+  `action()`, so wrapping the handler would throw on a schema-mismatched
+  denial and fail `generate()`. Prefer omitting `outputSchema` on
+  guarded tools. The helper overwrites the original registry key because
+  `generate()` converts `tools` to name and schema defs and looks the
+  live action up. On `DENY` the original action never runs. The model
+  receives an `ArcjetDenialResult` as a completed `toolResponse.output`.
+  It does not throw. It does not call `interrupt()` or
+  `ToolInterruptError`. `finishReason` is not `"interrupted"`.
+- `guardMiddleware()` is a plain `{ name, instantiate }` object with a
+  `tool` hook. Pass it on `ai.generate({ use })`. A raw function becomes
+  a model hook only and cannot deny. The hook denies by returning a
+  completed `ToolResponsePart` without calling `next()`. It skips
+  branded (`guardTool`) tools when it can look them up. Tools that
+  cannot be looked up are still gated.
 - `genkitContext()` reads a caller-owned ID: `correlationId`, then
-  `sessionId`, then `conversationId`, then a caller-owned flow or run ID.
-  It never mints an ID. It never reads `traceId` or OpenTelemetry.
+  `sessionId`, then `conversationId`, then `flowId` / `runId`, then
+  envelope copies, then `init.sessionId`. It never mints an ID. It never
+  reads `traceId`. It never treats `interrupt` / `resumed` as
+  correlation. It never reads `Session.sessionId` from a Session
+  constructed without an ID.
 
 There is no `guardInbound`. There is no inbound hook. Screen user text with a
 direct `guard()` call before `ai.generate()` or `chat.send()`. There is no
 `guardApproval`.
 
 Never call `createAgentContext` inside a Genkit callback. Don't also wrap
-these tools with `@arcjet/guard/vercel-ai/v7`.
+these tools with `@arcjet/guard/vercel-ai/v7`. Don't wrap Go or Python
+Genkit with this adapter.
 
 ## Helper options
 
 | Option | Helpers | Description |
 | --- | --- | --- |
-| `action` | `guardTool`, `guardMiddleware` | Guard label and capture name. Use `resource.verb` in the past tense. |
-| `rules` | `guardTool`, `guardMiddleware` | SDK rules, or a function of the parsed tool input. Omit to submit none. |
+| `action` | `guardTool`, `guardMiddleware` | Guard label and capture name. Use `resource.verb` in the past tense. For `guardMiddleware`, a string or a function of `{ toolName, input }`. Middleware defaults to `tool.invoked`. |
+| `rules` | `guardTool`, `guardMiddleware` | SDK rules, or a function of the parsed tool input (or `{ toolName, input }` on the middleware). Omit to submit none. |
 | `metadata` | `guardTool`, `guardMiddleware` | Nested JSON, or a function of the same input as `rules`. |
+| `sessionId` | `guardTool`, `guardMiddleware` | Caller-owned fallback when the tool options or hook `ctx` do not carry one. Put the same ID on `generate({ context })` and on `guardMiddleware` for tool-time correlation. |
 | `onGuardError` | `guardTool`, `guardMiddleware` | `"deny"` (default) or `"allow"`. |
+| `onDeny` | `guardTool`, `guardMiddleware` | Reshape the denial object returned as `toolResponse.output`. |
 
 Inbound screening uses direct `guard()`, which takes `label` (not `action`)
 and fails open. See the following section.
@@ -85,13 +104,14 @@ There is no inbound hook, so there is no `guardInbound`. Put
 prompt-injection and other inbound rules in the application before
 `ai.generate()` or `chat.send()`.
 
-Middleware `model` is not Guard. It does not screen user text.
+Middleware `model` is not Guard. It intercepts the model call, not user
+text.
 
-Direct `client.guard({ label, rules, ...genkitContext(...) })` is the
-inbound pattern. Act on that decision. Direct `guard()` fails open, so an
-`ALLOW` is not proof the rules ran. Gate inbound on
-`decision.hasFailedOpen()` if this call site must fail closed. `guardTool`
-and `guardMiddleware` already default to that.
+Direct `client.guard({ label, rules, ...genkitContext({ context }) })`
+is the inbound pattern. Act on that decision. Direct `guard()` fails
+open, so an `ALLOW` is not proof the rules ran. Gate inbound on
+`decision.hasFailedOpen()` if this call site must fail closed.
+`guardTool` and `guardMiddleware` already default to that.
 
 On `DENY`, don't call `generate()` / `send()`.
 
@@ -101,18 +121,17 @@ import { genkitContext } from "@arcjet/guard/genkit/v1";
 import { arcjet } from "./arcjet.js";
 
 const inbound = detectPromptInjection();
+const appContext = { sessionId: conversationId };
 
 const decision = await arcjet.guard({
   label: "message.received",
   rules: [inbound(userText)],
-  ...genkitContext({ sessionId: conversationId }),
+  ...genkitContext({ context: appContext }),
 });
 
 if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
   throw new Error("message blocked");
 }
-
-await ai.generate({ prompt: userText });
 ```
 
 ## Human approval is not a policy gate
@@ -123,110 +142,108 @@ policy gate. Same trap as Mastra `requireApproval`, Claude `canUseTool`,
 LangGraph `interrupt()`, and OpenAI `needsApproval`. There is no
 `guardApproval`. Don't wrap them as Guard.
 
-Use `guardTool` for authored `ai.defineTool` handlers you own.
+Use `guardTool` for authored `ai.defineTool` actions you own.
 
-On `DENY` the original handler never runs. Return a structured
-`arcjetDenied` object if that object survives `outputSchema`. Don't throw
-`ToolInterruptError` and don't set `finishReason: 'interrupted'` to signal
-a policy deny. Scan free-text args (a note, reason, or body). An opaque
-`orderNumber` or tool-call ID will not trip email / phone / card / IP, so
-don't pass it to `localDetectSensitiveInfo`. That helper runs on a local
-ML model backend.
+On `DENY` the original `ToolAction` never runs, so the inner handler
+never runs a side effect. The model receives an `ArcjetDenialResult` as
+a completed `toolResponse.output`. Don't throw. Don't call
+`interrupt()` or `ToolInterruptError`. `finishReason` is not
+`"interrupted"`. Prefer omitting `outputSchema` on guarded tools.
+Scan free-text args (a note, reason, or body). An opaque `orderNumber`
+or tool-call ID will not trip email / phone / card / IP, so don't pass
+it to `localDetectSensitiveInfo`. That helper runs on a local ML model
+backend.
 
 ```ts
 import { z } from "genkit";
 import { guardTool } from "@arcjet/guard/genkit/v1";
-import { tokenBucket, localDetectSensitiveInfo } from "@arcjet/guard";
+import { tokenBucket } from "@arcjet/guard";
 import { arcjet } from "./arcjet.js";
 
 // `ai` is the instance `genkit()` returned.
-
-const lookupLimit = tokenBucket({
-  bucket: "lookups",
+const limit = tokenBucket({
   refillRate: 10,
   intervalSeconds: 60,
   maxTokens: 10,
 });
-// Factory then text. Same shape as `detectPromptInjection()(text)`.
-const detectPii = localDetectSensitiveInfo();
 
-export const lookupOrder = guardTool(
+const lookupOrder = guardTool(
   arcjet,
   ai.defineTool(
     {
       name: "lookup_order",
-      description: "Look up an order by number",
-      inputSchema: z.object({
-        orderNumber: z.string(),
-        note: z.string(),
-      }),
+      description: "Look up an order",
+      inputSchema: z.object({ orderNumber: z.string() }),
     },
-    async ({ orderNumber, note }) => ({
-      orderNumber,
-      note,
-      status: "shipped",
-    }),
+    async ({ orderNumber }) => ({ orderNumber, status: "shipped" }),
   ),
   {
     action: "order.looked-up",
-    rules: (input) => [
-      lookupLimit({ key: input.orderNumber, requested: 1 }),
-      detectPii(input.note),
-    ],
+    onGuardError: "deny",
+    rules: (input) => [limit({ key: input.orderNumber, requested: 1 })],
   },
 );
 ```
 
 ## Deny inside `ai.defineTool` via `guardTool`, and generate()-wide via `guardMiddleware`
 
-`guardTool` wraps an authored `ai.defineTool` handler. That handler is the
-only local side effect this adapter can stop on a single action.
+`guardTool` wraps the returned `ToolAction` callable and `.run`, not the
+inner `defineTool` handler. That action is the deny point for tools you
+own. Prefer omitting `outputSchema` on guarded tools. The helper
+overwrites the original registry key so `generate()` cannot look up the
+unguarded action.
 
-`guardMiddleware` is a `generateMiddleware` `tool` hook. Pass it on
-`ai.generate()` so tool attempts during that `generate()` hit Guard.
+`guardMiddleware` is a `generateMiddleware` `tool` hook. It is a plain
+`{ name, instantiate }` object. A raw function becomes a model hook only
+and cannot deny. The hook denies by returning a completed
+`ToolResponsePart` without calling `next()`. It skips branded
+(`guardTool`) tools when it can look them up. Tools that cannot be
+looked up are still gated.
 
 MCP and filesystem-injected tools skip an unwrapped handler. Hosted or
 injected tools are not a `defineTool` deny. `returnToolRequests: true`
 still hits `guardTool` if the caller invokes the wrapped action.
+`guardMiddleware` does not run if they never `generate()` the tool.
+
+The tool-hook `ctx` from `toRunOptions` is only `{ metadata, resumed }`
+– no async local storage (ALS) context. Put the same ID on
+`policy.sessionId` when you need tool-time correlation through the hook.
 
 ```ts
 import { guardMiddleware } from "@arcjet/guard/genkit/v1";
-import { tokenBucket } from "@arcjet/guard";
 import { arcjet } from "./arcjet.js";
 
-const generateLimit = tokenBucket({
-  bucket: "generate-tools",
-  refillRate: 20,
-  intervalSeconds: 60,
-  maxTokens: 20,
-});
+const appContext = { sessionId: conversationId };
 
-const result = await ai.generate({
+await ai.generate({
   prompt: userText,
   tools: [lookupOrder],
-  use: [
-    guardMiddleware(arcjet, {
-      action: "tool.invoked",
-      rules: [generateLimit({ key: conversationId, requested: 1 })],
-    }),
-  ],
+  use: [guardMiddleware(arcjet, { sessionId: conversationId })],
+  context: appContext,
 });
 ```
 
 ## Correlation
 
-`genkitContext` reads a caller-owned ID. Preference order is
-`correlationId`, then `sessionId`, then `conversationId`, then a
-caller-owned flow or run ID. It never mints an ID. It never reads
-`traceId` or OpenTelemetry. If nothing is a valid 1-256 printable-ASCII
-string, the call is uncorrelated rather than joined to a generated ID.
+`genkitContext` takes `{ context: appContext }`, not a bare
+`{ sessionId }`. Preference order is `correlationId`, then `sessionId`,
+then `conversationId`, then `flowId` / `runId`, then envelope copies,
+then `init.sessionId`. It never mints an ID. It never reads `traceId`.
+It never treats `interrupt` / `resumed` as correlation. It never reads
+`Session.sessionId` from a Session constructed without an ID. If nothing
+is a valid 1-256 printable-ASCII string, the call is uncorrelated rather
+than joined to a generated ID.
+
+`guardMiddleware` does not see `generate({ context })` on the tool-hook
+`ctx`. Pass the same caller-owned ID as `sessionId` on the middleware
+policy.
 
 ```ts
-const ctx = { sessionId: conversationId };
+const appContext = { sessionId: conversationId };
 
 await arcjet.guard({
   label: "message.received",
-  ...genkitContext(ctx),
+  ...genkitContext({ context: appContext }),
 });
 ```
 
@@ -238,11 +255,19 @@ await arcjet.guard({
   `@genkit-ai/middleware` `toolApproval` / `restartTool` are human HITL
   confirmation, not policy.
 - Don't treat middleware `model` as Guard.
-- Don't turn a deny into `ToolInterruptError` or
-  `finishReason: 'interrupted'`.
-- Don't expect an unwrapped MCP or filesystem-injected tool to hit
-  `guardTool`. Use `guardMiddleware` on that `generate()`.
-- Don't read `traceId` or OpenTelemetry for correlation.
+- Don't turn a deny into `interrupt()`, `ToolInterruptError`, or
+  `finishReason: "interrupted"`.
+- Don't wrap the inner `defineTool` handler. Wrap the returned
+  `ToolAction`. Prefer omitting `outputSchema` on guarded tools.
+- Don't pass a raw function as `generate` middleware. A raw function is
+  a model hook only and cannot deny.
+- Don't expect `guardMiddleware` to run when `returnToolRequests: true`
+  never calls `generate()` for the tool. `guardTool` still gates an
+  invoked wrapped action.
+- Don't read `traceId` for correlation. Don't treat `interrupt` /
+  `resumed` as correlation. Don't read `Session.sessionId` from a
+  Session constructed without an ID.
+- Don't wrap Go or Python Genkit with this adapter.
 - Don't call `createAgentContext` inside a Genkit callback.
 - Don't also wrap these tools with `@arcjet/guard/vercel-ai/v7`.
 - Don't import `@arcjet/guard/genkit`. The path is
@@ -251,14 +276,16 @@ await arcjet.guard({
 ## Common patterns
 
 - **Prompt injection before `generate()`:** Direct `guard()` with
-  `detectPromptInjection()(userText)` and a `hasFailedOpen()` check.
-- **Rate limit plus PII on a tool:** `guardTool` with `tokenBucket` keyed
-  on a trusted ID, plus `localDetectSensitiveInfo()` on a free-text
-  `note`.
-- **`generate()`-wide tools:** `guardMiddleware` as a `generateMiddleware`
-  `tool` hook on `ai.generate()`.
-- **Correlate the run:** Pass a caller-owned `sessionId` or
-  `conversationId` to `genkitContext`. Don't read `traceId`.
+  `detectPromptInjection()(userText)`, `genkitContext({ context })`, and
+  a `hasFailedOpen()` check.
+- **Rate limit on a tool:** `guardTool` with `tokenBucket` keyed on a
+  trusted ID such as `orderNumber`.
+- **`generate()`-wide tools:** `guardMiddleware` as a
+  `{ name, instantiate }` `tool` hook on `ai.generate({ use })`, with
+  `sessionId` for tool-time correlation.
+- **Correlate the run:** Put `{ sessionId: conversationId }` on
+  `generate({ context })` and pass `{ context: appContext }` to
+  `genkitContext`. Don't read `traceId`.
 
 ## Related
 
@@ -274,3 +301,4 @@ await arcjet.guard({
 - Example: `genkit-agent` on an
   [arcjet/examples](https://github.com/arcjet/examples) branch cut from
   `main`.
+- Adapter: [`f7619e4c`](https://github.com/arcjet/arcjet-js/commit/f7619e4c1c2a4f48a3342b7f8ab74a928ceb7309)
