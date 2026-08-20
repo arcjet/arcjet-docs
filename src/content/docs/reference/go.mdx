@@ -82,7 +82,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		arcjet.WithRequested(1),
 	)
 	if err != nil {
-		// Arcjet fails open. Log the error and apply your fallback policy.
+		// Fail-open: ERROR decision plus err. Log it and continue.
 		log.Printf("arcjet: %v", err)
 	} else if decision.IsDenied() {
 		status := http.StatusForbidden
@@ -139,6 +139,43 @@ by `ProtectDetails`.
 > value and ensure it comes from a trusted source. Do not pass a
 > client-controlled header directly; doing so could allow clients to choose the
 > IP address used for fingerprinting, rate limiting, and other security checks.
+
+## Error handling
+
+Arcjet fails open so a service issue does not block all requests.
+
+When a transport failure prevents a decision, `Protect` and `ProtectDetails`
+return an `ERROR` conclusion `Decision` together with `err`:
+
+- `decision.IsAllowed()` is true. An `ERROR` conclusion is treated as allowed.
+- `decision.IsErrored()` is true. Use it to distinguish a real allow from a
+  fail-open error.
+- `decision.IsDenied()` is false.
+
+If the client or request is nil, `Protect` returns the zero `Decision` together
+with `err`. The zero value has an empty `Conclusion`, so both `IsAllowed()` and
+`IsDenied()` are false.
+
+Log `err` and deny only when `IsDenied()` is true. If you only inspect `err`,
+log it and continue serving:
+
+```go
+decision, err := aj.Protect(r.Context(), r)
+if err != nil {
+	log.Printf("arcjet: %v", err)
+} else if decision.IsDenied() {
+	http.Error(w, "denied", http.StatusForbidden)
+	return
+}
+```
+
+If you check `decision.IsAllowed()`, an `ERROR` decision allows the request.
+The zero `Decision` from a nil client or nil request is not allowed. Check
+`decision.IsErrored()` when you need to distinguish a real allow from a
+fail-open error.
+
+Guard already returns a usable decision on transport failure. See
+[Errors and warnings](#errors-and-warnings).
 
 ## Guard non-HTTP operations
 
