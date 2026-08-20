@@ -145,6 +145,9 @@ The following fields are optional:
 - `disable_automatic_ip_detection` (`bool`) – Disable automatic client IP
   detection so the application can provide `ip_src` to every `protect()` call.
   Defaults to `False`. This option cannot be combined with `proxies`.
+- `timeout_ms` (`int`) – Request timeout in milliseconds. Defaults to
+  2000 ms for every rule, in both development and production. An explicit
+  `timeout_ms` overrides the default.
 
 <Tabs>
   <TabItem label="FastAPI (async)">
