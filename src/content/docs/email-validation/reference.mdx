@@ -186,8 +186,8 @@ with the `validate_email(...)` factory.
 # ValueError. An empty allow=[] allows no email types.
 def validate_email(
     *,
-    # Mode.LIVE blocks requests; Mode.DRY_RUN logs only. Defaults to Mode.LIVE.
-    mode: Mode = Mode.LIVE,
+    # Required. Mode.LIVE blocks requests; Mode.DRY_RUN logs only.
+    mode: Mode,
     # Email types to reject. All other types are allowed.
     deny: Sequence[str | EmailType] | None = None,
     # Email types to permit. All other types are rejected.
