@@ -1630,7 +1630,9 @@ Parameters:
 - `mode` (optional): `"LIVE"` or `"DRY_RUN"`
 
 Python: `detect_prompt_injection(mode=Mode.LIVE)` with
-`detect_prompt_injection_message=message` at protect() time.
+`detect_prompt_injection_message=message` at protect() time. On Python SDK
+`main`, passing `threshold=` raises `TypeError`. Drop `threshold`.
+`PromptInjectionReason.score` remains deprecated.
 
 ### validateEmail(options)
 

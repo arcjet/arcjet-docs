@@ -259,6 +259,10 @@ messages.
 `mode: "DRY_RUN"` - logs detections without blocking. Use this to measure the
 false-positive rate in production before switching to `"LIVE"`.
 
+Python `detect_prompt_injection` accepts only `mode`, which defaults to
+`Mode.LIVE`. Drop `threshold` on Python SDK `main` or the constructor raises
+`TypeError`.
+
 ## Combine with abuse protection
 
 Prompt injection detection controls _what_ your AI model receives. To also block

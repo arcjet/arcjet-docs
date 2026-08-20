@@ -14,6 +14,33 @@ provide a clear migration path that remains supported for some time.
 
 This page documents breaking changes and migrations between SDK releases.
 
+## Arcjet Python SDK main
+
+The Python SDK on `main` includes the following breaking changes.
+
+### Remove `threshold` from prompt injection detection
+
+`detect_prompt_injection(threshold=...)` and the `threshold` field on
+`PromptInjectionDetection` are removed. Only `mode` remains, and it defaults
+to `Mode.LIVE`.
+
+```py
+from arcjet import Mode, detect_prompt_injection
+
+detect_prompt_injection(mode=Mode.LIVE)
+```
+
+Drop `threshold` when you upgrade to Python SDK `main`. Passing `threshold=`
+raises `TypeError`. This differs from the JS core SDK, which ignores leftover
+`threshold` and does not throw. `@arcjet/astro` Zod `.strict()` throws at
+startup if `threshold` is still in the integration config.
+
+`PromptInjectionReason.score` remains deprecated. This removal does not drop
+`score`.
+
+This removal is on Python SDK `main`, not in published `arcjet` 0.9.0 or
+0.10.0b1.
+
 ## Arcjet JS SDK 1.0.0 – 1.4.0
 
 There have been no breaking changes.
