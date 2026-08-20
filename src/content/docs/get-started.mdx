@@ -5,39 +5,53 @@ titleByFramework:
   astro: "Get started with Astro"
   bun: "Get started with Bun"
   bun-hono: "Get started with Bun + Hono"
+  claude-agent-sdk: "Get started with Claude Agent SDK"
   deno: "Get started with Deno"
   fastify: "Get started with Fastify"
+  langchain: "Get started with LangChain"
+  langgraph: "Get started with LangGraph"
+  mastra: "Get started with Mastra"
   nest-js: "Get started with NestJS"
   next-js: "Get started with Next.js"
   node-js: "Get started with Node.js"
   node-js-express: "Get started with Node.js + Express"
   node-js-hono: "Get started with Node.js + Hono"
   nuxt: "Get started with Nuxt"
+  openai-agents: "Get started with OpenAI Agents"
   python-fastapi: "Get started with Python + FastAPI"
   python-flask: "Get started with Python + Flask"
   react-router: "Get started with React Router"
   remix: "Get started with Remix"
   sveltekit: "Get started with SvelteKit"
-description: "Getting started with Arcjet. Quick start guide to protect your AI applications from abuse, apply per-user token budgets, and block automated clients."
+  vercel-ai: "Get started with Vercel AI SDK"
+  vercel-eve: "Get started with Vercel Eve"
+description: "Getting started with Arcjet. Quick start guide to protect your AI applications and agents from abuse, apply per-user token budgets, and block automated clients."
 prev: false
 next: false
 frameworks:
   - astro
   - bun
   - bun-hono
+  - claude-agent-sdk
   - deno
   - fastify
+  - langchain
+  - langgraph
+  - mastra
   - nest-js
   - next-js
   - node-js
   - node-js-express
   - node-js-hono
   - nuxt
+  - openai-agents
   - python-fastapi
   - python-flask
   - react-router
   - remix
   - sveltekit
+  - vercel-ai
+  - vercel-eve
 ajToc:
   - text: 1. Install Arcjet
     anchor: "1-install-arcjet"
@@ -160,6 +174,48 @@ import SvelteKitStep2 from "@/snippets/get-started/sveltekit/Step2.mdx";
 import SvelteKitStep3 from "@/snippets/get-started/sveltekit/Step3.mdx";
 import SvelteKitStep4 from "@/snippets/get-started/sveltekit/Step4.mdx";
 
+import ClaudeAgentSdkStep1 from "@/snippets/get-started/claude-agent-sdk/Step1.mdx";
+import ClaudeAgentSdkRequirements from "@/snippets/get-started/claude-agent-sdk/Requirements.mdx";
+import ClaudeAgentSdkStep2 from "@/snippets/get-started/claude-agent-sdk/Step2.mdx";
+import ClaudeAgentSdkStep3 from "@/snippets/get-started/claude-agent-sdk/Step3.mdx";
+import ClaudeAgentSdkStep4 from "@/snippets/get-started/claude-agent-sdk/Step4.mdx";
+
+import LangchainStep1 from "@/snippets/get-started/langchain/Step1.mdx";
+import LangchainRequirements from "@/snippets/get-started/langchain/Requirements.mdx";
+import LangchainStep2 from "@/snippets/get-started/langchain/Step2.mdx";
+import LangchainStep3 from "@/snippets/get-started/langchain/Step3.mdx";
+import LangchainStep4 from "@/snippets/get-started/langchain/Step4.mdx";
+
+import LanggraphStep1 from "@/snippets/get-started/langgraph/Step1.mdx";
+import LanggraphRequirements from "@/snippets/get-started/langgraph/Requirements.mdx";
+import LanggraphStep2 from "@/snippets/get-started/langgraph/Step2.mdx";
+import LanggraphStep3 from "@/snippets/get-started/langgraph/Step3.mdx";
+import LanggraphStep4 from "@/snippets/get-started/langgraph/Step4.mdx";
+
+import MastraStep1 from "@/snippets/get-started/mastra/Step1.mdx";
+import MastraRequirements from "@/snippets/get-started/mastra/Requirements.mdx";
+import MastraStep2 from "@/snippets/get-started/mastra/Step2.mdx";
+import MastraStep3 from "@/snippets/get-started/mastra/Step3.mdx";
+import MastraStep4 from "@/snippets/get-started/mastra/Step4.mdx";
+
+import OpenaiAgentsStep1 from "@/snippets/get-started/openai-agents/Step1.mdx";
+import OpenaiAgentsRequirements from "@/snippets/get-started/openai-agents/Requirements.mdx";
+import OpenaiAgentsStep2 from "@/snippets/get-started/openai-agents/Step2.mdx";
+import OpenaiAgentsStep3 from "@/snippets/get-started/openai-agents/Step3.mdx";
+import OpenaiAgentsStep4 from "@/snippets/get-started/openai-agents/Step4.mdx";
+
+import VercelAiStep1 from "@/snippets/get-started/vercel-ai/Step1.mdx";
+import VercelAiRequirements from "@/snippets/get-started/vercel-ai/Requirements.mdx";
+import VercelAiStep2 from "@/snippets/get-started/vercel-ai/Step2.mdx";
+import VercelAiStep3 from "@/snippets/get-started/vercel-ai/Step3.mdx";
+import VercelAiStep4 from "@/snippets/get-started/vercel-ai/Step4.mdx";
+
+import VercelEveStep1 from "@/snippets/get-started/vercel-eve/Step1.mdx";
+import VercelEveRequirements from "@/snippets/get-started/vercel-eve/Requirements.mdx";
+import VercelEveStep2 from "@/snippets/get-started/vercel-eve/Step2.mdx";
+import VercelEveStep3 from "@/snippets/get-started/vercel-eve/Step3.mdx";
+import VercelEveStep4 from "@/snippets/get-started/vercel-eve/Step4.mdx";
+
 [Arcjet](https://arcjet.com) is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
 
 <Aside type="tip">
@@ -196,6 +252,13 @@ In your project root, run the following:
   <ReactRouterStep1 slot="react-router" />
   <RemixStep1 slot="remix" />
   <SvelteKitStep1 slot="sveltekit" />
+  <ClaudeAgentSdkStep1 slot="claude-agent-sdk" />
+  <LangchainStep1 slot="langchain" />
+  <LanggraphStep1 slot="langgraph" />
+  <MastraStep1 slot="mastra" />
+  <OpenaiAgentsStep1 slot="openai-agents" />
+  <VercelAiStep1 slot="vercel-ai" />
+  <VercelEveStep1 slot="vercel-eve" />
 </SlotByFramework>
 
 ### Requirements
@@ -217,6 +280,13 @@ In your project root, run the following:
   <ReactRouterRequirements slot="react-router" />
   <RemixRequirements slot="remix" />
   <SvelteKitRequirements slot="sveltekit" />
+  <ClaudeAgentSdkRequirements slot="claude-agent-sdk" />
+  <LangchainRequirements slot="langchain" />
+  <LanggraphRequirements slot="langgraph" />
+  <MastraRequirements slot="mastra" />
+  <OpenaiAgentsRequirements slot="openai-agents" />
+  <VercelAiRequirements slot="vercel-ai" />
+  <VercelEveRequirements slot="vercel-eve" />
 </SlotByFramework>
 
 ## 2. Set your key
@@ -241,6 +311,13 @@ instructions to add a site and get a key.
   <ReactRouterStep2 slot="react-router" />
   <RemixStep2 slot="remix" />
   <SvelteKitStep2 slot="sveltekit" />
+  <ClaudeAgentSdkStep2 slot="claude-agent-sdk" />
+  <LangchainStep2 slot="langchain" />
+  <LanggraphStep2 slot="langgraph" />
+  <MastraStep2 slot="mastra" />
+  <OpenaiAgentsStep2 slot="openai-agents" />
+  <VercelAiStep2 slot="vercel-ai" />
+  <VercelEveStep2 slot="vercel-eve" />
 </SlotByFramework>
 
 ## 3. Configure
@@ -265,6 +342,13 @@ inflate costs, and enforce per-user token budgets.
   <ReactRouterStep3 slot="react-router" />
   <RemixStep3 slot="remix" />
   <SvelteKitStep3 slot="sveltekit" />
+  <ClaudeAgentSdkStep3 slot="claude-agent-sdk" />
+  <LangchainStep3 slot="langchain" />
+  <LanggraphStep3 slot="langgraph" />
+  <MastraStep3 slot="mastra" />
+  <OpenaiAgentsStep3 slot="openai-agents" />
+  <VercelAiStep3 slot="vercel-ai" />
+  <VercelEveStep3 slot="vercel-eve" />
 </SlotByFramework>
 
 <SlotByFramework client:load>
@@ -284,6 +368,13 @@ inflate costs, and enforce per-user token budgets.
   <ReactRouterStep4 slot="react-router" />
   <RemixStep4 slot="remix" />
   <SvelteKitStep4 slot="sveltekit" />
+  <ClaudeAgentSdkStep4 slot="claude-agent-sdk" />
+  <LangchainStep4 slot="langchain" />
+  <LanggraphStep4 slot="langgraph" />
+  <MastraStep4 slot="mastra" />
+  <OpenaiAgentsStep4 slot="openai-agents" />
+  <VercelAiStep4 slot="vercel-ai" />
+  <VercelEveStep4 slot="vercel-eve" />
 </SlotByFramework>
 
 The requests also appear in the [Arcjet dashboard](https://app.arcjet.com).
@@ -299,6 +390,11 @@ The requests also appear in the [Arcjet dashboard](https://app.arcjet.com).
     title="AI runtime protection"
     href="/ai-protection"
     description="The runtime policy engine for AI features."
+  />
+  <Link.Card
+    title="Agent guard integrations"
+    href="/guards/framework-integrations"
+    description="Wrap tools in Vercel AI SDK, LangChain, LangGraph, OpenAI Agents, Eve, Mastra, and Claude Agent SDK."
   />
   <Link.Card
     title="Customize allowed bots"

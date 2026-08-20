@@ -1,0 +1,25 @@
+import Step from "./Example.ts?raw";
+import { Code } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+This example screens inbound user text for prompt injection before the model runs.
+
+We assume you already have a OpenAI Agents project set up. For helper options and
+denial behavior, see the <Link.Page href="/guards/openai-agents">OpenAI Agents agent guard</Link.Page>.
+
+Install the dependencies:
+
+```shell
+# Export your Arcjet API key from https://app.arcjet.com
+export ARCJET_KEY="ajkey_..."
+
+npm install @arcjet/guard @openai/agents
+```
+
+Create the example:
+
+<Code code={Step} lang="ts" title="agent.ts" />
+
+Then start or invoke the agent with a test prompt.
+
+Requests appear in your [Arcjet dashboard](https://app.arcjet.com) in real time.

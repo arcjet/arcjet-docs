@@ -1,0 +1,25 @@
+import Step from "./Example.ts?raw";
+import { Code } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+This example scans a free-text tool argument for personal information before the tool executes. Detection runs locally. Don't pass opaque IDs such as an order number to the detector.
+
+We assume you already have a Vercel Eve project set up. For helper options and
+denial behavior, see the <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>.
+
+Install the dependencies:
+
+```shell
+# Export your Arcjet API key from https://app.arcjet.com
+export ARCJET_KEY="ajkey_..."
+
+npm install @arcjet/guard eve
+```
+
+Create the example:
+
+<Code code={Step} lang="ts" title="agent.ts" />
+
+Then start or invoke the agent with a test prompt.
+
+Requests appear in your [Arcjet dashboard](https://app.arcjet.com) in real time.

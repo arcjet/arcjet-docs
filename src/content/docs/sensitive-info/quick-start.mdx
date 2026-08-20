@@ -3,23 +3,37 @@ title: "Sensitive information"
 titleByFramework:
   default: "Sensitive information detection"
   bun: "Sensitive information detection for Bun"
+  claude-agent-sdk: "Sensitive information detection for Claude Agent SDK"
+  langchain: "Sensitive information detection for LangChain"
+  langgraph: "Sensitive information detection for LangGraph"
+  mastra: "Sensitive information detection for Mastra"
   nest-js: "Sensitive information detection for NestJS"
   next-js: "Sensitive information detection for Next.js"
   node-js: "Sensitive information detection for Node.js"
+  openai-agents: "Sensitive information detection for OpenAI Agents"
   python-fastapi: "Sensitive information detection for Python + FastAPI"
   python-flask: "Sensitive information detection for Python + Flask"
   remix: "Sensitive information detection for Remix"
   sveltekit: "Sensitive information detection for SvelteKit"
+  vercel-ai: "Sensitive information detection for Vercel AI SDK"
+  vercel-eve: "Sensitive information detection for Vercel Eve"
 description: "Quick start guide for detecting sensitive information with Arcjet in your Next.js, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
+  - claude-agent-sdk
+  - langchain
+  - langgraph
+  - mastra
   - nest-js
   - next-js
   - node-js
+  - openai-agents
   - python-fastapi
   - python-flask
   - remix
   - sveltekit
+  - vercel-ai
+  - vercel-eve
 ajToc:
   - text: "Video quick start"
     anchor: "video-quick-start"
@@ -87,6 +101,41 @@ import Step4PythonFlask from "@/snippets/sensitive-info/quick-start/python-flask
 import Step4Remix from "@/snippets/sensitive-info/quick-start/remix/Step4.mdx";
 import Step4SvelteKit from "@/snippets/sensitive-info/quick-start/sveltekit/Step4.mdx";
 
+import Step1ClaudeAgentSdk from "@/snippets/sensitive-info/quick-start/claude-agent-sdk/Step1.mdx";
+import Step2ClaudeAgentSdk from "@/snippets/sensitive-info/quick-start/claude-agent-sdk/Step2.mdx";
+import Step3ClaudeAgentSdk from "@/snippets/sensitive-info/quick-start/claude-agent-sdk/Step3.mdx";
+import Step4ClaudeAgentSdk from "@/snippets/sensitive-info/quick-start/claude-agent-sdk/Step4.mdx";
+
+import Step1Langchain from "@/snippets/sensitive-info/quick-start/langchain/Step1.mdx";
+import Step2Langchain from "@/snippets/sensitive-info/quick-start/langchain/Step2.mdx";
+import Step3Langchain from "@/snippets/sensitive-info/quick-start/langchain/Step3.mdx";
+import Step4Langchain from "@/snippets/sensitive-info/quick-start/langchain/Step4.mdx";
+
+import Step1Langgraph from "@/snippets/sensitive-info/quick-start/langgraph/Step1.mdx";
+import Step2Langgraph from "@/snippets/sensitive-info/quick-start/langgraph/Step2.mdx";
+import Step3Langgraph from "@/snippets/sensitive-info/quick-start/langgraph/Step3.mdx";
+import Step4Langgraph from "@/snippets/sensitive-info/quick-start/langgraph/Step4.mdx";
+
+import Step1Mastra from "@/snippets/sensitive-info/quick-start/mastra/Step1.mdx";
+import Step2Mastra from "@/snippets/sensitive-info/quick-start/mastra/Step2.mdx";
+import Step3Mastra from "@/snippets/sensitive-info/quick-start/mastra/Step3.mdx";
+import Step4Mastra from "@/snippets/sensitive-info/quick-start/mastra/Step4.mdx";
+
+import Step1OpenaiAgents from "@/snippets/sensitive-info/quick-start/openai-agents/Step1.mdx";
+import Step2OpenaiAgents from "@/snippets/sensitive-info/quick-start/openai-agents/Step2.mdx";
+import Step3OpenaiAgents from "@/snippets/sensitive-info/quick-start/openai-agents/Step3.mdx";
+import Step4OpenaiAgents from "@/snippets/sensitive-info/quick-start/openai-agents/Step4.mdx";
+
+import Step1VercelAi from "@/snippets/sensitive-info/quick-start/vercel-ai/Step1.mdx";
+import Step2VercelAi from "@/snippets/sensitive-info/quick-start/vercel-ai/Step2.mdx";
+import Step3VercelAi from "@/snippets/sensitive-info/quick-start/vercel-ai/Step3.mdx";
+import Step4VercelAi from "@/snippets/sensitive-info/quick-start/vercel-ai/Step4.mdx";
+
+import Step1VercelEve from "@/snippets/sensitive-info/quick-start/vercel-eve/Step1.mdx";
+import Step2VercelEve from "@/snippets/sensitive-info/quick-start/vercel-eve/Step2.mdx";
+import Step3VercelEve from "@/snippets/sensitive-info/quick-start/vercel-eve/Step3.mdx";
+import Step4VercelEve from "@/snippets/sensitive-info/quick-start/vercel-eve/Step4.mdx";
+
 Arcjet Sensitive Information Detection protects against clients sending you
 sensitive information such as personally identifiable information (PII) that
 you do not wish to handle.
@@ -119,6 +168,13 @@ In your project root, install the SDK:
   <Step1PythonFlask slot="python-flask" />
   <StepRemix slot="remix" />
   <Step1SvelteKit slot="sveltekit" />
+  <Step1ClaudeAgentSdk slot="claude-agent-sdk" />
+  <Step1Langchain slot="langchain" />
+  <Step1Langgraph slot="langgraph" />
+  <Step1Mastra slot="mastra" />
+  <Step1OpenaiAgents slot="openai-agents" />
+  <Step1VercelAi slot="vercel-ai" />
+  <Step1VercelEve slot="vercel-eve" />
 </SlotByFramework>
 
 ### 2. Set your key
@@ -136,14 +192,22 @@ project root.
   <Step2PythonFlask slot="python-flask" />
   <Step2 slot="remix" />
   <Step2 slot="sveltekit" />
+  <Step2ClaudeAgentSdk slot="claude-agent-sdk" />
+  <Step2Langchain slot="langchain" />
+  <Step2Langgraph slot="langgraph" />
+  <Step2Mastra slot="mastra" />
+  <Step2OpenaiAgents slot="openai-agents" />
+  <Step2VercelAi slot="vercel-ai" />
+  <Step2VercelEve slot="vercel-eve" />
 </SlotByFramework>
 
 ### 3. Protect a route
 
-Create a sensitive info detection rule. This example uses the on-device <Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart backend</Link.Page>
-(installed in step 1) to detect names and email addresses. You can change which
-entity types to detect, switch the <Link.Page href="/sensitive-info/reference#detection-backends">detection backend</Link.Page>, or add a custom detection function. For
-details, see the <Link.Page href="/sensitive-info/reference">reference</Link.Page>.
+Create a sensitive info detection rule that scans untrusted text before you
+process it. HTTP adapters can use the on-device <Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart backend</Link.Page>.
+Agent integrations use `localDetectSensitiveInfo` from the Guard SDK. You can
+change which entity types to detect. For details, see the
+<Link.Page href="/sensitive-info/reference">reference</Link.Page>.
 
 <SlotByFramework client:load>
   <Step3Bun slot="bun" />
@@ -154,6 +218,13 @@ details, see the <Link.Page href="/sensitive-info/reference">reference</Link.Pag
   <Step3PythonFlask slot="python-flask" />
   <Step3Remix slot="remix" />
   <Step3SvelteKit slot="sveltekit" />
+  <Step3ClaudeAgentSdk slot="claude-agent-sdk" />
+  <Step3Langchain slot="langchain" />
+  <Step3Langgraph slot="langgraph" />
+  <Step3Mastra slot="mastra" />
+  <Step3OpenaiAgents slot="openai-agents" />
+  <Step3VercelAi slot="vercel-ai" />
+  <Step3VercelEve slot="vercel-eve" />
 </SlotByFramework>
 
 ### 4. Test sending personal info
@@ -170,6 +241,13 @@ request:
   <Step4PythonFlask slot="python-flask" />
   <Step4Remix slot="remix" />
   <Step4SvelteKit slot="sveltekit" />
+  <Step4ClaudeAgentSdk slot="claude-agent-sdk" />
+  <Step4Langchain slot="langchain" />
+  <Step4Langgraph slot="langgraph" />
+  <Step4Mastra slot="mastra" />
+  <Step4OpenaiAgents slot="openai-agents" />
+  <Step4VercelAi slot="vercel-ai" />
+  <Step4VercelEve slot="vercel-eve" />
 </SlotByFramework>
 
 Your logs show this
