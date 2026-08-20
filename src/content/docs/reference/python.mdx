@@ -186,10 +186,9 @@ constructors still default to `Mode.LIVE`.
 
 Pass `mode` on `shield()`, `detect_bot()`, `token_bucket()`,
 `fixed_window()`, `sliding_window()`, `validate_email()`,
-`detect_prompt_injection()`, `detect_sensitive_info()`, and
-`filter_request()`. `protect_signup()` forwards nested `rate_limit`,
-`bots`, and `email` mappings to those factories, so each mapping must
-include `mode` too.
+`detect_sensitive_info()`, and `filter_request()`. `protect_signup()`
+forwards nested `rate_limit`, `bots`, and `email` mappings to those
+factories, so each mapping must include `mode` too.
 
 This requirement is on Python SDK `main`, not in published `arcjet` 0.9.0
 or 0.10.0b1.
