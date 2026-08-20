@@ -97,8 +97,8 @@ Python they are constructed with the `filter_request(...)` factory.
 # `allow` and `deny` are mutually exclusive — pass only one.
 def filter_request(
     *,
-    # Mode.LIVE blocks requests; Mode.DRY_RUN logs only. Defaults to Mode.LIVE.
-    mode: Mode = Mode.LIVE,
+    # Required. Mode.LIVE blocks requests; Mode.DRY_RUN logs only.
+    mode: Mode,
     # Filter expressions that allow matching requests (others are denied).
     allow: Sequence[str] = (),
     # Filter expressions that deny matching requests (others are allowed).

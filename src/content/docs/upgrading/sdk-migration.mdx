@@ -14,6 +14,40 @@ provide a clear migration path that remains supported for some time.
 
 This page documents breaking changes and migrations between SDK releases.
 
+## Arcjet Python SDK main
+
+The Python SDK on `main` includes the following breaking changes.
+
+### Require explicit `mode` on HTTP rule factories
+
+HTTP Protect rule factories require `mode`. Omitting it raises `TypeError`.
+Pass `mode` on every `shield()`, `detect_bot()`, `token_bucket()`,
+`fixed_window()`, `sliding_window()`, `validate_email()`,
+`detect_prompt_injection()`, `detect_sensitive_info()`, and
+`filter_request()` call.
+
+```py
+from arcjet import Mode, detect_bot, shield
+
+rules = [
+    shield(mode=Mode.LIVE),
+    detect_bot(mode=Mode.LIVE, allow=["CATEGORY:SEARCH_ENGINE"]),
+]
+```
+
+`protect_signup()` forwards its nested `rate_limit`, `bots`, and `email`
+mappings to those factories, so each mapping must include `mode` too.
+
+This differs from JavaScript HTTP rules, which default to `"DRY_RUN"`.
+Defaulting Python HTTP rules to `DRY_RUN` turns `LIVE` configs into
+observe-only. Requiring `mode` is the breaking change.
+
+Guard constructors still default to `Mode.LIVE`, matching the JavaScript
+Guard SDK. You can omit `mode` on Guard constructors.
+
+This change is on Python SDK `main`, not in published `arcjet` 0.9.0 or
+0.10.0b1.
+
 ## Arcjet JS SDK 1.0.0 – 1.4.0
 
 There have been no breaking changes.

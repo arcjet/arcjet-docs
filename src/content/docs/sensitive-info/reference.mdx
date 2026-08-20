@@ -202,8 +202,8 @@ type SensitiveInfoOptionsDeny = {
 # Signature for arcjet.detect_sensitive_info
 def detect_sensitive_info(
     *,
-    # Mode.LIVE blocks requests; Mode.DRY_RUN logs only. Defaults to Mode.LIVE.
-    mode: Mode = Mode.LIVE,
+    # Required. Mode.LIVE blocks requests; Mode.DRY_RUN logs only.
+    mode: Mode,
     # Entity types to allow (report only). Mutually exclusive with `deny`.
     allow: Sequence[str | SensitiveInfoEntityType] = (),
     # Entity types to deny. Mutually exclusive with `allow`.
