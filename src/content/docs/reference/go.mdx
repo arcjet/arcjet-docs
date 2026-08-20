@@ -124,7 +124,19 @@ func must[T any](value T, err error) T {
 ```
 
 Use `client.WithRule(...)` to derive a client with an additional route-specific
-rule. Pass dynamic inputs with the following `Protect` options:
+rule.
+
+When you configure multiple Protect rules, declaration order does not control
+evaluation. `NewClient` and `WithRule` sort once: `SensitiveInfo`, `Filter`,
+`Shield`, rate-limit rules (`TokenBucket`, `FixedWindow`, `SlidingWindow`),
+`DetectBot`, `ValidateEmail`, then `DetectPromptInjection`. Rules with the
+same priority keep their declaration order. The first denial from a
+`ModeLive` rule stops evaluation of later rules.
+
+`SensitiveInfo` runs first so a denial happens before another rule can
+forward the payload.
+
+Pass dynamic inputs with the following `Protect` options:
 
 - `WithCharacteristics(...)` for rate-limit keys such as a user or tenant ID.
 - `WithRequested(...)` for the number of tokens a token bucket consumes.
@@ -158,6 +170,38 @@ by `ProtectDetails`.
 > value and ensure it comes from a trusted source. Do not pass a
 > client-controlled header directly; doing so could allow clients to choose the
 > IP address used for fingerprinting, rate limiting, and other security checks.
+
+### Sensitive information detection
+
+Use `SensitiveInfo` on the HTTP client and pass the text to scan with
+`WithSensitiveInfoValue`. Detection runs locally.
+
+`SensitiveInfoOptions.ContextWindowSize` is the number of adjacent tokens
+passed to `Config.SensitiveInfoDetect` at a time. When the value is zero or
+negative, the SDK uses 1. This matches JS `contextWindowSize` and Python
+`context_window_size`.
+
+```go
+aj, err := arcjet.NewClient(arcjet.Config{
+	Key: os.Getenv("ARCJET_KEY"),
+	SensitiveInfoDetect: func(_ context.Context, tokens []string) []arcjet.EntityType {
+		// tokens is a window of ContextWindowSize
+		return make([]arcjet.EntityType, len(tokens))
+	},
+	Rules: []arcjet.Rule{
+		arcjet.SensitiveInfo(arcjet.SensitiveInfoOptions{
+			Mode:              arcjet.ModeLive,
+			ContextWindowSize: 3,
+		}),
+	},
+})
+```
+
+`GuardSensitiveInfoRule` does not expose `ContextWindowSize`. Guard scans
+use a window of 1.
+
+For more information about scanning request text, see
+<Link.Page href="/sensitive-info">Sensitive information detection</Link.Page>.
 
 ## Guard non-HTTP operations
 
