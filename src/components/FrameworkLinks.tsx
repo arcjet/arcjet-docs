@@ -6,6 +6,7 @@ import { Deno as IconDeno } from "@/components/icons/tech/Deno";
 import { FastApi as IconFastApi } from "@/components/icons/tech/FastApi";
 import { Fastify as IconFastify } from "@/components/icons/tech/Fastify";
 import { Flask as IconFlask } from "@/components/icons/tech/Flask";
+import { Genkit as IconGenkit } from "@/components/icons/tech/Genkit";
 import { LangChain as IconLangChain } from "@/components/icons/tech/LangChain";
 import { LangGraph as IconLangGraph } from "@/components/icons/tech/LangGraph";
 import { Mastra as IconMastra } from "@/components/icons/tech/Mastra";
@@ -100,6 +101,9 @@ const FrameworkLinks = forwardRef(
                   break;
                 case "fastify":
                   icon = <IconFastify />;
+                  break;
+                case "genkit":
+                  icon = <IconGenkit />;
                   break;
                 case "nest-js":
                   icon = <IconNestJs />;

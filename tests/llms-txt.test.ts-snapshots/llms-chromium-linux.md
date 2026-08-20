@@ -40,10 +40,11 @@ extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricin
 - [Filters](https://docs.arcjet.com/filters): country / VPN / ASN allow + deny rules.
 - [Agent guards](https://docs.arcjet.com/guards): protect tool calls and other agent actions without an HTTP request.
 - [Agent guard quick start](https://docs.arcjet.com/guards/quick-start): guard one tool call.
-- [Agent guard integrations](https://docs.arcjet.com/guards/framework-integrations): Vercel AI SDK, LangChain, LangGraph, OpenAI Agents, Vercel Eve, Mastra, and Claude Agent SDK. One `ArcjetDenialResult` payload; per-framework envelopes.
+- [Agent guard integrations](https://docs.arcjet.com/guards/framework-integrations): Vercel AI SDK, LangChain, LangGraph, Genkit, OpenAI Agents, Vercel Eve, Mastra, and Claude Agent SDK. One `ArcjetDenialResult` payload; per-framework envelopes.
 - [Vercel AI SDK agent guard](https://docs.arcjet.com/guards/vercel-ai): `guardTool`, `aiToolsContext`, `guardAction`, and inbound `guard()` before `generateText`. Wrappers take `action`, not `label`.
 - [LangChain agent guard](https://docs.arcjet.com/guards/langchain): Python `guard_action`, `guard_tool`, `ArcjetMiddleware`, and observe-only capture handlers.
 - [LangGraph agent guard](https://docs.arcjet.com/guards/langgraph): inbound `guard()` before `invoke`, `guardTool`, and `guardToolNode`.
+- [Genkit agent guard](https://docs.arcjet.com/guards/genkit): inbound `guard()` before `generate()`, `guardTool` on `ai.defineTool`, and `guardMiddleware`.
 - [OpenAI Agents agent guard](https://docs.arcjet.com/guards/openai-agents): inbound `guard()` before `run()` and `guardTool` on authored `FunctionTool.invoke`.
 - [Vercel Eve agent guard](https://docs.arcjet.com/guards/vercel-eve): inbound screening, authored tools, connection approvals, and observe-only hooks.
 - [Mastra agent guard](https://docs.arcjet.com/guards/mastra): `guardProcessor`, `guardTool`, and `guardHooks`.

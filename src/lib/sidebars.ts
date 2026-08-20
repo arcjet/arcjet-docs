@@ -636,6 +636,10 @@ export const main = [
         attrs: { target: "_blank", class: "external-link" },
       },
       {
+        label: "Genkit",
+        link: "/guards/genkit",
+      },
+      {
         label: "LangChain",
         link: "/guards/langchain",
       },

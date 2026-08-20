@@ -6,6 +6,7 @@ import { Express as IconExpress } from "@/components/icons/tech/Express";
 import { FastApi as IconFastApi } from "@/components/icons/tech/FastApi";
 import { Fastify as IconFastify } from "@/components/icons/tech/Fastify";
 import { Flask as IconFlask } from "@/components/icons/tech/Flask";
+import { Genkit as IconGenkit } from "@/components/icons/tech/Genkit";
 import { Hono as IconHono } from "@/components/icons/tech/Hono";
 import { LangChain as IconLangChain } from "@/components/icons/tech/LangChain";
 import { LangGraph as IconLangGraph } from "@/components/icons/tech/LangGraph";
@@ -46,6 +47,7 @@ const frameworkIcon = {
   deno: <IconDeno />,
   express: <IconExpress />,
   fastify: <IconFastify />,
+  genkit: <IconGenkit />,
   hono: <IconHono />,
   langchain: <IconLangChain />,
   langgraph: <IconLangGraph />,
