@@ -473,17 +473,40 @@ Each result includes:
   as on the top-level decision).
 - `is_denied()` / `is_allowed()` / `is_error()` – convenience methods.
 
-For bot results, the SDK also exposes a top-level helper to check whether
-the request claimed to be a well-known crawler (for example, Googlebot) but did
-not
-match the verified IP ranges:
+For bot results, the SDK exports helpers that match the JavaScript
+`@arcjet/inspect` utilities. Import them from `arcjet`. See the
+<Link.Page href="/inspect">decision inspection reference</Link.Page>
+for return values.
 
 ```py
-from arcjet import is_spoofed_bot
+from arcjet import (
+    is_missing_user_agent,
+    is_spoofed_bot,
+    is_verified_bot,
+    set_rate_limit_headers,
+)
+
+if any(is_verified_bot(r) for r in decision.results):
+    return jsonify(message="Hello bot")
 
 if any(is_spoofed_bot(r) for r in decision.results):
     return jsonify(error="Spoofed bot"), 403
+
+if any(is_missing_user_agent(r) for r in decision.results):
+    return jsonify(error="User-Agent required"), 400
+
+set_rate_limit_headers(response, decision)
 ```
+
+`is_verified_bot`, `is_spoofed_bot`, and `is_missing_user_agent` ignore
+`"DRY_RUN"` results.
+
+`set_rate_limit_headers` writes IETF `RateLimit` and `RateLimit-Policy` headers
+onto a response, `response.headers`, or a mutable mapping. When several rate
+limit results are present, the tightest remaining budget is advertised. If two
+policies share the same `max`, no headers are written. For more information
+about rate limit headers, see the
+<Link.Page href="/rate-limiting/reference#rate-limit-headers">rate limiting reference</Link.Page>.
 
 See the
 <Link.Page href="/shield">shield</Link.Page>,

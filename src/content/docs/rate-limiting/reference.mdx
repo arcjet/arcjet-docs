@@ -149,6 +149,7 @@ import ByUserIdPythonFastapi from "@/snippets/rate-limiting/reference/python-fas
 import DecisionLogPythonFastapi from "@/snippets/rate-limiting/reference/python-fastapi/DecisionLog.mdx";
 import ErrorsPythonFastapi from "@/snippets/rate-limiting/reference/python-fastapi/Errors.mdx";
 import FixedWindowPythonFastapi from "@/snippets/rate-limiting/reference/python-fastapi/FixedWindow.mdx";
+import HeadersPythonFastapi from "@/snippets/rate-limiting/reference/python-fastapi/Headers.mdx";
 import SlidingWindowPythonFastapi from "@/snippets/rate-limiting/reference/python-fastapi/SlidingWindow.mdx";
 import TokenBucketPythonFastapi from "@/snippets/rate-limiting/reference/python-fastapi/TokenBucket.mdx";
 import TokenBucketRequestPythonFastapi from "@/snippets/rate-limiting/reference/python-fastapi/TokenBucketRequest.mdx";
@@ -157,6 +158,7 @@ import ByUserIdPythonFlask from "@/snippets/rate-limiting/reference/python-flask
 import DecisionLogPythonFlask from "@/snippets/rate-limiting/reference/python-flask/DecisionLog.mdx";
 import ErrorsPythonFlask from "@/snippets/rate-limiting/reference/python-flask/Errors.mdx";
 import FixedWindowPythonFlask from "@/snippets/rate-limiting/reference/python-flask/FixedWindow.mdx";
+import HeadersPythonFlask from "@/snippets/rate-limiting/reference/python-flask/Headers.mdx";
 import SlidingWindowPythonFlask from "@/snippets/rate-limiting/reference/python-flask/SlidingWindow.mdx";
 import TokenBucketPythonFlask from "@/snippets/rate-limiting/reference/python-flask/TokenBucket.mdx";
 import TokenBucketRequestPythonFlask from "@/snippets/rate-limiting/reference/python-flask/TokenBucketRequest.mdx";
@@ -538,15 +540,21 @@ These can be used to return `RateLimit` HTTP headers ([draft
 RFC](https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-ratelimit-headers-08)) to
 offer the client more detail.
 
-We provide the [@arcjet/decorate
-package](https://github.com/arcjet/arcjet-js/tree/main/decorate) for decorating
-your responses with appropriate `RateLimit` headers based on a decision.
+In JavaScript, use [`setRateLimitHeaders`](https://github.com/arcjet/arcjet-js/tree/main/decorate)
+from `@arcjet/decorate`. In Python, use `set_rate_limit_headers` from the
+`arcjet` package. Both write `RateLimit` and `RateLimit-Policy` headers from the
+decision.
+
+When several rate limit results are present, the tightest remaining budget is
+advertised. If two policies share the same `max`, no headers are written.
 
 <SlotByFramework client:load>
   <HeadersBun slot="bun" />
   <HeadersNestJs slot="nest-js" />
   <HeadersNextJs slot="next-js" />
   <HeadersNodeJs slot="node-js" />
+  <HeadersPythonFastapi slot="python-fastapi" />
+  <HeadersPythonFlask slot="python-flask" />
   <HeadersRemix slot="remix" />
   <HeadersSvelteKit slot="sveltekit" />
 </SlotByFramework>

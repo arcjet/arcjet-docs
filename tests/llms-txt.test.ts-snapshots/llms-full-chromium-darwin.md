@@ -1,15 +1,21 @@
 # Arcjet
 
-Arcjet is the runtime security platform that ships with your code. Install the Arcjet SDK to enforce budgets, stop prompt injection, detect bots, and protect personal information - configured by your agent via CLI or MCP, enforced inline in your application code with real identity and session context.
+> Arcjet is the runtime security platform that ships in your AI code. Detect prompt injection, authorize agent tool calls, redact sensitive data, and block bots and abuse. Real-time security building blocks you call inside your app, before an action happens.
+
+Arcjet is a lightweight SDK that enforces controls inline, with real identity and session context – configured by your agent with the CLI or MCP server.
+
+Arcjet's primary use case is securing the actions AI agents take in production. Agents have gone from answering questions to moving money, changing records, and shipping code, and the security or engineering leader now owns that risk. Identity and RBAC authenticate the agent but don't govern the action it's about to take, and network proxies can't see inside the workflow. Arcjet gives security and engineering teams visibility into what each agent is doing, real-time enforcement before a consequential action (prompt injection, PII, tool authorization), and an audit trail.
+
+Because it runs inside the same application code, Arcjet protects traditional entry points the same way – enforce budgets, detect bots, validate email, rate limit, and block common attacks across HTTP routes and APIs.
 
 Arcjet protects two types of entry points:
-- **Request-based** -- HTTP route handlers, API endpoints, middleware. Use `protect()` with any supported framework.
-- **Guards** -- tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` to pass inputs directly and get a decision back.
+- **Request-based** – HTTP route handlers, API endpoints, middleware. Use `protect()` with any supported framework.
+- **Guards** – tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` to pass inputs directly and get a decision back. Use `capture()` to record that an allowed action happened (visibility only; never changes a decision).
 
 Arcjet runs server-side. Bot protection advanced client signals are an optional
 extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricing
 
-## Getting started
+## Get started
 
 Set up Arcjet in two steps: (1) install a skill that gives your agent the
 documentation to integrate the Arcjet SDK, and (2) connect to Arcjet with the
@@ -20,7 +26,7 @@ Full guide: https://docs.arcjet.com/agent-get-started
 ### Step 1: Install the skill
 
 The Arcjet skill gives your agent the documentation to detect your framework,
-install the SDK, and wire up protection rules — for HTTP routes, tool calls,
+install the SDK, and wire up protection rules – for HTTP routes, tool calls,
 MCP servers, queues, and more:
 
 ```bash
@@ -87,12 +93,12 @@ Full documentation: https://docs.arcjet.com/mcp-server
 - **Explain decisions** to understand why requests were allowed or denied.
 - **Get site quota** usage and limits for the current billing window.
 - **Analyze traffic** patterns, denial rates, top paths, top IPs, and trend vs previous period.
-- **Detect anomalies** by comparing current traffic to the previous period — traffic spikes, geographic shifts, new threats, suspicious IPs.
+- **Detect anomalies** by comparing current traffic to the previous period – traffic spikes, geographic shifts, new threats, suspicious IPs.
 - **Investigate IPs** with geo location, ASN, threat intelligence, and per-site request activity.
-- **Get dry-run impact** — see what would happen if dry-run rules were promoted to live (blocked requests, affected IPs, false-positive estimate).
-- **Get a security briefing** — comprehensive daily overview combining traffic, threats, anomalies, dry-run readiness, quota, and recommendations.
+- **Get dry-run impact** – see what would happen if dry-run rules were promoted to live (blocked requests, affected IPs, false-positive estimate).
+- **Get a security briefing** – comprehensive daily overview combining traffic, threats, anomalies, dry-run readiness, quota, and recommendations.
 - **List remote rules** configured for a site.
-- **Create remote rules** with DRY_RUN or LIVE mode — no code changes needed.
+- **Create remote rules** with DRY_RUN or LIVE mode – no code changes needed.
 - **Update remote rules** by replacing the full rule configuration.
 - **Delete remote rules** to immediately stop evaluation.
 - **Promote remote rules** from DRY_RUN to LIVE after verification.
@@ -103,7 +109,7 @@ Full documentation: https://docs.arcjet.com/mcp-server
 
 **Investigate:** list-requests → get-request-details or explain-decision for a specific request.
 
-**Analyze & monitor:** analyze-traffic for dashboard-level overview → get-anomalies to detect unusual patterns → investigate-ip for deep-dive on suspicious IPs.
+**Analyze and monitor:** analyze-traffic for a Console-level overview → get-anomalies to detect unusual patterns → investigate-ip for deep-dive on suspicious IPs.
 
 **Daily security briefing:** get-security-briefing for a comprehensive overview (traffic, threats, anomalies, dry-run readiness, quota, and recommendations) in a single call.
 
@@ -113,15 +119,15 @@ Full documentation: https://docs.arcjet.com/mcp-server
 
 ### Remote rules
 
-Remote rules are managed via the MCP server or dashboard — no code changes or redeployment needed. They apply globally to all requests for a site. Supported types: rate_limit, bot, shield, filter. Rules needing request body content (email, sensitive_info, prompt_injection) require the SDK.
+Remote rules are managed via the MCP server or Console – no code changes or redeployment needed. They apply globally to all requests for a site. Supported types: rate_limit, bot, shield, filter. Rules needing request body content (email, sensitive_info, prompt_injection) require the SDK.
 
 **Responding to an active attack:** The most common use case is blocking suspicious traffic immediately. For example, to block a specific country, VPN, or IP range during an attack:
 
-1. `list-requests` — investigate traffic and identify patterns.
-2. `create-rule` — add a filter rule in DRY_RUN. Examples: `ip.src.country == "XX"` (ISO 3166-1 alpha-2 code e.g. `US`, `CN`, `RU`), `ip.src.vpn`, `ip.src in { 1.2.3.0/24 }`.
-3. `list-requests` — confirm the rule matches attack traffic, not legitimate users.
-4. `promote-rule` — switch to LIVE to start blocking.
-5. `delete-rule` — remove the block once the attack subsides.
+1. `list-requests` – investigate traffic and identify patterns.
+2. `create-rule` – add a filter rule in DRY_RUN. Examples: `ip.src.country == "XX"` (ISO 3166-1 alpha-2 code, such as `US`, `CN`, or `RU`), `ip.src.vpn`, `ip.src in { 1.2.3.0/24 }`.
+3. `list-requests` – confirm the rule matches attack traffic, not legitimate users.
+4. `promote-rule` – switch to LIVE to start blocking.
+5. `delete-rule` – remove the block once the attack subsides.
 
 ## Use cases
 
@@ -136,6 +142,8 @@ Remote rules are managed via the MCP server or dashboard — no code changes or 
 - Rate limiting per-user tool calls? → guard() with tokenBucket
 - Scanning tool inputs/outputs for PII? → guard() with sensitiveInfo
 - Detecting prompt injection in agent tool results? → guard() with detectPromptInjection
+- Recording that an allowed action happened? → capture() / Capture (batched, best-effort)
+- Moderating untrusted text at a tool boundary? → moderateContent() (JS), ModerateContent() (Python), or GuardModerateContent (Go).
 
 Add guard protection with the skill:
 ```bash
@@ -144,8 +152,9 @@ npx skills add arcjet/skills
 Source: https://github.com/arcjet/skills
 JS/TS SDK: https://github.com/arcjet/arcjet-js
 Python SDK: https://github.com/arcjet/arcjet-py
+Go SDK: https://github.com/arcjet/arcjet-go
 
-## Quick start — choose your framework
+## Quick start – choose your framework
 
 Each link below directs to the quick start guide with a framework-specific view:
 
@@ -153,6 +162,7 @@ Each link below directs to the quick start guide with a framework-specific view:
 - [Bun quick start](https://docs.arcjet.com/get-started?f=bun)
 - [Deno quick start](https://docs.arcjet.com/get-started?f=deno)
 - [Fastify quick start](https://docs.arcjet.com/get-started?f=fastify)
+- [Go SDK reference](https://docs.arcjet.com/reference/go)
 - [NestJS quick start](https://docs.arcjet.com/get-started?f=nest-js)
 - [Next.js quick start](https://docs.arcjet.com/get-started?f=next-js)
 - [Node.js quick start](https://docs.arcjet.com/get-started?f=node-js)
@@ -187,6 +197,106 @@ Full docs: https://docs.arcjet.com
 | Astro          | `@arcjet/astro`        | `npx astro add @arcjet/astro`          |
 | Python FastAPI | `arcjet`               | `pip install arcjet`                   |
 | Python Flask   | `arcjet`               | `pip install arcjet flask`             |
+| Go             | `github.com/arcjet/arcjet-go` | `go get github.com/arcjet/arcjet-go@latest` |
+
+## Go SDK
+
+The Go SDK is pre-release. Version 0.1.0 requires Go 1.25 or later and supports
+`net/http` request protection plus Guard protection for non-HTTP operations.
+Create clients once at package scope and reuse them.
+
+Full reference: https://docs.arcjet.com/reference/go
+
+### Go HTTP request protection
+
+```go
+var aj = must(arcjet.NewClient(arcjet.Config{
+    Key: os.Getenv("ARCJET_KEY"),
+    Rules: []arcjet.Rule{
+        arcjet.Shield(arcjet.ShieldOptions{Mode: arcjet.ModeLive}),
+        arcjet.DetectBot(arcjet.BotOptions{
+            Mode:  arcjet.ModeLive,
+            Allow: []string{},
+        }),
+        arcjet.TokenBucket(arcjet.TokenBucketOptions{
+            Mode:            arcjet.ModeLive,
+            Characteristics: []string{"userId"},
+            RefillRate:      10,
+            Interval:        time.Minute,
+            Capacity:        10,
+        }),
+    },
+}))
+
+func handler(w http.ResponseWriter, r *http.Request) {
+    decision, err := aj.Protect(
+        r.Context(),
+        r,
+        arcjet.WithCharacteristics(map[string]string{"userId": "user_123"}),
+        arcjet.WithRequested(1),
+    )
+    if err != nil {
+        // Arcjet fails open. Log the error and apply your fallback policy.
+        log.Printf("arcjet: %v", err)
+    } else if decision.IsDenied() {
+        status := http.StatusForbidden
+        if decision.Reason.IsRateLimit() {
+            status = http.StatusTooManyRequests
+        }
+        http.Error(w, "denied", status)
+        return
+    }
+}
+
+func must[T any](value T, err error) T {
+    if err != nil {
+        panic(err)
+    }
+    return value
+}
+```
+
+Call `Protect(r.Context(), r, ...)` once inside each handler. Use
+`WithCharacteristics`, `WithRequested`, `WithDetectPromptInjectionMessage`,
+`WithSensitiveInfoValue`, and `WithCorrelationId` for dynamic inputs.
+
+### Go Guard protection
+
+```go
+var guard = must(arcjet.NewGuardClient(arcjet.GuardConfig{
+    Key: os.Getenv("ARCJET_KEY"),
+}))
+
+var promptScan = must(arcjet.GuardPromptInjection(
+    arcjet.GuardPromptInjectionOptions{Mode: arcjet.ModeLive},
+))
+
+decision, err := guard.Guard(ctx, arcjet.GuardRequest{
+    Label:         "tools.summarize",
+    CorrelationId: "trace_123",
+    Metadata: arcjet.Metadata{
+        "user": map[string]any{"id": userID},
+    },
+    Rules: []arcjet.GuardRuleInput{
+        promptScan.Text(prompt),
+    },
+})
+if err != nil {
+    return err
+}
+if decision.IsDenied() {
+    return fmt.Errorf("blocked: %s", decision.Reason)
+}
+if decision.HasFailedOpen() {
+    log.Printf("guard failed open: %+v", decision.ErrorResults())
+}
+```
+
+Guard also supports rate limiting, sensitive information detection, custom
+local rules, and content moderation (`GuardModerateContent`). Use `Capture`
+to record what happened after a Guard call. Labels and buckets must be
+lowercase slugs containing letters, digits, dashes, or dots. Standard
+`HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` variables configure outbound calls.
 
 ## Common setup for all frameworks
 
@@ -1323,7 +1433,7 @@ evaluates and returns a decision but never blocks. Use `DRY_RUN` for testing.
 
 ### shield(options)
 
-Protects against common web attacks (SQL injection, XSS, etc.).
+Protects against common web attacks, including SQL injection and XSS.
 
 ```ts
 shield({
@@ -1357,8 +1467,8 @@ detectBot({
 
 Parameters:
 - `mode` (optional): `"LIVE"` or `"DRY_RUN"`
-- `allow` (array): Bots/categories to allow — everything else is denied
-- `deny` (array): Bots/categories to deny — everything else is allowed
+- `allow` (array): Bots/categories to allow – everything else is denied
+- `deny` (array): Bots/categories to deny – everything else is allowed
 - `allow` and `deny` are mutually exclusive; use one or the other
 
 Bot categories use the `CATEGORY:` prefix. Full list: https://arcjet.com/bot-list
@@ -1414,10 +1524,10 @@ fixedWindow({
 Parameters:
 - `mode` (optional): `"LIVE"` or `"DRY_RUN"`
 - `characteristics` (optional): Array of strings for tracking (default: IP)
-- `window` (required): Duration string (`"60s"`, `"1h"`, etc.)
+- `window` (required): Duration string, such as `"60s"` or `"1h"`
 - `max` (required): Maximum requests allowed per window
 
-Python: `fixed_window(mode=Mode.LIVE, window=60, max=100)` — `window` takes
+Python: `fixed_window(mode=Mode.LIVE, window=60, max=100)` – `window` takes
 seconds as a number in Python.
 
 ### slidingWindow(options)
@@ -1439,7 +1549,7 @@ Parameters:
 - `interval` (required): Window size in seconds (number)
 - `max` (required): Maximum requests allowed per window
 
-Python: `sliding_window(mode=Mode.LIVE, interval=60, max=100)` — `interval`
+Python: `sliding_window(mode=Mode.LIVE, interval=60, max=100)` – `interval`
 takes seconds as a number.
 
 Rate-limit characteristics are combined into one fingerprint. For example,
@@ -1478,8 +1588,22 @@ Parameters:
 - `deny` and `allow` are mutually exclusive
 - `contextWindowSize` (optional): Number of tokens for detection context (default: 1)
 - `detect` (optional): Custom detection function `(tokens: string[]) => Array<SensitiveInfoType | undefined>`
+- `backend` (optional): Alternative detection backend. Defaults to the built-in
+  WebAssembly engine; pass the on-device Rampart NER model to also detect names,
+  addresses, and government/financial identifiers. All detection stays local.
 
-Valid entity types: `CREDIT_CARD_NUMBER`, `EMAIL`, `PHONE_NUMBER`, `IP_ADDRESS`
+Entity types detected by the built-in engine: `CREDIT_CARD_NUMBER`, `EMAIL`,
+`PHONE_NUMBER`, `IP_ADDRESS`. The optional Rampart backend adds `GIVEN_NAME`,
+`SURNAME`, `SSN`, `URL`, `TAX_ID`, `BANK_ACCOUNT`, `ROUTING_NUMBER`,
+`GOVERNMENT_ID`, `PASSPORT`, `DRIVERS_LICENSE`, and address parts (`BUILDING_NUMBER`,
+`STREET_NAME`, `SECONDARY_ADDRESS`, `CITY`, `STATE`, `ZIP_CODE`).
+
+Rampart is an optional package: `@arcjet/sensitive-info-rampart` for the
+JavaScript SDKs, or the `arcjet[sensitive-info-rampart]` extra for Python. Import
+`rampart` and pass it as `backend: rampart()` (JS) / `backend=rampart()` (Python).
+It loads a bundled ONNX model on first use and needs a server runtime (Node.js,
+Bun, or Deno in JS). Full reference:
+https://docs.arcjet.com/sensitive-info/reference#on-device-detection-with-rampart
 
 Python: `detect_sensitive_info(mode=Mode.LIVE, deny=[SensitiveInfoEntityType.EMAIL, SensitiveInfoEntityType.CREDIT_CARD_NUMBER])`
 At protect() time: `sensitive_info_value="text to scan"`
@@ -1674,6 +1798,25 @@ elif decision.reason_v2.type == "BOT":
 for result in decision.results:
     print(result.reason_v2.type, result.is_denied())
 
+# Inspect helpers (from arcjet; no extra package). DRY_RUN is ignored by
+# is_verified_bot, is_spoofed_bot, and is_missing_user_agent.
+from arcjet import (
+    is_missing_user_agent,
+    is_spoofed_bot,
+    is_verified_bot,
+    set_rate_limit_headers,
+)
+
+if any(is_verified_bot(r) for r in decision.results):
+    print("verified bot")
+if any(is_spoofed_bot(r) for r in decision.results):
+    print("spoofed bot")
+if any(is_missing_user_agent(r) for r in decision.results):
+    print("missing User-Agent")
+
+# IETF RateLimit / RateLimit-Policy headers (same as JS @arcjet/decorate)
+set_rate_limit_headers(response, decision)
+
 # IP helpers (same as JS)
 decision.ip.is_hosting()
 decision.ip.is_vpn()
@@ -1695,7 +1838,7 @@ All parameters are optional keyword arguments passed alongside `request`:
 | `filter_local`                    | `dict[str, str]` | Request filters            |
 | `ip_src`                          | `str`            | Manual IP override         |
 
-## withRule() pattern — reusing a single client
+## withRule() pattern – reusing a single client
 
 Create one Arcjet instance and add route-specific rules with `withRule()`:
 
@@ -1750,23 +1893,23 @@ export async function GET(req: Request) {
 - Create the Arcjet client ONCE, outside the request handler, and reuse it.
 - Call `protect()` inside the route handler where you have the full request
   context.
-- Start new rules in `DRY_RUN` mode, verify in the dashboard, then switch to
+- Start new rules in `DRY_RUN` mode, verify in the Console, then switch to
   `LIVE`.
-- Handle all denial reasons explicitly (rate limit, bot, shield, etc.).
+- Handle every denial reason explicitly, including rate limit, bot, and shield.
 - Use `withRule()` to attach route-specific rules to a shared base instance.
 
 ### Don't
 
-- Don't create a new Arcjet instance per request — this defeats caching.
-- Don't call `protect()` multiple times for the same request — it may double-
+- Don't create a new Arcjet instance per request – this defeats caching.
+- Don't call `protect()` multiple times for the same request – it may double-
   count rate limits.
-- Don't use Arcjet in middleware — middleware lacks route context. Call
+- Don't use Arcjet in middleware – middleware lacks route context. Call
   `protect()` in each route handler instead. If you must use middleware, scope
   it carefully and don't also call `protect()` in the route handler.
 - Don't pass personal information (email addresses, names) as rate limit
-  `characteristics` — use opaque identifiers like user IDs.
-- Next.js renamed `middleware.js` to `proxy.js` in Next.js 16. The Arcjet
-  `protect()` function should be called only once per request.
+  `characteristics` – use opaque identifiers such as user IDs.
+- Next.js renamed `middleware.js` to `proxy.js` in Next.js 16. Call the Arcjet
+  `protect()` function only once per request.
 
 ### Proxies and load balancers
 
@@ -1778,22 +1921,22 @@ const aj = arcjet({
   key: process.env.ARCJET_KEY!,
   rules: [],
   proxies: [
-    "100.100.100.100",   // A single IP
-    "100.100.100.0/24",  // A CIDR range
+    "203.0.113.100",   // A single IP
+    "203.0.113.0/24",  // A CIDR range
   ],
 });
 ```
 
-This is not needed on Firebase, Netlify, Fly.io, or Vercel — Arcjet
+This is not needed on Firebase, Netlify, Fly.io, or Vercel – Arcjet
 auto-detects proxy IPs on these platforms.
 
 ## Product philosophy
 
-1. Enforcement runs inline in your application — with access to identity,
+1. Enforcement runs inline in your application – with access to identity,
    route, session, and spend context no proxy can see.
 2. Your agent configures protections via MCP. You review and approve.
 3. Start in DRY_RUN, verify against real traffic, promote to LIVE.
-4. Remote rules let you and your agents respond to attacks immediately — no code
+4. Remote rules let you and your agents respond to attacks immediately – no code
    deployment needed.
 
 Find out more at https://docs.arcjet.com/architecture
@@ -1806,13 +1949,13 @@ Find out more at https://docs.arcjet.com/architecture
 - Calls to `protect()` never throw. Arcjet fails open so that a service issue
   or misconfiguration does not block all requests.
 
-## Guards -- non-request protection
+## Guards – non-request protection
 
 Guards apply Arcjet security rules inside AI agent tool calls, MCP tool
 handlers, queue workers, and anywhere else you process untrusted input without an
 HTTP request. Pass inputs directly, get a decision back.
 
-Supported languages: **JavaScript / TypeScript** (`@arcjet/guard` >= 1.4.0) and **Python** (`arcjet` >= 0.7.0).
+Supported languages: **JavaScript / TypeScript** (`@arcjet/guard` >= 1.4.0), **Python** (`arcjet` >= 0.7.0), and **Go** (`arcjet-go` >= 0.1.0, pre-release).
 
 ### JavaScript / TypeScript example
 
@@ -1915,9 +2058,12 @@ For the full API reference, read the installed library source:
 - [Email validation](https://docs.arcjet.com/email-validation)
 - [Sensitive information](https://docs.arcjet.com/sensitive-info)
 - [Prompt injection](https://docs.arcjet.com/prompt-injection)
+- [Content moderation](https://docs.arcjet.com/content-moderation)
 - [Signup form protection](https://docs.arcjet.com/signup-protection)
 - [Filters](https://docs.arcjet.com/filters)
 - [Guards](https://docs.arcjet.com/guards)
+- [LangChain agent guard](https://docs.arcjet.com/guards/langchain)
+- [Capture events](https://docs.arcjet.com/guards/capture)
 
 ### SDKs
 
@@ -1925,10 +2071,12 @@ For the full API reference, read the installed library source:
 - [Bun](https://docs.arcjet.com/reference/bun)
 - [Deno](https://docs.arcjet.com/reference/deno)
 - [Fastify](https://docs.arcjet.com/reference/fastify)
+- [Go](https://docs.arcjet.com/reference/go)
 - [NestJS](https://docs.arcjet.com/reference/nestjs)
 - [Next.js](https://docs.arcjet.com/reference/nextjs)
 - [Node.js](https://docs.arcjet.com/reference/nodejs)
 - [Nuxt](https://docs.arcjet.com/reference/nuxt)
+- [Python](https://docs.arcjet.com/reference/python)
 - [React Router](https://docs.arcjet.com/reference/react-router)
 - [Remix](https://docs.arcjet.com/reference/remix)
 - [SvelteKit](https://docs.arcjet.com/reference/sveltekit)
