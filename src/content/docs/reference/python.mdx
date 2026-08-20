@@ -17,6 +17,7 @@ import ProtectSync from "/src/snippets/reference/python/ProtectSync.py?raw";
 import IPLocation from "/src/snippets/reference/python/IPLocation.py?raw";
 import ErrorLogging from "/src/snippets/reference/python/ErrorLogging.py?raw";
 import Guard from "/src/snippets/reference/python/Guard.py?raw";
+import Requirements from "@/snippets/shared/python/Requirements.mdx";
 
 [![PyPI](https://img.shields.io/pypi/v/arcjet?style=flat-square&label=%E2%9C%A6Aj&labelColor=ECE6F0&color=ECE6F0)](https://pypi.org/project/arcjet/)
 
@@ -45,14 +46,13 @@ pip install arcjet
 </TabItem>
 </Tabs>
 
+Prefer a glibc Linux container image such as `python:3.10-slim` or
+`astral/uv:python3.10-trixie-slim`. Alpine/musl isn't a supported install
+target.
+
 ### Requirements
 
-- Python 3.10 or later.
-- `libgcc`, needed by the bundled WebAssembly runtime (used for local bot
-  detection, sensitive information detection, and prompt injection
-  detection). Most Linux distributions include this by default, but Alpine
-  Linux does not; run `apk add libgcc` first, otherwise `import arcjet`
-  raises `OSError: Error loading shared library libgcc_s.so.1`.
+<Requirements />
 
 ## Quick start
 
@@ -871,7 +871,8 @@ Use `arcjet.guard.testing.register_test_client()` in tests. See
 
 ## Version support
 
-Arcjet supports Python 3.10 and later.
+Arcjet supports CPython 3.10 and later on macOS, Windows, and glibc Linux.
+Alpine/musl isn't supported.
 
 <Link.Page href="/support">Technical support</Link.Page> is provided for the
 current major version of the Arcjet SDK for all users and for the current and

@@ -1,0 +1,15 @@
+- CPython 3.10 or later on macOS, Windows, and glibc Linux (Debian, Ubuntu,
+  RHEL, and `*-slim` / manylinux container images)
+- Alpine Linux and other musl-based systems aren't supported. Prefer a glibc
+  container image such as `python:3.10-slim` or
+  `astral/uv:python3.10-trixie-slim`
+
+Two runtime dependencies ship native code:
+
+- [`wasmtime`](https://pypi.org/project/wasmtime/): local WASM rule evaluation
+- [`pyqwest`](https://pypi.org/project/pyqwest/): HTTP client used by
+  `connect-python`
+
+Those packages publish `musllinux` wheels, so `pip install arcjet` can succeed
+on Alpine without a compiler. Alpine/musl isn't a supported target. A missing
+wheel forces a source build that needs Rust and a C toolchain.
