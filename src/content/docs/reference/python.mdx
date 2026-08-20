@@ -201,10 +201,30 @@ You can combine rules to create a more complex protection strategy. For example,
 you can combine rate limiting and bot protection rules to protect your API from
 automated clients.
 
-:::note
-When specifying multiple rules, the order of the rules is ignored. Rule
-execution ordering is automatically optimized for performance.
-:::
+Declaration order does not control which `Mode.LIVE` deny you see. Local
+WebAssembly evaluation sorts rules by the same priority table as the JS and Go
+Protect SDKs. The first `Mode.LIVE` deny stops evaluation of later local rules.
+
+The following table lists the local evaluation order, from first to last:
+
+| Priority | Rule                      | Constructor                                              |
+| -------- | ------------------------- | -------------------------------------------------------- |
+| 1        | Sensitive information     | `detect_sensitive_info`                                  |
+| 2        | Filter                    | `filter_request`                                         |
+| 3        | Shield                    | `shield`                                                 |
+| 4        | Rate limiting             | `token_bucket`, `fixed_window`, `sliding_window`         |
+| 5        | Bot protection            | `detect_bot`                                             |
+| 6        | Email validation          | `validate_email`                                         |
+| 7        | Prompt injection          | `detect_prompt_injection`                                |
+
+Rules with the same priority keep their declaration order. The three rate-limit
+constructors share priority 4. Unknown rule types sort last, at priority 100.
+
+Sensitive information detection runs first so a `Mode.LIVE` deny happens before
+another rule can forward the payload.
+
+`detect_prompt_injection` is listed so the table matches the JS SDK. The Python
+SDK does not evaluate prompt injection locally. The rank is reserved.
 
 <Code code={MultipleRules} title="main.py" lang="py" />
 
@@ -405,7 +425,8 @@ you would have to iterate over the `results` property on the decision.
 The `reason_v2` property of the `ArcjetDecision` object describes the
 conclusion. It always reflects the highest-priority rule that produced that
 conclusion; to inspect other rules, iterate over the `results` property on the
-decision.
+decision. Local evaluation ranks rules as described in
+[Multiple rules](#multiple-rules).
 
 Switch on `reason_v2.type` to map each rule kind to a response. Only branch on
 reasons that produce a different response – a branch that returns 403 for

@@ -224,11 +224,12 @@ string identifiers like `"CURL"` for specific bots.
 </TabItem>
 </Tabs>
 
-:::note
-When specifying multiple rules, the order of the rules is ignored. Rule
-execution ordering is automatically optimized for performance. For
-how to examine the execution results.
-:::
+Declaration order does not control which `LIVE` deny you see. The JS, Go, and
+Python SDKs sort local Protect rules in the same order: Sensitive Info, Filter,
+Shield, rate limiting, Bot, Email, then Prompt Injection. Rules with the same
+priority keep their declaration order. For details about examining the results,
+see [Decision](#decision). For the Python priority table, see
+<Link.Page href="/reference/python#multiple-rules">Multiple rules in the Python SDK reference</Link.Page>.
 
 ### Allow specific bots
 
