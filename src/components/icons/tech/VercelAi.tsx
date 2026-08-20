@@ -11,14 +11,17 @@ export const VercelAi = forwardRef(
     return (
       <svg
         ref={ref}
-        viewBox="0 0 128 128"
+        viewBox="2.97 3.64 77.84 82.36"
         width="128"
         height="128"
         fill="currentColor"
         className={cls}
         {...props}
       >
-        <path d="M64 16L120 112H8L64 16Z" />
+        <path
+          fillRule="evenodd"
+          d="M2.97269 86L32.6687 3.64H51.1127L80.8087 86H65.0327L58.1887 66.512H25.5927L18.7487 86H2.97269ZM30.0007 53.636H53.7807L41.9487 18.836L30.0007 53.636Z"
+        />
       </svg>
     );
   },
