@@ -622,7 +622,7 @@ Error handling
 
 [Section titled “Error handling”](#error-handling)
 
-Arcjet is designed to fail open so that a service issue or misconfiguration does not block all requests. The SDK also times out and fails open after 1000 ms in development (see [`ARCJET_ENV`](/environment#arcjet-env)) and 500 ms otherwise. However, in most cases, the response time is less than 20 ms to 30 ms.
+Arcjet is designed to fail open so that a service issue or misconfiguration does not block all requests. The SDK also times out and fails open after 2000 ms by default. However, in most cases, the response time is less than 20 ms to 30 ms.
 
 If there is an error condition when processing the rule, Arcjet returns an `ERROR` result for that rule and you can check the `message` property on the rule’s error result for more information.
 
