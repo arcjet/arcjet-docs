@@ -21,8 +21,8 @@ The Python SDK on `main` includes the following breaking changes.
 ### Remove `threshold` from prompt injection detection
 
 `detect_prompt_injection(threshold=...)` and the `threshold` field on
-`PromptInjectionDetection` are removed. Only `mode` remains, and it defaults
-to `Mode.LIVE`.
+`PromptInjectionDetection` are removed. Only `mode` remains, and it is
+required.
 
 ```py
 from arcjet import Mode, detect_prompt_injection
@@ -38,7 +38,15 @@ startup if `threshold` is still in the integration config.
 `PromptInjectionReason.score` remains deprecated. This removal does not drop
 `score`.
 
-This removal is on Python SDK `main`, not in published `arcjet` 0.9.0 or
+### Require `mode` on `detect_prompt_injection`
+
+HTTP `detect_prompt_injection` requires `mode`. Omitting `mode` raises
+`TypeError`. There is no default.
+
+Guard `DetectPromptInjection` still defaults to `LIVE`. Omitting `mode` there
+does not raise `TypeError`.
+
+These changes are on Python SDK `main`, not in published `arcjet` 0.9.0 or
 0.10.0b1.
 
 ## Arcjet JS SDK 1.0.0 – 1.4.0

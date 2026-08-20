@@ -259,8 +259,8 @@ messages.
 `mode: "DRY_RUN"` - logs detections without blocking. Use this to measure the
 false-positive rate in production before switching to `"LIVE"`.
 
-Python `detect_prompt_injection` accepts only `mode`, which defaults to
-`Mode.LIVE`. Drop `threshold` on Python SDK `main` or the constructor raises
+Python `detect_prompt_injection` accepts only `mode`, which is required. On
+Python SDK `main`, omitting `mode` or passing `threshold=` raises
 `TypeError`.
 
 ## Combine with abuse protection

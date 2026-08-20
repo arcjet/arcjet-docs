@@ -318,9 +318,9 @@ client mode:
 | `ip_src`                           | `str`                  | Manual IP override (advanced) |
 | `correlation_id`                   | `str`                  | Correlates this decision with a guard call, workflow run, or agent trace. A dedicated, indexable field – not `extra` or `metadata` – and does not affect the decision or its cache key (`arcjet` >= 0.9.0) |
 
-`detect_prompt_injection` accepts only `mode`, which defaults to
-`Mode.LIVE`. Drop `threshold` on Python SDK `main` or the constructor
-raises `TypeError`.
+HTTP `detect_prompt_injection` accepts only `mode`, which is required. On
+Python SDK `main`, omitting `mode` or passing `threshold=` raises
+`TypeError`. Guard `DetectPromptInjection` still defaults to `LIVE`.
 
 #### Override the client IP
 
