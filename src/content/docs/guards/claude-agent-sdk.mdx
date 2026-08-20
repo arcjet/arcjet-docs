@@ -43,18 +43,18 @@ export const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 The integration exposes three surfaces:
 
 - `guardTool(client, toolDefinition, policy)` wraps an authored `tool()`. On
-  `DENY` it returns a `CallToolResult` with `isError: true`. Do not throw.
+  `DENY` it returns a `CallToolResult` with `isError: true`. Don't throw.
 - `guardHooks()` screens inbound text on `UserPromptSubmit`, denies unwrapped
   built-in and MCP tools on `PreToolUse`, and captures results on
   `PostToolUse`. Capture cannot undo a tool that already ran.
 - `claudeAgentContext()` reads `session_id` from hook input or
-  `options.sessionId`. It never mints an id. Subagent `agent_id` is metadata
+  `options.sessionId`. It never mints an ID. Subagent `agent_id` is metadata
   only.
 
 There is no `guardInbound`. Screen prompt injection on `guardHooks({ inbound })`
 in `UserPromptSubmit`. There is no `guardCanUseTool` and no `guardApproval`.
 
-Never call `createAgentContext` inside a Claude callback. Do not also wrap
+Never call `createAgentContext` inside a Claude callback. Don't also wrap
 these tools with `@arcjet/guard/vercel-ai/v7`.
 
 The Claude Agent SDK integration skill ships with `@arcjet/guard`. After
@@ -101,7 +101,8 @@ import { detectPromptInjection } from "@arcjet/guard";
 import { arcjet } from "./arcjet.js";
 
 // `options.sessionId` must be a UUID and can only be created once, so mint one
-// per conversation and store it. See Correlation below.
+// per conversation and store it. For more information about session IDs, see
+// the Correlation section.
 const sessionId = conversationId ?? randomUUID();
 
 for await (const message of query({
@@ -122,19 +123,19 @@ for await (const message of query({
 }
 ```
 
-## `canUseTool` is not a policy gate
+## Tool permission callbacks are not a policy gate
 
-Claude's `canUseTool` is skipped by `allowedTools`, allow rules, and
-`bypassPermissions` / `acceptEdits`. That is the same trap as Eve approval and
-Mastra `requireApproval`: the callback looks like a gate, but the runtime can
-skip it.
+`allowedTools`, allow rules, and `bypassPermissions` / `acceptEdits` skip
+Claude's `canUseTool`. That is the same trap as Eve approval and Mastra
+`requireApproval`: the callback looks like a gate, but the runtime can skip
+it.
 
-There is no `guardCanUseTool`. Do not put Arcjet policy on `canUseTool`. Use
+There is no `guardCanUseTool`. Don't put Arcjet policy on `canUseTool`. Use
 `guardTool` for authored tools or `PreToolUse` for unwrapped ones.
 
 On `DENY` the tool's handler never runs. The model receives a `CallToolResult`
 with `isError: true`. Scan free-text args (a note, reason, or body). An opaque
-`orderId` doesn't trip email, phone, card, or IP detection, so do not pass it to
+`orderId` doesn't trip email, phone, card, or IP detection, so don't pass it to
 `localDetectSensitiveInfo`. That helper runs on a local ML model backend.
 
 ```ts
@@ -176,7 +177,7 @@ export const lookupOrder = guardTool(
 );
 ```
 
-## `PreToolUse` is the only deny for unwrapped tools
+## Deny unwrapped tools with `PreToolUse`
 
 Built-ins (Bash, Write, …) and MCP tools not passed through `guardTool` are
 gated here. `PreToolUse` returns `permissionDecision: "deny"`. Timeout already
@@ -185,7 +186,7 @@ fail-closes, so the tool does not run.
 Annotations (`readOnlyHint`) and sandbox settings are not enforcement.
 `PostToolUse` is capture only and cannot undo a tool that already ran.
 
-Do not apply `guardTool` and `PreToolUse` to the same authored tool. That
+Don't apply `guardTool` and `PreToolUse` to the same authored tool. That
 double-calls the guard.
 
 ```ts
@@ -242,7 +243,7 @@ already fail-closes the prompt (Claude Code v2.1.208+).
 
 `claudeAgentContext` reads hook `session_id` first, then `options.sessionId`. It
 never calls `createAgentContext`. If neither is a valid 1-256 printable-ASCII
-string, the call is uncorrelated rather than joined to a generated id. Subagent
+string, the call is uncorrelated rather than joined to a generated ID. Subagent
 `agent_id` is metadata only.
 
 Two Claude Agent SDK constraints decide what you can pass, and neither is
@@ -250,7 +251,7 @@ Arcjet's:
 
 1. **`options.sessionId` must be a UUID.** Anything else exits the CLI with
    `Error: Invalid session ID. Must be a valid UUID.`
-2. **A session id can only be created once.** Passing the same id to a second
+2. **A session ID can only be created once.** Passing the same ID to a second
    `query()` exits with `Error: Session ID <id> is already in use.` Continue an
    existing conversation with `options.resume`.
 
@@ -262,7 +263,7 @@ splits correlation silently instead of erroring.
 ```ts
 import { randomUUID } from "node:crypto";
 
-// Store this with the conversation. Do not generate one per turn.
+// Store this with the conversation. Don't generate one per turn.
 const sessionId = conversationId ?? randomUUID();
 
 async function turn(userText: string, firstTurn: boolean) {
@@ -289,10 +290,10 @@ shape, and needs no `resume`.
   `guardHooks({ inbound })` in `UserPromptSubmit`.
 - There is no `guardCanUseTool`. `canUseTool` is not a policy gate.
 - There is no `guardApproval`.
-- Do not call `createAgentContext` inside a Claude callback.
-- Do not also wrap these tools with `@arcjet/guard/vercel-ai/v7`.
-- Do not apply `guardTool` and `PreToolUse` to the same authored tool.
-- Do not import `@arcjet/guard/claude-agent-sdk`. The path is
+- Don't call `createAgentContext` inside a Claude callback.
+- Don't also wrap these tools with `@arcjet/guard/vercel-ai/v7`.
+- Don't apply `guardTool` and `PreToolUse` to the same authored tool.
+- Don't import `@arcjet/guard/claude-agent-sdk`. The path is
   `@arcjet/guard/claude-agent-sdk/v0`.
 
 ## Common patterns

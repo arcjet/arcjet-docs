@@ -301,7 +301,7 @@ fail closed.
 ## Correlation
 
 Pass one correlation ID into `ainvoke()` so middleware and guarded tools
-share one Sequence. Do not mint a new ID per turn.
+share one Sequence. Don't mint a new ID per turn.
 
 ```py
 await agent.ainvoke(
@@ -326,14 +326,14 @@ joins this run's events, but it builds a Sequence that nobody searches for.
 
 ## What not to use
 
-- Do not use `ArcjetCaptureHandler` or `ArcjetAsyncCaptureHandler` to deny
+- Don't use `ArcjetCaptureHandler` or `ArcjetAsyncCaptureHandler` to deny
   a call. Callbacks cannot block.
-- Do not change `args_schema`, `handle_tool_error`, `callbacks`, or
+- Don't change `args_schema`, `handle_tool_error`, `callbacks`, or
   `response_format` on a tool after `guard_tool()`.
-- Do not import `ArcjetMiddleware` or `ToolPolicy` unless you installed
+- Don't import `ArcjetMiddleware` or `ToolPolicy` unless you installed
   `arcjet[langchain-agents]`.
-- Do not use these helpers with the JavaScript LangGraph Graph API adapter.
-- Do not mint a new `arcjet_correlation_id` per turn.
+- Don't use these helpers with the JavaScript LangGraph Graph API adapter.
+- Don't mint a new `arcjet_correlation_id` per turn.
 
 ## Common patterns
 

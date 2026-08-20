@@ -1,6 +1,6 @@
 ---
 title: "LangGraph agent guard"
-description: "Screen inbound before invoke, wrap tool() and StructuredTool, and deny unwrapped or MCP tools at ToolNode."
+description: "Screen inbound before invoke, wrap `tool()` and `StructuredTool`, and deny unwrapped or MCP tools at `ToolNode`."
 ---
 
 import { Link } from "@/components/link";
@@ -61,8 +61,8 @@ The integration exposes three surfaces:
   Unwrapped, MCP, and runtime-discovered tools hit Guard. Already-branded
   `guardTool` tools are skipped (no double-call). A second wrap of an
   already-branded node throws.
-- `langgraphAgentContext()` reads `configurable.thread_id`, then the run id,
-  then `configurable.checkpoint_ns`. It never mints an id. It never calls
+- `langgraphAgentContext()` reads `configurable.thread_id`, then the run ID,
+  then `configurable.checkpoint_ns`. It never mints an ID. It never calls
   `createAgentContext`.
 
 There is no `guardInbound`. There is no first-class LangGraph channel, so
@@ -70,7 +70,7 @@ screen inbound with a direct `guard()` call before `graph.invoke` or in the
 graph's first node. There is no `guardApproval`, no `guardInterrupt`, and no
 `guardHooks` for LangGraph.
 
-Never call `createAgentContext` inside a LangGraph callback. Do not also wrap
+Never call `createAgentContext` inside a LangGraph callback. Don't also wrap
 these tools with `@arcjet/guard/vercel-ai/v7`.
 
 The LangGraph integration skill ships with `@arcjet/guard`. After
@@ -109,8 +109,8 @@ inbound pattern. Direct `guard()` fails open, so an `ALLOW` is not proof the
 rules ran. Gate on `decision.hasFailedOpen()` when this call site must fail
 closed.
 
-On `DENY`, do not call `graph.invoke`. `guardTool` and `guardToolNode` already
-default to fail closed. You do not need this extra check on wrapped tools.
+On `DENY`, don't call `graph.invoke`. `guardTool` and `guardToolNode` already
+default to fail closed. You don't need this extra check on wrapped tools.
 
 ```ts
 import { detectPromptInjection } from "@arcjet/guard";
@@ -132,11 +132,12 @@ if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
 await graph.invoke({ messages: [{ role: "user", content: userText }] }, config);
 ```
 
-## `interrupt()` is not a policy gate
+## Human approval is not a policy gate
 
-`interrupt()` / `interrupt_before=["tools"]` is human-in-the-loop. It is not a
-remote policy. Same trap as Mastra `requireApproval` and Claude `canUseTool`.
-There is no `guardInterrupt` and no `guardApproval`. Do not wrap them as Guard.
+`interrupt()` / `interrupt_before=["tools"]` is human-in-the-loop (HITL)
+confirmation. It is not a remote policy. Same trap as Mastra `requireApproval`
+and Claude `canUseTool`. There is no `guardInterrupt` and no `guardApproval`.
+Don't wrap them as Guard.
 
 Use `guardTool` for authored tools you invoke yourself.
 
@@ -147,7 +148,7 @@ plain `ArcjetDenialResult`
 `success`. The denial rides in the payload (`arcjetDenied: true`), not the
 envelope. Scan free-text args (a note, reason, or body). An opaque
 `orderNumber` or `tool_call_id` will not trip email / phone / card / IP, so
-do not pass it to `localDetectSensitiveInfo`. That helper runs on a local ML
+don't pass it to `localDetectSensitiveInfo`. That helper runs on a local ML
 model backend.
 
 Policy factories (`action` / `rules` / `metadata` functions) are try/caught. If
@@ -204,7 +205,7 @@ cannot stop `tool.invoke`. Use `guardToolNode` (or `guardTool` for authored
 tools you invoke yourself).
 
 `guardToolNode` guards the node's tools in place and returns the same node.
-That is not an optimisation: `ToolNode`'s constructor captures
+That is not an optimization: `ToolNode`'s constructor captures
 `func: (input, config) => this.run(input, config)`, and `run` reads
 `this.tools`, so a copy holding a fresh tools array would leave the original
 node executing unguarded tools. A frozen tools array throws at wrap time.
@@ -256,10 +257,10 @@ fail-open inbound screening.
 
 Pass the checkpointer `thread_id` you already have on
 `graph.invoke(input, { configurable: { thread_id } })`.
-`langgraphAgentContext` reads `configurable.thread_id`, then the run id,
-then `configurable.checkpoint_ns`. It never mints an id. It never calls
+`langgraphAgentContext` reads `configurable.thread_id`, then the run ID,
+then `configurable.checkpoint_ns`. It never mints an ID. It never calls
 `createAgentContext`. If none is a valid 1-256 printable-ASCII string, the
-call is uncorrelated rather than joined to a generated id. `correlationId`
+call is uncorrelated rather than joined to a generated ID. `correlationId`
 reconstructs a run only.
 
 ```ts
@@ -271,16 +272,16 @@ await graph.invoke({ messages }, config);
 
 - There is no `guardInbound`. Screen prompt injection before `graph.invoke` or
   in the first graph node.
-- There is no `guardInterrupt` and no `guardApproval`. `interrupt()` is HITL,
-  not policy.
+- There is no `guardInterrupt` and no `guardApproval`. `interrupt()` is HITL
+  confirmation, not policy.
 - There is no `guardHooks` for LangGraph.
-- Do not use deprecated `createReactAgent`.
-- Do not use this adapter with LangChain `createAgent` / `wrapToolCall`.
-  For Python `create_agent`, see the
+- Don't use deprecated `createReactAgent`.
+- Don't use this adapter with LangChain `createAgent` / `wrapToolCall`.
+  For more information about Python `create_agent`, see the
   <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
-- Do not call `createAgentContext` inside a LangGraph callback.
-- Do not also wrap these tools with `@arcjet/guard/vercel-ai/v7`.
-- Do not import `@arcjet/guard/langgraph`. The path is
+- Don't call `createAgentContext` inside a LangGraph callback.
+- Don't also wrap these tools with `@arcjet/guard/vercel-ai/v7`.
+- Don't import `@arcjet/guard/langgraph`. The path is
   `@arcjet/guard/langgraph/v1`.
 
 ## Common patterns

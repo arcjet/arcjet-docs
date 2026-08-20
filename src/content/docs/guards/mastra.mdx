@@ -1,6 +1,6 @@
 ---
 title: "Mastra agent guard"
-description: "Screen Mastra input with a processor tripwire, wrap createTool() execute, and deny unwrapped MCP/workspace tools with hooks."
+description: "Screen Mastra input with a processor tripwire, wrap `createTool()` execute, and deny unwrapped MCP/workspace tools with hooks."
 ---
 
 import { Link } from "@/components/link";
@@ -41,7 +41,7 @@ The integration exposes four surfaces:
 
 - `guardTool()` wraps a Mastra `createTool({ execute })`. On `DENY` the tool
   never runs. The model receives a structured `ArcjetDenialResult`
-  (`{ arcjetDenied, reason, message, retryable }`). Do not throw.
+  (`{ arcjetDenied, reason, message, retryable }`). Don't throw.
 - `guardProcessor()` is a Mastra `Processor` for `inputProcessors` /
   `outputProcessors`. On `DENY`, `processInput` / `processInputStep` call
   `abort()` (tripwire). `processInputStep` screens later agentic steps so tool
@@ -51,12 +51,13 @@ The integration exposes four surfaces:
   `beforeToolCall` can return `{ proceed: false, output }` on `DENY`.
   `afterToolCall` is observe-only.
 - `mastraAgentContext()` reads `MASTRA_THREAD_ID_KEY`, then resource, then
-  `workflow.runId`. It never mints an id.
+  `workflow.runId`. It never mints an ID.
 
 There is no `guardInbound`. Mastra channels already hit `processInput`. There
-is no `guardApproval`. Mastra `requireApproval` is human HITL, not policy.
+is no `guardApproval`. Mastra `requireApproval` is human-in-the-loop (HITL)
+confirmation, not policy.
 
-Never call `createAgentContext` inside a Mastra callback. Do not also wrap
+Never call `createAgentContext` inside a Mastra callback. Don't also wrap
 these tools with `@arcjet/guard/vercel-ai/v7`.
 
 The Mastra integration skill ships with `@arcjet/guard`. After `npm install`,
@@ -119,7 +120,7 @@ export const agent = new Agent({
 });
 ```
 
-## `requireApproval` is not a policy gate
+## Human approval is not a policy gate
 
 Mastra `requireApproval` pauses for a human. It is not a remote policy. Use
 `guardTool` for authored tools or `guardHooks` for unwrapped tools.
@@ -127,7 +128,7 @@ Mastra `requireApproval` pauses for a human. It is not a remote policy. Use
 On `DENY` the tool's `execute` never runs. The model receives
 `{ arcjetDenied: true, reason, message, retryable }`. Scan free-text args (a
 note, reason, or body). An opaque `orderId` doesn't trip email, phone, card, or
-IP detection, so do not pass it to `localDetectSensitiveInfo`.
+IP detection, so don't pass it to `localDetectSensitiveInfo`.
 
 ```ts
 import { createTool } from "@mastra/core/tools";
@@ -210,7 +211,7 @@ Set `MASTRA_THREAD_ID_KEY` / `MASTRA_RESOURCE_ID_KEY` on `RequestContext`
 before `generate` / `stream`. `mastraAgentContext()` reads them. It never
 calls `createAgentContext`. Preference order is thread, then resource, then
 `workflow.runId`. If none is a valid 1-256 printable-ASCII string, the call is
-uncorrelated rather than joined to a generated id.
+uncorrelated rather than joined to a generated ID.
 
 ```ts
 import {
@@ -229,10 +230,11 @@ await agent.generate(message, { requestContext });
 ## What not to use
 
 - There is no `guardInbound`. Channels already hit `processInput`.
-- There is no `guardApproval`. `requireApproval` is human HITL, not policy.
-- Do not call `createAgentContext` inside a Mastra callback.
-- Do not also wrap these tools with `@arcjet/guard/vercel-ai/v7`.
-- Do not import `@arcjet/guard/mastra`. The path is `@arcjet/guard/mastra/v1`.
+- There is no `guardApproval`. `requireApproval` is human HITL confirmation,
+  not policy.
+- Don't call `createAgentContext` inside a Mastra callback.
+- Don't also wrap these tools with `@arcjet/guard/vercel-ai/v7`.
+- Don't import `@arcjet/guard/mastra`. The path is `@arcjet/guard/mastra/v1`.
 
 ## Common patterns
 

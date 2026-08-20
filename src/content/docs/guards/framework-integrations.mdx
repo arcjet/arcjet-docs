@@ -27,11 +27,10 @@ the helpers on each framework page for agent tools and other non-HTTP actions.
   `label` for the same slug. Passing `label` to `guardTool()` does not compile.
 </Aside>
 
-<Aside type="tip">
-  You choose the context each policy receives. Map only the tool arguments the
-  policy needs, and take the actor from your authenticated application context.
-  This keeps the policy contract explicit and avoids sending unrelated data.
-</Aside>
+You choose the context that each policy receives. Map only the tool arguments
+that the policy needs, and take the actor from your authenticated application
+context. This keeps the policy contract explicit and avoids sending unrelated
+data.
 
 ## Choose an adapter
 
@@ -50,7 +49,7 @@ Pick the page that matches the object you hold when the effect runs:
 Each JavaScript path is versioned. Unversioned aliases such as
 `@arcjet/guard/vercel-ai` do not resolve.
 
-Do not mix adapters. A Mastra `createTool`, Eve `defineTool`, LangGraph
+Don't mix adapters. A Mastra `createTool`, Eve `defineTool`, LangGraph
 `tool()`, OpenAI Agents `tool()`, or Claude Agent SDK `tool()` is not an AI SDK
 `tool()`. Wrapping one of those with `@arcjet/guard/vercel-ai/v7` throws or
 misses the real execute path.
@@ -103,8 +102,9 @@ await generateText({
 ```
 
 On a policy denial the tool does not execute and the model receives an
-`ArcjetDenialResult`. For context, `guardAction`, capture, and inbound
-screening, see the <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>.
+`ArcjetDenialResult`. For more information about `guardAction`, capture, and
+inbound screening, see the
+<Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>.
 
 ## LangChain
 
@@ -123,38 +123,42 @@ Pick the surface that matches what you hold when the effect runs:
 - Observe only: `ArcjetCaptureHandler` / `ArcjetAsyncCaptureHandler`.
   These cannot deny a call. LangChain ignores callback return values.
 
-See the <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
-for install, helpers, fail-closed behavior, and correlation.
+For more information about install, helpers, fail-closed behavior, and
+correlation, see the
+<Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
 
 ## LangGraph JS
 
 LangGraph Graph API agents (`StateGraph` + `ToolNode`) call authored tools and
 `ToolNode` / MCP tools. There is no `guardInbound`. Screen inbound text with a
 direct `guard()` call before `graph.invoke`, or in the first graph node.
-`interrupt()` is human HITL, not policy. Use `guardTool()` for authored `tool()`
-/ `StructuredTool` handlers and `guardToolNode()` for unwrapped and MCP tools
-that execute inside `ToolNode`.
+`interrupt()` is human-in-the-loop (HITL) confirmation, not policy. Use
+`guardTool()` for authored `tool()` / `StructuredTool` handlers and
+`guardToolNode()` for unwrapped and MCP tools that execute inside `ToolNode`.
 
 This is not the Python
 <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>. It is
 not LangChain `createAgent` / `wrapToolCall`.
 
-See the <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>
-for inbound screening, authored tools, and `ToolNode` denials.
+For more information about inbound screening, authored tools, and `ToolNode`
+denials, see the
+<Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>.
 
 ## OpenAI Agents
 
 OpenAI Agents text `Agent` workflows (`run()` + authored `tool()`) have no
 `guardInbound`. Screen user text with a direct `guard()` call before `run()`.
-`needsApproval` and hosted `requireApproval` are human HITL, not policy. Use
-`guardTool()` to wrap `FunctionTool.invoke` after `tool({ execute })`. Hosted
-tools, handoffs, and Runner `agent_tool_start` are not deny points.
+`needsApproval` and hosted `requireApproval` are human HITL confirmation, not
+policy. Use `guardTool()` to wrap `FunctionTool.invoke` after
+`tool({ execute })`. Hosted tools, handoffs, and Runner `agent_tool_start` are
+not deny points.
 
 This is not Realtime, Sandbox, hosted tools, MCP, `agent.asTool()`, or
 computer/shell.
 
-See the <Link.Page href="/guards/openai-agents">OpenAI Agents agent guard</Link.Page>
-for inbound screening, authored tools, and execute denials.
+For more information about inbound screening, authored tools, and execute
+denials, see the
+<Link.Page href="/guards/openai-agents">OpenAI Agents agent guard</Link.Page>.
 
 ## Vercel Eve
 
@@ -163,8 +167,9 @@ local `execute`, so the enforcement point is `guardApproval()` on the
 connection. Screen inbound channel text with `guardInbound()` before the agent
 starts. Hooks are observe-only (handlers return `void`).
 
-For inbound screening, authored tools, connection approvals, and lifecycle
-hooks, see the <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>.
+For more information about inbound screening, authored tools, connection
+approvals, and lifecycle hooks, see the
+<Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>.
 
 ## Mastra
 
@@ -174,7 +179,7 @@ inbound text with `guardProcessor`. Gate authored tools with `guardTool`. Gate
 MCP or workspace tools you did not wrap with `guardHooks` (`beforeToolCall` can
 deny).
 
-For processors, tools, and hooks, see the
+For more information about processors, tools, and hooks, see the
 <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>.
 
 ## Claude Agent SDK
@@ -185,7 +190,8 @@ MCP tools. There is no `guardInbound`. Screen inbound prompts with
 gate. Use `guardTool()` for authored tools and `PreToolUse` for unwrapped
 built-ins and MCP tools.
 
-For inbound screening, authored tools, and `PreToolUse` denials, see the
+For more information about inbound screening, authored tools, and `PreToolUse`
+denials, see the
 <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>.
 
 ## Denials and availability

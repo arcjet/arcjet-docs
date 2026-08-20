@@ -47,11 +47,11 @@ The integration exposes four surfaces:
 - `guardInbound()` screens inbound text on a channel.
 - `arcjetHooks()` observes agent lifecycle events.
 
-`guardTool()`, `guardApproval()`, and `arcjetHooks()` correlate by session id.
+`guardTool()`, `guardApproval()`, and `arcjetHooks()` correlate by session ID.
 `guardInbound()` runs before the session exists, so you pass an explicit
 `correlationId`.
 
-Never call `createAgentContext` inside an Eve callback. The session id is
+Never call `createAgentContext` inside an Eve callback. The session ID is
 already the run identity. Use `eveAgentContext` only when you need the context
 object explicitly.
 
@@ -126,9 +126,9 @@ export default guardTool(
 before the agent sees it. This is the only place a turn can be declined before
 it starts.
 
-On `DENY`, return an HTTP error and do not start the agent. Pass an explicit
-`correlationId`. Use a value the app already has, such as a conversation id.
-Do not generate a per-request id. Reuse that same value with `args.from()` so
+On `DENY`, return an HTTP error and don't start the agent. Pass an explicit
+`correlationId`. Use a value the app already has, such as a conversation ID.
+Don't generate a per-request ID. Reuse that same value with `args.from()` so
 the inbound decision can join the session later.
 
 Eve helpers default to `onGuardError: "deny"`. `"allow"` is a legitimate choice
@@ -157,7 +157,7 @@ export default defineChannel({
       }
 
       // correlationId must be stable across retries so the inbound decision
-      // correlates with the session. Do not use crypto.randomUUID() here.
+      // correlates with the session. Don't use crypto.randomUUID() here.
       const correlationId = conversationId;
       const verdict = await guardInbound(arcjet, message, {
         rules: [detectPromptInjection()(message)],
@@ -195,7 +195,7 @@ export default defineChannel({
 });
 ```
 
-## `guardApproval` with no authored tools
+## Gate connections with no authored tools
 
 An Eve agent can have zero authored tools. OpenAPI and MCP connections
 (`agent/connections/*.ts`) have no local `execute`. The only enforcement point
@@ -307,7 +307,7 @@ export default defineOpenAPIConnection({
 cannot reject a turn. If the request is to block prompt injection, the answer
 is `guardInbound` at the channel, not a hook.
 
-Hooks emit lifecycle captures joined to the session id. The
+Hooks emit lifecycle captures joined to the session ID. The
 `eve.session-started` event carries both inbound and session correlation. Use
 hooks for audit trails, not enforcement.
 

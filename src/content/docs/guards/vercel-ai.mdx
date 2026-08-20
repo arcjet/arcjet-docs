@@ -16,7 +16,7 @@ allow or deny the call before a side effect runs.
 
 The JavaScript integration supports Vercel AI SDK v7 through the versioned
 `@arcjet/guard/vercel-ai/v7` export. This adapter is for AI SDK `tool()`
-handlers. Do not use it to wrap Mastra `createTool`, Eve `defineTool`, LangGraph
+handlers. Don't use it to wrap Mastra `createTool`, Eve `defineTool`, LangGraph
 `tool()`, OpenAI Agents `tool()`, or Claude Agent SDK `tool()` – each of those
 has its own adapter.
 
@@ -47,13 +47,13 @@ The integration exposes the following surfaces:
 
 - `guardTool()` wraps an AI SDK `tool({ execute })`. On `DENY` the tool never
   runs. The model receives a structured `ArcjetDenialResult`
-  (`{ arcjetDenied, reason, message, retryable, retryAfterSeconds? }`). Do not
+  (`{ arcjetDenied, reason, message, retryable, retryAfterSeconds? }`). Don't
   throw.
 - `aiToolsContext()` maps an `ArcjetAgentContext` onto `toolsContext` for
   `generateText` / `streamText`. Only tools branded by `guardTool` are included.
 - `createAgentContext()` builds the context you pass to `aiToolsContext`. Pass a
-  stable `correlationId` when the app already has one. Omit it and a ULID is
-  generated.
+  stable `correlationId` when the app already has one. Omit it and the helper
+  generates a universally unique lexicographically sortable identifier (ULID).
 - `guardAction()` wraps an app-invoked function (not a model tool). On `DENY` it
   throws `ArcjetDeniedError`. When Guard cannot be evaluated it throws
   `ArcjetGuardUnavailableError`.
@@ -79,7 +79,7 @@ Code, run `/integrate-arcjet-guard-agents`. The skill source is
 ## Create context for the run
 
 Create one context at the HTTP route, job, or webhook that starts the run. Thread
-it by hand into `generateText` and any `guardAction` call. Do not store it in
+it by hand into `generateText` and any `guardAction` call. Don't store it in
 module state or `AsyncLocalStorage`.
 
 ```ts
@@ -184,7 +184,7 @@ export async function runAgent(
 The same `tools` and `toolsContext` pattern works with `streamText` and
 `ToolLoopAgent`.
 
-## `guardTool` options
+## Options for `guardTool`
 
 | Option | Required | Description |
 | --- | --- | --- |
@@ -241,7 +241,7 @@ if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
 }
 ```
 
-`guardTool` already defaults to fail closed. You do not need this extra check
+`guardTool` already defaults to fail closed. You don't need this extra check
 on wrapped tools.
 
 ## Guard an app-invoked action
@@ -290,7 +290,7 @@ try {
   );
 } catch (error) {
   if (error instanceof ArcjetDeniedError) {
-    // A rule denied the call. Tell the user why. Do not retry.
+    // A rule denied the call. Tell the user why. Don't retry.
     console.warn("denied:", error.decision.reason);
   } else if (error instanceof ArcjetGuardUnavailableError) {
     // Policy could not be evaluated. Alert on this separately from a DENY.
@@ -368,7 +368,7 @@ be evaluated, the wrapped function does not run.
 
 Set `onGuardError: "allow"` only when executing without a complete security
 decision is acceptable, such as a read-only lookup. Direct `guard()` still fails
-open. For more information, see
+open. For more information about fail-open versus fail-closed behavior, see
 <Link.Page href="/guards/reference#availability-and-fail-behavior">Availability and fail behavior</Link.Page>.
 
 ## Correlation
@@ -384,14 +384,14 @@ first such call always warns.
 
 ## What not to use
 
-- Do not pass `label` to `guardTool`. The field is `action`.
-- Do not declare a `contextSchema` on a tool you wrap. Arcjet uses that slot.
-- Do not wrap the same tool twice. `guardTool` throws if the tool already
+- Don't pass `label` to `guardTool`. The field is `action`.
+- Don't declare a `contextSchema` on a tool you wrap. Arcjet uses that slot.
+- Don't wrap the same tool twice. `guardTool` throws if the tool already
   carries the Arcjet protection brand.
-- Do not also wrap these tools with another framework adapter.
-- Do not import `@arcjet/guard/vercel-ai`. The path is
+- Don't also wrap these tools with another framework adapter.
+- Don't import `@arcjet/guard/vercel-ai`. The path is
   `@arcjet/guard/vercel-ai/v7`.
-- Do not use this adapter with Mastra, Eve, LangGraph, OpenAI Agents, or Claude
+- Don't use this adapter with Mastra, Eve, LangGraph, OpenAI Agents, or Claude
   Agent SDK tools.
 
 ## Related
