@@ -304,21 +304,7 @@ often significantly less.
 There is a timeout in place to prevent waiting for a response indefinitely in
 case of problems.
 This value is configurable in the SDK.
-The default is 500&nbsp;ms in production and 1000&nbsp;ms in development.
-
-The reason for this difference is that in production your app usually runs on a
-server close to the Cloud API.
-In development your app may run on a laptop some distance away from the Cloud
-API.
-That introduces additional latency.
-
-To illustrate,
-a developer in New Zealand may have to connect to the Arcjet Cloud API running
-in the closest cloud region, which might be Australia.
-In contrast,
-a user would connect to your application and then the application would connect
-to the closest Arcjet Cloud API,
-usually within the same region.
+The default is 2000&nbsp;ms in both development and production.
 
 A shorter timeout may result in faster failure responses but could lead to
 increased error rates if the Cloud API needs time to respond.

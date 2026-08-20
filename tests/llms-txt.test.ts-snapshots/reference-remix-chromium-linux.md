@@ -784,7 +784,7 @@ Error handling
 
 [Section titled “Error handling”](#error-handling)
 
-Arcjet is designed to fail open so that a service issue or misconfiguration does not block all requests. The SDK also times out and fails open after 1000 ms in development (see [`ARCJET_ENV`](/environment#arcjet-env)) and 500 ms otherwise. However, in most cases, the response time is less than 20 ms to 30 ms.
+Arcjet is designed to fail open so that a service issue or misconfiguration does not block all requests. The SDK also times out and fails open after 2000 ms by default. However, in most cases, the response time is less than 20 ms to 30 ms.
 
 If there is an error condition when processing the rule, Arcjet returns an `ERROR` result for that rule and you can check the `message` property on the rule’s error result for more information.
 
@@ -1096,11 +1096,9 @@ const client = createRemoteClient({
   // environment variable.
   baseUrl: baseUrl(process.env),
   // timeout is the maximum time to wait for a response from the server.
-  // It defaults to 1000ms in development
-  // (see [`ARCJET_ENV`](https://docs.arcjet.com/environment#arcjet-env))
-  // and 500ms otherwise. This is a conservative limit to fail open by default.
+  // It defaults to 2000ms. This is a conservative limit to fail open by default.
   // In most cases, the response time will be <20-30ms.
-  timeout: 500,
+  timeout: 2000,
 });
 
 const aj = arcjet({
@@ -1128,11 +1126,9 @@ const client = createRemoteClient({
   // environment variable.
   baseUrl: baseUrl(process.env),
   // timeout is the maximum time to wait for a response from the server.
-  // It defaults to 1000ms in development
-  // (see [`ARCJET_ENV`](https://docs.arcjet.com/environment#arcjet-env))
-  // and 500ms otherwise. This is a conservative limit to fail open by default.
+  // It defaults to 2000ms. This is a conservative limit to fail open by default.
   // In most cases, the response time will be <20-30ms.
-  timeout: 500,
+  timeout: 2000,
 });
 
 const aj = arcjet({
