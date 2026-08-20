@@ -3,13 +3,20 @@ title: "Rate limiting reference"
 description: "Reference guide for adding Arcjet rate limiting to your Next.js, NestJS, Node.js, Bun, Python, Remix, or SvelteKit app."
 frameworks:
   - bun
+  - claude-agent-sdk
+  - langchain
+  - langgraph
+  - mastra
   - nest-js
   - next-js
   - node-js
+  - openai-agents
   - python-fastapi
   - python-flask
   - remix
   - sveltekit
+  - vercel-ai
+  - vercel-eve
 ajToc:
   - text: "Configuration"
     anchor: "configuration"
@@ -184,6 +191,55 @@ import SlidingWindowSvelteKit from "@/snippets/rate-limiting/reference/sveltekit
 import TokenBucketSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/TokenBucket.mdx";
 import TokenBucketRequestSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/TokenBucketRequest.mdx";
 
+import TokenBucketClaudeAgentSdk from "@/snippets/rate-limiting/reference/claude-agent-sdk/TokenBucket.mdx";
+import TokenBucketRequestClaudeAgentSdk from "@/snippets/rate-limiting/reference/claude-agent-sdk/TokenBucketRequest.mdx";
+import ByUserIdClaudeAgentSdk from "@/snippets/rate-limiting/reference/claude-agent-sdk/ByUserId.mdx";
+import ErrorsClaudeAgentSdk from "@/snippets/rate-limiting/reference/claude-agent-sdk/Errors.mdx";
+import DecisionLogClaudeAgentSdk from "@/snippets/rate-limiting/reference/claude-agent-sdk/DecisionLog.mdx";
+import GuardAlgoClaudeAgentSdk from "@/snippets/rate-limiting/reference/claude-agent-sdk/GuardAlgo.mdx";
+
+import TokenBucketLangchain from "@/snippets/rate-limiting/reference/langchain/TokenBucket.mdx";
+import TokenBucketRequestLangchain from "@/snippets/rate-limiting/reference/langchain/TokenBucketRequest.mdx";
+import ByUserIdLangchain from "@/snippets/rate-limiting/reference/langchain/ByUserId.mdx";
+import ErrorsLangchain from "@/snippets/rate-limiting/reference/langchain/Errors.mdx";
+import DecisionLogLangchain from "@/snippets/rate-limiting/reference/langchain/DecisionLog.mdx";
+import GuardAlgoLangchain from "@/snippets/rate-limiting/reference/langchain/GuardAlgo.mdx";
+
+import TokenBucketLanggraph from "@/snippets/rate-limiting/reference/langgraph/TokenBucket.mdx";
+import TokenBucketRequestLanggraph from "@/snippets/rate-limiting/reference/langgraph/TokenBucketRequest.mdx";
+import ByUserIdLanggraph from "@/snippets/rate-limiting/reference/langgraph/ByUserId.mdx";
+import ErrorsLanggraph from "@/snippets/rate-limiting/reference/langgraph/Errors.mdx";
+import DecisionLogLanggraph from "@/snippets/rate-limiting/reference/langgraph/DecisionLog.mdx";
+import GuardAlgoLanggraph from "@/snippets/rate-limiting/reference/langgraph/GuardAlgo.mdx";
+
+import TokenBucketMastra from "@/snippets/rate-limiting/reference/mastra/TokenBucket.mdx";
+import TokenBucketRequestMastra from "@/snippets/rate-limiting/reference/mastra/TokenBucketRequest.mdx";
+import ByUserIdMastra from "@/snippets/rate-limiting/reference/mastra/ByUserId.mdx";
+import ErrorsMastra from "@/snippets/rate-limiting/reference/mastra/Errors.mdx";
+import DecisionLogMastra from "@/snippets/rate-limiting/reference/mastra/DecisionLog.mdx";
+import GuardAlgoMastra from "@/snippets/rate-limiting/reference/mastra/GuardAlgo.mdx";
+
+import TokenBucketOpenaiAgents from "@/snippets/rate-limiting/reference/openai-agents/TokenBucket.mdx";
+import TokenBucketRequestOpenaiAgents from "@/snippets/rate-limiting/reference/openai-agents/TokenBucketRequest.mdx";
+import ByUserIdOpenaiAgents from "@/snippets/rate-limiting/reference/openai-agents/ByUserId.mdx";
+import ErrorsOpenaiAgents from "@/snippets/rate-limiting/reference/openai-agents/Errors.mdx";
+import DecisionLogOpenaiAgents from "@/snippets/rate-limiting/reference/openai-agents/DecisionLog.mdx";
+import GuardAlgoOpenaiAgents from "@/snippets/rate-limiting/reference/openai-agents/GuardAlgo.mdx";
+
+import TokenBucketVercelAi from "@/snippets/rate-limiting/reference/vercel-ai/TokenBucket.mdx";
+import TokenBucketRequestVercelAi from "@/snippets/rate-limiting/reference/vercel-ai/TokenBucketRequest.mdx";
+import ByUserIdVercelAi from "@/snippets/rate-limiting/reference/vercel-ai/ByUserId.mdx";
+import ErrorsVercelAi from "@/snippets/rate-limiting/reference/vercel-ai/Errors.mdx";
+import DecisionLogVercelAi from "@/snippets/rate-limiting/reference/vercel-ai/DecisionLog.mdx";
+import GuardAlgoVercelAi from "@/snippets/rate-limiting/reference/vercel-ai/GuardAlgo.mdx";
+
+import TokenBucketVercelEve from "@/snippets/rate-limiting/reference/vercel-eve/TokenBucket.mdx";
+import TokenBucketRequestVercelEve from "@/snippets/rate-limiting/reference/vercel-eve/TokenBucketRequest.mdx";
+import ByUserIdVercelEve from "@/snippets/rate-limiting/reference/vercel-eve/ByUserId.mdx";
+import ErrorsVercelEve from "@/snippets/rate-limiting/reference/vercel-eve/Errors.mdx";
+import DecisionLogVercelEve from "@/snippets/rate-limiting/reference/vercel-eve/DecisionLog.mdx";
+import GuardAlgoVercelEve from "@/snippets/rate-limiting/reference/vercel-eve/GuardAlgo.mdx";
+
 Arcjet rate limiting lets you define rules which limit the number of
 requests a client can make over a period of time.
 
@@ -254,6 +310,13 @@ def fixed_window(
   <FixedWindowPythonFlask slot="python-flask" />
   <FixedWindowRemix slot="remix" />
   <FixedWindowSvelteKit slot="sveltekit" />
+  <GuardAlgoClaudeAgentSdk slot="claude-agent-sdk" />
+  <GuardAlgoLangchain slot="langchain" />
+  <GuardAlgoLanggraph slot="langgraph" />
+  <GuardAlgoMastra slot="mastra" />
+  <GuardAlgoOpenaiAgents slot="openai-agents" />
+  <GuardAlgoVercelAi slot="vercel-ai" />
+  <GuardAlgoVercelEve slot="vercel-eve" />
 </SlotByFramework>
 
 ### Sliding window rate limit options
@@ -309,6 +372,13 @@ def sliding_window(
   <SlidingWindowPythonFlask slot="python-flask" />
   <SlidingWindowRemix slot="remix" />
   <SlidingWindowSvelteKit slot="sveltekit" />
+  <GuardAlgoClaudeAgentSdk slot="claude-agent-sdk" />
+  <GuardAlgoLangchain slot="langchain" />
+  <GuardAlgoLanggraph slot="langgraph" />
+  <GuardAlgoMastra slot="mastra" />
+  <GuardAlgoOpenaiAgents slot="openai-agents" />
+  <GuardAlgoVercelAi slot="vercel-ai" />
+  <GuardAlgoVercelEve slot="vercel-eve" />
 </SlotByFramework>
 
 ### Token bucket rate limit options
@@ -377,6 +447,13 @@ request example](#token-bucket-request).
   <TokenBucketPythonFlask slot="python-flask" />
   <TokenBucketRemix slot="remix" />
   <TokenBucketSvelteKit slot="sveltekit" />
+  <TokenBucketClaudeAgentSdk slot="claude-agent-sdk" />
+  <TokenBucketLangchain slot="langchain" />
+  <TokenBucketLanggraph slot="langgraph" />
+  <TokenBucketMastra slot="mastra" />
+  <TokenBucketOpenaiAgents slot="openai-agents" />
+  <TokenBucketVercelAi slot="vercel-ai" />
+  <TokenBucketVercelEve slot="vercel-eve" />
 </SlotByFramework>
 
 The amount of tokens to deduct from the bucket is specified in the `requested`
@@ -429,6 +506,13 @@ The custom characteristic is `userId` with the value passed as a prop on the
   <ByUserIdPythonFlask slot="python-flask" />
   <ByUserIdRemix slot="remix" />
   <ByUserIdSvelteKit slot="sveltekit" />
+  <ByUserIdClaudeAgentSdk slot="claude-agent-sdk" />
+  <ByUserIdLangchain slot="langchain" />
+  <ByUserIdLanggraph slot="langgraph" />
+  <ByUserIdMastra slot="mastra" />
+  <ByUserIdOpenaiAgents slot="openai-agents" />
+  <ByUserIdVercelAi slot="vercel-ai" />
+  <ByUserIdVercelEve slot="vercel-eve" />
 </SlotByFramework>
 
 To identify users with different characteristics, such as IP address for anonymous
@@ -505,6 +589,13 @@ This example logs the full result as well as each rate limit rule:
   <DecisionLogPythonFlask slot="python-flask" />
   <DecisionLogRemix slot="remix" />
   <DecisionLogSvelteKit slot="sveltekit" />
+  <DecisionLogClaudeAgentSdk slot="claude-agent-sdk" />
+  <DecisionLogLangchain slot="langchain" />
+  <DecisionLogLanggraph slot="langgraph" />
+  <DecisionLogMastra slot="mastra" />
+  <DecisionLogOpenaiAgents slot="openai-agents" />
+  <DecisionLogVercelAi slot="vercel-ai" />
+  <DecisionLogVercelEve slot="vercel-eve" />
 </SlotByFramework>
 
 ### Token bucket request
@@ -522,6 +613,13 @@ requesting to withdraw from the bucket.
   <TokenBucketRequestPythonFlask slot="python-flask" />
   <TokenBucketRequestRemix slot="remix" />
   <TokenBucketRequestSvelteKit slot="sveltekit" />
+  <TokenBucketRequestClaudeAgentSdk slot="claude-agent-sdk" />
+  <TokenBucketRequestLangchain slot="langchain" />
+  <TokenBucketRequestLanggraph slot="langgraph" />
+  <TokenBucketRequestMastra slot="mastra" />
+  <TokenBucketRequestOpenaiAgents slot="openai-agents" />
+  <TokenBucketRequestVercelAi slot="vercel-ai" />
+  <TokenBucketRequestVercelEve slot="vercel-eve" />
 </SlotByFramework>
 
 ### Rate limit headers
@@ -594,6 +692,13 @@ Arcjet conclusion is `ERROR`.
   <ErrorsPythonFlask slot="python-flask" />
   <ErrorsRemix slot="remix" />
   <ErrorsSvelteKit slot="sveltekit" />
+  <ErrorsClaudeAgentSdk slot="claude-agent-sdk" />
+  <ErrorsLangchain slot="langchain" />
+  <ErrorsLanggraph slot="langgraph" />
+  <ErrorsMastra slot="mastra" />
+  <ErrorsOpenaiAgents slot="openai-agents" />
+  <ErrorsVercelAi slot="vercel-ai" />
+  <ErrorsVercelEve slot="vercel-eve" />
 </SlotByFramework>
 
 ## Testing

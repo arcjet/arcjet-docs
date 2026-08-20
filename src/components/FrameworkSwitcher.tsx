@@ -1,18 +1,25 @@
 import { Astro as IconAstro } from "@/components/icons/tech/Astro";
 import { Bun as IconBun } from "@/components/icons/tech/Bun";
+import { ClaudeAgentSdk as IconClaudeAgentSdk } from "@/components/icons/tech/ClaudeAgentSdk";
 import { Deno as IconDeno } from "@/components/icons/tech/Deno";
 import { Express as IconExpress } from "@/components/icons/tech/Express";
 import { FastApi as IconFastApi } from "@/components/icons/tech/FastApi";
 import { Fastify as IconFastify } from "@/components/icons/tech/Fastify";
 import { Flask as IconFlask } from "@/components/icons/tech/Flask";
 import { Hono as IconHono } from "@/components/icons/tech/Hono";
+import { LangChain as IconLangChain } from "@/components/icons/tech/LangChain";
+import { LangGraph as IconLangGraph } from "@/components/icons/tech/LangGraph";
+import { Mastra as IconMastra } from "@/components/icons/tech/Mastra";
 import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
 import { NextJs as IconNextJs } from "@/components/icons/tech/NextJs";
 import { NodeJs as IconNodeJs } from "@/components/icons/tech/NodeJs";
 import { Nuxt as IconNuxt } from "@/components/icons/tech/Nuxt";
+import { OpenAiAgents as IconOpenAiAgents } from "@/components/icons/tech/OpenAiAgents";
 import { ReactRouter as IconReactRouter } from "@/components/icons/tech/ReactRouter";
 import { Remix as IconRemix } from "@/components/icons/tech/Remix";
 import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
+import { VercelAi as IconVercelAi } from "@/components/icons/tech/VercelAi";
+import { VercelEve as IconVercelEve } from "@/components/icons/tech/VercelEve";
 import type { Props as SelectProps } from "@/components/Select";
 import Select from "@/components/Select";
 import type { Framework, FrameworkKey } from "@/lib/prefs";
@@ -35,21 +42,28 @@ const frameworkIcon = {
   astro: <IconAstro />,
   "bun-hono": <IconBun />,
   bun: <IconBun />,
+  "claude-agent-sdk": <IconClaudeAgentSdk />,
   deno: <IconDeno />,
   express: <IconExpress />,
   fastify: <IconFastify />,
   hono: <IconHono />,
+  langchain: <IconLangChain />,
+  langgraph: <IconLangGraph />,
+  mastra: <IconMastra />,
   "nest-js": <IconNestJs />,
   "next-js": <IconNextJs />,
   "node-js-express": <IconNodeJs />,
   "node-js-hono": <IconNodeJs />,
   "node-js": <IconNodeJs />,
   nuxt: <IconNuxt />,
+  "openai-agents": <IconOpenAiAgents />,
   "python-fastapi": <IconFastApi />,
   "python-flask": <IconFlask />,
   "react-router": <IconReactRouter />,
   remix: <IconRemix />,
   sveltekit: <IconSvelteKit />,
+  "vercel-ai": <IconVercelAi />,
+  "vercel-eve": <IconVercelEve />,
 };
 
 interface Props extends React.HTMLAttributes<HTMLSelectElement> {

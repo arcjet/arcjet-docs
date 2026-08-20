@@ -1,17 +1,24 @@
 import Button from "@/components/Button";
 import { Astro as IconAstro } from "@/components/icons/tech/Astro";
 import { Bun as IconBun } from "@/components/icons/tech/Bun";
+import { ClaudeAgentSdk as IconClaudeAgentSdk } from "@/components/icons/tech/ClaudeAgentSdk";
 import { Deno as IconDeno } from "@/components/icons/tech/Deno";
 import { FastApi as IconFastApi } from "@/components/icons/tech/FastApi";
 import { Fastify as IconFastify } from "@/components/icons/tech/Fastify";
 import { Flask as IconFlask } from "@/components/icons/tech/Flask";
+import { LangChain as IconLangChain } from "@/components/icons/tech/LangChain";
+import { LangGraph as IconLangGraph } from "@/components/icons/tech/LangGraph";
+import { Mastra as IconMastra } from "@/components/icons/tech/Mastra";
 import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
 import { NextJs as IconNextJs } from "@/components/icons/tech/NextJs";
 import { NodeJs as IconNodeJs } from "@/components/icons/tech/NodeJs";
 import { Nuxt as IconNuxt } from "@/components/icons/tech/Nuxt";
+import { OpenAiAgents as IconOpenAiAgents } from "@/components/icons/tech/OpenAiAgents";
 import { ReactRouter as IconReactRouter } from "@/components/icons/tech/ReactRouter";
 import { Remix as IconRemix } from "@/components/icons/tech/Remix";
 import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
+import { VercelAi as IconVercelAi } from "@/components/icons/tech/VercelAi";
+import { VercelEve as IconVercelEve } from "@/components/icons/tech/VercelEve";
 import { frameworks, getStoredFramework, type FrameworkKey } from "@/lib/prefs";
 import { queryParamFramework } from "@/store";
 import { useStore } from "@nanostores/react";
@@ -126,6 +133,27 @@ const FrameworkLinks = forwardRef(
                   break;
                 case "sveltekit":
                   icon = <IconSvelteKit />;
+                  break;
+                case "claude-agent-sdk":
+                  icon = <IconClaudeAgentSdk />;
+                  break;
+                case "langchain":
+                  icon = <IconLangChain />;
+                  break;
+                case "langgraph":
+                  icon = <IconLangGraph />;
+                  break;
+                case "mastra":
+                  icon = <IconMastra />;
+                  break;
+                case "openai-agents":
+                  icon = <IconOpenAiAgents />;
+                  break;
+                case "vercel-ai":
+                  icon = <IconVercelAi />;
+                  break;
+                case "vercel-eve":
+                  icon = <IconVercelEve />;
                   break;
                 default:
                   icon = "";

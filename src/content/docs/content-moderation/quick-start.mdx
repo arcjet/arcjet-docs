@@ -1,12 +1,40 @@
 ---
 title: "Content moderation"
+titleByFramework:
+  default: "Content moderation"
+  claude-agent-sdk: "Content moderation for Claude Agent SDK"
+  langchain: "Content moderation for LangChain"
+  langgraph: "Content moderation for LangGraph"
+  mastra: "Content moderation for Mastra"
+  openai-agents: "Content moderation for OpenAI Agents"
+  vercel-ai: "Content moderation for Vercel AI SDK"
+  vercel-eve: "Content moderation for Vercel Eve"
 description: "Quick start for Arcjet content moderation on Guard in JavaScript, Python, and Go."
+frameworks:
+  - claude-agent-sdk
+  - langchain
+  - langgraph
+  - mastra
+  - openai-agents
+  - vercel-ai
+  - vercel-eve
 ---
 
 import { CardGrid, Tabs, TabItem } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "/src/components/Comments.astro";
+import SlotByFramework from "@/components/SlotByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks";
+import { frameworks } from "@/lib/prefs";
+
+import ClaudeAgentSdkStep from "@/snippets/content-moderation/quick-start/claude-agent-sdk/Example.mdx";
+import LangchainStep from "@/snippets/content-moderation/quick-start/langchain/Example.mdx";
+import LanggraphStep from "@/snippets/content-moderation/quick-start/langgraph/Example.mdx";
+import MastraStep from "@/snippets/content-moderation/quick-start/mastra/Example.mdx";
+import OpenaiAgentsStep from "@/snippets/content-moderation/quick-start/openai-agents/Example.mdx";
+import VercelAiStep from "@/snippets/content-moderation/quick-start/vercel-ai/Example.mdx";
+import VercelEveStep from "@/snippets/content-moderation/quick-start/vercel-eve/Example.mdx";
 
 Arcjet content moderation detects harmful content in untrusted text before it
 is stored, displayed, or forwarded. It is a Guard rule – call it from
@@ -14,7 +42,27 @@ is stored, displayed, or forwarded. It is a Guard rule – call it from
 
 <WhatIsArcjet />
 
+<FrameworkLinks
+  client:load
+  exclude={frameworks
+    .filter((d) => !frontmatter.frameworks.includes(d.key))
+    .map((d) => d.key)}
+  title="Choose a framework"
+/>
+
 ## Quick start
+
+<SlotByFramework client:load>
+  <ClaudeAgentSdkStep slot="claude-agent-sdk" />
+  <LangchainStep slot="langchain" />
+  <LanggraphStep slot="langgraph" />
+  <MastraStep slot="mastra" />
+  <OpenaiAgentsStep slot="openai-agents" />
+  <VercelAiStep slot="vercel-ai" />
+  <VercelEveStep slot="vercel-eve" />
+</SlotByFramework>
+
+### Language examples
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">

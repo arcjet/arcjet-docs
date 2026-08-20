@@ -3,15 +3,29 @@ title: "AI budget control"
 titleByFramework:
   default: "AI budget control"
   next-js: "AI budget control for Next.js"
+  claude-agent-sdk: "AI budget control for Claude Agent SDK"
+  langchain: "AI budget control for LangChain"
+  langgraph: "AI budget control for LangGraph"
+  mastra: "AI budget control for Mastra"
+  openai-agents: "AI budget control for OpenAI Agents"
   python-fastapi: "AI budget control for Python + FastAPI"
   python-flask: "AI budget control for Python + Flask"
+  vercel-ai: "AI budget control for Vercel AI SDK"
+  vercel-eve: "AI budget control for Vercel Eve"
 description: "Enforce per-user AI token budgets with Arcjet rate limiting. Stop cost explosions and free-tier abuse with token bucket rate limits."
 prev: true
 next: true
 frameworks:
+  - claude-agent-sdk
+  - langchain
+  - langgraph
+  - mastra
   - next-js
+  - openai-agents
   - python-fastapi
   - python-flask
+  - vercel-ai
+  - vercel-eve
 ajToc:
   - text: "Get started"
     anchor: "get-started"
@@ -29,6 +43,13 @@ import { frameworks } from "@/lib/prefs";
 import NextJsStep from "@/snippets/ai-protection/budget-control/nextjs/Example.mdx";
 import PythonFastapiStep from "@/snippets/ai-protection/budget-control/python-fastapi/Example.mdx";
 import PythonFlaskStep from "@/snippets/ai-protection/budget-control/python-flask/Example.mdx";
+import ClaudeAgentSdkStep from "@/snippets/ai-protection/budget-control/claude-agent-sdk/Example.mdx";
+import LangchainStep from "@/snippets/ai-protection/budget-control/langchain/Example.mdx";
+import LanggraphStep from "@/snippets/ai-protection/budget-control/langgraph/Example.mdx";
+import MastraStep from "@/snippets/ai-protection/budget-control/mastra/Example.mdx";
+import OpenaiAgentsStep from "@/snippets/ai-protection/budget-control/openai-agents/Example.mdx";
+import VercelAiStep from "@/snippets/ai-protection/budget-control/vercel-ai/Example.mdx";
+import VercelEveStep from "@/snippets/ai-protection/budget-control/vercel-eve/Example.mdx";
 
 AI providers bill per token. Without per-user limits, a single user can exhaust
 your entire monthly budget – through prompt attacks, runaway loops, or just
@@ -60,6 +81,13 @@ or external state store required.
   <NextJsStep slot="next-js" />
   <PythonFastapiStep slot="python-fastapi" />
   <PythonFlaskStep slot="python-flask" />
+  <ClaudeAgentSdkStep slot="claude-agent-sdk" />
+  <LangchainStep slot="langchain" />
+  <LanggraphStep slot="langgraph" />
+  <MastraStep slot="mastra" />
+  <OpenaiAgentsStep slot="openai-agents" />
+  <VercelAiStep slot="vercel-ai" />
+  <VercelEveStep slot="vercel-eve" />
 </SlotByFramework>
 
 ## Configure the rate limit

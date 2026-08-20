@@ -1,0 +1,25 @@
+import Step from "./Example.ts?raw";
+import { Code } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+This example deducts an estimated token cost from a per-user bucket before a tool runs. When the bucket is empty, the tool does not execute.
+
+We assume you already have a Vercel Eve project set up. For helper options and
+denial behavior, see the <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>.
+
+Install the dependencies:
+
+```shell
+# Export your Arcjet API key from https://app.arcjet.com
+export ARCJET_KEY="ajkey_..."
+
+npm install @arcjet/guard eve
+```
+
+Create the example:
+
+<Code code={Step} lang="ts" title="agent.ts" />
+
+Then start or invoke the agent with a test prompt.
+
+Requests appear in your [Arcjet dashboard](https://app.arcjet.com) in real time.

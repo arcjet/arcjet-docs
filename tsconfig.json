@@ -17,5 +17,18 @@
     //       get picked up and included via interface merging.
     "**/*"
   ],
-  "exclude": ["dist", "snippets"]
+  "exclude": [
+    "dist",
+    "snippets",
+    // Guard adapter snippets import packages that this repo does not install
+    // (`@arcjet/guard` and each framework SDK). They are shown as raw source
+    // in the docs, so they are excluded from `astro check` until those
+    // packages are added as dependencies.
+    "src/snippets/**/claude-agent-sdk/**/*.ts",
+    "src/snippets/**/langgraph/**/*.ts",
+    "src/snippets/**/mastra/**/*.ts",
+    "src/snippets/**/openai-agents/**/*.ts",
+    "src/snippets/**/vercel-ai/**/*.ts",
+    "src/snippets/**/vercel-eve/**/*.ts"
+  ]
 }

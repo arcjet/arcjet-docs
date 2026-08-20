@@ -3,23 +3,37 @@ title: "Rate limiting"
 titleByFramework:
   default: "Rate limiting"
   bun: "Rate limiting for Bun"
+  claude-agent-sdk: "Rate limiting for Claude Agent SDK"
+  langchain: "Rate limiting for LangChain"
+  langgraph: "Rate limiting for LangGraph"
+  mastra: "Rate limiting for Mastra"
   nest-js: "Rate limiting for NestJS"
   next-js: "Rate limiting for Next.js"
   node-js: "Rate limiting for Node.js"
+  openai-agents: "Rate limiting for OpenAI Agents"
   python-fastapi: "Rate limiting for Python + FastAPI"
   python-flask: "Rate limiting for Python + Flask"
   remix: "Rate limiting for Remix"
   sveltekit: "Rate limiting for SvelteKit"
+  vercel-ai: "Rate limiting for Vercel AI SDK"
+  vercel-eve: "Rate limiting for Vercel Eve"
 description: "Quick start guide for adding Arcjet rate limiting to your Next.js, NestJS, Node.js, Bun, Python, Remix, or SvelteKit app."
 frameworks:
   - bun
+  - claude-agent-sdk
+  - langchain
+  - langgraph
+  - mastra
   - nest-js
   - next-js
   - node-js
+  - openai-agents
   - python-fastapi
   - python-flask
   - remix
   - sveltekit
+  - vercel-ai
+  - vercel-eve
 ajToc:
   - text: "Video quick start"
     anchor: "video-quick-start"
@@ -38,7 +52,7 @@ ajToc:
         framework: ["bun", "node-js", "python-fastapi", "python-flask"]
       - text: 4. Start app
         anchor: "4-start-app"
-        framework: ["nest-js", "next-js", "remix", "sveltekit"]
+        framework: ["claude-agent-sdk", "langchain", "langgraph", "mastra", "nest-js", "next-js", "openai-agents", "remix", "sveltekit", "vercel-ai", "vercel-eve"]
   - text: "FAQs"
     anchor: "faqs"
   - text: "What next?"
@@ -99,6 +113,41 @@ import SvelteKitStep2 from "@/snippets/rate-limiting/quick-start/sveltekit/Step2
 import SvelteKitStep3 from "@/snippets/rate-limiting/quick-start/sveltekit/Step3.mdx";
 import SvelteKitStep4 from "@/snippets/rate-limiting/quick-start/sveltekit/Step4.mdx";
 
+import ClaudeAgentSdkStep1 from "@/snippets/rate-limiting/quick-start/claude-agent-sdk/Step1.mdx";
+import ClaudeAgentSdkStep2 from "@/snippets/rate-limiting/quick-start/claude-agent-sdk/Step2.mdx";
+import ClaudeAgentSdkStep3 from "@/snippets/rate-limiting/quick-start/claude-agent-sdk/Step3.mdx";
+import ClaudeAgentSdkStep4 from "@/snippets/rate-limiting/quick-start/claude-agent-sdk/Step4.mdx";
+
+import LangchainStep1 from "@/snippets/rate-limiting/quick-start/langchain/Step1.mdx";
+import LangchainStep2 from "@/snippets/rate-limiting/quick-start/langchain/Step2.mdx";
+import LangchainStep3 from "@/snippets/rate-limiting/quick-start/langchain/Step3.mdx";
+import LangchainStep4 from "@/snippets/rate-limiting/quick-start/langchain/Step4.mdx";
+
+import LanggraphStep1 from "@/snippets/rate-limiting/quick-start/langgraph/Step1.mdx";
+import LanggraphStep2 from "@/snippets/rate-limiting/quick-start/langgraph/Step2.mdx";
+import LanggraphStep3 from "@/snippets/rate-limiting/quick-start/langgraph/Step3.mdx";
+import LanggraphStep4 from "@/snippets/rate-limiting/quick-start/langgraph/Step4.mdx";
+
+import MastraStep1 from "@/snippets/rate-limiting/quick-start/mastra/Step1.mdx";
+import MastraStep2 from "@/snippets/rate-limiting/quick-start/mastra/Step2.mdx";
+import MastraStep3 from "@/snippets/rate-limiting/quick-start/mastra/Step3.mdx";
+import MastraStep4 from "@/snippets/rate-limiting/quick-start/mastra/Step4.mdx";
+
+import OpenaiAgentsStep1 from "@/snippets/rate-limiting/quick-start/openai-agents/Step1.mdx";
+import OpenaiAgentsStep2 from "@/snippets/rate-limiting/quick-start/openai-agents/Step2.mdx";
+import OpenaiAgentsStep3 from "@/snippets/rate-limiting/quick-start/openai-agents/Step3.mdx";
+import OpenaiAgentsStep4 from "@/snippets/rate-limiting/quick-start/openai-agents/Step4.mdx";
+
+import VercelAiStep1 from "@/snippets/rate-limiting/quick-start/vercel-ai/Step1.mdx";
+import VercelAiStep2 from "@/snippets/rate-limiting/quick-start/vercel-ai/Step2.mdx";
+import VercelAiStep3 from "@/snippets/rate-limiting/quick-start/vercel-ai/Step3.mdx";
+import VercelAiStep4 from "@/snippets/rate-limiting/quick-start/vercel-ai/Step4.mdx";
+
+import VercelEveStep1 from "@/snippets/rate-limiting/quick-start/vercel-eve/Step1.mdx";
+import VercelEveStep2 from "@/snippets/rate-limiting/quick-start/vercel-eve/Step2.mdx";
+import VercelEveStep3 from "@/snippets/rate-limiting/quick-start/vercel-eve/Step3.mdx";
+import VercelEveStep4 from "@/snippets/rate-limiting/quick-start/vercel-eve/Step4.mdx";
+
 Arcjet rate limiting lets you define rules which limit the number of
 requests a client can make over a period of time.
 
@@ -134,6 +183,13 @@ In your project root, install the SDK:
   <PythonFlaskStep1 slot="python-flask" />
   <RemixStep1 slot="remix" />
   <SvelteKitStep1 slot="sveltekit" />
+  <ClaudeAgentSdkStep1 slot="claude-agent-sdk" />
+  <LangchainStep1 slot="langchain" />
+  <LanggraphStep1 slot="langgraph" />
+  <MastraStep1 slot="mastra" />
+  <OpenaiAgentsStep1 slot="openai-agents" />
+  <VercelAiStep1 slot="vercel-ai" />
+  <VercelEveStep1 slot="vercel-eve" />
 </SlotByFramework>
 
 ### 2. Set your key
@@ -150,6 +206,13 @@ instructions to add a site and get a key.
   <PythonFlaskStep2 slot="python-flask" />
   <RemixStep2 slot="remix" />
   <SvelteKitStep2 slot="sveltekit" />
+  <ClaudeAgentSdkStep2 slot="claude-agent-sdk" />
+  <LangchainStep2 slot="langchain" />
+  <LanggraphStep2 slot="langgraph" />
+  <MastraStep2 slot="mastra" />
+  <OpenaiAgentsStep2 slot="openai-agents" />
+  <VercelAiStep2 slot="vercel-ai" />
+  <VercelEveStep2 slot="vercel-eve" />
 </SlotByFramework>
 
 ### 3. Add a rate limit to a route
@@ -168,6 +231,13 @@ tokens every 10 seconds. Each request consumes 5 tokens.
   <PythonFlaskStep3 slot="python-flask" />
   <RemixStep3 slot="remix" />
   <SvelteKitStep3 slot="sveltekit" />
+  <ClaudeAgentSdkStep3 slot="claude-agent-sdk" />
+  <LangchainStep3 slot="langchain" />
+  <LanggraphStep3 slot="langgraph" />
+  <MastraStep3 slot="mastra" />
+  <OpenaiAgentsStep3 slot="openai-agents" />
+  <VercelAiStep3 slot="vercel-ai" />
+  <VercelEveStep3 slot="vercel-eve" />
 </SlotByFramework>
 
 <SlotByFramework client:load>
@@ -179,6 +249,13 @@ tokens every 10 seconds. Each request consumes 5 tokens.
   <PythonFlaskStep4 slot="python-flask" />
   <RemixStep4 slot="remix" />
   <SvelteKitStep4 slot="sveltekit" />
+  <ClaudeAgentSdkStep4 slot="claude-agent-sdk" />
+  <LangchainStep4 slot="langchain" />
+  <LanggraphStep4 slot="langgraph" />
+  <MastraStep4 slot="mastra" />
+  <OpenaiAgentsStep4 slot="openai-agents" />
+  <VercelAiStep4 slot="vercel-ai" />
+  <VercelEveStep4 slot="vercel-eve" />
 </SlotByFramework>
 
 The requests also appear in the [Arcjet dashboard](https://app.arcjet.com).
