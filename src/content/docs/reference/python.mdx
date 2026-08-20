@@ -14,6 +14,8 @@ import MultipleRules from "/src/snippets/reference/python/MultipleRules.py?raw";
 import Proxies from "/src/snippets/reference/python/Proxies.py?raw";
 import ProtectAsync from "/src/snippets/reference/python/Protect.py?raw";
 import ProtectSync from "/src/snippets/reference/python/ProtectSync.py?raw";
+import WithRuleAsync from "/src/snippets/reference/python/WithRule.py?raw";
+import WithRuleSync from "/src/snippets/reference/python/WithRuleSync.py?raw";
 import IPLocation from "/src/snippets/reference/python/IPLocation.py?raw";
 import ErrorLogging from "/src/snippets/reference/python/ErrorLogging.py?raw";
 import Guard from "/src/snippets/reference/python/Guard.py?raw";
@@ -189,9 +191,10 @@ constructors still default to `Mode.LIVE`.
 
 Pass `mode` on `shield()`, `detect_bot()`, `token_bucket()`,
 `fixed_window()`, `sliding_window()`, `validate_email()`,
-`detect_sensitive_info()`, and `filter_request()`. `protect_signup()`
-forwards nested `rate_limit`, `bots`, and `email` mappings to those
-factories, so each mapping must include `mode` too.
+`detect_sensitive_info()`, `filter_request()`, and
+`detect_prompt_injection()`. `protect_signup()` forwards nested
+`rate_limit`, `bots`, and `email` mappings to those factories, so each
+mapping must include `mode` too.
 
 This requirement is on Python SDK `main`, not in published `arcjet` 0.9.0
 or 0.10.0b1.
@@ -324,6 +327,31 @@ the client IP address.
 You can also specify CIDR ranges to match multiple IP addresses.
 
 <Code code={Proxies} lang="py" />
+
+### Ad hoc rules
+
+Sometimes it is useful to add extra protection with a rule based on the logic
+in your handler. You usually want to inherit the rules, cache, and other
+configuration from the primary client. Use `with_rule()` on `Arcjet` or
+`ArcjetSync` for that.
+
+`with_rule()` accepts a single rule or a sequence of rules. It returns a new
+client. The clone shares this instance's `DecisionCache`, key,
+characteristics, and transport. The original client is unchanged.
+
+You can call `with_rule()` more than once to add rules incrementally.
+
+This method is on Python SDK `main`. It is not in published `arcjet` 0.9.0 or
+`0.10.0b1`.
+
+<Tabs>
+  <TabItem label="FastAPI (async)">
+    <Code code={WithRuleAsync} title="main.py" lang="py" />
+  </TabItem>
+  <TabItem label="Flask (sync)">
+    <Code code={WithRuleSync} title="main.py" lang="py" />
+  </TabItem>
+</Tabs>
 
 ### `protect()`
 

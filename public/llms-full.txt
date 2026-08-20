@@ -1907,7 +1907,11 @@ All parameters are optional keyword arguments passed alongside `request`:
 
 ## withRule() pattern – reusing a single client
 
-Create one Arcjet instance and add route-specific rules with `withRule()`:
+Create one Arcjet instance and add route-specific rules with `withRule()`
+(JS) or `with_rule()` (Python). The Python clone shares `DecisionCache`,
+key, characteristics, and transport. The original client is unchanged.
+`with_rule()` accepts a single rule or a sequence of rules. HTTP Python
+rule factories require `mode`. This method is on Python SDK `main`.
 
 ```ts
 // lib/arcjet.ts — create and export a base instance
@@ -1953,6 +1957,22 @@ export async function GET(req: Request) {
 }
 ```
 
+Python:
+
+```py
+import os
+
+from arcjet import Mode, arcjet, detect_bot, fixed_window, shield
+
+aj = arcjet(key=os.environ["ARCJET_KEY"], rules=[shield(mode=Mode.LIVE)])
+protected = aj.with_rule(
+    [
+        detect_bot(mode=Mode.LIVE, allow=[]),
+        fixed_window(mode=Mode.LIVE, window=60, max=100),
+    ]
+)
+```
+
 ## Best practices and anti-patterns
 
 ### Do
@@ -1963,7 +1983,8 @@ export async function GET(req: Request) {
 - Start new rules in `DRY_RUN` mode, verify in the Console, then switch to
   `LIVE`.
 - Handle every denial reason explicitly, including rate limit, bot, and shield.
-- Use `withRule()` to attach route-specific rules to a shared base instance.
+- Use `withRule()` (JS) or `with_rule()` (Python) to attach route-specific
+  rules to a shared base instance.
 
 ### Don't
 
