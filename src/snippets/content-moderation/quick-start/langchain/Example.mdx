@@ -1,0 +1,26 @@
+import Step from "./Example.py?raw";
+import { Code } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+This example screens inbound text with content moderation before the agent continues.
+
+We assume you already have a LangChain project set up. For helper options and
+denial behavior, see the <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
+
+Install the dependencies:
+
+```shell
+# Export your Arcjet API key from https://app.arcjet.com
+export ARCJET_KEY="ajkey_..."
+export ARCJET_ENV=development
+
+pip install "arcjet[langchain-agents]" langchain langchain-openai
+```
+
+Create the example:
+
+<Code code={Step} lang="py" title="agent.py" />
+
+Then start or invoke the agent with a test prompt.
+
+Requests appear in your [Arcjet dashboard](https://app.arcjet.com) in real time.
