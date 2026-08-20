@@ -229,8 +229,8 @@ type FixedWindowRateLimitOptions = {
 # See https://docs.arcjet.com/rate-limiting/configuration
 def fixed_window(
     *,
-    # Mode.LIVE blocks requests; Mode.DRY_RUN logs only. Defaults to Mode.LIVE.
-    mode: Mode = Mode.LIVE,
+    # Required. Mode.LIVE blocks requests; Mode.DRY_RUN logs only.
+    mode: Mode,
     # Time window in seconds the rate limit applies to (integer only — Python
     # does not accept the "1h"/"60s" duration strings that the JS SDK does).
     window: int,
@@ -285,8 +285,8 @@ type SlidingWindowRateLimitOptions = {
 # See https://docs.arcjet.com/rate-limiting/configuration
 def sliding_window(
     *,
-    # Mode.LIVE blocks requests; Mode.DRY_RUN logs only. Defaults to Mode.LIVE.
-    mode: Mode = Mode.LIVE,
+    # Required. Mode.LIVE blocks requests; Mode.DRY_RUN logs only.
+    mode: Mode,
     # The time interval in seconds for the rate limit
     interval: int,
     # Maximum number of requests allowed over the time interval
@@ -344,8 +344,8 @@ type TokenBucketRateLimitOptions = {
 # See https://docs.arcjet.com/rate-limiting/configuration
 def token_bucket(
     *,
-    # Mode.LIVE blocks requests; Mode.DRY_RUN logs only. Defaults to Mode.LIVE.
-    mode: Mode = Mode.LIVE,
+    # Required. Mode.LIVE blocks requests; Mode.DRY_RUN logs only.
+    mode: Mode,
     # Number of tokens to add to the bucket at each interval
     refill_rate: int,
     # The interval in seconds to add tokens to the bucket

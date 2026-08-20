@@ -214,8 +214,8 @@ one or many `BotOptions`.
 # ValueError. An empty allow=[] blocks every detected bot.
 def detect_bot(
     *,
-    # Mode.LIVE blocks requests; Mode.DRY_RUN logs only. Defaults to Mode.LIVE.
-    mode: Mode = Mode.LIVE,
+    # Required. Mode.LIVE blocks requests; Mode.DRY_RUN logs only.
+    mode: Mode,
     # Bots to permit. All other detected bots are denied.
     allow: Sequence[str | BotCategory] | None = None,
     # Bots to block. All other detected bots are allowed.

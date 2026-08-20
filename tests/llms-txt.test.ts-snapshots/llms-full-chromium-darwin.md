@@ -1695,7 +1695,9 @@ Python: `protect_signup` is not one composite rule. It returns a
 `(SlidingWindow, BotDetection, EmailValidation)` tuple that you unpack into
 `rules`. All three mappings are required (JS `ProtectSignupOptions` fields are
 optional). Nested `bots` and `email` must include exactly one of `allow` or
-`deny` (`allow=[]` is valid).
+`deny` (`allow=[]` is valid). Nested mappings are forwarded to
+`sliding_window()`, `detect_bot()`, and `validate_email()`, so each mapping
+must include `mode`.
 
 ```py
 import os

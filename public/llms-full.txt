@@ -1442,6 +1442,10 @@ flask run
 Every rule accepts `mode: "LIVE" | "DRY_RUN"`. In `DRY_RUN` mode the rule
 evaluates and returns a decision but never blocks. Use `DRY_RUN` for testing.
 
+On Python SDK `main`, HTTP rule factories require `mode`. Omitting it raises
+`TypeError`. Guard constructors still default to `Mode.LIVE`. JavaScript HTTP
+rules default to `"DRY_RUN"`.
+
 ### shield(options)
 
 Protects against common web attacks, including SQL injection and XSS.
@@ -1722,7 +1726,9 @@ Python: `protect_signup` is not one composite rule. It returns a
 `(SlidingWindow, BotDetection, EmailValidation)` tuple that you unpack into
 `rules`. All three mappings are required (JS `ProtectSignupOptions` fields are
 optional). Nested `bots` and `email` must include exactly one of `allow` or
-`deny` (`allow=[]` is valid).
+`deny` (`allow=[]` is valid). Nested mappings are forwarded to
+`sliding_window()`, `detect_bot()`, and `validate_email()`, so each mapping
+must include `mode`.
 
 ```py
 import os
