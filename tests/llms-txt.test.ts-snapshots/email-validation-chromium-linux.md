@@ -53,5 +53,7 @@ The Arcjet Cloud API performs additional checks for syntactically valid addresse
 
 These checks help you decide whether to accept, reject, or flag an email address in your application logic.
 
+Configure each email validation rule with exactly one of `allow` or `deny`. An empty `allow` list allows no email types.
+
 Discussion
 ----------
