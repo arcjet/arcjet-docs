@@ -4,15 +4,17 @@ description: "Screen user text before the agent run, wrap authored function-tool
 ---
 
 import { Link } from "@/components/link";
+import FrameworkPrimer from "@/snippets/guards/FrameworkPrimer.mdx";
 
 [OpenAI Agents](https://openai.github.io/openai-agents-js/) text `Agent`
 workflows call authored `tool()` handlers from `run()`. Arcjet Guard sits at
 those boundaries so a remote policy can allow or deny the action before a
 side effect runs.
 
-Use <Link.Page href="/get-started">`protect()`</Link.Page> for HTTP routes. Use the OpenAI Agents helpers on this page for
-authored tools and inbound screening. Vercel AI SDK, Python LangChain, Eve,
-Mastra, LangGraph, and Claude wrappers are on
+<FrameworkPrimer />
+
+Vercel AI SDK, Python LangChain, Eve, Mastra, LangGraph, and Claude wrappers
+are on
 <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>.
 
 This adapter is a text `Agent` plus `run()` plus authored `tool()`. It is not
@@ -30,9 +32,7 @@ Import helpers from the versioned path `@arcjet/guard/openai-agents/v0`.
 There is no unversioned alias. `@arcjet/guard/openai-agents` does not
 resolve. The SDK is pre-1.0, so the segment is `v0`. `@openai/agents`
 (`>=0.17.0 <1`) is an optional peer. The integration requires Node.js 22
-or later. Until `@arcjet/guard/openai-agents/v0` is published, the import
-is on [arcjet-js main](https://github.com/arcjet/arcjet-js/pull/6233), not
-on npm.
+or later.
 
 Launch one client at module scope:
 
@@ -90,11 +90,23 @@ cp -r node_modules/@arcjet/guard/skills/integrate-arcjet-guard-openai-agents ~/.
 ```
 
 Then ask the agent to add Arcjet Guard to this OpenAI Agents project. In
-Claude Code, run `/integrate-arcjet-guard-openai-agents`. Until
-`@arcjet/guard/openai-agents/v0` is published, the skill source is
-[integrate-arcjet-guard-openai-agents](https://github.com/arcjet/arcjet-js/pull/6233).
+Claude Code, run `/integrate-arcjet-guard-openai-agents`. The skill source is
+[integrate-arcjet-guard-openai-agents](https://github.com/arcjet/arcjet-js/blob/main/arcjet-guard/skills/integrate-arcjet-guard-openai-agents/SKILL.md).
 
-## Screen user text before `run()` — there is no inbound hook. `inputGuardrails` / `callModelInputFilter` are not Guard.
+## Helper options
+
+| Option | Helpers | Description |
+| --- | --- | --- |
+| `action` | `guardTool` | Guard label and capture name. Use `resource.verb` in the past tense. |
+| `rules` | `guardTool` | SDK rules, or a function of the parsed tool input. Omit to submit none. |
+| `metadata` | `guardTool` | Nested JSON, or a function of the tool input. |
+| `onGuardError` | `guardTool` | `"deny"` (default) or `"allow"`. |
+| `onDeny` | `guardTool` | Reshape the denial object the runner stringifies onto the tool result. |
+
+Inbound screening uses direct `guard()`, which takes `label` (not `action`)
+and fails open. See the following section.
+
+## Screen user text before `run()`
 
 There is no first-class inbound hook, so there is no `guardInbound`. Put
 prompt-injection (and other inbound rules) in the application before
@@ -133,7 +145,7 @@ if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
 await run(agent, userText, { context: appContext });
 ```
 
-## `needsApproval` is HITL, not a policy gate (same trap as hosted `requireApproval`).
+## `needsApproval` is not a policy gate
 
 `needsApproval` pauses the run and returns `interruptions` for
 human-in-the-loop (`state.approve` / `state.reject`). Hosted MCP
@@ -198,7 +210,7 @@ export const lookupOrder = guardTool(
 );
 ```
 
-## Deny inside `tool({ execute })` — the only local side-effect you can stop. Hosted tools, handoffs, and Runner `agent_tool_start` are not deny points.
+## Deny authored `tool({ execute })` handlers
 
 `guardTool` wraps `FunctionTool.invoke` after `tool({ execute })`. That
 closed-over `execute` is the only local side effect this adapter can stop.
@@ -254,13 +266,22 @@ await run(agent, userText, { context: appContext });
 - Do not import `@arcjet/guard/openai-agents`. The path is
   `@arcjet/guard/openai-agents/v0`.
 
+## Common patterns
+
+- **Prompt injection before the run:** Direct `guard()` with
+  `detectPromptInjection()(userText)` and a `hasFailedOpen()` check.
+- **Rate limit plus PII on a tool:** `tokenBucket` keyed on a trusted ID,
+  plus `localDetectSensitiveInfo()` on a free-text `note`.
+- **Correlate the run:** Put `{ sessionId: conversationId }` on
+  `run(..., { context })`. Do not read `traceId` or call `getSessionId()`.
+
 ## Related
 
 - <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
+- <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>
 - <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>
 - <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
 - <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>
 - <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>
 - <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>
 - <Link.Page href="/guards">Agent guards</Link.Page>
-- Adapter: [arcjet/arcjet-js#6233](https://github.com/arcjet/arcjet-js/pull/6233)

@@ -37,6 +37,9 @@ Publish the policy before running the example.
 
 ## 2. Wrap the tool
 
+The wrappers take `action` for the same slug you configured as the policy
+label. Direct `guard()` calls still use the field name `label`.
+
 <Tabs syncKey="language">
 <TabItem label="Vercel AI SDK">
 
@@ -90,8 +93,8 @@ export async function runEmailAgent(
         emailProvider.send({ to: recipient, body }),
     }),
     {
-      // The label selects the remote policy configured in step 1.
-      label: "email.sent",
+      // The action selects the remote policy configured in step 1.
+      action: "email.sent",
       // Actor and the allow list come from trusted application state.
       actor: user.id,
       // Map only the values the remote policy needs.
@@ -164,8 +167,8 @@ async def run_email_agent(user, prompt: str):
     guarded_send_email = guard_tool(
         guard=arcjet,
         tool=send_email,
-        # The label selects the remote policy configured in step 1.
-        label="email.sent",
+        # The action selects the remote policy configured in step 1.
+        action="email.sent",
         # Actor and the allow list come from trusted application state.
         actor=user.id,
         # Map only the values the remote policy needs.
@@ -326,7 +329,9 @@ Each scenario demonstrates a different result from the same guarded tool:
   information policy blocks `sendEmail` before the data leaves the application.
 
 Continue to <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
-for context, denial handling, and integration options,
+for every adapter,
+<Link.Page href="/guards/vercel-ai">Vercel AI SDK</Link.Page>
+for `guardTool` options and `toolsContext`,
 <Link.Page href="/guards/langchain">LangChain</Link.Page>
 for Python tools and `create_agent`,
 <Link.Page href="/guards/vercel-eve">Vercel Eve</Link.Page>

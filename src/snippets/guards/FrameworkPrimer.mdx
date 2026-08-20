@@ -1,0 +1,21 @@
+import { Link } from "@/components/link";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+
+<WhatIsArcjet />
+
+Use <Link.Page href="/get-started">`protect()`</Link.Page> on HTTP routes. Use
+the helpers on this page for agent tools and other actions that have no HTTP
+request.
+
+You need an [Arcjet account](https://app.arcjet.com) and an `ARCJET_KEY`. Launch
+one client at module scope and reuse it.
+
+Framework wrappers take an `action` string such as `email.sent`. That slug
+selects the matching <Link.Page href="/guards/remote-policies">remote policy</Link.Page>
+and names the event in the Arcjet Console. Direct `guard()` calls use the field
+name `label` for the same slug. Do not pass `label` to a wrapper such as
+`guardTool()`.
+
+You can submit SDK rules in code, rely on a published remote policy, or combine
+both. For more information about the decision model, see
+<Link.Page href="/guards">Agent guards</Link.Page>.

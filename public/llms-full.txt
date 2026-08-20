@@ -2043,7 +2043,14 @@ For the full API reference, read the installed library source:
 - [Signup form protection](https://docs.arcjet.com/signup-protection)
 - [Filters](https://docs.arcjet.com/filters)
 - [Guards](https://docs.arcjet.com/guards)
+- [Agent guard integrations](https://docs.arcjet.com/guards/framework-integrations)
+- [Vercel AI SDK agent guard](https://docs.arcjet.com/guards/vercel-ai)
 - [LangChain agent guard](https://docs.arcjet.com/guards/langchain)
+- [LangGraph agent guard](https://docs.arcjet.com/guards/langgraph)
+- [OpenAI Agents agent guard](https://docs.arcjet.com/guards/openai-agents)
+- [Vercel Eve agent guard](https://docs.arcjet.com/guards/vercel-eve)
+- [Mastra agent guard](https://docs.arcjet.com/guards/mastra)
+- [Claude Agent SDK agent guard](https://docs.arcjet.com/guards/claude-agent-sdk)
 - [Capture events](https://docs.arcjet.com/guards/capture)
 
 ### SDKs

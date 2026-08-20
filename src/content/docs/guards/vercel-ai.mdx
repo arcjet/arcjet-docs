@@ -1,0 +1,408 @@
+---
+title: "Vercel AI SDK agent guard"
+description: "Wrap Vercel AI SDK tools with Guard, thread agent context, and record app-invoked actions."
+---
+
+import { Aside } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+import FrameworkPrimer from "@/snippets/guards/FrameworkPrimer.mdx";
+
+[Vercel AI SDK](https://ai-sdk.dev/) agents call authored `tool()` handlers from
+`generateText`, `streamText`, or `ToolLoopAgent`. Arcjet Guard sits between the
+model's proposed arguments and `execute`, so a remote policy or SDK rule can
+allow or deny the call before a side effect runs.
+
+<FrameworkPrimer />
+
+The JavaScript integration supports Vercel AI SDK v7 through the versioned
+`@arcjet/guard/vercel-ai/v7` export. This adapter is for AI SDK `tool()`
+handlers. Do not use it to wrap Mastra `createTool`, Eve `defineTool`, LangGraph
+`tool()`, OpenAI Agents `tool()`, or Claude Agent SDK `tool()` – each of those
+has its own adapter.
+
+## Install
+
+Install the Guard SDK and the AI SDK peers:
+
+```bash
+npm install @arcjet/guard ai @ai-sdk/provider-utils
+```
+
+Import helpers from `@arcjet/guard/vercel-ai/v7`. There is no unversioned alias.
+`@arcjet/guard/vercel-ai` does not resolve. The version segment is the AI SDK
+major. `ai` (`>=7 <8`) and `@ai-sdk/provider-utils` (`>=5 <6`) are optional
+peers. The integration requires Node.js 22 or later.
+
+Launch one client at module scope:
+
+```ts
+import { launchArcjet } from "@arcjet/guard";
+
+export const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+```
+
+## Helpers
+
+The integration exposes the following surfaces:
+
+- `guardTool()` wraps an AI SDK `tool({ execute })`. On `DENY` the tool never
+  runs. The model receives a structured `ArcjetDenialResult`
+  (`{ arcjetDenied, reason, message, retryable, retryAfterSeconds? }`). Do not
+  throw.
+- `aiToolsContext()` maps an `ArcjetAgentContext` onto `toolsContext` for
+  `generateText` / `streamText`. Only tools branded by `guardTool` are included.
+- `createAgentContext()` builds the context you pass to `aiToolsContext`. Pass a
+  stable `correlationId` when the app already has one. Omit it and a ULID is
+  generated.
+- `guardAction()` wraps an app-invoked function (not a model tool). On `DENY` it
+  throws `ArcjetDeniedError`. When Guard cannot be evaluated it throws
+  `ArcjetGuardUnavailableError`.
+- `captureAction()` records that something happened. It never blocks.
+- `securityMetadata()` maps a small vocabulary (`user`, `agent`, `workflow`,
+  `dataClass`, `destination`, `reversibility`, `resource`) onto wire keys.
+
+The wrapped tool must have an `execute` function and cannot already declare a
+`contextSchema`, because Arcjet uses that slot for agent context.
+
+The Vercel AI integration skill ships with `@arcjet/guard`. After `npm install`,
+copy or symlink it into your coding agent's skills directory:
+
+```bash
+mkdir -p ~/.claude/skills
+cp -r node_modules/@arcjet/guard/skills/integrate-arcjet-guard-agents ~/.claude/skills/
+```
+
+Then ask the agent to add Arcjet Guard to this Vercel AI SDK project. In Claude
+Code, run `/integrate-arcjet-guard-agents`. The skill source is
+[integrate-arcjet-guard-agents](https://github.com/arcjet/arcjet-js/blob/main/arcjet-guard/skills/integrate-arcjet-guard-agents/SKILL.md).
+
+## Create context for the run
+
+Create one context at the HTTP route, job, or webhook that starts the run. Thread
+it by hand into `generateText` and any `guardAction` call. Do not store it in
+module state or `AsyncLocalStorage`.
+
+```ts
+import {
+  createAgentContext,
+  securityMetadata,
+} from "@arcjet/guard/vercel-ai/v7";
+
+const context = createAgentContext({
+  // Reuse an ID the app already has so you can search the Sequence later.
+  correlationId: conversationId,
+  metadata: securityMetadata({
+    agent: "support-agent",
+    workflow: "support-request",
+    user: userId,
+  }),
+});
+```
+
+A caller-supplied `correlationId` must be 1-256 characters of printable ASCII.
+Invalid values throw. Prefer a conversation ID, request ID, or ticket ID over a
+generated value.
+
+## Wrap a model-invoked tool
+
+`guardTool` runs Guard before `execute`. On `DENY` the email provider never
+runs and the model receives the denial object.
+
+```ts
+import { launchArcjet, policyInput, tokenBucket } from "@arcjet/guard";
+import {
+  aiToolsContext,
+  createAgentContext,
+  guardTool,
+} from "@arcjet/guard/vercel-ai/v7";
+import { generateText, stepCountIs, tool } from "ai";
+import { z } from "zod";
+import { arcjet } from "./arcjet.js";
+
+const emailLimit = tokenBucket({
+  bucket: "email",
+  refillRate: 5,
+  intervalSeconds: 60,
+  maxTokens: 5,
+});
+
+export async function runAgent(
+  user: { id: string; allowedRecipients: string[] },
+  prompt: string,
+) {
+  const sendEmail = guardTool(
+    arcjet,
+    tool({
+      description: "Send an email",
+      inputSchema: z.object({
+        recipient: z.string().email(),
+        body: z.string(),
+      }),
+      execute: ({ recipient, body }) =>
+        emailProvider.send({ to: recipient, body }),
+    }),
+    {
+      // Selects the remote policy and names the Console event.
+      action: "email.sent",
+      actor: user.id,
+      rules: () => [emailLimit({ key: user.id, requested: 1 })],
+      inputs: ({ recipient, body }) => ({
+        recipient: policyInput.server.string(recipient),
+        allowed_recipients: policyInput.server.stringList(
+          user.allowedRecipients,
+        ),
+        body: policyInput.local.string(body),
+      }),
+    },
+  );
+
+  const tools = { sendEmail };
+  const context = createAgentContext({
+    correlationId: user.id,
+  });
+
+  return generateText({
+    model: "openai/gpt-4o-mini",
+    system:
+      "If a tool call is denied by security policy, do not retry it. " +
+      "Explain the denial to the user or try a different approach.",
+    prompt,
+    tools,
+    toolsContext: aiToolsContext(context, tools),
+    stopWhen: stepCountIs(3),
+  });
+}
+```
+
+<Aside type="caution">
+  The compiler does not catch a missing `toolsContext`. The injected context
+  type includes `undefined`, so uncorrelated calls still run. The first missing
+  context always warns. Later ones are silent unless `ARCJET_LOG_LEVEL` is
+  `warn` or `debug`.
+</Aside>
+
+The same `tools` and `toolsContext` pattern works with `streamText` and
+`ToolLoopAgent`.
+
+## `guardTool` options
+
+| Option | Required | Description |
+| --- | --- | --- |
+| `action` | Yes | Guard label and capture name. Use `resource.verb` in the past tense, such as `email.sent`. Slug: lowercase letters, digits, dash, and dot. |
+| `rules` | No | SDK rules, or a function of the parsed tool input. Omit or return `[]` to submit none. The Guard call still happens so a remote policy can apply. |
+| `actor` | No | Trusted identity, or a function of `(input, context)`. Take it from authenticated application state, never from a model-produced argument. |
+| `inputs` | No | Named values built with `policyInput.server.*` or `policyInput.local.*`, or a function of `(input, context)`. |
+| `metadata` | No | Nested JSON, or a function of the tool input. Merged over the context metadata. |
+| `correlationId` | No | Overrides the context correlation ID for this call. |
+| `onGuardError` | No | `"deny"` (default) or `"allow"`. Controls what happens when Guard cannot be evaluated. A real `DENY` always blocks. |
+| `onDeny` | No | Reshape the payload the model sees for a real `DENY`. Does not run for outages. |
+
+On a policy denial the model receives:
+
+```ts
+{
+  arcjetDenied: true,
+  reason: "RATE_LIMIT", // or PROMPT_INJECTION, SENSITIVE_INFO, ERROR
+  message: "Arcjet denied this tool call (RATE_LIMIT). It may be retried after 12 seconds.",
+  retryable: true,
+  retryAfterSeconds: 12,
+}
+```
+
+Only rate-limit denials set `retryable: true` and include `retryAfterSeconds`.
+Other reasons tell the model not to retry.
+
+When Guard is unavailable and `onGuardError` is `"deny"`, the model receives
+`reason: "ERROR"`, `retryable: true`, and `retryAfterSeconds: 5`.
+
+## Screen inbound text before `generateText`
+
+There is no `guardInbound`. Put prompt-injection and other inbound rules in the
+application before `generateText`. Direct `guard()` fails open, so an `ALLOW` is
+not proof the rules ran. Gate on `decision.hasFailedOpen()` when this call site
+must fail closed.
+
+```ts
+import { detectPromptInjection } from "@arcjet/guard";
+import { createAgentContext } from "@arcjet/guard/vercel-ai/v7";
+import { arcjet } from "./arcjet.js";
+
+const context = createAgentContext({ correlationId: conversationId });
+const inbound = detectPromptInjection();
+
+const decision = await arcjet.guard({
+  label: "message.received",
+  rules: [inbound(prompt)],
+  correlationId: context.correlationId,
+});
+
+if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+  throw new Error("message blocked");
+}
+```
+
+`guardTool` already defaults to fail closed. You do not need this extra check
+on wrapped tools.
+
+## Guard an app-invoked action
+
+When your code performs a risky action the model did not call as a tool, wrap
+that function with `guardAction`. It throws instead of returning a denial
+object.
+
+```ts
+import {
+  ArcjetDeniedError,
+  ArcjetGuardUnavailableError,
+  captureAction,
+  guardAction,
+  securityMetadata,
+} from "@arcjet/guard/vercel-ai/v7";
+import { tokenBucket } from "@arcjet/guard";
+import { arcjet } from "./arcjet.js";
+
+const submitLimit = tokenBucket({
+  bucket: "reviews",
+  refillRate: 5,
+  intervalSeconds: 60,
+  maxTokens: 5,
+});
+
+try {
+  await guardAction(
+    arcjet,
+    context,
+    {
+      action: "review.submitted",
+      rules: [submitLimit({ key: repoId, requested: 1 })],
+      metadata: securityMetadata({
+        destination: "github",
+        reversibility: "compensable",
+      }),
+    },
+    () =>
+      github.pulls.createReview({
+        owner,
+        repo,
+        pull_number: prNumber,
+        body: reviewText,
+      }),
+  );
+} catch (error) {
+  if (error instanceof ArcjetDeniedError) {
+    // A rule denied the call. Tell the user why. Do not retry.
+    console.warn("denied:", error.decision.reason);
+  } else if (error instanceof ArcjetGuardUnavailableError) {
+    // Policy could not be evaluated. Alert on this separately from a DENY.
+    console.warn("policy unavailable for:", error.action);
+  } else {
+    throw error;
+  }
+}
+
+captureAction(arcjet, context, {
+  action: "notification.sent",
+  metadata: securityMetadata({ destination: "slack" }),
+});
+```
+
+Use `captureAction` when you want a record and no decision. Omit `rules` on
+`guardTool` when you still want a remote policy to be able to deny the call.
+
+## Common patterns
+
+### Rate limit a tool per user
+
+```ts
+const lookupLimit = tokenBucket({
+  bucket: "lookups",
+  refillRate: 10,
+  intervalSeconds: 60,
+  maxTokens: 10,
+});
+
+const lookupOrder = guardTool(arcjet, lookupOrderTool, {
+  action: "order.looked-up",
+  rules: () => [lookupLimit({ key: user.id, requested: 1 })],
+});
+```
+
+### Scan free-text arguments for sensitive information
+
+Scan a note, reason, or body. An opaque `orderId` does not trip email, phone,
+card, or IP detection, so do not pass it to `localDetectSensitiveInfo`.
+
+```ts
+import { localDetectSensitiveInfo, tokenBucket } from "@arcjet/guard";
+
+const detectPii = localDetectSensitiveInfo();
+
+const lookupOrder = guardTool(arcjet, lookupOrderTool, {
+  action: "order.looked-up",
+  rules: (input) => [
+    lookupLimit({ key: input.orderNumber, requested: 1 }),
+    detectPii(input.note),
+  ],
+});
+```
+
+### Map only the values a remote policy needs
+
+Build each input with `policyInput`. The SDK does not inspect the tool schema.
+
+```ts
+inputs: ({ recipient, body }) => ({
+  recipient: policyInput.server.string(recipient),
+  allowed_recipients: policyInput.server.stringList(user.allowedRecipients),
+  body: policyInput.local.string(body),
+}),
+```
+
+For more information about input types and supported remote rules, see
+<Link.Page href="/guards/remote-policies">Remote policies</Link.Page>.
+
+## Fail-closed default
+
+`guardTool` and `guardAction` default to `onGuardError: "deny"`. If Guard cannot
+be evaluated, the wrapped function does not run.
+
+Set `onGuardError: "allow"` only when executing without a complete security
+decision is acceptable, such as a read-only lookup. Direct `guard()` still fails
+open. For more information, see
+<Link.Page href="/guards/reference#availability-and-fail-behavior">Availability and fail behavior</Link.Page>.
+
+## Correlation
+
+Pass the same `ArcjetAgentContext` to every helper in the run:
+
+1. Create it once with `createAgentContext`.
+2. Pass it to `aiToolsContext(context, tools)`.
+3. Pass it to `guardAction` / `captureAction`.
+
+If you omit `toolsContext`, Guard still runs but the call is uncorrelated. The
+first such call always warns.
+
+## What not to use
+
+- Do not pass `label` to `guardTool`. The field is `action`.
+- Do not declare a `contextSchema` on a tool you wrap. Arcjet uses that slot.
+- Do not wrap the same tool twice. `guardTool` throws if the tool already
+  carries the Arcjet protection brand.
+- Do not also wrap these tools with another framework adapter.
+- Do not import `@arcjet/guard/vercel-ai`. The path is
+  `@arcjet/guard/vercel-ai/v7`.
+- Do not use this adapter with Mastra, Eve, LangGraph, OpenAI Agents, or Claude
+  Agent SDK tools.
+
+## Related
+
+- <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
+- <Link.Page href="/guards/quick-start">Agent guards quick start</Link.Page>
+- <Link.Page href="/guards/remote-policies">Remote policies</Link.Page>
+- <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
+- <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>
+- <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>
+- <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>
+- <Link.Page href="/guards/openai-agents">OpenAI Agents agent guard</Link.Page>
+- <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>
+- <Link.Page href="/guards">Agent guards</Link.Page>

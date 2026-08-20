@@ -247,16 +247,18 @@ inputs=lambda _arguments, _config: {
 
 ### Combine policies in an agent workflow
 
-One `email.sent` policy can combine all three of the preceding rules. The integration maps
-the current agent run and generated tool arguments into the policy before the
-framework executes the tool:
+One `email.sent` policy can combine all three of the preceding rules. The
+integration maps the current agent run and generated tool arguments into the
+policy before the framework executes the tool. Framework wrappers such as
+`guardTool` take that slug as `action`. Direct `guard()` calls take it as
+`label`.
 
 <Tabs syncKey="language">
 <TabItem label="Vercel AI SDK">
 
 ```ts
 const sendEmail = guardTool(arcjet, sendEmailTool, {
-  label: "email.sent",
+  action: "email.sent",
   actor: currentUser.id,
   inputs: ({ recipient, body }) => ({
     recipient: policyInput.server.string(recipient),
@@ -284,7 +286,7 @@ const result = await generateText({
 guarded_send_email = guard_tool(
     guard=arcjet,
     tool=send_email_tool,
-    label="email.sent",
+    action="email.sent",
     actor=current_user.id,
     inputs=lambda arguments, _config: {
         "recipient": server_input.string(arguments["recipient"]),

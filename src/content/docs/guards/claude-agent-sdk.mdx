@@ -4,15 +4,16 @@ description: "Screen inbound Claude Agent SDK prompts, gate authored and unwrapp
 ---
 
 import { Link } from "@/components/link";
+import FrameworkPrimer from "@/snippets/guards/FrameworkPrimer.mdx";
 
 [Claude Agent SDK](https://docs.anthropic.com/en/docs/agent-sdk/overview) agents
 call authored `tool()` handlers, built-in tools, and MCP tools. Arcjet Guard
 sits at those boundaries so a remote policy can allow or deny the action
 before a side effect runs.
 
-Use <Link.Page href="/get-started">`protect()`</Link.Page> for HTTP routes. Use the Claude helpers on this page for authored tools,
-inbound prompts, and unwrapped built-in or MCP tools. Vercel AI SDK, LangChain,
-Eve, Mastra, and LangGraph wrappers are on
+<FrameworkPrimer />
+
+Vercel AI SDK, LangChain, Eve, Mastra, and LangGraph wrappers are on
 <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>.
 
 ## Install
@@ -66,7 +67,18 @@ cp -r node_modules/@arcjet/guard/skills/integrate-arcjet-guard-claude-agent-sdk 
 
 Then ask the agent to add Arcjet Guard to this Claude Agent SDK project. In
 Claude Code, run `/integrate-arcjet-guard-claude-agent-sdk`. The skill source is
-[integrate-arcjet-guard-claude-agent-sdk](https://github.com/arcjet/arcjet-js/blob/7af2b36e/arcjet-guard/skills/integrate-arcjet-guard-claude-agent-sdk/SKILL.md).
+[integrate-arcjet-guard-claude-agent-sdk](https://github.com/arcjet/arcjet-js/blob/main/arcjet-guard/skills/integrate-arcjet-guard-claude-agent-sdk/SKILL.md).
+
+## Helper options
+
+| Option | Helpers | Description |
+| --- | --- | --- |
+| `action` | `guardTool`, `guardHooks` | Guard label and capture name. A string, or for hooks a function of `{ toolName }`. |
+| `rules` | `guardTool`, `guardHooks` | SDK rules, or a function of the tool input or `{ toolName }`. Omit to submit none. |
+| `inbound` | `guardHooks` | Policy for `UserPromptSubmit`. Uses `{ prompt }` in `rules`. |
+| `exclude` | `guardHooks` | Tools already wrapped with `guardTool`. Pass `{ server, name }` for authored MCP tools or a bare string for a built-in such as `"Bash"`. |
+| `sessionId` | `guardHooks` | Fallback correlation ID. Must be a UUID if you also pass it to `query()`. |
+| `onGuardError` | Both | `"deny"` (default) or `"allow"`. |
 
 ## Screen inbound with `UserPromptSubmit`
 
@@ -138,7 +150,7 @@ const lookupLimit = tokenBucket({
   intervalSeconds: 60,
   maxTokens: 10,
 });
-// Factory then text — same shape as `detectPromptInjection()(text)`.
+// Factory then text – same shape as `detectPromptInjection()(text)`.
 const detectPii = localDetectSensitiveInfo();
 
 export const lookupOrder = guardTool(
@@ -205,7 +217,7 @@ Pass `hooks` to `query({ options.hooks })`. Use this for tools you did not
 pass through `guardTool`.
 
 `PreToolUse` fires for **every** tool and its input carries only a name, never
-the Arcjet marker `guardTool` applies — so list your wrapped tools in `exclude`
+the Arcjet marker `guardTool` applies – so list your wrapped tools in `exclude`
 or each one is guarded twice per invocation, costing two round trips and two
 quota units.
 
@@ -273,8 +285,8 @@ shape, and needs no `resume`.
 
 ## What not to use
 
-- There is no `guardInbound`. Screen prompt injection on `guardHooks({ inbound
-  })` in `UserPromptSubmit`.
+- There is no `guardInbound`. Screen prompt injection on
+  `guardHooks({ inbound })` in `UserPromptSubmit`.
 - There is no `guardCanUseTool`. `canUseTool` is not a policy gate.
 - There is no `guardApproval`.
 - Do not call `createAgentContext` inside a Claude callback.
@@ -283,9 +295,19 @@ shape, and needs no `resume`.
 - Do not import `@arcjet/guard/claude-agent-sdk`. The path is
   `@arcjet/guard/claude-agent-sdk/v0`.
 
+## Common patterns
+
+- **Prompt injection before the model sees the prompt:** `guardHooks` with
+  `inbound.rules` calling `detectPromptInjection()(prompt)`.
+- **Rate limit plus PII on an authored tool:** `guardTool` with `tokenBucket`
+  and `localDetectSensitiveInfo()` on a free-text `note`.
+- **Built-ins and MCP tools:** `PreToolUse` through `guardHooks`, and list
+  every `guardTool` wrapper in `exclude`.
+
 ## Related
 
 - <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
+- <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>
 - <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
 - <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>
 - <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>
