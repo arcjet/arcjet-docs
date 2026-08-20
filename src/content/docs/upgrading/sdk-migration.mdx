@@ -14,6 +14,35 @@ provide a clear migration path that remains supported for some time.
 
 This page documents breaking changes and migrations between SDK releases.
 
+## Arcjet JS SDK main
+
+The JS SDK on `main` includes the following breaking changes.
+
+### Remove `threshold` and `score` from prompt injection detection
+
+`detectPromptInjection({ threshold })` and
+`ArcjetPromptInjectionReason.score` are removed. Only `mode` remains.
+
+The verdict is binary. Use `decision.reason.isPromptInjection()` or
+`decision.reason.injectionDetected`:
+
+```ts
+detectPromptInjection({ mode: "LIVE" });
+
+if (decision.reason.isPromptInjection()) {
+  return new Response("Prompt injection detected", { status: 403 });
+}
+```
+
+Drop `threshold` and `score` when you upgrade. The core SDK ignores leftover
+`threshold` – it does not throw and it does not change the rule id.
+
+`@arcjet/astro` validates rule options with Zod `.strict()`. Leftover
+`threshold` in the integration config throws at startup. Remove `threshold`
+from `astro.config` when you upgrade.
+
+This change applies to the JS SDK only.
+
 ## Arcjet JS SDK 1.0.0 – 1.4.0
 
 There have been no breaking changes.

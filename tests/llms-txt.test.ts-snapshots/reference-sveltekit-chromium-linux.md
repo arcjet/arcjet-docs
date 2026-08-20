@@ -558,6 +558,7 @@ The `ArcjetReason` object has the following methods that can be used to check wh
 *   `isEmail()` (`bool`) – Returns `true` if the email rules have been applied and the email address has a problem.
 *   `isRateLimit()` (`bool`) – Returns `true` if the rate limit rules have been applied and the request has exceeded the rate limit.
 *   `isSensitiveInfo()` (`bool`) – Returns `true` if sensitive info rules have been applied and sensitive info has been detected.
+*   `isPromptInjection()` (`bool`) – Returns `true` if the prompt injection rules have been applied and a prompt injection attempt was detected.
 *   `isShield()` (`bool`) – Returns `true` if the shield rules have been applied and the request is suspicious based on analysis by Arcjet Shield WAF.
 *   `isError()` (`bool`) – Returns `true` if there was an error processing the request.
 
@@ -751,6 +752,18 @@ An `ArcjetEmailType` is one of the following strings:
 ```
 
 For more information about these properties, see the [email validation documentation](/email-validation/reference?f=sveltekit).
+
+##### Prompt injection
+
+[Section titled “Prompt injection”](#prompt-injection)
+
+The `ArcjetReason` object for prompt injection rules has the following properties:
+
+```ts
+injectionDetected: boolean;
+```
+
+`injectionDetected` is `true` when the detector found a prompt injection attempt. You can also call `reason.isPromptInjection()`. For more information about these properties, see the [prompt injection documentation](/prompt-injection).
 
 ### IP analysis
 
