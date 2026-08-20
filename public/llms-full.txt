@@ -274,7 +274,7 @@ var guard = must(arcjet.NewGuardClient(arcjet.GuardConfig{
 }))
 
 var promptScan = must(arcjet.GuardPromptInjection(
-    arcjet.GuardPromptInjectionOptions{Mode: arcjet.ModeLive},
+    arcjet.GuardPromptInjectionOptions{Mode: arcjet.ModeLive}, // required
 ))
 
 decision, err := guard.Guard(ctx, arcjet.GuardRequest{
@@ -303,6 +303,11 @@ local rules, and content moderation (`GuardModerateContent`). Use `Capture`
 to record what happened after a Guard call. Labels and buckets must be
 lowercase slugs containing letters, digits, dashes, or dots. Standard
 `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` variables configure outbound calls.
+
+Every Guard rule constructor requires `Mode` (`ModeLive` or `ModeDryRun`). An
+empty `Mode` returns `ErrInvalidMode`. HTTP `Protect` rules default an empty
+`Mode` to `ModeDryRun`. JavaScript and Python Guard rules default to `LIVE`;
+Go returns a constructor error instead of defaulting to `LIVE`.
 
 ## Common setup for all frameworks
 
