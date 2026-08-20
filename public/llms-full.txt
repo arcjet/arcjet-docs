@@ -1798,6 +1798,25 @@ elif decision.reason_v2.type == "BOT":
 for result in decision.results:
     print(result.reason_v2.type, result.is_denied())
 
+# Inspect helpers (from arcjet; no extra package). DRY_RUN is ignored by
+# is_verified_bot and is_missing_user_agent.
+from arcjet import (
+    is_missing_user_agent,
+    is_spoofed_bot,
+    is_verified_bot,
+    set_rate_limit_headers,
+)
+
+if any(is_verified_bot(r) for r in decision.results):
+    print("verified bot")
+if any(is_spoofed_bot(r) for r in decision.results):
+    print("spoofed bot")
+if any(is_missing_user_agent(r) for r in decision.results):
+    print("missing User-Agent")
+
+# IETF RateLimit / RateLimit-Policy headers (same as JS @arcjet/decorate)
+set_rate_limit_headers(response, decision)
+
 # IP helpers (same as JS)
 decision.ip.is_hosting()
 decision.ip.is_vpn()

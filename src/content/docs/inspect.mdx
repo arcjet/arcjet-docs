@@ -1,19 +1,22 @@
 ---
 title: "Arcjet decision inspection reference"
-description: "Reference for the @arcjet/inspect library"
+description: "Inspect Arcjet decisions in JavaScript with @arcjet/inspect or in Python from the arcjet package"
 prev: false
 next: false
 ---
 
-import { Code } from "@astrojs/starlight/components";
+import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
 import DisplayType from "@/components/DisplayType.astro";
 
-The Arcjet decision inspection library provides utilities for working with the
-decision returned from an Arcjet SDK.
+The Arcjet decision inspection helpers work with the decision returned from an
+Arcjet SDK.
 
 import WhatAreArcjetUtilities from "@/components/WhatAreArcjetUtilities.astro";
 
 <WhatAreArcjetUtilities />
+
+In JavaScript they ship as the `@arcjet/inspect` package. In Python they are
+exported from the `arcjet` package – no extra install.
 
 ## Why inspect a decision
 
@@ -22,32 +25,59 @@ SDK also provides a lot of metadata attached to every decision. You can use all
 of these signals to inform application logic, but extracting the information can
 be verbose.
 
-As we notice common patterns, we provide optional utilities in the
-`@arcjet/inspect` package to streamline these operations.
+As we notice common patterns, we provide optional utilities to streamline these
+operations.
 
 ## Install
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 ```sh
 npm install -S @arcjet/inspect
 ```
+</TabItem>
+<TabItem label="Python">
+
+The helpers ship in the `arcjet` package. Import them after you install the
+SDK:
+
+```py
+from arcjet import is_missing_user_agent, is_spoofed_bot, is_verified_bot
+```
+
+</TabItem>
+</Tabs>
 
 ## Usage
 
 import InspectUsage from "@/snippets/inspect/usage.ts?raw";
+import InspectUsagePy from "@/snippets/inspect/usage.py?raw";
 import Free from "@/components/badges/Free.astro";
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 <Code code={InspectUsage} lang="ts" />
+</TabItem>
+<TabItem label="Python">
+<Code code={InspectUsagePy} lang="py" title="main.py" />
+</TabItem>
+</Tabs>
 
 ## API
 
-### `isSpoofedBot(result: ArcjetRuleResult)`
+### `isSpoofedBot` / `is_spoofed_bot`
 
-Determines whether a non-`"DRY_RUN"` bot rule detected a spoofed request. If `true`,
-the request was likely spoofed and you may want to block it.
+Determines whether a bot rule detected a spoofed request. If the helper reports
+a spoofed bot, the request was likely spoofed and you may want to block it.
 
 For `allow` rules, Arcjet verifies the authenticity of detected bots by checking
 IP data and performing reverse DNS lookups. This helps protect against spoofed
 bots where malicious clients pretend to be a well-behaving bot.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+`isSpoofedBot(result: ArcjetRuleResult)` from `@arcjet/inspect`.
 
 Returns one of the following:
 
@@ -58,15 +88,25 @@ Returns one of the following:
 - `undefined` if the rule result was from a `"DRY_RUN"` bot rule or a non-bot
   rule.
 
-:::note
-Spoofed bot detection is not available on <Free /> plans.
-:::
-
 **Types:**
 
 <DisplayType type="ArcjetRuleResult" from="@arcjet/protocol" />
 
-### `isVerifiedBot(result: ArcjetRuleResult)`
+</TabItem>
+<TabItem label="Python">
+
+`is_spoofed_bot(result: RuleResult)` from `arcjet`.
+
+Returns `True` if a bot rule detected a spoofed user agent, otherwise `False`.
+
+</TabItem>
+</Tabs>
+
+:::note
+Spoofed bot detection is not available on <Free /> plans.
+:::
+
+### `isVerifiedBot` / `is_verified_bot`
 
 Determines whether a non-`"DRY_RUN"` bot rule detected a request from a verified
 bot.
@@ -77,6 +117,11 @@ For `allow` rules, Arcjet verifies the authenticity of detected bots by checking
 IP data and performing reverse DNS lookups. A verified bot is a bot that has
 passed these checks.
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+`isVerifiedBot(result: ArcjetRuleResult)` from `@arcjet/inspect`.
+
 Returns one of the following:
 
 - `true` if the bot rule result was not `"DRY_RUN"` and Arcjet detected a
@@ -86,21 +131,37 @@ Returns one of the following:
 - `undefined` if the rule result was from a `"DRY_RUN"` bot rule or a non-bot
   rule.
 
-:::note
-Verified bot detection is not available on <Free /> plans.
-:::
-
 **Types:**
 
 <DisplayType type="ArcjetRuleResult" from="@arcjet/protocol" />
 
-### `isMissingUserAgent(result: ArcjetRuleResult)`
+</TabItem>
+<TabItem label="Python">
+
+`is_verified_bot(result: RuleResult)` from `arcjet`.
+
+Returns `True` if a live bot rule verified the client as a known bot. Returns
+`False` for `"DRY_RUN"` results and non-bot rules.
+
+</TabItem>
+</Tabs>
+
+:::note
+Verified bot detection is not available on <Free /> plans.
+:::
+
+### `isMissingUserAgent` / `is_missing_user_agent`
 
 Determines whether a non-`"DRY_RUN"` bot rule errored because the request was
 missing a `User-Agent` header. If `true`, you may want to block the request,
 because a missing `User-Agent` header is a good indicator of a malicious request:
 [RFC 9110](https://datatracker.ietf.org/doc/html/rfc9110#field.user-agent)
 recommends the header.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+`isMissingUserAgent(result: ArcjetRuleResult)` from `@arcjet/inspect`.
 
 Returns one of the following:
 
@@ -115,6 +176,17 @@ Returns one of the following:
 
 <DisplayType type="ArcjetRuleResult" from="@arcjet/protocol" />
 
+</TabItem>
+<TabItem label="Python">
+
+`is_missing_user_agent(result: RuleResult)` from `arcjet`.
+
+Returns `True` if a live bot rule reported a missing `User-Agent` header.
+Returns `False` for `"DRY_RUN"` results and non-bot rules.
+
+</TabItem>
+</Tabs>
+
 ## What next?
 
 Arcjet can protect your entire app or individual routes with a few lines of
@@ -125,6 +197,11 @@ import { Link } from "@/components/link";
 import { CardGrid } from "@astrojs/starlight/components";
 
 <CardGrid>
+  <Link.Card
+    title="Python SDK reference"
+    href="/reference/python"
+    description="Inspect helpers and rate limit headers in Python."
+  />
   <Link.Card
     title="Example apps"
     href="https://github.com/arcjet/arcjet-js/tree/main/examples"

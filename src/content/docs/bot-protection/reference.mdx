@@ -489,7 +489,7 @@ if (decision.isDenied()) {
 <TabItem label="Python">
 
 ```py
-from arcjet import arcjet, detect_bot, Mode
+from arcjet import Mode, arcjet, detect_bot, is_verified_bot
 
 # ...
 aj = arcjet(
@@ -503,12 +503,8 @@ aj = arcjet(
 decision = await aj.protect(request)
 # ...
 
-# Ignore other signals for verified search engine bots. The Python SDK does
-# not export an `is_verified_bot()` helper — check `reason_v2.verified` on
-# each rule result instead.
-if any(
-    r.reason_v2.type == "BOT" and r.reason_v2.verified for r in decision.results
-):
+# Ignore other signals for verified search engine bots
+if any(is_verified_bot(r) for r in decision.results):
     return JSONResponse({"message": "Hello Bot!"})
 
 # Leverage all Arcjet signals
@@ -577,6 +573,14 @@ for (const { reason } of decision.results) {
 <TabItem label="Python">
 
 ```py
+from arcjet import is_verified_bot
+
+# Use the is_verified_bot() helper exported by arcjet:
+if any(is_verified_bot(r) for r in decision.results):
+    print("Verified bot")
+    # Allow the request
+
+# Or inspect each rule result directly:
 for result in decision.results:
     if result.reason_v2.type == "BOT" and result.reason_v2.verified:
         print("Verified bot")
@@ -650,25 +654,15 @@ if (decision.results.some(isMissingUserAgent)) {
 </TabItem>
 <TabItem label="Python">
 
-The Python SDK does not export an `is_missing_user_agent()` helper. Check the
-request headers directly or inspect the rule result `ERROR` reason message:
+Use the `is_missing_user_agent` helper from `arcjet`:
 
 ```py
-# Option 1: check the request headers before calling protect()
-user_agent = request.headers.get("user-agent")
-if not user_agent:
-    return JSONResponse({"error": "Bad request"}, status_code=400)
+from arcjet import is_missing_user_agent
 
-# Option 2: inspect the decision for an ERROR result on the bot rule
-for result in decision.results:
-    if result.reason_v2.type == "ERROR":
-        # Bot detection requires a User-Agent header — when missing it
-        # produces an ERROR result with this in the message.
-        logger.warning(
-            "request missing required user-agent header: %s",
-            result.reason_v2.message,
-        )
-        return JSONResponse({"error": "Bad request"}, status_code=400)
+if any(is_missing_user_agent(r) for r in decision.results):
+    logger.warning("request missing required user-agent header")
+    # You could return a 400 Bad request error here
+    return JSONResponse({"error": "Bad request"}, status_code=400)
 ```
 
 </TabItem>
