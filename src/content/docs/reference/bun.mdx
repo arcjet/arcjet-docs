@@ -390,6 +390,8 @@ which rule caused the conclusion:
   applied and the request has exceeded the rate limit.
 - `isSensitiveInfo()` (`bool`) – Returns `true` if sensitive info rules have
   been applied and sensitive info has been detected.
+- `isPromptInjection()` (`bool`) – Returns `true` if the prompt injection
+  rules have been applied and a prompt injection attempt was detected.
 - `isShield()` (`bool`) – Returns `true` if the shield rules have been applied
   and the request is suspicious based on analysis by Arcjet Shield WAF.
 - `isError()` (`bool`) – Returns `true` if there was an error processing the
@@ -504,6 +506,20 @@ An `ArcjetEmailType` is one of the following strings:
 ```
 
 For more information about these properties, see the <Link.ToSdk href="/email-validation/reference" sdk="bun">email validation documentation</Link.ToSdk>.
+
+##### Prompt injection
+
+The `ArcjetReason` object for prompt injection rules has the following
+properties:
+
+```ts
+injectionDetected: boolean;
+```
+
+`injectionDetected` is `true` when the detector found a prompt injection
+attempt. You can also call `reason.isPromptInjection()`. For more
+information about these properties, see the
+<Link.Page href="/prompt-injection">prompt injection documentation</Link.Page>.
 
 ### IP analysis
 

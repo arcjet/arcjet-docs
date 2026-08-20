@@ -90,7 +90,15 @@ approximately 100 ms of latency to requests.
 ### Dry run mode
 
 `mode: "DRY_RUN"` logs detections without blocking. Use this to measure the
-false-positive rate in production before switching to `"LIVE"`.
+false-positive rate in production before switching to `"LIVE"`. JavaScript
+`detectPromptInjection` accepts only `mode`.
+
+### Decision
+
+The verdict is binary. In JavaScript, use
+`decision.reason.isPromptInjection()` or
+`decision.reason.injectionDetected`. In Python, check
+`decision.reason_v2.type == "PROMPT_INJECTION"`.
 
 ## Pricing
 

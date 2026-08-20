@@ -1629,6 +1629,14 @@ const decision = await aj.protect(req, {
 Parameters:
 - `mode` (optional): `"LIVE"` or `"DRY_RUN"`
 
+JavaScript accepts only `mode`. `threshold` and `score` are removed on JS SDK
+`main` – drop them on upgrade. The core SDK ignores leftover `threshold`.
+`@arcjet/astro` Zod `.strict()` throws at startup if `threshold` is still in
+the integration config.
+
+The verdict is binary: `decision.reason.isPromptInjection()` or
+`decision.reason.injectionDetected`.
+
 Python: `detect_prompt_injection(mode=Mode.LIVE)` with
 `detect_prompt_injection_message=message` at protect() time.
 
@@ -1743,6 +1751,7 @@ if (decision.isDenied()) {
   decision.reason.isSensitiveInfo()  // PII detected
   decision.reason.isEmail()          // Email validation failed
   decision.reason.isPromptInjection() // Prompt injection detected
+  decision.reason.injectionDetected  // Binary prompt-injection verdict
   decision.reason.isFilterRule()     // Filter rule matched
 }
 ```
