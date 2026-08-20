@@ -1567,6 +1567,39 @@ At protect() time, pass the email:
 const decision = await aj.protect(req, { email: "user@example.com" });
 ```
 
+Python: `protect_signup` is not one composite rule. It returns a
+`(SlidingWindow, BotDetection, EmailValidation)` tuple that you unpack into
+`rules`. All three mappings are required (JS `ProtectSignupOptions` fields are
+optional). Nested `bots` and `email` must include exactly one of `allow` or
+`deny` (`allow=[]` is valid).
+
+```py
+import os
+
+from arcjet import EmailType, Mode, arcjet, protect_signup
+
+aj = arcjet(
+    key=os.environ["ARCJET_KEY"],
+    rules=[
+        *protect_signup(
+            rate_limit={"mode": Mode.LIVE, "max": 5, "interval": 600},
+            bots={"mode": Mode.LIVE, "allow": []},
+            email={
+                "mode": Mode.LIVE,
+                "deny": [
+                    EmailType.DISPOSABLE,
+                    EmailType.INVALID,
+                    EmailType.NO_MX_RECORDS,
+                ],
+            },
+        )
+    ],
+)
+```
+
+At protect() time: `email="user@example.com"`. The helper is on the Python SDK
+`main` branch. It is not in published `arcjet` 0.9.0 or `0.10.0b1`.
+
 ### filter(options)
 
 Filter requests based on expressions using request and IP metadata.
