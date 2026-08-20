@@ -47,7 +47,7 @@ Create a new `Arcjet` object with your API key and rules.
 
 The following fields are required:
 
-*   `key` (`string`) – Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://app.arcjet.com).
+*   `key` (`string`) – Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://console.arcjet.com).
 *   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these, such as [shield](/shield/reference?f=bun), [rate limiting](/rate-limiting/reference?f=bun), [bot protection](/bot-protection/reference?f=bun), [email validation](/email-validation/reference?f=bun).
 
 The following fields are optional:
@@ -63,7 +63,7 @@ import arcjet, { shield } from "@arcjet/bun";
 import { env } from "bun";
 
 export const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
     // Protect against common attacks with Arcjet Shield
     shield({
@@ -78,7 +78,7 @@ import arcjet, { shield } from "@arcjet/bun";
 import { env } from "bun";
 
 export const aj = arcjet({
-  key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  key: env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
   rules: [
     // Protect against common attacks with Arcjet Shield
     shield({
@@ -166,7 +166,7 @@ import { env } from "bun";
 
 // Create an Arcjet instance with multiple rules
 const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
     tokenBucket({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
@@ -190,7 +190,7 @@ import { env } from "bun";
 
 // Create an Arcjet instance with multiple rules
 const aj = arcjet({
-  key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  key: env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
   rules: [
     tokenBucket({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
@@ -405,7 +405,7 @@ import arcjet, { shield } from "@arcjet/bun";
 import { env } from "bun";
 
 const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
     // Protect against common attacks with Arcjet Shield
     shield({
@@ -434,7 +434,7 @@ import arcjet, { shield } from "@arcjet/bun";
 import { env } from "bun";
 
 const aj = arcjet({
-  key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  key: env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
   rules: [
     // Protect against common attacks with Arcjet Shield
     shield({
@@ -518,7 +518,7 @@ import { isSpoofedBot } from "@arcjet/inspect";
 import { env } from "bun";
 
 const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
     // Shield protects your app from common attacks e.g. SQL injection
     shield({ mode: "LIVE" }),

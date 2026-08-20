@@ -74,7 +74,7 @@ Create a new `Arcjet` object with your API key and rules. This should be in a se
 
 The required fields are:
 
-*   `key` (`string`) - Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://app.arcjet.com).
+*   `key` (`string`) - Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://console.arcjet.com).
 *   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these e.g. [shield](/shield/reference?f=sveltekit), [rate limiting](/rate-limiting/reference?f=sveltekit), [bot protection](/bot-protection/reference?f=sveltekit), [email validation](/email-validation/reference?f=sveltekit).
 
 The optional fields are:
@@ -87,12 +87,12 @@ The optional fields are:
 
 ```
 1import { env } from "$env/dynamic/private";2import arcjet, { shield } from "@arcjet/sveltekit";3
-4export const aj = arcjet({5  // Get your site key from https://app.arcjet.com6  // and set it as an environment variable rather than hard coding.7  // See: https://kit.svelte.dev/docs/modules#$env-dynamic-private8  key: env.ARCJET_KEY!,9  rules: [10    // Protect against common attacks with Arcjet Shield11    shield({12      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only13    }),14  ],15});
+4export const aj = arcjet({5  // Get your site key from https://console.arcjet.com6  // and set it as an environment variable rather than hard coding.7  // See: https://kit.svelte.dev/docs/modules#$env-dynamic-private8  key: env.ARCJET_KEY!,9  rules: [10    // Protect against common attacks with Arcjet Shield11    shield({12      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only13    }),14  ],15});
 ```
 
 ```
 1import { env } from "$env/dynamic/private";2import arcjet, { shield } from "@arcjet/sveltekit";3
-4export const aj = arcjet({5  // Get your site key from https://app.arcjet.com6  // and set it as an environment variable rather than hard coding.7  // See: https://kit.svelte.dev/docs/modules#$env-dynamic-private8  key: env.ARCJET_KEY,9  rules: [10    // Protect against common attacks with Arcjet Shield11    shield({12      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only13    }),14  ],15});
+4export const aj = arcjet({5  // Get your site key from https://console.arcjet.com6  // and set it as an environment variable rather than hard coding.7  // See: https://kit.svelte.dev/docs/modules#$env-dynamic-private8  key: env.ARCJET_KEY,9  rules: [10    // Protect against common attacks with Arcjet Shield11    shield({12      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only13    }),14  ],15});
 ```
 
 ### Single instance
@@ -139,14 +139,14 @@ index.ts
 
 ```
 1import { env } from "$env/dynamic/private";2import arcjet, { detectBot, tokenBucket } from "@arcjet/sveltekit";3
-4// Create an Arcjet instance with multiple rules5const aj = arcjet({6  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com7  rules: [8    tokenBucket({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10      refillRate: 5, // refill 5 tokens per interval11      interval: 10, // refill every 10 seconds12      capacity: 10, // bucket maximum capacity of 10 tokens13    }),14    detectBot({15      mode: "LIVE",16      allow: [], // "allow none" will block all detected bots17    }),18  ],19});
+4// Create an Arcjet instance with multiple rules5const aj = arcjet({6  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com7  rules: [8    tokenBucket({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10      refillRate: 5, // refill 5 tokens per interval11      interval: 10, // refill every 10 seconds12      capacity: 10, // bucket maximum capacity of 10 tokens13    }),14    detectBot({15      mode: "LIVE",16      allow: [], // "allow none" will block all detected bots17    }),18  ],19});
 ```
 
 index.js
 
 ```
 1import { env } from "$env/dynamic/private";2import arcjet, { detectBot, tokenBucket } from "@arcjet/sveltekit";3
-4// Create an Arcjet instance with multiple rules5const aj = arcjet({6  key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com7  rules: [8    tokenBucket({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10      refillRate: 5, // refill 5 tokens per interval11      interval: 10, // refill every 10 seconds12      capacity: 10, // bucket maximum capacity of 10 tokens13    }),14    detectBot({15      mode: "LIVE",16      allow: [], // "allow none" will block all detected bots17    }),18  ],19});
+4// Create an Arcjet instance with multiple rules5const aj = arcjet({6  key: env.ARCJET_KEY, // Get your site key from https://console.arcjet.com7  rules: [8    tokenBucket({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10      refillRate: 5, // refill 5 tokens per interval11      interval: 10, // refill every 10 seconds12      capacity: 10, // bucket maximum capacity of 10 tokens13    }),14    detectBot({15      mode: "LIVE",16      allow: [], // "allow none" will block all detected bots17    }),18  ],19});
 ```
 
 ### Environment variables

@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 arcjet_key = os.getenv("ARCJET_KEY")
 if not arcjet_key:
-    raise RuntimeError("ARCJET_KEY is required. Get one at https://app.arcjet.com")
+    raise RuntimeError("ARCJET_KEY is required. Get one at https://console.arcjet.com")
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
 if not openai_api_key:
@@ -40,7 +40,7 @@ chain = prompt | llm | StrOutputParser()
 
 # Create a single Arcjet client at startup and reuse it across requests
 aj = arcjet_sync(
-    key=arcjet_key,  # Get your key from https://app.arcjet.com
+    key=arcjet_key,  # Get your key from https://console.arcjet.com
     rules=[
         detect_sensitive_info(
             mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only

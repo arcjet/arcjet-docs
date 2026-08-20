@@ -6,7 +6,7 @@ from arcjet import Mode, arcjet, detect_bot, shield, sliding_window
 # Clones share DecisionCache, key, characteristics, and transport.
 
 aj = arcjet(
-    # Get your site key from https://app.arcjet.com
+    # Get your site key from https://console.arcjet.com
     # and set it as an environment variable rather than hard coding.
     key=os.environ["ARCJET_KEY"],
     rules=[

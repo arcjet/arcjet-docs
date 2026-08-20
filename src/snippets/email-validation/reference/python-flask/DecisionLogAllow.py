@@ -9,7 +9,7 @@ app = Flask(__name__)
 logger = logging.getLogger(__name__)
 
 aj = arcjet_sync(
-    key=os.environ["ARCJET_KEY"],  # Get your site key from https://app.arcjet.com
+    key=os.environ["ARCJET_KEY"],  # Get your site key from https://console.arcjet.com
     rules=[
         validate_email(
             mode=Mode.LIVE,

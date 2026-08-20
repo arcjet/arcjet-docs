@@ -76,7 +76,7 @@ Create a new `Arcjet` object with your API key and rules. This should be outside
 
 The required fields are:
 
-*   `key` (`string`) - Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://app.arcjet.com).
+*   `key` (`string`) - Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://console.arcjet.com).
 *   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these e.g. [shield](/shield/reference?f=next-js), [rate limiting](/rate-limiting/reference?f=next-js), [bot protection](/bot-protection/reference?f=next-js), [email validation](/email-validation/reference?f=next-js).
 
 The optional fields are:
@@ -89,12 +89,12 @@ The optional fields are:
 
 ```
 1import arcjet, { shield } from "@arcjet/next";2
-3const aj = arcjet({4  // Get your site key from https://app.arcjet.com5  // and set it as an environment variable rather than hard coding.6  // See: https://nextjs.org/docs/app/building-your-application/configuring/environment-variables7  key: process.env.ARCJET_KEY!,8  rules: [9    // Protect against common attacks with Arcjet Shield10    shield({11      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only12    }),13  ],14});
+3const aj = arcjet({4  // Get your site key from https://console.arcjet.com5  // and set it as an environment variable rather than hard coding.6  // See: https://nextjs.org/docs/app/building-your-application/configuring/environment-variables7  key: process.env.ARCJET_KEY!,8  rules: [9    // Protect against common attacks with Arcjet Shield10    shield({11      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only12    }),13  ],14});
 ```
 
 ```
 1import arcjet, { shield } from "@arcjet/next";2
-3const aj = arcjet({4  // Get your site key from https://app.arcjet.com5  // and set it as an environment variable rather than hard coding.6  // See: https://nextjs.org/docs/app/building-your-application/configuring/environment-variables7  key: process.env.ARCJET_KEY,8  rules: [9    // Protect against common attacks with Arcjet Shield10    shield({11      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only12    }),13  ],14});
+3const aj = arcjet({4  // Get your site key from https://console.arcjet.com5  // and set it as an environment variable rather than hard coding.6  // See: https://nextjs.org/docs/app/building-your-application/configuring/environment-variables7  key: process.env.ARCJET_KEY,8  rules: [9    // Protect against common attacks with Arcjet Shield10    shield({11      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only12    }),13  ],14});
 ```
 
 ### Single instance
@@ -149,14 +149,14 @@ index.ts
 
 ```
 1import arcjet, { detectBot, tokenBucket } from "@arcjet/next";2
-3// Create an Arcjet instance with multiple rules4const aj = arcjet({5  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com6  rules: [7    tokenBucket({8      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only9      refillRate: 5, // refill 5 tokens per interval10      interval: 10, // refill every 10 seconds11      capacity: 10, // bucket maximum capacity of 10 tokens12    }),13    detectBot({14      mode: "LIVE",15      allow: [], // "allow none" will block all detected bots16    }),17  ],18});
+3// Create an Arcjet instance with multiple rules4const aj = arcjet({5  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com6  rules: [7    tokenBucket({8      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only9      refillRate: 5, // refill 5 tokens per interval10      interval: 10, // refill every 10 seconds11      capacity: 10, // bucket maximum capacity of 10 tokens12    }),13    detectBot({14      mode: "LIVE",15      allow: [], // "allow none" will block all detected bots16    }),17  ],18});
 ```
 
 index.js
 
 ```
 1import arcjet, { detectBot, tokenBucket } from "@arcjet/next";2
-3// Create an Arcjet instance with multiple rules4const aj = arcjet({5  key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com6  rules: [7    tokenBucket({8      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only9      refillRate: 5, // refill 5 tokens per interval10      interval: 10, // refill every 10 seconds11      capacity: 10, // bucket maximum capacity of 10 tokens12    }),13    detectBot({14      mode: "LIVE",15      allow: [], // "allow none" will block all detected bots16    }),17  ],18});
+3// Create an Arcjet instance with multiple rules4const aj = arcjet({5  key: process.env.ARCJET_KEY, // Get your site key from https://console.arcjet.com6  rules: [7    tokenBucket({8      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only9      refillRate: 5, // refill 5 tokens per interval10      interval: 10, // refill every 10 seconds11      capacity: 10, // bucket maximum capacity of 10 tokens12    }),13    detectBot({14      mode: "LIVE",15      allow: [], // "allow none" will block all detected bots16    }),17  ],18});
 ```
 
 ### Environment variables
@@ -318,7 +318,7 @@ app/page.tsx
 ```
 1// Pages are server components by default, so this is just being explicit2"use server";3
 4import arcjet, { detectBot, request } from "@arcjet/next";5
-6const aj = arcjet({7  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com8  rules: [9    // Create a bot detection rule10    detectBot({11      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only12      // Block all bots except the following13      allow: [14        "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc15        // Uncomment to allow these other common bot categories16        // See the full list at https://arcjet.com/bot-list17        //"CATEGORY:MONITOR", // Uptime monitoring services18        //"CATEGORY:PREVIEW", // Link previews e.g. Slack, Discord19      ],20    }),21  ],22});23
+6const aj = arcjet({7  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com8  rules: [9    // Create a bot detection rule10    detectBot({11      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only12      // Block all bots except the following13      allow: [14        "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc15        // Uncomment to allow these other common bot categories16        // See the full list at https://arcjet.com/bot-list17        //"CATEGORY:MONITOR", // Uptime monitoring services18        //"CATEGORY:PREVIEW", // Link previews e.g. Slack, Discord19      ],20    }),21  ],22});23
 24export default async function Page() {25  // Access the request object so Arcjet can analyze it26  const req = await request();27  // Call Arcjet protect28  const decision = await aj.protect(req);29
 30  if (decision.isDenied()) {31    // This will be caught by the nearest error boundary32    // See https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#error-handling33    throw new Error("Forbidden");34  }35
 36  return <h1>Hello, Home page!</h1>;37}
@@ -343,7 +343,7 @@ app/actions.ts
 ```
 1"use server";2
 3import arcjet, { detectBot, request, shield } from "@arcjet/next";4
-5const aj = arcjet({6  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com7  rules: [8    // Shield protects your app from common attacks e.g. SQL injection9    shield({ mode: "LIVE" }),10    // Create a bot detection rule11    detectBot({12      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only13      // Block all bots. See14      // https://arcjet.com/bot-list15      allow: [],16    }),17  ],18});19
+5const aj = arcjet({6  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com7  rules: [8    // Shield protects your app from common attacks e.g. SQL injection9    shield({ mode: "LIVE" }),10    // Create a bot detection rule11    detectBot({12      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only13      // Block all bots. See14      // https://arcjet.com/bot-list15      allow: [],16    }),17  ],18});19
 20export async function create() {21  // Access request data that Arcjet needs when you call `protect()` similarly22  // to `await headers()` and `await cookies()` in `next/headers`23  const req = await request();24
 25  // Call Arcjet protect26  const decision = await aj.protect(req);27  console.log("Decision:", decision);28
 29  if (decision.isDenied()) {30    // This will be caught by the nearest error boundary31    // See https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#error-handling32    throw new Error("Forbidden");33  }34
@@ -377,7 +377,7 @@ app/invoices/page.tsx
 
 ```
 1import arcjet, { shield, request, detectBot } from "@arcjet/next";2
-3const aj = arcjet({4  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com5  rules: [6    // Shield protects your app from common attacks e.g. SQL injection7    shield({ mode: "LIVE" }),8    // Create a bot detection rule9    detectBot({10      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only11      // Block all bots. See12      // https://arcjet.com/bot-list13      allow: [],14    }),15  ],16});17
+3const aj = arcjet({4  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com5  rules: [6    // Shield protects your app from common attacks e.g. SQL injection7    shield({ mode: "LIVE" }),8    // Create a bot detection rule9    detectBot({10      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only11      // Block all bots. See12      // https://arcjet.com/bot-list13      allow: [],14    }),15  ],16});17
 18// A simple form handler Based on19// https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#forms20export default function Page() {21  async function createInvoice(formData: FormData) {22    "use server";23
 24    // Access the request object so Arcjet can analyze it25    const req = await request();26    // Call Arcjet protect27    const decision = await aj.protect(req);28
 29    if (decision.isDenied()) {30      // This will be caught by the nearest error boundary31      // See https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations#error-handling32      throw new Error("Forbidden");33    }34

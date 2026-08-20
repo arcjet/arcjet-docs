@@ -53,7 +53,7 @@ The main way to configure Arcjet is to pass options to the `arcjet` function. It
 *   `log` (`ArcjetLogger`, optional) – log interface to emit useful info
 *   `rules` (`Array<ArcjetRule>`, **required**) – rules to use (order insensitive)
 
-Get the Arcjet key for your site from the [Arcjet dashboard](https://app.arcjet.com). Set it as an environment variable called `ARCJET_KEY` in your `.env` file:
+Get the Arcjet key for your site from the [Arcjet dashboard](https://console.arcjet.com). Set it as an environment variable called `ARCJET_KEY` in your `.env` file:
 
 Terminal window
 

@@ -1,7 +1,7 @@
 import arcjet, { filter } from "@arcjet/bun";
 import { env } from "bun";
 
-// Get your Arcjet key at <https://app.arcjet.com>.
+// Get your Arcjet key at <https://console.arcjet.com>.
 // Set it as an environment variable instead of hard coding it.
 const arcjetKey = env.ARCJET_KEY;
 

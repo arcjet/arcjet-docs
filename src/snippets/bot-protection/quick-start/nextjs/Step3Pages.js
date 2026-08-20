@@ -2,7 +2,7 @@ import arcjet, { detectBot } from "@arcjet/next";
 import { isSpoofedBot } from "@arcjet/inspect";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
   rules: [
     detectBot({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only

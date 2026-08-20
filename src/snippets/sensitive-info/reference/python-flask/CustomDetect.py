@@ -13,7 +13,7 @@ def detect_secret(tokens: list[str]) -> list[Optional[str]]:
 
 
 aj = arcjet_sync(
-    key=os.environ["ARCJET_KEY"],  # Get your site key from https://app.arcjet.com
+    key=os.environ["ARCJET_KEY"],  # Get your site key from https://console.arcjet.com
     rules=[
         detect_sensitive_info(
             mode=Mode.LIVE,

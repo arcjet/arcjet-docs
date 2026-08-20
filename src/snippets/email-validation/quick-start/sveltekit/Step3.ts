@@ -3,7 +3,7 @@ import arcjet, { validateEmail } from "@arcjet/sveltekit";
 import { error, json, type RequestEvent } from "@sveltejs/kit";
 
 const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
     validateEmail({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only

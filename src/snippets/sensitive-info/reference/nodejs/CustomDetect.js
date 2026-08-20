@@ -12,7 +12,7 @@ function detectDash(tokens) {
 }
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
   rules: [
     sensitiveInfo({
       deny: ["EMAIL"],

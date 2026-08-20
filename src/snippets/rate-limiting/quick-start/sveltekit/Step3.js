@@ -3,7 +3,7 @@ import arcjet, { tokenBucket } from "@arcjet/sveltekit";
 import { error, json } from "@sveltejs/kit";
 
 const aj = arcjet({
-  // Get your site key from https://app.arcjet.com
+  // Get your site key from https://console.arcjet.com
   // and set it as an environment variable rather than hard coding.
   // See: https://kit.svelte.dev/docs/modules#$env-dynamic-private
   key: env.ARCJET_KEY,
