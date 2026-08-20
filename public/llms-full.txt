@@ -236,7 +236,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
         arcjet.WithRequested(1),
     )
     if err != nil {
-        // Arcjet fails open. Log the error and apply your fallback policy.
+        // Fail-open: ERROR decision plus err. Log it and continue.
         log.Printf("arcjet: %v", err)
     } else if decision.IsDenied() {
         status := http.StatusForbidden
@@ -260,6 +260,12 @@ Call `Protect(r.Context(), r, ...)` once inside each handler. Use
 `WithCharacteristics`, `WithRequested`, `WithDetectPromptInjectionMessage`,
 `WithSensitiveInfoValue`, and `WithCorrelationId` for dynamic inputs.
 
+On a transport failure, `Protect` returns an `ERROR` conclusion `Decision`
+together with `err`. `IsAllowed()` and `IsErrored()` are both true;
+`IsDenied()` is false. If the client or request is nil, `Protect` returns the
+zero `Decision`. Log `err` and deny only when `IsDenied()` is true. Use
+`IsErrored()` to distinguish a real allow from a fail-open error.
+
 ### Go Guard protection
 
 ```go
@@ -268,7 +274,7 @@ var guard = must(arcjet.NewGuardClient(arcjet.GuardConfig{
 }))
 
 var promptScan = must(arcjet.GuardPromptInjection(
-    arcjet.GuardPromptInjectionOptions{Mode: arcjet.ModeLive},
+    arcjet.GuardPromptInjectionOptions{Mode: arcjet.ModeLive}, // required
 ))
 
 decision, err := guard.Guard(ctx, arcjet.GuardRequest{
@@ -297,6 +303,11 @@ local rules, and content moderation (`GuardModerateContent`). Use `Capture`
 to record what happened after a Guard call. Labels and buckets must be
 lowercase slugs containing letters, digits, dashes, or dots. Standard
 `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` variables configure outbound calls.
+
+Every Guard rule constructor requires `Mode` (`ModeLive` or `ModeDryRun`). An
+empty `Mode` returns `ErrInvalidMode`. HTTP `Protect` rules default an empty
+`Mode` to `ModeDryRun`. JavaScript and Python Guard rules default to `LIVE`;
+Go returns a constructor error instead of defaulting to `LIVE`.
 
 ## Common setup for all frameworks
 
@@ -1431,6 +1442,10 @@ flask run
 Every rule accepts `mode: "LIVE" | "DRY_RUN"`. In `DRY_RUN` mode the rule
 evaluates and returns a decision but never blocks. Use `DRY_RUN` for testing.
 
+On Python SDK `main`, HTTP rule factories require `mode`. Omitting it raises
+`TypeError`. Guard constructors still default to `Mode.LIVE`. JavaScript HTTP
+rules default to `"DRY_RUN"`.
+
 ### shield(options)
 
 Protects against common web attacks, including SQL injection and XSS.
@@ -1475,7 +1490,9 @@ Bot categories use the `CATEGORY:` prefix. Full list: https://arcjet.com/bot-lis
 
 Python: `detect_bot(mode=Mode.LIVE, allow=[BotCategory.SEARCH_ENGINE])` or
 `detect_bot(mode=Mode.LIVE, allow=["CURL"])`. Use `BotCategory.<NAME>` for
-categories or pass specific bot name strings directly.
+categories or pass specific bot name strings directly. Pass exactly one of
+`allow` or `deny`. `allow=[]` blocks every detected bot. Passing neither list
+or both lists raises `ValueError`.
 
 ### tokenBucket(options)
 
@@ -1629,8 +1646,20 @@ const decision = await aj.protect(req, {
 Parameters:
 - `mode` (optional): `"LIVE"` or `"DRY_RUN"`
 
+JavaScript accepts only `mode`. `threshold` and `score` are removed on JS SDK
+`main` – drop them on upgrade. The core SDK ignores leftover `threshold`.
+`@arcjet/astro` Zod `.strict()` throws at startup if `threshold` is still in
+the integration config.
+
+The verdict is binary: `decision.reason.isPromptInjection()` or
+`decision.reason.injectionDetected`.
+
 Python: `detect_prompt_injection(mode=Mode.LIVE)` with
-`detect_prompt_injection_message=message` at protect() time.
+`detect_prompt_injection_message=message` at protect() time. `mode` is
+required. On Python SDK `main`, omitting `mode` or passing `threshold=`
+raises `TypeError`. Drop `threshold`.
+`PromptInjectionReason.score` remains deprecated. Guard
+`DetectPromptInjection` still defaults to `LIVE`.
 
 ### validateEmail(options)
 
@@ -1660,7 +1689,9 @@ Parameters:
 Valid email types: `DISPOSABLE`, `FREE`, `NO_MX_RECORDS`, `NO_GRAVATAR`, `INVALID`
 
 Python: `validate_email(mode=Mode.LIVE, deny=[EmailType.DISPOSABLE, EmailType.INVALID, EmailType.NO_MX_RECORDS])`
-At protect() time: `email="user@example.com"`
+At protect() time: `email="user@example.com"`. Pass exactly one of `allow` or
+`deny`. `allow=[]` allows no email types. Passing neither list or both lists
+raises `ValueError`.
 
 ### protectSignup(options)
 
@@ -1690,6 +1721,41 @@ At protect() time, pass the email:
 ```ts
 const decision = await aj.protect(req, { email: "user@example.com" });
 ```
+
+Python: `protect_signup` is not one composite rule. It returns a
+`(SlidingWindow, BotDetection, EmailValidation)` tuple that you unpack into
+`rules`. All three mappings are required (JS `ProtectSignupOptions` fields are
+optional). Nested `bots` and `email` must include exactly one of `allow` or
+`deny` (`allow=[]` is valid). Nested mappings are forwarded to
+`sliding_window()`, `detect_bot()`, and `validate_email()`, so each mapping
+must include `mode`.
+
+```py
+import os
+
+from arcjet import EmailType, Mode, arcjet, protect_signup
+
+aj = arcjet(
+    key=os.environ["ARCJET_KEY"],
+    rules=[
+        *protect_signup(
+            rate_limit={"mode": Mode.LIVE, "max": 5, "interval": 600},
+            bots={"mode": Mode.LIVE, "allow": []},
+            email={
+                "mode": Mode.LIVE,
+                "deny": [
+                    EmailType.DISPOSABLE,
+                    EmailType.INVALID,
+                    EmailType.NO_MX_RECORDS,
+                ],
+            },
+        )
+    ],
+)
+```
+
+At protect() time: `email="user@example.com"`. The helper is on the Python SDK
+`main` branch. It is not in published `arcjet` 0.9.0 or `0.10.0b1`.
 
 ### filter(options)
 
@@ -1743,6 +1809,7 @@ if (decision.isDenied()) {
   decision.reason.isSensitiveInfo()  // PII detected
   decision.reason.isEmail()          // Email validation failed
   decision.reason.isPromptInjection() // Prompt injection detected
+  decision.reason.injectionDetected  // Binary prompt-injection verdict
   decision.reason.isFilterRule()     // Filter rule matched
 }
 ```
@@ -1798,6 +1865,25 @@ elif decision.reason_v2.type == "BOT":
 for result in decision.results:
     print(result.reason_v2.type, result.is_denied())
 
+# Inspect helpers (from arcjet; no extra package). DRY_RUN is ignored by
+# is_verified_bot, is_spoofed_bot, and is_missing_user_agent.
+from arcjet import (
+    is_missing_user_agent,
+    is_spoofed_bot,
+    is_verified_bot,
+    set_rate_limit_headers,
+)
+
+if any(is_verified_bot(r) for r in decision.results):
+    print("verified bot")
+if any(is_spoofed_bot(r) for r in decision.results):
+    print("spoofed bot")
+if any(is_missing_user_agent(r) for r in decision.results):
+    print("missing User-Agent")
+
+# IETF RateLimit / RateLimit-Policy headers (same as JS @arcjet/decorate)
+set_rate_limit_headers(response, decision)
+
 # IP helpers (same as JS)
 decision.ip.is_hosting()
 decision.ip.is_vpn()
@@ -1821,7 +1907,11 @@ All parameters are optional keyword arguments passed alongside `request`:
 
 ## withRule() pattern – reusing a single client
 
-Create one Arcjet instance and add route-specific rules with `withRule()`:
+Create one Arcjet instance and add route-specific rules with `withRule()`
+(JS) or `with_rule()` (Python). The Python clone shares `DecisionCache`,
+key, characteristics, and transport. The original client is unchanged.
+`with_rule()` accepts a single rule or a sequence of rules. HTTP Python
+rule factories require `mode`. This method is on Python SDK `main`.
 
 ```ts
 // lib/arcjet.ts — create and export a base instance
@@ -1867,6 +1957,22 @@ export async function GET(req: Request) {
 }
 ```
 
+Python:
+
+```py
+import os
+
+from arcjet import Mode, arcjet, detect_bot, fixed_window, shield
+
+aj = arcjet(key=os.environ["ARCJET_KEY"], rules=[shield(mode=Mode.LIVE)])
+protected = aj.with_rule(
+    [
+        detect_bot(mode=Mode.LIVE, allow=[]),
+        fixed_window(mode=Mode.LIVE, window=60, max=100),
+    ]
+)
+```
+
 ## Best practices and anti-patterns
 
 ### Do
@@ -1877,7 +1983,8 @@ export async function GET(req: Request) {
 - Start new rules in `DRY_RUN` mode, verify in the Console, then switch to
   `LIVE`.
 - Handle every denial reason explicitly, including rate limit, bot, and shield.
-- Use `withRule()` to attach route-specific rules to a shared base instance.
+- Use `withRule()` (JS) or `with_rule()` (Python) to attach route-specific
+  rules to a shared base instance.
 
 ### Don't
 

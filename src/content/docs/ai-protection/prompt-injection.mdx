@@ -284,8 +284,19 @@ default.
 recent message, or the full conversation history if you want to scan all
 messages.
 
-`mode: "DRY_RUN"` - logs detections without blocking. Use this to measure the
-false-positive rate in production before switching to `"LIVE"`.
+`mode` - `"LIVE"` blocks detections. `"DRY_RUN"` logs detections without
+blocking. Use `"DRY_RUN"` to measure the false-positive rate in production
+before switching to `"LIVE"`. JavaScript `detectPromptInjection` accepts only
+`mode`.
+
+The verdict is binary. In JavaScript, use
+`decision.reason.isPromptInjection()` or
+`decision.reason.injectionDetected`. In Python, check
+`decision.reason_v2.type == "PROMPT_INJECTION"`.
+
+Python `detect_prompt_injection` accepts only `mode`, which is required. On
+Python SDK `main`, omitting `mode` or passing `threshold=` raises
+`TypeError`.
 
 ## Combine with abuse protection
 

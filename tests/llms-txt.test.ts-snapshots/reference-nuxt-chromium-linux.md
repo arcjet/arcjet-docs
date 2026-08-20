@@ -608,6 +608,7 @@ It is always the highest-priority rule that produced that conclusion; to inspect
 *   `isEmail()` (`bool`) – Returns `true` if the email rules have been applied and the email address has a problem.
 *   `isRateLimit()` (`bool`) – Returns `true` if the rate limit rules have been applied and the request has exceeded the rate limit.
 *   `isSensitiveInfo()` (`bool`) – Returns `true` if sensitive info rules have been applied and sensitive info has been detected.
+*   `isPromptInjection()` (`bool`) – Returns `true` if the prompt injection rules have been applied and a prompt injection attempt was detected.
 *   `isShield()` (`bool`) – Returns `true` if the shield rules have been applied and the request is suspicious based on analysis by Arcjet Shield WAF.
 *   `isError()` (`bool`) – Returns `true` if there was an error processing the request.
 
@@ -801,6 +802,18 @@ An `ArcjetEmailType` is one of the following strings:
 ```ts
 "DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
 ```
+
+##### Prompt injection
+
+[Section titled “Prompt injection”](#prompt-injection)
+
+The `ArcjetReason` object for prompt injection rules has the following properties:
+
+```ts
+injectionDetected: boolean;
+```
+
+`injectionDetected` is `true` when the detector found a prompt injection attempt. You can also call `reason.isPromptInjection()`. For more information about these properties, see the [prompt injection documentation](/prompt-injection).
 
 ### IP analysis
 
@@ -1014,7 +1027,7 @@ Error handling
 
 [Section titled “Error handling”](#error-handling)
 
-Arcjet is designed to fail open so that a service issue or misconfiguration does not block all requests. The SDK also times out and fails open after 1000 ms in development (see [`ARCJET_ENV`](/environment#arcjet-env)) and 500 ms otherwise. However, in most cases, the response time is less than 20 ms to 30 ms.
+Arcjet is designed to fail open so that a service issue or misconfiguration does not block all requests. The SDK also times out and fails open after 2000 ms by default. However, in most cases, the response time is less than 20 ms to 30 ms.
 
 If there is an error condition when processing the rule, Arcjet returns an `ERROR` result for that rule and you can check the `message` property on the rule’s error result for more information.
 
@@ -1285,11 +1298,9 @@ const client = createRemoteClient({
   // environment variable.
   baseUrl: baseUrl(process.env),
   // timeout is the maximum time to wait for a response from the server.
-  // It defaults to 1000ms in development
-  // (see [`ARCJET_ENV`](https://docs.arcjet.com/environment#arcjet-env))
-  // and 500ms otherwise. This is a conservative limit to fail open by default.
+  // It defaults to 2000ms. This is a conservative limit to fail open by default.
   // In most cases, the response time will be <20-30ms.
-  timeout: 500,
+  timeout: 2000,
 });
 
 export const arcjet = arcjetNuxt({
@@ -1322,11 +1333,9 @@ const client = createRemoteClient({
   // environment variable.
   baseUrl: baseUrl(process.env),
   // timeout is the maximum time to wait for a response from the server.
-  // It defaults to 1000ms in development
-  // (see [`ARCJET_ENV`](https://docs.arcjet.com/environment#arcjet-env))
-  // and 500ms otherwise. This is a conservative limit to fail open by default.
+  // It defaults to 2000ms. This is a conservative limit to fail open by default.
   // In most cases, the response time will be <20-30ms.
-  timeout: 500,
+  timeout: 2000,
 });
 
 export const arcjet = arcjetNuxt({

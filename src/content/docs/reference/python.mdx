@@ -14,6 +14,8 @@ import MultipleRules from "/src/snippets/reference/python/MultipleRules.py?raw";
 import Proxies from "/src/snippets/reference/python/Proxies.py?raw";
 import ProtectAsync from "/src/snippets/reference/python/Protect.py?raw";
 import ProtectSync from "/src/snippets/reference/python/ProtectSync.py?raw";
+import WithRuleAsync from "/src/snippets/reference/python/WithRule.py?raw";
+import WithRuleSync from "/src/snippets/reference/python/WithRuleSync.py?raw";
 import IPLocation from "/src/snippets/reference/python/IPLocation.py?raw";
 import ErrorLogging from "/src/snippets/reference/python/ErrorLogging.py?raw";
 import Guard from "/src/snippets/reference/python/Guard.py?raw";
@@ -145,6 +147,9 @@ The following fields are optional:
 - `disable_automatic_ip_detection` (`bool`) – Disable automatic client IP
   detection so the application can provide `ip_src` to every `protect()` call.
   Defaults to `False`. This option cannot be combined with `proxies`.
+- `timeout_ms` (`int`) – Request timeout in milliseconds. Defaults to
+  2000 ms for every rule, in both development and production. An explicit
+  `timeout_ms` overrides the default.
 
 <Tabs>
   <TabItem label="FastAPI (async)">
@@ -180,11 +185,33 @@ Each rule can be configured in either `Mode.LIVE` or `Mode.DRY_RUN`. When in
 This lets you run Arcjet in passive or demo mode to test rules before
 enabling them.
 
+HTTP Protect rule factories require `mode`. Omitting it raises `TypeError`.
+This differs from JavaScript HTTP rules, which default to `"DRY_RUN"`. Guard
+constructors still default to `Mode.LIVE`.
+
+Pass `mode` on `shield()`, `detect_bot()`, `token_bucket()`,
+`fixed_window()`, `sliding_window()`, `validate_email()`,
+`detect_sensitive_info()`, `filter_request()`, and
+`detect_prompt_injection()`. `protect_signup()` forwards nested
+`rate_limit`, `bots`, and `email` mappings to those factories, so each
+mapping must include `mode` too.
+
+This requirement is on Python SDK `main`, not in published `arcjet` 0.9.0
+or 0.10.0b1.
+
 ```py
 from arcjet import Mode, detect_bot
 
 detect_bot(mode=Mode.DRY_RUN, allow=[])
 ```
+
+`detect_bot` and `validate_email` require exactly one of `allow` or `deny`. The
+`BotDetection` and `EmailValidation` dataclasses enforce the same requirement.
+An empty `allow` list is valid: it blocks every detected bot, or allows no
+email types. Passing neither list or both lists raises `ValueError`. For more
+information about these rules, see
+<Link.Page href="/bot-protection/reference">Bot protection</Link.Page> and
+<Link.Page href="/email-validation/reference">Email validation</Link.Page>.
 
 Because the top level conclusion is always `ALLOW` in `DRY_RUN` mode, you can
 loop through each rule result to check what would have happened:
@@ -201,10 +228,30 @@ You can combine rules to create a more complex protection strategy. For example,
 you can combine rate limiting and bot protection rules to protect your API from
 automated clients.
 
-:::note
-When specifying multiple rules, the order of the rules is ignored. Rule
-execution ordering is automatically optimized for performance.
-:::
+Declaration order does not control which `Mode.LIVE` deny you see. Local
+WebAssembly evaluation sorts rules by the same priority table as the JS and Go
+Protect SDKs. The first `Mode.LIVE` deny stops evaluation of later local rules.
+
+The following table lists the local evaluation order, from first to last:
+
+| Priority | Rule                      | Constructor                                              |
+| -------- | ------------------------- | -------------------------------------------------------- |
+| 1        | Sensitive information     | `detect_sensitive_info`                                  |
+| 2        | Filter                    | `filter_request`                                         |
+| 3        | Shield                    | `shield`                                                 |
+| 4        | Rate limiting             | `token_bucket`, `fixed_window`, `sliding_window`         |
+| 5        | Bot protection            | `detect_bot`                                             |
+| 6        | Email validation          | `validate_email`                                         |
+| 7        | Prompt injection          | `detect_prompt_injection`                                |
+
+Rules with the same priority keep their declaration order. The three rate-limit
+constructors share priority 4. Unknown rule types sort last, at priority 100.
+
+Sensitive information detection runs first so a `Mode.LIVE` deny happens before
+another rule can forward the payload.
+
+`detect_prompt_injection` is listed so the table matches the JS SDK. The Python
+SDK does not evaluate prompt injection locally. The rank is reserved.
 
 <Code code={MultipleRules} title="main.py" lang="py" />
 
@@ -281,6 +328,31 @@ You can also specify CIDR ranges to match multiple IP addresses.
 
 <Code code={Proxies} lang="py" />
 
+### Ad hoc rules
+
+Sometimes it is useful to add extra protection with a rule based on the logic
+in your handler. You usually want to inherit the rules, cache, and other
+configuration from the primary client. Use `with_rule()` on `Arcjet` or
+`ArcjetSync` for that.
+
+`with_rule()` accepts a single rule or a sequence of rules. It returns a new
+client. The clone shares this instance's `DecisionCache`, key,
+characteristics, and transport. The original client is unchanged.
+
+You can call `with_rule()` more than once to add rules incrementally.
+
+This method is on Python SDK `main`. It is not in published `arcjet` 0.9.0 or
+`0.10.0b1`.
+
+<Tabs>
+  <TabItem label="FastAPI (async)">
+    <Code code={WithRuleAsync} title="main.py" lang="py" />
+  </TabItem>
+  <TabItem label="Flask (sync)">
+    <Code code={WithRuleSync} title="main.py" lang="py" />
+  </TabItem>
+</Tabs>
+
 ### `protect()`
 
 Arcjet exposes a single `protect` method that is used to execute your
@@ -317,6 +389,10 @@ client mode:
 | `metadata`                         | `Metadata \| None`     | Nested JSON for correlation and analytics. See [Metadata](#metadata). |
 | `ip_src`                           | `str`                  | Manual IP override (advanced) |
 | `correlation_id`                   | `str`                  | Correlates this decision with a guard call, workflow run, or agent trace. A dedicated, indexable field – not `extra` or `metadata` – and does not affect the decision or its cache key (`arcjet` >= 0.9.0) |
+
+HTTP `detect_prompt_injection` accepts only `mode`, which is required. On
+Python SDK `main`, omitting `mode` or passing `threshold=` raises
+`TypeError`. Guard `DetectPromptInjection` still defaults to `LIVE`.
 
 #### Override the client IP
 
@@ -405,7 +481,8 @@ you would have to iterate over the `results` property on the decision.
 The `reason_v2` property of the `ArcjetDecision` object describes the
 conclusion. It always reflects the highest-priority rule that produced that
 conclusion; to inspect other rules, iterate over the `results` property on the
-decision.
+decision. Local evaluation ranks rules as described in
+[Multiple rules](#multiple-rules).
 
 Switch on `reason_v2.type` to map each rule kind to a response. Only branch on
 reasons that produce a different response – a branch that returns 403 for
@@ -440,7 +517,7 @@ Each variant exposes type-specific fields:
 | `"SHIELD"`           | `shield_triggered` (`bool`)                                            |
 | `"EMAIL"`            | `email_types` (for example, `["DISPOSABLE", "NO_MX_RECORDS"]`)          |
 | `"SENSITIVE_INFO"`   | `allowed`, `denied` (each a list of `IdentifiedEntity`)                |
-| `"PROMPT_INJECTION"` | `injection_detected` (`bool`)                                          |
+| `"PROMPT_INJECTION"` | `injection_detected` (`bool`); `score` (`float`, deprecated) |
 | `"FILTER"`           | `matched_expressions`, `undetermined_expressions`                      |
 | `"ERROR"`            | `message` (`str`)                                                      |
 
@@ -462,17 +539,40 @@ Each result includes:
   as on the top-level decision).
 - `is_denied()` / `is_allowed()` / `is_error()` – convenience methods.
 
-For bot results, the SDK also exposes a top-level helper to check whether
-the request claimed to be a well-known crawler (for example, Googlebot) but did
-not
-match the verified IP ranges:
+For bot results, the SDK exports helpers that match the JavaScript
+`@arcjet/inspect` utilities. Import them from `arcjet`. See the
+<Link.Page href="/inspect">decision inspection reference</Link.Page>
+for return values.
 
 ```py
-from arcjet import is_spoofed_bot
+from arcjet import (
+    is_missing_user_agent,
+    is_spoofed_bot,
+    is_verified_bot,
+    set_rate_limit_headers,
+)
+
+if any(is_verified_bot(r) for r in decision.results):
+    return jsonify(message="Hello bot")
 
 if any(is_spoofed_bot(r) for r in decision.results):
     return jsonify(error="Spoofed bot"), 403
+
+if any(is_missing_user_agent(r) for r in decision.results):
+    return jsonify(error="User-Agent required"), 400
+
+set_rate_limit_headers(response, decision)
 ```
+
+`is_verified_bot`, `is_spoofed_bot`, and `is_missing_user_agent` ignore
+`"DRY_RUN"` results.
+
+`set_rate_limit_headers` writes IETF `RateLimit` and `RateLimit-Policy` headers
+onto a response, `response.headers`, or a mutable mapping. When several rate
+limit results are present, the tightest remaining budget is advertised. If two
+policies share the same `max`, no headers are written. For more information
+about rate limit headers, see the
+<Link.Page href="/rate-limiting/reference#rate-limit-headers">rate limiting reference</Link.Page>.
 
 See the
 <Link.Page href="/shield">shield</Link.Page>,

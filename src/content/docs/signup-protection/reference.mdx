@@ -43,6 +43,8 @@ import RecommendedBun from "@/snippets/signup-protection/reference/bun/Recommend
 import RecommendedNestJs from "@/snippets/signup-protection/reference/nestjs/Recommended.mdx";
 import RecommendedNextJs from "@/snippets/signup-protection/reference/nextjs/Recommended.mdx";
 import RecommendedNodeJs from "@/snippets/signup-protection/reference/nodejs/Recommended.mdx";
+import RecommendedPythonFastapi from "@/snippets/signup-protection/reference/python-fastapi/Recommended.mdx";
+import RecommendedPythonFlask from "@/snippets/signup-protection/reference/python-flask/Recommended.mdx";
 import RecommendedRemix from "@/snippets/signup-protection/reference/remix/Recommended.mdx";
 import RecommendedSvelteKit from "@/snippets/signup-protection/reference/sveltekit/Recommended.mdx";
 
@@ -84,8 +86,11 @@ Signup form protection is a combination of the
 <Link.ToSdk href="/rate-limiting/quick-start" sdk="next">rate limiting</Link.ToSdk>,
 <Link.ToSdk href="/bot-protection/quick-start" sdk="next">bot protection</Link.ToSdk>,
 and <Link.ToSdk href="/email-validation/quick-start" sdk="next">email validation</Link.ToSdk>
-primitives. The configuration options are the same, but specified in a single
-rule.
+primitives. The configuration options are the same as those primitives.
+
+In JavaScript and TypeScript, you configure those options in a single
+`protectSignup` rule. In Python, `protect_signup` forwards the same options to
+the three rules and returns a tuple that you unpack into `rules`.
 
 The configuration definition is:
 
@@ -101,40 +106,40 @@ interface ProtectSignupOptions {
 
 The `arcjet` client is configured with one `protectSignup` rule which takes
 `ProtectSignupOptions`.
+
 </TabItem>
 <TabItem label="Python">
+```py
+# Signature for arcjet.protect_signup
+# Options are forwarded as keyword arguments to sliding_window(),
+# detect_bot(), and validate_email().
+def protect_signup(
+    *,
+    # Options forwarded to sliding_window(). Typical keys: mode, max,
+    # and interval.
+    rate_limit: Mapping[str, Any],
+    # Options forwarded to detect_bot(). Typical keys: mode and either
+    # allow or deny.
+    bots: Mapping[str, Any],
+    # Options forwarded to validate_email(). Typical keys: mode and
+    # either allow or deny.
+    email: Mapping[str, Any],
+) -> tuple[SlidingWindow, BotDetection, EmailValidation]: ...
+```
 
-The Python SDK does not include a `protect_signup` composite rule. The
-equivalent configuration is to add `detect_bot`, `validate_email`, and
-`sliding_window` rules independently to the `arcjet(...)` / `arcjet_sync(...)`
-`rules=[...]` list. For a complete Python example, see [Custom verification
-logic](#custom-verification-logic).
+Configure the `arcjet` or `arcjet_sync` client with `*protect_signup(...)`
+unpacked into the `rules` list. The helper returns those three rules. It is
+not one composite rule.
+
+Unlike JavaScript `ProtectSignupOptions`, all three mappings are required.
+The nested `bots` and `email` mappings must include exactly one of `allow`
+or `deny`. An empty `allow=[]` list is valid and blocks every detected bot.
+
+The `protect_signup` helper is on the Python SDK `main` branch. It is not
+in the published `arcjet` 0.9.0 or `0.10.0b1` packages.
 
 </TabItem>
 </Tabs>
-
-<SlotByFramework client:load>
-  <Fragment slot="python-fastapi">
-
-    :::note
-    The Python SDK does not include a `protect_signup` composite rule. Instead,
-    you compose the three building blocks manually: `detect_bot`,
-    `validate_email`, and `sliding_window`. For the recommended Python pattern,
-    see [Custom verification logic](#custom-verification-logic).
-    :::
-
-  </Fragment>
-  <Fragment slot="python-flask">
-
-    :::note
-    The Python SDK does not include a `protect_signup` composite rule. Instead,
-    you compose the three building blocks manually: `detect_bot`,
-    `validate_email`, and `sliding_window`. For the recommended Python pattern,
-    see [Custom verification logic](#custom-verification-logic).
-    :::
-
-  </Fragment>
-</SlotByFramework>
 
 ### Recommended configuration
 
@@ -152,27 +157,10 @@ This can be configured as follows:
   <RecommendedNestJs slot="nest-js" />
   <RecommendedNextJs slot="next-js" />
   <RecommendedNodeJs slot="node-js" />
+  <RecommendedPythonFastapi slot="python-fastapi" />
+  <RecommendedPythonFlask slot="python-flask" />
   <RecommendedRemix slot="remix" />
   <RecommendedSvelteKit slot="sveltekit" />
-</SlotByFramework>
-
-<SlotByFramework client:load>
-  <Fragment slot="python-fastapi">
-
-    Because Python has no composite `protect_signup` rule, the equivalent
-    recommended configuration manually composes `detect_bot`, `validate_email`,
-    and `sliding_window`. See the [Custom verification
-    logic](#custom-verification-logic) snippet for a complete Python example.
-
-  </Fragment>
-  <Fragment slot="python-flask">
-
-    Because Python has no composite `protect_signup` rule, the equivalent
-    recommended configuration manually composes `detect_bot`, `validate_email`,
-    and `sliding_window`. See the [Custom verification
-    logic](#custom-verification-logic) snippet for a complete Python example.
-
-  </Fragment>
 </SlotByFramework>
 
 ### Test with dry run mode
@@ -195,8 +183,8 @@ not, or log them to your database.
 
 Arcjet provides a single `protect` function that is used to execute your
 protection rules. This requires a `request` argument which is the request
-context as passed to the request handler. When configured with a `protectSignup`
-rule it also requires an additional `email` prop.
+context as passed to the request handler. When you configure signup form
+protection, `protect` also requires an `email` argument.
 
 <SlotByFramework client:load>
   <NestJsGuardDecision slot="nest-js" />
@@ -275,10 +263,8 @@ users who sign up with a free email address.
 ## Error handling
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
-not block all requests. The SDK also times out and fails open after 1000&nbsp;ms
-in development (see <Link.Page
-href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>) and 500&nbsp;ms
-otherwise. However, in most cases, the response time is less than 20&nbsp;ms to
+not block all requests. The SDK also times out and fails open after 2000&nbsp;ms
+by default. However, in most cases, the response time is less than 20&nbsp;ms to
 30&nbsp;ms.
 
 If there is an error condition when processing the rule, Arcjet returns an

@@ -14,6 +14,89 @@ provide a clear migration path that remains supported for some time.
 
 This page documents breaking changes and migrations between SDK releases.
 
+## Arcjet JS SDK main
+
+The JS SDK on `main` includes the following breaking changes.
+
+### Remove `threshold` and `score` from prompt injection detection
+
+`detectPromptInjection({ threshold })` and
+`ArcjetPromptInjectionReason.score` are removed. Only `mode` remains.
+
+The verdict is binary. Use `decision.reason.isPromptInjection()` or
+`decision.reason.injectionDetected`:
+
+```ts
+detectPromptInjection({ mode: "LIVE" });
+
+if (decision.reason.isPromptInjection()) {
+  return new Response("Prompt injection detected", { status: 403 });
+}
+```
+
+Drop `threshold` and `score` when you upgrade. The core SDK ignores leftover
+`threshold` – it does not throw and it does not change the rule id.
+
+`@arcjet/astro` validates rule options with Zod `.strict()`. Leftover
+`threshold` in the integration config throws at startup. Remove `threshold`
+from `astro.config` when you upgrade.
+
+This change applies to the JS SDK only.
+
+## Arcjet Python SDK main
+
+The Python SDK on `main` includes the following breaking changes.
+
+### Remove `threshold` from prompt injection detection
+
+`detect_prompt_injection(threshold=...)` and the `threshold` field on
+`PromptInjectionDetection` are removed. Only `mode` remains, and it is
+required.
+
+```py
+from arcjet import Mode, detect_prompt_injection
+
+detect_prompt_injection(mode=Mode.LIVE)
+```
+
+Drop `threshold` when you upgrade to Python SDK `main`. Passing `threshold=`
+raises `TypeError`. This differs from the JS core SDK, which ignores leftover
+`threshold` and does not throw. `@arcjet/astro` Zod `.strict()` throws at
+startup if `threshold` is still in the integration config.
+
+`PromptInjectionReason.score` remains deprecated. This removal does not drop
+`score`.
+
+### Require explicit `mode` on HTTP rule factories
+
+HTTP Protect rule factories require `mode`. Omitting it raises `TypeError`.
+Pass `mode` on every `shield()`, `detect_bot()`, `token_bucket()`,
+`fixed_window()`, `sliding_window()`, `validate_email()`,
+`detect_sensitive_info()`, `filter_request()`, and
+`detect_prompt_injection()` call.
+
+```py
+from arcjet import Mode, detect_bot, shield
+
+rules = [
+    shield(mode=Mode.LIVE),
+    detect_bot(mode=Mode.LIVE, allow=["CATEGORY:SEARCH_ENGINE"]),
+]
+```
+
+`protect_signup()` forwards its nested `rate_limit`, `bots`, and `email`
+mappings to those factories, so each mapping must include `mode` too.
+
+This differs from JavaScript HTTP rules, which default to `"DRY_RUN"`.
+Defaulting Python HTTP rules to `DRY_RUN` turns `LIVE` configs into
+observe-only. Requiring `mode` is the breaking change.
+
+Guard constructors still default to `Mode.LIVE`, matching the JavaScript
+Guard SDK. You can omit `mode` on Guard constructors.
+
+These changes are on Python SDK `main`, not in published `arcjet` 0.9.0 or
+0.10.0b1.
+
 ## Arcjet JS SDK 1.0.0 – 1.4.0
 
 There have been no breaking changes.

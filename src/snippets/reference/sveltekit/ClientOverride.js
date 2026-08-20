@@ -10,11 +10,9 @@ const client = createRemoteClient({
   // environment variable.
   baseUrl: baseUrl(env),
   // timeout is the maximum time to wait for a response from the server.
-  // It defaults to 1000ms in development
-  // (see [`ARCJET_ENV`](https://docs.arcjet.com/environment#arcjet-env))
-  // and 500ms otherwise. This is a conservative limit to fail open by default.
+  // It defaults to 2000ms. This is a conservative limit to fail open by default.
   // In most cases, the response time will be <20-30ms.
-  timeout: 500,
+  timeout: 2000,
 });
 
 const aj = arcjet({

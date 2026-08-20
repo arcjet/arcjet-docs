@@ -99,8 +99,10 @@ application-aware bot rules and avoid blocking legitimate users.
 ## How Arcjet bot detection works
 
 Arcjet detects more than 600 different bots (such as `GOOGLE_CRAWLER`) and
-classifies them into 25 categories (such as `CATEGORY:AI`). You can specify
-individual bots or entire categories to allow or deny.
+classifies them into 23 categories (such as `CATEGORY:AI`). You can specify
+individual bots or entire categories to allow or deny. Each bot rule takes
+exactly one of `allow` or `deny`. An empty `allow` list blocks every detected
+bot.
 
 The identifiers of specific bots and categories, and their corresponding
 detection and verification patterns, are open source and maintained in

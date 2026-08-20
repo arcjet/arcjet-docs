@@ -165,13 +165,42 @@ of the following:
 Email validation is configured by specifying the email types you wish to allow
 or deny, and whether you wish to modify certain validation options.
 
-The `arcjet` client can be configured with one or more Email validation rules,
-which are constructed with the `validateEmail(options: EmailOptions)` function
-and configured by `EmailOptions`:
+The `arcjet` client can be configured with one or more email validation rules.
+In JavaScript / TypeScript these are constructed with the
+`validateEmail(options: EmailOptions)` function. In Python they are constructed
+with the `validate_email(...)` factory.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
 <DisplayType type="EmailOptions" from="arcjet" />
 <DisplayType type="ArcjetMode" from="arcjet" />
 <DisplayType type="ArcjetEmailType" from="arcjet" />
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+# Signature for arcjet.validate_email
+# Pass exactly one of `allow` or `deny`. Passing neither or both raises
+# ValueError. An empty allow=[] allows no email types.
+def validate_email(
+    *,
+    # Required. Mode.LIVE blocks requests; Mode.DRY_RUN logs only.
+    mode: Mode,
+    # Email types to reject. All other types are allowed.
+    deny: Sequence[str | EmailType] | None = None,
+    # Email types to permit. All other types are rejected.
+    allow: Sequence[str | EmailType] | None = None,
+    # Reject addresses without a valid TLD. Defaults to True.
+    require_top_level_domain: bool = True,
+    # Allow IP-literal domains such as user@[192.0.2.1]. Defaults to False.
+    allow_domain_literal: bool = False,
+) -> EmailValidation: ...
+```
+
+</TabItem>
+</Tabs>
 
 <Aside type="note">
   When specifying multiple rules, the order of the rules is ignored. Rule
@@ -180,9 +209,13 @@ and configured by `EmailOptions`:
   <Link.Page href="#decision">decision</Link.Page>.
 </Aside>
 
-The `allow` and `deny` lists are mutually exclusive. With `allow`, Arcjet denies
-any email type that the list does not name. With `deny`, Arcjet allows any email
-type that the list does not name.
+You must pass exactly one of `allow` or `deny`. The lists are mutually
+exclusive. With `allow`, Arcjet denies any email type that the list does not
+name. With `deny`, Arcjet allows any email type that the list does not name.
+
+An empty `allow` list is valid and allows no email types. In Python,
+`validate_email` and the `EmailValidation` dataclass raise `ValueError` if you
+pass neither list or both lists.
 
 The validation options can usually be left as the defaults. However, if you wish
 to allow certain types of email addresses, you can modify the options:
@@ -371,10 +404,8 @@ else:
 ## Error handling
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
-not block all requests. The SDK also times out and fails open after 1000&nbsp;ms
-in development (see <Link.Page
-href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>) and 500&nbsp;ms
-otherwise. However, in most cases, the response time is less than 20&nbsp;ms to
+not block all requests. The SDK also times out and fails open after 2000&nbsp;ms
+by default. However, in most cases, the response time is less than 20&nbsp;ms to
 30&nbsp;ms.
 
 If there is an error condition when processing the rule, Arcjet returns an

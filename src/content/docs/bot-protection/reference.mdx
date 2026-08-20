@@ -175,10 +175,14 @@ Arcjet bot detection lets you manage traffic by automated clients and bots.
 
 ## Configuration
 
-Bot detection is configured by allowing or denying a subset of bots. The `allow`
-and `deny` lists are mutually exclusive. With `allow`, Arcjet denies any
-detected bot that the list does not name. With `deny`, Arcjet allows any
-detected bot that the list does not name.
+Bot detection is configured by allowing or denying a subset of bots. You must
+pass exactly one of `allow` or `deny`. The lists are mutually exclusive. With
+`allow`, Arcjet denies any detected bot that the list does not name. With
+`deny`, Arcjet allows any detected bot that the list does not name.
+
+An empty `allow` list is valid and blocks every detected bot. In Python,
+`detect_bot` and the `BotDetection` dataclass raise `ValueError` if you pass
+neither list or both lists.
 
 You can use only one of the following configuration definitions:
 
@@ -206,15 +210,16 @@ one or many `BotOptions`.
 
 ```py
 # Signature for arcjet.detect_bot
-# `allow` and `deny` are mutually exclusive — pass only one.
+# Pass exactly one of `allow` or `deny`. Passing neither or both raises
+# ValueError. An empty allow=[] blocks every detected bot.
 def detect_bot(
     *,
-    # Mode.LIVE blocks requests; Mode.DRY_RUN logs only. Defaults to Mode.LIVE.
-    mode: Mode = Mode.LIVE,
+    # Required. Mode.LIVE blocks requests; Mode.DRY_RUN logs only.
+    mode: Mode,
     # Bots to permit. All other detected bots are denied.
-    allow: Sequence[str | BotCategory] = (),
+    allow: Sequence[str | BotCategory] | None = None,
     # Bots to block. All other detected bots are allowed.
-    deny: Sequence[str | BotCategory] = (),
+    deny: Sequence[str | BotCategory] | None = None,
 ) -> BotDetection: ...
 ```
 
@@ -224,11 +229,12 @@ string identifiers like `"CURL"` for specific bots.
 </TabItem>
 </Tabs>
 
-:::note
-When specifying multiple rules, the order of the rules is ignored. Rule
-execution ordering is automatically optimized for performance. For
-how to examine the execution results.
-:::
+Declaration order does not control which `LIVE` deny you see. The JS, Go, and
+Python SDKs sort local Protect rules in the same order: Sensitive Info, Filter,
+Shield, rate limiting, Bot, Email, then Prompt Injection. Rules with the same
+priority keep their declaration order. For details about examining the results,
+see [Decision](#decision). For the Python priority table, see
+<Link.Page href="/reference/python#multiple-rules">Multiple rules in the Python SDK reference</Link.Page>.
 
 ### Allow specific bots
 
@@ -374,10 +380,8 @@ available on the `decision.allowed` and `decision.denied` properties.
 ## Error handling
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
-not block all requests. The SDK also times out and fails open after 1000&nbsp;ms
-in development (see <Link.Page
-href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>) and 500&nbsp;ms
-otherwise. However, in most cases, the response time is less than 20&nbsp;ms to
+not block all requests. The SDK also times out and fails open after 2000&nbsp;ms
+by default. However, in most cases, the response time is less than 20&nbsp;ms to
 30&nbsp;ms.
 
 If there is an error condition when processing the rule, Arcjet returns an
@@ -489,7 +493,7 @@ if (decision.isDenied()) {
 <TabItem label="Python">
 
 ```py
-from arcjet import arcjet, detect_bot, Mode
+from arcjet import Mode, arcjet, detect_bot, is_verified_bot
 
 # ...
 aj = arcjet(
@@ -503,12 +507,8 @@ aj = arcjet(
 decision = await aj.protect(request)
 # ...
 
-# Ignore other signals for verified search engine bots. The Python SDK does
-# not export an `is_verified_bot()` helper — check `reason_v2.verified` on
-# each rule result instead.
-if any(
-    r.reason_v2.type == "BOT" and r.reason_v2.verified for r in decision.results
-):
+# Ignore other signals for verified search engine bots
+if any(is_verified_bot(r) for r in decision.results):
     return JSONResponse({"message": "Hello Bot!"})
 
 # Leverage all Arcjet signals
@@ -577,6 +577,14 @@ for (const { reason } of decision.results) {
 <TabItem label="Python">
 
 ```py
+from arcjet import is_verified_bot
+
+# Use the is_verified_bot() helper exported by arcjet:
+if any(is_verified_bot(r) for r in decision.results):
+    print("Verified bot")
+    # Allow the request
+
+# Or inspect each rule result directly:
 for result in decision.results:
     if result.reason_v2.type == "BOT" and result.reason_v2.verified:
         print("Verified bot")
@@ -650,25 +658,15 @@ if (decision.results.some(isMissingUserAgent)) {
 </TabItem>
 <TabItem label="Python">
 
-The Python SDK does not export an `is_missing_user_agent()` helper. Check the
-request headers directly or inspect the rule result `ERROR` reason message:
+Use the `is_missing_user_agent` helper from `arcjet`:
 
 ```py
-# Option 1: check the request headers before calling protect()
-user_agent = request.headers.get("user-agent")
-if not user_agent:
-    return JSONResponse({"error": "Bad request"}, status_code=400)
+from arcjet import is_missing_user_agent
 
-# Option 2: inspect the decision for an ERROR result on the bot rule
-for result in decision.results:
-    if result.reason_v2.type == "ERROR":
-        # Bot detection requires a User-Agent header — when missing it
-        # produces an ERROR result with this in the message.
-        logger.warning(
-            "request missing required user-agent header: %s",
-            result.reason_v2.message,
-        )
-        return JSONResponse({"error": "Bad request"}, status_code=400)
+if any(is_missing_user_agent(r) for r in decision.results):
+    logger.warning("request missing required user-agent header")
+    # You could return a 400 Bad request error here
+    return JSONResponse({"error": "Bad request"}, status_code=400)
 ```
 
 </TabItem>

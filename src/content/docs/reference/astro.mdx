@@ -150,6 +150,10 @@ The following fields are optional:
   `cloudflare()` to read the real client IP from a service-specific header. For
   an example, see [Load balancers and proxies](#load-balancers-and-proxies).
 
+The integration validates each rule with Zod `.strict()`. Unknown fields throw
+at startup. `detectPromptInjection` accepts only `mode`. Leftover `threshold`
+in this config throws; the core JS SDK ignores it instead.
+
 ### Single instance
 
 We recommend creating a single instance of the `Arcjet` object and reusing it
@@ -428,6 +432,8 @@ other rules, iterate over the `results` property on the decision.
   applied and the request has exceeded the rate limit.
 - `isSensitiveInfo()` (`bool`) – Returns `true` if sensitive info rules have
   been applied and sensitive info has been detected.
+- `isPromptInjection()` (`bool`) – Returns `true` if the prompt injection
+  rules have been applied and a prompt injection attempt was detected.
 - `isShield()` (`bool`) – Returns `true` if the shield rules have been applied
   and the request is suspicious based on analysis by Arcjet Shield WAF.
 - `isError()` (`bool`) – Returns `true` if there was an error processing the
@@ -554,6 +560,20 @@ An `ArcjetEmailType` is one of the following strings:
 {/* See the <Link.ToSdk href="/email-validation/reference" sdk="astro">email validation documentation</Link.ToSdk> for */}
 {/* more information about these properties. */}
 
+##### Prompt injection
+
+The `ArcjetReason` object for prompt injection rules has the following
+properties:
+
+```ts
+injectionDetected: boolean;
+```
+
+`injectionDetected` is `true` when the detector found a prompt injection
+attempt. You can also call `reason.isPromptInjection()`. For more
+information about these properties, see the
+<Link.Page href="/prompt-injection">prompt injection documentation</Link.Page>.
+
 ### IP analysis
 
 <IPAnalysis />
@@ -596,10 +616,8 @@ returns only the fields it has data for:
 ## Error handling
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
-not block all requests. The SDK also times out and fails open after 1000&nbsp;ms
-in development (see <Link.Page
-href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>) and 500&nbsp;ms
-otherwise. However, in most cases, the response time is less than 20&nbsp;ms to
+not block all requests. The SDK also times out and fails open after 2000&nbsp;ms
+by default. However, in most cases, the response time is less than 20&nbsp;ms to
 30&nbsp;ms.
 
 If there is an error condition when processing the rule, Arcjet returns an

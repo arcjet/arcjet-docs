@@ -202,8 +202,8 @@ type SensitiveInfoOptionsDeny = {
 # Signature for arcjet.detect_sensitive_info
 def detect_sensitive_info(
     *,
-    # Mode.LIVE blocks requests; Mode.DRY_RUN logs only. Defaults to Mode.LIVE.
-    mode: Mode = Mode.LIVE,
+    # Required. Mode.LIVE blocks requests; Mode.DRY_RUN logs only.
+    mode: Mode,
     # Entity types to allow (report only). Mutually exclusive with `deny`.
     allow: Sequence[str | SensitiveInfoEntityType] = (),
     # Entity types to deny. Mutually exclusive with `allow`.
@@ -658,11 +658,9 @@ than tokens.
 ## Error handling
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
-not block all requests. The SDK also times out and fails open after 1000&nbsp;ms in
-development (see
-<Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>)
-and 500&nbsp;ms otherwise. However, in most cases, the response time is less than
-20&nbsp;ms to 30&nbsp;ms.
+not block all requests. The SDK also times out and fails open after 2000&nbsp;ms
+by default. However, in most cases, the response time is less than 20&nbsp;ms to
+30&nbsp;ms.
 
 If there is an error condition when processing the rule, Arcjet returns an
 `ERROR` result for that rule and you can check the `message` property on the

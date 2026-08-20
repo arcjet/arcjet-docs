@@ -8,9 +8,10 @@ import { Link } from "@/components/link";
 import { Badge, Tabs, TabItem } from "@astrojs/starlight/components";
 import Comments from "/src/components/Comments.astro";
 
-Arcjet lets you configure a list of bots to allow or deny. To construct the
-list, you can specify individual bots, use categories to allow or deny all bots
-in a category, or both.
+Arcjet lets you configure a list of bots to allow or deny. Pass exactly one of
+`allow` or `deny` on each rule. An empty `allow` list blocks every detected
+bot. To construct the list, you can specify individual bots, use categories to
+allow or deny all bots in a category, or both.
 
 If you are using TypeScript, these appear as autocomplete values for the `allow`
 or `deny` options while writing your rules. In Python, the same string
@@ -68,6 +69,7 @@ We provide the following categories:
 - `CATEGORY:ADVERTISING`: Scrape data for advertising and marketing purposes
 - `CATEGORY:AI`: Scrape data for AI and LLM purposes
 - `CATEGORY:AMAZON`: Scrape data for Amazon products and services
+- `CATEGORY:APPLE`: Scrape data for Apple products and services
 - `CATEGORY:ARCHIVE`: Scrape data for archival purposes
 - `CATEGORY:BOTNET`: Automated behavior for malicious botnets
 - `CATEGORY:FEEDFETCHER`: Request data for RSS and other feeds

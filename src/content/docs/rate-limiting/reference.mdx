@@ -156,6 +156,7 @@ import ByUserIdPythonFastapi from "@/snippets/rate-limiting/reference/python-fas
 import DecisionLogPythonFastapi from "@/snippets/rate-limiting/reference/python-fastapi/DecisionLog.mdx";
 import ErrorsPythonFastapi from "@/snippets/rate-limiting/reference/python-fastapi/Errors.mdx";
 import FixedWindowPythonFastapi from "@/snippets/rate-limiting/reference/python-fastapi/FixedWindow.mdx";
+import HeadersPythonFastapi from "@/snippets/rate-limiting/reference/python-fastapi/Headers.mdx";
 import SlidingWindowPythonFastapi from "@/snippets/rate-limiting/reference/python-fastapi/SlidingWindow.mdx";
 import TokenBucketPythonFastapi from "@/snippets/rate-limiting/reference/python-fastapi/TokenBucket.mdx";
 import TokenBucketRequestPythonFastapi from "@/snippets/rate-limiting/reference/python-fastapi/TokenBucketRequest.mdx";
@@ -164,6 +165,7 @@ import ByUserIdPythonFlask from "@/snippets/rate-limiting/reference/python-flask
 import DecisionLogPythonFlask from "@/snippets/rate-limiting/reference/python-flask/DecisionLog.mdx";
 import ErrorsPythonFlask from "@/snippets/rate-limiting/reference/python-flask/Errors.mdx";
 import FixedWindowPythonFlask from "@/snippets/rate-limiting/reference/python-flask/FixedWindow.mdx";
+import HeadersPythonFlask from "@/snippets/rate-limiting/reference/python-flask/Headers.mdx";
 import SlidingWindowPythonFlask from "@/snippets/rate-limiting/reference/python-flask/SlidingWindow.mdx";
 import TokenBucketPythonFlask from "@/snippets/rate-limiting/reference/python-flask/TokenBucket.mdx";
 import TokenBucketRequestPythonFlask from "@/snippets/rate-limiting/reference/python-flask/TokenBucketRequest.mdx";
@@ -283,8 +285,8 @@ type FixedWindowRateLimitOptions = {
 # See https://docs.arcjet.com/rate-limiting/configuration
 def fixed_window(
     *,
-    # Mode.LIVE blocks requests; Mode.DRY_RUN logs only. Defaults to Mode.LIVE.
-    mode: Mode = Mode.LIVE,
+    # Required. Mode.LIVE blocks requests; Mode.DRY_RUN logs only.
+    mode: Mode,
     # Time window in seconds the rate limit applies to (integer only — Python
     # does not accept the "1h"/"60s" duration strings that the JS SDK does).
     window: int,
@@ -346,8 +348,8 @@ type SlidingWindowRateLimitOptions = {
 # See https://docs.arcjet.com/rate-limiting/configuration
 def sliding_window(
     *,
-    # Mode.LIVE blocks requests; Mode.DRY_RUN logs only. Defaults to Mode.LIVE.
-    mode: Mode = Mode.LIVE,
+    # Required. Mode.LIVE blocks requests; Mode.DRY_RUN logs only.
+    mode: Mode,
     # The time interval in seconds for the rate limit
     interval: int,
     # Maximum number of requests allowed over the time interval
@@ -412,8 +414,8 @@ type TokenBucketRateLimitOptions = {
 # See https://docs.arcjet.com/rate-limiting/configuration
 def token_bucket(
     *,
-    # Mode.LIVE blocks requests; Mode.DRY_RUN logs only. Defaults to Mode.LIVE.
-    mode: Mode = Mode.LIVE,
+    # Required. Mode.LIVE blocks requests; Mode.DRY_RUN logs only.
+    mode: Mode,
     # Number of tokens to add to the bucket at each interval
     refill_rate: int,
     # The interval in seconds to add tokens to the bucket
@@ -514,8 +516,9 @@ The custom characteristic is `userId` with the value passed as a prop on the
 </SlotByFramework>
 
 To identify users with different characteristics, such as IP address for anonymous
-users and a user ID for logged in users, you can use `withRule` to create
-augmented clients that use different characteristics. See the
+users and a user ID for logged in users, you can use `withRule` (JS) or
+`with_rule()` (Python) to create augmented clients that use different
+characteristics. See the
 <Link.Page href="/rate-limiting/configuration#ip-address--user-id">example in the custom characteristics section</Link.Page>.
 
 <SlotByFramework client:load>
@@ -636,15 +639,21 @@ These can be used to return `RateLimit` HTTP headers ([draft
 RFC](https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-ratelimit-headers-08)) to
 offer the client more detail.
 
-We provide the [@arcjet/decorate
-package](https://github.com/arcjet/arcjet-js/tree/main/decorate) for decorating
-your responses with appropriate `RateLimit` headers based on a decision.
+In JavaScript, use [`setRateLimitHeaders`](https://github.com/arcjet/arcjet-js/tree/main/decorate)
+from `@arcjet/decorate`. In Python, use `set_rate_limit_headers` from the
+`arcjet` package. Both write `RateLimit` and `RateLimit-Policy` headers from the
+decision.
+
+When several rate limit results are present, the tightest remaining budget is
+advertised. If two policies share the same `max`, no headers are written.
 
 <SlotByFramework client:load>
   <HeadersBun slot="bun" />
   <HeadersNestJs slot="nest-js" />
   <HeadersNextJs slot="next-js" />
   <HeadersNodeJs slot="node-js" />
+  <HeadersPythonFastapi slot="python-fastapi" />
+  <HeadersPythonFlask slot="python-flask" />
   <HeadersRemix slot="remix" />
   <HeadersSvelteKit slot="sveltekit" />
 </SlotByFramework>
@@ -663,10 +672,8 @@ response headers similar to the following:
 ## Error handling
 
 Arcjet is designed to fail open so that a service issue or misconfiguration does
-not block all requests. The SDK also times out and fails open after 1000&nbsp;ms
-in development (see <Link.Page
-href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>) and 500&nbsp;ms
-otherwise. However, in most cases, the response time is less than 20&nbsp;ms to
+not block all requests. The SDK also times out and fails open after 2000&nbsp;ms
+by default. However, in most cases, the response time is less than 20&nbsp;ms to
 30&nbsp;ms.
 
 If there is an error condition when processing the rule, Arcjet returns an

@@ -104,8 +104,9 @@ export async function runAgent(user: { id: string }, prompt: string) {
 ```
 
 On a policy denial the tool does not execute and the model receives an
-`ArcjetDenialResult`. For more information about `guardAction`, capture, and
-inbound screening, see the
+`ArcjetDenialResult`. Don't throw from `guardTool`. `guardAction` throws so
+application code can `catch`. For more information about `guardAction`,
+capture, and inbound screening, see the
 <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>.
 
 ## LangChain
@@ -142,8 +143,9 @@ This is not the Python
 <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>. It is
 not LangChain `createAgent` / `wrapToolCall`.
 
-For more information about inbound screening, authored tools, and `ToolNode`
-denials, see the
+`guardTool` returns the plain payload. Don't fabricate a `ToolMessage` to
+force `status: "error"`. For more information about inbound screening,
+authored tools, and `ToolNode` denials, see the
 <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>.
 
 ## OpenAI Agents
@@ -158,6 +160,7 @@ not deny points.
 This is not Realtime, Sandbox, hosted tools, MCP, `agent.asTool()`, or
 computer/shell.
 
+`guardTool` returns `{ arcjetDenied: true, … }` from `invoke`. Don't throw.
 For more information about inbound screening, authored tools, and execute
 denials, see the
 <Link.Page href="/guards/openai-agents">OpenAI Agents agent guard</Link.Page>.
@@ -169,8 +172,9 @@ local `execute`, so the enforcement point is `guardApproval()` on the
 connection. Screen inbound channel text with `guardInbound()` before the agent
 starts. Hooks are observe-only (handlers return `void`).
 
-For more information about inbound screening, authored tools, connection
-approvals, and lifecycle hooks, see the
+`guardTool` throws `ArcjetDeniedError`. Pass `onDeny: "result"` to return
+the payload instead. For more information about inbound screening, authored
+tools, connection approvals, and lifecycle hooks, see the
 <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>.
 
 ## Mastra
@@ -181,7 +185,8 @@ inbound text with `guardProcessor`. Gate authored tools with `guardTool`. Gate
 MCP or workspace tools you did not wrap with `guardHooks` (`beforeToolCall` can
 deny).
 
-For more information about processors, tools, and hooks, see the
+`guardTool` returns `{ arcjetDenied: true, … }` as the tool result. Don't
+throw. For more information about processors, tools, and hooks, see the
 <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>.
 
 ## Claude Agent SDK
@@ -192,37 +197,81 @@ MCP tools. There is no `guardInbound`. Screen inbound prompts with
 gate. Use `guardTool()` for authored tools and `PreToolUse` for unwrapped
 built-ins and MCP tools.
 
-For more information about inbound screening, authored tools, and `PreToolUse`
-denials, see the
+`guardTool` returns an MCP `CallToolResult` with `isError: true` and the
+payload on `structuredContent`. Don't throw. For more information about
+inbound screening, authored tools, and `PreToolUse` denials, see the
 <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>.
+
+## Denial responses
+
+Every JavaScript adapter uses one payload, `ArcjetDenialResult`. The fields,
+wording, and retry-after rules are the same, so a model sees one shape. The
+envelope is per-framework, because each SDK reports a tool that did not run
+in a different way:
+
+| Adapter | Idiomatic envelope | Why not the others |
+| --- | --- | --- |
+| AI SDK / Mastra | Return `{ arcjetDenied: true, … }` as the tool result | A throw becomes a generic tool error and drops the fields |
+| OpenAI Agents | Return `{ arcjetDenied: true, … }` from `invoke` | A throw hits `errorFunction` or `ToolCallError` and can kill the run |
+| LangGraph | Return `{ arcjetDenied: true, … }`. `ToolNode` wraps a `ToolMessage` with `status: "success"` | Fabricating a `ToolMessage` to force `status: "error"` crashes the graph reducer |
+| Claude Agent SDK | MCP `CallToolResult` with `isError: true` and the payload on `structuredContent` | A throw is a raw exception. Omitting `isError` looks like success |
+| Vercel Eve | Throw `ArcjetDeniedError`. Opt in to a returned payload with `onDeny: "result"` | Eve projects a throw as a failed `action.result`. A silent return can violate `outputSchema` |
+
+```ts
+const result: ArcjetDenialResult = {
+  arcjetDenied: true,
+  reason: "RATE_LIMIT",
+  message:
+    "Arcjet denied this call (RATE_LIMIT). It may be retried after 30 seconds.",
+  retryable: true,
+  retryAfterSeconds: 30,
+};
+```
+
+You can import `ArcjetDenialResult` from `@arcjet/guard/vercel-ai/v7` and the
+other JavaScript adapter namespaces.
+
+`guardTool` must produce an envelope the model can inspect. `guardAction`
+throws so application code can `catch`. These cannot share one handler.
+
+Only rate-limit denials set `retryable: true` and include `retryAfterSeconds`.
+When Guard is unavailable and `onGuardError` is `"deny"`, the payload uses
+`reason: "ERROR"`, `retryable: true`, and `retryAfterSeconds: 5`.
 
 ## Denials and availability
 
 The wrappers default to fail closed when Guard is unavailable:
 
-- Vercel AI does not execute the tool and returns a retryable denial result to
-  the model with reason `ERROR`.
+- Vercel AI does not execute the tool and returns a retryable
+  `ArcjetDenialResult` to the model with reason `ERROR`. A throw from
+  `guardTool` becomes a generic tool error and drops the fields.
 - LangChain `guard_tool` raises `ArcjetToolUnavailableError`. A policy
   denial raises `ArcjetToolDeniedError`, or follows the wrapped tool's
   `handle_tool_error` behavior when configured. `guard_action` and
   `ArcjetMiddleware` raise `ArcjetUnavailableError` /
   `ArcjetDeniedError`.
-- Vercel Eve helpers default to `onGuardError: "deny"`. On a channel, `"allow"`
-  is a legitimate choice because failing closed stops the agent answering.
-- Mastra helpers default to `onGuardError: "deny"`. `"allow"` is a legitimate
-  choice on the inbound processor because failing closed stops the agent
-  answering.
-- Claude Agent SDK helpers default to `onGuardError: "deny"`. On inbound
-  `UserPromptSubmit`, `"allow"` is a legitimate choice because failing closed
-  stops the agent answering.
-- LangGraph helpers default to `onGuardError: "deny"`. Direct `guard()` before
-  `invoke` fails open. Check `decision.hasFailedOpen()` when that call site
-  must fail closed.
+- Vercel Eve helpers default to `onGuardError: "deny"`. `guardTool` throws
+  `ArcjetDeniedError`. Pass `onDeny: "result"` to return the payload instead.
+  On a channel, `"allow"` is a legitimate choice because failing closed stops
+  the agent answering.
+- Mastra helpers default to `onGuardError: "deny"`. `guardTool` returns
+  `{ arcjetDenied: true, … }` as the tool result. A throw becomes a generic
+  tool error and drops the fields. `"allow"` is a legitimate choice on the
+  inbound processor because failing closed stops the agent answering.
+- Claude Agent SDK helpers default to `onGuardError: "deny"`. `guardTool`
+  returns an MCP `CallToolResult` with `isError: true` and the payload on
+  `structuredContent`. On inbound `UserPromptSubmit`, `"allow"` is a
+  legitimate choice because failing closed stops the agent answering.
+- LangGraph helpers default to `onGuardError: "deny"`. `guardTool` returns the
+  plain payload. `ToolNode` wraps a `ToolMessage` whose `status` is
+  `success`. Direct `guard()` before `invoke` fails open. Check
+  `decision.hasFailedOpen()` when that call site must fail closed.
 - OpenAI Agents helpers default to `onGuardError: "deny"`. `guardTool`
-  returns a plain `ArcjetDenialResult` and does not throw. The runner
-  stringifies it onto a `function_call_result` with `status: "completed"`.
-  Direct `guard()` before `run()` fails open. Check `decision.hasFailedOpen()`
-  when that call site must fail closed.
+  returns a plain `ArcjetDenialResult` and does not throw. A throw hits
+  `ToolCallError` and drops the fields. The runner stringifies the payload
+  onto a `function_call_result` with `status: "completed"`. Direct `guard()`
+  before `run()` fails open. Check `decision.hasFailedOpen()` when that call
+  site must fail closed.
 
 Set `onGuardError: "allow"` in JavaScript or `on_guard_error="allow"` in Python
 only when executing without a complete security decision is acceptable.

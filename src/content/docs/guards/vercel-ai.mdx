@@ -48,7 +48,7 @@ The integration exposes the following surfaces:
 - `guardTool()` wraps an AI SDK `tool({ execute })`. On `DENY` the tool never
   runs. The model receives a structured `ArcjetDenialResult`
   (`{ arcjetDenied, reason, message, retryable, retryAfterSeconds? }`). Don't
-  throw.
+  throw. A throw becomes a generic tool error and drops the fields.
 - `aiToolsContext()` maps an `ArcjetAgentContext` onto `toolsContext` for
   `generateText` / `streamText`. Only tools branded by `guardTool` are included.
 - `createAgentContext()` builds the context you pass to `aiToolsContext`. Pass a
@@ -203,11 +203,14 @@ On a policy denial the model receives:
 {
   arcjetDenied: true,
   reason: "RATE_LIMIT", // or PROMPT_INJECTION, SENSITIVE_INFO, ERROR
-  message: "Arcjet denied this tool call (RATE_LIMIT). It may be retried after 12 seconds.",
+  message:
+    "Arcjet denied this call (RATE_LIMIT). It may be retried after 30 seconds.",
   retryable: true,
-  retryAfterSeconds: 12,
+  retryAfterSeconds: 30,
 }
 ```
+
+You can import `ArcjetDenialResult` from `@arcjet/guard/vercel-ai/v7`.
 
 Only rate-limit denials set `retryable: true` and include `retryAfterSeconds`.
 Other reasons tell the model not to retry.
@@ -247,8 +250,9 @@ on wrapped tools.
 ## Guard an app-invoked action
 
 When your code performs a risky action the model did not call as a tool, wrap
-that function with `guardAction`. It throws instead of returning a denial
-object.
+that function with `guardAction`. It throws so application code can `catch`.
+Don't share one handler with `guardTool`: a model-facing envelope must stay
+inspectable, and a throw into the tool loop drops the fields.
 
 ```ts
 import {
@@ -400,6 +404,8 @@ first such call always warns.
 - Don't declare a `contextSchema` on a tool you wrap. Arcjet uses that slot.
 - Don't wrap the same tool twice. `guardTool` throws if the tool already
   carries the Arcjet protection brand.
+- Don't throw from `guardTool` to signal a denial. Return the payload so the
+  model can inspect it.
 - Don't also wrap these tools with another framework adapter.
 - Don't import `@arcjet/guard/vercel-ai`. The path is
   `@arcjet/guard/vercel-ai/v7`.

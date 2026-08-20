@@ -74,14 +74,12 @@ export async function GET(req: Request) {
 </TabItem>
 <TabItem label="Python">
 
-The Python SDK's `arcjet()` / `arcjet_sync()` constructor takes the full rule
-set at creation time – there is **no** `with_rule()` chain method on the
-resulting client (that pattern only exists in the JS SDKs). To apply different
-rules to different routes, create one client per rule set and import them
-where you need them.
+In the Python SDK, create one base client and add route-specific rules with
+`with_rule()`. The clone shares this instance's `DecisionCache`, key,
+characteristics, and transport. The original client is unchanged.
 
 Use `arcjet()` for async frameworks (FastAPI, Starlette) and `arcjet_sync()`
-for sync frameworks (Flask, Django).
+for sync frameworks (Flask, Django). HTTP rule factories require `mode`.
 
 <Code code={ArcjetLibPy} lang="py" title="/lib/arcjet.py" />
 
