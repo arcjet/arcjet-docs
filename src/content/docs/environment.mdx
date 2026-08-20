@@ -51,10 +51,13 @@ Python SDK users: if your config library doesn't propagate `.env` into
 `environment=` kwarg on `arcjet()` / `arcjet_sync()` – see the
 <Link.Page href="/reference/python#pydantic-settings-users">Python SDK reference</Link.Page>.
 
-In development, the timeout for connecting to Cloud API is increased. In
-production, the timeout is quicker. This is because in production your app
+In the JavaScript SDKs, the timeout for connecting to Cloud API is increased in
+development and quicker in production. This is because in production your app
 typically runs close to an Arcjet server, but in development your app may run on
-your local machine, far away from Arcjet servers. For more information, see <Link.Page href="/architecture#api-latency">Architecture: API latency</Link.Page>.
+your local machine, far away from Arcjet servers. The Python SDK uses a 2000 ms
+timeout for `arcjet()` / `arcjet_sync()` in both environments. For more
+information, see <Link.Page href="/architecture#api-latency">Architecture: API latency</Link.Page>
+and the <Link.Page href="/reference/python#configuration">Python SDK reference</Link.Page>.
 
 In production, an error is logged when no client IP is found. In development,
 the local IP `127.0.0.1` is used as a fallback. When the client IP is missing
