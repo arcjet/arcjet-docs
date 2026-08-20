@@ -487,8 +487,8 @@ if any(is_missing_user_agent(r) for r in decision.results):
 set_rate_limit_headers(response, decision)
 ```
 
-`is_verified_bot` and `is_missing_user_agent` ignore `"DRY_RUN"` results.
-`is_spoofed_bot` reports the spoofed flag on a bot rule result.
+`is_verified_bot`, `is_spoofed_bot`, and `is_missing_user_agent` ignore
+`"DRY_RUN"` results.
 
 `set_rate_limit_headers` writes IETF `RateLimit` and `RateLimit-Policy` headers
 onto a response, `response.headers`, or a mutable mapping. When several rate

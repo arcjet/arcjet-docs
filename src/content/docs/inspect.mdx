@@ -67,8 +67,9 @@ import Free from "@/components/badges/Free.astro";
 
 ### `isSpoofedBot` / `is_spoofed_bot`
 
-Determines whether a bot rule detected a spoofed request. If the helper reports
-a spoofed bot, the request was likely spoofed and you may want to block it.
+Determines whether a non-`"DRY_RUN"` bot rule detected a spoofed request. If
+the helper reports a spoofed bot, the request was likely spoofed and you may
+want to block it.
 
 For `allow` rules, Arcjet verifies the authenticity of detected bots by checking
 IP data and performing reverse DNS lookups. This helps protect against spoofed
@@ -97,7 +98,8 @@ Returns one of the following:
 
 `is_spoofed_bot(result: RuleResult)` from `arcjet`.
 
-Returns `True` if a bot rule detected a spoofed user agent, otherwise `False`.
+Returns `True` if a live bot rule detected a spoofed user agent. Returns
+`False` for `"DRY_RUN"` results and non-bot rules.
 
 </TabItem>
 </Tabs>
