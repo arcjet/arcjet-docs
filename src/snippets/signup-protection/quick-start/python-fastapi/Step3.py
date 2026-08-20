@@ -1,14 +1,6 @@
 import os
 
-from arcjet import (
-    EmailType,
-    Mode,
-    arcjet,
-    detect_bot,
-    shield,
-    sliding_window,
-    validate_email,
-)
+from arcjet import EmailType, Mode, arcjet, protect_signup, shield
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import JSONResponse
 
@@ -19,28 +11,28 @@ aj = arcjet(
     rules=[
         # Shield protects your app from common attacks (e.g. SQL injection).
         shield(mode=Mode.LIVE),
-        # Block all bots. The Python SDK does not provide a `protect_signup`
-        # composite rule, so we compose the rules manually here.
-        detect_bot(
-            mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
-            allow=[],  # "allow none" will block all detected bots
-        ),
-        # Block emails that are disposable, invalid, or have no MX records.
-        validate_email(
-            mode=Mode.LIVE,
-            deny=[
-                EmailType.DISPOSABLE,
-                EmailType.INVALID,
-                EmailType.NO_MX_RECORDS,
-            ],
-        ),
-        # It would be unusual for a form to be submitted more than 5 times in
-        # 10 minutes from the same IP address.
-        sliding_window(
-            mode=Mode.LIVE,
-            interval=600,  # 10 minute sliding window
-            max=5,  # allows 5 submissions within the window
-            characteristics=["ip.src"],
+        *protect_signup(
+            rate_limit={
+                # It would be unusual for a form to be submitted more than 5
+                # times in 10 minutes from the same IP address
+                "mode": Mode.LIVE,
+                "max": 5,  # allows 5 submissions within the window
+                "interval": 600,  # 10 minute sliding window
+            },
+            bots={
+                "mode": Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
+                "allow": [],  # "allow none" will block all detected bots
+            },
+            email={
+                "mode": Mode.LIVE,
+                # Block emails that are disposable, invalid, or have no MX
+                # records.
+                "deny": [
+                    EmailType.DISPOSABLE,
+                    EmailType.INVALID,
+                    EmailType.NO_MX_RECORDS,
+                ],
+            },
         ),
     ],
 )
