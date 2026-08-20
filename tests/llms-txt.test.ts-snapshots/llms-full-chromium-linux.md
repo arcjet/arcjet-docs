@@ -1431,6 +1431,10 @@ flask run
 Every rule accepts `mode: "LIVE" | "DRY_RUN"`. In `DRY_RUN` mode the rule
 evaluates and returns a decision but never blocks. Use `DRY_RUN` for testing.
 
+On Python SDK `main`, HTTP rule factories require `mode`. Omitting it raises
+`TypeError`. Guard constructors still default to `Mode.LIVE`. JavaScript HTTP
+rules default to `"DRY_RUN"`.
+
 ### shield(options)
 
 Protects against common web attacks, including SQL injection and XSS.
@@ -1690,6 +1694,8 @@ At protect() time, pass the email:
 ```ts
 const decision = await aj.protect(req, { email: "user@example.com" });
 ```
+
+Python: `protect_signup(rate_limit={"mode": Mode.LIVE, "max": 5, "interval": 600}, bots={"mode": Mode.LIVE, "allow": []}, email={"mode": Mode.LIVE, "deny": [EmailType.DISPOSABLE, EmailType.INVALID, EmailType.NO_MX_RECORDS]})`. Nested mappings are forwarded to `sliding_window()`, `detect_bot()`, and `validate_email()`, so each mapping must include `mode`.
 
 ### filter(options)
 
