@@ -236,7 +236,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
         arcjet.WithRequested(1),
     )
     if err != nil {
-        // Arcjet fails open. Log the error and apply your fallback policy.
+        // Fail-open: ERROR decision plus err. Log it and continue.
         log.Printf("arcjet: %v", err)
     } else if decision.IsDenied() {
         status := http.StatusForbidden
@@ -259,6 +259,12 @@ func must[T any](value T, err error) T {
 Call `Protect(r.Context(), r, ...)` once inside each handler. Use
 `WithCharacteristics`, `WithRequested`, `WithDetectPromptInjectionMessage`,
 `WithSensitiveInfoValue`, and `WithCorrelationId` for dynamic inputs.
+
+On a transport failure, `Protect` returns an `ERROR` conclusion `Decision`
+together with `err`. `IsAllowed()` and `IsErrored()` are both true;
+`IsDenied()` is false. If the client or request is nil, `Protect` returns the
+zero `Decision`. Log `err` and deny only when `IsDenied()` is true. Use
+`IsErrored()` to distinguish a real allow from a fail-open error.
 
 ### Go Guard protection
 
