@@ -175,10 +175,14 @@ Arcjet bot detection lets you manage traffic by automated clients and bots.
 
 ## Configuration
 
-Bot detection is configured by allowing or denying a subset of bots. The `allow`
-and `deny` lists are mutually exclusive. With `allow`, Arcjet denies any
-detected bot that the list does not name. With `deny`, Arcjet allows any
-detected bot that the list does not name.
+Bot detection is configured by allowing or denying a subset of bots. You must
+pass exactly one of `allow` or `deny`. The lists are mutually exclusive. With
+`allow`, Arcjet denies any detected bot that the list does not name. With
+`deny`, Arcjet allows any detected bot that the list does not name.
+
+An empty `allow` list is valid and blocks every detected bot. In Python,
+`detect_bot` and the `BotDetection` dataclass raise `ValueError` if you pass
+neither list or both lists.
 
 You can use only one of the following configuration definitions:
 
@@ -206,15 +210,16 @@ one or many `BotOptions`.
 
 ```py
 # Signature for arcjet.detect_bot
-# `allow` and `deny` are mutually exclusive — pass only one.
+# Pass exactly one of `allow` or `deny`. Passing neither or both raises
+# ValueError. An empty allow=[] blocks every detected bot.
 def detect_bot(
     *,
     # Mode.LIVE blocks requests; Mode.DRY_RUN logs only. Defaults to Mode.LIVE.
     mode: Mode = Mode.LIVE,
     # Bots to permit. All other detected bots are denied.
-    allow: Sequence[str | BotCategory] = (),
+    allow: Sequence[str | BotCategory] | None = None,
     # Bots to block. All other detected bots are allowed.
-    deny: Sequence[str | BotCategory] = (),
+    deny: Sequence[str | BotCategory] | None = None,
 ) -> BotDetection: ...
 ```
 

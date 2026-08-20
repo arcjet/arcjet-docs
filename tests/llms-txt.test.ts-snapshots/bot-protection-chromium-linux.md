@@ -63,7 +63,7 @@ How Arcjet bot detection works
 
 [Section titled “How Arcjet bot detection works”](#how-arcjet-bot-detection-works)
 
-Arcjet detects more than 600 different bots (such as `GOOGLE_CRAWLER`) and classifies them into 23 categories (such as `CATEGORY:AI`). You can specify individual bots or entire categories to allow or deny.
+Arcjet detects more than 600 different bots (such as `GOOGLE_CRAWLER`) and classifies them into 23 categories (such as `CATEGORY:AI`). You can specify individual bots or entire categories to allow or deny. Each bot rule takes exactly one of `allow` or `deny`. An empty `allow` list blocks every detected bot.
 
 The identifiers of specific bots and categories, and their corresponding detection and verification patterns, are open source and maintained in [`arcjet/well-known-bots`](https://github.com/arcjet/well-known-bots), which ships with the Arcjet SDK. Names and categories are autocompleted in your editor if you use TypeScript.
 

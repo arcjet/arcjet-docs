@@ -189,6 +189,14 @@ from arcjet import Mode, detect_bot
 detect_bot(mode=Mode.DRY_RUN, allow=[])
 ```
 
+`detect_bot` and `validate_email` require exactly one of `allow` or `deny`. The
+`BotDetection` and `EmailValidation` dataclasses enforce the same requirement.
+An empty `allow` list is valid: it blocks every detected bot, or allows no
+email types. Passing neither list or both lists raises `ValueError`. For more
+information about these rules, see
+<Link.Page href="/bot-protection/reference">Bot protection</Link.Page> and
+<Link.Page href="/email-validation/reference">Email validation</Link.Page>.
+
 Because the top level conclusion is always `ALLOW` in `DRY_RUN` mode, you can
 loop through each rule result to check what would have happened:
 

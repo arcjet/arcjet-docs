@@ -1486,7 +1486,9 @@ Bot categories use the `CATEGORY:` prefix. Full list: https://arcjet.com/bot-lis
 
 Python: `detect_bot(mode=Mode.LIVE, allow=[BotCategory.SEARCH_ENGINE])` or
 `detect_bot(mode=Mode.LIVE, allow=["CURL"])`. Use `BotCategory.<NAME>` for
-categories or pass specific bot name strings directly.
+categories or pass specific bot name strings directly. Pass exactly one of
+`allow` or `deny`. `allow=[]` blocks every detected bot. Passing neither list
+or both lists raises `ValueError`.
 
 ### tokenBucket(options)
 
@@ -1679,7 +1681,9 @@ Parameters:
 Valid email types: `DISPOSABLE`, `FREE`, `NO_MX_RECORDS`, `NO_GRAVATAR`, `INVALID`
 
 Python: `validate_email(mode=Mode.LIVE, deny=[EmailType.DISPOSABLE, EmailType.INVALID, EmailType.NO_MX_RECORDS])`
-At protect() time: `email="user@example.com"`
+At protect() time: `email="user@example.com"`. Pass exactly one of `allow` or
+`deny`. `allow=[]` allows no email types. Passing neither list or both lists
+raises `ValueError`.
 
 ### protectSignup(options)
 
