@@ -23,5 +23,9 @@ lookup_order = guard_tool(
     guard=arcjet,
     tool=lookup_order,
     action="order.looked-up",
-    rules=[lookup_limit(key="user123", requested=5)],
+    rules=[
+        # Deduct 50 tokens from the bucket.
+        # The value for `requested` must be a positive integer.
+        lookup_limit(key="user123", requested=50)
+    ],
 )

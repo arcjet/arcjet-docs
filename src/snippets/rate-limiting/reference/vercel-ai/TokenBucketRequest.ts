@@ -21,7 +21,11 @@ export const lookupOrder = guardTool(
   }),
   {
     action: "order.looked-up",
-    actor: "user123",
-    rules: () => [lookupLimit({ key: "user123", requested: 5 })],
+    actor: "user123", // Replace with your authenticated user ID
+    rules: () => [
+      // Deduct 50 tokens from the bucket.
+      // The value for `requested` must be a positive integer.
+      lookupLimit({ key: "user123", requested: 50 }),
+    ],
   },
 );

@@ -25,7 +25,7 @@ complete_prompt = guard_tool(
     action="prompt.completed",
     rules=lambda arguments, _config: [
         token_budget(
-            key="user123",
+            key="user123",  # Replace with your authenticated user ID
             requested=max(1, int(arguments["estimated_tokens"])),
         )
     ],

@@ -23,6 +23,10 @@ export default guardTool(
   }),
   {
     action: "order.looked-up",
-    rules: (input) => [lookupLimit({ key: input.orderId, requested: 5 })],
+    rules: (input) => [
+      // Deduct 50 tokens from the bucket.
+      // The value for `requested` must be a positive integer.
+      lookupLimit({ key: input.orderId, requested: 50 }),
+    ],
   },
 );

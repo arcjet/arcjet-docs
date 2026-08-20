@@ -28,7 +28,7 @@ export default guardTool(
     action: "prompt.completed",
     rules: (input) => [
       tokenBudget({
-        key: "user123",
+        key: "user123", // Replace with your authenticated user ID
         requested: Math.max(1, Math.ceil(input.estimatedTokens)),
       }),
     ],
