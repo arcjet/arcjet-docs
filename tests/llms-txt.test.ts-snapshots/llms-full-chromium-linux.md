@@ -236,7 +236,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
         arcjet.WithRequested(1),
     )
     if err != nil {
-        // Arcjet fails open. Log the error and apply your fallback policy.
+        // Fail-open: ERROR decision plus err. Log it and continue.
         log.Printf("arcjet: %v", err)
     } else if decision.IsDenied() {
         status := http.StatusForbidden
@@ -260,6 +260,12 @@ Call `Protect(r.Context(), r, ...)` once inside each handler. Use
 `WithCharacteristics`, `WithRequested`, `WithDetectPromptInjectionMessage`,
 `WithSensitiveInfoValue`, and `WithCorrelationId` for dynamic inputs.
 
+On a transport failure, `Protect` returns an `ERROR` conclusion `Decision`
+together with `err`. `IsAllowed()` and `IsErrored()` are both true;
+`IsDenied()` is false. If the client or request is nil, `Protect` returns the
+zero `Decision`. Log `err` and deny only when `IsDenied()` is true. Use
+`IsErrored()` to distinguish a real allow from a fail-open error.
+
 ### Go Guard protection
 
 ```go
@@ -268,7 +274,7 @@ var guard = must(arcjet.NewGuardClient(arcjet.GuardConfig{
 }))
 
 var promptScan = must(arcjet.GuardPromptInjection(
-    arcjet.GuardPromptInjectionOptions{Mode: arcjet.ModeLive},
+    arcjet.GuardPromptInjectionOptions{Mode: arcjet.ModeLive}, // required
 ))
 
 decision, err := guard.Guard(ctx, arcjet.GuardRequest{
@@ -297,6 +303,11 @@ local rules, and content moderation (`GuardModerateContent`). Use `Capture`
 to record what happened after a Guard call. Labels and buckets must be
 lowercase slugs containing letters, digits, dashes, or dots. Standard
 `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` variables configure outbound calls.
+
+Every Guard rule constructor requires `Mode` (`ModeLive` or `ModeDryRun`). An
+empty `Mode` returns `ErrInvalidMode`. HTTP `Protect` rules default an empty
+`Mode` to `ModeDryRun`. JavaScript and Python Guard rules default to `LIVE`;
+Go returns a constructor error instead of defaulting to `LIVE`.
 
 ## Common setup for all frameworks
 

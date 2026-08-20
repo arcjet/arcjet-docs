@@ -182,6 +182,15 @@ A typical setup has the following steps:
 3. Call `protect()` (or `Protect`) inside each route handler and check whether
    the decision was denied.
 
+In Go, log the `err` from `Protect` and deny only when `IsDenied()` is true. A
+transport failure returns an `ERROR` decision that `IsAllowed()` treats as
+allowed; use `IsErrored()` to distinguish it from a real allow. If the client
+or request is nil, `Protect` returns the zero `Decision`.
+
+Go Guard rule constructors require `Mode` (`ModeLive` or `ModeDryRun`). An
+empty `Mode` returns `ErrInvalidMode`. HTTP `Protect` rules default an empty
+`Mode` to `ModeDryRun`.
+
 <Aside type="caution">
   **Do not** create a new Arcjet instance per request – this defeats caching.
   **Do not** call `protect()` multiple times for the same request. **Do not**

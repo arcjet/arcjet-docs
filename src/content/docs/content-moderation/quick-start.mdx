@@ -90,7 +90,7 @@ go get github.com/arcjet/arcjet-go@latest
 
 ```go
 moderation, err := arcjet.GuardModerateContent(arcjet.GuardModerateContentOptions{
-	Mode: arcjet.ModeLive,
+	Mode: arcjet.ModeLive, // required
 })
 if err != nil {
 	return err
@@ -112,6 +112,8 @@ if result := moderation.Result(decision); result != nil && result.Billing != nil
 	fmt.Printf("charged %d %s\n", result.Billing.Count, result.Billing.Unit)
 }
 ```
+
+Set `Mode` on every Guard rule. An empty `Mode` returns `ErrInvalidMode`.
 
 `ExperimentalGuardModerateContent` and the matching Options/Rule names remain
 as deprecated aliases until 1.0.
