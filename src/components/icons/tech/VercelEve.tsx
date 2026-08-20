@@ -11,7 +11,7 @@ export const VercelEve = forwardRef(
     return (
       <svg
         ref={ref}
-        viewBox="0 0 102 102"
+        viewBox="0 28 102 46"
         width="128"
         height="128"
         fill="currentColor"
