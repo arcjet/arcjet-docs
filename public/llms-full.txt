@@ -1651,7 +1651,11 @@ The verdict is binary: `decision.reason.isPromptInjection()` or
 `decision.reason.injectionDetected`.
 
 Python: `detect_prompt_injection(mode=Mode.LIVE)` with
-`detect_prompt_injection_message=message` at protect() time.
+`detect_prompt_injection_message=message` at protect() time. `mode` is
+required. On Python SDK `main`, omitting `mode` or passing `threshold=`
+raises `TypeError`. Drop `threshold`.
+`PromptInjectionReason.score` remains deprecated. Guard
+`DetectPromptInjection` still defaults to `LIVE`.
 
 ### validateEmail(options)
 

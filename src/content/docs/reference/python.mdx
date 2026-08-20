@@ -349,6 +349,10 @@ client mode:
 | `ip_src`                           | `str`                  | Manual IP override (advanced) |
 | `correlation_id`                   | `str`                  | Correlates this decision with a guard call, workflow run, or agent trace. A dedicated, indexable field – not `extra` or `metadata` – and does not affect the decision or its cache key (`arcjet` >= 0.9.0) |
 
+HTTP `detect_prompt_injection` accepts only `mode`, which is required. On
+Python SDK `main`, omitting `mode` or passing `threshold=` raises
+`TypeError`. Guard `DetectPromptInjection` still defaults to `LIVE`.
+
 #### Override the client IP
 
 Arcjet normally detects the client IP address from the framework request. If
@@ -472,7 +476,7 @@ Each variant exposes type-specific fields:
 | `"SHIELD"`           | `shield_triggered` (`bool`)                                            |
 | `"EMAIL"`            | `email_types` (for example, `["DISPOSABLE", "NO_MX_RECORDS"]`)          |
 | `"SENSITIVE_INFO"`   | `allowed`, `denied` (each a list of `IdentifiedEntity`)                |
-| `"PROMPT_INJECTION"` | `injection_detected` (`bool`)                                          |
+| `"PROMPT_INJECTION"` | `injection_detected` (`bool`); `score` (`float`, deprecated) |
 | `"FILTER"`           | `matched_expressions`, `undetermined_expressions`                      |
 | `"ERROR"`            | `message` (`str`)                                                      |
 
