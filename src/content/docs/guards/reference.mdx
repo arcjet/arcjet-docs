@@ -200,7 +200,7 @@ The Arcjet server combines enforced SDK and remote rules into the final
 
 Every rule in a call is evaluated, so **a denial by one rule still consumes
 another's budget**. A call that trips `detectSensitiveInfo` also spends a token
-from a `tokenBucket` in the same `rules` array — the decision reads `DENY`
+from a `tokenBucket` in the same `rules` array – the decision reads `DENY`
 overall while its `TOKEN_BUCKET` result reads `ALLOW` with a decremented
 `remaining`. That is usually what you want, since a caller sending PII is one
 you are happy to slow down. Split the rules across two guard calls when a false
@@ -372,7 +372,8 @@ For the HTTP Newman examples and a fuller walkthrough of the test client, see
 - <Link.Page href="/guards/capture">Capture events</Link.Page>
 - <Link.Page href="/content-moderation">Content moderation</Link.Page>
 - <Link.Page href="/guards/remote-policies">Remote policy inputs and supported rules</Link.Page>
-- <Link.Page href="/guards/framework-integrations">Vercel AI SDK and LangChain wrappers</Link.Page>
+- <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
+- <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>
 - <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
 - <Link.Page href="/reference/python#guard">Python Guard SDK reference</Link.Page>
 - <Link.Page href="/reference/go#guard-non-http-operations">Go Guard SDK reference</Link.Page>

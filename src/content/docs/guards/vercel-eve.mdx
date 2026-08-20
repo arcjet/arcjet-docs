@@ -4,14 +4,15 @@ description: "Screen inbound Eve messages, gate tools and connections, and obser
 ---
 
 import { Link } from "@/components/link";
+import FrameworkPrimer from "@/snippets/guards/FrameworkPrimer.mdx";
 
 [Vercel Eve](https://eve.dev/) agents call authored tools, OpenAPI connections, and MCP connections.
 Arcjet Guard sits at those boundaries so a remote policy can allow or deny the
 action before a side effect runs.
 
-Use <Link.Page href="/get-started">`protect()`</Link.Page> for HTTP routes. Use the Eve helpers on this page for tools,
-connections, inbound channel text, and lifecycle observation. Vercel AI SDK,
-LangChain, and LangGraph wrappers are on
+<FrameworkPrimer />
+
+Vercel AI SDK, LangChain, and LangGraph wrappers are on
 <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>.
 
 ## Install
@@ -46,11 +47,11 @@ The integration exposes four surfaces:
 - `guardInbound()` screens inbound text on a channel.
 - `arcjetHooks()` observes agent lifecycle events.
 
-`guardTool()`, `guardApproval()`, and `arcjetHooks()` correlate by session id.
+`guardTool()`, `guardApproval()`, and `arcjetHooks()` correlate by session ID.
 `guardInbound()` runs before the session exists, so you pass an explicit
 `correlationId`.
 
-Never call `createAgentContext` inside an Eve callback. The session id is
+Never call `createAgentContext` inside an Eve callback. The session ID is
 already the run identity. Use `eveAgentContext` only when you need the context
 object explicitly.
 
@@ -66,15 +67,68 @@ Then ask the agent to add Arcjet Guard to this Eve project. In Claude Code, run
 `/integrate-arcjet-guard-eve`. The skill source is
 [integrate-arcjet-guard-eve](https://github.com/arcjet/arcjet-js/blob/main/arcjet-guard/skills/integrate-arcjet-guard-eve/SKILL.md).
 
+## Wrap an authored tool
+
+Use `guardTool()` when you own `execute` and need the outcome. On `DENY` the
+helper throws. Eve projects that as a failed `action.result`. Prefer
+`guardApproval()` when you only need to gate the call and want the model to
+read a `denied` status.
+
+```ts
+import { defineTool } from "eve/tools";
+import { z } from "zod";
+import { tokenBucket } from "@arcjet/guard";
+import { guardTool } from "@arcjet/guard/vercel-eve/v0";
+import { arcjet } from "../arcjet.js";
+
+const lookupLimit = tokenBucket({
+  bucket: "lookups",
+  refillRate: 10,
+  intervalSeconds: 60,
+  maxTokens: 10,
+});
+
+export default guardTool(
+  arcjet,
+  defineTool({
+    description: "Look up an order by ID",
+    inputSchema: z.object({ orderId: z.string() }),
+    async execute(input) {
+      return { orderId: input.orderId, status: "shipped" };
+    },
+  }),
+  {
+    action: "order.looked-up",
+    rules: (input) => [lookupLimit({ key: input.orderId, requested: 1 })],
+  },
+);
+```
+
+`defineDynamic` tools cannot be wrapped with `guardTool()`. Gate those with
+`guardApproval()` instead.
+
+## Helper options
+
+| Option | Helpers | Description |
+| --- | --- | --- |
+| `action` | All | Guard label and capture name. Use `resource.verb` in the past tense. |
+| `rules` | All | SDK rules, or a function of the tool input or Eve context. Omit to submit none. The Guard call still happens. |
+| `metadata` | `guardTool`, `guardApproval`, `guardInbound` | Nested JSON merged into the decision. |
+| `correlationId` | `guardInbound` | Required. Use a stable conversation ID, not `crypto.randomUUID()`. |
+| `onGuardError` | All | `"deny"` (default) or `"allow"`. |
+| `onAllow` | `guardApproval` | `"user-approval"` parks the call for a human after the request-time gate. |
+| `response` | `guardApproval` | Authorizes who may approve a parked request. |
+| `onDeny` | `guardTool` | Reshape the denial the model sees. |
+
 ## Inbound screening
 
 `guardInbound()` on an Eve channel (`agent/channels/*.ts`) screens inbound text
 before the agent sees it. This is the only place a turn can be declined before
 it starts.
 
-On `DENY`, return an HTTP error and do not start the agent. Pass an explicit
-`correlationId`. Use a value the app already has, such as a conversation id.
-Do not generate a per-request id. Reuse that same value with `args.from()` so
+On `DENY`, return an HTTP error and don't start the agent. Pass an explicit
+`correlationId`. Use a value the app already has, such as a conversation ID.
+Don't generate a per-request ID. Reuse that same value with `args.from()` so
 the inbound decision can join the session later.
 
 Eve helpers default to `onGuardError: "deny"`. `"allow"` is a legitimate choice
@@ -103,7 +157,7 @@ export default defineChannel({
       }
 
       // correlationId must be stable across retries so the inbound decision
-      // correlates with the session. Do not use crypto.randomUUID() here.
+      // correlates with the session. Don't use crypto.randomUUID() here.
       const correlationId = conversationId;
       const verdict = await guardInbound(arcjet, message, {
         rules: [detectPromptInjection()(message)],
@@ -112,7 +166,7 @@ export default defineChannel({
       });
 
       if (!verdict.allowed) {
-        // `verdict.outcome` is "DENY" | "UNAVAILABLE" — a policy denial versus
+        // `verdict.outcome` is "DENY" | "UNAVAILABLE" – a policy denial versus
         // an Arcjet outage. Answer them differently: a denial is the caller's
         // problem (403), an outage is ours (503, which is also retryable).
         // The rule category that fired lives on `verdict.decision?.reason`,
@@ -141,12 +195,13 @@ export default defineChannel({
 });
 ```
 
-## `guardApproval` with no authored tools
+## Gate connections with no authored tools
 
 An Eve agent can have zero authored tools. OpenAPI and MCP connections
 (`agent/connections/*.ts`) have no local `execute`. The only enforcement point
 is `guardApproval()` on the connection's `approval` field. There is no
-middleware or hook alternative.
+middleware or hook alternative. `defineDynamic` tools also have no wrappable
+`execute`. Gate those with `guardApproval()` on the tool's `approval` field.
 
 On request-time `DENY`, Eve returns `{ type: "denied", reason }` the model can
 read. That differs from `guardTool()`, which throws. Human-in-the-loop (HITL)
@@ -161,9 +216,6 @@ where `request` is Eve's `ApprovalPolicy` function. Don't compose the
 returned value with Eve's `always()`, `once()`, or `never()`. To also
 require a human after the request-time gate, use `onAllow: "user-approval"`.
 The `response` policy authorizes the responder.
-
-`defineDynamic` tools cannot be wrapped with `guardTool()`. Gate those with
-`guardApproval()` too.
 
 The following connection omits `response`, so `guardApproval()` returns Eve's
 function form:
@@ -250,13 +302,13 @@ export default defineOpenAPIConnection({
 });
 ```
 
-## Why Eve hooks can't enforce
+## Hooks cannot enforce policy
 
 `arcjetHooks()` and Eve hooks are observe-only. Handlers return `void` and
 cannot reject a turn. If the request is to block prompt injection, the answer
 is `guardInbound` at the channel, not a hook.
 
-Hooks emit lifecycle captures joined to the session id. The
+Hooks emit lifecycle captures joined to the session ID. The
 `eve.session-started` event carries both inbound and session correlation. Use
 hooks for audit trails, not enforcement.
 
@@ -268,9 +320,20 @@ import { arcjet } from "../arcjet.js";
 export default defineHook(arcjetHooks(arcjet));
 ```
 
+## Common patterns
+
+- **Prompt injection on a channel:** `guardInbound` with
+  `detectPromptInjection()(message)` before `args.from().send()`.
+- **Rate limit a connection:** `guardApproval` with a `tokenBucket` keyed on
+  `ctx.session.id`.
+- **Human approval after policy:** `onAllow: "user-approval"` plus a `response`
+  policy that rate limits `ctx.responder.principalId`.
+- **Observe without blocking:** `arcjetHooks(arcjet)` on `defineHook`.
+
 ## Related
 
 - <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
+- <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>
 - <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
 - <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>
 - <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>

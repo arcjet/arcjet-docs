@@ -666,6 +666,10 @@ export const main = [
         attrs: { target: "_blank", class: "external-link" },
       },
       {
+        label: "Vercel AI SDK",
+        link: "/guards/vercel-ai",
+      },
+      {
         label: "Vercel Eve",
         link: "/guards/vercel-eve",
       },

@@ -1,18 +1,20 @@
 ---
 title: "OpenAI Agents agent guard"
-description: "Screen user text before the agent run, wrap authored function-tool invoke, and treat approval pauses as HITL, not policy."
+description: "Screen user text before the agent run, wrap authored function-tool invoke, and treat approval pauses as human-in-the-loop confirmation, not policy."
 ---
 
 import { Link } from "@/components/link";
+import FrameworkPrimer from "@/snippets/guards/FrameworkPrimer.mdx";
 
 [OpenAI Agents](https://openai.github.io/openai-agents-js/) text `Agent`
 workflows call authored `tool()` handlers from `run()`. Arcjet Guard sits at
 those boundaries so a remote policy can allow or deny the action before a
 side effect runs.
 
-Use <Link.Page href="/get-started">`protect()`</Link.Page> for HTTP routes. Use the OpenAI Agents helpers on this page for
-authored tools and inbound screening. Vercel AI SDK, Python LangChain, Eve,
-Mastra, LangGraph, and Claude wrappers are on
+<FrameworkPrimer />
+
+Vercel AI SDK, Python LangChain, Eve, Mastra, LangGraph, and Claude wrappers
+are on
 <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>.
 
 This adapter is a text `Agent` plus `run()` plus authored `tool()`. It is not
@@ -30,9 +32,7 @@ Import helpers from the versioned path `@arcjet/guard/openai-agents/v0`.
 There is no unversioned alias. `@arcjet/guard/openai-agents` does not
 resolve. The SDK is pre-1.0, so the segment is `v0`. `@openai/agents`
 (`>=0.17.0 <1`) is an optional peer. The integration requires Node.js 22
-or later. Until `@arcjet/guard/openai-agents/v0` is published, the import
-is on [arcjet-js main](https://github.com/arcjet/arcjet-js/pull/6233), not
-on npm.
+or later.
 
 Launch one client at module scope:
 
@@ -66,7 +66,7 @@ The integration exposes two surfaces:
   `conversationId`, then `groupId`. Then it reads envelope copies
   (`conversationId`, `groupId`, already-resolved `sessionId`). It also
   accepts a bare app object (`{ sessionId }`) or
-  `{ context: appContext, conversationId }`. It never mints an id. It
+  `{ context: appContext, conversationId }`. It never mints an ID. It
   never reads `traceId`. It never calls `session.getSessionId()`. It
   never calls `createAgentContext`.
 
@@ -78,7 +78,7 @@ OpenAI's `inputGuardrails`, `outputGuardrails`, and
 `defineToolInputGuardrail` / `defineToolOutputGuardrail` are the SDK's own
 tripwires (`tripwireTriggered`, `rejectContent`). They are not Arcjet.
 
-Never call `createAgentContext` inside an OpenAI Agents callback. Do not also
+Never call `createAgentContext` inside an OpenAI Agents callback. Don't also
 wrap these tools with `@arcjet/guard/vercel-ai/v7`.
 
 The OpenAI Agents integration skill ships with `@arcjet/guard`. After
@@ -90,11 +90,23 @@ cp -r node_modules/@arcjet/guard/skills/integrate-arcjet-guard-openai-agents ~/.
 ```
 
 Then ask the agent to add Arcjet Guard to this OpenAI Agents project. In
-Claude Code, run `/integrate-arcjet-guard-openai-agents`. Until
-`@arcjet/guard/openai-agents/v0` is published, the skill source is
-[integrate-arcjet-guard-openai-agents](https://github.com/arcjet/arcjet-js/pull/6233).
+Claude Code, run `/integrate-arcjet-guard-openai-agents`. The skill source is
+[integrate-arcjet-guard-openai-agents](https://github.com/arcjet/arcjet-js/blob/main/arcjet-guard/skills/integrate-arcjet-guard-openai-agents/SKILL.md).
 
-## Screen user text before `run()` — there is no inbound hook. `inputGuardrails` / `callModelInputFilter` are not Guard.
+## Helper options
+
+| Option | Helpers | Description |
+| --- | --- | --- |
+| `action` | `guardTool` | Guard label and capture name. Use `resource.verb` in the past tense. |
+| `rules` | `guardTool` | SDK rules, or a function of the parsed tool input. Omit to submit none. |
+| `metadata` | `guardTool` | Nested JSON, or a function of the tool input. |
+| `onGuardError` | `guardTool` | `"deny"` (default) or `"allow"`. |
+| `onDeny` | `guardTool` | Reshape the denial object the runner stringifies onto the tool result. |
+
+Inbound screening uses direct `guard()`, which takes `label` (not `action`)
+and fails open. See the following section.
+
+## Screen user text before `run()`
 
 There is no first-class inbound hook, so there is no `guardInbound`. Put
 prompt-injection (and other inbound rules) in the application before
@@ -109,7 +121,7 @@ inbound pattern. Act on that decision. Direct `guard()` fails open, so an
 `ALLOW` is not proof the rules ran. Gate on `decision.hasFailedOpen()` if
 this call site must fail closed. `guardTool` already defaults to that.
 
-On `DENY`, do not call `run()`.
+On `DENY`, don't call `run()`.
 
 ```ts
 import { detectPromptInjection } from "@arcjet/guard";
@@ -133,13 +145,13 @@ if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
 await run(agent, userText, { context: appContext });
 ```
 
-## `needsApproval` is HITL, not a policy gate (same trap as hosted `requireApproval`).
+## Human approval is not a policy gate
 
 `needsApproval` pauses the run and returns `interruptions` for
-human-in-the-loop (`state.approve` / `state.reject`). Hosted MCP
-`requireApproval` is the same class of control. Neither is a remote policy.
-Same trap as Mastra `requireApproval`, Claude `canUseTool`, and LangGraph
-`interrupt()`. There is no `guardApproval`. Do not wrap them as Guard.
+human-in-the-loop (HITL) confirmation (`state.approve` / `state.reject`).
+Hosted MCP `requireApproval` is the same class of control. Neither is a remote
+policy. Same trap as Mastra `requireApproval`, Claude `canUseTool`, and
+LangGraph `interrupt()`. There is no `guardApproval`. Don't wrap them as Guard.
 
 Use `guardTool` for authored `tool({ execute })` handlers you own.
 
@@ -147,14 +159,14 @@ On `DENY` the original `invoke` never runs, so `execute` never runs a side
 effect. `guardTool` returns a plain `ArcjetDenialResult`
 (`{ arcjetDenied: true, reason, message, retryable, retryAfterSeconds? }`).
 It does not throw. The runner stringifies that object onto a
-`function_call_result` with `status: "completed"`. Do not throw from
+`function_call_result` with `status: "completed"`. Don't throw from
 `execute` to signal a denial: the SDK `errorFunction` would turn a throw
 into a model-visible string (or `ToolCallError` when `outputSchema` is
 set). `timeoutMs` races the guard round trip, and
 `outputGuardrails` / `customDataExtractor` receive the denial object.
 Scan free-text args (a note, reason, or body). An opaque
-`orderNumber` or tool-call id will not trip email / phone / card / IP, so
-do not pass it to `localDetectSensitiveInfo`. That helper runs on a local
+`orderNumber` or tool-call ID will not trip email / phone / card / IP, so
+don't pass it to `localDetectSensitiveInfo`. That helper runs on a local
 ML model backend.
 
 ```ts
@@ -198,7 +210,7 @@ export const lookupOrder = guardTool(
 );
 ```
 
-## Deny inside `tool({ execute })` — the only local side-effect you can stop. Hosted tools, handoffs, and Runner `agent_tool_start` are not deny points.
+## Deny authored `tool({ execute })` handlers
 
 `guardTool` wraps `FunctionTool.invoke` after `tool({ execute })`. That
 closed-over `execute` is the only local side effect this adapter can stop.
@@ -214,9 +226,9 @@ Pass wrapped tools on the `Agent` `tools` array, then call `run()`.
 
 ## Correlation
 
-`RunContext` has no conversation or session id. Put the id you already have
-on the app object you pass as `run(..., { context })`. Do not write
-`runContext.conversationId`. Do not pass a `Session` and expect
+`RunContext` has no conversation or session ID. Put the ID that you already
+have on the app object you pass as `run(..., { context })`. Don't write
+`runContext.conversationId`. Don't pass a `Session` and expect
 `getSessionId()` to run: `openaiAgentsContext` never calls it, and
 `MemorySession` mints a UUID when constructed without `sessionId`.
 
@@ -226,7 +238,7 @@ copies: `conversationId`, `groupId`, already-resolved `sessionId`. A bare
 app object (`{ sessionId }`) and `{ context: appContext, conversationId }`
 are both valid sources. `traceId` is never read. If nothing is a valid
 1-256 printable-ASCII string, the call is uncorrelated rather than joined
-to a generated id.
+to a generated ID.
 
 ```ts
 const appContext = { sessionId: conversationId };
@@ -238,29 +250,38 @@ await run(agent, userText, { context: appContext });
 
 - There is no `guardInbound`. Screen prompt injection before `run()`.
 - There is no `guardApproval`. `needsApproval` and hosted `requireApproval`
-  are human HITL, not policy.
+  are human HITL confirmation, not policy.
 - There is no `guardToolNode` and no `guardHooks`.
-- Do not treat `inputGuardrails`, `outputGuardrails`,
+- Don't treat `inputGuardrails`, `outputGuardrails`,
   `defineToolInputGuardrail` / `defineToolOutputGuardrail`, or
   `callModelInputFilter` as Arcjet.
-- Do not deny from Runner `agent_tool_start`.
-- Do not call `session.getSessionId()` from this helper. Put the id you
+- Don't deny from Runner `agent_tool_start`.
+- Don't call `session.getSessionId()` from this helper. Put the ID that you
   already have on `context`.
-- Do not read `traceId` for correlation. The SDK mints one when omitted.
-- Do not use this adapter with Realtime, Sandbox, hosted tools, MCP,
+- Don't read `traceId` for correlation. The SDK mints one when omitted.
+- Don't use this adapter with Realtime, Sandbox, hosted tools, MCP,
   `agent.asTool()`, or computer/shell.
-- Do not call `createAgentContext` inside an OpenAI Agents callback.
-- Do not also wrap these tools with `@arcjet/guard/vercel-ai/v7`.
-- Do not import `@arcjet/guard/openai-agents`. The path is
+- Don't call `createAgentContext` inside an OpenAI Agents callback.
+- Don't also wrap these tools with `@arcjet/guard/vercel-ai/v7`.
+- Don't import `@arcjet/guard/openai-agents`. The path is
   `@arcjet/guard/openai-agents/v0`.
+
+## Common patterns
+
+- **Prompt injection before the run:** Direct `guard()` with
+  `detectPromptInjection()(userText)` and a `hasFailedOpen()` check.
+- **Rate limit plus PII on a tool:** `tokenBucket` keyed on a trusted ID,
+  plus `localDetectSensitiveInfo()` on a free-text `note`.
+- **Correlate the run:** Put `{ sessionId: conversationId }` on
+  `run(..., { context })`. Don't read `traceId` or call `getSessionId()`.
 
 ## Related
 
 - <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
+- <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>
 - <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>
 - <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
 - <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>
 - <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>
 - <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>
 - <Link.Page href="/guards">Agent guards</Link.Page>
-- Adapter: [arcjet/arcjet-js#6233](https://github.com/arcjet/arcjet-js/pull/6233)
