@@ -320,6 +320,11 @@ a user would connect to your application and then the application would connect
 to the closest Arcjet Cloud API,
 usually within the same region.
 
+The Go SDK applies a 2 second deadline when the incoming context has none,
+and 4 seconds when an email rule is configured. A caller-supplied deadline
+is not shortened or replaced. For more information, see the
+<Link.Page href="/reference/go#timeouts">Go SDK reference</Link.Page>.
+
 A shorter timeout may result in faster failure responses but could lead to
 increased error rates if the Cloud API needs time to respond.
 Conversely,

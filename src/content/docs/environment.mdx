@@ -74,6 +74,12 @@ a hosting platform. To override the detected client IP on a request, pass
 `WithIPSrc` to `Protect`. For more information, see the
 <Link.Page href="/reference/go#environment-variables">Go SDK reference</Link.Page>.
 
+`Protect` and `ProtectDetails` apply a 2 second deadline when the incoming
+context has none, or 4 seconds when an email rule is configured. A
+caller-supplied deadline is not shortened or replaced. For more
+information about the deadline, see
+<Link.Page href="/reference/go#timeouts">Timeouts in the Go SDK reference</Link.Page>.
+
 <a name="arcjet-key" />
 
 ### `ARCJET_KEY`

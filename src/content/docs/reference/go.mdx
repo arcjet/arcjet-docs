@@ -151,6 +151,24 @@ If the application is behind a trusted reverse proxy, configure `Config.Proxies`
 with the trusted proxy addresses or CIDRs so Arcjet receives the correct client
 IP.
 
+### Timeouts
+
+`Protect` and `ProtectDetails` apply a 2 second deadline when the incoming
+context has none. An email rule doubles that to 4 seconds. A prompt-injection
+rule has a 1 second floor that the 2 second base already meets. A client
+with both email and prompt-injection rules still uses 4 seconds (the email
+doubling). A caller-supplied deadline is not shortened or replaced.
+
+```go
+// The context has no deadline, so the SDK applies 2 seconds.
+decision, err := aj.Protect(context.Background(), r)
+
+ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+defer cancel()
+// The caller deadline is kept.
+decision, err = aj.Protect(ctx, r)
+```
+
 ### Override the client IP
 
 Arcjet normally detects the client IP address from the request. If your
@@ -270,6 +288,10 @@ Guard labels and rate-limit buckets are slugs: lowercase letters, digits,
 dashes, and dots, starting and ending with a letter or digit. Use a stable,
 hardcoded label for each operation and an explicit rate-limit key such as a
 user ID, session ID, or API key.
+
+If you omit `Bucket`, the SDK uses `default-token-bucket`,
+`default-fixed-window`, or `default-sliding-window`. Set `Bucket` explicitly
+so unrelated rules do not share a counter.
 
 Available Guard rules include rate limiting, prompt injection detection,
 content moderation (`GuardModerateContent`), sensitive information detection,
