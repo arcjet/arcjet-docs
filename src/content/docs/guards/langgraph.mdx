@@ -48,10 +48,12 @@ The integration exposes three surfaces:
 - `guardTool()` wraps a LangChain `tool()` / `StructuredTool`. It wraps `func`
   and `invoke`. On `DENY` the tool never runs. It returns a plain
   `ArcjetDenialResult` (`arcjetDenied: true`, plus reason / message /
-  retryable). It does not throw. `ToolNode` wraps that object into a real
-  `ToolMessage`. Because the tool did not throw, that message's `status` is
+  retryable / `retryAfterSeconds?`). It does not throw. `ToolNode` wraps
+  that object into a real `ToolMessage`. Because the tool did not throw,
+  that message's `status` is
   `success`. The denial rides in the payload (`arcjetDenied: true`), not the
-  envelope.
+  envelope. Don't fabricate a `ToolMessage` to force `status: "error"`.
+  That crashes the graph reducer.
 - `guardToolNode()` guards a `ToolNode` from `@langchain/langgraph/prebuilt`
   in place and returns the same node (not a copy). `ToolNode`'s constructor
   captures `func` as an arrow bound to the instance, and `run` reads
@@ -143,10 +145,12 @@ Use `guardTool` for authored tools you invoke yourself.
 
 On `DENY` the tool's `func` / `invoke` never runs. `guardTool` returns a
 plain `ArcjetDenialResult`
-(`{ arcjetDenied: true, reason, message, retryable }`). It does not throw.
-`ToolNode` wraps that object into a real `ToolMessage` whose `status` is
-`success`. The denial rides in the payload (`arcjetDenied: true`), not the
-envelope. Scan free-text args (a note, reason, or body). An opaque
+(`{ arcjetDenied: true, reason, message, retryable, retryAfterSeconds? }`).
+It does not throw. `ToolNode` wraps that object into a real `ToolMessage`
+whose `status` is `success`. The denial rides in the payload
+(`arcjetDenied: true`), not the envelope. Don't fabricate a `ToolMessage`
+to force `status: "error"`. That crashes the graph reducer. Scan free-text
+args (a note, reason, or body). An opaque
 `orderNumber` or `tool_call_id` will not trip email / phone / card / IP, so
 don't pass it to `localDetectSensitiveInfo`. That helper runs on a local ML
 model backend.
@@ -281,6 +285,10 @@ await graph.invoke({ messages }, config);
   <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
 - Don't call `createAgentContext` inside a LangGraph callback.
 - Don't also wrap these tools with `@arcjet/guard/vercel-ai/v7`.
+- Don't throw from `guardTool` to signal a denial. Return the payload so
+  `ToolNode` can wrap a real `ToolMessage`.
+- Don't fabricate a `ToolMessage` to force `status: "error"`. That crashes
+  the graph reducer.
 - Don't import `@arcjet/guard/langgraph`. The path is
   `@arcjet/guard/langgraph/v1`.
 

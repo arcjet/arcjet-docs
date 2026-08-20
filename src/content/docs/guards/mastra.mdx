@@ -41,7 +41,8 @@ The integration exposes four surfaces:
 
 - `guardTool()` wraps a Mastra `createTool({ execute })`. On `DENY` the tool
   never runs. The model receives a structured `ArcjetDenialResult`
-  (`{ arcjetDenied, reason, message, retryable }`). Don't throw.
+  (`{ arcjetDenied, reason, message, retryable, retryAfterSeconds? }`). Don't
+  throw. A throw becomes a generic tool error and drops the fields.
 - `guardProcessor()` is a Mastra `Processor` for `inputProcessors` /
   `outputProcessors`. On `DENY`, `processInput` / `processInputStep` call
   `abort()` (tripwire). `processInputStep` screens later agentic steps so tool
@@ -126,9 +127,11 @@ Mastra `requireApproval` pauses for a human. It is not a remote policy. Use
 `guardTool` for authored tools or `guardHooks` for unwrapped tools.
 
 On `DENY` the tool's `execute` never runs. The model receives
-`{ arcjetDenied: true, reason, message, retryable }`. Scan free-text args (a
-note, reason, or body). An opaque `orderId` doesn't trip email, phone, card, or
-IP detection, so don't pass it to `localDetectSensitiveInfo`.
+`{ arcjetDenied: true, reason, message, retryable, retryAfterSeconds? }`.
+Don't throw. A throw becomes a generic tool error and drops the fields. Scan
+free-text args (a note, reason, or body). An opaque `orderId` doesn't trip
+email, phone, card, or IP detection, so don't pass it to
+`localDetectSensitiveInfo`.
 
 ```ts
 import { createTool } from "@mastra/core/tools";
@@ -234,6 +237,8 @@ await agent.generate(message, { requestContext });
   not policy.
 - Don't call `createAgentContext` inside a Mastra callback.
 - Don't also wrap these tools with `@arcjet/guard/vercel-ai/v7`.
+- Don't throw from `guardTool` to signal a denial. Return the payload so the
+  model can inspect it.
 - Don't import `@arcjet/guard/mastra`. The path is `@arcjet/guard/mastra/v1`.
 
 ## Common patterns

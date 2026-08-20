@@ -42,6 +42,9 @@ export const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 The integration exposes four surfaces:
 
 - `guardTool()` wraps an authored tool when you need the execution outcome.
+  On `DENY` it throws `ArcjetDeniedError`. Eve projects that as a failed
+  `action.result`. Returning the `ArcjetDenialResult` payload is opt-in with
+  `onDeny: "result"` so an `outputSchema` is not silently violated.
 - `guardApproval()` gates a tool or a connection before it runs. Set
   `response` to authorize who may approve a parked request.
 - `guardInbound()` screens inbound text on a channel.
@@ -70,9 +73,10 @@ Then ask the agent to add Arcjet Guard to this Eve project. In Claude Code, run
 ## Wrap an authored tool
 
 Use `guardTool()` when you own `execute` and need the outcome. On `DENY` the
-helper throws. Eve projects that as a failed `action.result`. Prefer
-`guardApproval()` when you only need to gate the call and want the model to
-read a `denied` status.
+helper throws `ArcjetDeniedError`. Eve projects that as a failed
+`action.result`. Returning the payload is opt-in with `onDeny: "result"` so
+an `outputSchema` is not silently violated. Prefer `guardApproval()` when you
+only need to gate the call and want the model to read a `denied` status.
 
 ```ts
 import { defineTool } from "eve/tools";
@@ -118,7 +122,7 @@ export default guardTool(
 | `onGuardError` | All | `"deny"` (default) or `"allow"`. |
 | `onAllow` | `guardApproval` | `"user-approval"` parks the call for a human after the request-time gate. |
 | `response` | `guardApproval` | Authorizes who may approve a parked request. |
-| `onDeny` | `guardTool` | Reshape the denial the model sees. |
+| `onDeny` | `guardTool` | Reshape the denial, or pass `"result"` to return `ArcjetDenialResult` instead of throwing. |
 
 ## Inbound screening
 
@@ -204,8 +208,9 @@ middleware or hook alternative. `defineDynamic` tools also have no wrappable
 `execute`. Gate those with `guardApproval()` on the tool's `approval` field.
 
 On request-time `DENY`, Eve returns `{ type: "denied", reason }` the model can
-read. That differs from `guardTool()`, which throws. Human-in-the-loop (HITL)
-clients answer a parked request with `cancel`, not `deny`.
+read. That differs from `guardTool()`, which throws `ArcjetDeniedError`
+unless you pass `onDeny: "result"`. Human-in-the-loop (HITL) clients answer a
+parked request with `cancel`, not `deny`.
 
 `approval` is one field. It can be a function or `{ request, response }`.
 Request-time options live on `GuardApprovalPolicy`: `action`, plus optional

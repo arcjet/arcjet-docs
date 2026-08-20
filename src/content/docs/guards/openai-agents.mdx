@@ -52,7 +52,8 @@ The integration exposes two surfaces:
   never runs, so `execute` never runs a side effect. It returns a plain
   `ArcjetDenialResult`
   (`{ arcjetDenied, reason, message, retryable, retryAfterSeconds? }`).
-  It does not throw. The runner stringifies that object onto a
+  It does not throw. A throw hits `errorFunction` or `ToolCallError` and
+  drops the fields. The runner stringifies that object onto a
   `function_call_result` with `status: "completed"`. The denial rides in
   the payload (`arcjetDenied: true`), not the envelope. Because the
   runner treats that return as the tool's output, `timeoutMs` races the
@@ -158,11 +159,10 @@ Use `guardTool` for authored `tool({ execute })` handlers you own.
 On `DENY` the original `invoke` never runs, so `execute` never runs a side
 effect. `guardTool` returns a plain `ArcjetDenialResult`
 (`{ arcjetDenied: true, reason, message, retryable, retryAfterSeconds? }`).
-It does not throw. The runner stringifies that object onto a
+It does not throw. A throw hits `errorFunction` or `ToolCallError` and
+drops the fields. The runner stringifies that object onto a
 `function_call_result` with `status: "completed"`. Don't throw from
-`execute` to signal a denial: the SDK `errorFunction` would turn a throw
-into a model-visible string (or `ToolCallError` when `outputSchema` is
-set). `timeoutMs` races the guard round trip, and
+`execute` to signal a denial. `timeoutMs` races the guard round trip, and
 `outputGuardrails` / `customDataExtractor` receive the denial object.
 Scan free-text args (a note, reason, or body). An opaque
 `orderNumber` or tool-call ID will not trip email / phone / card / IP, so
@@ -263,6 +263,8 @@ await run(agent, userText, { context: appContext });
   `agent.asTool()`, or computer/shell.
 - Don't call `createAgentContext` inside an OpenAI Agents callback.
 - Don't also wrap these tools with `@arcjet/guard/vercel-ai/v7`.
+- Don't throw from `guardTool` to signal a denial. A throw becomes
+  `ToolCallError` and drops the fields.
 - Don't import `@arcjet/guard/openai-agents`. The path is
   `@arcjet/guard/openai-agents/v0`.
 

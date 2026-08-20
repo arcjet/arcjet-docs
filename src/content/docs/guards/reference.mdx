@@ -259,6 +259,11 @@ execute on either a real `DENY` or unavailable evaluation. Use
 `onGuardError: "allow"` / `on_guard_error="allow"` to opt a wrapper into
 execution when the security check cannot be completed.
 
+JavaScript `guardTool` wrappers share one `ArcjetDenialResult` payload. The
+envelope is per-framework. `guardAction` still throws so application code
+can `catch`. For the envelope table, see
+<Link.Page href="/guards/framework-integrations#denial-responses">Framework integrations: Denial responses</Link.Page>.
+
 Warnings are informational and do not mean the decision failed open. Log them
 to correct request data, but do not treat a warning alone as a denial.
 
