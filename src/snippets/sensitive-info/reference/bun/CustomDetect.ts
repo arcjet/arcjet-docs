@@ -11,7 +11,7 @@ function detectDash(tokens: string[]): Array<"CONTAINS_DASH" | undefined> {
 }
 
 const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
     sensitiveInfo({
       deny: ["EMAIL", "CONTAINS_DASH"],

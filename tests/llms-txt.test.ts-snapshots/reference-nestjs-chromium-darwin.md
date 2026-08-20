@@ -58,7 +58,7 @@ Create a new root `ArcjetModule.forRoot` object with your API key and any defaul
 
 The required fields are:
 
-*   `key` (`string`) - Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://app.arcjet.com).
+*   `key` (`string`) - Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://console.arcjet.com).
 *   `rules` - The rules to apply to the request. This can be empty in the root object so you can set rules within each controller. See the various sections of the docs for how to configure these e.g. [shield](/shield/reference?f=nest-js), [rate limiting](/rate-limiting/reference?f=nest-js), [bot protection](/bot-protection/reference?f=nest-js), [email validation](/email-validation/reference?f=nest-js).
 
 The optional fields are:

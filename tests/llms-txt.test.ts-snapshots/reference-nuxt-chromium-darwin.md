@@ -66,7 +66,7 @@ Arcjet is configured as an integration in your `nuxt.config.ts` file. You will n
 
 [Section titled “API Key”](#api-key)
 
-First, get your site key from the [Arcjet dashboard](https://app.arcjet.com). Set it as an environment variable called `ARCJET_KEY` in your `.env` file:
+First, get your site key from the [Arcjet dashboard](https://console.arcjet.com). Set it as an environment variable called `ARCJET_KEY` in your `.env` file:
 
 Terminal window
 
@@ -88,7 +88,7 @@ nuxt.config.ts
 
 The required fields are:
 
-*   `key` (`string`) - Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://app.arcjet.com).
+*   `key` (`string`) - Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://console.arcjet.com).
 
 *   [TS](#tab-panel-XXX)
 *   [JS](#tab-panel-XXX)

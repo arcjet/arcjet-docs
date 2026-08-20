@@ -3,7 +3,7 @@ import { rampart } from "@arcjet/sensitive-info-rampart";
 import type { ActionFunctionArgs } from "@remix-run/node";
 
 const aj = arcjet({
-  // Get your site key from https://app.arcjet.com
+  // Get your site key from https://console.arcjet.com
   // and set it as an environment variable rather than hard coding.
   key: process.env.ARCJET_KEY!,
   rules: [

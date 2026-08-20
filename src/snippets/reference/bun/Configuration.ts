@@ -2,7 +2,7 @@ import arcjet, { shield } from "@arcjet/bun";
 import { env } from "bun";
 
 export const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
     // Protect against common attacks with Arcjet Shield
     shield({

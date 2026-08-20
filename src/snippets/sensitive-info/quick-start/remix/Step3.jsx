@@ -2,7 +2,7 @@ import arcjet, { sensitiveInfo } from "@arcjet/remix";
 import { rampart } from "@arcjet/sensitive-info-rampart";
 
 const aj = arcjet({
-  // Get your site key from https://app.arcjet.com
+  // Get your site key from https://console.arcjet.com
   // and set it as an environment variable rather than hard coding.
   key: process.env.ARCJET_KEY,
   rules: [

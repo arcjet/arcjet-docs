@@ -313,7 +313,7 @@ Go returns a constructor error instead of defaulting to `LIVE`.
 
 ### 1. Set your key
 
-[Create an Arcjet account](https://app.arcjet.com) then follow the
+[Create an Arcjet account](https://console.arcjet.com) then follow the
 instructions to add a site and get a key. Store the key securely using
 environment variables provided by your hosting platform to avoid exposing it
 in source control.
@@ -354,7 +354,7 @@ import type { UIMessage } from "ai";
 import { convertToModelMessages, isTextUIPart, streamText } from "ai";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   // Track budgets per user — replace "userId" with any stable identifier
   characteristics: ["userId"],
   rules: [
@@ -1277,7 +1277,7 @@ from arcjet import (
 app = FastAPI()
 
 aj = arcjet(
-    key=os.getenv("ARCJET_KEY"),  # Get your key from https://app.arcjet.com
+    key=os.getenv("ARCJET_KEY"),  # Get your key from https://console.arcjet.com
     rules=[
         # Detect prompt injection attacks before they reach your LLM
         detect_prompt_injection(mode=Mode.LIVE),
@@ -1370,7 +1370,7 @@ from arcjet import (
 app = Flask(__name__)
 
 aj = arcjet_sync(
-    key=os.getenv("ARCJET_KEY"),  # Get your key from https://app.arcjet.com
+    key=os.getenv("ARCJET_KEY"),  # Get your key from https://console.arcjet.com
     rules=[
         # Detect prompt injection attacks before they reach your LLM
         detect_prompt_injection(mode=Mode.LIVE),

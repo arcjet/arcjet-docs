@@ -56,7 +56,7 @@ Create a new `Arcjet` object with your API key and rules. Create it outside of t
 
 The following fields are required:
 
-*   `key` (`string`) – Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://app.arcjet.com).
+*   `key` (`string`) – Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://console.arcjet.com).
 *   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these, such as [shield](/shield/reference?f=node-js), [rate limiting](/rate-limiting/reference?f=node-js), [bot protection](/bot-protection/reference?f=node-js), [email validation](/email-validation/reference?f=node-js).
 
 The following fields are optional:
@@ -71,7 +71,7 @@ The following fields are optional:
 import arcjet, { shield } from "@arcjet/node";
 
 const aj = arcjet({
-  // Get your site key from https://app.arcjet.com
+  // Get your site key from https://console.arcjet.com
   // and set it as an environment variable rather than hard coding.
   // See: https://www.npmjs.com/package/dotenv
   key: process.env.ARCJET_KEY!,
@@ -88,7 +88,7 @@ const aj = arcjet({
 import arcjet, { shield } from "@arcjet/node";
 
 const aj = arcjet({
-  // Get your site key from https://app.arcjet.com
+  // Get your site key from https://console.arcjet.com
   // and set it as an environment variable rather than hard coding.
   // See: https://www.npmjs.com/package/dotenv
   key: process.env.ARCJET_KEY,
@@ -147,7 +147,7 @@ import arcjet, { detectBot, tokenBucket } from "@arcjet/node";
 
 // Create an Arcjet instance with multiple rules
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
     tokenBucket({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
@@ -170,7 +170,7 @@ import arcjet, { detectBot, tokenBucket } from "@arcjet/node";
 
 // Create an Arcjet instance with multiple rules
 const aj = arcjet({
-  key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
   rules: [
     tokenBucket({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
@@ -357,7 +357,7 @@ import arcjet, { tokenBucket } from "@arcjet/node";
 import http from "node:http";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
     // Create a token bucket rate limit. Other algorithms are supported.
     tokenBucket({
@@ -401,7 +401,7 @@ import arcjet, { tokenBucket } from "@arcjet/node";
 import http from "node:http";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
   rules: [
     // Create a token bucket rate limit. Other algorithms are supported.
     tokenBucket({
@@ -723,7 +723,7 @@ import arcjet, { shield } from "@arcjet/node";
 import http from "node:http";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
     shield({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
@@ -767,7 +767,7 @@ import arcjet, { shield } from "@arcjet/node";
 import http from "node:http";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
   rules: [
     shield({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
@@ -1030,7 +1030,7 @@ import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/node";
 import http from "node:http";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
     // Protect against common attacks with Arcjet Shield
     shield({
@@ -1099,7 +1099,7 @@ import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/node";
 import http from "node:http";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
   rules: [
     // Protect against common attacks with Arcjet Shield
     shield({

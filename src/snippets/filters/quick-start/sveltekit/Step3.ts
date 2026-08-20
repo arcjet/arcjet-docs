@@ -9,7 +9,7 @@ interface HandleProperties {
 
 type Resolve = (event: RequestEvent) => Promise<Response> | Response;
 
-// Get your Arcjet key at <https://app.arcjet.com>.
+// Get your Arcjet key at <https://console.arcjet.com>.
 // Set it as an environment variable instead of hard coding it.
 const arcjetKey = env.ARCJET_KEY;
 
