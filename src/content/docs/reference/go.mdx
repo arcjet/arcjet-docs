@@ -27,6 +27,25 @@ Set `ARCJET_KEY` in the environment. Retrieve it from the
 <Link.Page href="/cli">Arcjet CLI</Link.Page>, or the
 <Link.Page href="/mcp-server">MCP server</Link.Page>.
 
+## Environment variables
+
+`NewClient` and `NewGuardClient` read `ARCJET_KEY` when `Key` is empty. An
+explicit `Key` wins, so passing `Key: os.Getenv("ARCJET_KEY")` is still
+correct.
+
+This differs from the JS and Python SDKs. The JS Guard SDK does not read
+environment variables. Python Guard and Python Protect require an explicit
+key.
+
+The Go SDK does not read
+<Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>
+and has no development-mode switch. Set `Config.Platform` on the HTTP
+client to select a hosting platform. To override the detected client IP on
+a request, pass `WithIPSrc` to `Protect`.
+
+For more information, see
+<Link.Page href="/environment">Concepts: Environment variables</Link.Page>.
+
 ## Choose an API
 
 | API | Use it for |
@@ -105,7 +124,19 @@ func must[T any](value T, err error) T {
 ```
 
 Use `client.WithRule(...)` to derive a client with an additional route-specific
-rule. Pass dynamic inputs with the following `Protect` options:
+rule.
+
+When you configure multiple Protect rules, declaration order does not control
+evaluation. `NewClient` and `WithRule` sort once: `SensitiveInfo`, `Filter`,
+`Shield`, rate-limit rules (`TokenBucket`, `FixedWindow`, `SlidingWindow`),
+`DetectBot`, `ValidateEmail`, then `DetectPromptInjection`. Rules with the
+same priority keep their declaration order. The first denial from a
+`ModeLive` rule stops evaluation of later rules.
+
+`SensitiveInfo` runs first so a denial happens before another rule can
+forward the payload.
+
+Pass dynamic inputs with the following `Protect` options:
 
 - `WithCharacteristics(...)` for rate-limit keys such as a user or tenant ID.
 - `WithRequested(...)` for the number of tokens a token bucket consumes.
@@ -119,6 +150,24 @@ rule. Pass dynamic inputs with the following `Protect` options:
 If the application is behind a trusted reverse proxy, configure `Config.Proxies`
 with the trusted proxy addresses or CIDRs so Arcjet receives the correct client
 IP.
+
+### Timeouts
+
+`Protect` and `ProtectDetails` apply a 2 second deadline when the incoming
+context has none. An email rule doubles that to 4 seconds. A prompt-injection
+rule has a 1 second floor that the 2 second base already meets. A client
+with both email and prompt-injection rules still uses 4 seconds (the email
+doubling). A caller-supplied deadline is not shortened or replaced.
+
+```go
+// The context has no deadline, so the SDK applies 2 seconds.
+decision, err := aj.Protect(context.Background(), r)
+
+ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+defer cancel()
+// The caller deadline is kept.
+decision, err = aj.Protect(ctx, r)
+```
 
 ### Override the client IP
 
@@ -139,6 +188,38 @@ by `ProtectDetails`.
 > value and ensure it comes from a trusted source. Do not pass a
 > client-controlled header directly; doing so could allow clients to choose the
 > IP address used for fingerprinting, rate limiting, and other security checks.
+
+### Sensitive information detection
+
+Use `SensitiveInfo` on the HTTP client and pass the text to scan with
+`WithSensitiveInfoValue`. Detection runs locally.
+
+`SensitiveInfoOptions.ContextWindowSize` is the number of adjacent tokens
+passed to `Config.SensitiveInfoDetect` at a time. When the value is zero or
+negative, the SDK uses 1. This matches JS `contextWindowSize` and Python
+`context_window_size`.
+
+```go
+aj, err := arcjet.NewClient(arcjet.Config{
+	Key: os.Getenv("ARCJET_KEY"),
+	SensitiveInfoDetect: func(_ context.Context, tokens []string) []arcjet.EntityType {
+		// tokens is a window of ContextWindowSize
+		return make([]arcjet.EntityType, len(tokens))
+	},
+	Rules: []arcjet.Rule{
+		arcjet.SensitiveInfo(arcjet.SensitiveInfoOptions{
+			Mode:              arcjet.ModeLive,
+			ContextWindowSize: 3,
+		}),
+	},
+})
+```
+
+`GuardSensitiveInfoRule` does not expose `ContextWindowSize`. Guard scans
+use a window of 1.
+
+For more information about scanning request text, see
+<Link.Page href="/sensitive-info">Sensitive information detection</Link.Page>.
 
 ## Error handling
 
@@ -250,6 +331,10 @@ empty `Mode` returns `ErrInvalidMode`. HTTP `Protect` rules default an empty
 `Mode` to `ModeDryRun`. JavaScript and Python Guard rules default to `LIVE`.
 Go cannot require a struct field, so the constructor returns an error instead
 of defaulting to `LIVE`.
+
+If you omit `Bucket`, the SDK uses `default-token-bucket`,
+`default-fixed-window`, or `default-sliding-window`. Set `Bucket` explicitly
+so unrelated rules do not share a counter.
 
 Available Guard rules include rate limiting, prompt injection detection,
 content moderation (`GuardModerateContent`), sensitive information detection,

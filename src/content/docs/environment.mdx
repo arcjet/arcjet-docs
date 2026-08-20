@@ -71,25 +71,43 @@ trusted as they can be set by malicious users.
 The Arcjet Astro SDK uses `ARCJET_ENV` and the value at `import.meta.env.MODE`
 (from Vite) but does not use `NODE_ENV`.
 
+The Go SDK does not read `ARCJET_ENV` or `NODE_ENV` and has no
+development-mode switch. Set `Config.Platform` on the HTTP client to select
+a hosting platform. To override the detected client IP on a request, pass
+`WithIPSrc` to `Protect`. For more information, see the
+<Link.Page href="/reference/go#environment-variables">Go SDK reference</Link.Page>.
+
+`Protect` and `ProtectDetails` apply a 2 second deadline when the incoming
+context has none, or 4 seconds when an email rule is configured. A
+caller-supplied deadline is not shortened or replaced. For more
+information about the deadline, see
+<Link.Page href="/reference/go#timeouts">Timeouts in the Go SDK reference</Link.Page>.
+
 <a name="arcjet-key" />
 
 ### `ARCJET_KEY`
 
 Arcjet key for your site (`string`). In most cases, this variable name is a
-recommended convention. Unlike the other variables, Arcjet SDKs do not read this
-value automatically: retrieve it from the environment yourself and pass it
-explicitly. For more information, see <Link.Page href="/environment#how-to-read-environment-variables">How to read environment variables</Link.Page>.
+recommended convention.
+
+The Go SDK reads `ARCJET_KEY` when `Key` is empty on `NewClient` or
+`NewGuardClient`. An explicit `Key` wins. The Astro SDK also reads this
+value automatically.
+
+The JS Guard SDK does not read environment variables. Python Guard and
+Python Protect require an explicit key – typically
+`os.environ["ARCJET_KEY"]` or `os.environ.get("ARCJET_KEY")` passed to
+`arcjet(key=...)`, `arcjet_sync(key=...)`, `launch_arcjet(key=...)`, or
+`launch_arcjet_sync(key=...)`. Other JS SDKs (except Astro) require you to
+retrieve the value and pass it yourself.
+
+For more information, see <Link.Page href="/environment#how-to-read-environment-variables">How to read environment variables</Link.Page>.
 
 You can find your site key in the [Arcjet dashboard](https://app.arcjet.com).
 Select your site, select "SDK configuration", then click to copy.
 
 Arcjet keys are secrets that are always prefixed with `ajkey_`.
 As this is a secret, do not commit it to source control or otherwise expose it.
-
-This value is read automatically when using the Arcjet Astro SDK. In the
-Python SDK, pass it explicitly to `arcjet(key=...)` or
-`arcjet_sync(key=...)` – typically read with
-`os.environ["ARCJET_KEY"]` or `os.environ.get("ARCJET_KEY")`.
 
 <a name="arcjet-log-level" />
 
@@ -230,9 +248,11 @@ manually at module load time.
 ## How to read environment variables
 
 Arcjet reads most environment variables automatically.
-The `ARCJET_KEY` value is not read automatically, except in Astro.
-How to read it and other environment variables depends on your framework or
-runtime:
+The Go SDK reads `ARCJET_KEY` when `Key` is empty. The Astro SDK also reads
+it automatically. Other JS SDKs and the Python SDK require you to pass the
+key explicitly.
+How you read `ARCJET_KEY` and other environment variables depends on your
+framework or runtime:
 
 In [Node.js](https://nodejs.org/docs/latest/api/process.html#processenv)
 and [Bun](https://bun.com/docs/runtime/environment-variables#reading-environment-variables)
@@ -244,6 +264,18 @@ you can read environment variables with `Deno.env.get()`.
 In SvelteKit you can read environment variables from
 [`$env/dynamic/private`](https://svelte.dev/docs/kit/$env-dynamic-private) and
 the like.
+
+In Go you can read environment variables with
+[`os.Getenv`](https://pkg.go.dev/os#Getenv). Passing
+`Key: os.Getenv("ARCJET_KEY")` is the explicit-wins pattern. If you omit
+`Key`, `NewClient` and `NewGuardClient` read `ARCJET_KEY` from the
+environment:
+
+```go
+aj, err := arcjet.NewClient(arcjet.Config{
+	Key: os.Getenv("ARCJET_KEY"),
+})
+```
 
 In Python you can read environment variables with
 [`os.environ`](https://docs.python.org/3/library/os.html#os.environ).
@@ -270,7 +302,7 @@ To read values in the same way as the JS SDKs,
 for example to figure out whether Arcjet is in development mode,
 you can use this package.
 
-There is no equivalent package for Python. The Python SDK reads environment
+There is no equivalent package for Python or Go. The Python SDK reads environment
 variables directly with `os.environ` or `os.getenv` in
 [`arcjet/_client.py`](https://github.com/arcjet/arcjet-py/blob/main/src/arcjet/_client.py),
 [`arcjet/_context.py`](https://github.com/arcjet/arcjet-py/blob/main/src/arcjet/_context.py),
