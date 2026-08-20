@@ -1,14 +1,7 @@
 import logging
 import os
 
-from arcjet import (
-    EmailType,
-    Mode,
-    arcjet,
-    detect_bot,
-    sliding_window,
-    validate_email,
-)
+from arcjet import EmailType, Mode, arcjet, protect_signup
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import JSONResponse
 
@@ -19,24 +12,25 @@ logger = logging.getLogger(__name__)
 aj = arcjet(
     key=os.environ["ARCJET_KEY"],  # Get your site key from https://app.arcjet.com
     rules=[
-        detect_bot(
-            mode=Mode.LIVE,
-            allow=[],  # "allow none" will block all detected bots
-        ),
-        validate_email(
-            mode=Mode.LIVE,
-            deny=[
-                EmailType.DISPOSABLE,
-                EmailType.INVALID,
-                EmailType.NO_MX_RECORDS,
-            ],
-        ),
-        sliding_window(
-            mode=Mode.LIVE,
-            interval=600,
-            max=5,
-            characteristics=["ip.src"],
-        ),
+        *protect_signup(
+            rate_limit={
+                "mode": Mode.LIVE,
+                "max": 5,
+                "interval": 600,
+            },
+            bots={
+                "mode": Mode.LIVE,
+                "allow": [],  # "allow none" will block all detected bots
+            },
+            email={
+                "mode": Mode.LIVE,
+                "deny": [
+                    EmailType.DISPOSABLE,
+                    EmailType.INVALID,
+                    EmailType.NO_MX_RECORDS,
+                ],
+            },
+        )
     ],
 )
 

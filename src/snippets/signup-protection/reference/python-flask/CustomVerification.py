@@ -1,42 +1,36 @@
 import os
 
-from arcjet import (
-    ArcjetDecision,
-    EmailType,
-    Mode,
-    arcjet_sync,
-    detect_bot,
-    sliding_window,
-    validate_email,
-)
+from arcjet import ArcjetDecision, EmailType, Mode, arcjet_sync, protect_signup
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-# The Python SDK does not include a `protect_signup` composite rule. Instead,
-# compose the three building blocks manually: bot detection, email validation,
-# and a sliding window rate limit.
 aj = arcjet_sync(
     key=os.environ["ARCJET_KEY"],  # Get your site key from https://app.arcjet.com
     rules=[
-        detect_bot(
-            mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
-            allow=[],  # "allow none" will block all detected bots
-        ),
-        validate_email(
-            mode=Mode.LIVE,
-            deny=[
-                EmailType.DISPOSABLE,
-                EmailType.INVALID,
-                EmailType.NO_MX_RECORDS,
-            ],
-        ),
-        sliding_window(
-            mode=Mode.LIVE,
-            interval=600,  # 10 minute sliding window
-            max=5,  # allows 5 submissions within the window
-            characteristics=["ip.src"],
-        ),
+        *protect_signup(
+            rate_limit={
+                # It would be unusual for a form to be submitted more than 5
+                # times in 10 minutes from the same IP address
+                "mode": Mode.LIVE,
+                "max": 5,  # allows 5 submissions within the window
+                "interval": 600,  # 10 minute sliding window
+            },
+            bots={
+                "mode": Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
+                "allow": [],  # "allow none" will block all detected bots
+            },
+            email={
+                "mode": Mode.LIVE,
+                # Block emails that are disposable, invalid, or have no MX
+                # records.
+                "deny": [
+                    EmailType.DISPOSABLE,
+                    EmailType.INVALID,
+                    EmailType.NO_MX_RECORDS,
+                ],
+            },
+        )
     ],
 )
 
