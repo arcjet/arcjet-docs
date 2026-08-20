@@ -27,6 +27,25 @@ Set `ARCJET_KEY` in the environment. Retrieve it from the
 <Link.Page href="/cli">Arcjet CLI</Link.Page>, or the
 <Link.Page href="/mcp-server">MCP server</Link.Page>.
 
+## Environment variables
+
+`NewClient` and `NewGuardClient` read `ARCJET_KEY` when `Key` is empty. An
+explicit `Key` wins, so passing `Key: os.Getenv("ARCJET_KEY")` is still
+correct.
+
+This differs from the JS and Python SDKs. The JS Guard SDK does not read
+environment variables. Python Guard and Python Protect require an explicit
+key.
+
+The Go SDK does not read
+<Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>
+and has no development-mode switch. Set `Config.Platform` on the HTTP
+client to select a hosting platform. To override the detected client IP on
+a request, pass `WithIPSrc` to `Protect`.
+
+For more information, see
+<Link.Page href="/environment">Concepts: Environment variables</Link.Page>.
+
 ## Choose an API
 
 | API | Use it for |
