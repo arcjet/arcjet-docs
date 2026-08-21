@@ -1,0 +1,30 @@
+import Step from "./Example.ts?raw";
+import { Code } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+This example screens inbound text with content moderation before you store or
+display it.
+
+Content moderation is a Guard rule, so this example uses `@arcjet/guard` inside
+your Next.js route – not `protect()`.
+
+We assume you already have a Next.js app set up. For helper options and
+denial behavior, see the <Link.Page href="/guards">Agent guards</Link.Page>
+guide.
+
+Install the dependencies:
+
+```shell
+# Export your Arcjet API key from https://app.arcjet.com
+export ARCJET_KEY="ajkey_..."
+
+npm install @arcjet/guard
+```
+
+Create the example:
+
+<Code code={Step} lang="ts" title="/app/api/messages/route.ts" />
+
+Then send a test `POST` request to the route.
+
+Requests appear in your [Arcjet dashboard](https://app.arcjet.com) in real time.

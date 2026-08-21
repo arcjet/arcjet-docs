@@ -1,0 +1,31 @@
+import Step from "./Example.py?raw";
+import { Code } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+This example screens inbound text with content moderation before you store or
+display it.
+
+Content moderation is a Guard rule, so this example uses `arcjet.guard` inside
+your FastAPI route – not `protect()`.
+
+We assume you already have a FastAPI project set up. For helper options and
+denial behavior, see the <Link.Page href="/guards">Agent guards</Link.Page>
+guide.
+
+Install the dependencies:
+
+```shell
+# Export your Arcjet API key from https://app.arcjet.com
+export ARCJET_KEY="ajkey_..."
+export ARCJET_ENV=development
+
+pip install arcjet fastapi
+```
+
+Create the example:
+
+<Code code={Step} lang="py" title="main.py" />
+
+Then send a test `POST` request to `/messages`.
+
+Requests appear in your [Arcjet dashboard](https://app.arcjet.com) in real time.
