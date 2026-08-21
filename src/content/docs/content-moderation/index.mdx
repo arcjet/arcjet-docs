@@ -90,9 +90,9 @@ The result shape does not include per-category scores.
 
 | SDK | Public API | Notes |
 | --- | --- | --- |
-| JavaScript / TypeScript | `moderateContent()` | Defaults to `LIVE`. |
-| Python | `ModerateContent()` | Defaults to `LIVE`. |
-| Go | `GuardModerateContent` | `Mode` is required (`ModeLive` or `ModeDryRun`). |
+| JavaScript / TypeScript | `moderateContent()` | `mode` is optional and defaults to `LIVE`. |
+| Python | `ModerateContent()` | `mode` is optional and defaults to `LIVE`. |
+| Go | `GuardModerateContent` | `Mode` is required (`ModeLive` or `ModeDryRun`). An empty `Mode` returns `ErrInvalidMode`. |
 
 ### Examples
 

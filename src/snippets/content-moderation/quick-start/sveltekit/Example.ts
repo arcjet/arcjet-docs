@@ -17,4 +17,4 @@ export async function POST({ request }: RequestEvent) {
   }
 
   return json({ ok: true });
-};
+}
