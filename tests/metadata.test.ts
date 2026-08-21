@@ -260,6 +260,31 @@ test.describe("breadcrumbsFromSidebar", () => {
     ).toEqual([]);
   });
 
+  test("resolves the current page when it is passed as an absolute docs URL", () => {
+    expect(
+      breadcrumbsFromSidebar([
+        {
+          type: "group",
+          label: "Rate limiting",
+          entries: [
+            {
+              type: "link",
+              href: "https://docs.arcjet.com/rate-limiting/",
+              isCurrent: false,
+            },
+            {
+              type: "link",
+              href: "https://docs.arcjet.com/rate-limiting/reference/",
+              isCurrent: true,
+            },
+          ],
+        },
+      ]),
+    ).toEqual([
+      { name: "Rate limiting", url: "https://docs.arcjet.com/rate-limiting/" },
+    ]);
+  });
+
   test("does not treat the current page as its own ancestor", () => {
     expect(
       breadcrumbsFromSidebar([

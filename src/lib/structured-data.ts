@@ -166,7 +166,9 @@ function groupLandingHref(
   entries: SidebarBreadcrumbEntry[],
   currentHref: string,
 ): string | undefined {
-  const current = normalizePathname(currentHref);
+  const currentAbsolute = absoluteDocsUrl(currentHref);
+  if (!currentAbsolute) return undefined;
+  const current = normalizePathname(new URL(currentAbsolute).pathname);
   let best: string | undefined;
   let bestLength = 0;
 
