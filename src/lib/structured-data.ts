@@ -32,9 +32,25 @@ const SITE_DESCRIPTION =
 
 export type BreadcrumbItem = {
   name: string;
-  /** Absolute URL, or `undefined` for a group with no page of its own. */
+  /** Absolute URL of a real page. Items without a URL are omitted. */
   url?: string;
 };
+
+/**
+ * The sidebar fields the breadcrumb walk needs. Starlight's `SidebarEntry` is
+ * assignable to this; extra fields are ignored.
+ */
+export type SidebarBreadcrumbEntry =
+  | {
+      type: "group";
+      label: string;
+      entries: SidebarBreadcrumbEntry[];
+    }
+  | {
+      type: "link";
+      href: string;
+      isCurrent: boolean;
+    };
 
 export type PageStructuredDataOptions = {
   /** Canonical URL of the page. */
@@ -118,16 +134,103 @@ function siteNodes() {
   ];
 }
 
+/**
+ * Turns an internal docs href into an absolute URL with a trailing slash.
+ * External hrefs are ignored. Breadcrumbs stay on this site.
+ */
+export function absoluteDocsUrl(href: string): string | undefined {
+  if (/^https?:\/\//i.test(href)) {
+    if (!href.startsWith(`${SITE_URL}/`) && href !== SITE_URL) return undefined;
+    try {
+      return `${SITE_URL}${normalizePathname(new URL(href).pathname)}`;
+    } catch {
+      return undefined;
+    }
+  }
+  if (!href.startsWith("/")) return undefined;
+  return `${SITE_URL}${normalizePathname(href)}`;
+}
+
+function normalizePathname(href: string): string {
+  const path = href.split("?")[0].split("#")[0];
+  const withLeading = path.startsWith("/") ? path : `/${path}`;
+  return withLeading.endsWith("/") ? withLeading : `${withLeading}/`;
+}
+
+/**
+ * Section landing page for a group: the child link whose path is a proper
+ * prefix of the current page. Groups that are labels only have no landing
+ * page, so they cannot appear in a Google-valid `BreadcrumbList`.
+ */
+function groupLandingHref(
+  entries: SidebarBreadcrumbEntry[],
+  currentHref: string,
+): string | undefined {
+  const current = normalizePathname(currentHref);
+  let best: string | undefined;
+  let bestLength = 0;
+
+  for (const entry of entries) {
+    if (entry.type !== "link") continue;
+    const absolute = absoluteDocsUrl(entry.href);
+    if (!absolute) continue;
+    const path = normalizePathname(new URL(absolute).pathname);
+    if (path === current) continue;
+    if (current.startsWith(path) && path.length > bestLength) {
+      best = absolute;
+      bestLength = path.length;
+    }
+  }
+
+  return best;
+}
+
+/**
+ * Walks the sidebar to find the trail of groups leading to the current page.
+ *
+ * Google requires every `itemListElement` to include `item` (a URL) except
+ * optionally the last entry. Sidebar groups are labels, not links, so a group
+ * is included only when it has a section landing page among its children.
+ */
+export function breadcrumbsFromSidebar(
+  sidebar: SidebarBreadcrumbEntry[],
+): BreadcrumbItem[] {
+  function walk(
+    entries: SidebarBreadcrumbEntry[],
+    groups: { label: string; entries: SidebarBreadcrumbEntry[] }[],
+  ): BreadcrumbItem[] | undefined {
+    for (const entry of entries) {
+      if (entry.type === "group") {
+        const found = walk(entry.entries, [
+          ...groups,
+          { label: entry.label, entries: entry.entries },
+        ]);
+        if (found) return found;
+      } else if (entry.isCurrent) {
+        return groups.flatMap((group) => {
+          const url = groupLandingHref(group.entries, entry.href);
+          return url ? [{ name: group.label, url }] : [];
+        });
+      }
+    }
+    return undefined;
+  }
+
+  return walk(sidebar, []) ?? [];
+}
+
 function breadcrumbNode(
   canonical: string,
   title: string,
   breadcrumbs: BreadcrumbItem[],
 ) {
-  const trail: BreadcrumbItem[] = [
+  const trail = [
     { name: "Arcjet Docs", url: `${SITE_URL}/` },
     ...breadcrumbs,
     { name: title, url: canonical },
-  ];
+  ].filter((item): item is BreadcrumbItem & { url: string } =>
+    Boolean(item.url),
+  );
 
   return {
     "@type": "BreadcrumbList",
@@ -136,9 +239,10 @@ function breadcrumbNode(
       "@type": "ListItem",
       position: index + 1,
       name: item.name,
-      // Groups without a page of their own are positional only, so they carry no
-      // `item`. Schema.org allows this for intermediate breadcrumb entries.
-      ...(item.url ? { item: item.url } : {}),
+      // Google Search rejects a BreadcrumbList when any `itemListElement`
+      // is missing `item`. Schema.org allows omitting it on the last entry;
+      // we still emit it so every crumb is a real, crawlable URL.
+      item: item.url,
     })),
   };
 }
