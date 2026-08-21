@@ -98,6 +98,113 @@ Genkit with this adapter.
 Inbound screening uses direct `guard()`, which takes `label` (not `action`)
 and fails open. See the following section.
 
+## Denial payload
+
+On `DENY` the original `ToolAction` never runs. The model receives a
+completed `toolResponse.output` with this shape. It is not a throw. It
+is not `interrupt()`.
+
+```ts
+{
+  arcjetDenied: true,
+  reason: "RATE_LIMIT", // or PROMPT_INJECTION, SENSITIVE_INFO, ERROR
+  message:
+    "Arcjet denied this call (RATE_LIMIT). It may be retried after 30 seconds.",
+  retryable: true,
+  retryAfterSeconds: 30,
+}
+```
+
+You can import `ArcjetDenialResult` from `@arcjet/guard/genkit/v1`.
+
+Only rate-limit denials set `retryable: true` and include
+`retryAfterSeconds`. Other reasons tell the model not to retry.
+
+When Guard is unavailable and `onGuardError` is `"deny"`, the model
+receives `reason: "ERROR"`, `retryable: true`, and `retryAfterSeconds: 5`.
+
+## Run a guarded `generate()`
+
+Screen inbound text, wrap `lookup_order`, and pass `guardMiddleware` on
+`generate({ use })`. Prefer omitting `outputSchema` on guarded tools.
+
+```ts
+import {
+  launchArcjet,
+  detectPromptInjection,
+  localDetectSensitiveInfo,
+  tokenBucket,
+} from "@arcjet/guard";
+import {
+  guardTool,
+  guardMiddleware,
+  genkitContext,
+} from "@arcjet/guard/genkit/v1";
+import { genkit, z } from "genkit";
+
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+const ai = genkit({
+  // Configure your model plugin.
+});
+
+const lookupLimit = tokenBucket({
+  bucket: "lookups",
+  refillRate: 10,
+  intervalSeconds: 60,
+  maxTokens: 10,
+});
+const detectPii = localDetectSensitiveInfo();
+const inbound = detectPromptInjection();
+
+const lookupOrder = guardTool(
+  arcjet,
+  ai.defineTool(
+    {
+      name: "lookup_order",
+      description: "Look up an order by number",
+      inputSchema: z.object({
+        orderNumber: z.string(),
+        note: z.string(),
+      }),
+    },
+    async ({ orderNumber, note }) => ({
+      orderNumber,
+      note,
+      status: "shipped",
+    }),
+  ),
+  {
+    action: "order.looked-up",
+    onGuardError: "deny",
+    rules: (input) => [
+      lookupLimit({ key: input.orderNumber, requested: 1 }),
+      detectPii(input.note),
+    ],
+  },
+);
+
+export async function runAgent(conversationId: string, userText: string) {
+  const appContext = { sessionId: conversationId };
+
+  const decision = await arcjet.guard({
+    label: "message.received",
+    rules: [inbound(userText)],
+    ...genkitContext({ context: appContext }),
+  });
+
+  if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+    throw new Error("message blocked");
+  }
+
+  return ai.generate({
+    prompt: userText,
+    tools: [lookupOrder],
+    use: [guardMiddleware(arcjet, { sessionId: conversationId })],
+    context: appContext,
+  });
+}
+```
+
 ## Screen user text before `generate()`
 
 There is no inbound hook, so there is no `guardInbound`. Put
@@ -157,30 +264,42 @@ backend.
 ```ts
 import { z } from "genkit";
 import { guardTool } from "@arcjet/guard/genkit/v1";
-import { tokenBucket } from "@arcjet/guard";
+import { tokenBucket, localDetectSensitiveInfo } from "@arcjet/guard";
 import { arcjet } from "./arcjet.js";
 
 // `ai` is the instance `genkit()` returned.
-const limit = tokenBucket({
+const lookupLimit = tokenBucket({
+  bucket: "lookups",
   refillRate: 10,
   intervalSeconds: 60,
   maxTokens: 10,
 });
+const detectPii = localDetectSensitiveInfo();
 
 const lookupOrder = guardTool(
   arcjet,
   ai.defineTool(
     {
       name: "lookup_order",
-      description: "Look up an order",
-      inputSchema: z.object({ orderNumber: z.string() }),
+      description: "Look up an order by number",
+      inputSchema: z.object({
+        orderNumber: z.string(),
+        note: z.string(),
+      }),
     },
-    async ({ orderNumber }) => ({ orderNumber, status: "shipped" }),
+    async ({ orderNumber, note }) => ({
+      orderNumber,
+      note,
+      status: "shipped",
+    }),
   ),
   {
     action: "order.looked-up",
     onGuardError: "deny",
-    rules: (input) => [limit({ key: input.orderNumber, requested: 1 })],
+    rules: (input) => [
+      lookupLimit({ key: input.orderNumber, requested: 1 }),
+      detectPii(input.note),
+    ],
   },
 );
 ```
@@ -275,17 +394,85 @@ await arcjet.guard({
 
 ## Common patterns
 
-- **Prompt injection before `generate()`:** Direct `guard()` with
-  `detectPromptInjection()(userText)`, `genkitContext({ context })`, and
-  a `hasFailedOpen()` check.
-- **Rate limit on a tool:** `guardTool` with `tokenBucket` keyed on a
-  trusted ID such as `orderNumber`.
-- **`generate()`-wide tools:** `guardMiddleware` as a
-  `{ name, instantiate }` `tool` hook on `ai.generate({ use })`, with
-  `sessionId` for tool-time correlation.
-- **Correlate the run:** Put `{ sessionId: conversationId }` on
-  `generate({ context })` and pass `{ context: appContext }` to
-  `genkitContext`. Don't read `traceId`.
+### Rate limit a tool per trusted id
+
+Key the bucket on a trusted identifier such as `orderNumber`. Don't key
+it on free-text user input.
+
+```ts
+const lookupLimit = tokenBucket({
+  bucket: "lookups",
+  refillRate: 10,
+  intervalSeconds: 60,
+  maxTokens: 10,
+});
+
+const lookupOrder = guardTool(
+  arcjet,
+  ai.defineTool(
+    {
+      name: "lookup_order",
+      description: "Look up an order",
+      inputSchema: z.object({ orderNumber: z.string() }),
+    },
+    async ({ orderNumber }) => ({ orderNumber, status: "shipped" }),
+  ),
+  {
+    action: "order.looked-up",
+    rules: (input) => [lookupLimit({ key: input.orderNumber, requested: 1 })],
+  },
+);
+```
+
+### Scan a free-text note for sensitive information
+
+Scan a note, reason, or body. An opaque `orderNumber` does not trip
+email, phone, card, or IP detection, so don't pass it to
+`localDetectSensitiveInfo`.
+
+```ts
+import { localDetectSensitiveInfo, tokenBucket } from "@arcjet/guard";
+
+const detectPii = localDetectSensitiveInfo();
+
+const lookupOrder = guardTool(
+  arcjet,
+  ai.defineTool(
+    {
+      name: "lookup_order",
+      description: "Look up an order",
+      inputSchema: z.object({
+        orderNumber: z.string(),
+        note: z.string(),
+      }),
+    },
+    async ({ orderNumber, note }) => ({
+      orderNumber,
+      note,
+      status: "shipped",
+    }),
+  ),
+  {
+    action: "order.looked-up",
+    rules: (input) => [
+      lookupLimit({ key: input.orderNumber, requested: 1 }),
+      detectPii(input.note),
+    ],
+  },
+);
+```
+
+## Fail-closed default
+
+`guardTool` and `guardMiddleware` default to `onGuardError: "deny"`. If
+Guard cannot be evaluated, the wrapped tool does not run and
+`generate()` does not call `next()` for that tool.
+
+Set `onGuardError: "allow"` only when executing without a complete
+security decision is acceptable, such as a read-only lookup. Direct
+`guard()` still fails open. For more information about fail-open versus
+fail-closed behavior, see
+<Link.Page href="/guards/reference#availability-and-fail-behavior">Availability and fail behavior</Link.Page>.
 
 ## Related
 
