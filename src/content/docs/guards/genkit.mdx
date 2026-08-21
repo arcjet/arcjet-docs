@@ -322,7 +322,7 @@ still hits `guardTool` if the caller invokes the wrapped action.
 `guardMiddleware` does not run if they never `generate()` the tool.
 
 The tool-hook `ctx` from `toRunOptions` is only `{ metadata, resumed }`
-– no async local storage (ALS) context. Put the same ID on
+– no async local storage context. Put the same ID on
 `policy.sessionId` when you need tool-time correlation through the hook.
 
 ```ts
