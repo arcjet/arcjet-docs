@@ -35,9 +35,7 @@ no unversioned alias. `@arcjet/guard/genkit` does not resolve. The version
 segment is Genkit's major. `genkit` (`>=1.0.0 <2`) is an optional peer.
 `guardMiddleware` needs the `generateMiddleware` `tool` hook (Genkit >=
 1.33). Verified against Genkit 1.41.0. The integration requires Node.js 22
-or later. Until `@arcjet/guard/genkit/v1` is published, the import lives
-on [`f7619e4c`](https://github.com/arcjet/arcjet-js/commit/f7619e4c1c2a4f48a3342b7f8ab74a928ceb7309),
-not in the published `@arcjet/guard` package on npm.
+or later.
 
 Launch one client at module scope:
 
@@ -49,8 +47,7 @@ export const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 
 ## Helpers
 
-The integration exposes three surfaces. Facts match
-[`f7619e4c`](https://github.com/arcjet/arcjet-js/commit/f7619e4c1c2a4f48a3342b7f8ab74a928ceb7309).
+The integration exposes three surfaces:
 
 - `guardTool()` wraps the `ToolAction` that `ai.defineTool` returns. It
   replaces that callable and `.run`. It does not wrap the inner
@@ -488,4 +485,3 @@ fail-closed behavior, see
 - Example: `genkit-agent` on an
   [arcjet/examples](https://github.com/arcjet/examples) branch cut from
   `main`.
-- Adapter: [`f7619e4c`](https://github.com/arcjet/arcjet-js/commit/f7619e4c1c2a4f48a3342b7f8ab74a928ceb7309)
