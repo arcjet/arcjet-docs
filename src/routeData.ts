@@ -1,7 +1,10 @@
 import { defineRouteMiddleware } from "@astrojs/starlight/route-data";
 import { sdkFromPathname } from "@/lib/sdk";
-import type { BreadcrumbItem } from "@/lib/structured-data";
-import { pageJsonLd, serializeJsonLd } from "@/lib/structured-data";
+import {
+  breadcrumbsFromSidebar,
+  pageJsonLd,
+  serializeJsonLd,
+} from "@/lib/structured-data";
 
 type StarlightRouteData = App.Locals["starlightRoute"];
 type SidebarEntry = StarlightRouteData["sidebar"][number];
@@ -27,33 +30,6 @@ function canonicalFrom(
     }
   }
   return new URL(pathname, SITE_URL).href;
-}
-
-/**
- * Walks the sidebar to find the trail of groups leading to the current page.
- *
- * Sidebar groups are labels rather than links, so the returned items have no
- * URL. They still give AI crawlers the section hierarchy each page sits in.
- */
-function breadcrumbsFromSidebar(sidebar: SidebarEntry[]): BreadcrumbItem[] {
-  function walk(
-    entries: SidebarEntry[],
-    trail: BreadcrumbItem[],
-  ): BreadcrumbItem[] | undefined {
-    for (const entry of entries) {
-      if (entry.type === "group") {
-        const found = walk(entry.entries, [...trail, { name: entry.label }]);
-        if (found) return found;
-      } else if (entry.isCurrent) {
-        // The current page becomes the last breadcrumb itself, so only its
-        // ancestors are returned here.
-        return trail;
-      }
-    }
-    return undefined;
-  }
-
-  return walk(sidebar, []) ?? [];
 }
 
 /**

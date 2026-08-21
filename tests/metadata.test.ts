@@ -1,6 +1,11 @@
 import { expect, test } from "@playwright/test";
 import { routeForDocsFile, routeForSitemapUrl } from "../src/lib/content-dates";
-import { pageJsonLd, serializeJsonLd } from "../src/lib/structured-data";
+import {
+  absoluteDocsUrl,
+  breadcrumbsFromSidebar,
+  pageJsonLd,
+  serializeJsonLd,
+} from "../src/lib/structured-data";
 
 const ORGANIZATION_ID = "https://arcjet.com/#organization";
 const SOFTWARE_ID = "https://arcjet.com/#software";
@@ -101,7 +106,40 @@ test.describe("pageJsonLd", () => {
     expect(nodes.get("ImageObject")?.["@id"]).toBe("https://arcjet.com/#logo");
   });
 
-  test("builds a breadcrumb trail ending at the page itself", () => {
+  test("builds a breadcrumb trail of real pages, each with an item URL", () => {
+    const graph = pageJsonLd({
+      ...base,
+      breadcrumbs: [
+        { name: "Rate limiting", url: "https://docs.arcjet.com/rate-limiting/" },
+      ],
+    });
+    const breadcrumb = nodesByType(graph).get("BreadcrumbList") as
+      | { itemListElement: { position: number; name: string; item?: string }[] }
+      | undefined;
+
+    expect(breadcrumb?.itemListElement).toEqual([
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Arcjet Docs",
+        item: "https://docs.arcjet.com/",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Rate limiting",
+        item: "https://docs.arcjet.com/rate-limiting/",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: base.title,
+        item: base.canonical,
+      },
+    ]);
+  });
+
+  test("drops ancestor crumbs that have no URL so Google sees no missing item", () => {
     const graph = pageJsonLd({
       ...base,
       breadcrumbs: [{ name: "Building blocks" }],
@@ -117,15 +155,16 @@ test.describe("pageJsonLd", () => {
         name: "Arcjet Docs",
         item: "https://docs.arcjet.com/",
       },
-      // Sidebar groups are labels, not links, so they carry no `item`.
-      { "@type": "ListItem", position: 2, name: "Building blocks" },
       {
         "@type": "ListItem",
-        position: 3,
+        position: 2,
         name: base.title,
         item: base.canonical,
       },
     ]);
+    for (const item of breadcrumb?.itemListElement ?? []) {
+      expect(item.item).toMatch(/^https:\/\//);
+    }
   });
 
   test("describes the landing page as a WebPage with no breadcrumb", () => {
@@ -159,6 +198,113 @@ test.describe("pageJsonLd", () => {
   });
 });
 
+test.describe("absoluteDocsUrl", () => {
+  test("normalizes internal paths to an absolute trailing-slash URL", () => {
+    expect(absoluteDocsUrl("/rate-limiting")).toBe(
+      "https://docs.arcjet.com/rate-limiting/",
+    );
+    expect(absoluteDocsUrl("/rate-limiting/")).toBe(
+      "https://docs.arcjet.com/rate-limiting/",
+    );
+    expect(absoluteDocsUrl("https://docs.arcjet.com/rate-limiting")).toBe(
+      "https://docs.arcjet.com/rate-limiting/",
+    );
+  });
+
+  test("ignores external hrefs", () => {
+    expect(absoluteDocsUrl("https://github.com/arcjet/skills")).toBeUndefined();
+    expect(absoluteDocsUrl("rate-limiting")).toBeUndefined();
+  });
+});
+
+test.describe("breadcrumbsFromSidebar", () => {
+  test("uses a group's landing page when it is a prefix of the current page", () => {
+    expect(
+      breadcrumbsFromSidebar([
+        {
+          type: "group",
+          label: "Building blocks",
+          entries: [
+            {
+              type: "group",
+              label: "Rate limiting",
+              entries: [
+                { type: "link", href: "/rate-limiting", isCurrent: false },
+                {
+                  type: "link",
+                  href: "/rate-limiting/reference",
+                  isCurrent: true,
+                },
+              ],
+            },
+          ],
+        },
+      ]),
+    ).toEqual([
+      { name: "Rate limiting", url: "https://docs.arcjet.com/rate-limiting/" },
+    ]);
+  });
+
+  test("omits groups that have no page of their own", () => {
+    expect(
+      breadcrumbsFromSidebar([
+        {
+          type: "group",
+          label: "Coding agent tools",
+          entries: [
+            { type: "link", href: "/arcjet-plugin", isCurrent: true },
+            { type: "link", href: "/mcp-server", isCurrent: false },
+          ],
+        },
+      ]),
+    ).toEqual([]);
+  });
+
+  test("resolves the current page when it is passed as an absolute docs URL", () => {
+    expect(
+      breadcrumbsFromSidebar([
+        {
+          type: "group",
+          label: "Rate limiting",
+          entries: [
+            {
+              type: "link",
+              href: "https://docs.arcjet.com/rate-limiting/",
+              isCurrent: false,
+            },
+            {
+              type: "link",
+              href: "https://docs.arcjet.com/rate-limiting/reference/",
+              isCurrent: true,
+            },
+          ],
+        },
+      ]),
+    ).toEqual([
+      { name: "Rate limiting", url: "https://docs.arcjet.com/rate-limiting/" },
+    ]);
+  });
+
+  test("does not treat the current page as its own ancestor", () => {
+    expect(
+      breadcrumbsFromSidebar([
+        {
+          type: "group",
+          label: "Rate limiting",
+          entries: [
+            { type: "link", href: "/rate-limiting", isCurrent: true },
+            {
+              type: "link",
+              href: "/rate-limiting/reference",
+              isCurrent: false,
+            },
+          ],
+        },
+      ]),
+    ).toEqual([]);
+  });
+});
+
 test.describe("serializeJsonLd", () => {
   test("escapes < so a value cannot close the script element early", () => {
     const serialized = serializeJsonLd({
@@ -187,7 +333,13 @@ test.describe("rendered metadata", () => {
     expect(lastmods.length).toBe(locations.length);
   });
 
-  for (const path of ["/prompt-injection/", "/reference/nextjs/"]) {
+  for (const path of [
+    "/prompt-injection/",
+    "/reference/nextjs/",
+    // Google Search Console flagged these two for a missing breadcrumb `item`.
+    "/rate-limiting/reference/",
+    "/arcjet-plugin/",
+  ]) {
     test(`${path} serves a TechArticle graph and a non-empty h1`, async ({
       page,
     }) => {
@@ -218,6 +370,71 @@ test.describe("rendered metadata", () => {
           "TechArticle",
           "BreadcrumbList",
         ]),
+      );
+    });
+  }
+
+  const breadcrumbCases: {
+    path: string;
+    crumbs: { name: string; item: string }[];
+  }[] = [
+    {
+      path: "/rate-limiting/reference/",
+      crumbs: [
+        { name: "Arcjet Docs", item: "https://docs.arcjet.com/" },
+        {
+          name: "Rate limiting",
+          item: "https://docs.arcjet.com/rate-limiting/",
+        },
+        {
+          name: "Rate limiting reference",
+          item: "https://docs.arcjet.com/rate-limiting/reference/",
+        },
+      ],
+    },
+    {
+      path: "/arcjet-plugin/",
+      crumbs: [
+        { name: "Arcjet Docs", item: "https://docs.arcjet.com/" },
+        {
+          name: "Arcjet plugin",
+          item: "https://docs.arcjet.com/arcjet-plugin/",
+        },
+      ],
+    },
+  ];
+
+  for (const { path, crumbs } of breadcrumbCases) {
+    test(`${path} breadcrumb ListItems all include item`, async ({ page }) => {
+      await page.goto(path, { waitUntil: "domcontentloaded" });
+
+      const lists = await page
+        .locator('script[type="application/ld+json"]')
+        .evaluateAll((scripts) =>
+          scripts.flatMap((script) => {
+            try {
+              const data = JSON.parse(script.textContent ?? "");
+              const graph = data["@graph"] ?? [data];
+              return graph.filter(
+                (node: Node) => node["@type"] === "BreadcrumbList",
+              );
+            } catch {
+              return [];
+            }
+          }),
+        );
+
+      expect(lists).toHaveLength(1);
+      const items = lists[0]?.itemListElement as
+        | { position: number; name: string; item?: string }[]
+        | undefined;
+      expect(items).toEqual(
+        crumbs.map((crumb, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: crumb.name,
+          item: crumb.item,
+        })),
       );
     });
   }
