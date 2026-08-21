@@ -88,8 +88,8 @@ Full documentation: https://docs.arcjet.com/mcp-server
 - **List sites** within a team.
 - **Create new sites** within a team.
 - **Get site keys** (`ARCJET_KEY`) for use in your projects.
-- **List requests** received by a site with optional filtering.
-- **Get request details** including headers, rules executed, and decision info.
+- **List requests** received by a site within the plan retention window, with optional filtering.
+- **Get request details** for a request inside the plan retention window, including headers, rules executed, and decision info.
 - **Explain decisions** to understand why requests were allowed or denied.
 - **Get site quota** usage and limits for the current billing window.
 - **Analyze traffic** patterns, denial rates, top paths, top IPs, and trend vs previous period.
