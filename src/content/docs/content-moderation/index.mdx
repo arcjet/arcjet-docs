@@ -5,6 +5,7 @@ prev: false
 generateMarkdownRoute: true
 ---
 
+import { Tabs, TabItem } from "@astrojs/starlight/components";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "../../../components/Comments.astro";
 import { Link } from "@/components/link";
@@ -60,9 +61,101 @@ The result shape does not include per-category scores.
 
 | SDK | Public API | Notes |
 | --- | --- | --- |
-| JavaScript / TypeScript | `moderateContent()` | `experimental_moderateContent` is a deprecated alias. |
-| Python | `ModerateContent()` | `experimental_ModerateContent` is a deprecated alias (`DeprecationWarning`). |
-| Go | `GuardModerateContent` | `Mode` is required (`ModeLive` or `ModeDryRun`). `ExperimentalGuardModerateContent*` aliases are deprecated until 1.0. |
+| JavaScript / TypeScript | `moderateContent()` | Defaults to `LIVE`. |
+| Python | `ModerateContent()` | Defaults to `LIVE`. |
+| Go | `GuardModerateContent` | `Mode` is required (`ModeLive` or `ModeDryRun`). |
+
+### Examples
+
+Configure the rule once, bind the untrusted text, and submit it with
+`guard()` / `Guard`:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+import { launchArcjet, moderateContent } from "@arcjet/guard";
+
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+const moderate = moderateContent();
+
+const decision = await arcjet.guard({
+  label: "tools.chat",
+  rules: [moderate(userMessage)],
+});
+
+if (decision.conclusion === "DENY" && decision.reason === "MODERATE_CONTENT") {
+  throw new Error("Harmful content detected – rephrase your message");
+}
+
+const result = moderate.result(decision);
+// `detected` is true when harmful content was found. Billing is undefined
+// when the service does not report usage. Content moderation uses text_units.
+console.log(result?.detected, result?.billing?.unit, result?.billing?.count);
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+import os
+
+from arcjet.guard import ModerateContent, launch_arcjet
+
+arcjet = launch_arcjet(key=os.environ["ARCJET_KEY"])
+moderate = ModerateContent()
+
+decision = await arcjet.guard(
+    label="llm.output",
+    rules=[moderate(text)],
+)
+
+if decision.conclusion == "DENY" and decision.reason == "MODERATE_CONTENT":
+    raise RuntimeError("Harmful content detected – rephrase your message")
+
+result = moderate.result(decision)
+# `detected` is True when harmful content was found. Billing is None
+# when the service does not report usage. Content moderation uses text_units.
+print(result.detected if result else None)
+if result and result.billing:
+    print(result.billing.unit, result.billing.count)
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+moderation, err := arcjet.GuardModerateContent(arcjet.GuardModerateContentOptions{
+	Mode: arcjet.ModeLive, // required
+})
+if err != nil {
+	return err
+}
+
+decision, err := guard.Guard(ctx, arcjet.GuardRequest{
+	Label: "tools.generate",
+	Rules: []arcjet.GuardRuleInput{moderation.Text(userMessage)},
+})
+if err != nil {
+	return err
+}
+if decision.IsDenied() && decision.Reason == arcjet.ReasonModerateContent {
+	return errors.New("content flagged by moderation")
+}
+
+// Billing is optional. Content moderation usage is measured in text_units.
+if result := moderation.Result(decision); result != nil && result.Billing != nil {
+	fmt.Printf("charged %d %s\n", result.Billing.Count, result.Billing.Unit)
+}
+```
+
+Set `Mode` on every Guard rule. An empty `Mode` returns `ErrInvalidMode`.
+
+</TabItem>
+</Tabs>
+
+For install steps and framework-specific wrappers, see the
+<Link.Page href="/content-moderation/quick-start">content moderation quick start</Link.Page>.
 
 ### Dry run mode
 

@@ -2,20 +2,36 @@
 title: "Content moderation"
 titleByFramework:
   default: "Content moderation"
+  bun: "Content moderation for Bun"
   claude-agent-sdk: "Content moderation for Claude Agent SDK"
   langchain: "Content moderation for LangChain"
   langgraph: "Content moderation for LangGraph"
   mastra: "Content moderation for Mastra"
+  nest-js: "Content moderation for NestJS"
+  next-js: "Content moderation for Next.js"
+  node-js: "Content moderation for Node.js"
   openai-agents: "Content moderation for OpenAI Agents"
+  python-fastapi: "Content moderation for Python + FastAPI"
+  python-flask: "Content moderation for Python + Flask"
+  remix: "Content moderation for Remix"
+  sveltekit: "Content moderation for SvelteKit"
   vercel-ai: "Content moderation for Vercel AI SDK"
   vercel-eve: "Content moderation for Vercel Eve"
 description: "Quick start for Arcjet content moderation on Guard in JavaScript, Python, and Go."
 frameworks:
+  - bun
   - claude-agent-sdk
   - langchain
   - langgraph
   - mastra
+  - nest-js
+  - next-js
+  - node-js
   - openai-agents
+  - python-fastapi
+  - python-flask
+  - remix
+  - sveltekit
   - vercel-ai
   - vercel-eve
 ---
@@ -28,11 +44,19 @@ import SlotByFramework from "@/components/SlotByFramework";
 import FrameworkLinks from "@/components/FrameworkLinks";
 import { frameworks } from "@/lib/prefs";
 
+import BunStep from "@/snippets/content-moderation/quick-start/bun/Example.mdx";
 import ClaudeAgentSdkStep from "@/snippets/content-moderation/quick-start/claude-agent-sdk/Example.mdx";
 import LangchainStep from "@/snippets/content-moderation/quick-start/langchain/Example.mdx";
 import LanggraphStep from "@/snippets/content-moderation/quick-start/langgraph/Example.mdx";
 import MastraStep from "@/snippets/content-moderation/quick-start/mastra/Example.mdx";
+import NestJsStep from "@/snippets/content-moderation/quick-start/nestjs/Example.mdx";
+import NextJsStep from "@/snippets/content-moderation/quick-start/nextjs/Example.mdx";
+import NodeJsStep from "@/snippets/content-moderation/quick-start/nodejs/Example.mdx";
 import OpenaiAgentsStep from "@/snippets/content-moderation/quick-start/openai-agents/Example.mdx";
+import PythonFastapiStep from "@/snippets/content-moderation/quick-start/python-fastapi/Example.mdx";
+import PythonFlaskStep from "@/snippets/content-moderation/quick-start/python-flask/Example.mdx";
+import RemixStep from "@/snippets/content-moderation/quick-start/remix/Example.mdx";
+import SvelteKitStep from "@/snippets/content-moderation/quick-start/sveltekit/Example.mdx";
 import VercelAiStep from "@/snippets/content-moderation/quick-start/vercel-ai/Example.mdx";
 import VercelEveStep from "@/snippets/content-moderation/quick-start/vercel-eve/Example.mdx";
 
@@ -53,11 +77,19 @@ is stored, displayed, or forwarded. It is a Guard rule – call it from
 ## Quick start
 
 <SlotByFramework client:load>
+  <BunStep slot="bun" />
   <ClaudeAgentSdkStep slot="claude-agent-sdk" />
   <LangchainStep slot="langchain" />
   <LanggraphStep slot="langgraph" />
   <MastraStep slot="mastra" />
+  <NestJsStep slot="nest-js" />
+  <NextJsStep slot="next-js" />
+  <NodeJsStep slot="node-js" />
   <OpenaiAgentsStep slot="openai-agents" />
+  <PythonFastapiStep slot="python-fastapi" />
+  <PythonFlaskStep slot="python-flask" />
+  <RemixStep slot="remix" />
+  <SvelteKitStep slot="sveltekit" />
   <VercelAiStep slot="vercel-ai" />
   <VercelEveStep slot="vercel-eve" />
 </SlotByFramework>
@@ -83,7 +115,7 @@ const decision = await arcjet.guard({
 });
 
 if (decision.conclusion === "DENY" && decision.reason === "MODERATE_CONTENT") {
-  throw new Error("Harmful content detected — please rephrase your message");
+  throw new Error("Harmful content detected – rephrase your message");
 }
 
 const result = moderate.result(decision);
@@ -91,9 +123,6 @@ const result = moderate.result(decision);
 // when the service does not report usage. Content moderation uses text_units.
 console.log(result?.detected, result?.billing?.unit, result?.billing?.count);
 ```
-
-`experimental_moderateContent` remains a deprecated alias of
-`moderateContent()`.
 
 </TabItem>
 <TabItem label="Python">
@@ -116,7 +145,7 @@ decision = await arcjet.guard(
 )
 
 if decision.conclusion == "DENY" and decision.reason == "MODERATE_CONTENT":
-    raise RuntimeError("Harmful content detected — please rephrase your message")
+    raise RuntimeError("Harmful content detected – rephrase your message")
 
 result = moderate.result(decision)
 # `detected` is True when harmful content was found. Billing is None
@@ -125,9 +154,6 @@ print(result.detected if result else None)
 if result and result.billing:
     print(result.billing.unit, result.billing.count)
 ```
-
-`experimental_ModerateContent` remains a deprecated alias of
-`ModerateContent()` and emits `DeprecationWarning`.
 
 </TabItem>
 <TabItem label="Go">
@@ -162,9 +188,6 @@ if result := moderation.Result(decision); result != nil && result.Billing != nil
 ```
 
 Set `Mode` on every Guard rule. An empty `Mode` returns `ErrInvalidMode`.
-
-`ExperimentalGuardModerateContent` and the matching Options/Rule names remain
-as deprecated aliases until 1.0.
 
 </TabItem>
 </Tabs>
