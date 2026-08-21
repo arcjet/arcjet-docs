@@ -1,0 +1,10 @@
+import { Link } from "@/components/link";
+
+Guard rate limits use `tokenBucket` / `TokenBucket`. There is no
+`fixedWindow` or `slidingWindow` helper on `@arcjet/guard`. Set
+`maxTokens` to the burst you want and `refillRate` / `intervalSeconds`
+to the sustained allowance.
+
+For a complete tool example, see the token bucket example on this page. For
+adapter-specific options, see the
+<Link.Page href="/guards/genkit">Genkit agent guard</Link.Page>.

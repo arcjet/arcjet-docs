@@ -1,0 +1,29 @@
+import Step from "./Example.ts?raw";
+import { Code } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+This example screens inbound user text for prompt injection before the model runs.
+
+We assume you already have a Genkit project set up. For helper options and
+denial behavior, see the <Link.Page href="/guards/genkit">Genkit agent guard</Link.Page>.
+
+Until `@arcjet/guard/genkit/v1` is published, the import lives on
+[`f7619e4c`](https://github.com/arcjet/arcjet-js/commit/f7619e4c1c2a4f48a3342b7f8ab74a928ceb7309),
+not in the published `@arcjet/guard` package on npm.
+
+Install the dependencies:
+
+```shell
+# Export your Arcjet API key from https://console.arcjet.com
+export ARCJET_KEY="ajkey_..."
+
+npm install @arcjet/guard genkit
+```
+
+Create the example:
+
+<Code code={Step} lang="ts" title="agent.ts" />
+
+Then start or invoke the agent with a test prompt.
+
+Requests appear in your [Arcjet dashboard](https://console.arcjet.com) in real time.

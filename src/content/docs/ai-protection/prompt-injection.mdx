@@ -4,6 +4,7 @@ titleByFramework:
   default: "AI prompt injection detection"
   next-js: "AI prompt injection detection for Next.js"
   claude-agent-sdk: "AI prompt injection detection for Claude Agent SDK"
+  genkit: "AI prompt injection detection for Genkit"
   langchain: "AI prompt injection detection for LangChain"
   langgraph: "AI prompt injection detection for LangGraph"
   mastra: "AI prompt injection detection for Mastra"
@@ -17,6 +18,7 @@ prev: true
 next: true
 frameworks:
   - claude-agent-sdk
+  - genkit
   - langchain
   - langgraph
   - mastra
@@ -49,6 +51,7 @@ import NextJsStep from "@/snippets/ai-protection/prompt-injection/nextjs/Example
 import PythonFastapiStep from "@/snippets/ai-protection/prompt-injection/python-fastapi/Example.mdx";
 import PythonFlaskStep from "@/snippets/ai-protection/prompt-injection/python-flask/Example.mdx";
 import ClaudeAgentSdkStep from "@/snippets/ai-protection/prompt-injection/claude-agent-sdk/Example.mdx";
+import GenkitStep from "@/snippets/ai-protection/prompt-injection/genkit/Example.mdx";
 import LangchainStep from "@/snippets/ai-protection/prompt-injection/langchain/Example.mdx";
 import LanggraphStep from "@/snippets/ai-protection/prompt-injection/langgraph/Example.mdx";
 import MastraStep from "@/snippets/ai-protection/prompt-injection/mastra/Example.mdx";
@@ -80,6 +83,7 @@ application behavior and your AI budget.
   <PythonFastapiStep slot="python-fastapi" />
   <PythonFlaskStep slot="python-flask" />
   <ClaudeAgentSdkStep slot="claude-agent-sdk" />
+  <GenkitStep slot="genkit" />
   <LangchainStep slot="langchain" />
   <LanggraphStep slot="langgraph" />
   <MastraStep slot="mastra" />
@@ -119,7 +123,7 @@ import type { UIMessage } from "ai";
 import { convertToModelMessages, isTextUIPart, streamText } from "ai";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
     // Shield protects against common web attacks e.g. SQL injection
     shield({ mode: "LIVE" }),
@@ -220,7 +224,7 @@ class ChatRequest(BaseModel):
 
 
 aj = arcjet(
-    key=os.environ["ARCJET_KEY"],  # Get your site key from https://app.arcjet.com
+    key=os.environ["ARCJET_KEY"],  # Get your site key from https://console.arcjet.com
     rules=[
         # Shield protects against common web attacks e.g. SQL injection
         shield(mode=Mode.LIVE),
