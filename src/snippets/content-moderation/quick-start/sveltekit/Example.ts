@@ -1,11 +1,10 @@
 import { launchArcjet, moderateContent } from "@arcjet/guard";
-import { error, json } from "@sveltejs/kit";
-import type { RequestHandler } from "./$types";
+import { error, json, type RequestEvent } from "@sveltejs/kit";
 
 const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 const moderate = moderateContent();
 
-export const POST: RequestHandler = async ({ request }) => {
+export async function POST({ request }: RequestEvent) {
   const { message }: { message: string } = await request.json();
 
   const decision = await arcjet.guard({
