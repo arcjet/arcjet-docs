@@ -2,7 +2,7 @@ import arcjet, { validateEmail } from "@arcjet/next";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
     validateEmail({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only

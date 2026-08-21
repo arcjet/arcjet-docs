@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 export const runtime = "nodejs";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
   rules: [
     sensitiveInfo({
       mode: "LIVE", // Will block requests, use "DRY_RUN" to log only

@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 app = FastAPI()
 
 aj = arcjet(
-    key=os.environ["ARCJET_KEY"],  # Get your site key from https://app.arcjet.com
+    key=os.environ["ARCJET_KEY"],  # Get your site key from https://console.arcjet.com
     rules=[
         fixed_window(
             mode=Mode.LIVE,

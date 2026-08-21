@@ -1,6 +1,6 @@
 import arcjet, { filter } from "@arcjet/deno";
 
-// Get your Arcjet key at <https://app.arcjet.com>.
+// Get your Arcjet key at <https://console.arcjet.com>.
 // Set it as an environment variable instead of hard coding it.
 const arcjetKey = Deno.env.get("ARCJET_KEY");
 

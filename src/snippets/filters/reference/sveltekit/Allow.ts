@@ -3,7 +3,7 @@ import arcjet, { filter } from "@arcjet/sveltekit";
 import { type RequestEvent, error } from "@sveltejs/kit";
 
 const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
     filter({
       allow: [

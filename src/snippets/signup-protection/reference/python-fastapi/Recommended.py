@@ -3,7 +3,7 @@ import os
 from arcjet import EmailType, Mode, arcjet, protect_signup
 
 aj = arcjet(
-    key=os.environ["ARCJET_KEY"],  # Get your site key from https://app.arcjet.com
+    key=os.environ["ARCJET_KEY"],  # Get your site key from https://console.arcjet.com
     rules=[
         *protect_signup(
             rate_limit={

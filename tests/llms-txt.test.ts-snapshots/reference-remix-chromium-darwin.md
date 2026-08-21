@@ -56,7 +56,7 @@ Create a new `Arcjet` object with your API key and rules. This should be outside
 
 The required fields are:
 
-*   `key` (`string`) - Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://app.arcjet.com).
+*   `key` (`string`) - Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://console.arcjet.com).
 *   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these e.g. [shield](/shield/reference?f=remix), [rate limiting](/rate-limiting/reference?f=remix), [bot protection](/bot-protection/reference?f=remix), [email validation](/email-validation/reference?f=remix).
 
 The optional fields are:
@@ -69,12 +69,12 @@ The optional fields are:
 
 ```
 1import arcjet, { shield } from "@arcjet/remix";2
-3const aj = arcjet({4  // Get your site key from https://app.arcjet.com5  // and set it as an environment variable rather than hard coding.6  // See: https://www.npmjs.com/package/dotenv7  key: process.env.ARCJET_KEY!,8  rules: [9    // Protect against common attacks with Arcjet Shield10    shield({11      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only12    }),13  ],14});
+3const aj = arcjet({4  // Get your site key from https://console.arcjet.com5  // and set it as an environment variable rather than hard coding.6  // See: https://www.npmjs.com/package/dotenv7  key: process.env.ARCJET_KEY!,8  rules: [9    // Protect against common attacks with Arcjet Shield10    shield({11      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only12    }),13  ],14});
 ```
 
 ```
 1import arcjet, { shield } from "@arcjet/remix";2
-3const aj = arcjet({4  // Get your site key from https://app.arcjet.com5  // and set it as an environment variable rather than hard coding.6  // See: https://www.npmjs.com/package/dotenv7  key: process.env.ARCJET_KEY,8  rules: [9    // Protect against common attacks with Arcjet Shield10    shield({11      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only12    }),13  ],14});
+3const aj = arcjet({4  // Get your site key from https://console.arcjet.com5  // and set it as an environment variable rather than hard coding.6  // See: https://www.npmjs.com/package/dotenv7  key: process.env.ARCJET_KEY,8  rules: [9    // Protect against common attacks with Arcjet Shield10    shield({11      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only12    }),13  ],14});
 ```
 
 ### Single instance
@@ -116,14 +116,14 @@ index.ts
 
 ```
 1import arcjet, { detectBot, tokenBucket } from "@arcjet/remix";2
-3// Create an Arcjet instance with multiple rules4const aj = arcjet({5  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com6  rules: [7    tokenBucket({8      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only9      refillRate: 5, // refill 5 tokens per interval10      interval: 10, // refill every 10 seconds11      capacity: 10, // bucket maximum capacity of 10 tokens12    }),13    detectBot({14      mode: "LIVE",15      allow: [], // "allow none" will block all detected bots16    }),17  ],18});
+3// Create an Arcjet instance with multiple rules4const aj = arcjet({5  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com6  rules: [7    tokenBucket({8      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only9      refillRate: 5, // refill 5 tokens per interval10      interval: 10, // refill every 10 seconds11      capacity: 10, // bucket maximum capacity of 10 tokens12    }),13    detectBot({14      mode: "LIVE",15      allow: [], // "allow none" will block all detected bots16    }),17  ],18});
 ```
 
 index.js
 
 ```
 1import arcjet, { detectBot, tokenBucket } from "@arcjet/remix";2
-3// Create an Arcjet instance with multiple rules4const aj = arcjet({5  key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com6  rules: [7    tokenBucket({8      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only9      refillRate: 5, // refill 5 tokens per interval10      interval: 10, // refill every 10 seconds11      capacity: 10, // bucket maximum capacity of 10 tokens12    }),13    detectBot({14      mode: "LIVE",15      allow: [], // "allow none" will block all detected bots16    }),17  ],18});
+3// Create an Arcjet instance with multiple rules4const aj = arcjet({5  key: process.env.ARCJET_KEY, // Get your site key from https://console.arcjet.com6  rules: [7    tokenBucket({8      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only9      refillRate: 5, // refill 5 tokens per interval10      interval: 10, // refill every 10 seconds11      capacity: 10, // bucket maximum capacity of 10 tokens12    }),13    detectBot({14      mode: "LIVE",15      allow: [], // "allow none" will block all detected bots16    }),17  ],18});
 ```
 
 ### Environment variables
@@ -227,7 +227,7 @@ This function returns a `Promise` that resolves to an `ArcjetDecision` object, w
 
 ```
 1import arcjet, { tokenBucket } from "@arcjet/remix";2import type { LoaderFunctionArgs } from "@remix-run/node";3
-4const aj = arcjet({5  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com6  rules: [7    // Create a token bucket rate limit. Other algorithms are supported.8    tokenBucket({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10      characteristics: ["userId"], // track requests by a custom user ID11      refillRate: 5, // refill 5 tokens per interval12      interval: 10, // refill every 10 seconds13      capacity: 10, // bucket maximum capacity of 10 tokens14    }),15  ],16});17
+4const aj = arcjet({5  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com6  rules: [7    // Create a token bucket rate limit. Other algorithms are supported.8    tokenBucket({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10      characteristics: ["userId"], // track requests by a custom user ID11      refillRate: 5, // refill 5 tokens per interval12      interval: 10, // refill every 10 seconds13      capacity: 10, // bucket maximum capacity of 10 tokens14    }),15  ],16});17
 18// The loader function is called for every request to the app, but you could19// also protect an action20export async function loader(args: LoaderFunctionArgs) {21  const userId = "user123"; // Replace with your authenticated user ID22  // The userId prop is required because it is defined in the characteristics23  // prop of the tokenBucket rule.24  const decision = await aj.protect(args, { userId, requested: 5 }); // Deduct 5 tokens from the bucket25
 26  if (decision.isDenied()) {27    throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });28  }29
 30  // We don't need to use the decision elsewhere, but you could return it to31  // the component32  return null;33}
@@ -237,7 +237,7 @@ This function returns a `Promise` that resolves to an `ArcjetDecision` object, w
 
 ```
 1import arcjet, { tokenBucket } from "@arcjet/remix";2
-3const aj = arcjet({4  key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com5  rules: [6    // Create a token bucket rate limit. Other algorithms are supported.7    tokenBucket({8      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only9      characteristics: ["userId"], // track requests by a custom user ID10      refillRate: 5, // refill 5 tokens per interval11      interval: 10, // refill every 10 seconds12      capacity: 10, // bucket maximum capacity of 10 tokens13    }),14  ],15});16
+3const aj = arcjet({4  key: process.env.ARCJET_KEY, // Get your site key from https://console.arcjet.com5  rules: [6    // Create a token bucket rate limit. Other algorithms are supported.7    tokenBucket({8      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only9      characteristics: ["userId"], // track requests by a custom user ID10      refillRate: 5, // refill 5 tokens per interval11      interval: 10, // refill every 10 seconds12      capacity: 10, // bucket maximum capacity of 10 tokens13    }),14  ],15});16
 17// The loader function is called for every request to the app, but you could18// also protect an action19export async function loader(args) {20  const userId = "user123"; // Replace with your authenticated user ID21  // The userId prop is required because it is defined in the characteristics22  // prop of the tokenBucket rule.23  const decision = await aj.protect(args, { userId, requested: 5 }); // Deduct 5 tokens from the bucket24
 25  if (decision.isDenied()) {26    throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });27  }28
 29  // We don't need to use the decision elsewhere, but you could return it to30  // the component31  return null;32}
@@ -450,7 +450,7 @@ The following are available on all pricing plans:
 
 ```
 1import arcjet, { shield } from "@arcjet/remix";2import type { LoaderFunctionArgs } from "@remix-run/node";3
-4const aj = arcjet({5  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com6  rules: [7    shield({8      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only9    }),10  ],11});12
+4const aj = arcjet({5  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com6  rules: [7    shield({8      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only9    }),10  ],11});12
 13// The loader function is called for every request to the app, but you could14// also protect an action15export async function loader(args: LoaderFunctionArgs) {16  const decision = await aj.protect(args);17
 18  if (decision.ip.hasCountry()) {19    console.log("Visitor from", decision.ip.countryName);20  }21
 22  if (decision.isDenied()) {23    throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });24  }25
@@ -461,7 +461,7 @@ The following are available on all pricing plans:
 
 ```
 1import arcjet, { shield } from "@arcjet/remix";2
-3const aj = arcjet({4  key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com5  rules: [6    shield({7      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only8    }),9  ],10});11
+3const aj = arcjet({4  key: process.env.ARCJET_KEY, // Get your site key from https://console.arcjet.com5  rules: [6    shield({7      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only8    }),9  ],10});11
 12// The loader function is called for every request to the app, but you could13// also protect an action14export async function loader(args) {15  const decision = await aj.protect(args);16
 17  if (decision.ip.hasCountry()) {18    console.log("Visitor from", decision.ip.countryName);19  }20
 21  if (decision.isDenied()) {22    throw new Response("Forbidden", { status: 403, statusText: "Forbidden" });23  }24
@@ -545,7 +545,7 @@ Sometimes it is useful to add additional protection via a rule based on the logi
 
 ```
 1import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/remix";2import type { LoaderFunctionArgs } from "@remix-run/node";3
-4const aj = arcjet({5  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com6  rules: [7    // Protect against common attacks with Arcjet Shield8    shield({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10    }),11  ],12});13
+4const aj = arcjet({5  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com6  rules: [7    // Protect against common attacks with Arcjet Shield8    shield({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10    }),11  ],12});13
 14function getClient(userId?: string) {15  if (userId) {16    return aj;17  } else {18    // Only apply bot detection and rate limiting to non-authenticated users19    return (20      aj21        .withRule(22          fixedWindow({23            max: 10,24            window: "1m",25          }),26        )27        // You can chain multiple rules, or just use one28        .withRule(29          detectBot({30            mode: "LIVE", // will block requests. Use "DRY_RUN" to log only31            allow: [], // "allow none" will block all detected bots32          }),33        )34    );35  }36}37
 38// The loader function is called for every request to the app, but you could39// also protect an action40export async function loader(args: LoaderFunctionArgs) {41  // This userId is hard coded for the example, but this is where you would do a42  // session lookup and get the user ID.43  const userId = "totoro";44
 45  const decision = await getClient(userId).protect(args);46
@@ -557,7 +557,7 @@ Sometimes it is useful to add additional protection via a rule based on the logi
 
 ```
 1import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/remix";2
-3const aj = arcjet({4  key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com5  rules: [6    // Protect against common attacks with Arcjet Shield7    shield({8      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only9    }),10  ],11});12
+3const aj = arcjet({4  key: process.env.ARCJET_KEY, // Get your site key from https://console.arcjet.com5  rules: [6    // Protect against common attacks with Arcjet Shield7    shield({8      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only9    }),10  ],11});12
 13function getClient(userId) {14  if (userId) {15    return aj;16  } else {17    // Only apply bot detection and rate limiting to non-authenticated users18    return (19      aj20        .withRule(21          fixedWindow({22            max: 10,23            window: "1m",24          }),25        )26        // You can chain multiple rules, or just use one27        .withRule(28          detectBot({29            mode: "LIVE", // will block requests. Use "DRY_RUN" to log only30            allow: [], // "allow none" will block all detected bots31          }),32        )33    );34  }35}36
 37// The loader function is called for every request to the app, but you could38// also protect an action39export async function loader(args) {40  // This userId is hard coded for the example, but this is where you would do a41  // session lookup and get the user ID.42  const userId = "totoro";43
 44  const decision = await getClient(userId).protect(args);45

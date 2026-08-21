@@ -4,7 +4,7 @@ import type { UIMessage } from "ai";
 import { convertToModelMessages, isTextUIPart, streamText } from "ai";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
     sensitiveInfo({
       mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only

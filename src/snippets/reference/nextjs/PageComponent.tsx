@@ -4,7 +4,7 @@
 import arcjet, { detectBot, request } from "@arcjet/next";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
     // Create a bot detection rule
     detectBot({

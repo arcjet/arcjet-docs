@@ -18,7 +18,7 @@ extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricin
 - [Arcjet CLI](https://docs.arcjet.com/cli): create sites, retrieve keys, inspect requests, manage rules from the terminal.
 - [MCP server](https://docs.arcjet.com/mcp-server): same management surface over MCP at `https://api.arcjet.com/mcp` (OAuth).
 - [Arcjet plugin](https://docs.arcjet.com/arcjet-plugin): bundled skills + MCP + coding rules for Claude Code and Cursor.
-- [Create an account](https://app.arcjet.com)
+- [Create an account](https://console.arcjet.com)
 - [Quick start guides by framework](https://docs.arcjet.com/get-started)
 
 ## Features

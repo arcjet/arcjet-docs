@@ -9,7 +9,7 @@ from pydantic import BaseModel
 app = FastAPI()
 
 aj = arcjet(
-    key=os.environ["ARCJET_KEY"],  # Get your site key from https://app.arcjet.com
+    key=os.environ["ARCJET_KEY"],  # Get your site key from https://console.arcjet.com
     rules=[
         detect_sensitive_info(
             mode=Mode.LIVE,  # Will block requests, use Mode.DRY_RUN to log only

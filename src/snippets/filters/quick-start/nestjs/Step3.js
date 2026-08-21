@@ -3,7 +3,7 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_GUARD, NestFactory } from "@nestjs/core";
 
-// Get your Arcjet key at <https://app.arcjet.com>.
+// Get your Arcjet key at <https://console.arcjet.com>.
 // Set it as an environment variable instead of hard coding it.
 const arcjetKey = process.env.ARCJET_KEY;
 

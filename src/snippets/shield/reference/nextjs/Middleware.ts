@@ -5,7 +5,7 @@ export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
     // Protect against common attacks with Arcjet Shield
     shield({

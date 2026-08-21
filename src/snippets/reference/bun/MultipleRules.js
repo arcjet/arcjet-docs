@@ -3,7 +3,7 @@ import { env } from "bun";
 
 // Create an Arcjet instance with multiple rules
 const aj = arcjet({
-  key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  key: env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
   rules: [
     tokenBucket({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
