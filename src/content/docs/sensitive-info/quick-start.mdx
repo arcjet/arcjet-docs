@@ -4,6 +4,7 @@ titleByFramework:
   default: "Sensitive information detection"
   bun: "Sensitive information detection for Bun"
   claude-agent-sdk: "Sensitive information detection for Claude Agent SDK"
+  genkit: "Sensitive information detection for Genkit"
   langchain: "Sensitive information detection for LangChain"
   langgraph: "Sensitive information detection for LangGraph"
   mastra: "Sensitive information detection for Mastra"
@@ -21,6 +22,7 @@ description: "Quick start guide for detecting sensitive information with Arcjet 
 frameworks:
   - bun
   - claude-agent-sdk
+  - genkit
   - langchain
   - langgraph
   - mastra
@@ -101,6 +103,11 @@ import Step4PythonFlask from "@/snippets/sensitive-info/quick-start/python-flask
 import Step4Remix from "@/snippets/sensitive-info/quick-start/remix/Step4.mdx";
 import Step4SvelteKit from "@/snippets/sensitive-info/quick-start/sveltekit/Step4.mdx";
 
+import Step1Genkit from "@/snippets/sensitive-info/quick-start/genkit/Step1.mdx";
+import Step2Genkit from "@/snippets/sensitive-info/quick-start/genkit/Step2.mdx";
+import Step3Genkit from "@/snippets/sensitive-info/quick-start/genkit/Step3.mdx";
+import Step4Genkit from "@/snippets/sensitive-info/quick-start/genkit/Step4.mdx";
+
 import Step1ClaudeAgentSdk from "@/snippets/sensitive-info/quick-start/claude-agent-sdk/Step1.mdx";
 import Step2ClaudeAgentSdk from "@/snippets/sensitive-info/quick-start/claude-agent-sdk/Step2.mdx";
 import Step3ClaudeAgentSdk from "@/snippets/sensitive-info/quick-start/claude-agent-sdk/Step3.mdx";
@@ -169,6 +176,7 @@ In your project root, install the SDK:
   <StepRemix slot="remix" />
   <Step1SvelteKit slot="sveltekit" />
   <Step1ClaudeAgentSdk slot="claude-agent-sdk" />
+  <Step1Genkit slot="genkit" />
   <Step1Langchain slot="langchain" />
   <Step1Langgraph slot="langgraph" />
   <Step1Mastra slot="mastra" />
@@ -179,7 +187,7 @@ In your project root, install the SDK:
 
 ### 2. Set your key
 
-[Create a free Arcjet account](https://app.arcjet.com) then follow the
+[Create a free Arcjet account](https://console.arcjet.com) then follow the
 instructions to add a site and get a key. Add it to a `.env.local` file in your
 project root.
 
@@ -193,6 +201,7 @@ project root.
   <Step2 slot="remix" />
   <Step2 slot="sveltekit" />
   <Step2ClaudeAgentSdk slot="claude-agent-sdk" />
+  <Step2Genkit slot="genkit" />
   <Step2Langchain slot="langchain" />
   <Step2Langgraph slot="langgraph" />
   <Step2Mastra slot="mastra" />
@@ -219,6 +228,7 @@ change which entity types to detect. For details, see the
   <Step3Remix slot="remix" />
   <Step3SvelteKit slot="sveltekit" />
   <Step3ClaudeAgentSdk slot="claude-agent-sdk" />
+  <Step3Genkit slot="genkit" />
   <Step3Langchain slot="langchain" />
   <Step3Langgraph slot="langgraph" />
   <Step3Mastra slot="mastra" />
@@ -242,6 +252,7 @@ request:
   <Step4Remix slot="remix" />
   <Step4SvelteKit slot="sveltekit" />
   <Step4ClaudeAgentSdk slot="claude-agent-sdk" />
+  <Step4Genkit slot="genkit" />
   <Step4Langchain slot="langchain" />
   <Step4Langgraph slot="langgraph" />
   <Step4Mastra slot="mastra" />
@@ -279,7 +290,7 @@ is a 400:
 < content-length: 72
 ```
 
-The requests also appear in the [Arcjet dashboard](https://app.arcjet.com).
+The requests also appear in the [Arcjet dashboard](https://console.arcjet.com).
 
 ## FAQs
 

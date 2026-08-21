@@ -4,6 +4,7 @@ description: "Reference guide for adding Arcjet rate limiting to your Next.js, N
 frameworks:
   - bun
   - claude-agent-sdk
+  - genkit
   - langchain
   - langgraph
   - mastra
@@ -191,6 +192,13 @@ import SlidingWindowSvelteKit from "@/snippets/rate-limiting/reference/sveltekit
 import TokenBucketSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/TokenBucket.mdx";
 import TokenBucketRequestSvelteKit from "@/snippets/rate-limiting/reference/sveltekit/TokenBucketRequest.mdx";
 
+import TokenBucketGenkit from "@/snippets/rate-limiting/reference/genkit/TokenBucket.mdx";
+import TokenBucketRequestGenkit from "@/snippets/rate-limiting/reference/genkit/TokenBucketRequest.mdx";
+import ByUserIdGenkit from "@/snippets/rate-limiting/reference/genkit/ByUserId.mdx";
+import ErrorsGenkit from "@/snippets/rate-limiting/reference/genkit/Errors.mdx";
+import DecisionLogGenkit from "@/snippets/rate-limiting/reference/genkit/DecisionLog.mdx";
+import GuardAlgoGenkit from "@/snippets/rate-limiting/reference/genkit/GuardAlgo.mdx";
+
 import TokenBucketClaudeAgentSdk from "@/snippets/rate-limiting/reference/claude-agent-sdk/TokenBucket.mdx";
 import TokenBucketRequestClaudeAgentSdk from "@/snippets/rate-limiting/reference/claude-agent-sdk/TokenBucketRequest.mdx";
 import ByUserIdClaudeAgentSdk from "@/snippets/rate-limiting/reference/claude-agent-sdk/ByUserId.mdx";
@@ -311,6 +319,7 @@ def fixed_window(
   <FixedWindowRemix slot="remix" />
   <FixedWindowSvelteKit slot="sveltekit" />
   <GuardAlgoClaudeAgentSdk slot="claude-agent-sdk" />
+  <GuardAlgoGenkit slot="genkit" />
   <GuardAlgoLangchain slot="langchain" />
   <GuardAlgoLanggraph slot="langgraph" />
   <GuardAlgoMastra slot="mastra" />
@@ -373,6 +382,7 @@ def sliding_window(
   <SlidingWindowRemix slot="remix" />
   <SlidingWindowSvelteKit slot="sveltekit" />
   <GuardAlgoClaudeAgentSdk slot="claude-agent-sdk" />
+  <GuardAlgoGenkit slot="genkit" />
   <GuardAlgoLangchain slot="langchain" />
   <GuardAlgoLanggraph slot="langgraph" />
   <GuardAlgoMastra slot="mastra" />
@@ -448,6 +458,7 @@ request example](#token-bucket-request).
   <TokenBucketRemix slot="remix" />
   <TokenBucketSvelteKit slot="sveltekit" />
   <TokenBucketClaudeAgentSdk slot="claude-agent-sdk" />
+  <TokenBucketGenkit slot="genkit" />
   <TokenBucketLangchain slot="langchain" />
   <TokenBucketLanggraph slot="langgraph" />
   <TokenBucketMastra slot="mastra" />
@@ -507,6 +518,7 @@ The custom characteristic is `userId` with the value passed as a prop on the
   <ByUserIdRemix slot="remix" />
   <ByUserIdSvelteKit slot="sveltekit" />
   <ByUserIdClaudeAgentSdk slot="claude-agent-sdk" />
+  <ByUserIdGenkit slot="genkit" />
   <ByUserIdLangchain slot="langchain" />
   <ByUserIdLanggraph slot="langgraph" />
   <ByUserIdMastra slot="mastra" />
@@ -590,6 +602,7 @@ This example logs the full result as well as each rate limit rule:
   <DecisionLogRemix slot="remix" />
   <DecisionLogSvelteKit slot="sveltekit" />
   <DecisionLogClaudeAgentSdk slot="claude-agent-sdk" />
+  <DecisionLogGenkit slot="genkit" />
   <DecisionLogLangchain slot="langchain" />
   <DecisionLogLanggraph slot="langgraph" />
   <DecisionLogMastra slot="mastra" />
@@ -614,6 +627,7 @@ requesting to withdraw from the bucket.
   <TokenBucketRequestRemix slot="remix" />
   <TokenBucketRequestSvelteKit slot="sveltekit" />
   <TokenBucketRequestClaudeAgentSdk slot="claude-agent-sdk" />
+  <TokenBucketRequestGenkit slot="genkit" />
   <TokenBucketRequestLangchain slot="langchain" />
   <TokenBucketRequestLanggraph slot="langgraph" />
   <TokenBucketRequestMastra slot="mastra" />
@@ -693,6 +707,7 @@ Arcjet conclusion is `ERROR`.
   <ErrorsRemix slot="remix" />
   <ErrorsSvelteKit slot="sveltekit" />
   <ErrorsClaudeAgentSdk slot="claude-agent-sdk" />
+  <ErrorsGenkit slot="genkit" />
   <ErrorsLangchain slot="langchain" />
   <ErrorsLanggraph slot="langgraph" />
   <ErrorsMastra slot="mastra" />

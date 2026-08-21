@@ -53,6 +53,7 @@ export const frameworks = [
   { key: "claude-agent-sdk", label: "Claude Agent SDK" },
   { key: "deno", label: "Deno" },
   { key: "fastify", label: "Fastify" },
+  { key: "genkit", label: "Genkit" },
   { key: "langchain", label: "LangChain" },
   { key: "langgraph", label: "LangGraph" },
   { key: "mastra", label: "Mastra" },

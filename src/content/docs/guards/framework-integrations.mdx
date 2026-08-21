@@ -1,6 +1,6 @@
 ---
 title: "Agent guard framework integrations"
-description: "Guard Vercel AI SDK, LangChain, LangGraph, OpenAI Agents, Vercel Eve, Mastra, and Claude Agent SDK tools, processors, and inbound messages."
+description: "Guard Vercel AI SDK, LangChain, LangGraph, Genkit, OpenAI Agents, Vercel Eve, Mastra, and Claude Agent SDK tools, processors, and inbound messages."
 ---
 
 import { Aside } from "@astrojs/starlight/components";
@@ -41,6 +41,7 @@ Pick the page that matches the object you hold when the effect runs:
 | Vercel AI SDK v7 | `@arcjet/guard/vercel-ai/v7` | <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page> |
 | LangChain (Python) | `arcjet.guard.langchain` | <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page> |
 | LangGraph JS | `@arcjet/guard/langgraph/v1` | <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page> |
+| Genkit JS | `@arcjet/guard/genkit/v1` | <Link.Page href="/guards/genkit">Genkit agent guard</Link.Page> |
 | OpenAI Agents | `@arcjet/guard/openai-agents/v0` | <Link.Page href="/guards/openai-agents">OpenAI Agents agent guard</Link.Page> |
 | Vercel Eve | `@arcjet/guard/vercel-eve/v0` | <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page> |
 | Mastra | `@arcjet/guard/mastra/v1` | <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page> |
@@ -50,9 +51,9 @@ Each JavaScript path is versioned. Unversioned aliases such as
 `@arcjet/guard/vercel-ai` do not resolve.
 
 Don't mix adapters. A Mastra `createTool`, Eve `defineTool`, LangGraph
-`tool()`, OpenAI Agents `tool()`, or Claude Agent SDK `tool()` is not an AI SDK
-`tool()`. Wrapping one of those with `@arcjet/guard/vercel-ai/v7` throws or
-misses the real execute path.
+`tool()`, OpenAI Agents `tool()`, Claude Agent SDK `tool()`, or Genkit
+`ai.defineTool` is not an AI SDK `tool()`. Wrapping one of those with
+`@arcjet/guard/vercel-ai/v7` throws or misses the real execute path.
 
 ## Vercel AI SDK
 
@@ -148,6 +149,24 @@ force `status: "error"`. For more information about inbound screening,
 authored tools, and `ToolNode` denials, see the
 <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>.
 
+## Genkit
+
+Genkit JS flows (`ai.generate()` / `chat.send()` plus authored
+`ai.defineTool`) have no `guardInbound`. Screen user text with a direct
+`guard()` call before `generate()` or `send()`. Middleware `model` is not
+Guard. `interrupt()` / `defineInterrupt` / `@genkit-ai/middleware`
+`toolApproval` / `restartTool` are human HITL confirmation, not policy.
+There is no `guardApproval`. Use `guardTool()` on the returned
+`ToolAction` and `guardMiddleware()` as a `{ name, instantiate }`
+`generateMiddleware` `tool` hook. Don't also wrap these tools with
+`@arcjet/guard/vercel-ai/v7`. This is not Go or Python Genkit.
+
+`guardTool` returns `{ arcjetDenied: true, … }` as completed
+`toolResponse.output`. Don't throw. Don't call `interrupt()`. For more
+information about inbound screening, authored tools, and
+`generate()`-wide denials, see the
+<Link.Page href="/guards/genkit">Genkit agent guard</Link.Page>.
+
 ## OpenAI Agents
 
 OpenAI Agents text `Agent` workflows (`run()` + authored `tool()`) have no
@@ -214,6 +233,7 @@ in a different way:
 | AI SDK / Mastra | Return `{ arcjetDenied: true, … }` as the tool result | A throw becomes a generic tool error and drops the fields |
 | OpenAI Agents | Return `{ arcjetDenied: true, … }` from `invoke` | A throw hits `errorFunction` or `ToolCallError` and can kill the run |
 | LangGraph | Return `{ arcjetDenied: true, … }`. `ToolNode` wraps a `ToolMessage` with `status: "success"` | Fabricating a `ToolMessage` to force `status: "error"` crashes the graph reducer |
+| Genkit | Return `{ arcjetDenied: true, … }` as completed `toolResponse.output` | A throw / `interrupt()` is HITL and the wrong envelope |
 | Claude Agent SDK | MCP `CallToolResult` with `isError: true` and the payload on `structuredContent` | A throw is a raw exception. Omitting `isError` looks like success |
 | Vercel Eve | Throw `ArcjetDeniedError`. Opt in to a returned payload with `onDeny: "result"` | Eve projects a throw as a failed `action.result`. A silent return can violate `outputSchema` |
 
@@ -266,6 +286,11 @@ The wrappers default to fail closed when Guard is unavailable:
   plain payload. `ToolNode` wraps a `ToolMessage` whose `status` is
   `success`. Direct `guard()` before `invoke` fails open. Check
   `decision.hasFailedOpen()` when that call site must fail closed.
+- Genkit helpers default to `onGuardError: "deny"`. `guardTool` returns
+  `{ arcjetDenied: true, … }` as completed `toolResponse.output`. Don't
+  throw. Don't call `interrupt()`. Direct `guard()` before
+  `generate()` / `send()` fails open. Check `decision.hasFailedOpen()`
+  when that call site must fail closed.
 - OpenAI Agents helpers default to `onGuardError: "deny"`. `guardTool`
   returns a plain `ArcjetDenialResult` and does not throw. A throw hits
   `ToolCallError` and drops the fields. The runner stringifies the payload

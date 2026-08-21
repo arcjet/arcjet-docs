@@ -4,6 +4,7 @@ titleByFramework:
   default: "Rate limiting"
   bun: "Rate limiting for Bun"
   claude-agent-sdk: "Rate limiting for Claude Agent SDK"
+  genkit: "Rate limiting for Genkit"
   langchain: "Rate limiting for LangChain"
   langgraph: "Rate limiting for LangGraph"
   mastra: "Rate limiting for Mastra"
@@ -21,6 +22,7 @@ description: "Quick start guide for adding Arcjet rate limiting to your Next.js,
 frameworks:
   - bun
   - claude-agent-sdk
+  - genkit
   - langchain
   - langgraph
   - mastra
@@ -52,7 +54,7 @@ ajToc:
         framework: ["bun", "node-js", "python-fastapi", "python-flask"]
       - text: 4. Start app
         anchor: "4-start-app"
-        framework: ["claude-agent-sdk", "langchain", "langgraph", "mastra", "nest-js", "next-js", "openai-agents", "remix", "sveltekit", "vercel-ai", "vercel-eve"]
+        framework: ["claude-agent-sdk", "genkit", "langchain", "langgraph", "mastra", "nest-js", "next-js", "openai-agents", "remix", "sveltekit", "vercel-ai", "vercel-eve"]
   - text: "FAQs"
     anchor: "faqs"
   - text: "What next?"
@@ -112,6 +114,11 @@ import SvelteKitStep1 from "@/snippets/rate-limiting/quick-start/sveltekit/Step1
 import SvelteKitStep2 from "@/snippets/rate-limiting/quick-start/sveltekit/Step2.mdx";
 import SvelteKitStep3 from "@/snippets/rate-limiting/quick-start/sveltekit/Step3.mdx";
 import SvelteKitStep4 from "@/snippets/rate-limiting/quick-start/sveltekit/Step4.mdx";
+
+import GenkitStep1 from "@/snippets/rate-limiting/quick-start/genkit/Step1.mdx";
+import GenkitStep2 from "@/snippets/rate-limiting/quick-start/genkit/Step2.mdx";
+import GenkitStep3 from "@/snippets/rate-limiting/quick-start/genkit/Step3.mdx";
+import GenkitStep4 from "@/snippets/rate-limiting/quick-start/genkit/Step4.mdx";
 
 import ClaudeAgentSdkStep1 from "@/snippets/rate-limiting/quick-start/claude-agent-sdk/Step1.mdx";
 import ClaudeAgentSdkStep2 from "@/snippets/rate-limiting/quick-start/claude-agent-sdk/Step2.mdx";
@@ -184,6 +191,7 @@ In your project root, install the SDK:
   <RemixStep1 slot="remix" />
   <SvelteKitStep1 slot="sveltekit" />
   <ClaudeAgentSdkStep1 slot="claude-agent-sdk" />
+  <GenkitStep1 slot="genkit" />
   <LangchainStep1 slot="langchain" />
   <LanggraphStep1 slot="langgraph" />
   <MastraStep1 slot="mastra" />
@@ -194,7 +202,7 @@ In your project root, install the SDK:
 
 ### 2. Set your key
 
-[Create a free Arcjet account](https://app.arcjet.com) then follow the
+[Create a free Arcjet account](https://console.arcjet.com) then follow the
 instructions to add a site and get a key.
 
 <SlotByFramework client:load>
@@ -207,6 +215,7 @@ instructions to add a site and get a key.
   <RemixStep2 slot="remix" />
   <SvelteKitStep2 slot="sveltekit" />
   <ClaudeAgentSdkStep2 slot="claude-agent-sdk" />
+  <GenkitStep2 slot="genkit" />
   <LangchainStep2 slot="langchain" />
   <LanggraphStep2 slot="langgraph" />
   <MastraStep2 slot="mastra" />
@@ -232,6 +241,7 @@ tokens every 10 seconds. Each request consumes 5 tokens.
   <RemixStep3 slot="remix" />
   <SvelteKitStep3 slot="sveltekit" />
   <ClaudeAgentSdkStep3 slot="claude-agent-sdk" />
+  <GenkitStep3 slot="genkit" />
   <LangchainStep3 slot="langchain" />
   <LanggraphStep3 slot="langgraph" />
   <MastraStep3 slot="mastra" />
@@ -250,6 +260,7 @@ tokens every 10 seconds. Each request consumes 5 tokens.
   <RemixStep4 slot="remix" />
   <SvelteKitStep4 slot="sveltekit" />
   <ClaudeAgentSdkStep4 slot="claude-agent-sdk" />
+  <GenkitStep4 slot="genkit" />
   <LangchainStep4 slot="langchain" />
   <LanggraphStep4 slot="langgraph" />
   <MastraStep4 slot="mastra" />
@@ -258,7 +269,7 @@ tokens every 10 seconds. Each request consumes 5 tokens.
   <VercelEveStep4 slot="vercel-eve" />
 </SlotByFramework>
 
-The requests also appear in the [Arcjet dashboard](https://app.arcjet.com).
+The requests also appear in the [Arcjet dashboard](https://console.arcjet.com).
 
 ## FAQs
 
