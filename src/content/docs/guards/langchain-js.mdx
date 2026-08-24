@@ -39,7 +39,11 @@ resolve. The version segment is LangChain's major. `langchain`
 LangChain 1.2.34, which is why `langchain` has the higher floor.
 `@langchain/core` keeps the `>=1 <2` range `langgraph/v1` already
 shipped. This adapter does not require `@langchain/langgraph`. The
-integration requires Node.js 22 or later. Until
+integration requires Node.js 22 or later.
+
+`createAgent` resolves a model string such as `"openai:gpt-4o"` through
+the matching provider package, so install the one your model needs. The
+examples on this page use `@langchain/openai`. Until
 `@arcjet/guard/langchain/v1` is published, pin `@arcjet/guard` to
 [`c49abcc1`](https://github.com/arcjet/arcjet-js/commit/c49abcc1f9afce7d284b6c294d0dcee5916ada86).
 The published `@arcjet/guard@1.10.0` package on npm does not export
@@ -91,10 +95,10 @@ also wrap these tools with `@arcjet/guard/langgraph/v1` or
 
 | Option | Helpers | Description |
 | --- | --- | --- |
-| `action` | `guardTool`, `guardMiddleware` | Guard label and capture name. Use `resource.verb` in the past tense. For `guardMiddleware`, a string or a function of `{ toolName, input }`. Middleware defaults to `tool.invoked`. |
-| `rules` | `guardTool`, `guardMiddleware` | SDK rules, or a function of the parsed tool input (or `{ toolName, input }` on the middleware). Omit to submit none. |
+| `action` | `guardTool`, `guardMiddleware` | Guard label and capture name. Use `resource.verb` in the past tense. A string, or a function of the parsed tool input (or `{ toolName, input }` on the middleware). Required on `guardTool`. Middleware defaults to `tool.invoked`. |
+| `rules` | `guardTool`, `guardMiddleware` | SDK rules, or a function of the parsed tool input (or `{ toolName, input }` on the middleware). Omit to submit none. The guard call still happens. |
 | `metadata` | `guardTool`, `guardMiddleware` | Nested JSON, or a function of the same input as `rules`. |
-| `sessionId` | `guardTool`, `guardMiddleware` | Caller-owned fallback when `configurable.thread_id` is absent. Prefer putting the ID on `agent.invoke(..., { configurable: { thread_id } })`. |
+| `sessionId` | `guardTool`, `guardMiddleware` | Caller-owned fallback when `configurable.thread_id` is absent. A string, or a function of the same input as `rules`. Prefer putting the ID on `agent.invoke(..., { configurable: { thread_id } })`. |
 | `onGuardError` | `guardTool`, `guardMiddleware` | `"deny"` (default) or `"allow"`. |
 | `onDeny` | `guardTool`, `guardMiddleware` | Reshape the denial payload. `guardTool` returns that object as the tool result. `guardMiddleware` JSON-stringifies it onto `ToolMessage.content`. |
 
