@@ -144,6 +144,9 @@ const FrameworkLinks = forwardRef(
                 case "langchain":
                   icon = <IconLangChain />;
                   break;
+                case "langchain-js":
+                  icon = <IconLangChain />;
+                  break;
                 case "langgraph":
                   icon = <IconLangGraph />;
                   break;

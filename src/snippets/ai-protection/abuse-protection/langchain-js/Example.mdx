@@ -1,0 +1,31 @@
+import Step from "./Example.ts?raw";
+import { Code } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+Bot detection is a request-based rule. On an agent, abuse control is a rate limit plus inbound prompt-injection screening so a single actor cannot loop tools or jailbreak the model.
+
+We assume you already have a LangChain JS `createAgent` project set up. For
+helper options and denial behavior, see the
+<Link.Page href="/guards/langchain-js">LangChain JS agent guard</Link.Page>.
+
+Until `@arcjet/guard/langchain/v1` is published, the import is not in
+the published `@arcjet/guard` package on npm. `@arcjet/guard@1.10.0`
+does not export `./langchain/v1`. TODO: pin the adapter SHA once
+Runtime has a branch.
+
+Install the dependencies:
+
+```shell
+# Export your Arcjet API key from https://console.arcjet.com
+export ARCJET_KEY="ajkey_..."
+
+npm install @arcjet/guard langchain @langchain/core
+```
+
+Create the example:
+
+<Code code={Step} lang="ts" title="agent.ts" />
+
+Then start or invoke the agent with a test prompt.
+
+Requests appear in your [Arcjet dashboard](https://console.arcjet.com) in real time.
