@@ -17,4 +17,4 @@ export const policy = {
   action: "order.looked-up",
   onGuardError: "deny",
   rules: () => [lookupLimit({ key: "user123", requested: 5 })],
-};
+} as const;

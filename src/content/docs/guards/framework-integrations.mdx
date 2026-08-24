@@ -51,6 +51,12 @@ Pick the page that matches the object you hold when the effect runs:
 Each JavaScript path is versioned. Unversioned aliases such as
 `@arcjet/guard/vercel-ai` do not resolve.
 
+`@arcjet/guard@1.10.0` does not export `./langchain/v1`. Until it does, pin
+`@arcjet/guard` to
+[`c49abcc1`](https://github.com/arcjet/arcjet-js/commit/c49abcc1f9afce7d284b6c294d0dcee5916ada86)
+to use the LangChain JS path. The other paths resolve from the published
+package.
+
 Don't mix adapters. A Mastra `createTool`, Eve `defineTool`, LangGraph
 `tool()`, LangChain JS `createAgent` tool, OpenAI Agents `tool()`,
 Claude Agent SDK `tool()`, or Genkit `ai.defineTool` is not an AI SDK
