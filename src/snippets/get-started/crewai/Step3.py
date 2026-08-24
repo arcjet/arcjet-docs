@@ -1,7 +1,7 @@
 import os
 
 from arcjet.guard import DetectPromptInjection, TokenBucket, launch_arcjet_sync
-from arcjet.guard.crewai import guard_hooks
+from arcjet.guard.crewai import register_arcjet_hooks
 from crewai import Agent, Crew, Task
 from crewai.tools import tool
 
@@ -21,13 +21,11 @@ def lookup_order(order_id: str) -> dict:
     return {"order_id": order_id, "status": "shipped"}
 
 
-guard_hooks(
+register_arcjet_hooks(
     guard=arcjet,
     tools=["lookup_order"],
     action="order.looked-up",
-    rules=lambda ctx: [
-        lookup_limit(key=ctx.tool_input["order_id"], requested=5)
-    ],
+    rules=[lookup_limit(key="orders", requested=5)],
 )
 
 agent = Agent(
