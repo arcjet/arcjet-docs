@@ -73,8 +73,10 @@ The integration exposes three surfaces:
 - `langchainContext()` reads `configurable.thread_id`, then
   caller-owned `sessionId` / `conversationId`, then `init.sessionId` /
   `init.correlationId`. It never mints an ID. It never reads
-  `traceId`. It never treats `interrupt` / resume as correlation. It
-  never calls `createAgentContext`.
+  `traceId`. A run that pauses on `interrupt()` resumes through the
+  same config, so it keeps `thread_id` and later Guard decisions stay
+  on the Sequence that started it. The interrupt and its resume value
+  are not correlation sources. It never calls `createAgentContext`.
 
 There is no `guardInbound`. There is no inbound hook. Screen user text
 with a direct `guard()` call before `agent.invoke` or `agent.stream`.
@@ -356,10 +358,17 @@ const agent = createAgent({
 `wrapToolCall` sees on `runtime.configurable` as of LangChain
 1.2.34), then caller-owned `sessionId` / `conversationId`, then
 `init.sessionId` / `init.correlationId`. It never mints an ID. It
-never reads `traceId`. It never treats `interrupt` / resume as
-correlation. It never calls `createAgentContext`. If nothing is a
-valid 1-256 printable-ASCII string, the call is uncorrelated rather
-than joined to a generated ID.
+never reads `traceId`. It never calls `createAgentContext`. If
+nothing is a valid 1-256 printable-ASCII string, the call is
+uncorrelated rather than joined to a generated ID.
+
+A run that pauses on `interrupt()` resumes through the same config.
+`humanInTheLoopMiddleware` resumes with
+`agent.invoke(new Command({ resume }), config)`. The run keeps
+`thread_id`, so later Guard decisions stay on the Sequence that
+started it. The interrupt and its resume value are not themselves
+correlation sources. Don't derive an ID from them. Don't mint one.
+Don't read `traceId`.
 
 Pass the same `thread_id` on `agent.invoke`. Use `sessionId` on
 `guardMiddleware` only as a fallback when that ID is absent.
