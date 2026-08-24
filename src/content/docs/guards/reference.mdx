@@ -179,8 +179,10 @@ Metadata is untrusted and is not redacted – do not put secrets or PII in it.
 
 Use `capture()` / `Capture` to record that an allowed action happened. Captures
 are visibility data: they never change a conclusion and never set
-`hasFailedOpen()`. For options, batching, `flush()`, and serverless `waitUntil`,
-see <Link.Page href="/guards/capture">Capture events</Link.Page>.
+`hasFailedOpen()`. Python checkpoint helpers and JavaScript wrappers also
+write `metadata.outcome` on the event they emit. For options, batching,
+`flush()`, serverless `waitUntil`, and the outcome values, see
+<Link.Page href="/guards/capture">Capture events</Link.Page>.
 
 ## Decisions and policy results
 

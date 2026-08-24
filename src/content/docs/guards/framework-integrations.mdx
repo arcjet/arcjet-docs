@@ -127,7 +127,9 @@ Pick the surface that matches what you hold when the effect runs:
 - Observe only: `ArcjetCaptureHandler` / `ArcjetAsyncCaptureHandler`.
   These cannot deny a call. LangChain ignores callback return values.
 
-For more information about install, helpers, fail-closed behavior, and
+`guard_tool` and `ArcjetMiddleware` go through the checkpoint engine, so
+their capture events include `metadata.outcome`. For more information
+about install, helpers, fail-closed behavior, capture outcomes, and
 correlation, see the
 <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
 
