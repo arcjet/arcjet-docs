@@ -187,6 +187,22 @@ You don't set `outcome`. The helper writes it after your metadata so a
 caller key can't overwrite what the helper recorded.
 
 <Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+JavaScript `guardTool` and `guardAction` record one of the following
+values:
+
+| Value | The action | What it means |
+| ----- | ---------- | ------------- |
+| `success` | Ran. | The helper executed the action. |
+| `error` | Ran, then threw. | The action failed after the check. |
+| `denied` | Did not run. | Policy evaluated `DENY`. |
+| `unavailable` | Did not run. | Fail-closed. The check was incomplete. |
+
+They don't record `degraded`. When `onGuardError` is `"allow"` and the
+action runs without a complete judgment, the event records `success`.
+
+</TabItem>
 <TabItem label="Python">
 
 Python checkpoint helpers record one of the following values:
@@ -226,25 +242,14 @@ A direct `capture()` call doesn't set `outcome`. Observe-only
 the checkpoint engine.
 
 </TabItem>
-<TabItem label="JavaScript / TypeScript">
+<TabItem label="Go">
 
-JavaScript `guardTool` and `guardAction` record one of the following
-values:
-
-| Value | The action | What it means |
-| ----- | ---------- | ------------- |
-| `success` | Ran. | The helper executed the action. |
-| `error` | Ran, then threw. | The action failed after the check. |
-| `denied` | Did not run. | Policy evaluated `DENY`. |
-| `unavailable` | Did not run. | Fail-closed. The check was incomplete. |
-
-They don't record `degraded`. When `onGuardError` is `"allow"` and the
-action runs without a complete judgment, the event records `success`.
+The Go SDK doesn't write `metadata.outcome` on `Capture`. Use `Capture`
+to record that an allowed action happened. Outcome classification is not
+part of the Go helper surface.
 
 </TabItem>
 </Tabs>
-
-The Go SDK doesn't write `metadata.outcome` on `Capture`.
 
 ## Call `capture()` without a client handle
 
