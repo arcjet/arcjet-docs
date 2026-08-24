@@ -34,13 +34,16 @@ npm install @arcjet/guard langchain @langchain/core
 Import helpers from the versioned path `@arcjet/guard/langchain/v1`.
 There is no unversioned alias. `@arcjet/guard/langchain` does not
 resolve. The version segment is LangChain's major. `langchain`
-(`>=1.2.0 <2`) and `@langchain/core` (`>=1.2.0 <2`) are optional
-peers. This adapter does not require `@langchain/langgraph`. The
+(`>=1.2.0 <2`) and `@langchain/core` (`>=1 <2`) are optional peers.
+`wrapToolCall` only sees `runtime.configurable.thread_id` as of
+LangChain 1.2.34, which is why `langchain` has the higher floor.
+`@langchain/core` keeps the `>=1 <2` range `langgraph/v1` already
+shipped. This adapter does not require `@langchain/langgraph`. The
 integration requires Node.js 22 or later. Until
-`@arcjet/guard/langchain/v1` is published, the import lives on
-[`ce4051a6`](https://github.com/arcjet/arcjet-js/commit/ce4051a6fd70ac92d56d91713726a5796a32cd65),
-not in the published `@arcjet/guard` package on npm.
-`@arcjet/guard@1.10.0` does not export `./langchain/v1`.
+`@arcjet/guard/langchain/v1` is published, pin `@arcjet/guard` to
+[`c49abcc1`](https://github.com/arcjet/arcjet-js/commit/c49abcc1f9afce7d284b6c294d0dcee5916ada86).
+The published `@arcjet/guard@1.10.0` package on npm does not export
+`./langchain/v1`.
 
 Launch one client at module scope:
 
@@ -491,7 +494,4 @@ versus fail-closed behavior, see
 - <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>
 - <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>
 - <Link.Page href="/guards">Agent guards</Link.Page>
-- Example: `langchain-agent` on an
-  [arcjet/examples](https://github.com/arcjet/examples) branch cut from
-  `main`.
-- Adapter: [`ce4051a6`](https://github.com/arcjet/arcjet-js/commit/ce4051a6fd70ac92d56d91713726a5796a32cd65)
+- Adapter: [`c49abcc1`](https://github.com/arcjet/arcjet-js/commit/c49abcc1f9afce7d284b6c294d0dcee5916ada86)
