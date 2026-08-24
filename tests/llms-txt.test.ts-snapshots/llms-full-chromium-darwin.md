@@ -2119,6 +2119,7 @@ For the full API reference, read the installed library source:
 - [Filters](https://docs.arcjet.com/filters)
 - [Guards](https://docs.arcjet.com/guards)
 - [LangChain agent guard](https://docs.arcjet.com/guards/langchain)
+- [CrewAI agent guard](https://docs.arcjet.com/guards/crewai)
 - [Capture events](https://docs.arcjet.com/guards/capture)
 
 ### SDKs

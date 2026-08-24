@@ -2154,6 +2154,7 @@ For the full API reference, read the installed library source:
 - [Vercel AI SDK agent guard](https://docs.arcjet.com/guards/vercel-ai)
 - [LangChain agent guard](https://docs.arcjet.com/guards/langchain)
 - [LangChain JS agent guard](https://docs.arcjet.com/guards/langchain-js)
+- [CrewAI agent guard](https://docs.arcjet.com/guards/crewai)
 - [LangGraph agent guard](https://docs.arcjet.com/guards/langgraph)
 - [Genkit agent guard](https://docs.arcjet.com/guards/genkit)
 - [OpenAI Agents agent guard](https://docs.arcjet.com/guards/openai-agents)

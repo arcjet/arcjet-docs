@@ -2,6 +2,7 @@ import Button from "@/components/Button";
 import { Astro as IconAstro } from "@/components/icons/tech/Astro";
 import { Bun as IconBun } from "@/components/icons/tech/Bun";
 import { ClaudeAgentSdk as IconClaudeAgentSdk } from "@/components/icons/tech/ClaudeAgentSdk";
+import { CrewAi as IconCrewAi } from "@/components/icons/tech/CrewAi";
 import { Deno as IconDeno } from "@/components/icons/tech/Deno";
 import { FastApi as IconFastApi } from "@/components/icons/tech/FastApi";
 import { Fastify as IconFastify } from "@/components/icons/tech/Fastify";
@@ -140,6 +141,9 @@ const FrameworkLinks = forwardRef(
                   break;
                 case "claude-agent-sdk":
                   icon = <IconClaudeAgentSdk />;
+                  break;
+                case "crewai":
+                  icon = <IconCrewAi />;
                   break;
                 case "langchain":
                   icon = <IconLangChain />;

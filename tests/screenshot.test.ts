@@ -40,6 +40,7 @@ const PATHS_FROM_SITEMAP = [
   "/get-started/",
   "/guards/",
   "/guards/claude-agent-sdk/",
+  "/guards/crewai/",
   "/guards/framework-integrations/",
   "/guards/genkit/",
   "/guards/langchain/",

@@ -1,6 +1,6 @@
 ---
 title: "Agent guard framework integrations"
-description: "Guard Vercel AI SDK, LangChain, LangChain JS, LangGraph, Genkit, OpenAI Agents, Vercel Eve, Mastra, and Claude Agent SDK tools, processors, and inbound messages."
+description: "Guard Vercel AI SDK, LangChain, LangChain JS, CrewAI, LangGraph, Genkit, OpenAI Agents, Vercel Eve, Mastra, and Claude Agent SDK tools, processors, and inbound messages."
 ---
 
 import { Aside } from "@astrojs/starlight/components";
@@ -41,6 +41,7 @@ Pick the page that matches the object you hold when the effect runs:
 | Vercel AI SDK v7 | `@arcjet/guard/vercel-ai/v7` | <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page> |
 | LangChain (Python) | `arcjet.guard.langchain` | <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page> |
 | LangChain JS | `@arcjet/guard/langchain/v1` | <Link.Page href="/guards/langchain-js">LangChain JS agent guard</Link.Page> |
+| CrewAI (Python) | `arcjet.guard.crewai` | <Link.Page href="/guards/crewai">CrewAI agent guard</Link.Page> |
 | LangGraph JS | `@arcjet/guard/langgraph/v1` | <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page> |
 | Genkit JS | `@arcjet/guard/genkit/v1` | <Link.Page href="/guards/genkit">Genkit agent guard</Link.Page> |
 | OpenAI Agents | `@arcjet/guard/openai-agents/v0` | <Link.Page href="/guards/openai-agents">OpenAI Agents agent guard</Link.Page> |
@@ -59,9 +60,10 @@ package.
 
 Don't mix adapters. A Mastra `createTool`, Eve `defineTool`, LangGraph
 `tool()`, LangChain JS `createAgent` tool, OpenAI Agents `tool()`,
-Claude Agent SDK `tool()`, or Genkit `ai.defineTool` is not an AI SDK
-`tool()`. Wrapping one of those with `@arcjet/guard/vercel-ai/v7`
-throws or misses the real execute path.
+Claude Agent SDK `tool()`, Genkit `ai.defineTool`, or official CrewAI
+`@tool` is not an AI SDK `tool()`. Wrapping one of those with
+`@arcjet/guard/vercel-ai/v7` throws or misses the real execute path.
+Don't use an npm CrewAI port with `arcjet.guard.crewai`.
 
 ## Vercel AI SDK
 
@@ -160,6 +162,22 @@ JSON `content` and default status. Don't throw. Policy sits on
 `wrapToolCall` only. For more information about inbound screening,
 authored tools, and agent-wide denials, see the
 <Link.Page href="/guards/langchain-js">LangChain JS agent guard</Link.Page>.
+
+## CrewAI
+
+Official CrewAI crews call authored tools during a kickoff. The Python
+extra sits at `@on(PRE_TOOL_CALL)` and raises `HookAborted` on `DENY`.
+`@on(POST_TOOL_CALL)` is capture only. It cannot deny a call. CrewAI
+`human_input` and `request_human_input()` are human HITL confirmation,
+not policy. This is not an npm CrewAI port.
+
+Until `arcjet[crewai]` is published, the extra is not in the published
+`arcjet` 0.9.0 package on PyPI. TODO: pin the Runtime commit once a
+branch exists.
+
+For more information about install, helpers, fail-closed behavior, and
+`HookAborted`, see the
+<Link.Page href="/guards/crewai">CrewAI agent guard</Link.Page>.
 
 ## LangGraph JS
 
@@ -302,6 +320,10 @@ The wrappers default to fail closed when Guard is unavailable:
   `handle_tool_error` behavior when configured. `guard_action` and
   `ArcjetMiddleware` raise `ArcjetUnavailableError` /
   `ArcjetDeniedError`.
+- CrewAI `guard_hooks` defaults to `on_guard_error="deny"`. On `DENY`
+  or unavailability, `PRE_TOOL_CALL` raises `HookAborted` so the tool
+  does not run. CrewAI swallows any other exception. `POST_TOOL_CALL`
+  is capture only and cannot deny.
 - Vercel Eve helpers default to `onGuardError: "deny"`. `guardTool` throws
   `ArcjetDeniedError`. Pass `onDeny: "result"` to return the payload instead.
   On a channel, `"allow"` is a legitimate choice because failing closed stops

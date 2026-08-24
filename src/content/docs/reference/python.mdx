@@ -712,9 +712,14 @@ checkpoint helpers. They fail closed by default
   (`arcjet[langchain-agents]`).
 - **Observe only** – `ArcjetCaptureHandler` /
   `ArcjetAsyncCaptureHandler`. These cannot deny a call.
+- **Official CrewAI tool calls** – `guard_hooks` (`arcjet[crewai]`).
+  The gate is `@on(PRE_TOOL_CALL)` plus `HookAborted`.
+  `POST_TOOL_CALL` is capture only.
 
 For install, examples, correlation, and the configure-before-wrap rule,
 see the <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
+For CrewAI hooks, see the
+<Link.Page href="/guards/crewai">CrewAI agent guard</Link.Page>.
 
 ### Rules
 
