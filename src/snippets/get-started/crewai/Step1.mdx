@@ -1,13 +1,16 @@
-Until `arcjet[crewai]` is published, install from
-[`cc7dd092`](https://github.com/arcjet/arcjet-py/commit/cc7dd09260cabe3bfac7aff8fa07e085c209b1db).
-The extra is not in the published `arcjet` 0.9.0 package on PyPI.
+Until `arcjet.guard.crewai` is published, pin `arcjet` to
+[`b1253640`](https://github.com/arcjet/arcjet-py/commit/b1253640ce676b948594beed5fe62450d0e1c77d).
+Published `arcjet` 0.9.0 on PyPI does not include this module. There is
+no `arcjet[crewai]` extra. Install official CrewAI yourself.
 
 ```shell
-pip install "arcjet[crewai] @ git+https://github.com/arcjet/arcjet-py@cc7dd09260cabe3bfac7aff8fa07e085c209b1db"
+pip install "arcjet @ git+https://github.com/arcjet/arcjet-py@b1253640ce676b948594beed5fe62450d0e1c77d"
+pip install "crewai>=1.15.3,<2"
 ```
 
 Or with [uv](https://docs.astral.sh/uv/):
 
 ```shell
-uv add "arcjet[crewai] @ git+https://github.com/arcjet/arcjet-py@cc7dd09260cabe3bfac7aff8fa07e085c209b1db"
+uv add "arcjet @ git+https://github.com/arcjet/arcjet-py@b1253640ce676b948594beed5fe62450d0e1c77d"
+uv add "crewai>=1.15.3,<2"
 ```

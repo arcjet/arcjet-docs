@@ -166,18 +166,20 @@ authored tools, and agent-wide denials, see the
 ## CrewAI
 
 Official CrewAI crews call authored tools during a kickoff. Register
-`register_arcjet_hooks` for process-wide `PRE_TOOL_CALL`. On `DENY` or
-fail-closed unavailability the extra raises
+`register_arcjet_hooks` for process-wide `PRE_TOOL_CALL` only.
+`POST_TOOL_CALL` is not registered. On `DENY` or fail-closed
+unavailability the helper raises
 `HookAborted(reason=..., source="arcjet")`. The agent always sees
-`Tool execution blocked by hook. Tool: {name}`. `POST_TOOL_CALL` is
-capture only and never rewrites `tool_result`. `guard_tool` wraps a
+`Tool execution blocked by hook. Tool: {name}`. `guard_tool` wraps a
 standalone `BaseTool` you call yourself and is the only path that
 raises Arcjet errors. There is no `guard_crew`. `human_input` is HITL,
-not policy. This is not an npm CrewAI port. Peer `crewai>=1.15.3,<2`.
+not policy. This is not an npm CrewAI port.
 
-Until `arcjet[crewai]` is published, install from
-[`cc7dd092`](https://github.com/arcjet/arcjet-py/commit/cc7dd09260cabe3bfac7aff8fa07e085c209b1db).
-The extra is not in the published `arcjet` 0.9.0 package on PyPI.
+There is no `arcjet[crewai]` extra. Install official
+`crewai>=1.15.3,<2` yourself. Until this module is on PyPI, pin
+`arcjet` to
+[`b1253640`](https://github.com/arcjet/arcjet-py/commit/b1253640ce676b948594beed5fe62450d0e1c77d).
+Published `arcjet` 0.9.0 does not include it.
 
 For more information about install, helpers, fail-closed behavior, and
 `HookAborted`, see the
@@ -328,9 +330,9 @@ The wrappers default to fail closed when Guard is unavailable:
   On `DENY` or unavailability, `PRE_TOOL_CALL` raises
   `HookAborted(reason=..., source="arcjet")` so the tool does not run.
   The agent always sees `Tool execution blocked by hook. Tool: {name}`.
-  CrewAI swallows any other exception. `POST_TOOL_CALL` is capture only
-  and never rewrites `tool_result`. `guard_tool` raises
-  `ArcjetDeniedError` / `ArcjetUnavailableError`.
+  CrewAI swallows any other exception. `POST_TOOL_CALL` is not
+  registered. `guard_tool` raises `ArcjetDeniedError` /
+  `ArcjetUnavailableError`.
 - Vercel Eve helpers default to `onGuardError: "deny"`. `guardTool` throws
   `ArcjetDeniedError`. Pass `onDeny: "result"` to return the payload instead.
   On a channel, `"allow"` is a legitimate choice because failing closed stops

@@ -44,7 +44,7 @@ extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricin
 - [Vercel AI SDK agent guard](https://docs.arcjet.com/guards/vercel-ai): `guardTool`, `aiToolsContext`, `guardAction`, and inbound `guard()` before `generateText`. Wrappers take `action`, not `label`.
 - [LangChain agent guard](https://docs.arcjet.com/guards/langchain): Python `guard_action`, `guard_tool`, `ArcjetMiddleware`, and observe-only capture handlers.
 - [LangChain JS agent guard](https://docs.arcjet.com/guards/langchain-js): inbound `guard()` before `invoke`, `guardTool` on `tool()`, and `guardMiddleware` (`createAgent` + `wrapToolCall`).
-- [CrewAI agent guard](https://docs.arcjet.com/guards/crewai): official CrewAI `register_arcjet_hooks` on `PRE_TOOL_CALL` plus `HookAborted(reason=..., source="arcjet")`. `guard_tool` for a standalone `BaseTool`. `POST_TOOL_CALL` is capture only.
+- [CrewAI agent guard](https://docs.arcjet.com/guards/crewai): official CrewAI `register_arcjet_hooks` on `PRE_TOOL_CALL` plus `HookAborted(reason=..., source="arcjet")`. `guard_tool` for a standalone `BaseTool`. `POST_TOOL_CALL` is not registered. There is no `arcjet[crewai]` extra.
 - [LangGraph agent guard](https://docs.arcjet.com/guards/langgraph): inbound `guard()` before `invoke`, `guardTool`, and `guardToolNode`.
 - [Genkit agent guard](https://docs.arcjet.com/guards/genkit): inbound `guard()` before `generate()`, `guardTool` on `ai.defineTool`, and `guardMiddleware`.
 - [OpenAI Agents agent guard](https://docs.arcjet.com/guards/openai-agents): inbound `guard()` before `run()` and `guardTool` on authored `FunctionTool.invoke`.
