@@ -35,10 +35,11 @@ export const lookupOrder = guardTool(
 );
 
 export async function runAgent(conversationId: string, userText: string) {
+  const config = { configurable: { thread_id: conversationId } };
   const decision = await arcjet.guard({
     label: "message.received",
     rules: [inbound(userText)],
-    ...langchainContext({ sessionId: conversationId }),
+    ...langchainContext(config),
   });
 
   if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
@@ -53,6 +54,6 @@ export async function runAgent(conversationId: string, userText: string) {
 
   return agent.invoke(
     { messages: [{ role: "user", content: userText }] },
-    { configurable: { thread_id: conversationId } },
+    config,
   );
 }

@@ -11,7 +11,7 @@ export async function screenPrompt(
   const decision = await arcjet.guard({
     label: "message.received",
     rules: [inbound(userText)],
-    ...langchainContext({ sessionId: conversationId }),
+    ...langchainContext({ configurable: { thread_id: conversationId } }),
   });
 
   if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {

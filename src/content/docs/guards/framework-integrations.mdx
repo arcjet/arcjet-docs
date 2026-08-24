@@ -148,9 +148,11 @@ This is not the Python
 <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
 It is not LangGraph `StateGraph` / `ToolNode`.
 
-`guardTool` and `wrapToolCall` return `{ arcjetDenied: true, … }` as a
-`ToolMessage`. Don't throw. For more information about inbound
-screening, authored tools, and agent-wide denials, see the
+`guardTool` returns a plain `{ arcjetDenied: true, … }`.
+`guardMiddleware` `wrapToolCall` returns a real `ToolMessage` with
+JSON `content` and default status. Don't throw. Policy sits on
+`wrapToolCall` only. For more information about inbound screening,
+authored tools, and agent-wide denials, see the
 <Link.Page href="/guards/langchain-js">LangChain JS agent guard</Link.Page>.
 
 ## LangGraph JS
@@ -256,7 +258,7 @@ in a different way:
 | AI SDK / Mastra | Return `{ arcjetDenied: true, … }` as the tool result | A throw becomes a generic tool error and drops the fields |
 | OpenAI Agents | Return `{ arcjetDenied: true, … }` from `invoke` | A throw hits `errorFunction` or `ToolCallError` and can kill the run |
 | LangGraph | Return `{ arcjetDenied: true, … }`. `ToolNode` wraps a `ToolMessage` with `status: "success"` | Fabricating a `ToolMessage` to force `status: "error"` crashes the graph reducer |
-| LangChain JS | Return `{ arcjetDenied: true, … }` as a `ToolMessage` | A throw becomes a generic tool error and drops the fields. This is not LangGraph `ToolNode` wrapping |
+| LangChain JS | `guardTool` returns `{ arcjetDenied: true, … }`. `guardMiddleware` returns a real `ToolMessage` (JSON `content`, default status) | A throw drops the fields. `wrapToolCall` cannot return a bare object. Don't set `status: "error"` |
 | Genkit | Return `{ arcjetDenied: true, … }` as completed `toolResponse.output` | A throw / `interrupt()` is HITL and the wrong envelope |
 | Claude Agent SDK | MCP `CallToolResult` with `isError: true` and the payload on `structuredContent` | A throw is a raw exception. Omitting `isError` looks like success |
 | Vercel Eve | Throw `ArcjetDeniedError`. Opt in to a returned payload with `onDeny: "result"` | Eve projects a throw as a failed `action.result`. A silent return can violate `outputSchema` |
@@ -311,10 +313,11 @@ The wrappers default to fail closed when Guard is unavailable:
   `success`. Direct `guard()` before `invoke` fails open. Check
   `decision.hasFailedOpen()` when that call site must fail closed.
 - LangChain JS helpers default to `onGuardError: "deny"`. `guardTool`
-  and `wrapToolCall` return `{ arcjetDenied: true, … }` as a
-  `ToolMessage`. Don't throw. Direct `guard()` before `invoke` /
-  `stream` fails open. Check `decision.hasFailedOpen()` when that call
-  site must fail closed.
+  returns a plain `{ arcjetDenied: true, … }`. `guardMiddleware`
+  `wrapToolCall` returns a real `ToolMessage` with JSON `content` and
+  default status. Don't throw. Policy sits on `wrapToolCall` only.
+  Direct `guard()` before `invoke` / `stream` fails open. Check
+  `decision.hasFailedOpen()` when that call site must fail closed.
 - Genkit helpers default to `onGuardError: "deny"`. `guardTool` returns
   `{ arcjetDenied: true, … }` as completed `toolResponse.output`. Don't
   throw. Don't call `interrupt()`. Direct `guard()` before
