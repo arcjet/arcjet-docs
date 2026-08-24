@@ -19,7 +19,9 @@ and the in-memory test client. Guard tests must assert that a denied or
 unavailable decision prevents the side effect, not only that Arcjet returned a
 particular result. Capture tests record that an allowed action happened, so they
 must assert that the application recorded the expected `action` after the side
-effect ran. See <Link.Page href="/guards/capture">Capture events</Link.Page>.
+effect ran. When you test a Python checkpoint helper, assert
+`metadata.outcome` as well. See
+<Link.Page href="/guards/capture#capture-outcomes">Capture outcomes</Link.Page>.
 
 ## Test with Newman
 
