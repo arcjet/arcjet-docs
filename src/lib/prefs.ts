@@ -55,6 +55,7 @@ export const frameworks = [
   { key: "fastify", label: "Fastify" },
   { key: "genkit", label: "Genkit" },
   { key: "langchain", label: "LangChain" },
+  { key: "langchain-js", label: "LangChain JS" },
   { key: "langgraph", label: "LangGraph" },
   { key: "mastra", label: "Mastra" },
   { key: "nest-js", label: "NestJS" },

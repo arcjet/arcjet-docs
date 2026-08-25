@@ -43,6 +43,7 @@ const PATHS_FROM_SITEMAP = [
   "/guards/framework-integrations/",
   "/guards/genkit/",
   "/guards/langchain/",
+  "/guards/langchain-js/",
   "/guards/langgraph/",
   "/guards/mastra/",
   "/guards/openai-agents/",

@@ -50,6 +50,7 @@ const frameworkIcon = {
   genkit: <IconGenkit />,
   hono: <IconHono />,
   langchain: <IconLangChain />,
+  "langchain-js": <IconLangChain />,
   langgraph: <IconLangGraph />,
   mastra: <IconMastra />,
   "nest-js": <IconNestJs />,

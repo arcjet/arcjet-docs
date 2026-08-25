@@ -644,6 +644,10 @@ export const main = [
         link: "/guards/langchain",
       },
       {
+        label: "LangChain JS",
+        link: "/guards/langchain-js",
+      },
+      {
         label: "LangGraph",
         link: "/guards/langgraph",
       },
