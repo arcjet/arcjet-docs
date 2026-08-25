@@ -28,17 +28,13 @@ This adapter is a text `Agent` plus `Runner.run` plus an authored
 
 ## Install
 
-The `arcjet[openai-agents]` extra and `arcjet.guard.openai_agents`
-module are unpublished. Published `arcjet` 0.9.x on PyPI does not
-include them. Install from git once an adapter SHA is provided.
-There is no adapter SHA to pin. Don't invent a hash.
-
-Replace `ADAPTER_SHA` with the openai-agents adapter commit when that
-SHA is available:
+Until `arcjet.guard.openai_agents` is published, pin `arcjet` to
+[`978670d0`](https://github.com/arcjet/arcjet-py/commit/978670d073f077eb9324654ec383150db4168c39).
+Published `arcjet` 0.9.x on PyPI does not include this extra or
+module.
 
 ```bash
-# ADAPTER_SHA is a placeholder. There is no adapter commit to pin.
-pip install "arcjet[openai-agents] @ git+https://github.com/arcjet/arcjet-py@ADAPTER_SHA"
+pip install "arcjet[openai-agents] @ git+https://github.com/arcjet/arcjet-py@978670d073f077eb9324654ec383150db4168c39"
 pip install "openai-agents>=0.19.0,<1"
 ```
 
@@ -98,7 +94,7 @@ Don't also wrap these tools with `@arcjet/guard/openai-agents/v0` or
 
 | Option | Required | Description |
 | --- | --- | --- |
-| `guard` | No | Blocking client. Optional if you called `register_arcjet()`. |
+| `guard` | Yes | Client from `launch_arcjet` or `launch_arcjet_sync`. |
 | `action` | Yes | Guard label and capture name. Use `resource.verb` in the past tense, such as `email.sent`. |
 | `rules` | No | Bound SDK rule inputs, or a function of the parsed tool arguments. Omit to submit none. |
 | `on_guard_error` | No | `"deny"` (default) or `"allow"`. A real `DENY` always blocks. |
@@ -106,9 +102,10 @@ Don't also wrap these tools with `@arcjet/guard/openai-agents/v0` or
 Inbound screening uses direct `guard()`, which takes `label` (not
 `action`) and fails open. See the following section.
 
-`openai_agents_context` reads a caller-owned `session_id` or
-`conversation_id` from the context you pass to `Runner.run`. It never
-mints an ID. It never reads `trace_id`.
+`openai_agents_context` reads a caller-owned `correlation_id`, then
+`session_id`, then `conversation_id`, then `group_id` from the
+context you pass to `Runner.run`. It never mints an ID. It never
+reads `trace_id`.
 
 ## Screen user text before `Runner.run`
 
@@ -135,11 +132,12 @@ from arcjet.guard.openai_agents import openai_agents_context
 arcjet = launch_arcjet(key=ARCJET_KEY)
 inbound = DetectPromptInjection()
 app_context = {"session_id": conversation_id}
+derived = openai_agents_context(app_context)
 
 decision = await arcjet.guard(
     label="message.received",
     rules=[inbound(user_text)],
-    **openai_agents_context(context=app_context),
+    correlation_id=derived.correlation_id,
 )
 if decision.conclusion == "DENY" or decision.has_failed_open():
     raise RuntimeError("message blocked")
@@ -257,9 +255,10 @@ For more information about fail-open versus fail-closed behavior, see
 the context object. Pass the ID that you already have. Don't mint an
 ID. Don't read `trace_id`. The SDK mints a trace when you omit one.
 
-`openai_agents_context` reads a caller-owned `session_id` or
-`conversation_id` from that context. If nothing is a valid ID, the
-call is uncorrelated rather than joined to a generated ID.
+`openai_agents_context` reads a caller-owned `correlation_id`, then
+`session_id`, then `conversation_id`, then `group_id` from that
+context. If nothing is a valid ID, the call is uncorrelated rather
+than joined to a generated ID.
 
 ```py
 app_context = {"session_id": conversation_id}
@@ -274,8 +273,8 @@ searches for.
 ## What not to use
 
 - Don't import `arcjet.guard.openai_agents` from published `arcjet`
-  0.9.x. The extra is unpublished.
-- Don't invent an adapter SHA. There is no SHA to pin.
+  0.9.x. Pin `arcjet` to
+  [`978670d0`](https://github.com/arcjet/arcjet-py/commit/978670d073f077eb9324654ec383150db4168c39).
 - There is no inbound helper. Screen prompt injection before
   `Runner.run`.
 - There is no approval helper. `needs_approval` and hosted
@@ -363,5 +362,5 @@ an ID.
 - <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>
 - <Link.Page href="/reference/python#guard">Python Guard SDK reference</Link.Page>
 - <Link.Page href="/guards">Agent guards</Link.Page>
-- Example:
-  [examples/fastapi-openai-agents-guard](https://github.com/arcjet/arcjet-py/tree/main/examples/fastapi-openai-agents-guard)
+- Adapter:
+  [`978670d0`](https://github.com/arcjet/arcjet-py/commit/978670d073f077eb9324654ec383150db4168c39)
