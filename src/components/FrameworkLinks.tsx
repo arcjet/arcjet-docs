@@ -18,6 +18,7 @@ import { Nuxt as IconNuxt } from "@/components/icons/tech/Nuxt";
 import { OpenAiAgents as IconOpenAiAgents } from "@/components/icons/tech/OpenAiAgents";
 import { ReactRouter as IconReactRouter } from "@/components/icons/tech/ReactRouter";
 import { Remix as IconRemix } from "@/components/icons/tech/Remix";
+import { StrandsAgents as IconStrandsAgents } from "@/components/icons/tech/StrandsAgents";
 import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
 import { VercelAi as IconVercelAi } from "@/components/icons/tech/VercelAi";
 import { VercelEve as IconVercelEve } from "@/components/icons/tech/VercelEve";
@@ -135,6 +136,9 @@ const FrameworkLinks = forwardRef(
                   break;
                 case "remix":
                   icon = <IconRemix />;
+                  break;
+                case "strands-agents":
+                  icon = <IconStrandsAgents />;
                   break;
                 case "sveltekit":
                   icon = <IconSvelteKit />;

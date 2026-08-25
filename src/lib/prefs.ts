@@ -70,6 +70,7 @@ export const frameworks = [
   { key: "python-flask", label: "Python + Flask" },
   { key: "react-router", label: "React Router" },
   { key: "remix", label: "Remix" },
+  { key: "strands-agents", label: "Strands Agents" },
   { key: "sveltekit", label: "SvelteKit" },
   { key: "vercel-ai", label: "Vercel AI SDK" },
   { key: "vercel-eve", label: "Vercel Eve" },

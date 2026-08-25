@@ -19,6 +19,7 @@ import { Nuxt as IconNuxt } from "@/components/icons/tech/Nuxt";
 import { OpenAiAgents as IconOpenAiAgents } from "@/components/icons/tech/OpenAiAgents";
 import { ReactRouter as IconReactRouter } from "@/components/icons/tech/ReactRouter";
 import { Remix as IconRemix } from "@/components/icons/tech/Remix";
+import { StrandsAgents as IconStrandsAgents } from "@/components/icons/tech/StrandsAgents";
 import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
 import { VercelAi as IconVercelAi } from "@/components/icons/tech/VercelAi";
 import { VercelEve as IconVercelEve } from "@/components/icons/tech/VercelEve";
@@ -66,6 +67,7 @@ const frameworkIcon = {
   "python-flask": <IconFlask />,
   "react-router": <IconReactRouter />,
   remix: <IconRemix />,
+  "strands-agents": <IconStrandsAgents />,
   sveltekit: <IconSvelteKit />,
   "vercel-ai": <IconVercelAi />,
   "vercel-eve": <IconVercelEve />,

@@ -1,0 +1,496 @@
+---
+title: "Strands Agents agent guard"
+description: "Screen user text before the agent runs, wrap authored tools, and treat `event.interrupt()` as confirmation, not policy."
+---
+
+import { Link } from "@/components/link";
+import FrameworkPrimer from "@/snippets/guards/FrameworkPrimer.mdx";
+
+[Strands Agents](https://strandsagents.com/docs/user-guide/quickstart/typescript/)
+JS `Agent` workflows call authored `tool()` handlers from `invoke()`.
+Arcjet Guard sits at those boundaries so a policy can allow or deny
+the action before a side effect runs.
+
+<FrameworkPrimer />
+
+Vercel AI SDK, Python LangChain, CrewAI, Eve, Mastra, LangGraph,
+OpenAI Agents, Genkit, LangChain JS, and Claude wrappers are on
+<Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>.
+
+This adapter is the JavaScript `@strands-agents/sdk` `Agent` plus
+`tool()` plus `BeforeToolCallEvent`. It is not Python Strands
+Agents. Don't also wrap these tools with
+`@arcjet/guard/langchain/v1`, `@arcjet/guard/langgraph/v1`, or
+`@arcjet/guard/vercel-ai/v7`.
+
+## Install
+
+Install the Guard SDK and Strands Agents:
+
+```bash
+npm install @arcjet/guard @strands-agents/sdk
+```
+
+`@strands-agents/sdk` is a peer of `@arcjet/guard`, not a
+dependency of it. If your project already has it in the range that
+follows, install `@arcjet/guard` on its own so your pins don't move.
+
+Import helpers from the versioned path
+`@arcjet/guard/strands-agents/v1`. There is no unversioned alias.
+`@arcjet/guard/strands-agents` does not resolve. The version
+segment is the Strands Agents SDK major. `@strands-agents/sdk`
+(`>=1.1.0 <2`) is an optional peer. The integration requires
+Node.js 22 or later.
+
+Until `@arcjet/guard/strands-agents/v1` is published, this export
+is not in the published `@arcjet/guard` package on npm. The module
+is unpublished and will be installed from git once an adapter SHA
+is provided. There is no adapter SHA yet. Replace `ADAPTER_SHA` in
+the command that follows when one is provided. Do not invent a
+commit hash. The published package does not export
+`./strands-agents/v1`.
+
+```bash
+npm install github:arcjet/arcjet-js#ADAPTER_SHA
+```
+
+Launch one client at module scope:
+
+```ts
+import { launchArcjet } from "@arcjet/guard";
+
+export const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+```
+
+## Helpers
+
+The integration exposes three surfaces:
+
+- `guardTool()` wraps a Strands `tool()` you pass to
+  `new Agent({ tools })`. On `DENY` the original `callback` never
+  runs. The helper returns a plain `ArcjetDenialResult`. It does
+  not throw. It does not call `event.interrupt()`.
+- `guardHooks()` is the invoke-wide `BeforeToolCallEvent` gate.
+  Register the return value with
+  `agent.addHook(BeforeToolCallEvent, hooks)`. On `DENY` it sets
+  `event.cancel` to a JSON string of `ArcjetDenialResult`. That
+  string is the tool result error message. It does not call
+  `event.interrupt()`. It skips branded (`guardTool`) tools when
+  the tool can be looked up. Tools that cannot be looked up are
+  still gated.
+- `strandsAgentContext()` reads caller-owned
+  `invocationState.sessionId`, then `correlationId`, then
+  `requestId`. It never mints an ID. It never reads `traceId`. It
+  never calls `createAgentContext`.
+
+There is no `guardInbound`. There is no inbound hook. Screen user
+text with a direct `guard()` call before `agent.invoke` or
+`agent.stream`. There is no `guardApproval`.
+
+Never call `createAgentContext` inside a Strands callback. Don't
+also wrap these tools with `@arcjet/guard/langchain/v1`,
+`@arcjet/guard/langgraph/v1`, or `@arcjet/guard/vercel-ai/v7`.
+Don't wrap Python Strands Agents with this adapter.
+
+## Helper options
+
+| Option | Helpers | Description |
+| --- | --- | --- |
+| `action` | `guardTool`, `guardHooks` | Guard label and capture name. Use `resource.verb` in the past tense. A string, or a function of the parsed tool input (or `{ toolName, input }` on the hooks). Required on `guardTool`. Hooks default to `tool.invoked`. |
+| `rules` | `guardTool`, `guardHooks` | SDK rules, or a function of the parsed tool input (or `{ toolName, input }` on the hooks). Omit to submit none. The guard call still happens. |
+| `metadata` | `guardTool`, `guardHooks` | Nested JSON, or a function of the same input as `rules`. |
+| `sessionId` | `guardTool`, `guardHooks` | Caller-owned fallback when `invocationState` has no `sessionId`, `correlationId`, or `requestId`. A string, or a function of the same input as `rules`. Prefer putting the ID on `agent.invoke(prompt, { invocationState })`. |
+| `onGuardError` | `guardTool`, `guardHooks` | `"deny"` (default) or `"allow"`. |
+| `onDeny` | `guardTool`, `guardHooks` | Reshape the denial payload. `guardTool` returns that object as the tool result. `guardHooks` JSON-stringifies it onto `event.cancel`. |
+
+Inbound screening uses direct `guard()`, which takes `label` (not
+`action`) and fails open. See the following section.
+
+## Denial payload
+
+On `DENY` the original tool never runs. The payload shape is one
+`ArcjetDenialResult`. The envelope differs by surface:
+
+- `guardTool` returns the object as the tool result.
+- `guardHooks` sets `event.cancel` to a JSON string of that
+  object. `BeforeToolCallEvent.cancel` is the policy gate. A
+  string value is the tool result error message.
+
+It is not a throw. It is not `event.interrupt()`.
+
+```ts
+{
+  arcjetDenied: true,
+  reason: "RATE_LIMIT", // or PROMPT_INJECTION, SENSITIVE_INFO, ERROR
+  message:
+    "Arcjet denied this call (RATE_LIMIT). It may be retried after 30 seconds.",
+  retryable: true,
+  retryAfterSeconds: 30,
+}
+```
+
+You can import `ArcjetDenialResult` from
+`@arcjet/guard/strands-agents/v1`.
+
+Only rate-limit denials set `retryable: true` and include
+`retryAfterSeconds`. Other reasons tell the model not to retry.
+
+When Guard is unavailable and `onGuardError` is `"deny"`, the
+model receives `reason: "ERROR"`, `retryable: true`, and
+`retryAfterSeconds: 5`.
+
+## Run a guarded `invoke`
+
+Screen inbound text, wrap `lookup_order`, and register
+`guardHooks` on `BeforeToolCallEvent`:
+
+```ts
+import {
+  launchArcjet,
+  detectPromptInjection,
+  localDetectSensitiveInfo,
+  tokenBucket,
+} from "@arcjet/guard";
+import {
+  guardTool,
+  guardHooks,
+  strandsAgentContext,
+} from "@arcjet/guard/strands-agents/v1";
+import { Agent, BeforeToolCallEvent, tool } from "@strands-agents/sdk";
+import { z } from "zod";
+
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+
+const lookupLimit = tokenBucket({
+  bucket: "lookups",
+  refillRate: 10,
+  intervalSeconds: 60,
+  maxTokens: 10,
+});
+const detectPii = localDetectSensitiveInfo();
+const inbound = detectPromptInjection();
+
+const lookupOrder = guardTool(
+  arcjet,
+  tool({
+    name: "lookup_order",
+    description: "Look up an order by number",
+    inputSchema: z.object({
+      orderNumber: z.string(),
+      note: z.string(),
+    }),
+    callback: ({ orderNumber, note }) => ({
+      orderNumber,
+      note,
+      status: "shipped",
+    }),
+  }),
+  {
+    action: "order.looked-up",
+    onGuardError: "deny",
+    rules: (input) => [
+      lookupLimit({ key: input.orderNumber, requested: 1 }),
+      detectPii(input.note),
+    ],
+  },
+);
+
+export async function runAgent(conversationId: string, userText: string) {
+  const invocationState = { sessionId: conversationId };
+
+  const decision = await arcjet.guard({
+    label: "message.received",
+    rules: [inbound(userText)],
+    ...strandsAgentContext({ invocationState }),
+  });
+
+  if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+    throw new Error("message blocked");
+  }
+
+  const agent = new Agent({
+    tools: [lookupOrder],
+  });
+  agent.addHook(
+    BeforeToolCallEvent,
+    guardHooks(arcjet, { sessionId: conversationId }),
+  );
+
+  return agent.invoke(userText, { invocationState });
+}
+```
+
+## Screen user text before `invoke`
+
+There is no inbound hook, so there is no `guardInbound`. Put
+prompt-injection and other inbound rules in the application before
+`agent.invoke` or `agent.stream`.
+
+Direct
+`client.guard({ label, rules, ...strandsAgentContext({ invocationState }) })`
+is the inbound pattern. Act on that decision. Direct `guard()`
+fails open, so an `ALLOW` is not proof the rules ran. Gate inbound
+on `decision.hasFailedOpen()` if this call site must fail closed.
+`guardTool` and `guardHooks` already default to that.
+
+On `DENY`, don't call `invoke` / `stream`.
+
+```ts
+import { detectPromptInjection } from "@arcjet/guard";
+import { strandsAgentContext } from "@arcjet/guard/strands-agents/v1";
+import { arcjet } from "./arcjet.js";
+
+const inbound = detectPromptInjection();
+const invocationState = { sessionId: conversationId };
+
+const decision = await arcjet.guard({
+  label: "message.received",
+  rules: [inbound(userText)],
+  ...strandsAgentContext({ invocationState }),
+});
+
+if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+  throw new Error("message blocked");
+}
+```
+
+## Human approval is not a policy gate
+
+`event.interrupt()` is human-in-the-loop (HITL) confirmation. It
+is not a policy gate. Same trap as LangChain JS
+`humanInTheLoopMiddleware`, Mastra `requireApproval`, Claude
+`canUseTool`, LangGraph `interrupt()`, Genkit `toolApproval`, and
+OpenAI `needsApproval`. There is no `guardApproval`. Don't wrap
+HITL as Guard. Don't deny by calling `interrupt()`. Policy sits on
+`BeforeToolCallEvent.cancel` only.
+
+Use `guardTool` for authored `tool()` handlers you own.
+
+On `DENY` the original tool never runs, so the inner `callback`
+never runs a side effect. `guardTool` returns a plain
+`ArcjetDenialResult`. Don't throw. Don't call `event.interrupt()`.
+Don't pause for a human to approve a denied call. Scan free-text
+args (a note, reason, or body). An opaque `orderNumber` or tool
+use ID will not trip email / phone / card / IP, so don't pass it
+to `localDetectSensitiveInfo`. That helper runs on a local ML
+model backend.
+
+```ts
+import { tool } from "@strands-agents/sdk";
+import { z } from "zod";
+import { guardTool } from "@arcjet/guard/strands-agents/v1";
+import { tokenBucket, localDetectSensitiveInfo } from "@arcjet/guard";
+import { arcjet } from "./arcjet.js";
+
+const lookupLimit = tokenBucket({
+  bucket: "lookups",
+  refillRate: 10,
+  intervalSeconds: 60,
+  maxTokens: 10,
+});
+const detectPii = localDetectSensitiveInfo();
+
+const lookupOrder = guardTool(
+  arcjet,
+  tool({
+    name: "lookup_order",
+    description: "Look up an order by number",
+    inputSchema: z.object({
+      orderNumber: z.string(),
+      note: z.string(),
+    }),
+    callback: ({ orderNumber, note }) => ({
+      orderNumber,
+      note,
+      status: "shipped",
+    }),
+  }),
+  {
+    action: "order.looked-up",
+    onGuardError: "deny",
+    rules: (input) => [
+      lookupLimit({ key: input.orderNumber, requested: 1 }),
+      detectPii(input.note),
+    ],
+  },
+);
+```
+
+## Deny inside `tool()` via `guardTool`, and invoke-wide via `guardHooks`
+
+`guardTool` wraps an authored `tool()` you pass to
+`new Agent({ tools })`. That tool is the deny point for tools you
+own. It returns a plain `ArcjetDenialResult`.
+
+`guardHooks` is the invoke-wide `BeforeToolCallEvent` gate.
+Register it with `agent.addHook(BeforeToolCallEvent, hooks)`. The
+callback denies by setting `event.cancel` to a JSON string of
+`ArcjetDenialResult` without calling the tool. Policy sits on
+`cancel` only. It skips branded (`guardTool`) tools when the tool
+can be looked up. Tools that cannot be looked up are still gated.
+
+MCP and injected tools skip an unwrapped handler. Hosted or
+injected tools are not a `tool()` deny. `guardHooks` still gates a
+tool call that Strands executes through `BeforeToolCallEvent`.
+
+This is not LangChain JS `createAgent` / `wrapToolCall`. Don't
+pass `guardMiddleware` to a Strands `Agent`.
+
+```ts
+import { Agent, BeforeToolCallEvent } from "@strands-agents/sdk";
+import { guardHooks } from "@arcjet/guard/strands-agents/v1";
+import { arcjet } from "./arcjet.js";
+
+const agent = new Agent({
+  tools: [lookupOrder],
+});
+agent.addHook(
+  BeforeToolCallEvent,
+  guardHooks(arcjet, { sessionId: conversationId }),
+);
+```
+
+## Correlation
+
+`strandsAgentContext` reads caller-owned
+`invocationState.sessionId` first, then `correlationId`, then
+`requestId`. It never mints an ID. It never reads `traceId`. It
+never calls `createAgentContext`. If the caller did not put one of
+those keys on `invocationState`, the call is uncorrelated rather
+than joined to a generated ID.
+
+A run that pauses on `event.interrupt()` resumes through a later
+`invoke`. Put the same `invocationState` on that resume call so
+later Guard decisions stay on the Sequence that started it. The
+interrupt and its resume value are not correlation sources. Don't
+derive an ID from them. Don't mint one. Don't read `traceId`.
+
+Pass the same `invocationState` on `agent.invoke`. Use `sessionId`
+on `guardHooks` only as a fallback when that object has no ID.
+
+```ts
+const invocationState = { sessionId: conversationId };
+
+await arcjet.guard({
+  label: "message.received",
+  ...strandsAgentContext({ invocationState }),
+});
+
+await agent.invoke(userText, { invocationState });
+```
+
+## What not to use
+
+- There is no `guardInbound`. Screen prompt injection before
+  `agent.invoke` or `agent.stream`.
+- There is no `guardApproval`. `event.interrupt()` is human HITL
+  confirmation, not policy.
+- Don't treat `event.interrupt()` as Guard. Policy sits on
+  `BeforeToolCallEvent.cancel` only.
+- Don't turn a deny into `event.interrupt()` or a human approval
+  pause.
+- Don't mint a correlation ID. Don't read `traceId`. If
+  `invocationState` has no `sessionId`, `correlationId`, or
+  `requestId`, leave the call uncorrelated.
+- Don't use this adapter with Python Strands Agents.
+- Don't throw from `guardTool` or the `BeforeToolCallEvent`
+  callback to signal a denial.
+- Don't call `createAgentContext` inside a Strands callback.
+- Don't also wrap these tools with `@arcjet/guard/langchain/v1`,
+  `@arcjet/guard/langgraph/v1`, or `@arcjet/guard/vercel-ai/v7`.
+- Don't import `@arcjet/guard/strands-agents`. The path is
+  `@arcjet/guard/strands-agents/v1`.
+
+## Common patterns
+
+### Rate limit a tool per trusted id
+
+Key the bucket on a trusted identifier such as `orderNumber`. Don't
+key it on free-text user input.
+
+```ts
+const lookupLimit = tokenBucket({
+  bucket: "lookups",
+  refillRate: 10,
+  intervalSeconds: 60,
+  maxTokens: 10,
+});
+
+const lookupOrder = guardTool(
+  arcjet,
+  tool({
+    name: "lookup_order",
+    description: "Look up an order",
+    inputSchema: z.object({ orderNumber: z.string() }),
+    callback: ({ orderNumber }) => ({ orderNumber, status: "shipped" }),
+  }),
+  {
+    action: "order.looked-up",
+    rules: (input) => [lookupLimit({ key: input.orderNumber, requested: 1 })],
+  },
+);
+```
+
+### Scan a free-text note for sensitive information
+
+Scan a note, reason, or body. An opaque `orderNumber` does not trip
+email, phone, card, or IP detection, so don't pass it to
+`localDetectSensitiveInfo`.
+
+```ts
+import { localDetectSensitiveInfo, tokenBucket } from "@arcjet/guard";
+
+const detectPii = localDetectSensitiveInfo();
+
+const lookupOrder = guardTool(
+  arcjet,
+  tool({
+    name: "lookup_order",
+    description: "Look up an order",
+    inputSchema: z.object({
+      orderNumber: z.string(),
+      note: z.string(),
+    }),
+    callback: ({ orderNumber, note }) => ({
+      orderNumber,
+      note,
+      status: "shipped",
+    }),
+  }),
+  {
+    action: "order.looked-up",
+    rules: (input) => [
+      lookupLimit({ key: input.orderNumber, requested: 1 }),
+      detectPii(input.note),
+    ],
+  },
+);
+```
+
+## Fail-closed default
+
+`guardTool` and `guardHooks` default to `onGuardError: "deny"`.
+If Guard cannot be evaluated, the wrapped tool does not run and
+`BeforeToolCallEvent` sets `event.cancel` instead of calling the
+tool.
+
+Set `onGuardError: "allow"` only when executing without a complete
+security decision is acceptable, such as a read-only lookup. Direct
+`guard()` still fails open. For more information about fail-open
+versus fail-closed behavior, see
+<Link.Page href="/guards/reference#availability-and-fail-behavior">Availability and fail behavior</Link.Page>.
+
+## Related
+
+- <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
+- <Link.Page href="/guards/langchain-js">LangChain JS agent guard</Link.Page>
+- <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>
+- <Link.Page href="/guards/genkit">Genkit agent guard</Link.Page>
+- <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>
+- <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>
+- <Link.Page href="/guards/openai-agents">OpenAI Agents agent guard</Link.Page>
+- <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>
+- <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>
+- <Link.Page href="/guards">Agent guards</Link.Page>
+- Example: `strands-agent` in
+  [arcjet-js examples](https://github.com/arcjet/arcjet-js/tree/main/examples)
