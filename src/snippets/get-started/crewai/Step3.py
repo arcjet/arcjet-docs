@@ -25,7 +25,7 @@ register_arcjet_hooks(
     guard=arcjet,
     tools=["lookup_order"],
     action="order.looked-up",
-    rules=[lookup_limit(key="orders", requested=5)],
+    rules=[lookup_limit(key="orders", requested=1)],
 )
 
 agent = Agent(

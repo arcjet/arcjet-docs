@@ -12,8 +12,8 @@ deny the action before a side effect runs.
 
 <FrameworkPrimer />
 
-Vercel AI SDK, Python LangChain, LangGraph JS, Genkit, Eve, Mastra,
-OpenAI Agents, and Claude wrappers are on
+Vercel AI SDK, Python LangChain, LangChain JS, LangGraph JS, Genkit,
+Eve, Mastra, OpenAI Agents, and Claude wrappers are on
 <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>.
 
 This is the official CrewAI Python package (`crewai` on PyPI). It is not
@@ -28,9 +28,10 @@ Published `arcjet` 0.9.0 on PyPI does not include this module.
 
 There is no `arcjet[crewai]` extra. CrewAI is not an Arcjet dependency,
 because it pulls `chromadb`, which includes an unpatched critical remote
-code execution vulnerability (CVE-2026-45829). Install official CrewAI
-yourself. Registration enforces `crewai>=1.15.3,<2`. Python 3.10 to
-3.13.
+code execution vulnerability
+([CVE-2026-45829](https://github.com/advisories/GHSA-f4j7-r4q5-qw2c)).
+Install official CrewAI yourself. Registration enforces
+`crewai>=1.15.3,<2`. Python 3.10 to 3.13.
 
 ```bash
 pip install "arcjet @ git+https://github.com/arcjet/arcjet-py@b1253640ce676b948594beed5fe62450d0e1c77d"
@@ -112,6 +113,7 @@ an npm CrewAI port with these helpers.
 
 | Option | Required | Description |
 | --- | --- | --- |
+| `guard` | No | Blocking client. Optional if you called `register_arcjet()`. The hook path needs `launch_arcjet_sync`. |
 | `action` | No | Guard label and capture name. Use `resource.verb` in the past tense, such as `email.sent`. A string, or a function of the hook context. Defaults to `{sanitized_tool_name}.invoked`. |
 | `rules` | No | Bound SDK rule inputs, or a function of `(arguments, ctx)`. `arguments` is the tool's own mapping from `ctx.tool_input`, unfiltered. Omit to submit none. |
 | `policies` | No | Per-tool `ToolPolicy` overrides, keyed by tool name. Keys are sanitized. |
@@ -389,6 +391,7 @@ register_arcjet_hooks(
 
 - <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
 - <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
+- <Link.Page href="/guards/langchain-js">LangChain JS agent guard</Link.Page>
 - <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>
 - <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>
 - <Link.Page href="/guards/genkit">Genkit agent guard</Link.Page>
