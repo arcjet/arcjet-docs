@@ -2,7 +2,7 @@ import arcjet, { protectSignup } from "@arcjet/bun";
 import { env } from "bun";
 
 const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
     protectSignup({
       email: {

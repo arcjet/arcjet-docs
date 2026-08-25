@@ -125,7 +125,7 @@ See the <Link.ToSdk href="/get-started" sdk="next">quick start</Link.ToSdk>.
 - `href` is the root-relative path without domain (e.g. `/environment#arcjet-env`)
 - Link text must be on a **single line** — newlines inside `<Link.*>…</Link.*>`
   break MDX rendering
-- External links and `[Arcjet Dashboard](https://app.arcjet.com)` style links
+- External links and `[Arcjet Dashboard](https://console.arcjet.com)` style links
   remain plain markdown
 
 ### Background

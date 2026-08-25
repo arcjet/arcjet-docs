@@ -3,7 +3,7 @@ import os
 from arcjet import Mode, arcjet_sync, shield
 
 aj = arcjet_sync(
-    # Get your site key from https://app.arcjet.com and set it as an
+    # Get your site key from https://console.arcjet.com and set it as an
     # environment variable rather than hard coding it.
     key=os.environ["ARCJET_KEY"],
     rules=[

@@ -1,7 +1,7 @@
 import arcjet, { shield } from "@arcjet/remix";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
   rules: [
     shield({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only

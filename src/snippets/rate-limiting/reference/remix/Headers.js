@@ -2,7 +2,7 @@ import { setRateLimitHeaders } from "@arcjet/decorate";
 import arcjet, { fixedWindow } from "@arcjet/remix";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  key: process.env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
   // Tracking by ip.src is the default if not specified
   rules: [
     fixedWindow({

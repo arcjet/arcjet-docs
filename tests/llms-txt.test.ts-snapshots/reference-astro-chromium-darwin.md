@@ -76,7 +76,7 @@ Arcjet is configured as an integration in your `astro.config.mjs` file. You will
 
 [Section titled “API Key”](#api-key)
 
-First, get your site key from the [Arcjet dashboard](https://app.arcjet.com). Set it as an environment variable called `ARCJET_KEY` in your `.env` file:
+First, get your site key from the [Arcjet dashboard](https://console.arcjet.com). Set it as an environment variable called `ARCJET_KEY` in your `.env` file:
 
 Terminal window
 

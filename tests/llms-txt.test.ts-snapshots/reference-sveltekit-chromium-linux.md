@@ -81,7 +81,7 @@ Create a new `Arcjet` object with your API key and rules. Put it in a server-onl
 
 The following fields are required:
 
-*   `key` (`string`) – Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://app.arcjet.com).
+*   `key` (`string`) – Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://console.arcjet.com).
 *   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these, such as [shield](/shield/reference?f=sveltekit), [rate limiting](/rate-limiting/reference?f=sveltekit), [bot protection](/bot-protection/reference?f=sveltekit), [email validation](/email-validation/reference?f=sveltekit).
 
 The following fields are optional:
@@ -97,7 +97,7 @@ import { env } from "$env/dynamic/private";
 import arcjet, { shield } from "@arcjet/sveltekit";
 
 export const aj = arcjet({
-  // Get your site key from https://app.arcjet.com
+  // Get your site key from https://console.arcjet.com
   // and set it as an environment variable rather than hard coding.
   // See: https://kit.svelte.dev/docs/modules#$env-dynamic-private
   key: env.ARCJET_KEY!,
@@ -115,7 +115,7 @@ import { env } from "$env/dynamic/private";
 import arcjet, { shield } from "@arcjet/sveltekit";
 
 export const aj = arcjet({
-  // Get your site key from https://app.arcjet.com
+  // Get your site key from https://console.arcjet.com
   // and set it as an environment variable rather than hard coding.
   // See: https://kit.svelte.dev/docs/modules#$env-dynamic-private
   key: env.ARCJET_KEY,
@@ -205,7 +205,7 @@ import arcjet, { detectBot, tokenBucket } from "@arcjet/sveltekit";
 
 // Create an Arcjet instance with multiple rules
 const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
+  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
     tokenBucket({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
@@ -229,7 +229,7 @@ import arcjet, { detectBot, tokenBucket } from "@arcjet/sveltekit";
 
 // Create an Arcjet instance with multiple rules
 const aj = arcjet({
-  key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com
+  key: env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
   rules: [
     tokenBucket({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only

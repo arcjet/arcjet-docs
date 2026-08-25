@@ -47,7 +47,7 @@ Create a new `Arcjet` object with your API key and rules.
 
 The required fields are:
 
-*   `key` (`string`) - Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://app.arcjet.com).
+*   `key` (`string`) - Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://console.arcjet.com).
 *   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these e.g. [shield](/shield/reference?f=bun), [rate limiting](/rate-limiting/reference?f=bun), [bot protection](/bot-protection/reference?f=bun), [email validation](/email-validation/reference?f=bun).
 
 The optional fields are:
@@ -60,12 +60,12 @@ The optional fields are:
 
 ```
 1import arcjet, { shield } from "@arcjet/bun";2import { env } from "bun";3
-4export const aj = arcjet({5  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com6  rules: [7    // Protect against common attacks with Arcjet Shield8    shield({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10    }),11  ],12});
+4export const aj = arcjet({5  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com6  rules: [7    // Protect against common attacks with Arcjet Shield8    shield({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10    }),11  ],12});
 ```
 
 ```
 1import arcjet, { shield } from "@arcjet/bun";2import { env } from "bun";3
-4export const aj = arcjet({5  key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com6  rules: [7    // Protect against common attacks with Arcjet Shield8    shield({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10    }),11  ],12});
+4export const aj = arcjet({5  key: env.ARCJET_KEY, // Get your site key from https://console.arcjet.com6  rules: [7    // Protect against common attacks with Arcjet Shield8    shield({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10    }),11  ],12});
 ```
 
 ### Single instance
@@ -112,14 +112,14 @@ index.ts
 
 ```
 1import arcjet, { detectBot, tokenBucket } from "@arcjet/bun";2import { env } from "bun";3
-4// Create an Arcjet instance with multiple rules5const aj = arcjet({6  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com7  rules: [8    tokenBucket({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10      refillRate: 5, // refill 5 tokens per interval11      interval: 10, // refill every 10 seconds12      capacity: 10, // bucket maximum capacity of 10 tokens13    }),14    detectBot({15      mode: "LIVE",16      allow: [], // "allow none" will block all detected bots17    }),18  ],19});
+4// Create an Arcjet instance with multiple rules5const aj = arcjet({6  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com7  rules: [8    tokenBucket({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10      refillRate: 5, // refill 5 tokens per interval11      interval: 10, // refill every 10 seconds12      capacity: 10, // bucket maximum capacity of 10 tokens13    }),14    detectBot({15      mode: "LIVE",16      allow: [], // "allow none" will block all detected bots17    }),18  ],19});
 ```
 
 index.js
 
 ```
 1import arcjet, { detectBot, tokenBucket } from "@arcjet/bun";2import { env } from "bun";3
-4// Create an Arcjet instance with multiple rules5const aj = arcjet({6  key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com7  rules: [8    tokenBucket({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10      refillRate: 5, // refill 5 tokens per interval11      interval: 10, // refill every 10 seconds12      capacity: 10, // bucket maximum capacity of 10 tokens13    }),14    detectBot({15      mode: "LIVE",16      allow: [], // "allow none" will block all detected bots17    }),18  ],19});
+4// Create an Arcjet instance with multiple rules5const aj = arcjet({6  key: env.ARCJET_KEY, // Get your site key from https://console.arcjet.com7  rules: [8    tokenBucket({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10      refillRate: 5, // refill 5 tokens per interval11      interval: 10, // refill every 10 seconds12      capacity: 10, // bucket maximum capacity of 10 tokens13    }),14    detectBot({15      mode: "LIVE",16      allow: [], // "allow none" will block all detected bots17    }),18  ],19});
 ```
 
 ### Environment variables
@@ -227,7 +227,7 @@ This function returns a `Promise` that resolves to an `ArcjetDecision` object, w
 
 ```
 1import arcjet, { shield } from "@arcjet/bun";2import { env } from "bun";3
-4const aj = arcjet({5  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com6  rules: [7    // Protect against common attacks with Arcjet Shield8    shield({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10    }),11  ],12});13
+4const aj = arcjet({5  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com6  rules: [7    // Protect against common attacks with Arcjet Shield8    shield({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10    }),11  ],12});13
 14export default {15  port: 3000,16  fetch: aj.handler(async (req) => {17    const decision = await aj.protect(req);18    console.log("Arcjet decision", decision);19
 20    if (decision.isDenied()) {21      return new Response("Forbidden", { status: 403 });22    }23
 24    return new Response("Hello world");25  }),26};
@@ -235,7 +235,7 @@ This function returns a `Promise` that resolves to an `ArcjetDecision` object, w
 
 ```
 1import arcjet, { shield } from "@arcjet/bun";2import { env } from "bun";3
-4const aj = arcjet({5  key: env.ARCJET_KEY, // Get your site key from https://app.arcjet.com6  rules: [7    // Protect against common attacks with Arcjet Shield8    shield({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10    }),11  ],12});13
+4const aj = arcjet({5  key: env.ARCJET_KEY, // Get your site key from https://console.arcjet.com6  rules: [7    // Protect against common attacks with Arcjet Shield8    shield({9      mode: "LIVE", // will block requests. Use "DRY_RUN" to log only10    }),11  ],12});13
 14export default {15  port: 3000,16  fetch: aj.handler(async (req) => {17    const decision = await aj.protect(req);18    console.log("Arcjet decision", decision);19
 20    if (decision.isDenied()) {21      return new Response("Forbidden", { status: 403 });22    }23
 24    return new Response("Hello world");25  }),26};
@@ -259,7 +259,7 @@ index.ts
 
 ```
 1/// <reference types="bun-types/bun.d.ts" />2import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/bun";3import { isSpoofedBot } from "@arcjet/inspect";4import { env } from "bun";5
-6const aj = arcjet({7  key: env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com8  rules: [9    // Shield protects your app from common attacks e.g. SQL injection10    shield({ mode: "LIVE" }),11    // Create a bot detection rule12    detectBot({13      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only14      // Block all bots except the following15      allow: [16        "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc17        // Uncomment to allow these other common bot categories18        // See the full list at https://arcjet.com/bot-list19        //"CATEGORY:MONITOR", // Uptime monitoring services20        //"CATEGORY:PREVIEW", // Link previews e.g. Slack, Discord21      ],22    }),23    // Create a token bucket rate limit. Other algorithms are supported.24    tokenBucket({25      mode: "LIVE",26      // Tracked by IP address by default, but this can be customized27      // See https://docs.arcjet.com/fingerprints28      //characteristics: ["ip.src"],29      refillRate: 5, // Refill 5 tokens per interval30      interval: 10, // Refill every 10 seconds31      capacity: 10, // Bucket capacity of 10 tokens32    }),33  ],34});35
+6const aj = arcjet({7  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com8  rules: [9    // Shield protects your app from common attacks e.g. SQL injection10    shield({ mode: "LIVE" }),11    // Create a bot detection rule12    detectBot({13      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only14      // Block all bots except the following15      allow: [16        "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc17        // Uncomment to allow these other common bot categories18        // See the full list at https://arcjet.com/bot-list19        //"CATEGORY:MONITOR", // Uptime monitoring services20        //"CATEGORY:PREVIEW", // Link previews e.g. Slack, Discord21      ],22    }),23    // Create a token bucket rate limit. Other algorithms are supported.24    tokenBucket({25      mode: "LIVE",26      // Tracked by IP address by default, but this can be customized27      // See https://docs.arcjet.com/fingerprints28      //characteristics: ["ip.src"],29      refillRate: 5, // Refill 5 tokens per interval30      interval: 10, // Refill every 10 seconds31      capacity: 10, // Bucket capacity of 10 tokens32    }),33  ],34});35
 36Bun.serve({37  async fetch(req: Request) {38    const decision = await aj.protect(req, { requested: 5 }); // Deduct 5 tokens from the bucket39    console.log("Arcjet decision", decision.conclusion);40
 41    if (decision.isDenied()) {42      if (decision.reason.isRateLimit()) {43        return new Response("Too many requests", { status: 429 });44      } else if (decision.reason.isBot()) {45        return new Response("No bots allowed", { status: 403 });46      } else {47        return new Response("Forbidden", { status: 403 });48      }49    }50
 51    // Paid Arcjet accounts include additional verification checks using IP data.52    // Verification isn't always possible, so we recommend checking the decision53    // separately.54    // https://docs.arcjet.com/bot-protection/reference#bot-verification55    if (decision.results.some(isSpoofedBot)) {56      return new Response("Forbidden", { status: 403 });57    }58

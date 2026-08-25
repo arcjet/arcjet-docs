@@ -2,7 +2,7 @@ import arcjet, { detectBot } from "@arcjet/deno";
 import { isMissingUserAgent } from "@arcjet/inspect";
 
 const aj = arcjet({
-  key: Deno.env.get("ARCJET_KEY")!, // Get your site key from https://app.arcjet.com
+  key: Deno.env.get("ARCJET_KEY")!, // Get your site key from https://console.arcjet.com
   rules: [
     detectBot({
       mode: "LIVE",
