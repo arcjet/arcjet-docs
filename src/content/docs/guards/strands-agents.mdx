@@ -28,7 +28,7 @@ Agents. Don't also wrap these tools with
 Install the Guard SDK and Strands Agents:
 
 ```bash
-npm install @arcjet/guard @strands-agents/sdk
+npm install github:arcjet/arcjet-js#23d5a85d1207ab999e1bb883cc1dca1ddb78a858 @strands-agents/sdk
 ```
 
 `@strands-agents/sdk` is a peer of `@arcjet/guard`, not a
@@ -42,17 +42,11 @@ segment is the Strands Agents SDK major. `@strands-agents/sdk`
 (`>=1.1.0 <2`) is an optional peer. The integration requires
 Node.js 22 or later.
 
-Until `@arcjet/guard/strands-agents/v1` is published, this export
-is not in the published `@arcjet/guard` package on npm. The module
-is unpublished and will be installed from git once an adapter SHA
-is provided. There is no adapter SHA yet. Replace `ADAPTER_SHA` in
-the command that follows when one is provided. Do not invent a
-commit hash. The published package does not export
+Until `@arcjet/guard/strands-agents/v1` is published, pin
+`@arcjet/guard` to
+[`23d5a85d`](https://github.com/arcjet/arcjet-js/commit/23d5a85d1207ab999e1bb883cc1dca1ddb78a858).
+The published `@arcjet/guard@1.10.0` package on npm does not export
 `./strands-agents/v1`.
-
-```bash
-npm install github:arcjet/arcjet-js#ADAPTER_SHA
-```
 
 Launch one client at module scope:
 
@@ -66,22 +60,25 @@ export const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 
 The integration exposes three surfaces:
 
-- `guardTool()` wraps a Strands `tool()` you pass to
+- `guardTool()` wraps a Strands `tool({ callback })` you pass to
   `new Agent({ tools })`. On `DENY` the original `callback` never
   runs. The helper returns a plain `ArcjetDenialResult`. It does
-  not throw. It does not call `event.interrupt()`.
-- `guardHooks()` is the invoke-wide `BeforeToolCallEvent` gate.
-  Register the return value with
-  `agent.addHook(BeforeToolCallEvent, hooks)`. On `DENY` it sets
-  `event.cancel` to a JSON string of `ArcjetDenialResult`. That
-  string is the tool result error message. It does not call
-  `event.interrupt()`. It skips branded (`guardTool`) tools when
-  the tool can be looked up. Tools that cannot be looked up are
-  still gated.
+  not throw. It does not call `event.interrupt()`. Prefer omitting
+  `outputSchema` on guarded tools.
+- `guardHooks()` is a Plugin whose `initAgent` registers
+  `BeforeToolCallEvent` as the invoke-wide gate. Pass it on
+  `new Agent({ plugins })`. On `DENY` it sets `event.cancel` to a
+  JSON string of `ArcjetDenialResult`. That string is the tool
+  result error message. It does not call `event.interrupt()`. It
+  does not set `BeforeToolsEvent.cancel`. It skips branded
+  (`guardTool`) tools. Tools that are not branded – MCP, vended,
+  or unwrapped – are still gated. `AfterToolCallEvent` is capture
+  only.
 - `strandsAgentContext()` reads caller-owned
-  `invocationState.sessionId`, then `correlationId`, then
+  `invocationState.correlationId`, then `sessionId`, then
   `requestId`. It never mints an ID. It never reads `traceId`. It
-  never calls `createAgentContext`.
+  never reads `agent.id`. It never calls `createAgentContext` or
+  `SessionManager`.
 
 There is no `guardInbound`. There is no inbound hook. Screen user
 text with a direct `guard()` call before `agent.invoke` or
@@ -99,7 +96,7 @@ Don't wrap Python Strands Agents with this adapter.
 | `action` | `guardTool`, `guardHooks` | Guard label and capture name. Use `resource.verb` in the past tense. A string, or a function of the parsed tool input (or `{ toolName, input }` on the hooks). Required on `guardTool`. Hooks default to `tool.invoked`. |
 | `rules` | `guardTool`, `guardHooks` | SDK rules, or a function of the parsed tool input (or `{ toolName, input }` on the hooks). Omit to submit none. The guard call still happens. |
 | `metadata` | `guardTool`, `guardHooks` | Nested JSON, or a function of the same input as `rules`. |
-| `sessionId` | `guardTool`, `guardHooks` | Caller-owned fallback when `invocationState` has no `sessionId`, `correlationId`, or `requestId`. A string, or a function of the same input as `rules`. Prefer putting the ID on `agent.invoke(prompt, { invocationState })`. |
+| `sessionId` | `guardTool`, `guardHooks` | Caller-owned fallback when `invocationState` has no `correlationId`, `sessionId`, or `requestId`. A string, or a function of the same input as `rules`. Prefer putting the ID on `agent.invoke(prompt, { invocationState })`. |
 | `onGuardError` | `guardTool`, `guardHooks` | `"deny"` (default) or `"allow"`. |
 | `onDeny` | `guardTool`, `guardHooks` | Reshape the denial payload. `guardTool` returns that object as the tool result. `guardHooks` JSON-stringifies it onto `event.cancel`. |
 
@@ -141,8 +138,8 @@ model receives `reason: "ERROR"`, `retryable: true`, and
 
 ## Run a guarded `invoke`
 
-Screen inbound text, wrap `lookup_order`, and register
-`guardHooks` on `BeforeToolCallEvent`:
+Screen inbound text, wrap `lookup_order`, and pass `guardHooks`
+on `new Agent({ plugins })`:
 
 ```ts
 import {
@@ -156,7 +153,7 @@ import {
   guardHooks,
   strandsAgentContext,
 } from "@arcjet/guard/strands-agents/v1";
-import { Agent, BeforeToolCallEvent, tool } from "@strands-agents/sdk";
+import { Agent, tool } from "@strands-agents/sdk";
 import { z } from "zod";
 
 const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
@@ -210,11 +207,8 @@ export async function runAgent(conversationId: string, userText: string) {
 
   const agent = new Agent({
     tools: [lookupOrder],
+    plugins: [guardHooks(arcjet, { sessionId: conversationId })],
   });
-  agent.addHook(
-    BeforeToolCallEvent,
-    guardHooks(arcjet, { sessionId: conversationId }),
-  );
 
   return agent.invoke(userText, { invocationState });
 }
@@ -322,42 +316,42 @@ const lookupOrder = guardTool(
 `new Agent({ tools })`. That tool is the deny point for tools you
 own. It returns a plain `ArcjetDenialResult`.
 
-`guardHooks` is the invoke-wide `BeforeToolCallEvent` gate.
-Register it with `agent.addHook(BeforeToolCallEvent, hooks)`. The
-callback denies by setting `event.cancel` to a JSON string of
-`ArcjetDenialResult` without calling the tool. Policy sits on
-`cancel` only. It skips branded (`guardTool`) tools when the tool
-can be looked up. Tools that cannot be looked up are still gated.
+`guardHooks` is a Plugin. Pass it on `new Agent({ plugins })`.
+`initAgent` registers `BeforeToolCallEvent` as the invoke-wide
+gate. The callback denies by setting `event.cancel` to a JSON
+string of `ArcjetDenialResult` without calling the tool. Policy
+sits on `cancel` only. Don't set `BeforeToolsEvent.cancel`. That
+skips per-tool hooks. It skips branded (`guardTool`) tools. Tools
+that are not branded are still gated. `AfterToolCallEvent` is
+capture only.
 
-MCP and injected tools skip an unwrapped handler. Hosted or
-injected tools are not a `tool()` deny. `guardHooks` still gates a
-tool call that Strands executes through `BeforeToolCallEvent`.
+MCP and vended tools skip an unwrapped handler. Those tools are
+not a `tool()` deny. `guardHooks` still gates a tool call that
+Strands executes through `BeforeToolCallEvent`.
 
 This is not LangChain JS `createAgent` / `wrapToolCall`. Don't
 pass `guardMiddleware` to a Strands `Agent`.
 
 ```ts
-import { Agent, BeforeToolCallEvent } from "@strands-agents/sdk";
+import { Agent } from "@strands-agents/sdk";
 import { guardHooks } from "@arcjet/guard/strands-agents/v1";
 import { arcjet } from "./arcjet.js";
 
 const agent = new Agent({
   tools: [lookupOrder],
+  plugins: [guardHooks(arcjet, { sessionId: conversationId })],
 });
-agent.addHook(
-  BeforeToolCallEvent,
-  guardHooks(arcjet, { sessionId: conversationId }),
-);
 ```
 
 ## Correlation
 
 `strandsAgentContext` reads caller-owned
-`invocationState.sessionId` first, then `correlationId`, then
+`invocationState.correlationId` first, then `sessionId`, then
 `requestId`. It never mints an ID. It never reads `traceId`. It
-never calls `createAgentContext`. If the caller did not put one of
-those keys on `invocationState`, the call is uncorrelated rather
-than joined to a generated ID.
+never reads `agent.id`. It never calls `createAgentContext` or
+`SessionManager`. If the caller did not put one of those keys on
+`invocationState`, the call is uncorrelated rather than joined to
+a generated ID.
 
 A run that pauses on `event.interrupt()` resumes through a later
 `invoke`. Put the same `invocationState` on that resume call so
@@ -387,17 +381,20 @@ await agent.invoke(userText, { invocationState });
   confirmation, not policy.
 - Don't treat `event.interrupt()` as Guard. Policy sits on
   `BeforeToolCallEvent.cancel` only.
+- Don't set `BeforeToolsEvent.cancel`. That skips per-tool hooks.
 - Don't turn a deny into `event.interrupt()` or a human approval
   pause.
-- Don't mint a correlation ID. Don't read `traceId`. If
-  `invocationState` has no `sessionId`, `correlationId`, or
-  `requestId`, leave the call uncorrelated.
+- Don't mint a correlation ID. Don't read `traceId`. Don't read
+  `agent.id`. If `invocationState` has no `correlationId`,
+  `sessionId`, or `requestId`, leave the call uncorrelated.
 - Don't use this adapter with Python Strands Agents.
 - Don't throw from `guardTool` or the `BeforeToolCallEvent`
   callback to signal a denial.
+- Don't pass `guardHooks()` to `agent.addHook`. It is a Plugin.
+  Pass it on `new Agent({ plugins })`.
 - Don't call `createAgentContext` inside a Strands callback.
-- Don't also wrap these tools with `@arcjet/guard/langchain/v1`,
-  `@arcjet/guard/langgraph/v1`, or `@arcjet/guard/vercel-ai/v7`.
+- Don't also wrap these tools with `@arcjet/guard/langgraph/v1` or
+  `@arcjet/guard/vercel-ai/v7`.
 - Don't import `@arcjet/guard/strands-agents`. The path is
   `@arcjet/guard/strands-agents/v1`.
 
@@ -494,3 +491,4 @@ versus fail-closed behavior, see
 - <Link.Page href="/guards">Agent guards</Link.Page>
 - Example: `strands-agent` in
   [arcjet-js examples](https://github.com/arcjet/arcjet-js/tree/main/examples)
+- Adapter: [`23d5a85d`](https://github.com/arcjet/arcjet-js/commit/23d5a85d1207ab999e1bb883cc1dca1ddb78a858)

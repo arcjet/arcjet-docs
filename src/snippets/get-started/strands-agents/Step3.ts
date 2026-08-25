@@ -4,7 +4,7 @@ import {
   guardHooks,
   strandsAgentContext,
 } from "@arcjet/guard/strands-agents/v1";
-import { Agent, BeforeToolCallEvent, tool } from "@strands-agents/sdk";
+import { Agent, tool } from "@strands-agents/sdk";
 import { z } from "zod";
 
 const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
@@ -45,11 +45,8 @@ export async function runAgent(conversationId: string, userText: string) {
 
   const agent = new Agent({
     tools: [lookupOrder],
+    plugins: [guardHooks(arcjet, { sessionId: conversationId })],
   });
-  agent.addHook(
-    BeforeToolCallEvent,
-    guardHooks(arcjet, { sessionId: conversationId }),
-  );
 
   return agent.invoke(userText, { invocationState });
 }

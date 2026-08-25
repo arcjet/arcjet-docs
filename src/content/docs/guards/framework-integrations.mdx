@@ -57,8 +57,8 @@ Each JavaScript path is versioned. Unversioned aliases such as
 `@arcjet/guard` to
 [`c49abcc1`](https://github.com/arcjet/arcjet-js/commit/c49abcc1f9afce7d284b6c294d0dcee5916ada86)
 to use the LangChain JS path. `@arcjet/guard` also does not export
-`./strands-agents/v1`. That module is unpublished and will be installed
-from git once an adapter SHA is provided. There is no adapter SHA yet.
+`./strands-agents/v1`. Until it does, pin `@arcjet/guard` to
+[`23d5a85d`](https://github.com/arcjet/arcjet-js/commit/23d5a85d1207ab999e1bb883cc1dca1ddb78a858).
 The other paths resolve from the published package.
 
 Don't mix adapters. A Mastra `createTool`, Eve `defineTool`, LangGraph
@@ -248,12 +248,13 @@ denials, see the
 Strands Agents JS `Agent` workflows (`invoke()` + authored `tool()`)
 have no `guardInbound`. Screen user text with a direct `guard()` call
 before `invoke` or `stream`. `event.interrupt()` is human HITL
-confirmation, not policy. Use `guardTool()` on authored `tool()`
-handlers and `guardHooks()` as the `BeforeToolCallEvent` gate. On
-`DENY`, `guardHooks` sets `event.cancel` to a JSON string of
-`ArcjetDenialResult`. Don't also wrap these tools with
-`@arcjet/guard/langchain/v1`, `@arcjet/guard/langgraph/v1`, or
-`@arcjet/guard/vercel-ai/v7`. This is not Python Strands Agents.
+confirmation, not policy. Use `guardTool()` on authored
+`tool({ callback })` handlers and `guardHooks()` as a Plugin on
+`new Agent({ plugins })`. On `DENY`, `guardHooks` sets
+`event.cancel` to a JSON string of `ArcjetDenialResult`. Don't set
+`BeforeToolsEvent.cancel`. Don't also wrap these tools with
+`@arcjet/guard/langgraph/v1` or `@arcjet/guard/vercel-ai/v7`. This
+is not Python Strands Agents.
 
 `guardTool` returns `{ arcjetDenied: true, … }` as the tool result.
 Don't throw. Don't call `event.interrupt()`. For more information
@@ -390,11 +391,13 @@ The wrappers default to fail closed when Guard is unavailable:
   before `run()` fails open. Check `decision.hasFailedOpen()` when that call
   site must fail closed.
 - Strands Agents helpers default to `onGuardError: "deny"`. `guardTool`
-  returns a plain `{ arcjetDenied: true, … }`. `guardHooks` sets
-  `event.cancel` to a JSON string of that object. Don't throw. Don't
-  call `event.interrupt()`. Policy sits on `BeforeToolCallEvent.cancel`
-  only. Direct `guard()` before `invoke` / `stream` fails open. Check
-  `decision.hasFailedOpen()` when that call site must fail closed.
+  returns a plain `{ arcjetDenied: true, … }`. `guardHooks` is a Plugin
+  that sets `event.cancel` to a JSON string of that object. Don't
+  throw. Don't call `event.interrupt()`. Don't set
+  `BeforeToolsEvent.cancel`. Policy sits on
+  `BeforeToolCallEvent.cancel` only. Direct `guard()` before
+  `invoke` / `stream` fails open. Check `decision.hasFailedOpen()`
+  when that call site must fail closed.
 
 Set `onGuardError: "allow"` in JavaScript or `on_guard_error="allow"` in Python
 only when executing without a complete security decision is acceptable.
