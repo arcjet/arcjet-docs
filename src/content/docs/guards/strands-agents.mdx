@@ -18,17 +18,16 @@ OpenAI Agents, Genkit, LangChain JS, and Claude wrappers are on
 <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>.
 
 This adapter is the JavaScript `@strands-agents/sdk` `Agent` plus
-`tool()` plus `BeforeToolCallEvent`. It is not Python Strands
-Agents. Don't also wrap these tools with
-`@arcjet/guard/langchain/v1`, `@arcjet/guard/langgraph/v1`, or
-`@arcjet/guard/vercel-ai/v7`.
+`tool()` plus `BeforeToolCallEvent`. Don't also wrap these tools
+with `@arcjet/guard/langchain/v1`, `@arcjet/guard/langgraph/v1`,
+or `@arcjet/guard/vercel-ai/v7`.
 
 ## Install
 
 Install the Guard SDK and Strands Agents:
 
 ```bash
-npm install github:arcjet/arcjet-js#f3a07ee675cbdd812a36dcb778ee4325d2f89617 @strands-agents/sdk
+npm install @arcjet/guard @strands-agents/sdk
 ```
 
 `@strands-agents/sdk` is a peer of `@arcjet/guard`, not a
@@ -41,12 +40,6 @@ Import helpers from the versioned path
 segment is the Strands Agents SDK major. `@strands-agents/sdk`
 (`>=1.1.0 <2`) is an optional peer. The integration requires
 Node.js 22 or later.
-
-Until `@arcjet/guard/strands-agents/v1` is published, pin
-`@arcjet/guard` to
-[`f3a07ee6`](https://github.com/arcjet/arcjet-js/commit/f3a07ee675cbdd812a36dcb778ee4325d2f89617).
-The published `@arcjet/guard@1.10.0` package on npm does not export
-`./strands-agents/v1`.
 
 Launch one client at module scope:
 
@@ -84,10 +77,9 @@ There is no `guardInbound`. There is no inbound hook. Screen user
 text with a direct `guard()` call before `agent.invoke` or
 `agent.stream`. There is no `guardApproval`.
 
-Never call `createAgentContext` inside a Strands callback. Don't
+Don't call `createAgentContext` inside a Strands callback. Don't
 also wrap these tools with `@arcjet/guard/langchain/v1`,
 `@arcjet/guard/langgraph/v1`, or `@arcjet/guard/vercel-ai/v7`.
-Don't wrap Python Strands Agents with this adapter.
 
 ## Helper options
 
@@ -387,7 +379,6 @@ await agent.invoke(userText, { invocationState });
 - Don't mint a correlation ID. Don't read `traceId`. Don't read
   `agent.id`. If `invocationState` has no `correlationId`,
   `sessionId`, or `requestId`, leave the call uncorrelated.
-- Don't use this adapter with Python Strands Agents.
 - Don't throw from `guardTool` or the `BeforeToolCallEvent`
   callback to signal a denial.
 - Don't pass `guardHooks()` to `agent.addHook`. It is a Plugin.
@@ -491,4 +482,3 @@ versus fail-closed behavior, see
 - <Link.Page href="/guards">Agent guards</Link.Page>
 - Example: `strands-agent` in
   [arcjet-js examples](https://github.com/arcjet/arcjet-js/tree/main/examples)
-- Adapter: [`f3a07ee6`](https://github.com/arcjet/arcjet-js/commit/f3a07ee675cbdd812a36dcb778ee4325d2f89617)

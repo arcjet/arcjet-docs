@@ -53,20 +53,12 @@ Pick the page that matches the object you hold when the effect runs:
 Each JavaScript path is versioned. Unversioned aliases such as
 `@arcjet/guard/vercel-ai` do not resolve.
 
-`@arcjet/guard@1.10.0` does not export `./langchain/v1`. Until it does, pin
-`@arcjet/guard` to
-[`c49abcc1`](https://github.com/arcjet/arcjet-js/commit/c49abcc1f9afce7d284b6c294d0dcee5916ada86)
-to use the LangChain JS path. `@arcjet/guard` also does not export
-`./strands-agents/v1`. Until it does, pin `@arcjet/guard` to
-[`f3a07ee6`](https://github.com/arcjet/arcjet-js/commit/f3a07ee675cbdd812a36dcb778ee4325d2f89617).
-The other paths resolve from the published package.
-
-Don't mix adapters. A Mastra `createTool`, Eve `defineTool`, LangGraph
-`tool()`, LangChain JS `createAgent` tool, OpenAI Agents `tool()`,
-Claude Agent SDK `tool()`, Genkit `ai.defineTool`, Strands Agents
-`tool()`, or official CrewAI `@tool` is not an AI SDK `tool()`.
-Wrapping one of those with `@arcjet/guard/vercel-ai/v7` throws or
-misses the real execute path. Don't use an npm CrewAI port with
+Don't mix adapters. Don't wrap a Mastra `createTool`, Eve
+`defineTool`, LangGraph `tool()`, LangChain JS `createAgent` tool,
+OpenAI Agents `tool()`, Claude Agent SDK `tool()`, Genkit
+`ai.defineTool`, Strands Agents `tool()`, or official CrewAI `@tool`
+with `@arcjet/guard/vercel-ai/v7`. The wrapper throws or misses the
+real execute path. Don't use an npm CrewAI port with
 `arcjet.guard.crewai`.
 
 ## Vercel AI SDK
@@ -253,8 +245,7 @@ confirmation, not policy. Use `guardTool()` on authored
 `new Agent({ plugins })`. On `DENY`, `guardHooks` sets
 `event.cancel` to a JSON string of `ArcjetDenialResult`. Don't set
 `BeforeToolsEvent.cancel`. Don't also wrap these tools with
-`@arcjet/guard/langgraph/v1` or `@arcjet/guard/vercel-ai/v7`. This
-is not Python Strands Agents.
+`@arcjet/guard/langgraph/v1` or `@arcjet/guard/vercel-ai/v7`.
 
 `guardTool` returns `{ arcjetDenied: true, … }` as the tool result.
 Don't throw. Don't call `event.interrupt()`. For more information
