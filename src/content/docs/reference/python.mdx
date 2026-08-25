@@ -701,8 +701,10 @@ request timeout defaults to 2000 ms (`timeout_ms` on `launch_arcjet` /
 To wrap an effect instead of handling the decision yourself, use the
 checkpoint helpers. They fail closed by default
 (`on_guard_error="deny"`). A `DENY` raises `ArcjetDeniedError` or
-`ArcjetToolDeniedError`. Unavailability raises
-`ArcjetUnavailableError` or `ArcjetToolUnavailableError`.
+`ArcjetToolDeniedError`, except the OpenAI Agents Python helper,
+which calls `reject_content(...)`. Unavailability raises
+`ArcjetUnavailableError` or `ArcjetToolUnavailableError` on the
+LangChain and CrewAI surfaces.
 
 - **Any Python callable** – `guard_action` / `guard_action_sync` in
   `arcjet.guard`. No extra.
@@ -718,11 +720,19 @@ checkpoint helpers. They fail closed by default
   plus `HookAborted(reason=..., source="arcjet")`. `guard_tool` wraps
   a standalone `BaseTool` you call yourself. `POST_TOOL_CALL` is not
   registered.
+- **OpenAI Agents Python `FunctionTool`** – `guard_tool`
+  (`arcjet[openai-agents]`, `arcjet.guard.openai_agents`,
+  `openai-agents>=0.19.0,<1`). The extra is unpublished on `arcjet`
+  0.9.x. The gate is `FunctionTool.tool_input_guardrails` plus
+  `reject_content`. The reject payload is JSON of
+  `ArcjetDenialResult`. Don't raise from the guardrail.
 
 For install, examples, correlation, and the configure-before-wrap rule,
 see the <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
 For CrewAI hooks, see the
 <Link.Page href="/guards/crewai">CrewAI agent guard</Link.Page>.
+For OpenAI Agents Python, see the
+<Link.Page href="/guards/openai-agents-py">OpenAI Agents Python agent guard</Link.Page>.
 
 ### Rules
 
