@@ -195,7 +195,7 @@ values:
 | Value | The action | What it means |
 | ----- | ---------- | ------------- |
 | `success` | Ran. | The helper executed the action. |
-| `error` | Ran, then threw. | The action failed after the check. |
+| `error` | Ran, then threw. | The wrapped action threw. |
 | `denied` | Did not run. | Policy evaluated `DENY`. |
 | `unavailable` | Did not run. | Fail-closed. The check was incomplete. |
 
@@ -207,12 +207,12 @@ action runs without a complete judgment, the event records `success`.
 
 Python checkpoint helpers record one of the following values:
 
-| Value | The action | What policy did |
-| ----- | ---------- | --------------- |
-| `success` | Ran. | Judged all of it. |
-| `degraded` | Ran. `on_guard_error` is `allow`. | Judged it in part or not at all. |
-| `error` | Ran, then threw. | Judged it or not. |
-| `denied` | Did not run. | Evaluated `DENY`. |
+| Value | The action | What it means |
+| ----- | ---------- | ------------- |
+| `success` | Ran. | Policy judged all of it. |
+| `degraded` | Ran. `on_guard_error` is `allow`. | Policy judged it in part or not at all. |
+| `error` | Ran, then threw. | The wrapped action threw. |
+| `denied` | Did not run. | Policy evaluated `DENY`. |
 | `unavailable` | Did not run. | Fail-closed. The check was incomplete. |
 
 `on_guard_error` is `"allow"` or `"deny"`. The default is `"deny"`: an
