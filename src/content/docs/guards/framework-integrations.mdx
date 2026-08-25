@@ -1,6 +1,6 @@
 ---
 title: "Agent guard framework integrations"
-description: "Guard Vercel AI SDK, LangChain, LangChain JS, CrewAI, LangGraph, Genkit, OpenAI Agents, Vercel Eve, Mastra, and Claude Agent SDK tools, processors, and inbound messages."
+description: "Guard Vercel AI SDK, LangChain, LangChain JS, CrewAI, LangGraph, Genkit, OpenAI Agents, OpenAI Agents Python, Strands Agents, Vercel Eve, Mastra, and Claude Agent SDK tools, processors, and inbound messages."
 ---
 
 import { Aside } from "@astrojs/starlight/components";
@@ -45,6 +45,8 @@ Pick the page that matches the object you hold when the effect runs:
 | LangGraph JS | `@arcjet/guard/langgraph/v1` | <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page> |
 | Genkit JS | `@arcjet/guard/genkit/v1` | <Link.Page href="/guards/genkit">Genkit agent guard</Link.Page> |
 | OpenAI Agents | `@arcjet/guard/openai-agents/v0` | <Link.Page href="/guards/openai-agents">OpenAI Agents agent guard</Link.Page> |
+| OpenAI Agents (Python) | `arcjet.guard.openai_agents` | <Link.Page href="/guards/openai-agents-py">OpenAI Agents Python agent guard</Link.Page> |
+| Strands Agents | `@arcjet/guard/strands-agents/v1` | <Link.Page href="/guards/strands-agents">Strands Agents agent guard</Link.Page> |
 | Vercel Eve | `@arcjet/guard/vercel-eve/v0` | <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page> |
 | Mastra | `@arcjet/guard/mastra/v1` | <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page> |
 | Claude Agent SDK | `@arcjet/guard/claude-agent-sdk/v0` | <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page> |
@@ -52,18 +54,14 @@ Pick the page that matches the object you hold when the effect runs:
 Each JavaScript path is versioned. Unversioned aliases such as
 `@arcjet/guard/vercel-ai` do not resolve.
 
-`@arcjet/guard@1.10.0` does not export `./langchain/v1`. Until it does, pin
-`@arcjet/guard` to
-[`c49abcc1`](https://github.com/arcjet/arcjet-js/commit/c49abcc1f9afce7d284b6c294d0dcee5916ada86)
-to use the LangChain JS path. The other paths resolve from the published
-package.
-
-Don't mix adapters. A Mastra `createTool`, Eve `defineTool`, LangGraph
-`tool()`, LangChain JS `createAgent` tool, OpenAI Agents `tool()`,
-Claude Agent SDK `tool()`, Genkit `ai.defineTool`, or official CrewAI
-`@tool` is not an AI SDK `tool()`. Wrapping one of those with
-`@arcjet/guard/vercel-ai/v7` throws or misses the real execute path.
-Don't use an npm CrewAI port with `arcjet.guard.crewai`.
+Don't mix adapters. Don't wrap a Mastra `createTool`, Eve
+`defineTool`, LangGraph `tool()`, LangChain JS `createAgent` tool,
+OpenAI Agents `tool()`, Python OpenAI Agents `function_tool`,
+Claude Agent SDK `tool()`, Genkit `ai.defineTool`, Strands Agents
+`tool()`, or official CrewAI `@tool` with
+`@arcjet/guard/vercel-ai/v7`. The wrapper throws or misses the
+real execute path. Don't use an npm CrewAI port with
+`arcjet.guard.crewai`.
 
 ## Vercel AI SDK
 
@@ -239,6 +237,43 @@ For more information about inbound screening, authored tools, and execute
 denials, see the
 <Link.Page href="/guards/openai-agents">OpenAI Agents agent guard</Link.Page>.
 
+## OpenAI Agents Python
+
+OpenAI Agents Python text `Agent` workflows (`Runner.run` + authored
+`function_tool`) have no inbound helper. Screen user text with a
+direct `guard()` call before `Runner.run`. `needs_approval` and hosted
+`require_approval` are human HITL confirmation, not policy. Use
+`guard_tool` to attach `FunctionTool.tool_input_guardrails`. On
+`DENY` the helper calls `reject_content(...)` with JSON of
+`ArcjetDenialResult`. Don't raise from the guardrail. A raise becomes
+a tripwire halt, or `default_tool_error_function` swallows it. Hosted
+tools, handoffs, and `Agent.as_tool()` are not deny points.
+
+The `arcjet[openai-agents]` extra depends on
+`openai-agents>=0.19.0,<1`.
+
+For more information about inbound screening, authored tools, and
+`reject_content` denials, see the
+<Link.Page href="/guards/openai-agents-py">OpenAI Agents Python agent guard</Link.Page>.
+
+## Strands Agents
+
+Strands Agents JS `Agent` workflows (`invoke()` + authored `tool()`)
+have no `guardInbound`. Screen user text with a direct `guard()` call
+before `invoke` or `stream`. `event.interrupt()` is human HITL
+confirmation, not policy. Use `guardTool()` on authored
+`tool({ callback })` handlers and `guardHooks()` as a Plugin on
+`new Agent({ plugins })`. On `DENY`, `guardHooks` sets
+`event.cancel` to a JSON string of `ArcjetDenialResult`. Don't set
+`BeforeToolsEvent.cancel`. Don't also wrap these tools with
+`@arcjet/guard/langgraph/v1` or `@arcjet/guard/vercel-ai/v7`.
+
+`guardTool` returns `{ arcjetDenied: true, … }` as the tool result.
+Don't throw. Don't call `event.interrupt()`. For more information
+about inbound screening, authored tools, and `BeforeToolCallEvent`
+denials, see the
+<Link.Page href="/guards/strands-agents">Strands Agents agent guard</Link.Page>.
+
 ## Vercel Eve
 
 Eve agents can have zero authored tools. OpenAPI and MCP connections have no
@@ -287,6 +322,8 @@ in a different way:
 | --- | --- | --- |
 | AI SDK / Mastra | Return `{ arcjetDenied: true, … }` as the tool result | A throw becomes a generic tool error and drops the fields |
 | OpenAI Agents | Return `{ arcjetDenied: true, … }` from `invoke` | A throw hits `errorFunction` or `ToolCallError` and can kill the run |
+| OpenAI Agents (Python) | `reject_content(...)` with JSON of `ArcjetDenialResult` | A raise becomes a tripwire halt, or `default_tool_error_function` swallows it |
+| Strands Agents | `guardTool` returns `{ arcjetDenied: true, … }`. `guardHooks` sets `event.cancel` to a JSON string of that object | A throw drops the fields. `event.interrupt()` is HITL, not policy |
 | LangGraph | Return `{ arcjetDenied: true, … }`. `ToolNode` wraps a `ToolMessage` with `status: "success"` | Fabricating a `ToolMessage` to force `status: "error"` crashes the graph reducer |
 | LangChain JS | `guardTool` returns `{ arcjetDenied: true, … }`. `guardMiddleware` returns a real `ToolMessage` (JSON `content`, default status) | A throw drops the fields. `wrapToolCall` cannot return a bare object. Don't set `status: "error"` |
 | Genkit | Return `{ arcjetDenied: true, … }` as completed `toolResponse.output` | A throw / `interrupt()` is HITL and the wrong envelope |
@@ -366,6 +403,20 @@ The wrappers default to fail closed when Guard is unavailable:
   onto a `function_call_result` with `status: "completed"`. Direct `guard()`
   before `run()` fails open. Check `decision.hasFailedOpen()` when that call
   site must fail closed.
+- OpenAI Agents Python `guard_tool` defaults to `on_guard_error="deny"`.
+  The policy gate is `FunctionTool.tool_input_guardrails` plus
+  `reject_content`. The reject payload is JSON of
+  `ArcjetDenialResult`. Don't raise from the guardrail. Direct
+  `guard()` before `Runner.run` fails open. Check
+  `decision.has_failed_open()` when that call site must fail closed.
+- Strands Agents helpers default to `onGuardError: "deny"`. `guardTool`
+  returns a plain `{ arcjetDenied: true, … }`. `guardHooks` is a Plugin
+  that sets `event.cancel` to a JSON string of that object. Don't
+  throw. Don't call `event.interrupt()`. Don't set
+  `BeforeToolsEvent.cancel`. Policy sits on
+  `BeforeToolCallEvent.cancel` only. Direct `guard()` before
+  `invoke` / `stream` fails open. Check `decision.hasFailedOpen()`
+  when that call site must fail closed.
 
 Set `onGuardError: "allow"` in JavaScript or `on_guard_error="allow"` in Python
 only when executing without a complete security decision is acceptable.

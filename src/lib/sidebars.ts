@@ -673,6 +673,14 @@ export const main = [
         link: "/guards/openai-agents",
       },
       {
+        label: "OpenAI Agents Python",
+        link: "/guards/openai-agents-py",
+      },
+      {
+        label: "Strands Agents",
+        link: "/guards/strands-agents",
+      },
+      {
         label: "Vercel",
         link: "https://vercel.com/integrations/arcjet",
         attrs: { target: "_blank", class: "external-link" },

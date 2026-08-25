@@ -1,0 +1,357 @@
+---
+title: "OpenAI Agents Python agent guard"
+description: "Screen user text before `Runner.run`, attach `tool_input_guardrails` plus `reject_content`, and treat `needs_approval` as confirmation, not policy."
+---
+
+import { Link } from "@/components/link";
+import FrameworkPrimer from "@/snippets/guards/FrameworkPrimer.mdx";
+
+[OpenAI Agents](https://openai.github.io/openai-agents-python/) Python
+`Agent` workflows call authored `function_tool` handlers from
+`Runner.run`. Arcjet Guard sits at those boundaries so a policy can
+allow or deny the action before a side effect runs.
+
+<FrameworkPrimer />
+
+Vercel AI SDK, Python LangChain, LangChain JS, CrewAI, LangGraph JS,
+Genkit, Eve, Mastra, OpenAI Agents JS, Strands Agents, and Claude
+wrappers are on
+<Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>.
+
+This adapter is the Python `openai-agents` text `Agent` plus
+`Runner.run` plus an authored `FunctionTool`. Don't wrap these tools
+with `@arcjet/guard/openai-agents/v0` or
+`@arcjet/guard/vercel-ai/v7`.
+
+## Install
+
+Install the Guard extra and the OpenAI Agents SDK:
+
+```bash
+pip install "arcjet[openai-agents]"
+```
+
+`arcjet[openai-agents]` depends on `openai-agents>=0.19.0,<1`. CPython
+3.10 or later.
+
+Import helpers from `arcjet.guard.openai_agents`:
+
+```py
+from arcjet.guard.openai_agents import (
+    guard_tool,
+    openai_agents_context,
+)
+```
+
+Launch one client at module scope:
+
+```py
+from arcjet.guard import launch_arcjet
+
+arcjet = launch_arcjet(key=ARCJET_KEY)
+```
+
+Use `launch_arcjet_sync` with Flask, Django, or other sync code.
+
+## Helpers
+
+Pick the surface that matches what you hold when the effect runs:
+
+| You have | Use | Needs | Blocks a call? |
+| --- | --- | --- | --- |
+| Any Python callable | `guard_action` / `guard_action_sync` | `arcjet` | Yes |
+| An authored `FunctionTool` | `guard_tool` | `arcjet[openai-agents]` | Yes |
+| A session or conversation ID you already have | `openai_agents_context` | `arcjet[openai-agents]` | No |
+
+`guard_tool` attaches the policy gate on
+`FunctionTool.tool_input_guardrails`. On `DENY`, or when Guard cannot
+be evaluated and `on_guard_error` is `"deny"`, the helper calls
+`reject_content(...)` with JSON of `ArcjetDenialResult`. The tool
+handler does not run.
+
+Don't raise from the guardrail. A raise becomes a tripwire halt, or
+`default_tool_error_function` swallows it. Denial is
+`reject_content(...)` only.
+
+There is no inbound helper. Screen user text with a direct `guard()`
+call before `Runner.run`. There is no approval helper.
+`needs_approval` is human-in-the-loop (HITL) confirmation, not
+policy.
+
+Don't also wrap these tools with `@arcjet/guard/openai-agents/v0` or
+`@arcjet/guard/vercel-ai/v7`.
+
+## Helper options
+
+`guard_tool` accepts this contract:
+
+| Option | Required | Description |
+| --- | --- | --- |
+| `guard` | Yes | Client from `launch_arcjet` or `launch_arcjet_sync`. |
+| `action` | Yes | Guard label and capture name. Use `resource.verb` in the past tense, such as `email.sent`. |
+| `rules` | No | Bound SDK rule inputs, or a function of the parsed tool arguments. Omit to submit none. |
+| `on_guard_error` | No | `"deny"` (default) or `"allow"`. A real `DENY` always blocks. |
+
+Inbound screening uses direct `guard()`, which takes `label` (not
+`action`) and fails open. See the following section.
+
+`openai_agents_context` reads a caller-owned `correlation_id`, then
+`session_id`, then `conversation_id`, then `group_id` from the
+context you pass to `Runner.run`. It never mints an ID. It never
+reads `trace_id`.
+
+## Screen user text before `Runner.run`
+
+There is no inbound hook, so there is no inbound helper. Put
+prompt-injection and other inbound rules in the application before
+`Runner.run`.
+
+Agent `input_guardrails`, `output_guardrails`, and OpenAI
+`tool_input_guardrail` / `tool_output_guardrail` decorators that you
+write yourself are SDK surfaces. They are not Arcjet. The Arcjet gate
+is the `tool_input_guardrails` entry that `guard_tool` attaches.
+
+Direct `guard()` fails open, so an `ALLOW` is not proof the rules
+ran. Gate inbound on `decision.has_failed_open()` if this call site
+must fail closed. `guard_tool` already defaults to that.
+
+On `DENY`, don't call `Runner.run`.
+
+```py
+from agents import Runner
+from arcjet.guard import DetectPromptInjection, launch_arcjet
+from arcjet.guard.openai_agents import openai_agents_context
+
+arcjet = launch_arcjet(key=ARCJET_KEY)
+inbound = DetectPromptInjection()
+app_context = {"session_id": conversation_id}
+derived = openai_agents_context(app_context)
+
+decision = await arcjet.guard(
+    label="message.received",
+    rules=[inbound(user_text)],
+    correlation_id=derived.correlation_id,
+)
+if decision.conclusion == "DENY" or decision.has_failed_open():
+    raise RuntimeError("message blocked")
+
+await Runner.run(agent, user_text, context=app_context)
+```
+
+## Gate authored `FunctionTool` handlers
+
+`guard_tool` attaches a `tool_input_guardrails` entry on a
+`FunctionTool` from `function_tool`. That authored handler is the
+only local side effect this adapter can stop.
+
+On `DENY` the handler does not run. The helper calls
+`reject_content(...)` with JSON of `ArcjetDenialResult`:
+
+```json
+{
+  "arcjetDenied": true,
+  "reason": "RATE_LIMIT",
+  "message": "Arcjet denied this call (RATE_LIMIT). It may be retried after 30 seconds.",
+  "retryable": true,
+  "retryAfterSeconds": 30
+}
+```
+
+Don't raise from the guardrail. A raise becomes a tripwire halt, or
+`default_tool_error_function` swallows it.
+
+Hosted tools, `handoff`, `Agent.as_tool()`, MCP servers, and
+computer/shell tools do not go through that authored
+`tool_input_guardrails` path. They are not a deny point.
+
+Scan free-text args (a note, reason, or body). An opaque `order_id`
+does not trip email / phone / card / IP, so don't pass it to
+`LocalDetectSensitiveInfo`. That helper runs on a local ML model
+backend.
+
+```py
+from agents import function_tool
+from arcjet.guard import (
+    LocalDetectSensitiveInfo,
+    TokenBucket,
+    launch_arcjet,
+)
+from arcjet.guard.openai_agents import guard_tool
+
+arcjet = launch_arcjet(key=ARCJET_KEY)
+lookup_limit = TokenBucket(
+    refill_rate=10,
+    interval_seconds=60,
+    max_tokens=10,
+    bucket="lookups",
+)
+detect_pii = LocalDetectSensitiveInfo()
+
+
+@function_tool
+def lookup_order(order_id: str, note: str) -> dict:
+    """Look up an order by ID."""
+    return {"order_id": order_id, "note": note, "status": "shipped"}
+
+
+guarded_lookup = guard_tool(
+    guard=arcjet,
+    tool=lookup_order,
+    action="order.looked-up",
+    rules=lambda arguments: [
+        lookup_limit(key="orders", requested=1),
+        detect_pii(arguments["note"]),
+    ],
+)
+```
+
+Pass wrapped tools on the `Agent` `tools` list, then call
+`Runner.run`.
+
+## Human approval is not a policy gate
+
+`needs_approval` on `function_tool` or `Agent.as_tool()` pauses the
+run for human-in-the-loop (HITL) confirmation. Hosted MCP
+`require_approval` is the same class of control. Neither is a policy
+gate. Same trap as CrewAI `human_input`, LangChain JS
+`humanInTheLoopMiddleware`, Mastra `requireApproval`, Claude
+`canUseTool`, LangGraph `interrupt()`, Genkit `interrupt()`, and
+OpenAI Agents JS `needsApproval`.
+
+There is no approval helper. Don't wrap `needs_approval` as Guard.
+Use `guard_tool` on authored `FunctionTool` handlers you own.
+
+## Fail-closed default
+
+`guard_tool` defaults to `on_guard_error="deny"`, matching the
+LangChain and CrewAI wrappers. If Guard cannot be evaluated, the
+helper calls `reject_content(...)` with JSON of
+`ArcjetDenialResult` and the tool handler does not run.
+
+Set `on_guard_error="allow"` only when you can accept running the
+action without a complete security decision. The helper rejects any
+other value.
+
+A `DENY` conclusion always blocks, regardless of `on_guard_error`.
+The helper still calls `reject_content(...)`. Don't raise.
+
+The core `guard()` call still fails open. It returns `ALLOW`, and
+`has_failed_open()` returns `True`. The wrapper that sits around an
+effect fails closed.
+
+For more information about fail-open versus fail-closed behavior, see
+<Link.Page href="/guards/reference#availability-and-fail-behavior">Availability and fail behavior</Link.Page>.
+
+## Correlation
+
+`Runner.run` has no conversation or session ID unless you put one on
+the context object. Pass the ID that you already have. Don't mint an
+ID. Don't read `trace_id`. The SDK mints a trace when you omit one.
+
+`openai_agents_context` reads a caller-owned `correlation_id`, then
+`session_id`, then `conversation_id`, then `group_id` from that
+context. If nothing is a valid ID, the call is uncorrelated rather
+than joined to a generated ID.
+
+```py
+app_context = {"session_id": conversation_id}
+
+await Runner.run(agent, user_text, context=app_context)
+```
+
+Derive the ID from a session the caller already has. A generated ID
+still joins this run's events, but it builds a Sequence that nobody
+searches for.
+
+## What not to use
+
+- There is no inbound helper. Screen prompt injection before
+  `Runner.run`.
+- There is no approval helper. `needs_approval` and hosted
+  `require_approval` are human HITL confirmation, not policy.
+- Don't raise from the guardrail. A raise becomes a tripwire halt, or
+  `default_tool_error_function` swallows it. Denial is
+  `reject_content(...)` only.
+- Don't treat Agent `input_guardrails`, `output_guardrails`, or a
+  raw `tool_input_guardrail` you wrote yourself as Arcjet.
+- Don't deny from hosted tools, `handoff`, `Agent.as_tool()`, MCP,
+  or computer/shell. Those paths have no authored
+  `tool_input_guardrails` gate.
+- Don't read `trace_id` for correlation. The SDK mints one when
+  omitted.
+- Don't mint a session or conversation ID.
+- Don't wrap these tools with `@arcjet/guard/openai-agents/v0` or
+  `@arcjet/guard/vercel-ai/v7`.
+- Don't use this adapter with Realtime, Sandbox, hosted tools, MCP,
+  `Agent.as_tool()`, or computer/shell.
+
+## Common patterns
+
+### Rate limit a tool per trusted key
+
+Key the bucket on a trusted identifier you own. Don't key it on
+free-text user input.
+
+```py
+lookup_limit = TokenBucket(
+    refill_rate=10,
+    interval_seconds=60,
+    max_tokens=10,
+    bucket="lookups",
+)
+
+guard_tool(
+    guard=arcjet,
+    tool=lookup_order,
+    action="order.looked-up",
+    rules=[lookup_limit(key="orders", requested=1)],
+)
+```
+
+### Scan a free-text note for sensitive information
+
+Scan a note, reason, or body from the parsed tool arguments. An
+opaque `order_id` is not a PII sample, so don't pass it to
+`LocalDetectSensitiveInfo`.
+
+```py
+from arcjet.guard import LocalDetectSensitiveInfo, TokenBucket
+from arcjet.guard.openai_agents import guard_tool
+
+detect_pii = LocalDetectSensitiveInfo()
+
+guard_tool(
+    guard=arcjet,
+    tool=lookup_order,
+    action="order.looked-up",
+    rules=lambda arguments: [
+        lookup_limit(key="orders", requested=1),
+        detect_pii(arguments["note"]),
+    ],
+)
+```
+
+### Correlate the run
+
+Put `{"session_id": conversation_id}` on
+`Runner.run(..., context=...)`. Don't read `trace_id` and don't mint
+an ID.
+
+## Related
+
+- <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
+- <Link.Page href="/guards/openai-agents">OpenAI Agents agent guard</Link.Page>
+- <Link.Page href="/guards/crewai">CrewAI agent guard</Link.Page>
+- <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
+- <Link.Page href="/guards/langchain-js">LangChain JS agent guard</Link.Page>
+- <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>
+- <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>
+- <Link.Page href="/guards/genkit">Genkit agent guard</Link.Page>
+- <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>
+- <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>
+- <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>
+- <Link.Page href="/reference/python#guard">Python Guard SDK reference</Link.Page>
+- <Link.Page href="/guards/strands-agents">Strands Agents agent guard</Link.Page>
+- <Link.Page href="/guards">Agent guards</Link.Page>
+- Example:
+  [examples/fastapi-openai-agents-guard](https://github.com/arcjet/arcjet-py/tree/main/examples/fastapi-openai-agents-guard)
