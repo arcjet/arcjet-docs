@@ -151,12 +151,15 @@ security checks.
 ```
 
 This error means that the Arcjet key you are using is invalid. Each site has a
-unique key to identify it within Arcjet. You can find your key in the Arcjet
-dashboard by clicking your site name and then going to the SDK installation tab.
+unique site key to identify it within Arcjet. You can find your site key in the
+Arcjet dashboard by clicking your site name and then going to the SDK
+installation tab.
 
-Arcjet keys are always prefixed with `ajkey_`
+Site keys are prefixed with `ajkey_`. Project collector keys are prefixed
+with `aj_prj_key_` and are ingest-only. Do not use a collector key as
+`ARCJET_KEY` for `protect()` or `guard()`.
 
-You provide the Arcjet SDK with the key when instantiating the client. For
+You provide the Arcjet SDK with the site key when instantiating the client. For
 example in this case the key is defined in an environment variable called
 `ARCJET_KEY`:
 
@@ -199,6 +202,15 @@ aj = arcjet(
 
 </TabItem>
 </Tabs>
+
+### Collector key used for protect or guard
+
+A project collector key (`aj_prj_key_...`) is ingest-only. Capture and
+OTLP HTTP accept it. In production, Guard and Decide respond `404`.
+
+Use a site key (`ajkey_...`) for `ARCJET_KEY`, `protect()`, and `guard()`.
+For more information about key types, see
+<Link.Page href="/environment#arcjet-key">Environment variables</Link.Page>.
 
 ### [deadline_exceeded] the operation timed out
 

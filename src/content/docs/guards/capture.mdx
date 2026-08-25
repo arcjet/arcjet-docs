@@ -73,6 +73,18 @@ event is sent with source `"sdk"`.
 
 Do not put secrets or PII in `metadata`. It is stored as untrusted data.
 
+## Keys
+
+`capture()` uses the key configured on the client. Capture accepts a site
+key (`ajkey_...`) or a project collector key (`aj_prj_key_...`).
+
+Collector keys are ingest-only. Do not use one for `guard()` or
+`protect()`, and do not set it as `ARCJET_KEY`. In production, Guard and
+Decide respond `404` to a collector key.
+
+For more information about key types, see
+<Link.Page href="/environment#arcjet-key">Environment variables</Link.Page>.
+
 ## Delivery
 
 Capture is best-effort and never blocks or throws into application code:

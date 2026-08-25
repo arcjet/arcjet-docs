@@ -106,8 +106,35 @@ For more information, see <Link.Page href="/environment#how-to-read-environment-
 You can find your site key in the [Arcjet dashboard](https://app.arcjet.com).
 Select your site, select "SDK configuration", then click to copy.
 
-Arcjet keys are secrets that are always prefixed with `ajkey_`.
-As this is a secret, do not commit it to source control or otherwise expose it.
+`ARCJET_KEY` for `protect()` and `guard()` is a site key. Do not use a
+collector key there.
+
+Arcjet issues two kinds of secret. Capture and OpenTelemetry Protocol
+(OTLP) HTTP accept either kind:
+
+| Kind | Prefix | Accepted by |
+| ---- | ------ | ----------- |
+| Site SDK key | `ajkey_` | `protect()`, `guard()`, Capture, and OTLP HTTP |
+| Project collector key | `aj_prj_key_` | Capture and OTLP HTTP |
+
+Collector keys are ingest-only. In production, Guard and Decide respond
+`404` to a collector key.
+
+OTLP export to Arcjet is HTTP only. Set this header on the exporter:
+
+```sh
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer SITE_OR_COLLECTOR_KEY"
+```
+
+Replace `SITE_OR_COLLECTOR_KEY` with a site key (`ajkey_...`) or a project
+collector key (`aj_prj_key_...`). Send the export to the Arcjet OTLP HTTP
+endpoint. gRPC OTLP is unsupported.
+
+Project collector keys are issued through the project and site APIs. They
+are not shown on the site dashboard.
+
+These keys are secrets. Do not commit them to source control or otherwise
+expose them.
 
 <a name="arcjet-log-level" />
 
