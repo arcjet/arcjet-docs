@@ -17,8 +17,8 @@ allow or deny the call before a side effect runs.
 The JavaScript integration supports Vercel AI SDK v7 through the versioned
 `@arcjet/guard/vercel-ai/v7` export. This adapter is for AI SDK `tool()`
 handlers. Don't use it to wrap Mastra `createTool`, Eve `defineTool`, LangGraph
-`tool()`, OpenAI Agents `tool()`, or Claude Agent SDK `tool()` – each of those
-has its own adapter.
+`tool()`, OpenAI Agents `tool()`, Claude Agent SDK `tool()`, or official CrewAI
+`@tool` – each of those has its own adapter.
 
 ## Install
 
@@ -409,8 +409,8 @@ first such call always warns.
 - Don't also wrap these tools with another framework adapter.
 - Don't import `@arcjet/guard/vercel-ai`. The path is
   `@arcjet/guard/vercel-ai/v7`.
-- Don't use this adapter with Mastra, Eve, LangGraph, OpenAI Agents, or Claude
-  Agent SDK tools.
+- Don't use this adapter with Mastra, Eve, LangGraph, OpenAI Agents, Claude
+  Agent SDK, or official CrewAI tools.
 
 ## Related
 
@@ -418,6 +418,8 @@ first such call always warns.
 - <Link.Page href="/guards/quick-start">Agent guards quick start</Link.Page>
 - <Link.Page href="/guards/remote-policies">Remote policies</Link.Page>
 - <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
+- <Link.Page href="/guards/langchain-js">LangChain JS agent guard</Link.Page>
+- <Link.Page href="/guards/crewai">CrewAI agent guard</Link.Page>
 - <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>
 - <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>
 - <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>

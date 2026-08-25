@@ -631,6 +631,10 @@ export const main = [
         link: "/integrations/clerk",
       },
       {
+        label: "CrewAI",
+        link: "/guards/crewai",
+      },
+      {
         label: "Fly.io",
         link: "https://fly.io/docs/reference/arcjet/",
         attrs: { target: "_blank", class: "external-link" },
@@ -642,6 +646,10 @@ export const main = [
       {
         label: "LangChain",
         link: "/guards/langchain",
+      },
+      {
+        label: "LangChain JS",
+        link: "/guards/langchain-js",
       },
       {
         label: "LangGraph",

@@ -1,0 +1,413 @@
+---
+title: "CrewAI agent guard"
+description: "Gate official CrewAI tool calls with `PRE_TOOL_CALL` and `HookAborted`, wrap a `BaseTool` you call yourself, and treat `human_input` as confirmation, not policy."
+---
+
+import { Link } from "@/components/link";
+import FrameworkPrimer from "@/snippets/guards/FrameworkPrimer.mdx";
+
+[CrewAI](https://docs.crewai.com/) crews call authored tools during a
+kickoff. Arcjet Guard sits at those boundaries so a policy can allow or
+deny the action before a side effect runs.
+
+<FrameworkPrimer />
+
+Vercel AI SDK, Python LangChain, LangChain JS, LangGraph JS, Genkit,
+Eve, Mastra, OpenAI Agents, and Claude wrappers are on
+<Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>.
+
+This is the official CrewAI Python package (`crewai` on PyPI). It is not
+an npm port such as the `crewai` package on npm. Don't wrap CrewAI tools
+with `@arcjet/guard/vercel-ai/v7`. There is no `guard_crew`.
+
+## Install
+
+Until `arcjet.guard.crewai` is published, pin `arcjet` to
+[`b1253640`](https://github.com/arcjet/arcjet-py/commit/b1253640ce676b948594beed5fe62450d0e1c77d).
+Published `arcjet` 0.9.0 on PyPI does not include this module.
+
+There is no `arcjet[crewai]` extra. CrewAI is not an Arcjet dependency,
+because it pulls `chromadb`, which includes an unpatched critical remote
+code execution vulnerability
+([CVE-2026-45829](https://github.com/advisories/GHSA-f4j7-r4q5-qw2c)).
+Install official CrewAI yourself. Registration enforces
+`crewai>=1.15.3,<2`. Python 3.10 to 3.13.
+
+```bash
+pip install "arcjet @ git+https://github.com/arcjet/arcjet-py@b1253640ce676b948594beed5fe62450d0e1c77d"
+pip install "crewai>=1.15.3,<2"
+```
+
+Import helpers from `arcjet.guard.crewai`:
+
+```py
+from arcjet.guard.crewai import (
+    ArcjetCrewAIHooks,
+    ToolPolicy,
+    free_text_arguments,
+    guard_tool,
+    register_arcjet_hooks,
+    sanitize_tool_name,
+    unregister_arcjet_hooks,
+)
+```
+
+Launch one sync client at module scope. CrewAI hooks are synchronous,
+so use `launch_arcjet_sync`. Don't pass `launch_arcjet` to
+`register_arcjet_hooks`:
+
+```py
+from arcjet.guard import launch_arcjet_sync
+
+arcjet = launch_arcjet_sync(key=ARCJET_KEY)
+```
+
+Use `launch_arcjet` only from async application code, such as a FastAPI
+route that later calls `crew.kickoff()`, or from `guard_tool` when you
+call `arun()`.
+
+## Helpers
+
+Pick the surface that matches what you hold when the effect runs:
+
+| You have | Use | Needs | Blocks a call? |
+| --- | --- | --- | --- |
+| Any Python callable | `guard_action` / `guard_action_sync` | `arcjet` | Yes |
+| A tool a crew, LiteAgent, or MCP adapter is about to run | `register_arcjet_hooks` | `arcjet`, `crewai` | Yes |
+| A CrewAI `BaseTool` you call yourself | `guard_tool` | `arcjet`, `crewai` | Yes |
+
+`register_arcjet_hooks` registers a process-wide `PRE_TOOL_CALL` hook
+and returns an `ArcjetCrewAIHooks` handle. It does not register
+`POST_TOOL_CALL`. The decision is recorded on the PRE hook.
+
+On `DENY`, or when Guard cannot be evaluated and `on_guard_error` is
+`"deny"`, the helper raises `HookAborted(reason=..., source="arcjet")`
+so the tool does not run.
+
+The agent always sees `Tool execution blocked by hook. Tool: {name}`.
+`HookAborted.reason` is telemetry only.
+
+CrewAI swallows any exception other than `HookAborted`. Don't raise
+`ArcjetDeniedError` or `ArcjetUnavailableError` from a raw hook. The
+hook path raises `HookAborted` so the abort reaches the crew.
+`guard_tool` is the only CrewAI surface that raises those Arcjet
+errors, because `BaseTool.run` never dispatches `PRE_TOOL_CALL`.
+
+There is no `guard_crew`. There is no inbound helper. Screen user text
+with a direct `guard_sync()` call before `crew.kickoff()`. There is no
+approval helper. `human_input` and `request_human_input()` are
+human-in-the-loop (HITL) confirmation, not policy.
+
+`sanitize_tool_name` matches CrewAI's `tools=` filter:
+`Send Email` and `send_email` name the same tool. `free_text_arguments`
+returns the model's free-text args with opaque ids stripped
+(`tool_call_id`, `trace_id`, and any `*_id` key). The hook does not
+apply that filter for you.
+
+Don't also wrap these tools with `@arcjet/guard/vercel-ai/v7`. Don't use
+an npm CrewAI port with these helpers.
+
+## Helper options
+
+`register_arcjet_hooks` accepts this contract:
+
+| Option | Required | Description |
+| --- | --- | --- |
+| `guard` | No | Blocking client. Optional if you called `register_arcjet()`. The hook path needs `launch_arcjet_sync`. |
+| `action` | No | Guard label and capture name. Use `resource.verb` in the past tense, such as `email.sent`. A string, or a function of the hook context. Defaults to `{sanitized_tool_name}.invoked`. |
+| `rules` | No | Bound SDK rule inputs, or a function of `(arguments, ctx)`. `arguments` is the tool's own mapping from `ctx.tool_input`, unfiltered. Omit to submit none. |
+| `policies` | No | Per-tool `ToolPolicy` overrides, keyed by tool name. Keys are sanitized. |
+| `tools` | No | Tool names to gate. Names are sanitized. Omit to gate every tool. |
+| `on_guard_error` | No | `"deny"` (default) or `"allow"`. A real `DENY` always blocks. |
+| `correlation_id` | No | Caller-owned Sequence id. Falls back to `arcjet_sequence`. Never minted from crew, task, or agent ids. |
+
+`guard` is optional if you called `register_arcjet()`. The hook path
+needs a blocking client. Direct `guard_sync()` takes `label` (not
+`action`) and fails open.
+
+`ToolPolicy` takes `action` (required) and `rules` (optional).
+`ToolPolicy.rules` is a bound sequence, not a function. Match it with
+`sanitize_tool_name` the same way CrewAI matches `tools=`.
+
+`guard_tool` takes `action` (required), `rules`, and `on_guard_error`.
+Use it only for a standalone `BaseTool` you invoke yourself.
+
+`unregister_arcjet_hooks(handle)` removes the hook. Call it in tests,
+or call `handle.unregister()`. Registration is once per process.
+Call `unregister()` on the handle before you register again.
+
+## Screen user text before kickoff
+
+There is no inbound hook, so there is no inbound helper. Put
+prompt-injection and other inbound rules in the application before
+`crew.kickoff()`.
+
+Direct `guard_sync()` fails open, so an `ALLOW` is not proof the rules
+ran. Gate inbound on `decision.has_failed_open()` if this call site must
+fail closed. `register_arcjet_hooks` already defaults to that on
+`PRE_TOOL_CALL`.
+
+On `DENY`, don't call `kickoff()`.
+
+```py
+from arcjet.guard import DetectPromptInjection, launch_arcjet_sync
+
+arcjet = launch_arcjet_sync(key=ARCJET_KEY)
+inbound = DetectPromptInjection()
+
+decision = arcjet.guard_sync(
+    label="message.received",
+    rules=[inbound(user_text)],
+)
+if decision.conclusion == "DENY" or decision.has_failed_open():
+    raise RuntimeError("message blocked")
+
+crew.kickoff(inputs={"request": user_text})
+```
+
+## Gate crew tool calls with `register_arcjet_hooks`
+
+`register_arcjet_hooks` registers a process-wide `PRE_TOOL_CALL` hook.
+That is the deny point for every tool a crew, LiteAgent, MCP adapter,
+or crew-injected list executes. On `DENY` the helper raises
+`HookAborted(reason=..., source="arcjet")`, so the tool handler never
+runs a side effect.
+
+Don't use `return False` from a legacy `@before_tool_call` hook as the
+Arcjet gate. Don't raise a generic exception. CrewAI swallows those and
+the tool still runs.
+
+Scan free-text args (a note, reason, or body) with
+`free_text_arguments`. An opaque `order_id` is stripped from that
+mapping, so don't pass it to `LocalDetectSensitiveInfo`. That helper
+runs on a local ML model backend.
+
+```py
+from arcjet.guard import (
+    LocalDetectSensitiveInfo,
+    TokenBucket,
+    launch_arcjet_sync,
+)
+from arcjet.guard.crewai import free_text_arguments, register_arcjet_hooks
+from crewai.tools import tool
+
+arcjet = launch_arcjet_sync(key=ARCJET_KEY)
+lookup_limit = TokenBucket(
+    refill_rate=10,
+    interval_seconds=60,
+    max_tokens=10,
+    bucket="lookups",
+)
+detect_pii = LocalDetectSensitiveInfo()
+
+
+@tool("lookup_order")
+def lookup_order(order_id: str, note: str) -> dict:
+    """Look up an order by ID."""
+    return {"order_id": order_id, "note": note, "status": "shipped"}
+
+
+handle = register_arcjet_hooks(
+    guard=arcjet,
+    tools=["lookup_order"],
+    action="order.looked-up",
+    rules=lambda arguments, _ctx: [
+        lookup_limit(key="orders", requested=1),
+        detect_pii(free_text_arguments(arguments)["note"]),
+    ],
+)
+```
+
+## Wrap a `BaseTool` you call yourself
+
+`guard_tool` wraps a CrewAI `BaseTool` you invoke with `run()` or
+`arun()`. `BaseTool.run` never dispatches `PRE_TOOL_CALL`, so a
+standalone call never hits the registrar.
+
+On `DENY` the wrapped tool does not run and the helper raises
+`ArcjetDeniedError`. If Guard cannot be evaluated, the default raises
+`ArcjetUnavailableError`. This is the only CrewAI surface that raises
+those errors.
+
+A tool that is both wrapped and later executed by a crew whose hooks
+are registered is evaluated once. The hook skips a branded wrap.
+
+```py
+from arcjet.guard import TokenBucket, launch_arcjet_sync
+from arcjet.guard.crewai import guard_tool
+
+arcjet = launch_arcjet_sync(key=ARCJET_KEY)
+lookup_limit = TokenBucket(
+    refill_rate=10,
+    interval_seconds=60,
+    max_tokens=10,
+    bucket="lookups",
+)
+
+guarded_lookup = guard_tool(
+    guard=arcjet,
+    tool=lookup_order,
+    action="order.looked-up",
+    rules=[lookup_limit(key="orders", requested=1)],
+)
+```
+
+## The `POST_TOOL_CALL` hook is not registered
+
+`register_arcjet_hooks` registers `PRE_TOOL_CALL` only. It does not
+register `POST_TOOL_CALL`. The decision is recorded on the PRE hook.
+
+Don't add your own `POST_TOOL_CALL` hook to deny a call or rewrite
+`ctx.tool_result`. POST fires on blocked calls too, and a rewrite
+would replace CrewAI's blocked-hook string.
+
+## Human input is not a policy gate
+
+CrewAI `human_input` on an agent or task, and
+`ctx.request_human_input()` inside a hook, pause for a human. They are
+human-in-the-loop (HITL) confirmation, not a policy gate. Same trap as
+Mastra `requireApproval`, Claude `canUseTool`, LangGraph `interrupt()`,
+Genkit `interrupt()`, and OpenAI `needsApproval`.
+
+There is no approval helper. Don't wrap `human_input` as Guard. Use
+`register_arcjet_hooks` on `PRE_TOOL_CALL` for tools a crew runs.
+
+## Fail-closed default
+
+`register_arcjet_hooks` and `guard_tool` default to
+`on_guard_error="deny"`, matching the LangChain wrappers in
+[arcjet-py#196](https://github.com/arcjet/arcjet-py/pull/196). If Guard
+cannot be evaluated, the hook raises `HookAborted` and the tool does
+not run. `guard_tool` raises `ArcjetUnavailableError`.
+
+Set `on_guard_error="allow"` only when you can accept running the
+action without a complete security decision. The helpers reject any
+other value.
+
+A `DENY` conclusion always blocks, regardless of `on_guard_error`. The
+hook still raises `HookAborted(reason=..., source="arcjet")` so CrewAI
+stops the call. CrewAI swallows any other exception (fail-open), so a
+raw `ArcjetDeniedError` or `ArcjetUnavailableError` does not abort the
+tool.
+
+The core `guard_sync()` call still fails open. It returns `ALLOW`, and
+`has_failed_open()` returns `True`. The wrappers that sit around an
+effect fail closed.
+
+`register_arcjet_hooks` records `metadata.outcome` as `success` when the
+action proceeds, including when `on_guard_error="allow"` and policy did
+not judge the action fully. It doesn't record `degraded`. `guard_tool`
+goes through the checkpoint engine, so it records the five checkpoint
+outcomes. For more information, see
+<Link.Page href="/guards/capture#capture-outcomes">Capture outcomes</Link.Page>.
+
+For more information about fail-open versus fail-closed behavior, see
+<Link.Page href="/guards/reference#availability-and-fail-behavior">Availability and fail behavior</Link.Page>.
+
+## What not to use
+
+- Don't install an npm CrewAI port. These helpers are official CrewAI
+  Python only.
+- Don't call `guard_crew`. That helper does not exist.
+- Don't expect `POST_TOOL_CALL` from this registrar. It is not
+  registered, and it is not a deny point.
+- Don't treat `human_input` or `request_human_input()` as a policy
+  gate.
+- Don't raise `ArcjetDeniedError` or `ArcjetUnavailableError` from a
+  raw hook. CrewAI swallows those. The helper raises
+  `HookAborted(reason=..., source="arcjet")`.
+- Don't use legacy `@before_tool_call` with `return False` as the
+  Arcjet gate.
+- Don't treat `PRE_MODEL_CALL` as the tool deny point.
+- Don't pass `launch_arcjet` to `register_arcjet_hooks`. The hook path
+  is sync only.
+- Don't also wrap these tools with `@arcjet/guard/vercel-ai/v7`.
+- Don't import `arcjet.guard.crewai` unless you installed official
+  CrewAI yourself.
+
+## Common patterns
+
+### Rate limit a tool per trusted key
+
+Key the bucket on a trusted identifier you own. Don't key it on
+free-text user input. `free_text_arguments` strips `*_id` keys, so
+don't read `order_id` from the arguments mapping.
+
+```py
+lookup_limit = TokenBucket(
+    refill_rate=10,
+    interval_seconds=60,
+    max_tokens=10,
+    bucket="lookups",
+)
+
+register_arcjet_hooks(
+    guard=arcjet,
+    tools=["lookup_order"],
+    action="order.looked-up",
+    rules=[lookup_limit(key="orders", requested=1)],
+)
+```
+
+### Scan a free-text note for sensitive information
+
+Scan a note, reason, or body from `free_text_arguments`. An opaque
+`order_id` is stripped, so don't pass it to
+`LocalDetectSensitiveInfo`.
+
+```py
+from arcjet.guard import LocalDetectSensitiveInfo, TokenBucket
+from arcjet.guard.crewai import free_text_arguments, register_arcjet_hooks
+
+detect_pii = LocalDetectSensitiveInfo()
+
+register_arcjet_hooks(
+    guard=arcjet,
+    tools=["lookup_order"],
+    action="order.looked-up",
+    rules=lambda arguments, _ctx: [
+        lookup_limit(key="orders", requested=1),
+        detect_pii(free_text_arguments(arguments)["note"]),
+    ],
+)
+```
+
+### Match a policy key to CrewAI's sanitized name
+
+`sanitize_tool_name("Send Email")` is `send_email`. Key `policies` and
+`tools` the same way, or pass the display name and let the helper
+sanitize it. `ToolPolicy.rules` is a bound sequence, not a function.
+
+```py
+from arcjet.guard.crewai import ToolPolicy, sanitize_tool_name
+
+assert sanitize_tool_name("Send Email") == "send_email"
+
+register_arcjet_hooks(
+    guard=arcjet,
+    policies={
+        "Send Email": ToolPolicy(
+            action="email.sent",
+            rules=[lookup_limit(key="email", requested=1)],
+        )
+    },
+)
+```
+
+## Related
+
+- <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
+- <Link.Page href="/guards/capture">Capture events</Link.Page>
+- <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
+- <Link.Page href="/guards/langchain-js">LangChain JS agent guard</Link.Page>
+- <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>
+- <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>
+- <Link.Page href="/guards/genkit">Genkit agent guard</Link.Page>
+- <Link.Page href="/guards/openai-agents">OpenAI Agents agent guard</Link.Page>
+- <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>
+- <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>
+- <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>
+- <Link.Page href="/reference/python#guard">Python Guard SDK reference</Link.Page>
+- <Link.Page href="/guards">Agent guards</Link.Page>
+- Adapter:
+  [`b1253640`](https://github.com/arcjet/arcjet-py/commit/b1253640ce676b948594beed5fe62450d0e1c77d)

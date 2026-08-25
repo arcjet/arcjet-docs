@@ -1,6 +1,7 @@
 import { Astro as IconAstro } from "@/components/icons/tech/Astro";
 import { Bun as IconBun } from "@/components/icons/tech/Bun";
 import { ClaudeAgentSdk as IconClaudeAgentSdk } from "@/components/icons/tech/ClaudeAgentSdk";
+import { CrewAi as IconCrewAi } from "@/components/icons/tech/CrewAi";
 import { Deno as IconDeno } from "@/components/icons/tech/Deno";
 import { Express as IconExpress } from "@/components/icons/tech/Express";
 import { FastApi as IconFastApi } from "@/components/icons/tech/FastApi";
@@ -44,12 +45,14 @@ const frameworkIcon = {
   "bun-hono": <IconBun />,
   bun: <IconBun />,
   "claude-agent-sdk": <IconClaudeAgentSdk />,
+  crewai: <IconCrewAi />,
   deno: <IconDeno />,
   express: <IconExpress />,
   fastify: <IconFastify />,
   genkit: <IconGenkit />,
   hono: <IconHono />,
   langchain: <IconLangChain />,
+  "langchain-js": <IconLangChain />,
   langgraph: <IconLangGraph />,
   mastra: <IconMastra />,
   "nest-js": <IconNestJs />,

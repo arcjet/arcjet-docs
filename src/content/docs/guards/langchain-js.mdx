@@ -1,0 +1,515 @@
+---
+title: "LangChain JS agent guard"
+description: "Screen user text before the agent runs, wrap authored tools, and treat `humanInTheLoopMiddleware` as confirmation, not policy."
+---
+
+import { Link } from "@/components/link";
+import FrameworkPrimer from "@/snippets/guards/FrameworkPrimer.mdx";
+
+[LangChain](https://docs.langchain.com/oss/javascript/langchain/overview) JS
+`createAgent` agents call authored tools. Arcjet Guard sits at those
+boundaries so a policy can allow or deny the action before a side
+effect runs.
+
+<FrameworkPrimer />
+
+Vercel AI SDK, Python LangChain, CrewAI, Eve, Mastra, LangGraph, OpenAI
+Agents, Genkit, and Claude wrappers are on
+<Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>.
+
+This adapter is LangChain JS `createAgent` plus
+`createMiddleware({ wrapToolCall })`. It is not Python LangChain
+(`guard_tool`, `ArcjetMiddleware`, `ToolPolicy`). It is not LangGraph
+Graph API (`StateGraph` + `ToolNode`). Don't also wrap these tools with
+`@arcjet/guard/langgraph/v1` or `@arcjet/guard/vercel-ai/v7`.
+
+## Install
+
+Install the Guard SDK and LangChain:
+
+```bash
+npm install @arcjet/guard langchain @langchain/core
+```
+
+`langchain` and `@langchain/core` are peers of `@arcjet/guard`, not
+dependencies of it. If your project already has them in the ranges that
+follow, install `@arcjet/guard` on its own so your pins don't move.
+
+Import helpers from the versioned path `@arcjet/guard/langchain/v1`.
+There is no unversioned alias. `@arcjet/guard/langchain` does not
+resolve. The version segment is LangChain's major. `langchain`
+(`>=1.2.0 <2`) and `@langchain/core` (`>=1 <2`) are optional peers.
+`wrapToolCall` only sees `runtime.configurable.thread_id` as of
+LangChain 1.2.34, which is why `langchain` has the higher floor.
+`@langchain/core` keeps the `>=1 <2` range `langgraph/v1` already
+shipped. This adapter does not require `@langchain/langgraph`. The
+integration requires Node.js 22 or later.
+
+`createAgent` resolves a model string such as `"openai:gpt-4o"` through
+the matching provider package, so install the one your model needs. The
+examples on this page use `@langchain/openai`. Until
+`@arcjet/guard/langchain/v1` is published, pin `@arcjet/guard` to
+[`c49abcc1`](https://github.com/arcjet/arcjet-js/commit/c49abcc1f9afce7d284b6c294d0dcee5916ada86).
+The published `@arcjet/guard@1.10.0` package on npm does not export
+`./langchain/v1`.
+
+Launch one client at module scope:
+
+```ts
+import { launchArcjet } from "@arcjet/guard";
+
+export const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+```
+
+## Helpers
+
+The integration exposes three surfaces:
+
+- `guardTool()` wraps a LangChain `tool()` / `StructuredTool` you pass
+  to `createAgent`. On `DENY` the original `func` / `invoke` never
+  runs. The helper returns a plain `ArcjetDenialResult`. It does not
+  throw. It does not fabricate a `ToolMessage`. `createAgent`'s
+  `baseHandler` wraps a non-`ToolMessage` in a success `ToolMessage`.
+  The denial lives in the payload.
+- `guardMiddleware()` is the invoke-wide gate. Pass it on
+  `createAgent({ middleware })`. Its `wrapToolCall` hook denies by
+  returning a real `ToolMessage` (`content` is JSON of the payload,
+  default status) without calling `handler`. A bare object crashes the
+  reducer. Don't set `status: "error"`. Policy sits on `wrapToolCall`
+  only. It skips branded (`guardTool`) tools when `request.tool` can
+  be looked up. Tools that cannot be looked up are still gated.
+- `langchainContext()` reads `configurable.thread_id`, then
+  caller-owned `sessionId` / `conversationId`, then `init.sessionId` /
+  `init.correlationId`. It never mints an ID. It never reads
+  `traceId`. A run that pauses on `interrupt()` resumes through the
+  same config, so it keeps `thread_id` and later Guard decisions stay
+  on the Sequence that started it. The interrupt and its resume value
+  are not correlation sources. It never calls `createAgentContext`.
+
+There is no `guardInbound`. There is no inbound hook. Screen user text
+with a direct `guard()` call before `agent.invoke` or `agent.stream`.
+There is no `guardApproval`.
+
+Never call `createAgentContext` inside a LangChain callback. Don't
+also wrap these tools with `@arcjet/guard/langgraph/v1` or
+`@arcjet/guard/vercel-ai/v7`. Don't wrap Python LangChain or LangGraph
+`StateGraph` / `ToolNode` with this adapter.
+
+## Helper options
+
+| Option | Helpers | Description |
+| --- | --- | --- |
+| `action` | `guardTool`, `guardMiddleware` | Guard label and capture name. Use `resource.verb` in the past tense. A string, or a function of the parsed tool input (or `{ toolName, input }` on the middleware). Required on `guardTool`. Middleware defaults to `tool.invoked`. |
+| `rules` | `guardTool`, `guardMiddleware` | SDK rules, or a function of the parsed tool input (or `{ toolName, input }` on the middleware). Omit to submit none. The guard call still happens. |
+| `metadata` | `guardTool`, `guardMiddleware` | Nested JSON, or a function of the same input as `rules`. |
+| `sessionId` | `guardTool`, `guardMiddleware` | Caller-owned fallback when `configurable.thread_id` is absent. A string, or a function of the same input as `rules`. Prefer putting the ID on `agent.invoke(..., { configurable: { thread_id } })`. |
+| `onGuardError` | `guardTool`, `guardMiddleware` | `"deny"` (default) or `"allow"`. |
+| `onDeny` | `guardTool`, `guardMiddleware` | Reshape the denial payload. `guardTool` returns that object as the tool result. `guardMiddleware` JSON-stringifies it onto `ToolMessage.content`. |
+
+Inbound screening uses direct `guard()`, which takes `label` (not
+`action`) and fails open. See the following section.
+
+## Denial payload
+
+On `DENY` the original tool never runs. The payload shape is one
+`ArcjetDenialResult`. The envelope differs by surface:
+
+- `guardTool` returns the object. `createAgent`'s `baseHandler` wraps
+  it in a success `ToolMessage`.
+- `guardMiddleware` returns a real `ToolMessage` whose `content` is
+  JSON of that object. Default status. The denial lives in `content`.
+
+It is not a throw. It is not `humanInTheLoopMiddleware`.
+
+```ts
+{
+  arcjetDenied: true,
+  reason: "RATE_LIMIT", // or PROMPT_INJECTION, SENSITIVE_INFO, ERROR
+  message:
+    "Arcjet denied this call (RATE_LIMIT). It may be retried after 30 seconds.",
+  retryable: true,
+  retryAfterSeconds: 30,
+}
+```
+
+You can import `ArcjetDenialResult` from `@arcjet/guard/langchain/v1`.
+
+Only rate-limit denials set `retryable: true` and include
+`retryAfterSeconds`. Other reasons tell the model not to retry.
+
+When Guard is unavailable and `onGuardError` is `"deny"`, the model
+receives `reason: "ERROR"`, `retryable: true`, and
+`retryAfterSeconds: 5`.
+
+## Run a guarded `createAgent`
+
+Screen inbound text, wrap `lookup_order`, and pass `guardMiddleware`
+on `createAgent({ middleware })`:
+
+```ts
+import {
+  launchArcjet,
+  detectPromptInjection,
+  localDetectSensitiveInfo,
+  tokenBucket,
+} from "@arcjet/guard";
+import {
+  guardTool,
+  guardMiddleware,
+  langchainContext,
+} from "@arcjet/guard/langchain/v1";
+import { createAgent } from "langchain";
+import { tool } from "@langchain/core/tools";
+import { z } from "zod";
+
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+
+const lookupLimit = tokenBucket({
+  bucket: "lookups",
+  refillRate: 10,
+  intervalSeconds: 60,
+  maxTokens: 10,
+});
+const detectPii = localDetectSensitiveInfo();
+const inbound = detectPromptInjection();
+
+const lookupOrder = guardTool(
+  arcjet,
+  tool(
+    async ({ orderNumber, note }) => ({
+      orderNumber,
+      note,
+      status: "shipped",
+    }),
+    {
+      name: "lookup_order",
+      description: "Look up an order by number",
+      schema: z.object({
+        orderNumber: z.string(),
+        note: z.string(),
+      }),
+    },
+  ),
+  {
+    action: "order.looked-up",
+    onGuardError: "deny",
+    rules: (input) => [
+      lookupLimit({ key: input.orderNumber, requested: 1 }),
+      detectPii(input.note),
+    ],
+  },
+);
+
+export async function runAgent(conversationId: string, userText: string) {
+  const config = { configurable: { thread_id: conversationId } };
+
+  const decision = await arcjet.guard({
+    label: "message.received",
+    rules: [inbound(userText)],
+    ...langchainContext(config),
+  });
+
+  if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+    throw new Error("message blocked");
+  }
+
+  const agent = createAgent({
+    model: "openai:gpt-4o",
+    tools: [lookupOrder],
+    middleware: [guardMiddleware(arcjet, { sessionId: conversationId })],
+  });
+
+  return agent.invoke(
+    { messages: [{ role: "user", content: userText }] },
+    config,
+  );
+}
+```
+
+## Screen user text before `invoke`
+
+There is no inbound hook, so there is no `guardInbound`. Put
+prompt-injection and other inbound rules in the application before
+`agent.invoke` or `agent.stream`.
+
+`wrapModelCall` / `beforeModel` / `afterModel` are not Guard. They
+intercept the model call, not user text. Policy sits on
+`wrapToolCall` only.
+
+Direct `client.guard({ label, rules, ...langchainContext(config) })`
+is the inbound pattern. Act on that decision. Direct `guard()` fails
+open, so an `ALLOW` is not proof the rules ran. Gate inbound on
+`decision.hasFailedOpen()` if this call site must fail closed.
+`guardTool` and `guardMiddleware` already default to that.
+
+On `DENY`, don't call `invoke` / `stream`.
+
+```ts
+import { detectPromptInjection } from "@arcjet/guard";
+import { langchainContext } from "@arcjet/guard/langchain/v1";
+import { arcjet } from "./arcjet.js";
+
+const inbound = detectPromptInjection();
+const config = { configurable: { thread_id: conversationId } };
+
+const decision = await arcjet.guard({
+  label: "message.received",
+  rules: [inbound(userText)],
+  ...langchainContext(config),
+});
+
+if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+  throw new Error("message blocked");
+}
+```
+
+## Human approval is not a policy gate
+
+`humanInTheLoopMiddleware` / `interrupt()` is human-in-the-loop
+(HITL) confirmation. It is not a policy gate. Same trap as Mastra
+`requireApproval`, Claude `canUseTool`, LangGraph `interrupt()`,
+Genkit `toolApproval`, and OpenAI `needsApproval`. There is no
+`guardApproval`. Don't wrap HITL as Guard. Don't deny in
+`afterModel`. Policy sits on `wrapToolCall` only.
+
+Use `guardTool` for authored `tool()` handlers you own.
+
+On `DENY` the original tool never runs, so the inner handler never
+runs a side effect. `guardTool` returns a plain
+`ArcjetDenialResult`. Don't throw. Don't fabricate a `ToolMessage`.
+Don't pause for a human to approve a denied call. Scan free-text
+args (a note, reason, or body). An opaque `orderNumber` or tool-call
+ID will not trip email / phone / card / IP, so don't pass it to
+`localDetectSensitiveInfo`. That helper runs on a local ML model
+backend.
+
+```ts
+import { tool } from "@langchain/core/tools";
+import { z } from "zod";
+import { guardTool } from "@arcjet/guard/langchain/v1";
+import { tokenBucket, localDetectSensitiveInfo } from "@arcjet/guard";
+import { arcjet } from "./arcjet.js";
+
+const lookupLimit = tokenBucket({
+  bucket: "lookups",
+  refillRate: 10,
+  intervalSeconds: 60,
+  maxTokens: 10,
+});
+const detectPii = localDetectSensitiveInfo();
+
+const lookupOrder = guardTool(
+  arcjet,
+  tool(
+    async ({ orderNumber, note }) => ({
+      orderNumber,
+      note,
+      status: "shipped",
+    }),
+    {
+      name: "lookup_order",
+      description: "Look up an order by number",
+      schema: z.object({
+        orderNumber: z.string(),
+        note: z.string(),
+      }),
+    },
+  ),
+  {
+    action: "order.looked-up",
+    onGuardError: "deny",
+    rules: (input) => [
+      lookupLimit({ key: input.orderNumber, requested: 1 }),
+      detectPii(input.note),
+    ],
+  },
+);
+```
+
+## Deny inside `tool()` via `guardTool`, and agent-wide via `guardMiddleware`
+
+`guardTool` wraps an authored `tool()` you pass to `createAgent`. That
+tool is the deny point for tools you own. It returns a plain
+`ArcjetDenialResult`. `createAgent`'s `baseHandler` wraps that object
+in a success `ToolMessage`.
+
+`guardMiddleware` is the invoke-wide `wrapToolCall` gate. Pass it on
+`createAgent({ middleware })`. The hook denies by returning a real
+`ToolMessage` without calling `handler`. `content` is JSON of the
+payload. Default status. A bare object crashes the reducer. Policy
+sits on `wrapToolCall` only. It skips branded (`guardTool`) tools
+when `request.tool` can be looked up. Tools that cannot be looked up
+are still gated.
+
+MCP and injected tools skip an unwrapped handler. Hosted or injected
+tools are not a `tool()` deny. `guardMiddleware` still gates a tool
+call that `createAgent` executes through `wrapToolCall`.
+
+This is not LangGraph `StateGraph` / `ToolNode`. Don't pass a
+`guardToolNode` result to `createAgent`.
+
+```ts
+import { createAgent } from "langchain";
+import { guardMiddleware } from "@arcjet/guard/langchain/v1";
+import { arcjet } from "./arcjet.js";
+
+const agent = createAgent({
+  model: "openai:gpt-4o",
+  tools: [lookupOrder],
+  middleware: [guardMiddleware(arcjet, { sessionId: conversationId })],
+});
+```
+
+## Correlation
+
+`langchainContext` reads `configurable.thread_id` first (what
+`wrapToolCall` sees on `runtime.configurable` as of LangChain
+1.2.34), then caller-owned `sessionId` / `conversationId`, then
+`init.sessionId` / `init.correlationId`. It never mints an ID. It
+never reads `traceId`. It never calls `createAgentContext`. If
+nothing is a valid 1-256 printable-ASCII string, the call is
+uncorrelated rather than joined to a generated ID.
+
+A run that pauses on `interrupt()` resumes through the same config.
+`humanInTheLoopMiddleware` resumes with
+`agent.invoke(new Command({ resume }), config)`. The run keeps
+`thread_id`, so later Guard decisions stay on the Sequence that
+started it. The interrupt and its resume value are not themselves
+correlation sources. Don't derive an ID from them. Don't mint one.
+Don't read `traceId`.
+
+Pass the same `thread_id` on `agent.invoke`. Use `sessionId` on
+`guardMiddleware` only as a fallback when that ID is absent.
+
+```ts
+const config = { configurable: { thread_id: conversationId } };
+
+await arcjet.guard({
+  label: "message.received",
+  ...langchainContext(config),
+});
+```
+
+## What not to use
+
+- There is no `guardInbound`. Screen prompt injection before
+  `agent.invoke` or `agent.stream`.
+- There is no `guardApproval`. `humanInTheLoopMiddleware` /
+  `interrupt()` is human HITL confirmation, not policy.
+- Don't treat `wrapModelCall` / `beforeModel` / `afterModel` as
+  Guard. Policy sits on `wrapToolCall` only.
+- Don't turn a deny into `humanInTheLoopMiddleware` or a human
+  approval pause.
+- Don't use this adapter with LangGraph `StateGraph` / `ToolNode`.
+  For more information about that adapter, see the
+  <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>.
+- Don't use this adapter with Python `create_agent` /
+  `ArcjetMiddleware`. For more information about that adapter, see the
+  <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
+- Don't throw from `guardTool` or `wrapToolCall` to signal a denial.
+- Don't fabricate a `ToolMessage` from `guardTool`. Return the plain
+  `ArcjetDenialResult`.
+- Don't return a bare object from `wrapToolCall`. Return a real
+  `ToolMessage` with JSON `content`. Don't set `status: "error"`.
+- Don't call `createAgentContext` inside a LangChain callback.
+- Don't also wrap these tools with `@arcjet/guard/langgraph/v1` or
+  `@arcjet/guard/vercel-ai/v7`.
+- Don't import `@arcjet/guard/langchain`. The path is
+  `@arcjet/guard/langchain/v1`.
+
+## Common patterns
+
+### Rate limit a tool per trusted id
+
+Key the bucket on a trusted identifier such as `orderNumber`. Don't
+key it on free-text user input.
+
+```ts
+const lookupLimit = tokenBucket({
+  bucket: "lookups",
+  refillRate: 10,
+  intervalSeconds: 60,
+  maxTokens: 10,
+});
+
+const lookupOrder = guardTool(
+  arcjet,
+  tool(
+    async ({ orderNumber }) => ({ orderNumber, status: "shipped" }),
+    {
+      name: "lookup_order",
+      description: "Look up an order",
+      schema: z.object({ orderNumber: z.string() }),
+    },
+  ),
+  {
+    action: "order.looked-up",
+    rules: (input) => [lookupLimit({ key: input.orderNumber, requested: 1 })],
+  },
+);
+```
+
+### Scan a free-text note for sensitive information
+
+Scan a note, reason, or body. An opaque `orderNumber` does not trip
+email, phone, card, or IP detection, so don't pass it to
+`localDetectSensitiveInfo`.
+
+```ts
+import { localDetectSensitiveInfo, tokenBucket } from "@arcjet/guard";
+
+const detectPii = localDetectSensitiveInfo();
+
+const lookupOrder = guardTool(
+  arcjet,
+  tool(
+    async ({ orderNumber, note }) => ({
+      orderNumber,
+      note,
+      status: "shipped",
+    }),
+    {
+      name: "lookup_order",
+      description: "Look up an order",
+      schema: z.object({
+        orderNumber: z.string(),
+        note: z.string(),
+      }),
+    },
+  ),
+  {
+    action: "order.looked-up",
+    rules: (input) => [
+      lookupLimit({ key: input.orderNumber, requested: 1 }),
+      detectPii(input.note),
+    ],
+  },
+);
+```
+
+## Fail-closed default
+
+`guardTool` and `guardMiddleware` default to `onGuardError: "deny"`.
+If Guard cannot be evaluated, the wrapped tool does not run and
+`wrapToolCall` does not call the handler.
+
+Set `onGuardError: "allow"` only when executing without a complete
+security decision is acceptable, such as a read-only lookup. Direct
+`guard()` still fails open. For more information about fail-open
+versus fail-closed behavior, see
+<Link.Page href="/guards/reference#availability-and-fail-behavior">Availability and fail behavior</Link.Page>.
+
+## Related
+
+- <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
+- <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
+- <Link.Page href="/guards/crewai">CrewAI agent guard</Link.Page>
+- <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>
+- <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>
+- <Link.Page href="/guards/genkit">Genkit agent guard</Link.Page>
+- <Link.Page href="/guards/openai-agents">OpenAI Agents agent guard</Link.Page>
+- <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>
+- <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>
+- <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>
+- <Link.Page href="/guards">Agent guards</Link.Page>
+- Adapter: [`c49abcc1`](https://github.com/arcjet/arcjet-js/commit/c49abcc1f9afce7d284b6c294d0dcee5916ada86)

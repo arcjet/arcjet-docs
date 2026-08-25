@@ -1,0 +1,31 @@
+import Step from "./Example.ts?raw";
+import { Code } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+This example deducts an estimated token cost from a per-user bucket before a tool runs. When the bucket is empty, the tool does not execute.
+
+We assume you already have a LangChain JS `createAgent` project set up. For
+helper options and denial behavior, see the
+<Link.Page href="/guards/langchain-js">LangChain JS agent guard</Link.Page>.
+
+Until `@arcjet/guard/langchain/v1` is published, pin `@arcjet/guard` to
+[`c49abcc1`](https://github.com/arcjet/arcjet-js/commit/c49abcc1f9afce7d284b6c294d0dcee5916ada86).
+The published `@arcjet/guard@1.10.0` package on npm does not export
+`./langchain/v1`.
+
+Install the dependencies:
+
+```shell
+# Export your Arcjet API key from https://console.arcjet.com
+export ARCJET_KEY="ajkey_..."
+
+npm install @arcjet/guard langchain @langchain/core
+```
+
+Create the example:
+
+<Code code={Step} lang="ts" title="agent.ts" />
+
+Then start or invoke the agent with a test prompt.
+
+Requests appear in your [Arcjet dashboard](https://console.arcjet.com) in real time.

@@ -234,8 +234,11 @@ The following helpers go through the checkpoint engine, so they record
 these outcomes:
 
 - `guard_action` / `guard_action_sync`
-- `guard_tool`
-- `ArcjetMiddleware`
+- LangChain `guard_tool` and `ArcjetMiddleware`
+- CrewAI `guard_tool`
+
+`register_arcjet_hooks` records `success` when the action proceeds. It
+doesn't record `degraded`.
 
 A direct `capture()` call doesn't set `outcome`. Observe-only
 `ArcjetCaptureHandler` and `ArcjetAsyncCaptureHandler` don't go through
@@ -262,6 +265,7 @@ startup and import the free `capture()` function. See <Link.Page href="/testing#
 - <Link.Page href="/guards">Agent guards</Link.Page>
 - <Link.Page href="/guards/reference">Guard testing and reference</Link.Page>
 - <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
+- <Link.Page href="/guards/crewai">CrewAI agent guard</Link.Page>
 - <Link.Page href="/testing">Testing Arcjet</Link.Page>
 - <Link.Page href="/reference/python#record-what-happened-with-capture">Python SDK capture</Link.Page>
 - <Link.Page href="/reference/go#capture">Go SDK capture</Link.Page>

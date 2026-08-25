@@ -712,15 +712,26 @@ checkpoint helpers. They fail closed by default
   (`arcjet[langchain-agents]`).
 - **Observe only** – `ArcjetCaptureHandler` /
   `ArcjetAsyncCaptureHandler`. These cannot deny a call.
+- **Official CrewAI tool calls** – `register_arcjet_hooks`
+  (`arcjet.guard.crewai`, `crewai>=1.15.3,<2`). There is no
+  `arcjet[crewai]` extra. The gate is process-wide `PRE_TOOL_CALL`
+  plus `HookAborted(reason=..., source="arcjet")`. `guard_tool` wraps
+  a standalone `BaseTool` you call yourself. `POST_TOOL_CALL` is not
+  registered.
 
-Checkpoint helpers that wrap an effect also record `metadata.outcome` on
-the capture event. The value is capture and Sequence metadata. It
-doesn't change `conclusion`, which remains `ALLOW` or `DENY`. For the
-five values and the `degraded` discriminator, see
+LangChain checkpoint helpers and CrewAI `guard_tool` record
+`metadata.outcome` on the capture event. The value is capture and
+Sequence metadata. It doesn't change `conclusion`, which remains
+`ALLOW` or `DENY`. For the five values and the `degraded`
+discriminator, see
 <Link.Page href="/guards/capture#capture-outcomes">Capture outcomes</Link.Page>.
+`register_arcjet_hooks` records `success` when the action proceeds. It
+doesn't record `degraded`.
 
 For install, examples, correlation, and the configure-before-wrap rule,
 see the <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
+For CrewAI hooks, see the
+<Link.Page href="/guards/crewai">CrewAI agent guard</Link.Page>.
 
 ### Rules
 
@@ -939,8 +950,9 @@ href="/guards/reference#metadata">Guard metadata</Link.Page>.
 `guard()` decides whether something is allowed.
 <Link.Page href="/guards/capture">`capture()`</Link.Page> records that it
 happened. It never affects a decision, never raises, and is not awaited even
-on the async client. Checkpoint helpers set `metadata.outcome` on the
-events they emit. A direct `capture()` call doesn't. See
+on the async client. LangChain checkpoint helpers and CrewAI
+`guard_tool` set `metadata.outcome` on the events they emit. A direct
+`capture()` call doesn't. See
 <Link.Page href="/guards/capture#capture-outcomes">Capture outcomes</Link.Page>.
 
 ```py
