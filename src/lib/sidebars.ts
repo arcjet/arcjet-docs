@@ -231,6 +231,11 @@ export const main = [
             label: "Quick start",
             link: "/content-moderation/quick-start",
           },
+          {
+            attrs: { class: "feature content-moderation" },
+            label: "Policy",
+            link: "/content-moderation/policy",
+          },
         ],
       },
       {
