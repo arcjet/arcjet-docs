@@ -137,7 +137,9 @@ Pick the surface that matches what you hold when the effect runs:
 - Observe only: `ArcjetCaptureHandler` / `ArcjetAsyncCaptureHandler`.
   These cannot deny a call. LangChain ignores callback return values.
 
-For more information about install, helpers, fail-closed behavior, and
+`guard_tool` and `ArcjetMiddleware` go through the checkpoint engine, so
+their capture events include `metadata.outcome`. For more information
+about install, helpers, fail-closed behavior, capture outcomes, and
 correlation, see the
 <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
 
@@ -181,8 +183,10 @@ There is no `arcjet[crewai]` extra. Install official
 [`b1253640`](https://github.com/arcjet/arcjet-py/commit/b1253640ce676b948594beed5fe62450d0e1c77d).
 Published `arcjet` 0.9.0 does not include it.
 
-For more information about install, helpers, fail-closed behavior, and
-`HookAborted`, see the
+`register_arcjet_hooks` records `metadata.outcome` as `success` when the
+action proceeds. It doesn't record `degraded`. `guard_tool` goes through
+the checkpoint engine. For more information about install, helpers,
+fail-closed behavior, `HookAborted`, and capture outcomes, see the
 <Link.Page href="/guards/crewai">CrewAI agent guard</Link.Page>.
 
 ## LangGraph JS

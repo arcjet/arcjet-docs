@@ -299,6 +299,14 @@ The core `guard()` call still fails open. It returns `ALLOW`, and
 `has_failed_open()` returns `True`. The wrappers that sit around an effect
 fail closed.
 
+Checkpoint surfaces go through the checkpoint engine, so the capture
+event they emit includes `metadata.outcome`. If the action ran only
+because `on_guard_error="allow"` and policy did not judge it fully, the
+event records `degraded`. The default records `unavailable` and blocks.
+For more information about the five values and how `decision_id`
+distinguishes a partial judgment, see
+<Link.Page href="/guards/capture#capture-outcomes">Capture outcomes</Link.Page>.
+
 ## Correlation
 
 Pass one correlation ID into `ainvoke()` so middleware and guarded tools

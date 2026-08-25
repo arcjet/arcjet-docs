@@ -176,6 +176,84 @@ export default {
 | `occurredAt` / `occurred_at` | Optional timestamp. Defaults to the time of the call. Pre-epoch values cannot be represented and are dropped. |
 | `waitUntil` | JavaScript only. Platform hook that keeps the invocation alive until the batch is sent. |
 
+## Capture outcomes
+
+Helpers that wrap an action record `metadata.outcome` on the capture event
+they emit. The value is capture and Sequence metadata. It never changes the
+decision. `conclusion` remains `ALLOW` or `DENY`. The decision has no
+outcome field.
+
+You don't set `outcome`. The helper writes it after your metadata so a
+caller key can't overwrite what the helper recorded.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+JavaScript `guardTool` and `guardAction` record one of the following
+values:
+
+| Value | The action | What it means |
+| ----- | ---------- | ------------- |
+| `success` | Ran. | The helper executed the action. |
+| `error` | Ran, then threw. | The wrapped action threw. |
+| `denied` | Did not run. | Policy evaluated `DENY`. |
+| `unavailable` | Did not run. | Fail-closed. The check was incomplete. |
+
+They don't record `degraded`. When `onGuardError` is `"allow"` and the
+action runs without a complete judgment, the event records `success`.
+
+</TabItem>
+<TabItem label="Python">
+
+Python checkpoint helpers record one of the following values:
+
+| Value | The action | What it means |
+| ----- | ---------- | ------------- |
+| `success` | Ran. | Policy judged all of it. |
+| `degraded` | Ran. `on_guard_error` is `allow`. | Policy judged it in part or not at all. |
+| `error` | Ran, then threw. | The wrapped action threw. |
+| `denied` | Did not run. | Policy evaluated `DENY`. |
+| `unavailable` | Did not run. | Fail-closed. The check was incomplete. |
+
+`on_guard_error` is `"allow"` or `"deny"`. The default is `"deny"`: an
+incomplete check blocks the action and records `unavailable`. If the
+action runs and then throws, the event records `error`, even when the
+judgment was incomplete.
+
+A `degraded` event uses `decision_id` to tell the two incomplete judgments
+apart:
+
+- Present: policy judged the action in part.
+- Absent: policy judged none of it. The helper had no decision, a
+  failed-open decision with an empty id, or an answer it could not read.
+
+An unreadable decision isn't passed into capture. The event emits
+without `decision_id`.
+
+The following helpers go through the checkpoint engine, so they record
+these outcomes:
+
+- `guard_action` / `guard_action_sync`
+- LangChain `guard_tool` and `ArcjetMiddleware`
+- CrewAI `guard_tool`
+
+`register_arcjet_hooks` records `success` when the action proceeds. It
+doesn't record `degraded`.
+
+A direct `capture()` call doesn't set `outcome`. Observe-only
+`ArcjetCaptureHandler` and `ArcjetAsyncCaptureHandler` don't go through
+the checkpoint engine.
+
+</TabItem>
+<TabItem label="Go">
+
+The Go SDK doesn't write `metadata.outcome` on `Capture`. Use `Capture`
+to record that an allowed action happened. Outcome classification is not
+part of the Go helper surface.
+
+</TabItem>
+</Tabs>
+
 ## Call `capture()` without a client handle
 
 Passing the client explicitly is the recommended path. When `capture()` is
@@ -186,6 +264,8 @@ startup and import the free `capture()` function. See <Link.Page href="/testing#
 
 - <Link.Page href="/guards">Agent guards</Link.Page>
 - <Link.Page href="/guards/reference">Guard testing and reference</Link.Page>
+- <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
+- <Link.Page href="/guards/crewai">CrewAI agent guard</Link.Page>
 - <Link.Page href="/testing">Testing Arcjet</Link.Page>
 - <Link.Page href="/reference/python#record-what-happened-with-capture">Python SDK capture</Link.Page>
 - <Link.Page href="/reference/go#capture">Go SDK capture</Link.Page>
