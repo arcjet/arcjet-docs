@@ -48,6 +48,7 @@ const PATHS_FROM_SITEMAP = [
   "/guards/langgraph/",
   "/guards/mastra/",
   "/guards/openai-agents/",
+  "/guards/openai-agents-py/",
   "/guards/quick-start/",
   "/guards/strands-agents/",
   "/guards/vercel-ai/",

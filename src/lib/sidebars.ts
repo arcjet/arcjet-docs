@@ -673,6 +673,10 @@ export const main = [
         link: "/guards/openai-agents",
       },
       {
+        label: "OpenAI Agents Python",
+        link: "/guards/openai-agents-py",
+      },
+      {
         label: "Strands Agents",
         link: "/guards/strands-agents",
       },

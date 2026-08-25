@@ -2158,6 +2158,7 @@ For the full API reference, read the installed library source:
 - [LangGraph agent guard](https://docs.arcjet.com/guards/langgraph)
 - [Genkit agent guard](https://docs.arcjet.com/guards/genkit)
 - [OpenAI Agents agent guard](https://docs.arcjet.com/guards/openai-agents)
+- [OpenAI Agents Python agent guard](https://docs.arcjet.com/guards/openai-agents-py)
 - [Strands Agents agent guard](https://docs.arcjet.com/guards/strands-agents)
 - [Vercel Eve agent guard](https://docs.arcjet.com/guards/vercel-eve)
 - [Mastra agent guard](https://docs.arcjet.com/guards/mastra)
