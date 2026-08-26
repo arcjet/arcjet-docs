@@ -196,9 +196,6 @@ Pass `mode` on `shield()`, `detect_bot()`, `token_bucket()`,
 `rate_limit`, `bots`, and `email` mappings to those factories, so each
 mapping must include `mode` too.
 
-This requirement is on Python SDK `main`, not in published `arcjet` 0.9.0
-or 0.10.0b1.
-
 ```py
 from arcjet import Mode, detect_bot
 
@@ -341,9 +338,6 @@ characteristics, and transport. The original client is unchanged.
 
 You can call `with_rule()` more than once to add rules incrementally.
 
-This method is on Python SDK `main`. It is not in published `arcjet` 0.9.0 or
-`0.10.0b1`.
-
 <Tabs>
   <TabItem label="FastAPI (async)">
     <Code code={WithRuleAsync} title="main.py" lang="py" />
@@ -390,9 +384,9 @@ client mode:
 | `ip_src`                           | `str`                  | Manual IP override (advanced) |
 | `correlation_id`                   | `str`                  | Correlates this decision with a guard call, workflow run, or agent trace. A dedicated, indexable field – not `extra` or `metadata` – and does not affect the decision or its cache key (`arcjet` >= 0.9.0) |
 
-HTTP `detect_prompt_injection` accepts only `mode`, which is required. On
-Python SDK `main`, omitting `mode` or passing `threshold=` raises
-`TypeError`. Guard `DetectPromptInjection` still defaults to `LIVE`.
+HTTP `detect_prompt_injection` accepts only `mode`, which is required.
+Omitting `mode` or passing `threshold=` raises `TypeError`. Guard
+`DetectPromptInjection` still defaults to `LIVE`.
 
 #### Override the client IP
 

@@ -22,9 +22,7 @@ with `@arcjet/guard/vercel-ai/v7`. There is no `guard_crew`.
 
 ## Install
 
-Until `arcjet.guard.crewai` is published, pin `arcjet` to
-[`b1253640`](https://github.com/arcjet/arcjet-py/commit/b1253640ce676b948594beed5fe62450d0e1c77d).
-Published `arcjet` 0.9.0 on PyPI does not include this module.
+The CrewAI integration requires `arcjet` 1.0.0 or later.
 
 There is no `arcjet[crewai]` extra. CrewAI is not an Arcjet dependency,
 because it pulls `chromadb`, which includes an unpatched critical remote
@@ -34,7 +32,7 @@ Install official CrewAI yourself. Registration enforces
 `crewai>=1.15.3,<2`. Python 3.10 to 3.13.
 
 ```bash
-pip install "arcjet @ git+https://github.com/arcjet/arcjet-py@b1253640ce676b948594beed5fe62450d0e1c77d"
+pip install "arcjet>=1.0.0"
 pip install "crewai>=1.15.3,<2"
 ```
 
