@@ -1,0 +1,127 @@
+---
+title: "Arcjet content moderation policy"
+description: "What the default Arcjet content moderation policy enforces, why it focuses on sexual content for payment processor compliance, how custom policies work, and how text units are billed."
+generateMarkdownRoute: true
+ajToc:
+  - text: "What the default policy enforces"
+    anchor: "what-the-default-policy-enforces"
+  - text: "Why the policy focuses on sexual content"
+    anchor: "why-the-policy-focuses-on-sexual-content"
+  - text: "Categories"
+    anchor: "categories"
+  - text: "Custom policies"
+    anchor: "custom-policies"
+  - text: "How text units are calculated"
+    anchor: "how-text-units-are-calculated"
+---
+
+import { Link } from "@/components/link";
+import Comments from "../../../components/Comments.astro";
+
+Arcjet content moderation evaluates untrusted text against a policy and returns
+an `ALLOW` or `DENY` decision. This page describes what the default policy
+enforces and how usage is billed. For how to call the rule from your code, see
+the <Link.Page href="/content-moderation/quick-start">content moderation quick
+start</Link.Page>.
+
+## What the default policy enforces
+
+The default policy is designed for generative AI applications that need to keep
+harmful content out of prompts and model outputs. It evaluates each piece of
+text across four categories – sexual content, misconduct, hate speech, and
+insults – and returns `DENY` when the text crosses the threshold for any one of
+them.
+
+The policy inspects the text you submit. Use it on the input to a model, the
+output from a model, or both. Content moderation returns a binary `detected`
+verdict for each rule. It doesn't return per-category scores, so keep your
+response to a denied decision generic and don't try to explain exactly what was
+flagged.
+
+## Why the policy focuses on sexual content
+
+Payment processors and card networks set rules for businesses that use their
+payment rails, and those rules extend to generative AI. Card network standards
+for adult content cover generated media, so an AI platform that lets users
+generate sexual or suggestive imagery can fall out of compliance and risk fines
+or losing the ability to take payments.
+
+Sexual content is the primary risk for these compliance regimes, so the default
+policy enforces the sexual content category most strictly. It's calibrated to
+catch suggestive, borderline, and provocative material – not only overtly
+explicit text – because that's the material card network rules target. The
+other three categories give you broader coverage against harmful content in the
+same moderation call.
+
+The card networks publish the standards these rules come from. For more
+information about their requirements for adult content and marketplaces, see the
+following:
+
+- [Mastercard's statement on adult content standards](https://newsroom.mastercard.com/news/press/2022/august/mastercard-statement-reinforcing-adult-content-standards/)
+- [Visa's payment facilitator and marketplace risk guide (PDF)](https://usa.visa.com/content/dam/VCOM/regional/na/us/partner-with-us/documents/visa-payment-facilitator-and-marketplace-risk-guide.pdf)
+
+The default policy is a starting point aimed at the most common compliance need.
+It isn't a legal determination that your application complies with any specific
+card network or payment processor rule. You're responsible for confirming your
+own compliance obligations. For a policy tuned to a specific compliance regime,
+see [Custom policies](#custom-policies).
+
+## Categories
+
+The default policy evaluates text against the following categories:
+
+- **Sexual content** – content that is sexual, suggestive, borderline, or
+  sexually provocative. This covers references to sexual acts and lewd content;
+  nudity or partial nudity; revealing, tight, fetish, or minimal clothing such
+  as lingerie and swimwear; sexualized posing; and framing that objectifies or
+  draws attention to a person's body. This category is enforced most strictly
+  for payment processor compliance.
+- **Misconduct** – content that depicts or facilitates criminal or deceptive
+  activity, such as fraud, money laundering, theft, drug trafficking,
+  counterfeiting, or unauthorized access to computer systems.
+- **Hate speech** – content that targets a person or group based on a protected
+  attribute such as race, ethnicity, religion, disability, age, nationality,
+  sexual orientation, gender, or gender identity. This includes slurs,
+  promotion of discrimination, and calls to violence. References to a protected
+  individual or group in a positive manner are allowed.
+- **Insults** – content that uses demeaning, humiliating, mocking, or belittling
+  language directed at a person or group, also known as bullying.
+
+## Custom policies
+
+The default policy suits the most common case, but the categories and how
+strictly each one is enforced can be tailored to your application. Arcjet can
+build and maintain a custom policy for you – for example, a stricter policy
+tuned to a specific payment processor or card network compliance regime, or a
+policy that adjusts which categories apply to your use case.
+
+A custom policy is built with you: Arcjet defines the policy with you, evaluates
+it against your traffic, and maintains it over time using feedback on false
+positives and false negatives. To discuss a custom policy, <Link.Page
+href="/support">contact Arcjet</Link.Page>.
+
+## How text units are calculated
+
+Content moderation usage is measured in text units. A text unit is the length
+of the text you submit to a single moderation call, in characters, divided by
+1,000 and rounded up.
+
+Each call to the content moderation rule is billed independently and rounds up
+to at least one text unit:
+
+| Characters submitted in one call | Text units billed |
+| --- | --- |
+| 1 to 1,000 | 1 |
+| 1,001 to 2,000 | 2 |
+| 2,001 to 3,000 | 3 |
+
+For example, a call that submits 2,300 characters is billed as three text
+units. If you moderate both the input to a model and its output, each is a
+separate call and is billed separately.
+
+The per-rule result reports usage in the `billing` field when the service
+reports it, with a `unit` of `text_units` and a `count`. Billing can be
+undefined when the service doesn't report usage. For the price per text unit,
+see the [pricing page](https://arcjet.com/pricing).
+
+<Comments />
