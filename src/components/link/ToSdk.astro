@@ -11,8 +11,7 @@ type Props = HTMLAttributes<"a"> & {
    * The target SDK key to scope the link to e.g. `"node"`, `"next"`.
    *
    * On SDK-scoped pages this produces `/sdk/{sdk}/{path}`. On non-SDK pages
-   * it falls back to `{path}?f={legacyFrameworkKey}` for backwards
-   * compatibility.
+   * it produces the matching `/sdk/{sdk}/...` route when one exists.
    */
   sdk: ArcjetSdkKey;
 };

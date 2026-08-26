@@ -344,12 +344,169 @@ export function sdkDisplayLabelFromPathname(
 export function sdkKeyFromLegacyFrameworkKey(
   legacyKey: string,
 ): ArcjetSdkKey | undefined {
+  for (const [sdkKey, variants] of Object.entries(SDK_VARIANTS)) {
+    for (const variant of variants ?? []) {
+      if (variant.legacyFrameworkKey === legacyKey) {
+        return sdkKey as ArcjetSdkKey;
+      }
+    }
+  }
+
   for (const sdkConfig of Object.values(ARCJET_SDKS)) {
     if (sdkConfig.legacyFrameworkKey === legacyKey) {
       return sdkConfig.key;
     }
   }
   return undefined;
+}
+
+/**
+ * Agent guard docs entry points keyed by legacy framework key.
+ *
+ * Used when linking to `/get-started` for guard-only frameworks that do not
+ * have an HTTP SDK route prefix.
+ */
+const GUARD_DOC_PATHS: Partial<Record<FrameworkKey, string>> = {
+  "claude-agent-sdk": "/guards/claude-agent-sdk/",
+  crewai: "/guards/crewai/",
+  genkit: "/guards/genkit/",
+  langchain: "/guards/langchain/",
+  "langchain-js": "/guards/langchain-js/",
+  langgraph: "/guards/langgraph/",
+  mastra: "/guards/mastra/",
+  "openai-agents": "/guards/openai-agents/",
+  "strands-agents": "/guards/strands-agents/",
+  "vercel-ai": "/guards/vercel-ai/",
+  "vercel-eve": "/guards/vercel-eve/",
+};
+
+function normalizeDocHref(href: string): string {
+  if (!href || href === "/") return "/";
+  const withLeading = href.startsWith("/") ? href : `/${href}`;
+  return withLeading.endsWith("/") ? withLeading : `${withLeading}/`;
+}
+
+/**
+ * Returns the `/sdk/...` route prefix for a legacy framework key, if one exists.
+ *
+ * @example
+ * sdkRoutePrefixFromLegacyFrameworkKey("next-js") // => "/sdk/next"
+ * sdkRoutePrefixFromLegacyFrameworkKey("bun-hono") // => "/sdk/bun/plus/hono"
+ */
+export function sdkRoutePrefixFromLegacyFrameworkKey(
+  legacyKey: FrameworkKey,
+): string | undefined {
+  for (const [sdkKey, variants] of Object.entries(SDK_VARIANTS)) {
+    for (const variant of variants ?? []) {
+      if (variant.legacyFrameworkKey === legacyKey) {
+        return `/sdk/${sdkKey}/plus/${variant.key}`;
+      }
+    }
+  }
+
+  for (const sdkConfig of Object.values(ARCJET_SDKS)) {
+    if (sdkConfig.legacyFrameworkKey === legacyKey) {
+      return `/sdk/${sdkConfig.key}`;
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Strips an `/sdk/:sdk/` (and optional `/plus/:variant/`) prefix from a pathname,
+ * returning the underlying docs route.
+ *
+ * @example
+ * docPathFromSdkPathname("/sdk/bun/plus/hono/get-started/")
+ * // => "/get-started/"
+ */
+export function docPathFromSdkPathname(pathname: string): string {
+  const sdkKey = sdkFromPathname(pathname);
+  if (!sdkKey) {
+    return normalizeDocHref(pathname);
+  }
+
+  let rest = pathname.replace(new RegExp(`^/sdk/${sdkKey}`), "") || "/";
+
+  const variant = sdkVariantFromPathname(pathname);
+  if (variant) {
+    rest = rest.replace(`/plus/${variant.key}`, "") || "/";
+  }
+
+  return normalizeDocHref(rest);
+}
+
+/**
+ * Returns the SDK-scoped (or guard docs) pathname for a legacy framework key.
+ *
+ * @example
+ * pathnameForLegacyFrameworkKey("next-js", "/get-started")
+ * // => "/sdk/next/get-started/"
+ *
+ * pathnameForLegacyFrameworkKey("bun-hono", "/get-started")
+ * // => "/sdk/bun/plus/hono/get-started/"
+ *
+ * pathnameForLegacyFrameworkKey("crewai", "/get-started")
+ * // => "/guards/crewai/"
+ */
+export function pathnameForLegacyFrameworkKey(
+  legacyKey: FrameworkKey,
+  href: string,
+): string {
+  let docHref = normalizeDocHref(href);
+  if (sdkFromPathname(docHref)) {
+    docHref = docPathFromSdkPathname(docHref);
+  }
+
+  const sdkPrefix = sdkRoutePrefixFromLegacyFrameworkKey(legacyKey);
+
+  if (sdkPrefix) {
+    return `${sdkPrefix}${docHref === "/" ? "" : docHref}`;
+  }
+
+  const guardPath = GUARD_DOC_PATHS[legacyKey];
+  if (guardPath && docHref === "/get-started/") {
+    return guardPath;
+  }
+
+  return docHref;
+}
+
+/**
+ * Returns the href to use when linking or navigating to a legacy framework.
+ *
+ * Produces SDK-scoped (or guard docs) paths when available. Falls back to
+ * `{path}?f={legacyKey}` for guard-only frameworks on pages other than
+ * get-started.
+ */
+export function hrefForLegacyFrameworkKey(
+  legacyKey: FrameworkKey,
+  href: string,
+): string {
+  const targetPath = pathnameForLegacyFrameworkKey(legacyKey, href);
+  const normalizedHref = normalizeDocHref(
+    sdkFromPathname(href) ? docPathFromSdkPathname(href) : href,
+  );
+  const normalizedTarget = normalizeDocHref(targetPath);
+
+  if (normalizedTarget !== normalizedHref) {
+    return targetPath;
+  }
+
+  const sdkPrefix = sdkRoutePrefixFromLegacyFrameworkKey(legacyKey);
+  const guardPath = GUARD_DOC_PATHS[legacyKey];
+  const hasDedicatedRoute =
+    !!sdkPrefix ||
+    (!!guardPath && normalizedHref === "/get-started/");
+
+  if (hasDedicatedRoute) {
+    return targetPath;
+  }
+
+  const base = href.split("?")[0].split("#")[0];
+  const normalizedBase = normalizeDocHref(base).replace(/\/$/, "") || "/";
+  return `${normalizedBase}?f=${legacyKey}`;
 }
 
 // Paths that should never be scoped to an SDK
@@ -397,18 +554,12 @@ export function scopeHrefToCurrentSdk(
 /**
  * Scopes an internal href to a specific target SDK.
  *
- * When the current page is SDK-scoped, produces an `/sdk/{targetSdk}/` path.
- * When the current page is not SDK-scoped, falls back to a `?f={legacyKey}`
- * query parameter for backwards compatibility.
+ * Produces an `/sdk/{targetSdk}/` path (including plus-variant prefixes when
+ * the target SDK maps to a legacy framework key).
  *
  * @example
- * // On /sdk/next/reference/nodejs:
- * scopeHrefToSdk("/sdk/next/reference/nodejs", "/get-started", "node")
- * // => "/sdk/node/get-started"
- *
- * // On /reference/nodejs (non-SDK page):
  * scopeHrefToSdk("/reference/nodejs", "/get-started", "node")
- * // => "/get-started?f=node-js"
+ * // => "/sdk/node/get-started/"
  */
 export function scopeHrefToSdk(
   currentPathname: string,
@@ -426,22 +577,62 @@ export function scopeHrefToSdk(
   const currentSdk = sdkFromPathname(currentPathname);
 
   if (currentSdk) {
-    // On an SDK-scoped page — produce a clean /sdk/ path
-    return `/sdk/${targetSdk}${href}`;
+    return `/sdk/${targetSdk}${normalizeDocHref(href) === "/" ? "" : normalizeDocHref(href)}`;
   }
 
-  // On a non-SDK page — fall back to ?f= for backwards compatibility
   const sdkConfig = ARCJET_SDKS[targetSdk];
   const legacyKey = sdkConfig.legacyFrameworkKey;
 
-  if (!legacyKey) {
-    // No legacy key mapping (e.g. python) — return bare href
-    return href;
+  if (legacyKey) {
+    return pathnameForLegacyFrameworkKey(legacyKey, href);
   }
 
-  // Parse the href to handle existing query params and hash fragments
-  const url = new URL(href, "https://placeholder.invalid");
-  url.searchParams.set("f", legacyKey);
-  // Return only the path + search + hash (no origin)
-  return `${url.pathname}${url.search}${url.hash}`;
+  return `/sdk/${targetSdk}${normalizeDocHref(href) === "/" ? "" : normalizeDocHref(href)}`;
+}
+
+function buildRedirectUrlWithoutFrameworkParam(
+  url: URL,
+  pathname: string,
+): string {
+  const redirect = new URL(pathname, url.origin);
+  const params = new URLSearchParams(url.searchParams);
+  params.delete("f");
+  redirect.search = params.toString();
+  redirect.hash = url.hash;
+  return redirect.toString();
+}
+
+/**
+ * Returns a redirect URL when a legacy `?f=` query param should map to an SDK
+ * (or guard docs) route, or be stripped on an already-correct SDK route.
+ *
+ * Returns `null` when the request should proceed unchanged (for example,
+ * guard-only frameworks on pages other than get-started).
+ */
+export function legacyFrameworkQueryRedirect(
+  url: URL,
+  legacyKey: FrameworkKey,
+): string | null {
+  const docPath = sdkFromPathname(url.pathname)
+    ? docPathFromSdkPathname(url.pathname)
+    : url.pathname;
+  const targetPath = pathnameForLegacyFrameworkKey(legacyKey, docPath);
+  const normalizedCurrent = normalizeDocHref(url.pathname);
+  const normalizedTarget = normalizeDocHref(targetPath);
+
+  const sdkPrefix = sdkRoutePrefixFromLegacyFrameworkKey(legacyKey);
+  const guardPath = GUARD_DOC_PATHS[legacyKey];
+  const hasDedicatedRoute =
+    !!sdkPrefix ||
+    (!!guardPath && normalizeDocHref(docPath) === "/get-started/");
+
+  if (normalizedTarget !== normalizedCurrent) {
+    return buildRedirectUrlWithoutFrameworkParam(url, normalizedTarget);
+  }
+
+  if (hasDedicatedRoute && url.searchParams.has("f")) {
+    return buildRedirectUrlWithoutFrameworkParam(url, normalizedCurrent);
+  }
+
+  return null;
 }

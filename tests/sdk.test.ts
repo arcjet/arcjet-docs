@@ -1,11 +1,17 @@
 import { expect, test } from "@playwright/test";
 import {
+  docPathFromSdkPathname,
+  hrefForLegacyFrameworkKey,
+  legacyFrameworkQueryRedirect,
   legacyKeyFromPathname,
+  pathnameForLegacyFrameworkKey,
   pathnameForSdk,
   pathnameForSdkVariant,
   scopeHrefToCurrentSdk,
+  scopeHrefToSdk,
   sdkDisplayLabelFromPathname,
   sdkFromPathname,
+  sdkRoutePrefixFromLegacyFrameworkKey,
   sdkVariantFromPathname,
 } from "@/lib/sdk";
 
@@ -91,5 +97,91 @@ test.describe("scopeHrefToCurrentSdk", () => {
         "/rate-limiting/quick-start/",
       ),
     ).toBe("/sdk/bun/plus/hono/rate-limiting/quick-start/");
+  });
+});
+
+test.describe("pathnameForLegacyFrameworkKey", () => {
+  test("maps HTTP SDKs to /sdk routes", () => {
+    expect(pathnameForLegacyFrameworkKey("next-js", "/get-started")).toBe(
+      "/sdk/next/get-started/",
+    );
+    expect(pathnameForLegacyFrameworkKey("bun-hono", "/get-started")).toBe(
+      "/sdk/bun/plus/hono/get-started/",
+    );
+  });
+
+  test("maps guard frameworks on get-started to guard docs", () => {
+    expect(pathnameForLegacyFrameworkKey("crewai", "/get-started")).toBe(
+      "/guards/crewai/",
+    );
+  });
+
+  test("strips existing SDK prefixes from href", () => {
+    expect(
+      pathnameForLegacyFrameworkKey("next-js", "/sdk/bun/get-started/"),
+    ).toBe("/sdk/next/get-started/");
+  });
+});
+
+test.describe("hrefForLegacyFrameworkKey", () => {
+  test("uses SDK routes for HTTP SDKs", () => {
+    expect(hrefForLegacyFrameworkKey("next-js", "/get-started")).toBe(
+      "/sdk/next/get-started/",
+    );
+  });
+
+  test("falls back to ?f= for guard frameworks on non-get-started pages", () => {
+    expect(
+      hrefForLegacyFrameworkKey("crewai", "/rate-limiting/quick-start/"),
+    ).toBe("/rate-limiting/quick-start?f=crewai");
+  });
+});
+
+test.describe("scopeHrefToSdk", () => {
+  test("uses SDK routes on non-SDK pages", () => {
+    expect(scopeHrefToSdk("/reference/nodejs", "/get-started", "node")).toBe(
+      "/sdk/node/get-started/",
+    );
+  });
+});
+
+test.describe("legacyFrameworkQueryRedirect", () => {
+  test("redirects legacy get-started URLs to SDK routes", () => {
+    const url = new URL("https://docs.arcjet.com/get-started?f=next-js");
+    expect(legacyFrameworkQueryRedirect(url, "next-js")).toBe(
+      "https://docs.arcjet.com/sdk/next/get-started/",
+    );
+  });
+
+  test("strips ?f= on SDK routes", () => {
+    const url = new URL(
+      "https://docs.arcjet.com/sdk/next/get-started/?f=next-js",
+    );
+    expect(legacyFrameworkQueryRedirect(url, "next-js")).toBe(
+      "https://docs.arcjet.com/sdk/next/get-started/",
+    );
+  });
+
+  test("preserves ?f= for guard frameworks on other pages", () => {
+    const url = new URL(
+      "https://docs.arcjet.com/rate-limiting/quick-start?f=crewai",
+    );
+    expect(legacyFrameworkQueryRedirect(url, "crewai")).toBeNull();
+  });
+});
+
+test.describe("sdkRoutePrefixFromLegacyFrameworkKey", () => {
+  test("resolves plus variants", () => {
+    expect(sdkRoutePrefixFromLegacyFrameworkKey("node-js-express")).toBe(
+      "/sdk/node/plus/express",
+    );
+  });
+});
+
+test.describe("docPathFromSdkPathname", () => {
+  test("strips SDK and plus-variant prefixes", () => {
+    expect(docPathFromSdkPathname("/sdk/bun/plus/hono/get-started/")).toBe(
+      "/get-started/",
+    );
   });
 });

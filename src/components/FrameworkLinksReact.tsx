@@ -23,6 +23,7 @@ import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
 import { VercelAi as IconVercelAi } from "@/components/icons/tech/VercelAi";
 import { VercelEve as IconVercelEve } from "@/components/icons/tech/VercelEve";
 import { frameworks, getStoredFramework, type FrameworkKey } from "@/lib/prefs";
+import { hrefForLegacyFrameworkKey } from "@/lib/sdk";
 import { queryParamFramework } from "@/store";
 import { useStore } from "@nanostores/react";
 import type { ForwardedRef, PropsWithChildren, ReactNode } from "react";
@@ -61,6 +62,14 @@ const FrameworkLinks = forwardRef(
     const [hide, setHide] = useState(true);
 
     const $queryParamFramework = useStore(queryParamFramework);
+
+    const [basePath, setBasePath] = useState(path);
+
+    useEffect(() => {
+      if (!path) {
+        setBasePath(window.location.pathname);
+      }
+    }, [path]);
 
     useEffect(() => {
       // Check if a framework is set in query params
@@ -182,7 +191,7 @@ const FrameworkLinks = forwardRef(
                   key={f.key + idx}
                   as="link"
                   size="lg"
-                  href={`${path}?f=${f.key}`}
+                  href={hrefForLegacyFrameworkKey(f.key, basePath || path || "/")}
                   decoratorLeft={icon}
                 >
                   {f.label}
