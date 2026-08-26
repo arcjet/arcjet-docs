@@ -3,6 +3,7 @@ import SdkIcon from "@/components/SdkIcon.astro";
 import {
 pathnameForSdk,
 sdk,
+sdkDisplayLabelFromPathname,
 sdkFromPathname,
 sdks,
 } from "@/lib/sdk";
@@ -11,6 +12,7 @@ import Default from "@astrojs/starlight/components/MobileTableOfContents.astro";
 
 const activeSdkKey = sdkFromPathname(Astro.url.pathname);
 const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
+const activeSdkLabel = sdkDisplayLabelFromPathname(Astro.url.pathname);
 ---
 
 {/* TODO: Remove once framework switching is removed. */}
@@ -32,7 +34,7 @@ const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
                         type="button"
                     >
                         <SdkIcon sdk={activeSdk.key} />
-                        {activeSdk.label}
+                        {activeSdkLabel}
                         <Icon class="caret" name="right-caret" size="1rem" />
                     </button>
                 </div>

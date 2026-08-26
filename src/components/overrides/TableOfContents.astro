@@ -4,6 +4,7 @@ import SdkIcon from "@/components/SdkIcon.astro";
 import {
 pathnameForSdk,
 sdk,
+sdkDisplayLabelFromPathname,
 sdkFromPathname,
 sdks,
 } from "@/lib/sdk";
@@ -12,6 +13,7 @@ import Default from "@astrojs/starlight/components/TableOfContents.astro";
 
 const activeSdkKey = sdkFromPathname(Astro.url.pathname);
 const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
+const activeSdkLabel = sdkDisplayLabelFromPathname(Astro.url.pathname);
 ---
 
 {
@@ -20,7 +22,7 @@ const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
             <h2 class="toc-label">SDK</h2>
             <button class="toc-toggle" popovertarget="toc-sdk" type="button">
                 <SdkIcon sdk={activeSdk.key} />
-                {activeSdk.label}
+                {activeSdkLabel}
                 <SelectChevron className="chevron" />
             </button>
             <nav id="toc-sdk" popover>

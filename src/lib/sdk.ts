@@ -320,6 +320,22 @@ export function pathnameForSdkVariant(
   );
 }
 
+export function sdkDisplayLabelFromPathname(
+  pathname: string,
+): string | undefined {
+  const sdkKey = sdkFromPathname(pathname);
+  if (!sdkKey) return undefined;
+
+  const variant = sdkVariantFromPathname(pathname);
+  const sdkConfig = sdk(sdkKey);
+
+  if (variant) {
+    return `${sdkConfig.label} + ${variant.label}`;
+  }
+
+  return sdkConfig.label;
+}
+
 /**
  * Returns the SDK key corresponding to a legacy framework key, if one exists.
  *
