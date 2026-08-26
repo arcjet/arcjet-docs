@@ -1,5 +1,9 @@
 import { defineRouteMiddleware } from "@astrojs/starlight/route-data";
-import { sdkFromPathname } from "@/lib/sdk";
+import {
+  legacyKeyFromPathname,
+  sdkFromPathname,
+  sdkVariantFromPathname,
+} from "@/lib/sdk";
 import {
   breadcrumbsFromSidebar,
   pageJsonLd,
@@ -97,8 +101,23 @@ function addStructuredData(
 export const onRequest = defineRouteMiddleware(async (context) => {
   const routeData = context.locals.starlightRoute;
   const sdk = sdkFromPathname(context.url.pathname);
+  const variant = sdkVariantFromPathname(context.url.pathname);
+  const legacyKey = legacyKeyFromPathname(context.url.pathname);
 
   if (sdk) {
+    const titleByFramework = routeData.entry.data.titleByFramework as
+      | Record<string, string>
+      | undefined;
+    if (legacyKey && titleByFramework?.[legacyKey]) {
+      routeData.entry.data.title = titleByFramework[legacyKey];
+
+      for (const tag of routeData.head) {
+        if (tag.tag === "title") {
+          tag.content = `${titleByFramework[legacyKey]} | Arcjet Docs`;
+        }
+      }
+    }
+
     /**
      * Internal helper to recursively update sidebar entries.
      *
@@ -115,8 +134,10 @@ export const onRequest = defineRouteMiddleware(async (context) => {
           break;
         }
         case "link": {
-          // TODO: Consider making a helper utility to scope these links
-          const href = `/sdk/${sdk}${entry.href}`;
+          const sdkPrefix = variant
+            ? `/sdk/${sdk}/plus/${variant.key}`
+            : `/sdk/${sdk}`;
+          const href = `${sdkPrefix}${entry.href}`;
           entry.href = href;
           entry.isCurrent = context.url.pathname === href;
           break;

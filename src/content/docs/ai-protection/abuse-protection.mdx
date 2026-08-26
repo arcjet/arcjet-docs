@@ -43,8 +43,8 @@ ajToc:
 
 import { Link } from "@/components/link";
 import { Tabs, TabItem } from "@astrojs/starlight/components";
-import SlotByFramework from "@/components/SlotByFramework";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import SlotByFramework from "@/components/SlotByFramework.astro";
+import FrameworkLinks from "@/components/FrameworkLinks.astro";
 import { frameworks } from "@/lib/prefs";
 
 import NextJsStep from "@/snippets/ai-protection/abuse-protection/nextjs/Example.mdx";
@@ -79,7 +79,7 @@ state).
     .map((d) => d.key)}
 />
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <NextJsStep slot="next-js" />
   <PythonFastapiStep slot="python-fastapi" />
   <PythonFlaskStep slot="python-flask" />

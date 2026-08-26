@@ -51,8 +51,8 @@ import { CardGrid, Tabs, TabItem } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "/src/components/Comments.astro";
-import SlotByFramework from "@/components/SlotByFramework";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import SlotByFramework from "@/components/SlotByFramework.astro";
+import FrameworkLinks from "@/components/FrameworkLinks.astro";
 import { frameworks } from "@/lib/prefs";
 
 import BunStep from "@/snippets/content-moderation/quick-start/bun/Example.mdx";
@@ -89,7 +89,7 @@ is stored, displayed, or forwarded. It is a Guard rule – call it from
 
 ## Quick start
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <BunStep slot="bun" />
   <ClaudeAgentSdkStep slot="claude-agent-sdk" />
   <GenkitStep slot="genkit" />

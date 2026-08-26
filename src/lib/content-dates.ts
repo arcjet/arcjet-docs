@@ -44,7 +44,15 @@ function stripSdkScope(pathname: string): string {
   const match = pathname.match(SDK_SEGMENT);
   if (!match || !isSdkKey(match[1])) return pathname;
 
-  return pathname.slice(match[0].length) || "/";
+  let rest = pathname.slice(match[0].length) || "/";
+
+  // Strip `/plus/:variant` when present so variant routes share source dates.
+  const plusMatch = rest.match(/^\/plus\/[^/]+(?=\/|$)/);
+  if (plusMatch) {
+    rest = rest.slice(plusMatch[0].length) || "/";
+  }
+
+  return rest;
 }
 
 /**

@@ -1,5 +1,6 @@
 import { atom } from "nanostores";
 
+import { legacyKeyFromPathname } from "./lib/sdk";
 import type { Framework, FrameworkKey } from "./lib/prefs";
 import {
   defaultSelectedFramework,
@@ -10,12 +11,17 @@ import {
 
 /**
  * Returns the framework to display on initial load.
- * On the client, prefers the query param framework, then the stored preference,
- * and finally the default. On the server, always returns the default to avoid
- * accessing browser APIs.
+ * On the client, prefers the SDK-scoped pathname, then the query param
+ * framework, then the stored preference, and finally the default. On the
+ * server, always returns the default to avoid accessing browser APIs.
  */
 function getInitialFramework(): FrameworkKey {
   if (typeof window === "undefined") return defaultSelectedFramework;
+
+  const legacyFromPath = legacyKeyFromPathname(window.location.pathname);
+  if (legacyFromPath) {
+    return legacyFromPath;
+  }
 
   // Check query param first (takes priority over stored preference)
   const params = new URLSearchParams(window.location.search);

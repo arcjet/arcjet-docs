@@ -40,8 +40,8 @@ ajToc:
 import { CardGrid } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
-import SlotByFramework from "@/components/SlotByFramework";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import SlotByFramework from "@/components/SlotByFramework.astro";
+import FrameworkLinks from "@/components/FrameworkLinks.astro";
 import { frameworks } from "@/lib/prefs";
 import Comments from "/src/components/Comments.astro";
 
@@ -74,7 +74,7 @@ application behavior and your AI budget.
 
 ## Quick start
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <NextJsStep slot="next-js" />
   <PythonFastapiStep slot="python-fastapi" />
   <PythonFlaskStep slot="python-flask" />

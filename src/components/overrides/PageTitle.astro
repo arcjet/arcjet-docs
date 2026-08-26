@@ -1,5 +1,5 @@
 ---
-import TitleByFramework from "@/components/TitleByFramework";
+import TitleByFramework from "@/components/TitleByFramework.astro";
 import Default from "@astrojs/starlight/components/PageTitle.astro";
 
 const props = Astro.locals.starlightRoute;
@@ -7,7 +7,7 @@ const titleByFramework = props.entry.data.titleByFramework;
 ---
 
 {titleByFramework && (
-<TitleByFramework client:load {...titleByFramework} />
+<TitleByFramework {...titleByFramework} />
 )}
 
 {! titleByFramework && (

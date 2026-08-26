@@ -52,6 +52,10 @@ test.describe("routeForSitemapUrl", () => {
       "https://docs.arcjet.com/sdk/react-router/shield/quick-start/",
       "/shield/quick-start/",
     ],
+    [
+      "https://docs.arcjet.com/sdk/bun/plus/hono/get-started/",
+      "/get-started/",
+    ],
     ["https://docs.arcjet.com/sdk/astro/", "/"],
     ["https://docs.arcjet.com/sdk/astro", "/"],
     // `go` is not an SDK key, so the segment must not be stripped.

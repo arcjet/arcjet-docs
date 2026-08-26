@@ -54,8 +54,8 @@ ajToc:
 
 import { Link } from "@/components/link";
 import { Code } from "@astrojs/starlight/components";
-import SlotByFramework from "@/components/SlotByFramework";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import SlotByFramework from "@/components/SlotByFramework.astro";
+import FrameworkLinks from "@/components/FrameworkLinks.astro";
 import { frameworks } from "@/lib/prefs";
 
 import NextJsStep from "@/snippets/ai-protection/data-loss-prevention/nextjs/Example.mdx";
@@ -91,7 +91,7 @@ choose what happens next: block the request, strip the data, or warn the user.
     .map((d) => d.key)}
 />
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <NextJsStep slot="next-js" />
   <PythonFastapiStep slot="python-fastapi" />
   <PythonFlaskStep slot="python-flask" />
@@ -136,7 +136,7 @@ _except_ the types you list (the two are mutually exclusive). Tune the list to
 your app – for a support bot that legitimately collects phone numbers, leave
 `PHONE_NUMBER` out of `deny`:
 
-<SlotByFramework client:load>
+<SlotByFramework>
 <div slot="next-js">
 
 ```ts
@@ -183,7 +183,7 @@ detectors.
 
 ### Detect names, addresses, and IDs
 
-<SlotByFramework client:load>
+<SlotByFramework>
 <div slot="next-js">
 
 The built-in types cover structured data, but AI prompts are full of _free-form_

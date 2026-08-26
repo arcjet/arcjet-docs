@@ -370,6 +370,11 @@ export function scopeHrefToCurrentSdk(
     return href;
   }
 
+  const variant = sdkVariantFromPathname(currentPathname);
+  if (variant) {
+    return `/sdk/${currentSdk}/plus/${variant.key}${href}`;
+  }
+
   return `/sdk/${currentSdk}${href}`;
 }
 
