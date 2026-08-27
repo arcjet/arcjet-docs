@@ -36,7 +36,7 @@ Quick start
 
 [Section titled “Quick start”](#quick-start)
 
-See the [quick start guide](/get-started?f=bun).
+See the [quick start guide](/sdk/bun/get-started/).
 
 Configuration
 -------------
@@ -48,7 +48,7 @@ Create a new `Arcjet` object with your API key and rules.
 The following fields are required:
 
 *   `key` (`string`) – Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://console.arcjet.com).
-*   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these, such as [shield](/shield/reference?f=bun), [rate limiting](/rate-limiting/reference?f=bun), [bot protection](/bot-protection/reference?f=bun), [email validation](/email-validation/reference?f=bun).
+*   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these, such as [shield](/sdk/bun/shield/reference/), [rate limiting](/sdk/bun/rate-limiting/reference/), [bot protection](/sdk/bun/bot-protection/reference/), [email validation](/sdk/bun/email-validation/reference/).
 
 The following fields are optional:
 
@@ -758,7 +758,7 @@ The `ArcjetReason` object for shield rules has the following properties:
 shieldTriggered: boolean;
 ```
 
-For more information about these properties, see the [shield documentation](/shield/reference?f=bun).
+For more information about these properties, see the [shield documentation](/sdk/bun/shield/reference/).
 
 ##### Bot protection
 
@@ -786,7 +786,7 @@ window: number;
 reset: number;
 ```
 
-For more information about these properties, see the [rate limiting documentation](/rate-limiting/reference?f=bun).
+For more information about these properties, see the [rate limiting documentation](/sdk/bun/rate-limiting/reference/).
 
 ##### Email validation and verification
 
@@ -804,7 +804,7 @@ An `ArcjetEmailType` is one of the following strings:
 "DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
 ```
 
-For more information about these properties, see the [email validation documentation](/email-validation/reference?f=bun).
+For more information about these properties, see the [email validation documentation](/sdk/bun/email-validation/reference/).
 
 ##### Prompt injection
 

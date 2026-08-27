@@ -15,7 +15,7 @@ Quick start
 
 [Section titled “Quick start”](#quick-start)
 
-See the [React Router quick start](/get-started?f=react-router).
+See the [React Router quick start](/sdk/react-router/get-started/).
 
 Requirements
 ------------

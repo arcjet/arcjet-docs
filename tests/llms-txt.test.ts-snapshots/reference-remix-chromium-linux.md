@@ -45,7 +45,7 @@ Quick start
 
 [Section titled “Quick start”](#quick-start)
 
-See the [quick start guide](/get-started?f=remix).
+See the [quick start guide](/sdk/remix/get-started/).
 
 Configuration
 -------------
@@ -57,7 +57,7 @@ Create a new `Arcjet` object with your API key and rules. Create it outside of t
 The following fields are required:
 
 *   `key` (`string`) – Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://console.arcjet.com).
-*   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these, such as [shield](/shield/reference?f=remix), [rate limiting](/rate-limiting/reference?f=remix), [bot protection](/bot-protection/reference?f=remix), [email validation](/email-validation/reference?f=remix).
+*   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these, such as [shield](/sdk/remix/shield/reference/), [rate limiting](/sdk/remix/rate-limiting/reference/), [bot protection](/sdk/remix/bot-protection/reference/), [email validation](/sdk/remix/email-validation/reference/).
 
 The following fields are optional:
 
@@ -556,7 +556,7 @@ The `ArcjetReason` object for shield rules has the following properties:
 shieldTriggered: boolean;
 ```
 
-For more information about these properties, see the [shield documentation](/shield/reference?f=remix).
+For more information about these properties, see the [shield documentation](/sdk/remix/shield/reference/).
 
 ##### Bot protection
 
@@ -584,7 +584,7 @@ window: number;
 reset: number;
 ```
 
-For more information about these properties, see the [rate limiting documentation](/rate-limiting/reference?f=remix).
+For more information about these properties, see the [rate limiting documentation](/sdk/remix/rate-limiting/reference/).
 
 ##### Email validation and verification
 
@@ -602,7 +602,7 @@ An `ArcjetEmailType` is one of the following strings:
 "DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
 ```
 
-For more information about these properties, see the [email validation documentation](/email-validation/reference?f=remix).
+For more information about these properties, see the [email validation documentation](/sdk/remix/email-validation/reference/).
 
 ##### Prompt injection
 

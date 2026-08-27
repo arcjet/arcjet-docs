@@ -45,7 +45,7 @@ Quick start
 
 [Section titled “Quick start”](#quick-start)
 
-See the [quick start guide](/get-started?f=node-js).
+See the [quick start guide](/sdk/node/get-started/).
 
 Configuration
 -------------
@@ -57,7 +57,7 @@ Create a new `Arcjet` object with your API key and rules. Create it outside of t
 The following fields are required:
 
 *   `key` (`string`) – Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://console.arcjet.com).
-*   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these, such as [shield](/shield/reference?f=node-js), [rate limiting](/rate-limiting/reference?f=node-js), [bot protection](/bot-protection/reference?f=node-js), [email validation](/email-validation/reference?f=node-js).
+*   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these, such as [shield](/sdk/node/shield/reference/), [rate limiting](/sdk/node/rate-limiting/reference/), [bot protection](/sdk/node/bot-protection/reference/), [email validation](/sdk/node/email-validation/reference/).
 
 The following fields are optional:
 
@@ -564,7 +564,7 @@ The `ArcjetReason` object for shield rules has the following properties:
 shieldTriggered: boolean;
 ```
 
-For more information about these properties, see the [shield documentation](/shield/reference?f=node-js).
+For more information about these properties, see the [shield documentation](/sdk/node/shield/reference/).
 
 ##### Bot protection
 
@@ -592,7 +592,7 @@ window: number;
 reset: number;
 ```
 
-For more information about these properties, see the [rate limiting documentation](/rate-limiting/reference?f=node-js).
+For more information about these properties, see the [rate limiting documentation](/sdk/node/rate-limiting/reference/).
 
 ##### Email validation and verification
 
@@ -610,7 +610,7 @@ An `ArcjetEmailType` is one of the following strings:
 "DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
 ```
 
-For more information about these properties, see the [email validation documentation](/email-validation/reference?f=node-js).
+For more information about these properties, see the [email validation documentation](/sdk/node/email-validation/reference/).
 
 ##### Prompt injection
 
