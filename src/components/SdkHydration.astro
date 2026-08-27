@@ -1,0 +1,18 @@
+---
+/**
+ * Seeds Astro island hydration on SDK routes that otherwise only contain
+ * static framework wrappers plus `SelectableContent` islands.
+ */
+import { sdkFromPathname } from "@/lib/sdk";
+import FrameworkName from "@/components/FrameworkName";
+
+const isSdkRoute = sdkFromPathname(Astro.url.pathname) !== undefined;
+---
+
+{
+  isSdkRoute ? (
+    <span hidden aria-hidden="true">
+      <FrameworkName client:load />
+    </span>
+  ) : null
+}

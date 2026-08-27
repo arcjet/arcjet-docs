@@ -3,10 +3,11 @@ import { sdks, sdkVariants } from "@/lib/sdk";
 
 /**
  * Validates that per-SDK route pages (`/sdk/:sdk/...`) render the same main
- * content as the legacy `?f=<framework>` pages.
+ * content as the legacy `?f=<framework>` pages by comparing normalised
+ * `.sl-markdown-content` text.
  *
- * The right sidebar (TOC / SDK switcher) will differ, so we only screenshot
- * the `<main>` element.
+ * The right sidebar (TOC / SDK switcher) will differ, so we only compare the
+ * markdown body rather than the full `<main>` element.
  */
 
 // These pages are heavy — give each test plenty of time.
@@ -178,18 +179,13 @@ async function sanitizePage(page: Page) {
   }
 }
 
-/**
- * Screenshot the `<main>` element after sanitisation.
- *
- * Returns the screenshot buffer so the caller can compare two of them.
- */
-async function screenshotMain(page: Page): Promise<Buffer> {
+/** Normalised markdown body text after sanitisation and hydration. */
+async function markdownText(page: Page): Promise<string> {
   await sanitizePage(page);
-
-  const main = page.locator("main");
-  await main.waitFor({ state: "visible" });
-
-  return (await main.screenshot()) as Buffer;
+  await page.locator("main .sl-markdown-content").waitFor({ state: "visible" });
+  return (await page.locator("main .sl-markdown-content").innerText())
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 /**
@@ -203,13 +199,9 @@ async function screenshotMain(page: Page): Promise<Buffer> {
  * `ssr` attribute, which Astro removes once an island has hydrated.
  */
 async function waitForHydration(page: Page) {
-  await page
-    .locator("main astro-island[ssr]")
-    .first()
-    .waitFor({ state: "detached", timeout: 15_000 })
-    .catch(() => {
-      // No un-hydrated islands — that's fine.
-    });
+  await expect(page.locator("main astro-island[ssr]")).toHaveCount(0, {
+    timeout: 15_000,
+  });
 
   // Give a short extra beat for any re-renders to settle.
   await page.waitForTimeout(500);
@@ -224,7 +216,6 @@ for (const spec of PAGES) {
     for (const { legacyKey, sdkPrefix } of entries) {
       const legacyUrl = `${spec.path}?f=${legacyKey}`;
       const sdkUrl = `${sdkPrefix}${spec.path}`;
-      const safeName = `${spec.path.slice(1).replaceAll("/", "-")}-${legacyKey}`;
 
       test(`${legacyUrl} vs ${sdkUrl}`, async ({ page }) => {
         const legacyRes = await page.goto(legacyUrl, {
@@ -233,7 +224,7 @@ for (const spec of PAGES) {
         expect(legacyRes?.ok(), `Legacy page ${legacyUrl} failed`).toBeTruthy();
         await waitForHydration(page);
 
-        const legacyShot = await screenshotMain(page);
+        const legacyText = await markdownText(page);
 
         const sdkRes = await page.goto(sdkUrl, {
           waitUntil: "networkidle",
@@ -241,16 +232,9 @@ for (const spec of PAGES) {
         expect(sdkRes?.ok(), `SDK page ${sdkUrl} failed`).toBeTruthy();
         await waitForHydration(page);
 
-        const sdkShot = await screenshotMain(page);
+        const sdkText = await markdownText(page);
 
-        expect(sdkShot).toMatchSnapshot(`sdk-parity-${safeName}.png`, {
-          maxDiffPixels: 200,
-          threshold: 0.15,
-        });
-        expect(legacyShot).toMatchSnapshot(`sdk-parity-${safeName}.png`, {
-          maxDiffPixels: 200,
-          threshold: 0.15,
-        });
+        expect(sdkText).toBe(legacyText);
       });
     }
   });
