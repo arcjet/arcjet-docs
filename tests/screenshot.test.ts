@@ -164,9 +164,10 @@ test.describe("Screenshots", () => {
               y: 0,
             },
             fullPage: true,
-            // Using absolute threshold rather than a ration seems to be more
-            // consistent for these large text-heavy screenshots.
-            maxDiffPixels: 100,
+            // Using absolute threshold rather than a ratio seems to be more
+            // consistent for these large text-heavy screenshots. Allow enough
+            // headroom for minor font-rendering differences across CI runners.
+            maxDiffPixels: 300,
             mask: [page.locator("[data-playwright-mask]")],
             threshold: 0.1,
           },
