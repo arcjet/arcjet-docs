@@ -10,10 +10,9 @@ vercel.redirects = vercel.redirects.filter(
   (redirect) => !redirect.has?.some((condition) => condition.key === "f"),
 );
 
-vercel.redirects.push(...legacyFrameworkVercelRedirects());
+const generated = legacyFrameworkVercelRedirects();
+vercel.redirects.push(...generated);
 
 fs.writeFileSync(vercelPath, `${JSON.stringify(vercel, null, 2)}\n`);
 
-console.log(
-  `Updated vercel.json with ${legacyFrameworkVercelRedirects().length} legacy ?f= redirects`,
-);
+console.log(`Updated vercel.json with ${generated.length} legacy ?f= redirects`);
