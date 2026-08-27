@@ -13,7 +13,7 @@ import {
   isShallowRepository,
   sitemapLastmodSerializer,
 } from "./src/lib/content-dates";
-import { shouldExcludeFromSitemap } from "./src/lib/sdk";
+import { shouldExcludeFromSitemap, variantOnlySdkAstroRedirects } from "./src/lib/sdk";
 import { main as sidebar } from "./src/lib/sidebars";
 
 /*
@@ -304,6 +304,7 @@ export default defineConfig({
     // local preview. Keep both in sync. Real file is sitemap-index.xml;
     // do not collapse /sdk/{framework}/ sitemap entries.
     "/sitemap.xml": "/sitemap-index.xml",
+    ...variantOnlySdkAstroRedirects(),
     ...withComparisonSdkScopes(comparisonMarketingRedirects),
   },
 });

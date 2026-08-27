@@ -5,6 +5,7 @@ import {
   isFrameworkSpecificEntry,
   isLegacyFrameworkHubPathname,
   isPlusVariantPathname,
+  isSdkSwitcherOptionCurrent,
   legacyFrameworkVercelRedirects,
   LEGACY_F_DOC_PATHS,
   legacyKeyFromPathname,
@@ -16,8 +17,11 @@ import {
   sdkDisplayLabelFromPathname,
   sdkFromPathname,
   sdkRoutePrefixFromLegacyFrameworkKey,
+  sdkSwitcherOptions,
   sdkVariantFromPathname,
   shouldExcludeFromSitemap,
+  variantOnlySdkRedirectTarget,
+  variantOnlySdkAstroRedirects,
 } from "@/lib/sdk";
 
 test.describe("isFrameworkSpecificEntry", () => {
@@ -104,6 +108,76 @@ test.describe("pathnameForSdk", () => {
       pathnameForSdk("/sdk/bun/plus/hono/rate-limiting/quick-start/", "next"),
     ).toBe("/sdk/next/rate-limiting/quick-start/");
   });
+
+  test("routes variant-only SDKs to their default plus-variant", () => {
+    expect(pathnameForSdk("/sdk/next/get-started/", "python")).toBe(
+      "/sdk/python/plus/fastapi/get-started/",
+    );
+  });
+});
+
+test.describe("sdkSwitcherOptions", () => {
+  test("lists Python variants instead of bare Python", () => {
+    const labels = sdkSwitcherOptions("/sdk/next/get-started/").map(
+      (option) => option.label,
+    );
+    expect(labels).toContain("Python + FastAPI");
+    expect(labels).toContain("Python + Flask");
+    expect(labels).not.toContain("Python");
+  });
+
+  test("includes base and variant entries for Node.js", () => {
+    const labels = sdkSwitcherOptions("/sdk/next/get-started/").map(
+      (option) => option.label,
+    );
+    expect(labels).toContain("Node.js");
+    expect(labels).toContain("Node.js + Express");
+    expect(labels).toContain("Node.js + Hono");
+  });
+});
+
+test.describe("isSdkSwitcherOptionCurrent", () => {
+  test("matches plus-variant paths", () => {
+    const options = sdkSwitcherOptions("/sdk/python/plus/fastapi/get-started/");
+    const fastapi = options.find((option) => option.label === "Python + FastAPI");
+    expect(fastapi).toBeDefined();
+    expect(
+      isSdkSwitcherOptionCurrent(
+        "/sdk/python/plus/fastapi/get-started/",
+        fastapi!,
+      ),
+    ).toBe(true);
+  });
+});
+
+test.describe("variantOnlySdkRedirectTarget", () => {
+  test("redirects bare Python SDK paths to FastAPI", () => {
+    expect(variantOnlySdkRedirectTarget("/sdk/python/get-started/")).toBe(
+      "/sdk/python/plus/fastapi/get-started/",
+    );
+  });
+
+  test("leaves plus-variant Python paths unchanged", () => {
+    expect(
+      variantOnlySdkRedirectTarget("/sdk/python/plus/flask/get-started/"),
+    ).toBeUndefined();
+  });
+
+  test("leaves SDKs with base legacy keys unchanged", () => {
+    expect(variantOnlySdkRedirectTarget("/sdk/next/get-started/")).toBeUndefined();
+  });
+});
+
+test.describe("variantOnlySdkAstroRedirects", () => {
+  test("redirects bare Python SDK paths to FastAPI", () => {
+    const redirects = variantOnlySdkAstroRedirects();
+    expect(redirects["/sdk/python/get-started"]).toBe(
+      "/sdk/python/plus/fastapi/get-started",
+    );
+    expect(redirects["/sdk/python/get-started/"]).toBe(
+      "/sdk/python/plus/fastapi/get-started/",
+    );
+  });
 });
 
 test.describe("pathnameForSdkVariant", () => {
@@ -166,6 +240,12 @@ test.describe("scopeHrefToSdk", () => {
   test("uses SDK routes on non-SDK pages", () => {
     expect(scopeHrefToSdk("/reference/nodejs", "/get-started", "node")).toBe(
       "/sdk/node/get-started/",
+    );
+  });
+
+  test("uses plus-variant routes for Python", () => {
+    expect(scopeHrefToSdk("/reference/nodejs", "/get-started", "python")).toBe(
+      "/sdk/python/plus/fastapi/get-started/",
     );
   });
 });

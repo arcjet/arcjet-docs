@@ -108,7 +108,9 @@ function loader(): Loader {
         }
 
         for (const sdk of sdks()) {
-          insertScopedEntry(entry, `sdk/${sdk.key}/${entry.id}`);
+          if (sdk.legacyFrameworkKey) {
+            insertScopedEntry(entry, `sdk/${sdk.key}/${entry.id}`);
+          }
 
           for (const variant of sdkVariants(sdk.key)) {
             insertScopedEntry(

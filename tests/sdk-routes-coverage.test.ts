@@ -44,14 +44,14 @@ const PLUS_VARIANT_SPECS: readonly PlusVariantSpec[] = [
     baseOnlyMarkers: ["Express.js 4.19 or later"],
   },
   {
-    baseUrl: "/sdk/python/get-started/",
+    baseUrl: "/sdk/python/plus/flask/get-started/",
     plusUrl: "/sdk/python/plus/fastapi/get-started/",
     title: "Get started with Python + FastAPI",
     plusMarkers: ["arcjet-fastapi"],
     baseOnlyMarkers: ["arcjet-flask"],
   },
   {
-    baseUrl: "/sdk/python/get-started/",
+    baseUrl: "/sdk/python/plus/fastapi/get-started/",
     plusUrl: "/sdk/python/plus/flask/get-started/",
     title: "Get started with Python + Flask",
     plusMarkers: ["arcjet-flask"],
@@ -274,5 +274,31 @@ test.describe("SDK switcher labels on plus-variant pages", () => {
     });
 
     await expect(page.locator(".toc-toggle")).toContainText("Bun + Hono");
+  });
+
+  test("/sdk/python/plus/fastapi/get-started/ lists Python variants in the SDK switcher", async ({
+    page,
+  }) => {
+    await page.goto("/sdk/python/plus/fastapi/get-started/", {
+      waitUntil: "domcontentloaded",
+    });
+
+    await page.locator(".toc-toggle").click();
+    const menu = page.locator("#toc-sdk");
+    await expect(menu.getByRole("link", { name: "Python + FastAPI" })).toBeVisible();
+    await expect(menu.getByRole("link", { name: "Python + Flask" })).toBeVisible();
+    await expect(menu.getByRole("link", { name: "Python", exact: true })).toHaveCount(
+      0,
+    );
+  });
+});
+
+test.describe("Variant-only SDK redirects", () => {
+  test("/sdk/python/get-started/ redirects to FastAPI", async ({ page }) => {
+    await page.goto("/sdk/python/get-started/", { waitUntil: "domcontentloaded" });
+
+    await expect(page).toHaveURL(/\/sdk\/python\/plus\/fastapi\/get-started\/?$/);
+    await expect(page.locator("h1")).toHaveText("Get started with Python + FastAPI");
+    await expect(page.locator("main")).toContainText("arcjet-fastapi");
   });
 });

@@ -265,6 +265,9 @@ export function sdkFromPathname(pathname: string): ArcjetSdkKey | undefined {
  * If the current path is a plus-variant route (e.g. `/sdk/bun/plus/hono/foo`),
  * the variant segment is stripped when switching to a different SDK because
  * variants are SDK-specific.
+ *
+ * SDKs without a base legacy framework key (currently Python) redirect to
+ * their first plus-variant instead of a bare `/sdk/:sdk/` path.
  */
 export function pathnameForSdk(
   pathname: string,
@@ -285,7 +288,16 @@ export function pathnameForSdk(
     cleanPathname = pathname.replace(`/plus/${plusVariant.key}`, "");
   }
 
-  return cleanPathname.replace(`/sdk/${previousSdk}`, `/sdk/${targetSdk}`);
+  let result = cleanPathname.replace(`/sdk/${previousSdk}`, `/sdk/${targetSdk}`);
+
+  if (!ARCJET_SDKS[targetSdk].legacyFrameworkKey) {
+    const defaultVariant = sdkVariants(targetSdk)[0];
+    if (defaultVariant) {
+      return pathnameForSdkVariant(result, targetSdk, defaultVariant.key);
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -336,6 +348,158 @@ export function sdkDisplayLabelFromPathname(
   }
 
   return sdkConfig.label;
+}
+
+/** One entry in the SDK switcher menu (base SDK or plus-variant). */
+export type SdkSwitcherOption = {
+  id: string;
+  label: string;
+  href: string;
+  sdkKey: ArcjetSdkKey;
+  variantKey?: ArcjetSdkVariantKey;
+};
+
+/**
+ * Returns SDK switcher menu options for the current pathname.
+ *
+ * SDKs with a base legacy framework key appear once (e.g. Next.js). SDKs that
+ * only ship plus-variants (Python) list each variant instead of a bare SDK row.
+ * SDKs with optional variants (Node.js, Bun) list both the base SDK and variants.
+ */
+export function sdkSwitcherOptions(pathname: string): readonly SdkSwitcherOption[] {
+  const options: SdkSwitcherOption[] = [];
+
+  for (const sdkItem of sdks()) {
+    const variants = sdkVariants(sdkItem.key);
+
+    if (sdkItem.legacyFrameworkKey) {
+      options.push({
+        id: sdkItem.key,
+        label: sdkItem.label,
+        href: pathnameForSdk(pathname, sdkItem.key),
+        sdkKey: sdkItem.key,
+      });
+    }
+
+    for (const variant of variants) {
+      options.push({
+        id: `${sdkItem.key}+${variant.key}`,
+        label: `${sdkItem.label} + ${variant.label}`,
+        href: pathnameForSdkVariant(pathname, sdkItem.key, variant.key),
+        sdkKey: sdkItem.key,
+        variantKey: variant.key,
+      });
+    }
+  }
+
+  return options;
+}
+
+/** Returns whether a switcher option matches the current SDK-scoped pathname. */
+export function isSdkSwitcherOptionCurrent(
+  pathname: string,
+  option: SdkSwitcherOption,
+): boolean {
+  const activeSdk = sdkFromPathname(pathname);
+  if (!activeSdk || activeSdk !== option.sdkKey) {
+    return false;
+  }
+
+  const activeVariant = sdkVariantFromPathname(pathname);
+  if (option.variantKey) {
+    return activeVariant?.key === option.variantKey;
+  }
+
+  return activeVariant === undefined;
+}
+
+/**
+ * Returns a redirect target when `pathname` is a bare SDK route for an SDK
+ * that requires a plus-variant (e.g. `/sdk/python/get-started/`).
+ */
+export function variantOnlySdkRedirectTarget(pathname: string): string | undefined {
+  const sdkKey = sdkFromPathname(pathname);
+  if (!sdkKey || sdkVariantFromPathname(pathname)) {
+    return undefined;
+  }
+
+  if (ARCJET_SDKS[sdkKey].legacyFrameworkKey) {
+    return undefined;
+  }
+
+  const defaultVariant = sdkVariants(sdkKey)[0];
+  if (!defaultVariant) {
+    return undefined;
+  }
+
+  const prefix = `/sdk/${sdkKey}`;
+  const suffix =
+    pathname.length > prefix.length ? pathname.slice(prefix.length) : "";
+
+  return `${prefix}/plus/${defaultVariant.key}${suffix}`;
+}
+
+/**
+ * Static Astro redirects for SDKs that require a plus-variant.
+ *
+ * Needed because prerendered pages are served as static files in preview and
+ * production, so middleware never runs for missing bare SDK routes.
+ */
+export function variantOnlySdkAstroRedirects(): Record<string, string> {
+  const redirects: Record<string, string> = {};
+
+  for (const sdkConfig of Object.values(ARCJET_SDKS)) {
+    if (sdkConfig.legacyFrameworkKey) continue;
+
+    const defaultVariant = sdkVariants(sdkConfig.key)[0];
+    if (!defaultVariant) continue;
+
+    const prefix = `/sdk/${sdkConfig.key}`;
+    const targetPrefix = `${prefix}/plus/${defaultVariant.key}`;
+
+    redirects[prefix] = targetPrefix;
+    redirects[`${prefix}/`] = `${targetPrefix}/`;
+
+    for (const hubPath of LEGACY_FRAMEWORK_HUB_PATHS) {
+      const withSlash = normalizeDocHref(hubPath);
+      const withoutSlash = withSlash.replace(/\/$/, "") || withSlash;
+      redirects[`${prefix}${withoutSlash}`] = `${targetPrefix}${withoutSlash}`;
+      redirects[`${prefix}${withSlash}`] = `${targetPrefix}${withSlash}`;
+    }
+  }
+
+  return redirects;
+}
+
+export type VercelSdkBaseRedirect = {
+  source: string;
+  destination: string;
+  permanent: true;
+};
+
+/** Vercel redirect rules for bare variant-only SDK paths. */
+export function variantOnlySdkVercelRedirects(): VercelSdkBaseRedirect[] {
+  const redirects: VercelSdkBaseRedirect[] = [];
+
+  for (const sdkConfig of Object.values(ARCJET_SDKS)) {
+    if (sdkConfig.legacyFrameworkKey) continue;
+
+    const defaultVariant = sdkVariants(sdkConfig.key)[0];
+    if (!defaultVariant) continue;
+
+    redirects.push({
+      source: `/sdk/${sdkConfig.key}`,
+      destination: `/sdk/${sdkConfig.key}/plus/${defaultVariant.key}`,
+      permanent: true,
+    });
+    redirects.push({
+      source: `/sdk/${sdkConfig.key}/:path((?!plus/).*)`,
+      destination: `/sdk/${sdkConfig.key}/plus/${defaultVariant.key}/:path`,
+      permanent: true,
+    });
+  }
+
+  return redirects;
 }
 
 /**
@@ -587,6 +751,14 @@ export function scopeHrefToSdk(
 
   if (legacyKey) {
     return pathnameForLegacyFrameworkKey(legacyKey, href);
+  }
+
+  const defaultVariant = sdkVariants(targetSdk)[0];
+  if (defaultVariant) {
+    return pathnameForLegacyFrameworkKey(
+      defaultVariant.legacyFrameworkKey,
+      href,
+    );
   }
 
   return `/sdk/${targetSdk}${normalizeDocHref(href) === "/" ? "" : normalizeDocHref(href)}`;
