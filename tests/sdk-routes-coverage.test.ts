@@ -1,7 +1,17 @@
 import { expect, test } from "@playwright/test";
-import { sdks, sdkVariants } from "@/lib/sdk";
+import {
+  LEGACY_FRAMEWORK_HUB_PATHS,
+  sdks,
+  sdkVariants,
+} from "@/lib/sdk";
 
 const SITE = "https://docs.arcjet.com";
+
+function sitemapUrls(body: string): Set<string> {
+  return new Set(
+    [...body.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]),
+  );
+}
 
 interface PlusVariantSpec {
   baseUrl: string;
@@ -49,23 +59,28 @@ const PLUS_VARIANT_SPECS: readonly PlusVariantSpec[] = [
   },
 ];
 
-const SDK_GET_STARTED_URLS = [
-  ...sdks()
-    .filter((entry) => entry.legacyFrameworkKey)
-    .map((entry) => `/sdk/${entry.key}/get-started/`),
-  ...sdks().flatMap((entry) =>
-    sdkVariants(entry.key).map(
-      (variant) => `/sdk/${entry.key}/plus/${variant.key}/get-started/`,
-    ),
+const INDEXABLE_SDK_GET_STARTED_URLS = sdks()
+  .filter((entry) => entry.legacyFrameworkKey)
+  .map((entry) => `/sdk/${entry.key}/get-started/`);
+
+const NOINDEX_PLUS_GET_STARTED_URLS = sdks().flatMap((entry) =>
+  sdkVariants(entry.key).map(
+    (variant) => `/sdk/${entry.key}/plus/${variant.key}/get-started/`,
   ),
-];
+);
 
 const LLMS_TXT_SDK_URLS = [
-  "https://docs.arcjet.com/sdk/next/get-started",
-  "https://docs.arcjet.com/sdk/astro/get-started",
-  "https://docs.arcjet.com/sdk/bun/plus/hono/get-started",
-  "https://docs.arcjet.com/sdk/node/plus/express/get-started",
-  "https://docs.arcjet.com/sdk/python/plus/fastapi/get-started",
+  "https://docs.arcjet.com/sdk/next/get-started/",
+  "https://docs.arcjet.com/sdk/astro/get-started/",
+  "https://docs.arcjet.com/sdk/bun/plus/hono/get-started/",
+  "https://docs.arcjet.com/sdk/node/plus/express/get-started/",
+  "https://docs.arcjet.com/sdk/python/plus/fastapi/get-started/",
+] as const;
+
+const LEGACY_HUB_SAMPLES = [
+  "/get-started/",
+  "/bot-protection/quick-start/",
+  "/filters/reference/",
 ] as const;
 
 async function mainText(page: import("@playwright/test").Page) {
@@ -103,8 +118,8 @@ test.describe("Plus-variant routes render variant-specific guides", () => {
   }
 });
 
-test.describe("SDK route SEO metadata", () => {
-  for (const path of SDK_GET_STARTED_URLS) {
+test.describe("Indexable SDK route SEO metadata", () => {
+  for (const path of INDEXABLE_SDK_GET_STARTED_URLS) {
     test(`${path} is indexable with a self-canonical URL`, async ({ page }) => {
       await page.goto(path, { waitUntil: "domcontentloaded" });
 
@@ -120,6 +135,23 @@ test.describe("SDK route SEO metadata", () => {
 
       await expect(page.locator("h1").first()).not.toBeEmpty();
       await expect(page.locator("title")).not.toHaveText(/Arcjet Docs \| Arcjet Docs/);
+    });
+  }
+});
+
+test.describe("Plus-variant SDK route SEO metadata", () => {
+  for (const path of NOINDEX_PLUS_GET_STARTED_URLS) {
+    test(`${path} is noindex with a self-canonical URL`, async ({ page }) => {
+      await page.goto(path, { waitUntil: "domcontentloaded" });
+
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+        "href",
+        `${SITE}${path}`,
+      );
+      await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+        "content",
+        /noindex,\s*follow/i,
+      );
     });
   }
 
@@ -153,14 +185,41 @@ test.describe("SDK route SEO metadata", () => {
   });
 });
 
+test.describe("Legacy framework hub SEO metadata", () => {
+  for (const path of LEGACY_HUB_SAMPLES) {
+    test(`${path} is noindex`, async ({ page }) => {
+      await page.goto(path, { waitUntil: "domcontentloaded" });
+
+      await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+        "content",
+        /noindex,\s*follow/i,
+      );
+      await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+        "href",
+        `${SITE}${path}`,
+      );
+    });
+  }
+});
+
 test.describe("SDK routes in sitemap", () => {
-  test("plus-variant get-started URLs are listed", async ({ request }) => {
+  test("plus-variant get-started URLs are omitted", async ({ request }) => {
     const response = await request.get("/sitemap-0.xml");
     expect(response.status()).toBe(200);
 
-    const body = await response.text();
+    const urls = sitemapUrls(await response.text());
     for (const spec of PLUS_VARIANT_SPECS) {
-      expect(body).toContain(`${SITE}${spec.plusUrl}`);
+      expect(urls.has(`${SITE}${spec.plusUrl}`)).toBe(false);
+    }
+  });
+
+  test("legacy framework hub URLs are omitted", async ({ request }) => {
+    const response = await request.get("/sitemap-0.xml");
+    expect(response.status()).toBe(200);
+
+    const urls = sitemapUrls(await response.text());
+    for (const path of LEGACY_FRAMEWORK_HUB_PATHS) {
+      expect(urls.has(`${SITE}${path}`)).toBe(false);
     }
   });
 
@@ -188,6 +247,21 @@ test.describe("llms.txt agent discovery", () => {
     for (const url of LLMS_TXT_SDK_URLS) {
       expect(body).toContain(url);
     }
+    expect(body).not.toMatch(/https:\/\/docs\.arcjet\.com\/[^\s)]*\?f=/);
+  });
+});
+
+test.describe("llms-full.txt agent discovery", () => {
+  test("lists SDK-scoped get-started URLs without legacy ?f= links", async ({
+    request,
+  }) => {
+    const response = await request.get("/llms-full.txt");
+    expect(response.status()).toBe(200);
+
+    const body = await response.text();
+    expect(body).toContain("https://docs.arcjet.com/sdk/next/get-started/");
+    expect(body).toContain("https://docs.arcjet.com/sdk/bun/plus/hono/get-started/");
+    expect(body).not.toMatch(/https:\/\/docs\.arcjet\.com\/[^\s)]*\?f=/);
   });
 });
 

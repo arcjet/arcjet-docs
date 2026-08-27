@@ -3,7 +3,10 @@ import {
   docPathFromSdkPathname,
   hrefForLegacyFrameworkKey,
   isFrameworkSpecificEntry,
+  isLegacyFrameworkHubPathname,
+  isPlusVariantPathname,
   legacyFrameworkVercelRedirects,
+  LEGACY_F_DOC_PATHS,
   legacyKeyFromPathname,
   pathnameForLegacyFrameworkKey,
   pathnameForSdk,
@@ -14,6 +17,7 @@ import {
   sdkFromPathname,
   sdkRoutePrefixFromLegacyFrameworkKey,
   sdkVariantFromPathname,
+  shouldExcludeFromSitemap,
 } from "@/lib/sdk";
 
 test.describe("isFrameworkSpecificEntry", () => {
@@ -210,6 +214,53 @@ test.describe("legacyFrameworkVercelRedirects", () => {
           r.has[0]?.value === "crewai",
       ),
     ).toBe(false);
+  });
+
+  for (const docPath of [
+    "/filters/reference",
+    "/rate-limiting/reference",
+    "/nosecone/quick-start",
+    "/sensitive-info/quick-start",
+    "/sensitive-info/reference",
+  ] as const) {
+    test(`redirects ${docPath}?f=next-js to the SDK route`, () => {
+      const redirects = legacyFrameworkVercelRedirects();
+      const source = docPath.replace(/\/$/, "") || "/";
+      const destination = pathnameForLegacyFrameworkKey("next-js", docPath);
+      const match = redirects.find(
+        (r) =>
+          r.source === source &&
+          r.has[0]?.value === "next-js" &&
+          r.destination === destination,
+      );
+      expect(match).toBeDefined();
+    });
+  }
+
+  test("covers every legacy ?f= doc path", () => {
+    expect(LEGACY_F_DOC_PATHS.length).toBeGreaterThanOrEqual(16);
+  });
+});
+
+test.describe("shouldExcludeFromSitemap", () => {
+  test("excludes plus-variant SDK routes", () => {
+    expect(
+      shouldExcludeFromSitemap("/sdk/bun/plus/hono/get-started/"),
+    ).toBe(true);
+    expect(shouldExcludeFromSitemap("/sdk/next/get-started/")).toBe(false);
+  });
+
+  test("excludes legacy framework hub routes", () => {
+    expect(isLegacyFrameworkHubPathname("/get-started/")).toBe(true);
+    expect(isLegacyFrameworkHubPathname("/sdk/next/get-started/")).toBe(false);
+    expect(shouldExcludeFromSitemap("/bot-protection/quick-start/")).toBe(true);
+  });
+
+  test("detects plus-variant pathnames", () => {
+    expect(isPlusVariantPathname("/sdk/node/plus/express/get-started/")).toBe(
+      true,
+    );
+    expect(isPlusVariantPathname("/sdk/node/get-started/")).toBe(false);
   });
 });
 
