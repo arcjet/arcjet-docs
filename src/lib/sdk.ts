@@ -590,49 +590,82 @@ export function scopeHrefToSdk(
   return `/sdk/${targetSdk}${normalizeDocHref(href) === "/" ? "" : normalizeDocHref(href)}`;
 }
 
-function buildRedirectUrlWithoutFrameworkParam(
-  url: URL,
-  pathname: string,
-): string {
-  const redirect = new URL(pathname, url.origin);
-  const params = new URLSearchParams(url.searchParams);
-  params.delete("f");
-  redirect.search = params.toString();
-  redirect.hash = url.hash;
-  return redirect.toString();
+/** Doc paths that historically accepted legacy `?f=` framework query params. */
+export const LEGACY_F_DOC_PATHS = [
+  "/get-started",
+  "/shield/quick-start",
+  "/shield/reference",
+  "/rate-limiting/quick-start",
+  "/bot-protection/quick-start",
+  "/bot-protection/reference",
+  "/email-validation/quick-start",
+  "/email-validation/reference",
+  "/signup-protection/quick-start",
+  "/signup-protection/reference",
+  "/filters/quick-start",
+  "/ai-protection/abuse-protection",
+] as const;
+
+export type VercelLegacyFrameworkRedirect = {
+  source: string;
+  has: Array<{ type: "query"; key: string; value?: string }>;
+  destination: string;
+  permanent: true;
+};
+
+function legacyFrameworkKeysForDocPath(docPath: string): FrameworkKey[] {
+  const keys: FrameworkKey[] = [];
+
+  for (const variants of Object.values(SDK_VARIANTS)) {
+    for (const variant of variants ?? []) {
+      keys.push(variant.legacyFrameworkKey);
+    }
+  }
+
+  for (const sdkConfig of Object.values(ARCJET_SDKS)) {
+    if (sdkConfig.legacyFrameworkKey) {
+      keys.push(sdkConfig.legacyFrameworkKey);
+    }
+  }
+
+  if (normalizeDocHref(docPath) === "/get-started/") {
+    keys.push(...(Object.keys(GUARD_DOC_PATHS) as FrameworkKey[]));
+  }
+
+  return keys;
 }
 
 /**
- * Returns a redirect URL when a legacy `?f=` query param should map to an SDK
- * (or guard docs) route, or be stripped on an already-correct SDK route.
+ * Returns Vercel redirect rules for legacy `?f=` URLs.
  *
- * Returns `null` when the request should proceed unchanged (for example,
- * guard-only frameworks on pages other than get-started).
+ * Used to keep `/vercel.json` in sync via `scripts/generate-legacy-f-redirects.ts`.
  */
-export function legacyFrameworkQueryRedirect(
-  url: URL,
-  legacyKey: FrameworkKey,
-): string | null {
-  const docPath = sdkFromPathname(url.pathname)
-    ? docPathFromSdkPathname(url.pathname)
-    : url.pathname;
-  const targetPath = pathnameForLegacyFrameworkKey(legacyKey, docPath);
-  const normalizedCurrent = normalizeDocHref(url.pathname);
-  const normalizedTarget = normalizeDocHref(targetPath);
+export function legacyFrameworkVercelRedirects(): VercelLegacyFrameworkRedirect[] {
+  const redirects: VercelLegacyFrameworkRedirect[] = [];
 
-  const sdkPrefix = sdkRoutePrefixFromLegacyFrameworkKey(legacyKey);
-  const guardPath = GUARD_DOC_PATHS[legacyKey];
-  const hasDedicatedRoute =
-    !!sdkPrefix ||
-    (!!guardPath && normalizeDocHref(docPath) === "/get-started/");
+  for (const docPath of LEGACY_F_DOC_PATHS) {
+    const source = docPath.replace(/\/$/, "") || "/";
+    const normalizedDoc = normalizeDocHref(docPath);
 
-  if (normalizedTarget !== normalizedCurrent) {
-    return buildRedirectUrlWithoutFrameworkParam(url, normalizedTarget);
+    for (const legacyKey of legacyFrameworkKeysForDocPath(docPath)) {
+      const destination = pathnameForLegacyFrameworkKey(legacyKey, docPath);
+      if (normalizeDocHref(destination) === normalizedDoc) continue;
+
+      redirects.push({
+        source,
+        has: [{ type: "query", key: "f", value: legacyKey }],
+        destination,
+        permanent: true,
+      });
+    }
   }
 
-  if (hasDedicatedRoute && url.searchParams.has("f")) {
-    return buildRedirectUrlWithoutFrameworkParam(url, normalizedCurrent);
-  }
+  redirects.push({
+    source: "/sdk/:path*",
+    has: [{ type: "query", key: "f" }],
+    destination: "/sdk/:path*",
+    permanent: true,
+  });
 
-  return null;
+  return redirects;
 }

@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import {
   docPathFromSdkPathname,
   hrefForLegacyFrameworkKey,
-  legacyFrameworkQueryRedirect,
+  legacyFrameworkVercelRedirects,
   legacyKeyFromPathname,
   pathnameForLegacyFrameworkKey,
   pathnameForSdk,
@@ -145,28 +145,50 @@ test.describe("scopeHrefToSdk", () => {
   });
 });
 
-test.describe("legacyFrameworkQueryRedirect", () => {
+test.describe("legacyFrameworkVercelRedirects", () => {
   test("redirects legacy get-started URLs to SDK routes", () => {
-    const url = new URL("https://docs.arcjet.com/get-started?f=next-js");
-    expect(legacyFrameworkQueryRedirect(url, "next-js")).toBe(
-      "https://docs.arcjet.com/sdk/next/get-started/",
+    const redirects = legacyFrameworkVercelRedirects();
+    const match = redirects.find(
+      (r) =>
+        r.source === "/get-started" &&
+        r.has[0]?.value === "next-js" &&
+        r.destination === "/sdk/next/get-started/",
     );
+    expect(match).toBeDefined();
   });
 
-  test("strips ?f= on SDK routes", () => {
-    const url = new URL(
-      "https://docs.arcjet.com/sdk/next/get-started/?f=next-js",
+  test("redirects guard get-started URLs to guard docs", () => {
+    const redirects = legacyFrameworkVercelRedirects();
+    const match = redirects.find(
+      (r) =>
+        r.source === "/get-started" &&
+        r.has[0]?.value === "crewai" &&
+        r.destination === "/guards/crewai/",
     );
-    expect(legacyFrameworkQueryRedirect(url, "next-js")).toBe(
-      "https://docs.arcjet.com/sdk/next/get-started/",
-    );
+    expect(match).toBeDefined();
   });
 
-  test("preserves ?f= for guard frameworks on other pages", () => {
-    const url = new URL(
-      "https://docs.arcjet.com/rate-limiting/quick-start?f=crewai",
-    );
-    expect(legacyFrameworkQueryRedirect(url, "crewai")).toBeNull();
+  test("strips ?f= from SDK routes", () => {
+    const redirects = legacyFrameworkVercelRedirects();
+    expect(
+      redirects.some(
+        (r) =>
+          r.source === "/sdk/:path*" &&
+          r.has[0]?.key === "f" &&
+          !r.has[0]?.value,
+      ),
+    ).toBe(true);
+  });
+
+  test("does not redirect guard frameworks on other pages", () => {
+    const redirects = legacyFrameworkVercelRedirects();
+    expect(
+      redirects.some(
+        (r) =>
+          r.source === "/rate-limiting/quick-start" &&
+          r.has[0]?.value === "crewai",
+      ),
+    ).toBe(false);
   });
 });
 
