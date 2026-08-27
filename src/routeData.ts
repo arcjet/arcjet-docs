@@ -1,5 +1,6 @@
 import { defineRouteMiddleware } from "@astrojs/starlight/route-data";
 import {
+  isFrameworkSpecificEntry,
   legacyKeyFromPathname,
   sdkFromPathname,
   sdkVariantFromPathname,
@@ -18,6 +19,25 @@ const SITE_URL = "https://docs.arcjet.com";
 /** Social card images, shared with the marketing site. */
 const OG_IMAGE = "https://arcjet.com/social/arcjet-og-image.png";
 const TWITTER_IMAGE = "https://arcjet.com/social/arcjet-twitter-card.png";
+
+function hasNoindex(routeData: StarlightRouteData): boolean {
+  return routeData.head.some(
+    (tag) =>
+      tag.tag === "meta" &&
+      tag.attrs?.name === "robots" &&
+      typeof tag.attrs.content === "string" &&
+      tag.attrs.content.includes("noindex"),
+  );
+}
+
+function addNoindex(routeData: StarlightRouteData) {
+  if (hasNoindex(routeData)) return;
+
+  routeData.head.push({
+    tag: "meta",
+    attrs: { name: "robots", content: "noindex, follow" },
+  });
+}
 
 /**
  * Reads the canonical URL Starlight already put in the head so structured data
@@ -100,9 +120,16 @@ function addStructuredData(
  */
 export const onRequest = defineRouteMiddleware(async (context) => {
   const routeData = context.locals.starlightRoute;
-  const sdk = sdkFromPathname(context.url.pathname);
-  const variant = sdkVariantFromPathname(context.url.pathname);
-  const legacyKey = legacyKeyFromPathname(context.url.pathname);
+  const pathname = context.url.pathname;
+  const sdk = sdkFromPathname(pathname);
+  const variant = sdkVariantFromPathname(pathname);
+  const legacyKey = legacyKeyFromPathname(pathname);
+
+  if (variant) {
+    addNoindex(routeData);
+  } else if (!sdk && isFrameworkSpecificEntry(routeData.entry.data)) {
+    addNoindex(routeData);
+  }
 
   if (sdk) {
     const titleByFramework = routeData.entry.data.titleByFramework as
@@ -160,5 +187,5 @@ export const onRequest = defineRouteMiddleware(async (context) => {
 
   // Runs after the sidebar scoping above so breadcrumbs see the final `isCurrent`.
   addOpenGraphMetadata(routeData, isLandingPage);
-  addStructuredData(routeData, context.url.pathname, isLandingPage);
+  addStructuredData(routeData, pathname, isLandingPage);
 });

@@ -13,6 +13,7 @@ import {
   isShallowRepository,
   sitemapLastmodSerializer,
 } from "./src/lib/content-dates";
+import { shouldExcludeFromSitemap } from "./src/lib/sdk";
 import { main as sidebar } from "./src/lib/sidebars";
 
 /*
@@ -224,6 +225,7 @@ export default defineConfig({
      * needs adding here too.
      */
     sitemap({
+      filter: (page) => !shouldExcludeFromSitemap(new URL(page).pathname),
       serialize: sitemapLastmodSerializer(),
     }),
     react(),

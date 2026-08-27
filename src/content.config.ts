@@ -6,7 +6,12 @@ import {
 import { docsSchema, i18nSchema } from "@astrojs/starlight/schema";
 import { defineCollection, type DataEntry } from "astro:content";
 import { z } from "astro/zod";
-import { sdkFromPathname, sdkVariants, sdks, isFrameworkSpecificEntry } from "@/lib/sdk";
+import {
+  sdkFromPathname,
+  sdkVariants,
+  sdks,
+  isFrameworkSpecificEntry,
+} from "@/lib/sdk";
 import type { FrameworkKey } from "@/lib/prefs";
 
 export type TocNode = {
@@ -27,6 +32,23 @@ function pathnameForEntryId(entryId: string): string {
   return `/${entryId}/`;
 }
 
+function noindexHeadTag() {
+  return {
+    tag: "meta" as const,
+    attrs: { name: "robots", content: "noindex, follow" },
+  };
+}
+
+function canonicalHeadTag(site: string | undefined, pathname: string) {
+  return {
+    tag: "link" as const,
+    attrs: {
+      href: `${site}${pathname}`,
+      rel: "canonical",
+    },
+  };
+}
+
 /**
  * An Astro Content loader that wraps the default Starlight docs loader
  * to duplicate all docs entries under each SDK-specific path.
@@ -45,7 +67,11 @@ function loader(): Loader {
        * Duplicates a docs entry under an SDK-scoped content id unless one
        * already exists.
        */
-      function insertScopedEntry(entry: DataEntry, scopedId: string) {
+      function insertScopedEntry(
+        entry: DataEntry,
+        scopedId: string,
+        options: { noindex?: boolean } = {},
+      ) {
         if (context.store.has(scopedId)) {
           return;
         }
@@ -59,16 +85,11 @@ function loader(): Loader {
             head: [
               ...(Array.isArray(entry.data.head) ? entry.data.head : []),
               /**
-               * SDK-scoped routes are the canonical, indexable URLs for
-               * framework-specific documentation.
+               * SDK-scoped routes are the canonical URLs for framework-specific
+               * documentation. Plus-variant routes stay out of the index.
                */
-              {
-                attrs: {
-                  href: `${context.config.site}${scopedPathname}`,
-                  rel: "canonical",
-                },
-                tag: "link",
-              },
+              canonicalHeadTag(context.config.site, scopedPathname),
+              ...(options.noindex ? [noindexHeadTag()] : []),
             ],
           },
           id: scopedId,
@@ -93,6 +114,7 @@ function loader(): Loader {
             insertScopedEntry(
               entry,
               `sdk/${sdk.key}/plus/${variant.key}/${entry.id}`,
+              { noindex: true },
             );
           }
         }
@@ -102,6 +124,10 @@ function loader(): Loader {
         insertScopedEntries(entry);
       }
 
+      // Legacy framework hub pages duplicate SDK content — keep them reachable
+      // but out of search indexes once SDK routes are canonical. Applied in
+      // routeData.ts because updating existing content-store entries here is
+      // unreliable during loader execution.
       // Astro Content loaders can run extra logic when files change in dev,
       // but in testing it doesn't seem necessary here.
       // https://docs.astro.build/en/reference/content-loader-reference/#watcher

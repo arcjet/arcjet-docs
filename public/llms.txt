@@ -31,22 +31,22 @@ extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricin
 
 Use these stable URLs when linking to a framework-specific guide. They replace `?f=` query parameters and render the matching guide server-side.
 
-- [Next.js](https://docs.arcjet.com/sdk/next/get-started)
-- [Astro](https://docs.arcjet.com/sdk/astro/get-started)
-- [Bun](https://docs.arcjet.com/sdk/bun/get-started)
-- [Bun + Hono](https://docs.arcjet.com/sdk/bun/plus/hono/get-started)
-- [Deno](https://docs.arcjet.com/sdk/deno/get-started)
-- [Fastify](https://docs.arcjet.com/sdk/fastify/get-started)
-- [NestJS](https://docs.arcjet.com/sdk/nest/get-started)
-- [Node.js](https://docs.arcjet.com/sdk/node/get-started)
-- [Node.js + Express](https://docs.arcjet.com/sdk/node/plus/express/get-started)
-- [Node.js + Hono](https://docs.arcjet.com/sdk/node/plus/hono/get-started)
-- [Nuxt](https://docs.arcjet.com/sdk/nuxt/get-started)
-- [Python + FastAPI](https://docs.arcjet.com/sdk/python/plus/fastapi/get-started)
-- [Python + Flask](https://docs.arcjet.com/sdk/python/plus/flask/get-started)
-- [React Router](https://docs.arcjet.com/sdk/react-router/get-started)
-- [Remix](https://docs.arcjet.com/sdk/remix/get-started)
-- [SvelteKit](https://docs.arcjet.com/sdk/sveltekit/get-started)
+- [Next.js](https://docs.arcjet.com/sdk/next/get-started/)
+- [Astro](https://docs.arcjet.com/sdk/astro/get-started/)
+- [Bun](https://docs.arcjet.com/sdk/bun/get-started/)
+- [Bun + Hono](https://docs.arcjet.com/sdk/bun/plus/hono/get-started/)
+- [Deno](https://docs.arcjet.com/sdk/deno/get-started/)
+- [Fastify](https://docs.arcjet.com/sdk/fastify/get-started/)
+- [NestJS](https://docs.arcjet.com/sdk/nest/get-started/)
+- [Node.js](https://docs.arcjet.com/sdk/node/get-started/)
+- [Node.js + Express](https://docs.arcjet.com/sdk/node/plus/express/get-started/)
+- [Node.js + Hono](https://docs.arcjet.com/sdk/node/plus/hono/get-started/)
+- [Nuxt](https://docs.arcjet.com/sdk/nuxt/get-started/)
+- [Python + FastAPI](https://docs.arcjet.com/sdk/python/plus/fastapi/get-started/)
+- [Python + Flask](https://docs.arcjet.com/sdk/python/plus/flask/get-started/)
+- [React Router](https://docs.arcjet.com/sdk/react-router/get-started/)
+- [Remix](https://docs.arcjet.com/sdk/remix/get-started/)
+- [SvelteKit](https://docs.arcjet.com/sdk/sveltekit/get-started/)
 
 ## Features
 

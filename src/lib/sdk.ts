@@ -620,6 +620,7 @@ export const LEGACY_F_DOC_PATHS = [
   "/shield/quick-start",
   "/shield/reference",
   "/rate-limiting/quick-start",
+  "/rate-limiting/reference",
   "/bot-protection/quick-start",
   "/bot-protection/reference",
   "/email-validation/quick-start",
@@ -627,8 +628,66 @@ export const LEGACY_F_DOC_PATHS = [
   "/signup-protection/quick-start",
   "/signup-protection/reference",
   "/filters/quick-start",
+  "/filters/reference",
+  "/nosecone/quick-start",
+  "/sensitive-info/quick-start",
+  "/sensitive-info/reference",
   "/ai-protection/abuse-protection",
 ] as const;
+
+/**
+ * Legacy hub URLs for framework-specific docs (non-SDK paths).
+ *
+ * Kept in sync with MDX entries that declare `frameworks` frontmatter. Used
+ * to exclude duplicate hub pages from the sitemap once SDK routes are canonical.
+ */
+export const LEGACY_FRAMEWORK_HUB_PATHS = [
+  "/get-started/",
+  "/bot-protection/quick-start/",
+  "/bot-protection/reference/",
+  "/bot-protection/advanced-signals/",
+  "/shield/quick-start/",
+  "/shield/reference/",
+  "/rate-limiting/quick-start/",
+  "/rate-limiting/reference/",
+  "/email-validation/quick-start/",
+  "/email-validation/reference/",
+  "/signup-protection/quick-start/",
+  "/signup-protection/reference/",
+  "/filters/quick-start/",
+  "/filters/reference/",
+  "/nosecone/quick-start/",
+  "/sensitive-info/quick-start/",
+  "/sensitive-info/reference/",
+  "/ai-protection/abuse-protection/",
+  "/ai-protection/budget-control/",
+  "/ai-protection/data-loss-prevention/",
+  "/ai-protection/prompt-injection/",
+  "/content-moderation/",
+  "/content-moderation/quick-start/",
+  "/prompt-injection/quick-start/",
+] as const;
+
+/** Returns whether a pathname is a plus-variant SDK route (`/sdk/:sdk/plus/:variant/...`). */
+export function isPlusVariantPathname(pathname: string): boolean {
+  return sdkVariantFromPathname(pathname) !== undefined;
+}
+
+/** Returns whether a pathname is a legacy framework hub (non-SDK, framework-specific). */
+export function isLegacyFrameworkHubPathname(pathname: string): boolean {
+  if (sdkFromPathname(pathname)) return false;
+  const normalized = normalizeDocHref(pathname);
+  return LEGACY_FRAMEWORK_HUB_PATHS.some(
+    (hubPath) => normalizeDocHref(hubPath) === normalized,
+  );
+}
+
+/** Returns whether a URL should be omitted from the sitemap. */
+export function shouldExcludeFromSitemap(pathname: string): boolean {
+  return (
+    isPlusVariantPathname(pathname) || isLegacyFrameworkHubPathname(pathname)
+  );
+}
 
 export type VercelLegacyFrameworkRedirect = {
   source: string;
