@@ -30,7 +30,7 @@ if (sdkKey) {
 
 {
   sdkKey && resolvedTitle ? (
-    <h1 id="_top">{resolvedTitle}</h1>
+    <h1 id="_top" set:html={resolvedTitle} />
   ) : (
     <TitleByFrameworkReact client:load {...(Astro.props as any)} />
   )

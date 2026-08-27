@@ -20,13 +20,15 @@ export type ArcjetSdkKey =
   | "remix"
   | "sveltekit";
 
+export type ArcjetSdkVariantKey = "express" | "fastapi" | "flask" | "hono";
+
 /**
  * A sub-variant of an SDK that uses the same Arcjet SDK package but
  * pairs it with a different framework (e.g. Bun + Hono, Node.js + Express).
  */
 export type ArcjetSdkVariant = {
-  /** URL-safe key used in `/sdk/:sdk/plus/:variant/` paths */
-  readonly key: string;
+  /** URL-safe key used in `/sdk/:sdk/plus/:variant/` paths (`[a-z-]+`) */
+  readonly key: ArcjetSdkVariantKey;
   /** Human readable label */
   readonly label: string;
   /** Maps to a legacy FrameworkKey for slot resolution */
@@ -588,6 +590,28 @@ export function scopeHrefToSdk(
   }
 
   return `/sdk/${targetSdk}${normalizeDocHref(href) === "/" ? "" : normalizeDocHref(href)}`;
+}
+
+/**
+ * Returns whether a docs entry should be duplicated under `/sdk/...` routes.
+ *
+ * Only framework-specific pages (those with `frameworks` or `titleByFramework`
+ * frontmatter) vary by SDK. Duplicating every doc would create many near-
+ * identical crawlable URLs that only differ in the SDK sidebar.
+ */
+export function isFrameworkSpecificEntry(data: {
+  frameworks?: FrameworkKey[];
+  titleByFramework?: Partial<Record<FrameworkKey, string>>;
+}): boolean {
+  if (Array.isArray(data.frameworks) && data.frameworks.length > 0) {
+    return true;
+  }
+
+  if (data.titleByFramework && Object.keys(data.titleByFramework).length > 0) {
+    return true;
+  }
+
+  return false;
 }
 
 /** Doc paths that historically accepted legacy `?f=` framework query params. */

@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import {
   docPathFromSdkPathname,
   hrefForLegacyFrameworkKey,
+  isFrameworkSpecificEntry,
   legacyFrameworkVercelRedirects,
   legacyKeyFromPathname,
   pathnameForLegacyFrameworkKey,
@@ -14,6 +15,26 @@ import {
   sdkRoutePrefixFromLegacyFrameworkKey,
   sdkVariantFromPathname,
 } from "@/lib/sdk";
+
+test.describe("isFrameworkSpecificEntry", () => {
+  test("matches entries with frameworks frontmatter", () => {
+    expect(
+      isFrameworkSpecificEntry({ frameworks: ["next-js", "node-js"] }),
+    ).toBe(true);
+  });
+
+  test("matches entries with titleByFramework frontmatter", () => {
+    expect(
+      isFrameworkSpecificEntry({
+        titleByFramework: { "next-js": "Next.js guide" },
+      }),
+    ).toBe(true);
+  });
+
+  test("skips framework-agnostic entries", () => {
+    expect(isFrameworkSpecificEntry({})).toBe(false);
+  });
+});
 
 test.describe("sdkFromPathname", () => {
   const cases: [string, string | undefined][] = [

@@ -6,7 +6,7 @@ import {
 import { docsSchema, i18nSchema } from "@astrojs/starlight/schema";
 import { defineCollection, type DataEntry } from "astro:content";
 import { z } from "astro/zod";
-import { sdkFromPathname, sdkVariants, sdks } from "@/lib/sdk";
+import { sdkFromPathname, sdkVariants, sdks, isFrameworkSpecificEntry } from "@/lib/sdk";
 import type { FrameworkKey } from "@/lib/prefs";
 
 export type TocNode = {
@@ -79,6 +79,10 @@ function loader(): Loader {
       // SDK-specific version already exists.
       function insertScopedEntries(entry: DataEntry) {
         if (sdkFromPathname(`/${entry.id}`) !== undefined) {
+          return;
+        }
+
+        if (!isFrameworkSpecificEntry(entry.data)) {
           return;
         }
 
