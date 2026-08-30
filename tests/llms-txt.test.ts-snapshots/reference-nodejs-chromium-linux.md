@@ -47,6 +47,17 @@ Quick start
 
 See the [quick start guide](/sdk/node/get-started/).
 
+Client IP address detection
+---------------------------
+
+[Section titled “Client IP address detection”](#client-ip-address-detection)
+
+Forwarding headers must come from trusted infrastructure
+
+When a platform-provided client IP is unavailable, Arcjet may use forwarding headers such as `X-Forwarded-For`. Clients can spoof these headers if they can reach your application directly or your proxy preserves client-supplied values. Plain IP or CIDR entries in `proxies` tell Arcjet which hops to skip; they do not verify that the connection came through those proxies.
+
+In production, make the application reachable only through a proxy that overwrites or safely appends forwarding headers, and list every trusted hop in `proxies`. Use a proxy-service helper such as `cloudflare()` where available. If your application determines the client IP itself, pass a validated `ipSrc` to `protect()`.
+
 Configuration
 -------------
 

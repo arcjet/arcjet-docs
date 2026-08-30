@@ -14,6 +14,22 @@ the standard library and routers that expose `*http.Request`.
 > **Caution:** The Go SDK is pre-release and its API may change. Version 0.1.0
 > requires Go 1.25 or later.
 
+## Client IP address detection
+
+:::caution[Configure every trusted ingress]
+Outside supported hosting platforms, Arcjet uses `Request.RemoteAddr` and
+ignores `X-Forwarded-For` unless the direct peer matches an IP or CIDR in
+`Config.Proxies`. It then walks the header from right to left, skipping
+configured proxy hops.
+
+In production, make the application reachable only through the configured
+proxies and ensure they overwrite or safely append `X-Forwarded-For`. Configure
+the actual direct proxy and every trusted hop in `Config.Proxies`. On a supported
+hosting platform, use `Config.Platform` when automatic platform detection is
+unavailable. If your application determines the client IP itself, pass a
+validated value with `WithIPSrc`.
+:::
+
 ## Install
 
 Use Go tooling so the project records a compatible version in `go.mod`:
