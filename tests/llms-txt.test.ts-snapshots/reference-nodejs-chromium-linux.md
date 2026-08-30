@@ -54,9 +54,9 @@ Client IP address detection
 
 Forwarding headers must come from trusted infrastructure
 
-When a platform-provided client IP is unavailable, Arcjet may use forwarding headers such as `X-Forwarded-For`. Clients can spoof these headers if they can reach your application directly or your proxy preserves client-supplied values. Plain IP or CIDR entries in `proxies` tell Arcjet which hops to skip; they do not verify that the connection came through those proxies.
+When a platform-provided client IP is unavailable, Arcjet may use forwarding headers such as `X-Forwarded-For`. Clients can spoof these headers if they can reach your application directly or your proxy preserves client-supplied values. Arcjet continues protecting the request, but warns once per client and records `client_ip_provenance="unverified-header"` at debug level.
 
-In production, make the application reachable only through a proxy that overwrites or safely appends forwarding headers, and list every trusted hop in `proxies`. Use a proxy-service helper such as `cloudflare()` where available. If your application determines the client IP itself, pass a validated `ipSrc` to `protect()`.
+In production, make the application reachable only through a proxy that overwrites or safely appends forwarding headers, and list every trusted hop in `proxies`. Use a proxy-service helper such as `cloudflare()` where available. Invalid proxy entries and manual `ipSrc` values are rejected; trust-all ranges produce a warning. Inspect the selection with `client.clientIpDetails(request)` in `@arcjet/node`, or `findIpDetails()` / `resolveClientIp()` from `@arcjet/ip`. Never copy an untrusted forwarding header into `ipSrc`.
 
 Configuration
 -------------
@@ -328,6 +328,8 @@ const aj = arcjet({
   ],
 });
 ```
+
+Malformed IP addresses and CIDRs are rejected when the client is created. Trusting `0.0.0.0/0` or `::/0` is allowed for compatibility, but emits a warning because every connecting peer is then treated as trusted.
 
 #### Proxy services
 
@@ -1176,7 +1178,18 @@ IP address detection
 
 Arcjet automatically detects the IP address of the client making the request based on the context provided. The implementation is open source in our [@arcjet/ip package](https://github.com/arcjet/arcjet-js/blob/main/ip).
 
-in development (see [`ARCJET_ENV`](/environment#arcjet-env)), we allow private/internal addresses so that the SDKs work correctly locally.
+Every resolution has an `ip`, `provenance`, `verified`, and optional `header`. The provenance is `direct`, `platform`, `trusted-proxy`, `unverified-header`, `manual`, `development`, `request`, or `none`. Enable debug logging to receive the same information in `client_ip_provenance`, `client_ip_verified`, and `client_ip_header` facets.
+
+For `@arcjet/node`, inspect the value without protecting the request:
+
+```ts
+const details = aj.clientIpDetails(request);
+console.log(details.ip, details.provenance, details.verified, details.header);
+```
+
+Other framework adapters can inspect their request-like object with `findIpDetails(request, options)` or reproduce manual/development resolution with `resolveClientIp(request, options)` from `@arcjet/ip`. `verified` means the SDK tied the source to the request path; it does not certify your deployment.
+
+In development (see [`ARCJET_ENV`](/environment#arcjet-env)), we allow private/internal addresses so that the SDKs work correctly locally.
 
 Client override
 ---------------

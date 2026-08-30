@@ -14,6 +14,14 @@ Arcjet protects two types of entry points:
 - **Request-based** – HTTP route handlers, API endpoints, middleware. Use `protect()` with any supported framework.
 - **Guards** – tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` to pass inputs directly and get a decision back. Use `capture()` to record that an allowed action happened (visibility only; never changes a decision).
 
+## Client IP safety for request-based SDKs
+
+- JavaScript and Python may use common forwarding headers when a framework or hosting platform does not expose a usable client IP. This keeps protection running, but the header can be spoofed unless trusted infrastructure controls it. Arcjet labels this `unverified-header`, logs `client_ip_provenance` at debug level, and warns once per client.
+- Configure every trusted proxy IP or CIDR and ensure the application is reachable only through infrastructure that overwrites or safely appends forwarding headers. The Go SDK ignores `X-Forwarded-For` until the direct peer matches `Config.Proxies`.
+- Never copy `X-Forwarded-For` or another client-controlled header into JavaScript `ipSrc`, Python `ip_src`, or Go `WithIPSrc`. Manual overrides must come from an independently trusted source; syntax validation does not prove provenance.
+- Invalid proxy and manual IP values are rejected. Trusting `0.0.0.0/0` or `::/0` produces a warning.
+- Before shipping, inspect representative requests with JavaScript `clientIpDetails()` / `findIpDetails()`, Python `client_ip_details()`, or Go `ClientIPDetails()`. See https://docs.arcjet.com/best-practices#configure-proxies-and-load-balancers.
+
 Arcjet runs server-side. Bot protection advanced client signals are an optional
 extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricing
 
