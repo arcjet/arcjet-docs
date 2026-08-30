@@ -80,14 +80,16 @@ See the <Link.ToSdk href="/get-started" sdk="node">quick start guide</Link.ToSdk
 When a platform-provided client IP is unavailable, Arcjet may use forwarding
 headers such as `X-Forwarded-For`. Clients can spoof these headers if they can
 reach your application directly or your proxy preserves client-supplied values.
-Arcjet continues protecting the request, but warns once per client and records
+Arcjet continues protecting the request, but produces one warning for the
+lifetime of each Arcjet client instance and records
 `client_ip_provenance="unverified-header"` at debug level.
 
 In production, make the application reachable only through a proxy that
 overwrites or safely appends forwarding headers, and list every trusted hop in
 `proxies`. Use a proxy-service helper such as `cloudflare()` where available.
-Invalid proxy entries and manual `ipSrc` values are rejected; trust-all ranges
-produce a warning. Inspect the selection with `client.clientIpDetails(request)`
+Invalid proxy entries and non-empty malformed manual `ipSrc` values are
+rejected; an empty `ipSrc` is treated as omitted. Trust-all ranges produce a
+warning. Inspect the selection with `client.clientIpDetails(request)`
 in `@arcjet/node`, or `findIpDetails()` / `resolveClientIp()` from `@arcjet/ip`.
 Never copy an untrusted forwarding header into `ipSrc`.
 :::

@@ -17,12 +17,14 @@ the standard library and routers that expose `*http.Request`.
 ## Client IP address detection
 
 :::caution[Configure every trusted ingress]
-Outside supported hosting platforms, Arcjet uses `Request.RemoteAddr` and
-ignores `X-Forwarded-For` unless the direct peer matches an IP or CIDR in
-`Config.Proxies`. It then walks the header from right to left, skipping
-configured proxy hops. The selection is logged at debug level with the
-`client_ip_provenance` facet. If an integration ever uses an unverified
-forwarding header, Arcjet warns once per client.
+Outside supported hosting platforms, Arcjet first uses a public address from
+`Request.RemoteAddr`. When the direct peer matches `Config.Proxies`, Arcjet
+walks `X-Forwarded-For` from right to left and skips configured proxy hops. If
+`RemoteAddr` is missing or non-public, Arcjet may use a public address from a
+common forwarding header so protection can still run. That fallback has
+`Provenance == "unverified-header"` and `Verified == false`. The selection is
+logged at debug level with the `client_ip_provenance` facet, and the fallback
+produces one warning for the lifetime of each Arcjet client instance.
 
 In production, make the application reachable only through the configured
 proxies and ensure they overwrite or safely append `X-Forwarded-For`. Configure
@@ -30,7 +32,8 @@ the actual direct proxy and every trusted hop in `Config.Proxies`. On a supporte
 hosting platform, use `Config.Platform` when automatic platform detection is
 unavailable. If your application determines the client IP itself, pass a
 validated value with `WithIPSrc`. Malformed proxy entries and manual IPs are
-rejected; trust-all ranges produce a warning. Use
+rejected; `0.0.0.0/0` and `::/0` produce a warning because they trust an entire
+address family. The exact addresses `0.0.0.0` and `::` do not. Use
 `client.ClientIPDetails(request)` to inspect the selected address and its
 provenance without protecting the request.
 :::
@@ -218,8 +221,10 @@ log.Printf("ip=%s provenance=%s verified=%t header=%s",
 	details.IP, details.Provenance, details.Verified, details.Header)
 ```
 
-The provenance is `direct`, `platform`, `trusted-proxy`, `unverified-header`,
-`manual`, `development`, `request`, or `none`. Debug logs expose it as
+Automatic detection returns `direct`, `platform`, `trusted-proxy`,
+`unverified-header`, or `none`. Protection logs may also report `manual` when
+`WithIPSrc` is used or `request` when `ProtectDetails.IP` is supplied. Debug
+logs expose the provenance as
 `client_ip_provenance` alongside `client_ip_verified` and `client_ip_header`.
 `Verified` means the SDK tied the source to the request path; it does not
 certify your deployment.

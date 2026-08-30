@@ -165,12 +165,13 @@ contains the original client IP address. Make sure that this header reaches your
 application and that you configure Arcjet to ignore the proxy IP addresses.
 
 :::caution[Forwarding headers are not proof of origin]
-JavaScript and Python integrations may fall back to common forwarding headers
-when the framework and hosting platform do not expose a usable client address.
-This preserves protection coverage, but a directly connected client may be able
-to spoof the value. Arcjet labels that source `unverified-header`, logs the
-provenance at debug level, and warns once per client. The Go SDK instead ignores
-`X-Forwarded-For` until the direct peer matches `Config.Proxies`.
+JavaScript, Python, and Go integrations may fall back to common forwarding
+headers when the framework, direct peer, and hosting platform do not expose a
+usable public client address. This preserves protection coverage, but a directly
+connected client may be able to spoof the value. Arcjet labels that source
+`unverified-header`, logs the provenance at debug level, and produces one
+warning for the lifetime of each Arcjet client instance. A configured trusted
+proxy or managed platform has verified provenance instead.
 
 Do not silence the warning by copying a forwarding header into `ipSrc`,
 `ip_src`, or `WithIPSrc`. A manual override is trusted application input. Derive
@@ -226,7 +227,9 @@ aj, err := arcjet.NewClient(arcjet.Config{
 
 SDKs reject malformed proxy addresses and CIDRs. A trust-all range such as
 `0.0.0.0/0` or `::/0` remains available for unusual deployments, but emits a
-warning because it treats every connecting peer as a trusted proxy.
+warning because it treats every connecting peer as a trusted proxy. A literal
+`0.0.0.0` or `::` matches only that exact unspecified address and does not
+produce the trust-all warning.
 
 ### Verify client IP selection
 
