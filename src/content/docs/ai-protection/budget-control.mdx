@@ -40,8 +40,8 @@ ajToc:
 ---
 
 import { Link } from "@/components/link";
-import SlotByFramework from "@/components/SlotByFramework";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import SlotByFramework from "@/components/SlotByFramework.astro";
+import FrameworkLinks from "@/components/FrameworkLinks.astro";
 import { frameworks } from "@/lib/prefs";
 
 import NextJsStep from "@/snippets/ai-protection/budget-control/nextjs/Example.mdx";
@@ -83,7 +83,7 @@ or external state store required.
     .map((d) => d.key)}
 />
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <NextJsStep slot="next-js" />
   <PythonFastapiStep slot="python-fastapi" />
   <PythonFlaskStep slot="python-flask" />

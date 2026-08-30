@@ -1,0 +1,59 @@
+---
+/**
+ * SlotByFramework — Astro wrapper
+ *
+ * On SDK-scoped routes (`/sdk/:sdk/...`), renders only the matching slot at
+ * build time with zero client JavaScript.
+ *
+ * On legacy (unscoped) routes, delegates to the React `SlotByFrameworkReact`
+ * component with `client:load` so the existing client-side framework switching
+ * via nanostores continues to work.
+ */
+import SlotByFrameworkReact from "@/components/SlotByFrameworkReact";
+import { frameworks, type FrameworkKey } from "@/lib/prefs";
+import { sdkFromPathname, legacyKeyFromPathname } from "@/lib/sdk";
+
+import "@/components/SlotByFramework.scss";
+
+type Props = {
+  /** When true, renders the slot content inline without a wrapper div. */
+  inline?: boolean;
+};
+
+const { inline } = Astro.props;
+const sdkKey = sdkFromPathname(Astro.url.pathname);
+
+// Resolve the legacy framework key for the current SDK (or variant) so we can
+// look up the correct named slot (slots use legacy keys like "next-js", etc.).
+const legacyKey = sdkKey ? legacyKeyFromPathname(Astro.url.pathname) : undefined;
+
+const hasMatchingSlot = legacyKey ? Astro.slots.has(legacyKey) : false;
+
+const frameworkSlots: Partial<Record<FrameworkKey | "default", string>> = {};
+for (const framework of frameworks) {
+  if (Astro.slots.has(framework.key)) {
+    frameworkSlots[framework.key] = await Astro.slots.render(framework.key);
+  }
+}
+if (Astro.slots.has("default")) {
+  frameworkSlots.default = await Astro.slots.render("default");
+}
+---
+
+{
+  sdkKey && hasMatchingSlot ? (
+    inline ? (
+      <Fragment set:html={await Astro.slots.render(legacyKey!)} />
+    ) : (
+      <div class="SlotByFramework">
+        <Fragment set:html={await Astro.slots.render(legacyKey!)} />
+      </div>
+    )
+  ) : (
+    <SlotByFrameworkReact
+      client:load
+      inline={inline}
+      frameworkSlots={frameworkSlots}
+    />
+  )
+}

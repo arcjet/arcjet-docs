@@ -46,8 +46,8 @@ import { Badge } from "@astrojs/starlight/components";
 import Comments from "@/components/Comments.astro";
 import { Link } from "@/components/link";
 import { frameworks } from "@/lib/prefs";
-import SlotByFramework from "@/components/SlotByFramework";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import SlotByFramework from "@/components/SlotByFramework.astro";
+import FrameworkLinks from "@/components/FrameworkLinks.astro";
 
 import BunAddScript from "@/snippets/bot-protection/advanced-signals/html/AddScript.mdx";
 import DenoAddScript from "@/snippets/bot-protection/advanced-signals/html/AddScript.mdx";
@@ -162,7 +162,7 @@ Load the signals script on every page that might lead into a sensitive route, su
 
 We recommend adding the script to every page. Usage billing is based on when you call the `detectBot` rule, not on when the script runs, so you aren't charged for loading the script.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <BunAddScript slot="bun" />
   <DenoAddScript slot="deno" />
   <NestJsAddScript slot="nest-js" />
@@ -189,7 +189,7 @@ With an empty `allow` list, all detected bots are denied – including requests
 that fail signals evaluation. This is the recommended configuration for
 high-sensitivity endpoints:
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <BunBlockSignals slot="bun" />
   <DenoBlockSignals slot="deno" />
   <NestJsBlockSignals slot="nest-js" />
@@ -210,7 +210,7 @@ To block signals failures alongside other specific identifiers, add
 `ARCJET_SIGNALS` to the `deny` list. With a `deny` list, only the listed
 identifiers are blocked – any bot not in the list is allowed:
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <BunDenySignals slot="bun" />
   <DenoDenySignals slot="deno" />
   <NestJsDenySignals slot="nest-js" />
@@ -227,7 +227,7 @@ identifiers are blocked – any bot not in the list is allowed:
 To collect signals data without blocking, add `ARCJET_SIGNALS` to the `allow`
 list. Signals are still evaluated but the result does not affect the decision:
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <BunMonitorSignals slot="bun" />
   <DenoMonitorSignals slot="deno" />
   <NestJsMonitorSignals slot="nest-js" />
@@ -248,7 +248,7 @@ doesn't execute JavaScript and a scraper that targets your API directly.
 
 You can enforce the cookie by using a [filter rule](/filters) to block any request.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <BunFilterSignals slot="bun" />
   <DenoFilterSignals slot="deno" />
   <NestJsFilterSignals slot="nest-js" />
@@ -273,7 +273,7 @@ denial and return a more helpful response. For example, you can redirect the use
 to an error page that explains cookies are required, rather than returning a
 silent 403:
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <BunFilterDecision slot="bun" />
   <DenoFilterDecision slot="deno" />
   <NestJsFilterDecision slot="nest-js" />

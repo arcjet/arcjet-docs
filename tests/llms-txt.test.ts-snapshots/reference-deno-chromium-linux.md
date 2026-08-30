@@ -9,7 +9,7 @@ Quick start
 
 [Section titled “Quick start”](#quick-start)
 
-See the [Deno quick start](/get-started?f=deno).
+See the [Deno quick start](/sdk/deno/get-started/).
 
 Requirements
 ------------

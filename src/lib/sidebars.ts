@@ -671,7 +671,7 @@ export const main = [
       },
       {
         label: "OpenAI",
-        link: "/ai-protection/abuse-protection?f=next-js",
+        link: "/sdk/next/ai-protection/abuse-protection/",
       },
       {
         label: "OpenAI Agents",

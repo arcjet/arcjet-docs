@@ -15,7 +15,7 @@ Quick start
 
 [Section titled “Quick start”](#quick-start)
 
-See the [Fastify quick start](/get-started?f=fastify).
+See the [Fastify quick start](/sdk/fastify/get-started/).
 
 Requirements
 ------------

@@ -65,7 +65,7 @@ Quick start
 
 [Section titled “Quick start”](#quick-start)
 
-See the [quick start guide](/get-started?f=nuxt).
+See the [quick start guide](/sdk/nuxt/get-started/).
 
 Configuration
 -------------
@@ -144,7 +144,7 @@ export const arcjet = arcjetNuxt({
 
 The following fields are required:
 
-*   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these, such as [shield](/shield/reference?f=bun), [rate limiting](/rate-limiting/reference?f=bun), [bot protection](/bot-protection/reference?f=bun), [email validation](/email-validation/reference?f=bun).
+*   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these, such as [shield](/sdk/bun/shield/reference/), [rate limiting](/sdk/bun/rate-limiting/reference/), [bot protection](/sdk/bun/bot-protection/reference/), [email validation](/sdk/bun/email-validation/reference/).
 
 The following fields are optional:
 

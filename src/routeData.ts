@@ -1,5 +1,10 @@
 import { defineRouteMiddleware } from "@astrojs/starlight/route-data";
-import { sdkFromPathname } from "@/lib/sdk";
+import {
+  isFrameworkSpecificEntry,
+  legacyKeyFromPathname,
+  sdkFromPathname,
+  sdkVariantFromPathname,
+} from "@/lib/sdk";
 import {
   breadcrumbsFromSidebar,
   pageJsonLd,
@@ -14,6 +19,25 @@ const SITE_URL = "https://docs.arcjet.com";
 /** Social card images, shared with the marketing site. */
 const OG_IMAGE = "https://arcjet.com/social/arcjet-og-image.png";
 const TWITTER_IMAGE = "https://arcjet.com/social/arcjet-twitter-card.png";
+
+function hasNoindex(routeData: StarlightRouteData): boolean {
+  return routeData.head.some(
+    (tag) =>
+      tag.tag === "meta" &&
+      tag.attrs?.name === "robots" &&
+      typeof tag.attrs.content === "string" &&
+      tag.attrs.content.includes("noindex"),
+  );
+}
+
+function addNoindex(routeData: StarlightRouteData) {
+  if (hasNoindex(routeData)) return;
+
+  routeData.head.push({
+    tag: "meta",
+    attrs: { name: "robots", content: "noindex, follow" },
+  });
+}
 
 /**
  * Reads the canonical URL Starlight already put in the head so structured data
@@ -96,9 +120,31 @@ function addStructuredData(
  */
 export const onRequest = defineRouteMiddleware(async (context) => {
   const routeData = context.locals.starlightRoute;
-  const sdk = sdkFromPathname(context.url.pathname);
+  const pathname = context.url.pathname;
+  const sdk = sdkFromPathname(pathname);
+  const variant = sdkVariantFromPathname(pathname);
+  const legacyKey = legacyKeyFromPathname(pathname);
+
+  if (variant) {
+    addNoindex(routeData);
+  } else if (!sdk && isFrameworkSpecificEntry(routeData.entry.data)) {
+    addNoindex(routeData);
+  }
 
   if (sdk) {
+    const titleByFramework = routeData.entry.data.titleByFramework as
+      | Record<string, string>
+      | undefined;
+    if (legacyKey && titleByFramework?.[legacyKey]) {
+      routeData.entry.data.title = titleByFramework[legacyKey];
+
+      for (const tag of routeData.head) {
+        if (tag.tag === "title") {
+          tag.content = `${titleByFramework[legacyKey]} | Arcjet Docs`;
+        }
+      }
+    }
+
     /**
      * Internal helper to recursively update sidebar entries.
      *
@@ -115,8 +161,10 @@ export const onRequest = defineRouteMiddleware(async (context) => {
           break;
         }
         case "link": {
-          // TODO: Consider making a helper utility to scope these links
-          const href = `/sdk/${sdk}${entry.href}`;
+          const sdkPrefix = variant
+            ? `/sdk/${sdk}/plus/${variant.key}`
+            : `/sdk/${sdk}`;
+          const href = `${sdkPrefix}${entry.href}`;
           entry.href = href;
           entry.isCurrent = context.url.pathname === href;
           break;
@@ -139,5 +187,5 @@ export const onRequest = defineRouteMiddleware(async (context) => {
 
   // Runs after the sidebar scoping above so breadcrumbs see the final `isCurrent`.
   addOpenGraphMetadata(routeData, isLandingPage);
-  addStructuredData(routeData, context.url.pathname, isLandingPage);
+  addStructuredData(routeData, pathname, isLandingPage);
 });

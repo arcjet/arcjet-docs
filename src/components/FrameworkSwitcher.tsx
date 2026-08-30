@@ -34,6 +34,11 @@ import {
   storeFramework,
 } from "@/lib/prefs";
 import {
+  docPathFromSdkPathname,
+  hrefForLegacyFrameworkKey,
+  sdkFromPathname,
+} from "@/lib/sdk";
+import {
   availableFrameworks,
   displayedFramework,
   queryParamFramework,
@@ -111,10 +116,12 @@ const FrameworkSwitcher = forwardRef(
 
       storeFramework(val);
 
-      // Reload the page with the new framework in the query param
-      const url = new URL(window.location.toString());
-      url.searchParams.set("f", val);
-      window.location.replace(url.toString());
+      const currentPath = window.location.pathname;
+      const docPath = sdkFromPathname(currentPath)
+        ? docPathFromSdkPathname(currentPath)
+        : currentPath;
+      const target = hrefForLegacyFrameworkKey(val as FrameworkKey, docPath);
+      window.location.replace(target);
     };
 
     // Sync store with current page frontmatter

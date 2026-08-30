@@ -156,24 +156,25 @@ Go SDK: https://github.com/arcjet/arcjet-go
 
 ## Quick start – choose your framework
 
-Each link below directs to the quick start guide with a framework-specific view:
+Each link below directs to the SDK-scoped quick start guide for that framework:
 
-- [Astro quick start](https://docs.arcjet.com/get-started?f=astro)
-- [Bun quick start](https://docs.arcjet.com/get-started?f=bun)
-- [Deno quick start](https://docs.arcjet.com/get-started?f=deno)
-- [Fastify quick start](https://docs.arcjet.com/get-started?f=fastify)
+- [Astro quick start](https://docs.arcjet.com/sdk/astro/get-started/)
+- [Bun quick start](https://docs.arcjet.com/sdk/bun/get-started/)
+- [Deno quick start](https://docs.arcjet.com/sdk/deno/get-started/)
+- [Fastify quick start](https://docs.arcjet.com/sdk/fastify/get-started/)
 - [Go SDK reference](https://docs.arcjet.com/reference/go)
-- [NestJS quick start](https://docs.arcjet.com/get-started?f=nest-js)
-- [Next.js quick start](https://docs.arcjet.com/get-started?f=next-js)
-- [Node.js quick start](https://docs.arcjet.com/get-started?f=node-js)
-- [Node.js + Express quick start](https://docs.arcjet.com/get-started?f=node-js-express)
-- [Node.js + Hono quick start](https://docs.arcjet.com/get-started?f=node-js-hono)
-- [Nuxt quick start](https://docs.arcjet.com/get-started?f=nuxt)
-- [Python FastAPI quick start](https://docs.arcjet.com/get-started?f=python-fastapi)
-- [Python Flask quick start](https://docs.arcjet.com/get-started?f=python-flask)
-- [React Router quick start](https://docs.arcjet.com/get-started?f=react-router)
-- [Remix quick start](https://docs.arcjet.com/get-started?f=remix)
-- [SvelteKit quick start](https://docs.arcjet.com/get-started?f=sveltekit)
+- [NestJS quick start](https://docs.arcjet.com/sdk/nest/get-started/)
+- [Next.js quick start](https://docs.arcjet.com/sdk/next/get-started/)
+- [Node.js quick start](https://docs.arcjet.com/sdk/node/get-started/)
+- [Node.js + Express quick start](https://docs.arcjet.com/sdk/node/plus/express/get-started/)
+- [Node.js + Hono quick start](https://docs.arcjet.com/sdk/node/plus/hono/get-started/)
+- [Nuxt quick start](https://docs.arcjet.com/sdk/nuxt/get-started/)
+- [Python + FastAPI quick start](https://docs.arcjet.com/sdk/python/plus/fastapi/get-started/)
+- [Python + Flask quick start](https://docs.arcjet.com/sdk/python/plus/flask/get-started/)
+- [React Router quick start](https://docs.arcjet.com/sdk/react-router/get-started/)
+- [Remix quick start](https://docs.arcjet.com/sdk/remix/get-started/)
+- [SvelteKit quick start](https://docs.arcjet.com/sdk/sveltekit/get-started/)
+- [Bun + Hono quick start](https://docs.arcjet.com/sdk/bun/plus/hono/get-started/)
 
 Full docs: https://docs.arcjet.com
 

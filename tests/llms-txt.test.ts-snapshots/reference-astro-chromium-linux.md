@@ -85,7 +85,7 @@ Quick start
 
 [Section titled “Quick start”](#quick-start)
 
-See the [quick start guide](/get-started?f=astro).
+See the [quick start guide](/sdk/astro/get-started/).
 
 Configuration
 -------------

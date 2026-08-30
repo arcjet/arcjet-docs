@@ -70,7 +70,7 @@ Quick start
 
 [Section titled “Quick start”](#quick-start)
 
-See the [quick start guide](/get-started?f=sveltekit).
+See the [quick start guide](/sdk/sveltekit/get-started/).
 
 Configuration
 -------------
@@ -82,7 +82,7 @@ Create a new `Arcjet` object with your API key and rules. Put it in a server-onl
 The following fields are required:
 
 *   `key` (`string`) – Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://console.arcjet.com).
-*   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these, such as [shield](/shield/reference?f=sveltekit), [rate limiting](/rate-limiting/reference?f=sveltekit), [bot protection](/bot-protection/reference?f=sveltekit), [email validation](/email-validation/reference?f=sveltekit).
+*   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these, such as [shield](/sdk/sveltekit/shield/reference/), [rate limiting](/sdk/sveltekit/rate-limiting/reference/), [bot protection](/sdk/sveltekit/bot-protection/reference/), [email validation](/sdk/sveltekit/email-validation/reference/).
 
 The following fields are optional:
 
@@ -705,7 +705,7 @@ The `ArcjetReason` object for shield rules has the following properties:
 shieldTriggered: boolean;
 ```
 
-For more information about these properties, see the [shield documentation](/shield/reference?f=sveltekit).
+For more information about these properties, see the [shield documentation](/sdk/sveltekit/shield/reference/).
 
 ##### Bot protection
 
@@ -733,7 +733,7 @@ window: number;
 reset: number;
 ```
 
-For more information about these properties, see the [rate limiting documentation](/rate-limiting/reference?f=sveltekit).
+For more information about these properties, see the [rate limiting documentation](/sdk/sveltekit/rate-limiting/reference/).
 
 ##### Email validation and verification
 
@@ -751,7 +751,7 @@ An `ArcjetEmailType` is one of the following strings:
 "DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
 ```
 
-For more information about these properties, see the [email validation documentation](/email-validation/reference?f=sveltekit).
+For more information about these properties, see the [email validation documentation](/sdk/sveltekit/email-validation/reference/).
 
 ##### Prompt injection
 

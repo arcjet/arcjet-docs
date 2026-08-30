@@ -2,16 +2,18 @@
 import { SelectChevron } from "@/components/icons/SelectChevron";
 import SdkIcon from "@/components/SdkIcon.astro";
 import {
-pathnameForSdk,
 sdk,
+sdkDisplayLabelFromPathname,
 sdkFromPathname,
-sdks,
+sdkSwitcherOptions,
+isSdkSwitcherOptionCurrent,
 } from "@/lib/sdk";
 import { Icon } from "@astrojs/starlight/components";
 import Default from "@astrojs/starlight/components/TableOfContents.astro";
 
 const activeSdkKey = sdkFromPathname(Astro.url.pathname);
 const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
+const activeSdkLabel = sdkDisplayLabelFromPathname(Astro.url.pathname);
 ---
 
 {
@@ -20,14 +22,16 @@ const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
             <h2 class="toc-label">SDK</h2>
             <button class="toc-toggle" popovertarget="toc-sdk" type="button">
                 <SdkIcon sdk={activeSdk.key} />
-                {activeSdk.label}
+                {activeSdkLabel}
                 <SelectChevron className="chevron" />
             </button>
             <nav id="toc-sdk" popover>
                 <ul>
-                    {sdks().map((sdkItem) => {
-                        const isCurrent =
-                            sdkItem.key === activeSdk.key;
+                    {sdkSwitcherOptions(Astro.url.pathname).map((option) => {
+                        const isCurrent = isSdkSwitcherOptionCurrent(
+                            Astro.url.pathname,
+                            option,
+                        );
 
                         return (
                             <li>
@@ -35,13 +39,10 @@ const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
                                     aria-current={
                                         isCurrent ? "true" : undefined
                                     }
-                                    href={pathnameForSdk(
-                                        Astro.url.pathname,
-                                        sdkItem.key,
-                                    )}
+                                    href={option.href}
                                 >
-                                    <SdkIcon sdk={sdkItem.key} />
-                                    {sdkItem.label}
+                                    <SdkIcon sdk={option.sdkKey} />
+                                    {option.label}
                                     {isCurrent && (
                                         <Icon
                                             class="check"

@@ -32,10 +32,10 @@ ajToc:
 ---
 
 import { Badge, Tabs, TabItem } from "@astrojs/starlight/components";
-import SlotByFramework from "@/components/SlotByFramework";
-import TextByFramework from "@/components/TextByFramework";
+import SlotByFramework from "@/components/SlotByFramework.astro";
+import TextByFramework from "@/components/TextByFramework.astro";
 import { Link } from "@/components/link";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import FrameworkLinks from "@/components/FrameworkLinks.astro";
 import { frameworks } from "@/lib/prefs";
 import Comments from "/src/components/Comments.astro";
 
@@ -73,7 +73,6 @@ Arcjet signup form protection combines rate limiting, bot protection, and email
 validation to protect your signup forms from abuse.
 
 <FrameworkLinks
-  client:load
   exclude={frameworks
     .filter((d) => !frontmatter.frameworks.includes(d.key))
     .map((d) => d.key)}
@@ -149,7 +148,7 @@ For most signup forms, we recommend the following configuration:
 
 This can be configured as follows:
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <RecommendedBun slot="bun" />
   <RecommendedNestJs slot="nest-js" />
   <RecommendedNextJs slot="next-js" />
@@ -172,7 +171,7 @@ Even in dry run mode Arcjet still evaluates each rule, so you can still [check
 the rule results](#check-rule-results) to see if the email address is valid or
 not, or log them to your database.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <NextJsPagesServerActions slot="next-js" />
 </SlotByFramework>
 
@@ -183,7 +182,7 @@ protection rules. This requires a `request` argument which is the request
 context as passed to the request handler. When you configure signup form
 protection, `protect` also requires an `email` argument.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <NestJsGuardDecision slot="nest-js" />
 </SlotByFramework>
 
@@ -246,7 +245,7 @@ own verification logic. For example, you could decide to manually verify user
 signups that come from IP addresses associated with proxies or Tor, and any
 users who sign up with a free email address.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <CustomVerificationBun slot="bun" />
   <CustomVerificationNestJs slot="nest-js" />
   <CustomVerificationNextJs slot="next-js" />
@@ -271,7 +270,7 @@ rule's error result for more information.
 If all other rules that were run returned an `ALLOW` result, then the final
 Arcjet conclusion is `ERROR`.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <ErrorsBun slot="bun" />
   <ErrorsNestJs slot="nest-js" />
   <ErrorsNextJs slot="next-js" />

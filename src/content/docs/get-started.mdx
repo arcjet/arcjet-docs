@@ -78,13 +78,14 @@ ajToc:
 ---
 
 import { YouTube } from "astro-embed";
-import SlotByFramework from "@/components/SlotByFramework";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import SlotByFramework from "@/components/SlotByFramework.astro";
+import FrameworkLinks from "@/components/FrameworkLinks.astro";
 import { Link } from "@/components/link";
 import { Aside, LinkButton, CardGrid } from "@astrojs/starlight/components";
 import FAQs from "/src/components/FAQs.astro";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
+import SdkHydration from "@/components/SdkHydration.astro";
 
 import AstroStep1 from "@/snippets/shared/astro/Install.mdx";
 import AstroRequirements from "@/snippets/get-started/astro/Requirements.mdx";
@@ -250,6 +251,8 @@ import VercelEveStep4 from "@/snippets/get-started/vercel-eve/Step4.mdx";
 
 [Arcjet](https://arcjet.com) is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
 
+<SdkHydration />
+
 <Aside type="tip">
   Using an AI coding assistant? See the
   <Link.Page href="/agent-get-started">Agent get started</Link.Page> guide, or
@@ -261,13 +264,13 @@ import VercelEveStep4 from "@/snippets/get-started/vercel-eve/Step4.mdx";
 This guide shows you how to protect an application with Arcjet by blocking
 automated clients that inflate costs and enforcing per-user token budgets.
 
-<FrameworkLinks title="Choose a framework" client:load />
+<FrameworkLinks title="Choose a framework" />
 
 ## 1. Install Arcjet
 
 In your project root, run the following:
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <AstroStep1 slot="astro" />
   <BunStep1 slot="bun" />
   <BunHonoStep1 slot="bun-hono" />
@@ -299,7 +302,7 @@ In your project root, run the following:
 
 ### Requirements
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <AstroRequirements slot="astro" />
   <BunRequirements slot="bun" />
   <BunHonoRequirements slot="bun-hono" />
@@ -334,7 +337,7 @@ In your project root, run the following:
 [Create a free Arcjet account](https://console.arcjet.com) then follow the
 instructions to add a site and get a key.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <AstroStep2 slot="astro" />
   <BunStep2 slot="bun" />
   <BunHonoStep2 slot="bun-hono" />
@@ -369,7 +372,7 @@ instructions to add a site and get a key.
 This configures Arcjet to protect your AI application: block automated clients that
 inflate costs, and enforce per-user token budgets.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <AstroStep3 slot="astro" />
   <BunStep3 slot="bun" />
   <BunHonoStep3 slot="bun-hono" />
@@ -399,7 +402,7 @@ inflate costs, and enforce per-user token budgets.
   <VercelEveStep3 slot="vercel-eve" />
 </SlotByFramework>
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <AstroStep4 slot="astro" />
   <BunStep4 slot="bun" />
   <BunHonoStep4 slot="bun-hono" />

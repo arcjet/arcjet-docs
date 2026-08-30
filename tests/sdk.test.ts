@@ -1,0 +1,361 @@
+import { expect, test } from "@playwright/test";
+import {
+  docPathFromSdkPathname,
+  hrefForLegacyFrameworkKey,
+  isFrameworkSpecificEntry,
+  isLegacyFrameworkHubPathname,
+  isPlusVariantPathname,
+  isSdkSwitcherOptionCurrent,
+  legacyFrameworkVercelRedirects,
+  LEGACY_F_DOC_PATHS,
+  legacyKeyFromPathname,
+  pathnameForLegacyFrameworkKey,
+  pathnameForSdk,
+  pathnameForSdkVariant,
+  scopeHrefToCurrentSdk,
+  scopeHrefToSdk,
+  sdkDisplayLabelFromPathname,
+  sdkFromPathname,
+  sdkRoutePrefixFromLegacyFrameworkKey,
+  sdkSwitcherOptions,
+  sdkVariantFromPathname,
+  shouldExcludeFromSitemap,
+  variantOnlySdkRedirectTarget,
+  variantOnlySdkAstroRedirects,
+} from "@/lib/sdk";
+
+test.describe("isFrameworkSpecificEntry", () => {
+  test("matches entries with frameworks frontmatter", () => {
+    expect(
+      isFrameworkSpecificEntry({ frameworks: ["next-js", "node-js"] }),
+    ).toBe(true);
+  });
+
+  test("matches entries with titleByFramework frontmatter", () => {
+    expect(
+      isFrameworkSpecificEntry({
+        titleByFramework: { "next-js": "Next.js guide" },
+      }),
+    ).toBe(true);
+  });
+
+  test("skips framework-agnostic entries", () => {
+    expect(isFrameworkSpecificEntry({})).toBe(false);
+  });
+});
+
+test.describe("sdkFromPathname", () => {
+  const cases: [string, string | undefined][] = [
+    ["/sdk/next/get-started/", "next"],
+    ["/sdk/bun/plus/hono/get-started/", "bun"],
+    ["/sdk/python/plus/fastapi/get-started/", "python"],
+    ["/get-started/", undefined],
+    ["/sdk/go/get-started/", undefined],
+  ];
+
+  for (const [pathname, expected] of cases) {
+    test(`${pathname} → ${expected}`, () => {
+      expect(sdkFromPathname(pathname)).toBe(expected);
+    });
+  }
+});
+
+test.describe("sdkVariantFromPathname", () => {
+  test("resolves bun + hono", () => {
+    const variant = sdkVariantFromPathname("/sdk/bun/plus/hono/get-started/");
+    expect(variant?.key).toBe("hono");
+    expect(variant?.legacyFrameworkKey).toBe("bun-hono");
+  });
+
+  test("returns undefined for plain SDK routes", () => {
+    expect(sdkVariantFromPathname("/sdk/bun/get-started/")).toBeUndefined();
+  });
+});
+
+test.describe("legacyKeyFromPathname", () => {
+  const cases: [string, string | undefined][] = [
+    ["/sdk/next/get-started/", "next-js"],
+    ["/sdk/bun/plus/hono/get-started/", "bun-hono"],
+    ["/sdk/node/plus/express/get-started/", "node-js-express"],
+    ["/sdk/python/plus/flask/get-started/", "python-flask"],
+  ];
+
+  for (const [pathname, expected] of cases) {
+    test(`${pathname} → ${expected}`, () => {
+      expect(legacyKeyFromPathname(pathname)).toBe(expected);
+    });
+  }
+});
+
+test.describe("sdkDisplayLabelFromPathname", () => {
+  const cases: [string, string | undefined][] = [
+    ["/sdk/next/get-started/", "Next.js"],
+    ["/sdk/bun/plus/hono/get-started/", "Bun + Hono"],
+    ["/sdk/node/plus/express/get-started/", "Node.js + Express"],
+    ["/sdk/python/plus/fastapi/get-started/", "Python + FastAPI"],
+  ];
+
+  for (const [pathname, expected] of cases) {
+    test(`${pathname} → ${expected}`, () => {
+      expect(sdkDisplayLabelFromPathname(pathname)).toBe(expected);
+    });
+  }
+});
+
+test.describe("pathnameForSdk", () => {
+  test("strips plus-variant segments when switching SDKs", () => {
+    expect(
+      pathnameForSdk("/sdk/bun/plus/hono/rate-limiting/quick-start/", "next"),
+    ).toBe("/sdk/next/rate-limiting/quick-start/");
+  });
+
+  test("routes variant-only SDKs to their default plus-variant", () => {
+    expect(pathnameForSdk("/sdk/next/get-started/", "python")).toBe(
+      "/sdk/python/plus/fastapi/get-started/",
+    );
+  });
+});
+
+test.describe("sdkSwitcherOptions", () => {
+  test("lists Python variants instead of bare Python", () => {
+    const labels = sdkSwitcherOptions("/sdk/next/get-started/").map(
+      (option) => option.label,
+    );
+    expect(labels).toContain("Python + FastAPI");
+    expect(labels).toContain("Python + Flask");
+    expect(labels).not.toContain("Python");
+  });
+
+  test("includes base and variant entries for Node.js", () => {
+    const labels = sdkSwitcherOptions("/sdk/next/get-started/").map(
+      (option) => option.label,
+    );
+    expect(labels).toContain("Node.js");
+    expect(labels).toContain("Node.js + Express");
+    expect(labels).toContain("Node.js + Hono");
+  });
+});
+
+test.describe("isSdkSwitcherOptionCurrent", () => {
+  test("matches plus-variant paths", () => {
+    const options = sdkSwitcherOptions("/sdk/python/plus/fastapi/get-started/");
+    const fastapi = options.find((option) => option.label === "Python + FastAPI");
+    expect(fastapi).toBeDefined();
+    expect(
+      isSdkSwitcherOptionCurrent(
+        "/sdk/python/plus/fastapi/get-started/",
+        fastapi!,
+      ),
+    ).toBe(true);
+  });
+});
+
+test.describe("variantOnlySdkRedirectTarget", () => {
+  test("redirects bare Python SDK paths to FastAPI", () => {
+    expect(variantOnlySdkRedirectTarget("/sdk/python/get-started/")).toBe(
+      "/sdk/python/plus/fastapi/get-started/",
+    );
+  });
+
+  test("leaves plus-variant Python paths unchanged", () => {
+    expect(
+      variantOnlySdkRedirectTarget("/sdk/python/plus/flask/get-started/"),
+    ).toBeUndefined();
+  });
+
+  test("leaves SDKs with base legacy keys unchanged", () => {
+    expect(variantOnlySdkRedirectTarget("/sdk/next/get-started/")).toBeUndefined();
+  });
+});
+
+test.describe("variantOnlySdkAstroRedirects", () => {
+  test("redirects bare Python SDK paths to FastAPI", () => {
+    const redirects = variantOnlySdkAstroRedirects();
+    expect(redirects["/sdk/python/get-started"]).toBe(
+      "/sdk/python/plus/fastapi/get-started",
+    );
+    expect(redirects["/sdk/python/get-started/"]).toBe(
+      "/sdk/python/plus/fastapi/get-started/",
+    );
+  });
+});
+
+test.describe("pathnameForSdkVariant", () => {
+  test("injects a plus-variant segment", () => {
+    expect(pathnameForSdkVariant("/sdk/bun/get-started/", "bun", "hono")).toBe(
+      "/sdk/bun/plus/hono/get-started/",
+    );
+  });
+});
+
+test.describe("scopeHrefToCurrentSdk", () => {
+  test("preserves plus-variant prefixes", () => {
+    expect(
+      scopeHrefToCurrentSdk(
+        "/sdk/bun/plus/hono/get-started/",
+        "/rate-limiting/quick-start/",
+      ),
+    ).toBe("/sdk/bun/plus/hono/rate-limiting/quick-start/");
+  });
+});
+
+test.describe("pathnameForLegacyFrameworkKey", () => {
+  test("maps HTTP SDKs to /sdk routes", () => {
+    expect(pathnameForLegacyFrameworkKey("next-js", "/get-started")).toBe(
+      "/sdk/next/get-started/",
+    );
+    expect(pathnameForLegacyFrameworkKey("bun-hono", "/get-started")).toBe(
+      "/sdk/bun/plus/hono/get-started/",
+    );
+  });
+
+  test("maps guard frameworks on get-started to guard docs", () => {
+    expect(pathnameForLegacyFrameworkKey("crewai", "/get-started")).toBe(
+      "/guards/crewai/",
+    );
+  });
+
+  test("strips existing SDK prefixes from href", () => {
+    expect(
+      pathnameForLegacyFrameworkKey("next-js", "/sdk/bun/get-started/"),
+    ).toBe("/sdk/next/get-started/");
+  });
+});
+
+test.describe("hrefForLegacyFrameworkKey", () => {
+  test("uses SDK routes for HTTP SDKs", () => {
+    expect(hrefForLegacyFrameworkKey("next-js", "/get-started")).toBe(
+      "/sdk/next/get-started/",
+    );
+  });
+
+  test("falls back to ?f= for guard frameworks on non-get-started pages", () => {
+    expect(
+      hrefForLegacyFrameworkKey("crewai", "/rate-limiting/quick-start/"),
+    ).toBe("/rate-limiting/quick-start?f=crewai");
+  });
+});
+
+test.describe("scopeHrefToSdk", () => {
+  test("uses SDK routes on non-SDK pages", () => {
+    expect(scopeHrefToSdk("/reference/nodejs", "/get-started", "node")).toBe(
+      "/sdk/node/get-started/",
+    );
+  });
+
+  test("uses plus-variant routes for Python", () => {
+    expect(scopeHrefToSdk("/reference/nodejs", "/get-started", "python")).toBe(
+      "/sdk/python/plus/fastapi/get-started/",
+    );
+  });
+});
+
+test.describe("legacyFrameworkVercelRedirects", () => {
+  test("redirects legacy get-started URLs to SDK routes", () => {
+    const redirects = legacyFrameworkVercelRedirects();
+    const match = redirects.find(
+      (r) =>
+        r.source === "/get-started" &&
+        r.has[0]?.value === "next-js" &&
+        r.destination === "/sdk/next/get-started/",
+    );
+    expect(match).toBeDefined();
+  });
+
+  test("redirects guard get-started URLs to guard docs", () => {
+    const redirects = legacyFrameworkVercelRedirects();
+    const match = redirects.find(
+      (r) =>
+        r.source === "/get-started" &&
+        r.has[0]?.value === "crewai" &&
+        r.destination === "/guards/crewai/",
+    );
+    expect(match).toBeDefined();
+  });
+
+  test("strips ?f= from SDK routes", () => {
+    const redirects = legacyFrameworkVercelRedirects();
+    expect(
+      redirects.some(
+        (r) =>
+          r.source === "/sdk/:path*" &&
+          r.has[0]?.key === "f" &&
+          !r.has[0]?.value,
+      ),
+    ).toBe(true);
+  });
+
+  test("does not redirect guard frameworks on other pages", () => {
+    const redirects = legacyFrameworkVercelRedirects();
+    expect(
+      redirects.some(
+        (r) =>
+          r.source === "/rate-limiting/quick-start" &&
+          r.has[0]?.value === "crewai",
+      ),
+    ).toBe(false);
+  });
+
+  for (const docPath of [
+    "/filters/reference",
+    "/rate-limiting/reference",
+    "/nosecone/quick-start",
+    "/sensitive-info/quick-start",
+    "/sensitive-info/reference",
+  ] as const) {
+    test(`redirects ${docPath}?f=next-js to the SDK route`, () => {
+      const redirects = legacyFrameworkVercelRedirects();
+      const source = docPath.replace(/\/$/, "") || "/";
+      const destination = pathnameForLegacyFrameworkKey("next-js", docPath);
+      const match = redirects.find(
+        (r) =>
+          r.source === source &&
+          r.has[0]?.value === "next-js" &&
+          r.destination === destination,
+      );
+      expect(match).toBeDefined();
+    });
+  }
+
+  test("covers every legacy ?f= doc path", () => {
+    expect(LEGACY_F_DOC_PATHS.length).toBeGreaterThanOrEqual(16);
+  });
+});
+
+test.describe("shouldExcludeFromSitemap", () => {
+  test("excludes plus-variant SDK routes", () => {
+    expect(
+      shouldExcludeFromSitemap("/sdk/bun/plus/hono/get-started/"),
+    ).toBe(true);
+    expect(shouldExcludeFromSitemap("/sdk/next/get-started/")).toBe(false);
+  });
+
+  test("excludes legacy framework hub routes", () => {
+    expect(isLegacyFrameworkHubPathname("/get-started/")).toBe(true);
+    expect(isLegacyFrameworkHubPathname("/sdk/next/get-started/")).toBe(false);
+    expect(shouldExcludeFromSitemap("/bot-protection/quick-start/")).toBe(true);
+  });
+
+  test("detects plus-variant pathnames", () => {
+    expect(isPlusVariantPathname("/sdk/node/plus/express/get-started/")).toBe(
+      true,
+    );
+    expect(isPlusVariantPathname("/sdk/node/get-started/")).toBe(false);
+  });
+});
+
+test.describe("sdkRoutePrefixFromLegacyFrameworkKey", () => {
+  test("resolves plus variants", () => {
+    expect(sdkRoutePrefixFromLegacyFrameworkKey("node-js-express")).toBe(
+      "/sdk/node/plus/express",
+    );
+  });
+});
+
+test.describe("docPathFromSdkPathname", () => {
+  test("strips SDK and plus-variant prefixes", () => {
+    expect(docPathFromSdkPathname("/sdk/bun/plus/hono/get-started/")).toBe(
+      "/get-started/",
+    );
+  });
+});

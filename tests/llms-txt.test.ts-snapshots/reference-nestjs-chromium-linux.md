@@ -44,7 +44,7 @@ Quick start
 
 [Section titled “Quick start”](#quick-start)
 
-See the [quick start guide](/get-started?f=nest-js).
+See the [quick start guide](/sdk/nest/get-started/).
 
 Configuration
 -------------
@@ -56,7 +56,7 @@ Create a new root `ArcjetModule.forRoot` object with your API key and any defaul
 The following fields are required:
 
 *   `key` (`string`) – Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://console.arcjet.com).
-*   `rules` - The rules to apply to the request. This can be empty in the root object so you can set rules within each controller. See the various sections of the docs for how to configure these, such as [shield](/shield/reference?f=nest-js), [rate limiting](/rate-limiting/reference?f=nest-js), [bot protection](/bot-protection/reference?f=nest-js), [email validation](/email-validation/reference?f=nest-js).
+*   `rules` - The rules to apply to the request. This can be empty in the root object so you can set rules within each controller. See the various sections of the docs for how to configure these, such as [shield](/sdk/nest/shield/reference/), [rate limiting](/sdk/nest/rate-limiting/reference/), [bot protection](/sdk/nest/bot-protection/reference/), [email validation](/sdk/nest/email-validation/reference/).
 
 The following fields are optional:
 
@@ -404,7 +404,7 @@ The `ArcjetReason` object for shield rules has the following properties:
 shieldTriggered: boolean;
 ```
 
-For more information about these properties, see the [shield documentation](/shield/reference?f=remix).
+For more information about these properties, see the [shield documentation](/sdk/remix/shield/reference/).
 
 ##### Bot protection
 
@@ -432,7 +432,7 @@ window: number;
 reset: number;
 ```
 
-For more information about these properties, see the [rate limiting documentation](/rate-limiting/reference?f=node-js).
+For more information about these properties, see the [rate limiting documentation](/sdk/node/rate-limiting/reference/).
 
 ##### Email validation and verification
 
@@ -450,7 +450,7 @@ An `ArcjetEmailType` is one of the following strings:
 "DISPOSABLE" | "FREE" | "NO_MX_RECORDS" | "NO_GRAVATAR" | "INVALID";
 ```
 
-For more information about these properties, see the [email validation documentation](/email-validation/reference?f=node-js).
+For more information about these properties, see the [email validation documentation](/sdk/node/email-validation/reference/).
 
 ##### Prompt injection
 

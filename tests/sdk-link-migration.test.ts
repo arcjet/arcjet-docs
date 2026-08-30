@@ -1,0 +1,35 @@
+import { expect, test } from "@playwright/test";
+
+test.describe("SDK link migration", () => {
+  test("index Get started buttons link to SDK routes", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForSelector(".FrameworkLinks a[href*='/sdk/']", {
+      timeout: 15_000,
+    });
+
+    const hrefs = await page
+      .locator(".FrameworkLinks a")
+      .evaluateAll((anchors) => anchors.map((a) => a.getAttribute("href")));
+
+    expect(hrefs.length).toBeGreaterThan(0);
+    expect(hrefs.every((href) => !href?.includes("?f="))).toBe(true);
+    expect(hrefs.some((href) => href?.startsWith("/sdk/next/get-started"))).toBe(
+      true,
+    );
+  });
+
+  test("framework switcher navigates to SDK route on get-started", async ({
+    page,
+  }) => {
+    await page.goto("/get-started/");
+    await page.waitForSelector(".FrameworkSwitcher select", {
+      timeout: 15_000,
+    });
+
+    await page.selectOption(".FrameworkSwitcher select", "next-js");
+    await page.waitForURL(/\/sdk\/next\/get-started\/?/, { timeout: 15_000 });
+
+    expect(page.url()).toMatch(/\/sdk\/next\/get-started\/?$/);
+    expect(page.url()).not.toContain("?f=");
+  });
+});

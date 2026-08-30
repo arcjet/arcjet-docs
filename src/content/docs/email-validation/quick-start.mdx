@@ -48,8 +48,8 @@ import { Link } from "@/components/link";
 import { CardGrid } from "@astrojs/starlight/components";
 import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
-import FrameworkLinks from "@/components/FrameworkLinks";
-import SlotByFramework from "@/components/SlotByFramework";
+import FrameworkLinks from "@/components/FrameworkLinks.astro";
+import SlotByFramework from "@/components/SlotByFramework.astro";
 import FrameworkName from "@/components/FrameworkName";
 import { frameworks } from "@/lib/prefs";
 import Step1Bun from "@/snippets/email-validation/quick-start/bun/Step1.mdx";
@@ -90,7 +90,6 @@ reduce the amount of spam or fraudulent accounts.
 <WhatIsArcjet />
 
 <FrameworkLinks
-  client:load
   exclude={frameworks
     .filter((d) => !frontmatter.frameworks.includes(d.key))
     .map((d) => d.key)}
@@ -106,7 +105,7 @@ This guide shows you how to add email validation and verification to your
 
 In your project root, install the SDK:
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <Step1Bun slot="bun" />
   <Step1NestJs slot="nest-js" />
   <Step1NextJs slot="next-js" />
@@ -123,7 +122,7 @@ In your project root, install the SDK:
 instructions to add a site and get a key. Add it to a `.env.local` file in your
 project root.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <Step2SetEnv slot="bun" />
   <Step2 slot="next-js" />
   <Step2SetEnv slot="nest-js" />
@@ -141,7 +140,7 @@ email address is invalid or if no MX records are configured, Arcjet returns a
 deny decision. Pass exactly one of `allow` or `deny`. An empty `allow` list
 allows no email types.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <Step3Bun slot="bun" />
   <Step3NestJs slot="nest-js" />
   <Step3NextJs slot="next-js" />
@@ -152,7 +151,7 @@ allows no email types.
   <Step3SvelteKit slot="sveltekit" />
 </SlotByFramework>
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <Step4Bun slot="bun" />
   <Step4NestJs slot="nest-js" />
   <Step4 slot="next-js" />

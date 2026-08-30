@@ -68,8 +68,8 @@ import Comments from "/src/components/Comments.astro";
 import Faqs from "/src/components/FAQs.astro";
 import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
-import SlotByFramework from "@/components/SlotByFramework";
-import FrameworkLinks from "@/components/FrameworkLinks";
+import SlotByFramework from "@/components/SlotByFramework.astro";
+import FrameworkLinks from "@/components/FrameworkLinks.astro";
 import FrameworkName from "@/components/FrameworkName";
 import { frameworks } from "@/lib/prefs";
 import { Link } from "@/components/link";
@@ -132,7 +132,6 @@ lets you enforce rules such as allow or deny by country, network, or
 <WhatIsArcjet />
 
 <FrameworkLinks
-  client:load
   exclude={frameworks
     .filter((d) => !frontmatter.frameworks.includes(d.key))
     .map((d) => d.key)}
@@ -148,7 +147,7 @@ filters.
 
 In your project root, install the SDK:
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <AstroStep1 slot="astro" />
   <BunStep1 slot="bun" />
   <DenoStep1 slot="deno" />
@@ -168,7 +167,7 @@ In your project root, install the SDK:
 [Create a free Arcjet account](https://console.arcjet.com) and follow the
 instructions to add a site and get a key.
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <AstroStep2 slot="astro" />
   <BunStep2 slot="bun" />
   <DenoStep2 slot="deno" />
@@ -185,7 +184,7 @@ instructions to add a site and get a key.
 
 ### 3. Add filters
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <AstroStep3 slot="astro" />
   <BunStep3 slot="bun" />
   <DenoStep3 slot="deno" />
@@ -202,7 +201,7 @@ instructions to add a site and get a key.
 
 {/* Note: Step 4 has its heading inside it as it is dynamic. Make sure that the table of contents (in frontmatter) reflects that dynamic heading correctly. */}
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <AstroStep4 slot="astro" />
   <BunStep4 slot="bun" />
   <DenoStep4 slot="deno" />
@@ -221,7 +220,7 @@ instructions to add a site and get a key.
 
 Make a `curl` request from your terminal to your app:
 
-<SlotByFramework client:load>
+<SlotByFramework>
   <Fragment slot="bun">
 
     ```sh

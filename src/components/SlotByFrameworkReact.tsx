@@ -10,6 +10,8 @@ import "@/components/SlotByFramework.scss";
 
 interface Props extends PropsWithChildren {
   inline?: boolean;
+  /** Pre-rendered framework slot HTML from the Astro wrapper. */
+  frameworkSlots?: Partial<Record<FrameworkKey | "default", string>>;
 }
 
 /**
@@ -19,7 +21,7 @@ interface Props extends PropsWithChildren {
  *
  * @param inline - Renders the content without a wrapping element.
  */
-const SlotByFramework = ({ inline, ...props }: Props) => {
+const SlotByFramework = ({ inline, frameworkSlots, ...props }: Props) => {
   const $displayedFramework = useStore(displayedFramework);
 
   // The selected framework
@@ -30,13 +32,20 @@ const SlotByFramework = ({ inline, ...props }: Props) => {
   }, [$displayedFramework]);
 
   const content = useMemo(() => {
+    if (!selectedFramework) return null;
+
+    const slottedHtml = frameworkSlots?.[selectedFramework];
+    if (slottedHtml) {
+      return <span dangerouslySetInnerHTML={{ __html: slottedHtml }} />;
+    }
+
     return (
       <>
-        {selectedFramework && extractSlotContent(props, selectedFramework)}
+        {extractSlotContent(props, selectedFramework)}
         {props.children}
       </>
     );
-  }, [selectedFramework]);
+  }, [frameworkSlots, props, selectedFramework]);
 
   // Loading handling
   const [loading, setLoading] = useState(true);
