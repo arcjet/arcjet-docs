@@ -65,15 +65,18 @@ See the <Link.ToSdk href="/get-started" sdk="python">quick start guide</Link.ToS
 :::caution[Forwarding headers must come from trusted infrastructure]
 Arcjet may use `X-Forwarded-For` when it cannot get a public client IP from the
 framework request. Clients can spoof this header if they can reach your
-application directly or your proxy preserves client-supplied values. The
-`proxies` option tells Arcjet which IPs or CIDRs to skip while walking the
-header; it does not verify that the connection came through those proxies.
+application directly or your proxy preserves client-supplied values. Arcjet
+continues protecting the request, but warns once per client and records
+`client_ip_provenance="unverified-header"` at debug level.
 
 In production, make the application reachable only through a proxy that
 overwrites or safely appends `X-Forwarded-For`, and list every trusted hop in
-`proxies`. If you cannot guarantee the header's provenance, set
-`disable_automatic_ip_detection=True` and pass a validated `ip_src` to every
-`protect()` call.
+`proxies`. Invalid proxy entries and manual `ip_src` values are rejected;
+trust-all ranges (`0.0.0.0/0` and `::/0`) produce a warning. Inspect the result
+with `aj.client_ip_details(request)`. If your application selects the address,
+set `disable_automatic_ip_detection=True` and pass the same validated `ip_src`
+to `client_ip_details()` and every `protect()` call. Never copy an untrusted
+forwarding header into `ip_src`.
 :::
 
 ## Protect versus Guard
@@ -341,6 +344,27 @@ You can also specify CIDR ranges to match multiple IP addresses.
 
 <Code code={Proxies} lang="py" />
 
+Malformed IP addresses and CIDRs are rejected when the client is created.
+Trusting an entire address family with `0.0.0.0/0` or `::/0` is allowed for
+compatibility, but emits a warning because every connecting peer is then
+treated as trusted.
+
+#### Debug the selected client IP
+
+Use the side-effect-free debugging API to see what `protect()` will use:
+
+```py
+details = aj.client_ip_details(request)
+print(details.ip, details.provenance, details.verified, details.header)
+```
+
+`provenance` is one of `direct`, `platform`, `trusted-proxy`,
+`unverified-header`, `manual`, `development`, `request`, or `none`. `verified`
+means the SDK tied the source to the request path; it does not certify that
+your infrastructure is correctly configured. With debug logging enabled, the
+same values are emitted as `client_ip_provenance`, `client_ip_verified`, and
+`client_ip_header` facets.
+
 ### Ad hoc rules
 
 Sometimes it is useful to add extra protection with a rule based on the logic
@@ -427,12 +451,12 @@ is disabled, omitting `ip_src` or passing an empty string raises an
 `ArcjetMisconfiguration`. Passing a non-empty `ip_src` while automatic detection
 is enabled also raises an `ArcjetMisconfiguration`. With the default automatic
 detection enabled and `ip_src` omitted, Arcjet detects the IP from the framework
-request.
+request. A malformed `ip_src` is rejected before a decision is made.
 
-> **Caution:** The SDK trusts `ip_src` without validating it. Validate the value
-> and ensure it comes from a trusted source. Do not pass a client-controlled
-> header directly; doing so could allow clients to choose the IP address used
-> for fingerprinting, rate limiting, and other security checks.
+> **Caution:** Syntax validation does not establish provenance. Ensure `ip_src`
+> comes from a trusted source. Do not pass a client-controlled header directly;
+> doing so could allow clients to choose the IP address used for fingerprinting,
+> rate limiting, and other security checks.
 
 #### Metadata
 

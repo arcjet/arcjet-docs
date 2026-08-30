@@ -164,6 +164,20 @@ Most proxies and load balancers add an `X-Forwarded-For` header to requests that
 contains the original client IP address. Make sure that this header reaches your
 application and that you configure Arcjet to ignore the proxy IP addresses.
 
+:::caution[Forwarding headers are not proof of origin]
+JavaScript and Python integrations may fall back to common forwarding headers
+when the framework and hosting platform do not expose a usable client address.
+This preserves protection coverage, but a directly connected client may be able
+to spoof the value. Arcjet labels that source `unverified-header`, logs the
+provenance at debug level, and warns once per client. The Go SDK instead ignores
+`X-Forwarded-For` until the direct peer matches `Config.Proxies`.
+
+Do not silence the warning by copying a forwarding header into `ipSrc`,
+`ip_src`, or `WithIPSrc`. A manual override is trusted application input. Derive
+it only from a framework or infrastructure source whose trust boundary you have
+verified.
+:::
+
 This is not necessary on platforms such as Firebase, Netlify, Fly.io, or Vercel
 because Arcjet can auto-detect the proxy IPs for these platforms.
 
@@ -198,7 +212,44 @@ const aj = arcjet({
 <TabItem label="Python">
 <Code code={ProxiesPy} lang="py" />
 </TabItem>
+<TabItem label="Go">
+
+```go
+aj, err := arcjet.NewClient(arcjet.Config{
+	Key:     os.Getenv("ARCJET_KEY"),
+	Proxies: []string{"203.0.113.100", "203.0.113.0/24"},
+})
+```
+
+</TabItem>
 </Tabs>
+
+SDKs reject malformed proxy addresses and CIDRs. A trust-all range such as
+`0.0.0.0/0` or `::/0` remains available for unusual deployments, but emits a
+warning because it treats every connecting peer as a trusted proxy.
+
+### Verify client IP selection
+
+The SDKs expose the selection without sending a decision. Use this in staging
+with representative requests from every ingress path:
+
+| SDK | Debugging API |
+| --- | --- |
+| JavaScript | `client.clientIpDetails(request)` in `@arcjet/node`; `findIpDetails()` or `resolveClientIp()` from `@arcjet/ip` for other adapters |
+| Python | `client.client_ip_details(request, ip_src=...)` |
+| Go | `client.ClientIPDetails(request)` |
+
+The result contains the selected IP, its provenance, whether the SDK tied the
+source to the request path, and the header name when applicable. The same data
+is logged at debug level as `client_ip_provenance`, `client_ip_verified`, and
+`client_ip_header`. A `verified` value confirms how the SDK reached the source;
+it does not prove that the surrounding network configuration is safe.
+
+Expected production provenance is normally `platform`, `direct`,
+`trusted-proxy`, or a deliberately supplied `manual` value. Investigate
+`unverified-header`, confirm the application is reachable only through the
+expected ingress, make that ingress overwrite or safely append forwarding
+headers, and configure every trusted hop.
 
 ### Proxy services like Cloudflare
 

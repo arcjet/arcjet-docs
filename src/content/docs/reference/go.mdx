@@ -20,14 +20,19 @@ the standard library and routers that expose `*http.Request`.
 Outside supported hosting platforms, Arcjet uses `Request.RemoteAddr` and
 ignores `X-Forwarded-For` unless the direct peer matches an IP or CIDR in
 `Config.Proxies`. It then walks the header from right to left, skipping
-configured proxy hops.
+configured proxy hops. The selection is logged at debug level with the
+`client_ip_provenance` facet. If an integration ever uses an unverified
+forwarding header, Arcjet warns once per client.
 
 In production, make the application reachable only through the configured
 proxies and ensure they overwrite or safely append `X-Forwarded-For`. Configure
 the actual direct proxy and every trusted hop in `Config.Proxies`. On a supported
 hosting platform, use `Config.Platform` when automatic platform detection is
 unavailable. If your application determines the client IP itself, pass a
-validated value with `WithIPSrc`.
+validated value with `WithIPSrc`. Malformed proxy entries and manual IPs are
+rejected; trust-all ranges produce a warning. Use
+`client.ClientIPDetails(request)` to inspect the selected address and its
+provenance without protecting the request.
 :::
 
 ## Install
@@ -197,13 +202,27 @@ decision, err := aj.Protect(r.Context(), r, arcjet.WithIPSrc(ipSrc))
 ```
 
 A non-empty value takes precedence over automatic detection. An empty string
-does not override the automatically detected IP. `WithIPSrc` is also supported
-by `ProtectDetails`.
+is rejected, as is any malformed IPv4 or IPv6 address. `WithIPSrc` is also
+supported by `ProtectDetails`.
 
-> **Caution:** The SDK trusts the value without validating it. Validate the
-> value and ensure it comes from a trusted source. Do not pass a
+> **Caution:** Syntax validation does not establish provenance. Ensure the
+> value comes from a trusted source. Do not pass a
 > client-controlled header directly; doing so could allow clients to choose the
 > IP address used for fingerprinting, rate limiting, and other security checks.
+
+Inspect automatic detection without sending a decision:
+
+```go
+details := aj.ClientIPDetails(r)
+log.Printf("ip=%s provenance=%s verified=%t header=%s",
+	details.IP, details.Provenance, details.Verified, details.Header)
+```
+
+The provenance is `direct`, `platform`, `trusted-proxy`, `unverified-header`,
+`manual`, `development`, `request`, or `none`. Debug logs expose it as
+`client_ip_provenance` alongside `client_ip_verified` and `client_ip_header`.
+`Verified` means the SDK tied the source to the request path; it does not
+certify your deployment.
 
 ### Sensitive information detection
 
