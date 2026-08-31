@@ -68,6 +68,7 @@ const frameworkIcon = {
   "node-js": <IconNodeJs />,
   nuxt: <IconNuxt />,
   "openai-agents": <IconOpenAiAgents />,
+  "openai-agents-py": <IconOpenAiAgents />,
   "python-fastapi": <IconFastApi />,
   "python-flask": <IconFlask />,
   "react-router": <IconReactRouter />,

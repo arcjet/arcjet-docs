@@ -541,6 +541,7 @@ const GUARD_DOC_PATHS: Partial<Record<FrameworkKey, string>> = {
   langgraph: "/guards/langgraph/",
   mastra: "/guards/mastra/",
   "openai-agents": "/guards/openai-agents/",
+  "openai-agents-py": "/guards/openai-agents-py/",
   "strands-agents": "/guards/strands-agents/",
   "vercel-ai": "/guards/vercel-ai/",
   "vercel-eve": "/guards/vercel-eve/",

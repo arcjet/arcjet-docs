@@ -66,6 +66,7 @@ export const frameworks = [
   { key: "node-js-hono", label: "Node.js + Hono" },
   { key: "nuxt", label: "Nuxt" },
   { key: "openai-agents", label: "OpenAI Agents" },
+  { key: "openai-agents-py", label: "OpenAI Agents Python" },
   { key: "python-fastapi", label: "Python + FastAPI" },
   { key: "python-flask", label: "Python + Flask" },
   { key: "react-router", label: "React Router" },

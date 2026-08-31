@@ -1,21 +1,137 @@
 ---
-title: "Agent guards quick start"
-description: "Guard an AI agent tool with an Arcjet remote policy."
+title: "Agent guards"
+titleByFramework:
+  default: "Agent guards"
+  claude-agent-sdk: "Agent guards for Claude Agent SDK"
+  crewai: "Agent guards for CrewAI"
+  genkit: "Agent guards for Genkit"
+  langchain: "Agent guards for LangChain"
+  langchain-js: "Agent guards for LangChain JS"
+  langgraph: "Agent guards for LangGraph"
+  mastra: "Agent guards for Mastra"
+  openai-agents: "Agent guards for OpenAI Agents"
+  openai-agents-py: "Agent guards for OpenAI Agents Python"
+  strands-agents: "Agent guards for Strands Agents"
+  vercel-ai: "Agent guards for Vercel AI SDK"
+  vercel-eve: "Agent guards for Vercel Eve"
+description: "Quick start guide for guarding an AI agent tool with an Arcjet remote policy in Vercel AI SDK, LangChain, LangChain JS, CrewAI, LangGraph, Genkit, OpenAI Agents, OpenAI Agents Python, Strands Agents, Mastra, Vercel Eve, and Claude Agent SDK."
+frameworks:
+  - claude-agent-sdk
+  - crewai
+  - genkit
+  - langchain
+  - langchain-js
+  - langgraph
+  - mastra
+  - openai-agents
+  - openai-agents-py
+  - strands-agents
+  - vercel-ai
+  - vercel-eve
+ajToc:
+  - text: "Quick start"
+    anchor: "quick-start"
+    children:
+      - text: 1. Configure the policy
+        anchor: "1-configure-the-policy"
+      - text: 2. Install Arcjet
+        anchor: "2-install-arcjet"
+      - text: 3. Set your key
+        anchor: "3-set-your-key"
+      - text: 4. Wrap the tool
+        anchor: "4-wrap-the-tool"
+      - text: 5. Try the policy
+        anchor: "5-try-the-policy"
+  - text: "What next?"
+    anchor: "what-next"
+  - text: "Get help"
+    anchor: "get-help"
 ---
 
-import { Tabs, TabItem } from "@astrojs/starlight/components";
+import { CardGrid } from "@astrojs/starlight/components";
+import Comments from "/src/components/Comments.astro";
+import SlotByFramework from "@/components/SlotByFramework.astro";
+import FrameworkLinks from "@/components/FrameworkLinks.astro";
+import FrameworkName from "@/components/FrameworkName";
+import { frameworks } from "@/lib/prefs";
 import { Link } from "@/components/link";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+import SdkReferenceLinkByFramework from "@/components/SdkReferenceLinkByFramework.astro";
+
+import ClaudeInstall from "@/snippets/guards/quick-start/claude-agent-sdk/Install.mdx";
+import ClaudeWrap from "@/snippets/guards/quick-start/claude-agent-sdk/Wrap.mdx";
+import ClaudeTry from "@/snippets/guards/quick-start/claude-agent-sdk/Try.mdx";
+import CrewaiInstall from "@/snippets/guards/quick-start/crewai/Install.mdx";
+import CrewaiWrap from "@/snippets/guards/quick-start/crewai/Wrap.mdx";
+import CrewaiTry from "@/snippets/guards/quick-start/crewai/Try.mdx";
+import GenkitInstall from "@/snippets/guards/quick-start/genkit/Install.mdx";
+import GenkitWrap from "@/snippets/guards/quick-start/genkit/Wrap.mdx";
+import GenkitTry from "@/snippets/guards/quick-start/genkit/Try.mdx";
+import LangchainInstall from "@/snippets/guards/quick-start/langchain/Install.mdx";
+import LangchainWrap from "@/snippets/guards/quick-start/langchain/Wrap.mdx";
+import LangchainTry from "@/snippets/guards/quick-start/langchain/Try.mdx";
+import LangchainJsInstall from "@/snippets/guards/quick-start/langchain-js/Install.mdx";
+import LangchainJsWrap from "@/snippets/guards/quick-start/langchain-js/Wrap.mdx";
+import LangchainJsTry from "@/snippets/guards/quick-start/langchain-js/Try.mdx";
+import LanggraphInstall from "@/snippets/guards/quick-start/langgraph/Install.mdx";
+import LanggraphWrap from "@/snippets/guards/quick-start/langgraph/Wrap.mdx";
+import LanggraphTry from "@/snippets/guards/quick-start/langgraph/Try.mdx";
+import MastraInstall from "@/snippets/guards/quick-start/mastra/Install.mdx";
+import MastraWrap from "@/snippets/guards/quick-start/mastra/Wrap.mdx";
+import MastraTry from "@/snippets/guards/quick-start/mastra/Try.mdx";
+import OpenaiAgentsInstall from "@/snippets/guards/quick-start/openai-agents/Install.mdx";
+import OpenaiAgentsWrap from "@/snippets/guards/quick-start/openai-agents/Wrap.mdx";
+import OpenaiAgentsTry from "@/snippets/guards/quick-start/openai-agents/Try.mdx";
+import OpenaiAgentsPyInstall from "@/snippets/guards/quick-start/openai-agents-py/Install.mdx";
+import OpenaiAgentsPyWrap from "@/snippets/guards/quick-start/openai-agents-py/Wrap.mdx";
+import OpenaiAgentsPyTry from "@/snippets/guards/quick-start/openai-agents-py/Try.mdx";
+import OpenaiAgentsPyKey from "@/snippets/guards/quick-start/openai-agents-py/Key.mdx";
+import StrandsInstall from "@/snippets/guards/quick-start/strands-agents/Install.mdx";
+import StrandsWrap from "@/snippets/guards/quick-start/strands-agents/Wrap.mdx";
+import StrandsTry from "@/snippets/guards/quick-start/strands-agents/Try.mdx";
+import VercelAiInstall from "@/snippets/guards/quick-start/vercel-ai/Install.mdx";
+import VercelAiWrap from "@/snippets/guards/quick-start/vercel-ai/Wrap.mdx";
+import VercelAiTry from "@/snippets/guards/quick-start/vercel-ai/Try.mdx";
+import VercelEveInstall from "@/snippets/guards/quick-start/vercel-eve/Install.mdx";
+import VercelEveWrap from "@/snippets/guards/quick-start/vercel-eve/Wrap.mdx";
+import VercelEveTry from "@/snippets/guards/quick-start/vercel-eve/Try.mdx";
+
+import ClaudeKey from "@/snippets/get-started/claude-agent-sdk/Step2.mdx";
+import CrewaiKey from "@/snippets/get-started/crewai/Step2.mdx";
+import GenkitKey from "@/snippets/get-started/genkit/Step2.mdx";
+import LangchainKey from "@/snippets/get-started/langchain/Step2.mdx";
+import LangchainJsKey from "@/snippets/get-started/langchain-js/Step2.mdx";
+import LanggraphKey from "@/snippets/get-started/langgraph/Step2.mdx";
+import MastraKey from "@/snippets/get-started/mastra/Step2.mdx";
+import OpenaiAgentsKey from "@/snippets/get-started/openai-agents/Step2.mdx";
+import StrandsKey from "@/snippets/get-started/strands-agents/Step2.mdx";
+import VercelAiKey from "@/snippets/get-started/vercel-ai/Step2.mdx";
+import VercelEveKey from "@/snippets/get-started/vercel-eve/Step2.mdx";
 
 This example gives an AI agent two tools. `getClientRecord` returns account data
-that includes PII. `sendEmail` is protected by Arcjet, so the model can read the
-record but cannot send its sensitive fields outside the application. Arcjet
-checks the model-selected recipient and generated message body before the email
-provider runs.
+that includes personally identifiable information (PII). Arcjet guards
+`sendEmail`, so the model can read the record but cannot send its sensitive
+fields outside the application. Arcjet checks the model-selected recipient and
+generated message body before the email provider runs.
 
-## 1. Configure the policy
+<WhatIsArcjet />
 
-In the Arcjet Console, create an Agent Guard policy with the label `email.sent`.
-Add these inputs:
+<FrameworkLinks
+  exclude={frameworks
+    .filter((d) => !frontmatter.frameworks.includes(d.key))
+    .map((d) => d.key)}
+  title="Choose a framework"
+/>
+
+## Quick start
+
+This guide shows you how to guard an agent tool in your
+<FrameworkName client:load /> project.
+
+### 1. Configure the policy
+
+In the [Arcjet Console](https://console.arcjet.com), create an Agent Guard
+policy with the label `email.sent`. Add these inputs:
 
 | Input                | Exposure | Type        |
 | -------------------- | -------- | ----------- |
@@ -35,256 +151,88 @@ entity types locally.
 
 Publish the policy before running the example.
 
-## 2. Wrap the tool
+Framework wrappers take `action` for the same slug you configured as the
+policy label. Direct `guard()` calls still use the field name `label`.
 
-The wrappers take `action` for the same slug you configured as the policy
-label. Direct `guard()` calls still use the field name `label`.
+### 2. Install Arcjet
 
-<Tabs syncKey="language">
-<TabItem label="Vercel AI SDK">
+In your project root, install the SDK:
 
-```bash
-npm install @arcjet/guard @arcjet/sensitive-info-rampart ai zod
-```
+<SlotByFramework>
+  <ClaudeInstall slot="claude-agent-sdk" />
+  <CrewaiInstall slot="crewai" />
+  <GenkitInstall slot="genkit" />
+  <LangchainInstall slot="langchain" />
+  <LangchainJsInstall slot="langchain-js" />
+  <LanggraphInstall slot="langgraph" />
+  <MastraInstall slot="mastra" />
+  <OpenaiAgentsInstall slot="openai-agents" />
+  <OpenaiAgentsPyInstall slot="openai-agents-py" />
+  <StrandsInstall slot="strands-agents" />
+  <VercelAiInstall slot="vercel-ai" />
+  <VercelEveInstall slot="vercel-eve" />
+</SlotByFramework>
 
-```ts
-import { launchArcjet, policyInput } from "@arcjet/guard";
-import { rampart } from "@arcjet/sensitive-info-rampart";
-import {
-  aiToolsContext,
-  createAgentContext,
-  guardTool,
-} from "@arcjet/guard/vercel-ai/v7";
-import { generateText, stepCountIs, tool } from "ai";
-import { z } from "zod";
+### 3. Set your key
 
-// Create one Arcjet client and reuse it across agent runs. Rampart detects
-// bank account and routing numbers locally.
-const arcjet = launchArcjet({
-  key: process.env.ARCJET_KEY!,
-  sensitiveInfoBackend: rampart(),
-});
+[Create a free Arcjet account](https://console.arcjet.com) and follow the
+instructions to add a site and get a key.
 
-export async function runEmailAgent(
-  user: {
-    id: string;
-    allowedRecipients: string[];
-    record: { name: string; bankAccount: string; routingNumber: string };
-  },
-  prompt: string,
-) {
-  // This read-only tool gives the model the current customer's account data.
-  const getClientRecord = tool({
-    description: "Get the account details on file for the current customer",
-    inputSchema: z.object({}),
-    execute: () => user.record,
-  });
+<SlotByFramework>
+  <ClaudeKey slot="claude-agent-sdk" />
+  <CrewaiKey slot="crewai" />
+  <GenkitKey slot="genkit" />
+  <LangchainKey slot="langchain" />
+  <LangchainJsKey slot="langchain-js" />
+  <LanggraphKey slot="langgraph" />
+  <MastraKey slot="mastra" />
+  <OpenaiAgentsKey slot="openai-agents" />
+  <OpenaiAgentsPyKey slot="openai-agents-py" />
+  <StrandsKey slot="strands-agents" />
+  <VercelAiKey slot="vercel-ai" />
+  <VercelEveKey slot="vercel-eve" />
+</SlotByFramework>
 
-  // guardTool checks policy before the email provider can run.
-  const sendEmail = guardTool(
-    arcjet,
-    tool({
-      description: "Send an email",
-      inputSchema: z.object({
-        recipient: z.string().email(),
-        body: z.string(),
-      }),
-      execute: ({ recipient, body }) =>
-        emailProvider.send({ to: recipient, body }),
-    }),
-    {
-      // The action selects the remote policy configured in step 1.
-      action: "email.sent",
-      // Actor and the allow list come from trusted application state.
-      actor: user.id,
-      // Map only the values the remote policy needs.
-      inputs: ({ recipient, body }) => ({
-        recipient: policyInput.server.string(recipient),
-        allowed_recipients: policyInput.server.stringList(
-          user.allowedRecipients,
-        ),
-        body: policyInput.local.string(body),
-      }),
-    },
-  );
+### 4. Wrap the tool
 
-  const tools = { getClientRecord, sendEmail };
-  const context = createAgentContext();
+Adapters that accept `inputs` map the policy fields from trusted application
+state and the model-selected arguments. Other JavaScript adapters submit
+`action` and SDK `rules` for the local sensitive-information check.
 
-  // The model can call either tool, but sendEmail always passes through Arcjet.
-  return generateText({
-    model: "openai/gpt-4o-mini",
-    system:
-      "Use getClientRecord when the user asks for account details. " +
-      "Use sendEmail exactly once to complete the request.",
-    prompt,
-    tools,
-    toolsContext: aiToolsContext(context, tools),
-    stopWhen: stepCountIs(3),
-  });
-}
-```
+<SlotByFramework>
+  <ClaudeWrap slot="claude-agent-sdk" />
+  <CrewaiWrap slot="crewai" />
+  <GenkitWrap slot="genkit" />
+  <LangchainWrap slot="langchain" />
+  <LangchainJsWrap slot="langchain-js" />
+  <LanggraphWrap slot="langgraph" />
+  <MastraWrap slot="mastra" />
+  <OpenaiAgentsWrap slot="openai-agents" />
+  <OpenaiAgentsPyWrap slot="openai-agents-py" />
+  <StrandsWrap slot="strands-agents" />
+  <VercelAiWrap slot="vercel-ai" />
+  <VercelEveWrap slot="vercel-eve" />
+</SlotByFramework>
 
-</TabItem>
-<TabItem label="LangChain">
+### 5. Try the policy
 
-```bash
-pip install "arcjet[langchain,sensitive-info-rampart]" langchain langchain-openai
-```
+Keep identity, allowed recipients, and sensitive records on the server. The
+browser sends only the scenario name.
 
-```py
-import os
-
-from arcjet.guard import launch_arcjet, local_input, server_input
-from arcjet.guard.langchain import guard_tool
-from arcjet_sensitive_info_rampart import rampart
-from langchain.agents import create_agent
-from langchain_core.tools import tool
-from langchain_openai import ChatOpenAI
-
-# Create one Arcjet client and enable local bank-detail detection.
-arcjet = launch_arcjet(
-    key=os.environ["ARCJET_KEY"],
-    sensitive_info_backend=rampart(),
-)
-
-
-@tool
-async def send_email(recipient: str, body: str) -> str:
-    """Send an email."""
-    await email_provider.send(to=recipient, body=body)
-    return "sent"
-
-
-async def run_email_agent(user, prompt: str):
-    # This read-only tool returns the current customer's account data.
-    @tool
-    async def get_client_record() -> dict:
-        """Get the account details on file for the current customer."""
-        return user.record
-
-    # guard_tool checks remote policy before send_email can run.
-    guarded_send_email = guard_tool(
-        guard=arcjet,
-        tool=send_email,
-        # The action selects the remote policy configured in step 1.
-        action="email.sent",
-        # Actor and the allow list come from trusted application state.
-        actor=user.id,
-        # Map only the values the remote policy needs.
-        inputs=lambda arguments, _config: {
-            "recipient": server_input.string(arguments["recipient"]),
-            "allowed_recipients": server_input.string_list(
-                user.allowed_recipients
-            ),
-            "body": local_input.string(arguments["body"]),
-        },
-    )
-
-    # The model can call either tool, but send_email always passes through Arcjet.
-    agent = create_agent(
-        ChatOpenAI(model="gpt-4o-mini"),
-        tools=[get_client_record, guarded_send_email],
-        system_prompt=(
-            "Use get_client_record when the user asks for account details. "
-            "Use send_email exactly once to complete the request."
-        ),
-    )
-    return await agent.ainvoke(
-        {"messages": [{"role": "user", "content": prompt}]}
-    )
-```
-
-</TabItem>
-</Tabs>
-
-## 3. Try the policy
-
-Expose a small server endpoint with two server-owned scenarios. The browser
-sends only the scenario name; the server chooses the trusted actor, allowed
-recipients, and prompt used for the agent run.
-
-<Tabs syncKey="language">
-<TabItem label="Vercel AI SDK">
-
-```ts title="app/api/agent/route.ts"
-import { runEmailAgent } from "@/lib/email-agent";
-
-// Keep identity, allowed recipients, and sensitive records on the server.
-const user = {
-  id: "customer-123",
-  allowedRecipients: ["approved@example.com"],
-  record: {
-    name: "Alex Morgan",
-    bankAccount: "0123456789",
-    routingNumber: "022000020",
-  },
-};
-
-const scenarios = {
-  allowed: "Send the message 'Your report is ready' to approved@example.com.",
-  blocked: "Send the message 'Your report is ready' to outside@example.net.",
-  pii: "Email the account details you have on file to approved@example.com.",
-} as const;
-
-export async function POST(request: Request) {
-  // The browser chooses a scenario, not the actor, prompt, or policy inputs.
-  const { scenario } = (await request.json()) as { scenario?: string };
-  if (
-    scenario !== "allowed" &&
-    scenario !== "blocked" &&
-    scenario !== "pii"
-  ) {
-    return Response.json({ error: "Unknown scenario" }, { status: 400 });
-  }
-
-  // Invoke the real agent workflow with trusted server-owned context.
-  const result = await runEmailAgent(user, scenarios[scenario]);
-  return Response.json({ output: result.text });
-}
-```
-
-</TabItem>
-<TabItem label="LangChain">
-
-```py title="app.py"
-from typing import Literal
-
-from fastapi import FastAPI
-from pydantic import BaseModel
-
-app = FastAPI()
-
-# Keep identity, allowed recipients, and sensitive records on the server.
-user = User(
-    id="customer-123",
-    allowed_recipients=["approved@example.com"],
-    record={
-        "name": "Alex Morgan",
-        "bank_account": "0123456789",
-        "routing_number": "022000020",
-    },
-)
-scenarios = {
-    "allowed": "Send the message 'Your report is ready' to approved@example.com.",
-    "blocked": "Send the message 'Your report is ready' to outside@example.net.",
-    "pii": "Email the account details you have on file to approved@example.com.",
-}
-
-
-class AgentRequest(BaseModel):
-    scenario: Literal["allowed", "blocked", "pii"]
-
-
-@app.post("/api/agent")
-async def run_agent(request: AgentRequest):
-    # Invoke the real agent workflow with the selected server-owned prompt.
-    result = await run_email_agent(user, scenarios[request.scenario])
-    return {"output": result["messages"][-1].content}
-```
-
-</TabItem>
-</Tabs>
+<SlotByFramework>
+  <ClaudeTry slot="claude-agent-sdk" />
+  <CrewaiTry slot="crewai" />
+  <GenkitTry slot="genkit" />
+  <LangchainTry slot="langchain" />
+  <LangchainJsTry slot="langchain-js" />
+  <LanggraphTry slot="langgraph" />
+  <MastraTry slot="mastra" />
+  <OpenaiAgentsTry slot="openai-agents" />
+  <OpenaiAgentsPyTry slot="openai-agents-py" />
+  <StrandsTry slot="strands-agents" />
+  <VercelAiTry slot="vercel-ai" />
+  <VercelEveTry slot="vercel-eve" />
+</SlotByFramework>
 
 Add a minimal page that calls the endpoint and displays the agent's response:
 
@@ -319,26 +267,45 @@ Add a minimal page that calls the endpoint and displays the agent's response:
 Each scenario demonstrates a different result from the same guarded tool:
 
 - **Allowed recipient:** The recipient is on the allow list and the body has no
-  sensitive data, so `sendEmail` reaches the email provider.
+  sensitive data, so `sendEmail` can reach the email provider.
 - **Blocked recipient:** The model calls the same tool with an external address.
-  The remote membership policy denies the call before the provider runs, and
-  the model receives the denial result.
+  When the adapter maps `inputs`, the remote membership policy denies the call
+  before the provider runs, and the model receives the denial result.
 - **Sensitive information:** The recipient is allowed, but the agent first
   calls `getClientRecord` and receives test bank account and routing numbers.
   When the model includes that tool result in the email body, local sensitive
-  information policy blocks `sendEmail` before the data leaves the application.
+  information policy blocks `sendEmail` before the data leaves the
+  application.
 
-For more information about every adapter, see
-<Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>.
-For `guardTool` options and `toolsContext`, see
-<Link.Page href="/guards/vercel-ai">Vercel AI SDK</Link.Page>.
-For Python tools and `create_agent`, see
-<Link.Page href="/guards/langchain">LangChain</Link.Page>.
-For official CrewAI `register_arcjet_hooks` on `PRE_TOOL_CALL` and `HookAborted`, see
-<Link.Page href="/guards/crewai">CrewAI</Link.Page>.
-For Eve channels and connections, see
-<Link.Page href="/guards/vercel-eve">Vercel Eve</Link.Page>.
-For processors, tools, and hooks, see
-<Link.Page href="/guards/mastra">Mastra</Link.Page>.
-For the full input and rule reference, see
-<Link.Page href="/guards/remote-policies">Remote policies</Link.Page>.
+## What next?
+
+<CardGrid>
+  <Link.Card
+    title="Framework integrations"
+    href="/guards/framework-integrations"
+    description="Helpers, denial envelopes, and fail-closed defaults for every adapter."
+  />
+  <Link.Card
+    title="Remote policies"
+    href="/guards/remote-policies"
+    description="Labels, actors, typed inputs, and supported policy rules."
+  />
+  <Link.Card
+    title="Capture events"
+    href="/guards/capture"
+    description="Record that an allowed action happened, without changing the decision."
+  />
+  <Link.Card
+    title="Testing and reference"
+    href="/guards/reference"
+    description="Test denial and availability behavior and review the API."
+  />
+  <SdkReferenceLinkByFramework />
+</CardGrid>
+
+## Get help
+
+Need help with anything? Email support@arcjet.com to get support from our
+engineering team.
+
+<Comments />
