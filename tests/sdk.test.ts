@@ -5,6 +5,7 @@ import {
   isFrameworkSpecificEntry,
   isLegacyFrameworkHubPathname,
   isPlusVariantPathname,
+  isRouteSdkKey,
   isSdkSwitcherOptionCurrent,
   legacyFrameworkVercelRedirects,
   LEGACY_F_DOC_PATHS,
@@ -23,6 +24,14 @@ import {
   variantOnlySdkRedirectTarget,
   variantOnlySdkAstroRedirects,
 } from "@/lib/sdk";
+
+test.describe("isRouteSdkKey", () => {
+  test("accepts HTTP SDK keys and guard adapters", () => {
+    expect(isRouteSdkKey("next")).toBe(true);
+    expect(isRouteSdkKey("langchain")).toBe(true);
+    expect(isRouteSdkKey("go")).toBe(false);
+  });
+});
 
 test.describe("isFrameworkSpecificEntry", () => {
   test("matches entries with frameworks frontmatter", () => {
@@ -49,6 +58,7 @@ test.describe("sdkFromPathname", () => {
     ["/sdk/next/get-started/", "next"],
     ["/sdk/bun/plus/hono/get-started/", "bun"],
     ["/sdk/python/plus/fastapi/get-started/", "python"],
+    ["/sdk/langchain/guards/quick-start/", "langchain"],
     ["/get-started/", undefined],
     ["/sdk/go/get-started/", undefined],
   ];
@@ -78,6 +88,7 @@ test.describe("legacyKeyFromPathname", () => {
     ["/sdk/bun/plus/hono/get-started/", "bun-hono"],
     ["/sdk/node/plus/express/get-started/", "node-js-express"],
     ["/sdk/python/plus/flask/get-started/", "python-flask"],
+    ["/sdk/langchain/guards/quick-start/", "langchain"],
   ];
 
   for (const [pathname, expected] of cases) {
@@ -93,6 +104,7 @@ test.describe("sdkDisplayLabelFromPathname", () => {
     ["/sdk/bun/plus/hono/get-started/", "Bun + Hono"],
     ["/sdk/node/plus/express/get-started/", "Node.js + Express"],
     ["/sdk/python/plus/fastapi/get-started/", "Python + FastAPI"],
+    ["/sdk/langchain/guards/quick-start/", "LangChain"],
   ];
 
   for (const [pathname, expected] of cases) {
@@ -133,6 +145,68 @@ test.describe("sdkSwitcherOptions", () => {
     expect(labels).toContain("Node.js");
     expect(labels).toContain("Node.js + Express");
     expect(labels).toContain("Node.js + Hono");
+  });
+
+  test("lists guard adapters on guard-scoped pages", () => {
+    const options = sdkSwitcherOptions("/sdk/langchain/guards/quick-start/", [
+      "langchain",
+      "langchain-js",
+      "claude-agent-sdk",
+    ]);
+    const labels = options.map((option) => option.label);
+    expect(labels).toEqual([
+      "Claude Agent SDK",
+      "LangChain",
+      "LangChain JS",
+    ]);
+    expect(
+      options.find((option) => option.sdkKey === "langchain")?.href,
+    ).toBe("/sdk/langchain/guards/quick-start/");
+    expect(labels).not.toContain("Next.js");
+  });
+
+  test("includes HTTP SDKs and guards on mixed get-started pages", () => {
+    const fromNext = sdkSwitcherOptions("/sdk/next/get-started/", [
+      "next-js",
+      "crewai",
+      "langchain",
+    ]);
+    const fromNextLabels = fromNext.map((option) => option.label);
+    expect(fromNextLabels).toContain("Next.js");
+    expect(fromNextLabels).toContain("CrewAI");
+    expect(fromNextLabels).toContain("LangChain");
+    expect(fromNext.find((option) => option.sdkKey === "crewai")?.href).toBe(
+      "/sdk/crewai/get-started/",
+    );
+
+    const fromCrewai = sdkSwitcherOptions("/sdk/crewai/get-started/", [
+      "next-js",
+      "crewai",
+      "langchain",
+    ]);
+    expect(fromCrewai.find((option) => option.sdkKey === "next")?.href).toBe(
+      "/sdk/next/get-started/",
+    );
+  });
+
+  test("sorts options alphabetically by label", () => {
+    const guardLabels = sdkSwitcherOptions(
+      "/sdk/langchain/guards/quick-start/",
+      ["vercel-eve", "claude-agent-sdk", "langchain-js", "crewai"],
+    ).map((option) => option.label);
+    expect(guardLabels).toEqual([
+      "Claude Agent SDK",
+      "CrewAI",
+      "LangChain JS",
+      "Vercel Eve",
+    ]);
+
+    const httpLabels = sdkSwitcherOptions("/sdk/next/get-started/").map(
+      (option) => option.label,
+    );
+    expect(httpLabels).toEqual(
+      [...httpLabels].sort((a, b) => a.localeCompare(b, "en")),
+    );
   });
 });
 
@@ -209,10 +283,16 @@ test.describe("pathnameForLegacyFrameworkKey", () => {
     );
   });
 
-  test("maps guard frameworks on get-started to guard docs", () => {
+  test("maps guard frameworks on get-started to SDK get-started routes", () => {
     expect(pathnameForLegacyFrameworkKey("crewai", "/get-started")).toBe(
-      "/guards/crewai/",
+      "/sdk/crewai/get-started/",
     );
+  });
+
+  test("maps guard frameworks on the agent guards quick start to SDK routes", () => {
+    expect(
+      pathnameForLegacyFrameworkKey("langchain", "/guards/quick-start"),
+    ).toBe("/sdk/langchain/guards/quick-start/");
   });
 
   test("strips existing SDK prefixes from href", () => {
@@ -229,10 +309,16 @@ test.describe("hrefForLegacyFrameworkKey", () => {
     );
   });
 
-  test("falls back to ?f= for guard frameworks on non-get-started pages", () => {
+  test("uses SDK routes for guard frameworks on the agent guards quick start", () => {
     expect(
-      hrefForLegacyFrameworkKey("crewai", "/rate-limiting/quick-start/"),
-    ).toBe("/rate-limiting/quick-start?f=crewai");
+      hrefForLegacyFrameworkKey("langchain", "/guards/quick-start/"),
+    ).toBe("/sdk/langchain/guards/quick-start/");
+  });
+
+  test("uses SDK get-started routes for guard frameworks", () => {
+    expect(hrefForLegacyFrameworkKey("crewai", "/get-started/")).toBe(
+      "/sdk/crewai/get-started/",
+    );
   });
 });
 
@@ -262,13 +348,13 @@ test.describe("legacyFrameworkVercelRedirects", () => {
     expect(match).toBeDefined();
   });
 
-  test("redirects guard get-started URLs to guard docs", () => {
+  test("redirects guard get-started URLs to SDK get-started routes", () => {
     const redirects = legacyFrameworkVercelRedirects();
     const match = redirects.find(
       (r) =>
         r.source === "/get-started" &&
         r.has[0]?.value === "crewai" &&
-        r.destination === "/guards/crewai/",
+        r.destination === "/sdk/crewai/get-started/",
     );
     expect(match).toBeDefined();
   });
@@ -285,7 +371,7 @@ test.describe("legacyFrameworkVercelRedirects", () => {
     ).toBe(true);
   });
 
-  test("does not redirect guard frameworks on other pages", () => {
+  test("does not redirect guard frameworks on HTTP-only pages", () => {
     const redirects = legacyFrameworkVercelRedirects();
     expect(
       redirects.some(
@@ -294,6 +380,17 @@ test.describe("legacyFrameworkVercelRedirects", () => {
           r.has[0]?.value === "crewai",
       ),
     ).toBe(false);
+  });
+
+  test("redirects legacy guards quick-start URLs to SDK routes", () => {
+    const redirects = legacyFrameworkVercelRedirects();
+    const match = redirects.find(
+      (r) =>
+        r.source === "/guards/quick-start" &&
+        r.has[0]?.value === "langchain" &&
+        r.destination === "/sdk/langchain/guards/quick-start/",
+    );
+    expect(match).toBeDefined();
   });
 
   for (const docPath of [
@@ -334,6 +431,10 @@ test.describe("shouldExcludeFromSitemap", () => {
     expect(isLegacyFrameworkHubPathname("/get-started/")).toBe(true);
     expect(isLegacyFrameworkHubPathname("/sdk/next/get-started/")).toBe(false);
     expect(shouldExcludeFromSitemap("/bot-protection/quick-start/")).toBe(true);
+    expect(shouldExcludeFromSitemap("/guards/quick-start/")).toBe(true);
+    expect(shouldExcludeFromSitemap("/sdk/langchain/guards/quick-start/")).toBe(
+      false,
+    );
   });
 
   test("detects plus-variant pathnames", () => {

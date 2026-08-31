@@ -14,6 +14,7 @@ import Default from "@astrojs/starlight/components/TableOfContents.astro";
 const activeSdkKey = sdkFromPathname(Astro.url.pathname);
 const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
 const activeSdkLabel = sdkDisplayLabelFromPathname(Astro.url.pathname);
+const pageFrameworks = Astro.locals.starlightRoute.entry.data.frameworks;
 ---
 
 {
@@ -27,7 +28,7 @@ const activeSdkLabel = sdkDisplayLabelFromPathname(Astro.url.pathname);
             </button>
             <nav id="toc-sdk" popover>
                 <ul>
-                    {sdkSwitcherOptions(Astro.url.pathname).map((option) => {
+                    {sdkSwitcherOptions(Astro.url.pathname, pageFrameworks).map((option) => {
                         const isCurrent = isSdkSwitcherOptionCurrent(
                             Astro.url.pathname,
                             option,

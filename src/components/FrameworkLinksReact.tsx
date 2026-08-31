@@ -173,6 +173,9 @@ const FrameworkLinks = forwardRef(
                 case "openai-agents":
                   icon = <IconOpenAiAgents />;
                   break;
+                case "openai-agents-py":
+                  icon = <IconOpenAiAgents />;
+                  break;
                 case "vercel-ai":
                   icon = <IconVercelAi />;
                   break;

@@ -15,7 +15,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 // Relative rather than aliased: this module is imported by `astro.config.mts`.
 // `sdk.ts` only imports a type, so nothing browser-facing comes with it.
-import { isSdkKey } from "./sdk";
+import { isRouteSdkKey } from "./sdk";
 
 /**
  * Project root, resolved from this file's own location rather than the process
@@ -35,14 +35,14 @@ const SDK_SEGMENT = /^\/sdk\/([^/]+)(?=\/|$)/;
 /**
  * Removes the `/sdk/<sdk>` scope from a pathname.
  *
- * The segment is checked against the real SDK key list rather than a character
- * pattern, so a slug containing digits is handled if one is ever added, and a
- * docs page that merely happens to live under `/sdk/` is left alone instead of
- * being given another page's date.
+ * The segment is checked against HTTP SDK and guard adapter keys rather than a
+ * character pattern, so a slug containing digits is handled if one is ever
+ * added, and a docs page that merely happens to live under `/sdk/` is left
+ * alone instead of being given another page's date.
  */
 function stripSdkScope(pathname: string): string {
   const match = pathname.match(SDK_SEGMENT);
-  if (!match || !isSdkKey(match[1])) return pathname;
+  if (!match || !isRouteSdkKey(match[1])) return pathname;
 
   let rest = pathname.slice(match[0].length) || "/";
 

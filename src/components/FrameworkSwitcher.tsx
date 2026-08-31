@@ -27,6 +27,7 @@ import type { Props as SelectProps } from "@/components/Select";
 import Select from "@/components/Select";
 import type { Framework, FrameworkKey } from "@/lib/prefs";
 import {
+  defaultSelectedFramework,
   getClosestFrameworkMatch,
   getFrameworks,
   getStoredFramework,
@@ -68,6 +69,7 @@ const frameworkIcon = {
   "node-js": <IconNodeJs />,
   nuxt: <IconNuxt />,
   "openai-agents": <IconOpenAiAgents />,
+  "openai-agents-py": <IconOpenAiAgents />,
   "python-fastapi": <IconFastApi />,
   "python-flask": <IconFlask />,
   "react-router": <IconReactRouter />,
@@ -145,14 +147,13 @@ const FrameworkSwitcher = forwardRef(
         storeFramework(f);
       }
 
-      // Or get it from storage
+      // Or get it from storage, then the site default. Pages that omit
+      // `next-js` still need a rematch so slots are not empty.
       if (!framework) {
-        const storedFramework = getStoredFramework();
-        if (storedFramework) framework = storedFramework;
+        framework = getStoredFramework() ?? defaultSelectedFramework;
       }
 
-      // We update based on the framework choice if any
-      if (framework) {
+      if ($availableFrameworks.length > 0) {
         // Not all stored frameworks may be in the list currently,
         // so we try to return the closest match
         const match = getClosestFrameworkMatch(
