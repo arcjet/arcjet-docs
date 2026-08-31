@@ -14,6 +14,14 @@ Arcjet protects two types of entry points:
 - **Request-based** – HTTP route handlers, API endpoints, middleware. Use `protect()` with any supported framework.
 - **Guards** – tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` to pass inputs directly and get a decision back. Use `capture()` to record that an allowed action happened (visibility only; never changes a decision).
 
+## Client IP safety for request-based SDKs
+
+- JavaScript, Python, and Go may use common forwarding headers when a framework, direct peer, or hosting platform does not expose a usable public client IP. This keeps protection running, but the header can be spoofed unless trusted infrastructure controls it. Arcjet labels this `unverified-header`, logs `client_ip_provenance` at debug level, and produces one warning for the lifetime of each Arcjet client instance.
+- Configure every trusted proxy IP or CIDR and ensure the application is reachable only through infrastructure that overwrites or safely appends forwarding headers. Configured trusted proxies and managed platforms receive verified provenance.
+- Never copy `X-Forwarded-For` or another client-controlled header into JavaScript `ipSrc`, Python `ip_src`, or Go `WithIPSrc`. Manual overrides must come from an independently trusted source; syntax validation does not prove provenance.
+- Invalid proxy and manual IP values are rejected, except that JavaScript treats an empty `ipSrc` as omitted. Trusting `0.0.0.0/0` or `::/0` produces a warning; the literal addresses `0.0.0.0` and `::` do not trust an entire address family.
+- Before shipping, inspect representative requests with JavaScript `clientIpDetails()` / `findIpDetails()`, Python `client_ip_details()`, or Go `ClientIPDetails()`. See https://docs.arcjet.com/best-practices#configure-proxies-and-load-balancers.
+
 Arcjet runs server-side. Bot protection advanced client signals are an optional
 extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricing
 
