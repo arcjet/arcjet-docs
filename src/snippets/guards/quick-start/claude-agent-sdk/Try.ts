@@ -1,6 +1,14 @@
 import { randomUUID } from "node:crypto";
 import { runEmailAgent } from "./agent.js";
 
+const user = {
+  record: {
+    name: "Alex Morgan",
+    bankAccount: "0123456789",
+    routingNumber: "022000020",
+  },
+};
+
 const scenarios = {
   allowed:
     "Send the message 'Your report is ready' to approved@example.com.",
@@ -26,6 +34,10 @@ export async function POST(request: Request) {
 
   // options.sessionId must be a UUID and can only be created once.
   const sessionId = randomUUID();
-  await runEmailAgent(sessionId, scenarios[scenario]);
-  return Response.json({ output: "Agent run completed." });
+  const output = await runEmailAgent(
+    user,
+    sessionId,
+    scenarios[scenario],
+  );
+  return Response.json({ output: output ?? "Agent run completed." });
 }

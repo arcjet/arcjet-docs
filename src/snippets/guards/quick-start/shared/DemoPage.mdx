@@ -1,0 +1,29 @@
+Add a minimal page that calls the endpoint and displays the agent's response:
+
+```html title="public/index.html"
+<h1>Agent Guard policy demo</h1>
+<p>Test recipient and sensitive-information policies on the same email tool.</p>
+
+<button data-scenario="allowed">Allowed recipient</button>
+<button data-scenario="blocked">Blocked recipient</button>
+<button data-scenario="pii">Sensitive information</button>
+<pre id="output">Choose a scenario.</pre>
+
+<script>
+  // Send only the selected scenario name to the server.
+  const output = document.querySelector("#output");
+
+  for (const button of document.querySelectorAll("button")) {
+    button.addEventListener("click", async () => {
+      output.textContent = "Running agent…";
+      const response = await fetch("/api/agent", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ scenario: button.dataset.scenario }),
+      });
+      const result = await response.json();
+      output.textContent = result.output ?? result.error;
+    });
+  }
+</script>
+```

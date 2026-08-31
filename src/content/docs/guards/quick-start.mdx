@@ -95,6 +95,8 @@ import VercelAiTry from "@/snippets/guards/quick-start/vercel-ai/Try.mdx";
 import VercelEveInstall from "@/snippets/guards/quick-start/vercel-eve/Install.mdx";
 import VercelEveWrap from "@/snippets/guards/quick-start/vercel-eve/Wrap.mdx";
 import VercelEveTry from "@/snippets/guards/quick-start/vercel-eve/Try.mdx";
+import DemoPage from "@/snippets/guards/quick-start/shared/DemoPage.mdx";
+import EveDemoNote from "@/snippets/guards/quick-start/vercel-eve/DemoNote.mdx";
 
 import ClaudeKey from "@/snippets/get-started/claude-agent-sdk/Step2.mdx";
 import CrewaiKey from "@/snippets/get-started/crewai/Step2.mdx";
@@ -234,35 +236,20 @@ browser sends only the scenario name.
   <VercelEveTry slot="vercel-eve" />
 </SlotByFramework>
 
-Add a minimal page that calls the endpoint and displays the agent's response:
-
-```html title="public/index.html"
-<h1>Agent Guard policy demo</h1>
-<p>Test recipient and sensitive-information policies on the same email tool.</p>
-
-<button data-scenario="allowed">Allowed recipient</button>
-<button data-scenario="blocked">Blocked recipient</button>
-<button data-scenario="pii">Sensitive information</button>
-<pre id="output">Choose a scenario.</pre>
-
-<script>
-  // Send only the selected scenario name to the server.
-  const output = document.querySelector("#output");
-
-  for (const button of document.querySelectorAll("button")) {
-    button.addEventListener("click", async () => {
-      output.textContent = "Running agent…";
-      const response = await fetch("/api/agent", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ scenario: button.dataset.scenario }),
-      });
-      const result = await response.json();
-      output.textContent = result.output ?? result.error;
-    });
-  }
-</script>
-```
+<SlotByFramework>
+  <DemoPage slot="claude-agent-sdk" />
+  <DemoPage slot="crewai" />
+  <DemoPage slot="genkit" />
+  <DemoPage slot="langchain" />
+  <DemoPage slot="langchain-js" />
+  <DemoPage slot="langgraph" />
+  <DemoPage slot="mastra" />
+  <DemoPage slot="openai-agents" />
+  <DemoPage slot="openai-agents-py" />
+  <DemoPage slot="strands-agents" />
+  <DemoPage slot="vercel-ai" />
+  <EveDemoNote slot="vercel-eve" />
+</SlotByFramework>
 
 Each scenario demonstrates a different result from the same guarded tool:
 

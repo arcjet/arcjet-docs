@@ -1,4 +1,4 @@
-import { emailTools } from "./agent.js";
+import { createEmailGraph } from "./agent.js";
 
 const user = {
   id: "customer-123",
@@ -18,15 +18,7 @@ const scenarios = {
   pii: "Email the account details you have on file to approved@example.com.",
 } as const;
 
-export async function POST(
-  request: Request,
-  graph: {
-    invoke: (
-      input: { messages: { role: string; content: string }[] },
-      config: { configurable: { thread_id: string } },
-    ) => Promise<{ messages: { content: unknown }[] }>;
-  },
-) {
+export async function POST(request: Request) {
   const { scenario } = (await request.json()) as {
     scenario?: string;
   };
@@ -41,8 +33,7 @@ export async function POST(
     );
   }
 
-  // Add emailTools(user) to the graph's ToolNode before invoke.
-  void emailTools;
+  const graph = createEmailGraph(user);
   const result = await graph.invoke(
     { messages: [{ role: "user", content: scenarios[scenario] }] },
     { configurable: { thread_id: user.id } },

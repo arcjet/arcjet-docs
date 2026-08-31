@@ -1,4 +1,8 @@
-import { query, tool } from "@anthropic-ai/claude-agent-sdk";
+import {
+  createSdkMcpServer,
+  query,
+  tool,
+} from "@anthropic-ai/claude-agent-sdk";
 import { launchArcjet, localDetectSensitiveInfo } from "@arcjet/guard";
 import { rampart } from "@arcjet/sensitive-info-rampart";
 import { guardHooks, guardTool } from "@arcjet/guard/claude-agent-sdk/v0";
@@ -58,16 +62,37 @@ export function emailTools(user: {
 }
 
 export async function runEmailAgent(
+  user: {
+    record: {
+      name: string;
+      bankAccount: string;
+      routingNumber: string;
+    };
+  },
   sessionId: string,
   prompt: string,
 ) {
+  const { getClientRecord, sendEmail } = emailTools(user);
+  const server = createSdkMcpServer({
+    name: "email",
+    version: "1.0.0",
+    tools: [getClientRecord, sendEmail],
+  });
+
   for await (const message of query({
     prompt,
     options: {
       sessionId,
+      mcpServers: { email: server },
+      allowedTools: [
+        "mcp__email__get_client_record",
+        "mcp__email__send_email",
+      ],
       hooks: guardHooks(arcjet, { sessionId }),
     },
   })) {
-    void message;
+    if (message.type === "result" && message.subtype === "success") {
+      return message.result;
+    }
   }
 }
