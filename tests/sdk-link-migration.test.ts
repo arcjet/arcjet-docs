@@ -32,4 +32,21 @@ test.describe("SDK link migration", () => {
     expect(page.url()).toMatch(/\/sdk\/next\/get-started\/?$/);
     expect(page.url()).not.toContain("?f=");
   });
+
+  test("framework switcher navigates to SDK route on guards quick start", async ({
+    page,
+  }) => {
+    await page.goto("/guards/quick-start/");
+    await page.waitForSelector(".FrameworkSwitcher select", {
+      timeout: 15_000,
+    });
+
+    await page.selectOption(".FrameworkSwitcher select", "langchain");
+    await page.waitForURL(/\/sdk\/langchain\/guards\/quick-start\/?/, {
+      timeout: 15_000,
+    });
+
+    expect(page.url()).toMatch(/\/sdk\/langchain\/guards\/quick-start\/?$/);
+    expect(page.url()).not.toContain("?f=");
+  });
 });

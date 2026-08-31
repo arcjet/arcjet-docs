@@ -11,7 +11,9 @@ import {
   sdkVariants,
   sdks,
   isFrameworkSpecificEntry,
+  GUARD_SDK_KEYS,
 } from "@/lib/sdk";
+import type { ArcjetGuardSdkKey } from "@/lib/sdk";
 import type { FrameworkKey } from "@/lib/prefs";
 
 export type TocNode = {
@@ -118,6 +120,23 @@ function loader(): Loader {
               `sdk/${sdk.key}/plus/${variant.key}/${entry.id}`,
               { noindex: true },
             );
+          }
+        }
+
+        // Guard adapters share `/sdk/:sdk/` routes, but only on pages that
+        // list them. Skip get-started — those keys go to `/guards/{name}/`.
+        if (entry.id !== "get-started") {
+          const pageFrameworks = Array.isArray(entry.data.frameworks)
+            ? (entry.data.frameworks as FrameworkKey[])
+            : [];
+
+          for (const guardKey of GUARD_SDK_KEYS) {
+            if (pageFrameworks.includes(guardKey as FrameworkKey)) {
+              insertScopedEntry(
+                entry,
+                `sdk/${guardKey as ArcjetGuardSdkKey}/${entry.id}`,
+              );
+            }
           }
         }
       }

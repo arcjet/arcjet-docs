@@ -1,6 +1,7 @@
 import { defineRouteMiddleware } from "@astrojs/starlight/route-data";
 import {
   isFrameworkSpecificEntry,
+  isGuardSdkKey,
   legacyKeyFromPathname,
   sdkFromPathname,
   sdkVariantFromPathname,
@@ -175,9 +176,12 @@ export const onRequest = defineRouteMiddleware(async (context) => {
       }
     }
 
-    // At the moment we simply scope _every_ sidebar entry to the current SDK.
-    for (const entry of routeData.sidebar) {
-      updateSidebarEntry(entry);
+    // Guard adapter routes only duplicate pages that list that adapter.
+    // Leave sidebar links unscoped so they do not 404.
+    if (!isGuardSdkKey(sdk)) {
+      for (const entry of routeData.sidebar) {
+        updateSidebarEntry(entry);
+      }
     }
   }
 

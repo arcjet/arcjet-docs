@@ -13,6 +13,7 @@ import Default from "@astrojs/starlight/components/MobileTableOfContents.astro";
 const activeSdkKey = sdkFromPathname(Astro.url.pathname);
 const activeSdk = activeSdkKey ? sdk(activeSdkKey) : undefined;
 const activeSdkLabel = sdkDisplayLabelFromPathname(Astro.url.pathname);
+const pageFrameworks = Astro.locals.starlightRoute.entry.data.frameworks;
 ---
 
 {/* TODO: Remove once framework switching is removed. */}
@@ -40,7 +41,7 @@ const activeSdkLabel = sdkDisplayLabelFromPathname(Astro.url.pathname);
                 </div>
                 <nav id="mtoc-sdk" popover>
                     <ul>
-                        {sdkSwitcherOptions(Astro.url.pathname).map((option) => {
+                        {sdkSwitcherOptions(Astro.url.pathname, pageFrameworks).map((option) => {
                             const isCurrent = isSdkSwitcherOptionCurrent(
                                 Astro.url.pathname,
                                 option,

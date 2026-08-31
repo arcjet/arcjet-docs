@@ -20,6 +20,59 @@ export type ArcjetSdkKey =
   | "remix"
   | "sveltekit";
 
+/**
+ * URL-safe keys for agent-guard adapters.
+ *
+ * These are not HTTP SDKs. They share the `/sdk/:sdk/` route prefix so the
+ * path-based switcher can select a guard the same way it selects Next.js.
+ */
+export type ArcjetGuardSdkKey =
+  | "claude-agent-sdk"
+  | "crewai"
+  | "genkit"
+  | "langchain"
+  | "langchain-js"
+  | "langgraph"
+  | "mastra"
+  | "openai-agents"
+  | "openai-agents-py"
+  | "strands-agents"
+  | "vercel-ai"
+  | "vercel-eve";
+
+/** SDK or guard adapter key that can appear in `/sdk/:sdk/` pathnames. */
+export type ArcjetRouteSdkKey = ArcjetSdkKey | ArcjetGuardSdkKey;
+
+export const GUARD_SDK_KEYS = [
+  "claude-agent-sdk",
+  "crewai",
+  "genkit",
+  "langchain",
+  "langchain-js",
+  "langgraph",
+  "mastra",
+  "openai-agents",
+  "openai-agents-py",
+  "strands-agents",
+  "vercel-ai",
+  "vercel-eve",
+] as const satisfies readonly ArcjetGuardSdkKey[];
+
+const GUARD_SDK_LABELS = {
+  "claude-agent-sdk": "Claude Agent SDK",
+  crewai: "CrewAI",
+  genkit: "Genkit",
+  langchain: "LangChain",
+  "langchain-js": "LangChain JS",
+  langgraph: "LangGraph",
+  mastra: "Mastra",
+  "openai-agents": "OpenAI Agents",
+  "openai-agents-py": "OpenAI Agents Python",
+  "strands-agents": "Strands Agents",
+  "vercel-ai": "Vercel AI SDK",
+  "vercel-eve": "Vercel Eve",
+} as const satisfies Record<ArcjetGuardSdkKey, string>;
+
 export type ArcjetSdkVariantKey = "express" | "fastapi" | "flask" | "hono";
 
 /**
@@ -177,18 +230,42 @@ export function* sdks(): Generator<ArcjetSdk> {
 /**
  * Returns the SDK configuration for the given key.
  */
-export function sdk<TKey extends ArcjetSdkKey>(key: TKey): ArcjetSdk<TKey> {
+export function sdk<TKey extends ArcjetRouteSdkKey>(
+  key: TKey,
+): {
+  key: TKey;
+  label: string;
+  legacyFrameworkKey: FrameworkKey | null;
+} {
+  if (isGuardSdkKey(key)) {
+    return {
+      key,
+      label: guardSdkLabel(key),
+      legacyFrameworkKey: key,
+    };
+  }
+
   // Intentionally downcast so caller knows the literal key but doesn't get the
   // entire literal definition. This hopefully avoids accidentally narrowing on
   // non-key properties.
-  return ARCJET_SDKS[key] as ArcjetSdk<TKey>;
+  return ARCJET_SDKS[key] as ArcjetSdk<Extract<TKey, ArcjetSdkKey>>;
 }
 
 /**
- * Asserts whether the given value is a valid Arcjet SDK key.
+ * Asserts whether the given value is a valid Arcjet HTTP SDK key.
  */
 export function isSdkKey(value: string): value is ArcjetSdkKey {
   return Object.keys(ARCJET_SDKS).includes(value);
+}
+
+/** Asserts whether the given value is a valid agent-guard SDK key. */
+export function isGuardSdkKey(value: string): value is ArcjetGuardSdkKey {
+  return (GUARD_SDK_KEYS as readonly string[]).includes(value);
+}
+
+/** Returns the display label for a guard adapter key. */
+export function guardSdkLabel(key: ArcjetGuardSdkKey): string {
+  return GUARD_SDK_LABELS[key];
 }
 
 const SDK_PATH_REGEX = /^\/sdk\/([a-z-]+)/;
@@ -231,13 +308,15 @@ export function legacyKeyFromPathname(
   const sdkKey = sdkFromPathname(pathname);
   if (!sdkKey) return undefined;
 
+  if (isGuardSdkKey(sdkKey)) return sdkKey;
+
   return ARCJET_SDKS[sdkKey].legacyFrameworkKey ?? undefined;
 }
 
 /**
  * Extracts an Arcjet SDK key from a given pathname, if possible.
  */
-export function sdkFromPathname(pathname: string): ArcjetSdkKey | undefined {
+export function sdkFromPathname(pathname: string): ArcjetRouteSdkKey | undefined {
   // Some of our callers from mdx / astro files don't have the _best_ static
   // type checking support, so we defensively check the type here.
   if (typeof pathname !== "string") {
@@ -252,7 +331,7 @@ export function sdkFromPathname(pathname: string): ArcjetSdkKey | undefined {
   }
 
   const sdk = sdkMatch[1];
-  if (!isSdkKey(sdk)) {
+  if (!isSdkKey(sdk) && !isGuardSdkKey(sdk)) {
     return undefined;
   }
 
@@ -271,7 +350,7 @@ export function sdkFromPathname(pathname: string): ArcjetSdkKey | undefined {
  */
 export function pathnameForSdk(
   pathname: string,
-  targetSdk: ArcjetSdkKey,
+  targetSdk: ArcjetRouteSdkKey,
 ): string {
   const previousSdk = sdkFromPathname(pathname);
 
@@ -290,7 +369,7 @@ export function pathnameForSdk(
 
   let result = cleanPathname.replace(`/sdk/${previousSdk}`, `/sdk/${targetSdk}`);
 
-  if (!ARCJET_SDKS[targetSdk].legacyFrameworkKey) {
+  if (!isGuardSdkKey(targetSdk) && !ARCJET_SDKS[targetSdk].legacyFrameworkKey) {
     const defaultVariant = sdkVariants(targetSdk)[0];
     if (defaultVariant) {
       return pathnameForSdkVariant(result, targetSdk, defaultVariant.key);
@@ -355,7 +434,7 @@ export type SdkSwitcherOption = {
   id: string;
   label: string;
   href: string;
-  sdkKey: ArcjetSdkKey;
+  sdkKey: ArcjetRouteSdkKey;
   variantKey?: ArcjetSdkVariantKey;
 };
 
@@ -366,8 +445,29 @@ export type SdkSwitcherOption = {
  * only ship plus-variants (Python) list each variant instead of a bare SDK row.
  * SDKs with optional variants (Node.js, Bun) list both the base SDK and variants.
  */
-export function sdkSwitcherOptions(pathname: string): readonly SdkSwitcherOption[] {
+export function sdkSwitcherOptions(
+  pathname: string,
+  pageFrameworks?: FrameworkKey[],
+): readonly SdkSwitcherOption[] {
   const options: SdkSwitcherOption[] = [];
+  const currentSdk = sdkFromPathname(pathname);
+
+  if (currentSdk && isGuardSdkKey(currentSdk)) {
+    for (const guardKey of GUARD_SDK_KEYS) {
+      if (pageFrameworks && !pageFrameworks.includes(guardKey)) {
+        continue;
+      }
+
+      options.push({
+        id: guardKey,
+        label: guardSdkLabel(guardKey),
+        href: pathnameForSdk(pathname, guardKey),
+        sdkKey: guardKey,
+      });
+    }
+
+    return options;
+  }
 
   for (const sdkItem of sdks()) {
     const variants = sdkVariants(sdkItem.key);
@@ -423,7 +523,7 @@ export function variantOnlySdkRedirectTarget(pathname: string): string | undefin
     return undefined;
   }
 
-  if (ARCJET_SDKS[sdkKey].legacyFrameworkKey) {
+  if (isGuardSdkKey(sdkKey) || ARCJET_SDKS[sdkKey].legacyFrameworkKey) {
     return undefined;
   }
 
@@ -577,6 +677,10 @@ export function sdkRoutePrefixFromLegacyFrameworkKey(
     }
   }
 
+  if (isGuardSdkKey(legacyKey)) {
+    return `/sdk/${legacyKey}`;
+  }
+
   return undefined;
 }
 
@@ -626,15 +730,15 @@ export function pathnameForLegacyFrameworkKey(
     docHref = docPathFromSdkPathname(docHref);
   }
 
+  const guardPath = GUARD_DOC_PATHS[legacyKey];
+  if (guardPath && docHref === "/get-started/") {
+    return guardPath;
+  }
+
   const sdkPrefix = sdkRoutePrefixFromLegacyFrameworkKey(legacyKey);
 
   if (sdkPrefix) {
     return `${sdkPrefix}${docHref === "/" ? "" : docHref}`;
-  }
-
-  const guardPath = GUARD_DOC_PATHS[legacyKey];
-  if (guardPath && docHref === "/get-started/") {
-    return guardPath;
   }
 
   return docHref;
@@ -644,8 +748,8 @@ export function pathnameForLegacyFrameworkKey(
  * Returns the href to use when linking or navigating to a legacy framework.
  *
  * Produces SDK-scoped (or guard docs) paths when available. Falls back to
- * `{path}?f={legacyKey}` for guard-only frameworks on pages other than
- * get-started.
+ * `{path}?f={legacyKey}` only when the framework has no `/sdk/` or guard
+ * docs route for this page.
  */
 export function hrefForLegacyFrameworkKey(
   legacyKey: FrameworkKey,
@@ -839,6 +943,7 @@ export const LEGACY_FRAMEWORK_HUB_PATHS = [
   "/content-moderation/",
   "/content-moderation/quick-start/",
   "/prompt-injection/quick-start/",
+  "/guards/quick-start/",
 ] as const;
 
 /** Returns whether a pathname is a plus-variant SDK route (`/sdk/:sdk/plus/:variant/...`). */
@@ -914,6 +1019,20 @@ export function legacyFrameworkVercelRedirects(): VercelLegacyFrameworkRedirect[
         permanent: true,
       });
     }
+  }
+
+  for (const legacyKey of GUARD_SDK_KEYS) {
+    const destination = pathnameForLegacyFrameworkKey(
+      legacyKey,
+      "/guards/quick-start",
+    );
+
+    redirects.push({
+      source: "/guards/quick-start",
+      has: [{ type: "query", key: "f", value: legacyKey }],
+      destination,
+      permanent: true,
+    });
   }
 
   redirects.push({
