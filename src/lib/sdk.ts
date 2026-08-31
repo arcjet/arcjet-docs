@@ -447,6 +447,7 @@ export type SdkSwitcherOption = {
  * SDKs with a base legacy framework key appear once (e.g. Next.js). SDKs that
  * only ship plus-variants (Python) list each variant instead of a bare SDK row.
  * SDKs with optional variants (Node.js, Bun) list both the base SDK and variants.
+ * Pages that list both HTTP SDKs and guard adapters (get-started) include both.
  * Options are sorted alphabetically by label.
  */
 export function sdkSwitcherOptions(
@@ -455,21 +456,10 @@ export function sdkSwitcherOptions(
 ): readonly SdkSwitcherOption[] {
   const options: SdkSwitcherOption[] = [];
   const currentSdk = sdkFromPathname(pathname);
+  const mixed = pageListsGuardAndHttpFrameworks(pageFrameworks);
+  const guardOnlyPage = !!currentSdk && isGuardSdkKey(currentSdk) && !mixed;
 
-  if (currentSdk && isGuardSdkKey(currentSdk)) {
-    for (const guardKey of GUARD_SDK_KEYS) {
-      if (pageFrameworks && !pageFrameworks.includes(guardKey)) {
-        continue;
-      }
-
-      options.push({
-        id: guardKey,
-        label: guardSdkLabel(guardKey),
-        href: pathnameForSdk(pathname, guardKey),
-        sdkKey: guardKey,
-      });
-    }
-  } else {
+  if (!guardOnlyPage) {
     for (const sdkItem of sdks()) {
       const variants = sdkVariants(sdkItem.key);
 
@@ -494,8 +484,40 @@ export function sdkSwitcherOptions(
     }
   }
 
+  if (guardOnlyPage || mixed) {
+    for (const guardKey of GUARD_SDK_KEYS) {
+      if (pageFrameworks && !pageFrameworks.includes(guardKey)) {
+        continue;
+      }
+
+      options.push({
+        id: guardKey,
+        label: guardSdkLabel(guardKey),
+        href: currentSdk
+          ? pathnameForSdk(pathname, guardKey)
+          : pathnameForLegacyFrameworkKey(guardKey, pathname),
+        sdkKey: guardKey,
+      });
+    }
+  }
+
   options.sort((a, b) => a.label.localeCompare(b.label, "en"));
   return options;
+}
+
+function pageListsGuardAndHttpFrameworks(
+  pageFrameworks?: FrameworkKey[],
+): boolean {
+  if (!pageFrameworks?.length) return false;
+
+  let hasGuard = false;
+  let hasHttp = false;
+  for (const key of pageFrameworks) {
+    if (isGuardSdkKey(key)) hasGuard = true;
+    else hasHttp = true;
+    if (hasGuard && hasHttp) return true;
+  }
+  return false;
 }
 
 /** Returns whether a switcher option matches the current SDK-scoped pathname. */
@@ -629,27 +651,6 @@ export function sdkKeyFromLegacyFrameworkKey(
   return undefined;
 }
 
-/**
- * Agent guard docs entry points keyed by legacy framework key.
- *
- * Used when linking to `/get-started` for guard-only frameworks that do not
- * have an HTTP SDK route prefix.
- */
-const GUARD_DOC_PATHS: Partial<Record<FrameworkKey, string>> = {
-  "claude-agent-sdk": "/guards/claude-agent-sdk/",
-  crewai: "/guards/crewai/",
-  genkit: "/guards/genkit/",
-  langchain: "/guards/langchain/",
-  "langchain-js": "/guards/langchain-js/",
-  langgraph: "/guards/langgraph/",
-  mastra: "/guards/mastra/",
-  "openai-agents": "/guards/openai-agents/",
-  "openai-agents-py": "/guards/openai-agents-py/",
-  "strands-agents": "/guards/strands-agents/",
-  "vercel-ai": "/guards/vercel-ai/",
-  "vercel-eve": "/guards/vercel-eve/",
-};
-
 function normalizeDocHref(href: string): string {
   if (!href || href === "/") return "/";
   const withLeading = href.startsWith("/") ? href : `/${href}`;
@@ -712,7 +713,7 @@ export function docPathFromSdkPathname(pathname: string): string {
 }
 
 /**
- * Returns the SDK-scoped (or guard docs) pathname for a legacy framework key.
+ * Returns the SDK-scoped pathname for a legacy framework key.
  *
  * @example
  * pathnameForLegacyFrameworkKey("next-js", "/get-started")
@@ -722,7 +723,7 @@ export function docPathFromSdkPathname(pathname: string): string {
  * // => "/sdk/bun/plus/hono/get-started/"
  *
  * pathnameForLegacyFrameworkKey("crewai", "/get-started")
- * // => "/guards/crewai/"
+ * // => "/sdk/crewai/get-started/"
  */
 export function pathnameForLegacyFrameworkKey(
   legacyKey: FrameworkKey,
@@ -731,11 +732,6 @@ export function pathnameForLegacyFrameworkKey(
   let docHref = normalizeDocHref(href);
   if (sdkFromPathname(docHref)) {
     docHref = docPathFromSdkPathname(docHref);
-  }
-
-  const guardPath = GUARD_DOC_PATHS[legacyKey];
-  if (guardPath && docHref === "/get-started/") {
-    return guardPath;
   }
 
   const sdkPrefix = sdkRoutePrefixFromLegacyFrameworkKey(legacyKey);
@@ -750,9 +746,9 @@ export function pathnameForLegacyFrameworkKey(
 /**
  * Returns the href to use when linking or navigating to a legacy framework.
  *
- * Produces SDK-scoped (or guard docs) paths when available. Falls back to
- * `{path}?f={legacyKey}` only when the framework has no `/sdk/` or guard
- * docs route for this page.
+ * Produces SDK-scoped paths when available. Falls back to
+ * `{path}?f={legacyKey}` only when the framework has no `/sdk/` route
+ * for this page.
  */
 export function hrefForLegacyFrameworkKey(
   legacyKey: FrameworkKey,
@@ -769,12 +765,8 @@ export function hrefForLegacyFrameworkKey(
   }
 
   const sdkPrefix = sdkRoutePrefixFromLegacyFrameworkKey(legacyKey);
-  const guardPath = GUARD_DOC_PATHS[legacyKey];
-  const hasDedicatedRoute =
-    !!sdkPrefix ||
-    (!!guardPath && normalizedHref === "/get-started/");
 
-  if (hasDedicatedRoute) {
+  if (sdkPrefix) {
     return targetPath;
   }
 
@@ -993,7 +985,7 @@ function legacyFrameworkKeysForDocPath(docPath: string): FrameworkKey[] {
   }
 
   if (normalizeDocHref(docPath) === "/get-started/") {
-    keys.push(...(Object.keys(GUARD_DOC_PATHS) as FrameworkKey[]));
+    keys.push(...GUARD_SDK_KEYS);
   }
 
   return keys;

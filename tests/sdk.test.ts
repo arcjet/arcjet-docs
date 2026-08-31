@@ -165,6 +165,30 @@ test.describe("sdkSwitcherOptions", () => {
     expect(labels).not.toContain("Next.js");
   });
 
+  test("includes HTTP SDKs and guards on mixed get-started pages", () => {
+    const fromNext = sdkSwitcherOptions("/sdk/next/get-started/", [
+      "next-js",
+      "crewai",
+      "langchain",
+    ]);
+    const fromNextLabels = fromNext.map((option) => option.label);
+    expect(fromNextLabels).toContain("Next.js");
+    expect(fromNextLabels).toContain("CrewAI");
+    expect(fromNextLabels).toContain("LangChain");
+    expect(fromNext.find((option) => option.sdkKey === "crewai")?.href).toBe(
+      "/sdk/crewai/get-started/",
+    );
+
+    const fromCrewai = sdkSwitcherOptions("/sdk/crewai/get-started/", [
+      "next-js",
+      "crewai",
+      "langchain",
+    ]);
+    expect(fromCrewai.find((option) => option.sdkKey === "next")?.href).toBe(
+      "/sdk/next/get-started/",
+    );
+  });
+
   test("sorts options alphabetically by label", () => {
     const guardLabels = sdkSwitcherOptions(
       "/sdk/langchain/guards/quick-start/",
@@ -259,9 +283,9 @@ test.describe("pathnameForLegacyFrameworkKey", () => {
     );
   });
 
-  test("maps guard frameworks on get-started to guard docs", () => {
+  test("maps guard frameworks on get-started to SDK get-started routes", () => {
     expect(pathnameForLegacyFrameworkKey("crewai", "/get-started")).toBe(
-      "/guards/crewai/",
+      "/sdk/crewai/get-started/",
     );
   });
 
@@ -291,9 +315,9 @@ test.describe("hrefForLegacyFrameworkKey", () => {
     ).toBe("/sdk/langchain/guards/quick-start/");
   });
 
-  test("keeps dedicated guard docs for get-started", () => {
+  test("uses SDK get-started routes for guard frameworks", () => {
     expect(hrefForLegacyFrameworkKey("crewai", "/get-started/")).toBe(
-      "/guards/crewai/",
+      "/sdk/crewai/get-started/",
     );
   });
 });
@@ -324,13 +348,13 @@ test.describe("legacyFrameworkVercelRedirects", () => {
     expect(match).toBeDefined();
   });
 
-  test("redirects guard get-started URLs to guard docs", () => {
+  test("redirects guard get-started URLs to SDK get-started routes", () => {
     const redirects = legacyFrameworkVercelRedirects();
     const match = redirects.find(
       (r) =>
         r.source === "/get-started" &&
         r.has[0]?.value === "crewai" &&
-        r.destination === "/guards/crewai/",
+        r.destination === "/sdk/crewai/get-started/",
     );
     expect(match).toBeDefined();
   });

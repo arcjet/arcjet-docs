@@ -124,19 +124,17 @@ function loader(): Loader {
         }
 
         // Guard adapters share `/sdk/:sdk/` routes, but only on pages that
-        // list them. Skip get-started — those keys go to `/guards/{name}/`.
-        if (entry.id !== "get-started") {
-          const pageFrameworks = Array.isArray(entry.data.frameworks)
-            ? (entry.data.frameworks as FrameworkKey[])
-            : [];
+        // list them in `frameworks` frontmatter.
+        const pageFrameworks = Array.isArray(entry.data.frameworks)
+          ? (entry.data.frameworks as FrameworkKey[])
+          : [];
 
-          for (const guardKey of GUARD_SDK_KEYS) {
-            if (pageFrameworks.includes(guardKey as FrameworkKey)) {
-              insertScopedEntry(
-                entry,
-                `sdk/${guardKey as ArcjetGuardSdkKey}/${entry.id}`,
-              );
-            }
+        for (const guardKey of GUARD_SDK_KEYS) {
+          if (pageFrameworks.includes(guardKey as FrameworkKey)) {
+            insertScopedEntry(
+              entry,
+              `sdk/${guardKey as ArcjetGuardSdkKey}/${entry.id}`,
+            );
           }
         }
       }
