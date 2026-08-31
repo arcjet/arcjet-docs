@@ -58,6 +58,15 @@ test.describe("routeForSitemapUrl", () => {
     ],
     ["https://docs.arcjet.com/sdk/astro/", "/"],
     ["https://docs.arcjet.com/sdk/astro", "/"],
+    // Guard adapters share `/sdk/:sdk/` routes with HTTP SDKs.
+    [
+      "https://docs.arcjet.com/sdk/langchain/guards/quick-start/",
+      "/guards/quick-start/",
+    ],
+    [
+      "https://docs.arcjet.com/sdk/vercel-ai/rate-limiting/quick-start/",
+      "/rate-limiting/quick-start/",
+    ],
     // `go` is not an SDK key, so the segment must not be stripped.
     ["https://docs.arcjet.com/sdk/go/architecture/", "/sdk/go/architecture/"],
     // Neither is a slug that merely starts like one.

@@ -261,6 +261,11 @@ export function isGuardSdkKey(value: string): value is ArcjetGuardSdkKey {
   return (GUARD_SDK_KEYS as readonly string[]).includes(value);
 }
 
+/** Asserts whether the given value can appear in `/sdk/:sdk/` pathnames. */
+export function isRouteSdkKey(value: string): value is ArcjetRouteSdkKey {
+  return isSdkKey(value) || isGuardSdkKey(value);
+}
+
 /** Returns the display label for a guard adapter key. */
 export function guardSdkLabel(key: ArcjetGuardSdkKey): string {
   return GUARD_SDK_LABELS[key];
@@ -329,7 +334,7 @@ export function sdkFromPathname(pathname: string): ArcjetRouteSdkKey | undefined
   }
 
   const sdk = sdkMatch[1];
-  if (!isSdkKey(sdk) && !isGuardSdkKey(sdk)) {
+  if (!isRouteSdkKey(sdk)) {
     return undefined;
   }
 

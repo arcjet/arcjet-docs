@@ -5,6 +5,7 @@ import {
   isFrameworkSpecificEntry,
   isLegacyFrameworkHubPathname,
   isPlusVariantPathname,
+  isRouteSdkKey,
   isSdkSwitcherOptionCurrent,
   legacyFrameworkVercelRedirects,
   LEGACY_F_DOC_PATHS,
@@ -23,6 +24,14 @@ import {
   variantOnlySdkRedirectTarget,
   variantOnlySdkAstroRedirects,
 } from "@/lib/sdk";
+
+test.describe("isRouteSdkKey", () => {
+  test("accepts HTTP SDK keys and guard adapters", () => {
+    expect(isRouteSdkKey("next")).toBe(true);
+    expect(isRouteSdkKey("langchain")).toBe(true);
+    expect(isRouteSdkKey("go")).toBe(false);
+  });
+});
 
 test.describe("isFrameworkSpecificEntry", () => {
   test("matches entries with frameworks frontmatter", () => {
