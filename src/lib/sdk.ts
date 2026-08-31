@@ -447,6 +447,7 @@ export type SdkSwitcherOption = {
  * SDKs with a base legacy framework key appear once (e.g. Next.js). SDKs that
  * only ship plus-variants (Python) list each variant instead of a bare SDK row.
  * SDKs with optional variants (Node.js, Bun) list both the base SDK and variants.
+ * Options are sorted alphabetically by label.
  */
 export function sdkSwitcherOptions(
   pathname: string,
@@ -468,33 +469,32 @@ export function sdkSwitcherOptions(
         sdkKey: guardKey,
       });
     }
+  } else {
+    for (const sdkItem of sdks()) {
+      const variants = sdkVariants(sdkItem.key);
 
-    return options;
-  }
+      if (sdkItem.legacyFrameworkKey) {
+        options.push({
+          id: sdkItem.key,
+          label: sdkItem.label,
+          href: pathnameForSdk(pathname, sdkItem.key),
+          sdkKey: sdkItem.key,
+        });
+      }
 
-  for (const sdkItem of sdks()) {
-    const variants = sdkVariants(sdkItem.key);
-
-    if (sdkItem.legacyFrameworkKey) {
-      options.push({
-        id: sdkItem.key,
-        label: sdkItem.label,
-        href: pathnameForSdk(pathname, sdkItem.key),
-        sdkKey: sdkItem.key,
-      });
-    }
-
-    for (const variant of variants) {
-      options.push({
-        id: `${sdkItem.key}+${variant.key}`,
-        label: `${sdkItem.label} + ${variant.label}`,
-        href: pathnameForSdkVariant(pathname, sdkItem.key, variant.key),
-        sdkKey: sdkItem.key,
-        variantKey: variant.key,
-      });
+      for (const variant of variants) {
+        options.push({
+          id: `${sdkItem.key}+${variant.key}`,
+          label: `${sdkItem.label} + ${variant.label}`,
+          href: pathnameForSdkVariant(pathname, sdkItem.key, variant.key),
+          sdkKey: sdkItem.key,
+          variantKey: variant.key,
+        });
+      }
     }
   }
 
+  options.sort((a, b) => a.label.localeCompare(b.label, "en"));
   return options;
 }
 

@@ -94,8 +94,10 @@ export const defaultSelectedFramework: FrameworkKey = "next-js";
 export const getFrameworks = (
   keys: FrameworkKey[],
 ): ReadonlyArray<Framework> => {
-  return frameworks.filter((f) => keys.includes(f.key));
-};
+  return frameworks
+    .filter((f) => keys.includes(f.key))
+    .toSorted((a, b) => a.label.localeCompare(b.label, "en"));
+}
 
 /**
  * Type guard utility for sanitizing interaction input

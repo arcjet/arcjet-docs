@@ -164,6 +164,26 @@ test.describe("sdkSwitcherOptions", () => {
     ).toBe("/sdk/langchain/guards/quick-start/");
     expect(labels).not.toContain("Next.js");
   });
+
+  test("sorts options alphabetically by label", () => {
+    const guardLabels = sdkSwitcherOptions(
+      "/sdk/langchain/guards/quick-start/",
+      ["vercel-eve", "claude-agent-sdk", "langchain-js", "crewai"],
+    ).map((option) => option.label);
+    expect(guardLabels).toEqual([
+      "Claude Agent SDK",
+      "CrewAI",
+      "LangChain JS",
+      "Vercel Eve",
+    ]);
+
+    const httpLabels = sdkSwitcherOptions("/sdk/next/get-started/").map(
+      (option) => option.label,
+    );
+    expect(httpLabels).toEqual(
+      [...httpLabels].sort((a, b) => a.localeCompare(b, "en")),
+    );
+  });
 });
 
 test.describe("isSdkSwitcherOptionCurrent", () => {
