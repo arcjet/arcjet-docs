@@ -21,6 +21,7 @@ import { ReactRouter as IconReactRouter } from "@/components/icons/tech/ReactRou
 import { Remix as IconRemix } from "@/components/icons/tech/Remix";
 import { StrandsAgents as IconStrandsAgents } from "@/components/icons/tech/StrandsAgents";
 import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
+import { TanStackAi as IconTanStackAi } from "@/components/icons/tech/TanStackAi";
 import { VercelAi as IconVercelAi } from "@/components/icons/tech/VercelAi";
 import { VercelEve as IconVercelEve } from "@/components/icons/tech/VercelEve";
 import type { Props as SelectProps } from "@/components/Select";
@@ -77,6 +78,7 @@ const frameworkIcon = {
   remix: <IconRemix />,
   "strands-agents": <IconStrandsAgents />,
   sveltekit: <IconSvelteKit />,
+  "tanstack-ai": <IconTanStackAi />,
   "vercel-ai": <IconVercelAi />,
   "vercel-eve": <IconVercelEve />,
 };

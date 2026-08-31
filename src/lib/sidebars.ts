@@ -690,6 +690,10 @@ export const main = [
         link: "/guards/strands-agents",
       },
       {
+        label: "TanStack AI",
+        link: "/guards/tanstack-ai",
+      },
+      {
         label: "Vercel",
         link: "https://vercel.com/integrations/arcjet",
         attrs: { target: "_blank", class: "external-link" },

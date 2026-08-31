@@ -364,6 +364,9 @@ test.describe("pathnameForLegacyFrameworkKey", () => {
     expect(pathnameForLegacyFrameworkKey("crewai", "/get-started")).toBe(
       "/sdk/crewai/get-started/",
     );
+    expect(pathnameForLegacyFrameworkKey("tanstack-ai", "/get-started")).toBe(
+      "/sdk/tanstack-ai/get-started/",
+    );
   });
 
   test("maps Claude Agent SDK Python get-started to the SDK get-started route", () => {

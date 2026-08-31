@@ -1,6 +1,6 @@
 ---
 title: "Agent guard framework integrations"
-description: "Guard Vercel AI SDK, LangChain, LangChain JS, CrewAI, LangGraph, Genkit, OpenAI Agents, OpenAI Agents Python, Strands Agents, Vercel Eve, Mastra, Claude Agent SDK, and Claude Agent SDK Python tools, processors, and inbound messages."
+description: "Guard Vercel AI SDK, LangChain, LangChain JS, CrewAI, LangGraph, Genkit, OpenAI Agents, OpenAI Agents Python, Strands Agents, TanStack AI, Vercel Eve, Mastra, Claude Agent SDK, and Claude Agent SDK Python tools, processors, and inbound messages."
 ---
 
 import { Aside } from "@astrojs/starlight/components";
@@ -47,6 +47,7 @@ Pick the page that matches the object you hold when the effect runs:
 | OpenAI Agents | `@arcjet/guard/openai-agents/v0` | <Link.Page href="/guards/openai-agents">OpenAI Agents agent guard</Link.Page> |
 | OpenAI Agents (Python) | `arcjet.guard.openai_agents` | <Link.Page href="/guards/openai-agents-py">OpenAI Agents Python agent guard</Link.Page> |
 | Strands Agents | `@arcjet/guard/strands-agents/v1` | <Link.Page href="/guards/strands-agents">Strands Agents agent guard</Link.Page> |
+| TanStack AI | `@arcjet/guard/tanstack-ai/v0` | <Link.Page href="/guards/tanstack-ai">TanStack AI agent guard</Link.Page> |
 | Vercel Eve | `@arcjet/guard/vercel-eve/v0` | <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page> |
 | Mastra | `@arcjet/guard/mastra/v1` | <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page> |
 | Claude Agent SDK | `@arcjet/guard/claude-agent-sdk/v0` | <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page> |
@@ -59,8 +60,9 @@ Don't mix adapters. Don't wrap a Mastra `createTool`, Eve
 `defineTool`, LangGraph `tool()`, LangChain JS `createAgent` tool,
 OpenAI Agents `tool()`, Python OpenAI Agents `function_tool`,
 Claude Agent SDK `tool()`, Python Claude Agent SDK `@tool`, Genkit
-`ai.defineTool`, Strands Agents `tool()`, or official CrewAI `@tool`
-with `@arcjet/guard/vercel-ai/v7` or
+`ai.defineTool`, Strands Agents `tool()`, TanStack AI
+`toolDefinition`, or official CrewAI `@tool` with
+`@arcjet/guard/vercel-ai/v7` or
 `@arcjet/guard/claude-agent-sdk/v0`. The wrapper throws or misses
 the real execute path. Don't use an npm CrewAI port with
 `arcjet.guard.crewai`.
@@ -273,6 +275,30 @@ about inbound screening, authored tools, and `BeforeToolCallEvent`
 denials, see the
 <Link.Page href="/guards/strands-agents">Strands Agents agent guard</Link.Page>.
 
+## TanStack AI
+
+TanStack AI `chat()` workflows call authored tools through
+`chat({ middleware })` and `onBeforeToolCall`. There is no
+`guardInbound`. Screen inbound text with a direct `guard()` call
+before `chat()`. `needsApproval`, `defineInterrupt`, and
+`onInterruptBoundary` are human HITL confirmation, not policy.
+There is no `guardTool`. TanStack AI swallows an `execute` throw,
+so a tool wrapper is the wrong gate. Use `guardMiddleware()` as
+`chat({ middleware })`. Don't also wrap these tools with
+`@arcjet/guard/vercel-ai/v7`.
+
+This is not Vercel AI SDK
+<Link.Page href="/guards/vercel-ai">`@arcjet/guard/vercel-ai/v7`</Link.Page>.
+It is not TanStack Start HTTP `protect()`. TanStack's own
+`contentGuardMiddleware` is TanStack's content guard, not Arcjet
+Guard.
+
+`guardMiddleware` skips with `{ type: "skip", result }` and an
+`ArcjetDenialResult`. Don't throw. Policy sits on
+`onBeforeToolCall` only. For more information about inbound
+screening and `chat()`-wide denials, see the
+<Link.Page href="/guards/tanstack-ai">TanStack AI agent guard</Link.Page>.
+
 ## Vercel Eve
 
 Eve agents can have zero authored tools. OpenAPI and MCP connections have no
@@ -346,6 +372,7 @@ in a different way:
 | OpenAI Agents | Return `{ arcjetDenied: true, … }` from `invoke` | A throw hits `errorFunction` or `ToolCallError` and can kill the run |
 | OpenAI Agents (Python) | `reject_content(...)` with JSON of `ArcjetDenialResult` | A raise becomes a tripwire halt, or `default_tool_error_function` swallows it |
 | Strands Agents | `guardTool` returns `{ arcjetDenied: true, … }`. `guardHooks` sets `event.cancel` to a JSON string of that object | A throw drops the fields. `event.interrupt()` is HITL, not policy |
+| TanStack AI | `onBeforeToolCall` skip with `ArcjetDenialResult` (`{ type: "skip", result }`) | A throw from `execute` is swallowed. There is no `guardTool` |
 | LangGraph | Return `{ arcjetDenied: true, … }`. `ToolNode` wraps a `ToolMessage` with `status: "success"` | Fabricating a `ToolMessage` to force `status: "error"` crashes the graph reducer |
 | LangChain JS | `guardTool` returns `{ arcjetDenied: true, … }`. `guardMiddleware` returns a real `ToolMessage` (JSON `content`, default status) | A throw drops the fields. `wrapToolCall` cannot return a bare object. Don't set `status: "error"` |
 | Genkit | Return `{ arcjetDenied: true, … }` as completed `toolResponse.output` | A throw / `interrupt()` is HITL and the wrong envelope |
@@ -447,6 +474,13 @@ The wrappers default to fail closed when Guard is unavailable:
   `BeforeToolCallEvent.cancel` only. Direct `guard()` before
   `invoke` / `stream` fails open. Check `decision.hasFailedOpen()`
   when that call site must fail closed.
+- TanStack AI helpers default to `onGuardError: "deny"`.
+  `guardMiddleware` skips with `{ type: "skip", result }` and an
+  `ArcjetDenialResult`. There is no `guardTool`. A throw from
+  `execute` is swallowed. Don't throw. Policy sits on
+  `onBeforeToolCall` only. Direct `guard()` before `chat()` fails
+  open. Check `decision.hasFailedOpen()` when that call site must
+  fail closed.
 
 Set `onGuardError: "allow"` in JavaScript or `on_guard_error="allow"` in Python
 only when executing without a complete security decision is acceptable.

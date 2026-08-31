@@ -53,6 +53,7 @@ const PATHS_FROM_SITEMAP = [
   "/guards/openai-agents-py/",
   "/guards/quick-start/",
   "/guards/strands-agents/",
+  "/guards/tanstack-ai/",
   "/guards/vercel-ai/",
   "/guards/vercel-eve/",
   "/inspect/",
