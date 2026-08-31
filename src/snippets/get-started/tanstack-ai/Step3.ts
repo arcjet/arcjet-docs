@@ -27,10 +27,11 @@ export async function runAgent(
   userText: string,
   adapter: object,
 ) {
+  const appContext = { sessionId: conversationId };
   const decision = await arcjet.guard({
     label: "message.received",
     rules: [inbound(userText)],
-    ...tanstackAiContext({ sessionId: conversationId }),
+    ...tanstackAiContext({ context: appContext }),
   });
 
   if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
@@ -41,6 +42,7 @@ export async function runAgent(
     adapter,
     messages: [{ role: "user", content: userText }],
     tools: [lookupOrder],
+    context: appContext,
     middleware: [
       guardMiddleware(arcjet, {
         sessionId: conversationId,
