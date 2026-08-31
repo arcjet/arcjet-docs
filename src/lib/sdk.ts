@@ -229,11 +229,12 @@ export function* sdks(): Generator<ArcjetSdk> {
 
 /**
  * Returns the SDK configuration for the given key.
+ *
+ * Guard adapters are not in `ARCJET_SDKS`. After the guard-key check, TypeScript
+ * narrows `key` to `ArcjetSdkKey` so it can index the HTTP SDK map.
  */
-export function sdk<TKey extends ArcjetRouteSdkKey>(
-  key: TKey,
-): {
-  key: TKey;
+export function sdk(key: ArcjetRouteSdkKey): {
+  key: ArcjetRouteSdkKey;
   label: string;
   legacyFrameworkKey: FrameworkKey | null;
 } {
@@ -245,10 +246,7 @@ export function sdk<TKey extends ArcjetRouteSdkKey>(
     };
   }
 
-  // Intentionally downcast so caller knows the literal key but doesn't get the
-  // entire literal definition. This hopefully avoids accidentally narrowing on
-  // non-key properties.
-  return ARCJET_SDKS[key] as ArcjetSdk<Extract<TKey, ArcjetSdkKey>>;
+  return ARCJET_SDKS[key];
 }
 
 /**
