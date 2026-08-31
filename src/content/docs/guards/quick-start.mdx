@@ -197,9 +197,12 @@ instructions to add a site and get a key.
 
 ### 4. Wrap the tool
 
-Adapters that accept `inputs` map the policy fields from trusted application
-state and the model-selected arguments. Other JavaScript adapters submit
-`action` and SDK `rules` for the local sensitive-information check.
+The Vercel AI SDK v7 adapter and the Python adapters (LangChain, CrewAI,
+and OpenAI Agents) accept `inputs` and `actor`. Those samples map policy
+fields from trusted application state and the model-selected arguments.
+Other JavaScript adapters submit `action` and SDK `rules` for the local
+sensitive-information check, so the recipient allow-list is not enforced
+in those samples.
 
 <SlotByFramework>
   <ClaudeWrap slot="claude-agent-sdk" />

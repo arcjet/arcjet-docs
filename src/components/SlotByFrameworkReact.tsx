@@ -1,6 +1,5 @@
 import Skeleton from "@/components/Skeleton";
 import type { FrameworkKey } from "@/lib/prefs";
-import { getClosestFrameworkMatch } from "@/lib/prefs";
 import { extractSlotContent } from "@/lib/utils";
 import { displayedFramework } from "@/store";
 import { useStore } from "@nanostores/react";
@@ -29,21 +28,8 @@ const SlotByFramework = ({ inline, frameworkSlots, ...props }: Props) => {
   const [selectedFramework, setSelectedFramework] = useState<FrameworkKey>();
 
   useEffect(() => {
-    let framework = $displayedFramework;
-    const slotKeys = Object.entries(frameworkSlots ?? {})
-      .filter(([key, html]) => key !== "default" && !!html)
-      .map(([key]) => key as FrameworkKey);
-
-    if (
-      framework &&
-      slotKeys.length > 0 &&
-      !frameworkSlots?.[framework]
-    ) {
-      framework = getClosestFrameworkMatch(framework, slotKeys);
-    }
-
-    setSelectedFramework(framework);
-  }, [$displayedFramework, frameworkSlots]);
+    setSelectedFramework($displayedFramework);
+  }, [$displayedFramework]);
 
   const content = useMemo(() => {
     if (!selectedFramework) return null;
