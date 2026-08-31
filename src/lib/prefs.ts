@@ -51,6 +51,7 @@ export const frameworks = [
   { key: "bun", label: "Bun" },
   { key: "bun-hono", label: "Bun + Hono" },
   { key: "claude-agent-sdk", label: "Claude Agent SDK" },
+  { key: "claude-agent-sdk-py", label: "Claude Agent SDK Python" },
   { key: "crewai", label: "CrewAI" },
   { key: "deno", label: "Deno" },
   { key: "fastify", label: "Fastify" },

@@ -739,9 +739,10 @@ To wrap an effect instead of handling the decision yourself, use the
 checkpoint helpers. They fail closed by default
 (`on_guard_error="deny"`). A `DENY` raises `ArcjetDeniedError` or
 `ArcjetToolDeniedError`, except the OpenAI Agents Python helper,
-which calls `reject_content(...)`. Unavailability raises
-`ArcjetUnavailableError` or `ArcjetToolUnavailableError` on the
-LangChain and CrewAI surfaces.
+which calls `reject_content(...)`, and the Claude Agent SDK Python
+helper, which returns JSON in content with `is_error: True`.
+Unavailability raises `ArcjetUnavailableError` or
+`ArcjetToolUnavailableError` on the LangChain and CrewAI surfaces.
 
 - **Any Python callable** – `guard_action` / `guard_action_sync` in
   `arcjet.guard`. No extra.
@@ -763,6 +764,14 @@ LangChain and CrewAI surfaces.
   `FunctionTool.tool_input_guardrails` plus `reject_content`. The
   reject payload is JSON of `ArcjetDenialResult`. Don't raise from
   the guardrail.
+- **Claude Agent SDK Python `@tool`** – `guard_tool` plus
+  `guard_hooks` (`arcjet[claude-agent-sdk]`,
+  `arcjet.guard.claude_agent_sdk`, `claude-agent-sdk>=0.2.83,<1`).
+  Authored `@tool` returns JSON of `ArcjetDenialResult` in content
+  with `is_error: True`. Python does not forward
+  `structuredContent`. Unwrapped tools are `PreToolUse` deny.
+  Inbound is `UserPromptSubmit` block via `guard_hooks`. There is
+  no inbound helper. `can_use_tool` is HITL, not policy.
 
 For install, examples, correlation, and the configure-before-wrap rule,
 see the <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
@@ -770,6 +779,8 @@ For CrewAI hooks, see the
 <Link.Page href="/guards/crewai">CrewAI agent guard</Link.Page>.
 For OpenAI Agents Python, see the
 <Link.Page href="/guards/openai-agents-py">OpenAI Agents Python agent guard</Link.Page>.
+For Claude Agent SDK Python, see the
+<Link.Page href="/guards/claude-agent-sdk-py">Claude Agent SDK Python agent guard</Link.Page>.
 
 ### Rules
 

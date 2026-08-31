@@ -28,6 +28,7 @@ export type ArcjetSdkKey =
  */
 export type ArcjetGuardSdkKey =
   | "claude-agent-sdk"
+  | "claude-agent-sdk-py"
   | "crewai"
   | "genkit"
   | "langchain"
@@ -45,6 +46,7 @@ export type ArcjetRouteSdkKey = ArcjetSdkKey | ArcjetGuardSdkKey;
 
 export const GUARD_SDK_KEYS = [
   "claude-agent-sdk",
+  "claude-agent-sdk-py",
   "crewai",
   "genkit",
   "langchain",
@@ -60,6 +62,7 @@ export const GUARD_SDK_KEYS = [
 
 const GUARD_SDK_LABELS = {
   "claude-agent-sdk": "Claude Agent SDK",
+  "claude-agent-sdk-py": "Claude Agent SDK Python",
   crewai: "CrewAI",
   genkit: "Genkit",
   langchain: "LangChain",
