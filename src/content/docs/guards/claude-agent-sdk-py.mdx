@@ -26,14 +26,15 @@ wrap these tools with `@arcjet/guard/claude-agent-sdk/v0` or
 
 ## Install
 
-The `arcjet[claude-agent-sdk]` extra is unpublished. Install it from
-the development tree your team provides. Don't pin a commit SHA.
+Until `arcjet.guard.claude_agent_sdk` is published, pin `arcjet` to
+[`9ea0b06a`](https://github.com/arcjet/arcjet-py/commit/9ea0b06a87bcee77b8df0664338c712c4668b87b).
+Published `arcjet` 1.0.0 on PyPI does not include this extra.
 
 ```bash
-pip install "arcjet[claude-agent-sdk]"
+pip install "arcjet[claude-agent-sdk] @ git+https://github.com/arcjet/arcjet-py@9ea0b06a87bcee77b8df0664338c712c4668b87b"
 ```
 
-`arcjet[claude-agent-sdk]` depends on `claude-agent-sdk>=0.2.83,<1`.
+`arcjet[claude-agent-sdk]` depends on `claude-agent-sdk>=0.2.127,<1`.
 Unlike CrewAI, this extra is safe to install – it does not pull
 `chromadb`. CPython 3.10 or later.
 
@@ -81,9 +82,10 @@ like success.
 unwrapped built-in and MCP tools on `PreToolUse`. There is no
 inbound helper. Screen prompt injection on the hooks inbound path.
 
-`claude_agent_context` reads a caller-owned UUID `session_id`. It
-never mints an ID. If the caller did not pass a UUID session id, the
-call is uncorrelated.
+`claude_agent_context` reads a caller-owned UUID `session_id` from
+hook input, then the `session_id=` fallback. It never mints an ID.
+It never reads `trace_id`. If the caller did not pass a UUID
+session id, the call is uncorrelated.
 
 There is no `guard_inbound`. There is no `guard_can_use_tool` and no
 `guard_approval`. `can_use_tool` is human-in-the-loop (HITL)
@@ -101,6 +103,7 @@ or `@arcjet/guard/vercel-ai/v7`.
 | `guard` | Yes | Client from `launch_arcjet` or `launch_arcjet_sync`. |
 | `action` | Yes | Guard label and capture name. Use `resource.verb` in the past tense, such as `email.sent`. |
 | `rules` | No | Bound SDK rule inputs, or a function of the parsed tool arguments. Omit to submit none. |
+| `session_id` | No | Caller-owned UUID. An authored handler has no `extra.session_id`, so pass the same id you give `ClaudeAgentOptions`. Never minted. |
 | `on_guard_error` | No | `"deny"` (default) or `"allow"`. A real `DENY` always blocks. |
 
 `guard_hooks` accepts this contract:
@@ -108,15 +111,19 @@ or `@arcjet/guard/vercel-ai/v7`.
 | Option | Required | Description |
 | --- | --- | --- |
 | `guard` | Yes | Client from `launch_arcjet` or `launch_arcjet_sync`. |
-| `action` | No | Guard label and capture name. A string, or a function of `tool_name`. |
-| `rules` | No | SDK rules, or a function of `tool_name`. Omit to submit none. |
-| `inbound` | No | Policy for `UserPromptSubmit`. `rules` receives the prompt text. |
-| `exclude` | No | Tools already wrapped with `guard_tool`. Pass a mapping with `server` and `name` for an authored MCP tool, or a bare string for a built-in such as `"Bash"`. |
-| `session_id` | No | Caller-owned UUID. Must be a UUID if you also pass it to `query()`. Never minted. |
+| `action` | No | Guard label and capture name. A string, or a function of the hook input. Defaults to `{tool_name}.invoked` when a tool hook is registered. |
+| `rules` | No | Bound SDK rule inputs, or a function of the tool arguments. Omit to submit none. |
+| `inbound` | No | Policy for `UserPromptSubmit`. Requires `action`. `rules` receives `{"prompt": ...}`. |
+| `exclude` | No | Tools already wrapped with `guard_tool`. Pass `{"server": ..., "name": ...}` to match `mcp__{server}__{name}`, or a bare string for a built-in such as `"Bash"`. |
+| `session_id` | No | Caller-owned UUID fallback. Hook `session_id` is preferred. Never minted. |
 | `on_guard_error` | No | `"deny"` (default) or `"allow"`. A real `DENY` always blocks. |
 
-`claude_agent_context` reads the caller-owned UUID `session_id` you
-already have. It never mints an ID.
+`guard_hooks` needs a tool policy (`action` or `rules`), an
+`inbound` policy, or both. There is no `guard_inbound`.
+
+`claude_agent_context` reads a caller-owned UUID `session_id` from
+hook input, then the `session_id=` fallback. It never mints an ID.
+It never reads `trace_id`.
 
 ## Screen inbound with `UserPromptSubmit`
 
@@ -124,8 +131,8 @@ There is no inbound helper. Screen prompt injection on
 `guard_hooks` inbound in `UserPromptSubmit`. This is the only place
 a turn can be declined before the model sees the prompt.
 
-On `DENY`, `UserPromptSubmit` blocks the prompt. The model never
-sees it.
+On `DENY`, `UserPromptSubmit` returns `{"decision": "block"}`. The
+model never sees the prompt.
 
 Helpers default to `on_guard_error="deny"`. `"allow"` is a
 legitimate choice on inbound, because failing closed there stops the
@@ -149,7 +156,7 @@ options = ClaudeAgentOptions(
         session_id=conversation_id,
         inbound={
             "action": "message.received",
-            "rules": lambda prompt: [inbound(prompt)],
+            "rules": lambda arguments: [inbound(arguments["prompt"])],
         },
     ),
 )
@@ -221,6 +228,7 @@ guarded_lookup = guard_tool(
     guard=arcjet,
     tool=lookup_order,
     action="order.looked-up",
+    session_id=conversation_id,
     rules=lambda arguments: [
         lookup_limit(key="orders", requested=1),
         detect_pii(arguments["note"]),
@@ -231,8 +239,9 @@ guarded_lookup = guard_tool(
 ## Deny unwrapped tools with `PreToolUse`
 
 Built-ins (Bash, Write, and similar) and MCP tools not passed
-through `guard_tool` are gated here. `PreToolUse` denies the call,
-so the tool does not run.
+through `guard_tool` are gated here. `PreToolUse` returns
+`permissionDecision: "deny"`, so the tool does not run.
+`permissionDecision: "ask"` is HITL, not deny.
 
 Don't apply `guard_tool` and `PreToolUse` to the same authored
 tool. That double-calls the guard.
@@ -251,12 +260,14 @@ mcp_limit = TokenBucket(
 hooks = guard_hooks(
     guard=arcjet,
     session_id=conversation_id,
-    action=lambda tool_name: f"{tool_name}.invoked",
-    rules=lambda tool_name: [mcp_limit(key=tool_name, requested=1)],
+    action=lambda hook: f"{hook['tool_name']}.invoked",
+    rules=[mcp_limit(key="mcp", requested=1)],
     exclude=[{"server": "support", "name": "lookup_order"}],
     inbound={
         "action": "message.received",
-        "rules": lambda prompt: [DetectPromptInjection()(prompt)],
+        "rules": lambda arguments: [
+            DetectPromptInjection()(arguments["prompt"])
+        ],
     },
 )
 ```
@@ -268,11 +279,10 @@ not pass through `guard_tool`.
 `exclude` or each one is guarded twice per invocation.
 
 Entries match the reported name exactly. An authored tool arrives as
-`mcp__<server>__<tool>`, so pass a mapping with `server` and
-`name` and the qualified name is built for you. A bare string
-matches as-is, which
-is what you want for a built-in such as `"Bash"`. A bare authored
-name does not match every server's tool of that name.
+`mcp__{server}__{name}`, so pass `{"server": ..., "name": ...}` and
+the qualified name is built for you. A bare string matches as-is,
+which is what you want for a built-in such as `"Bash"`. A bare
+authored name does not match every server's tool of that name.
 
 ## Human approval is not a policy gate
 
@@ -285,8 +295,9 @@ the same trap as CrewAI `human_input`, LangChain JS
 OpenAI `needs_approval`.
 
 There is no approval helper. Don't wrap `can_use_tool` as Guard.
-Use `guard_tool` on authored `@tool` handlers you own, or
-`PreToolUse` through `guard_hooks` for unwrapped tools.
+`permissionDecision: "ask"` is HITL, not deny. Use `guard_tool` on
+authored `@tool` handlers you own, or `PreToolUse` through
+`guard_hooks` for unwrapped tools.
 
 ## Fail-closed default
 
@@ -316,17 +327,27 @@ For more information about fail-open versus fail-closed behavior, see
 
 `query()` has no conversation or session ID unless you pass one.
 Pass the UUID `session_id` that you already have. Don't mint an
-ID. `claude_agent_context` reads that caller-owned id. If you omit
-a UUID session id, the call is uncorrelated rather than joined to a
-generated ID.
+ID. `claude_agent_context` reads hook `session_id`, then the
+`session_id=` fallback. An authored handler has no
+`extra.session_id`, so pass `session_id=` on `guard_tool`. If you
+omit a UUID session id, the call is uncorrelated rather than
+joined to a generated ID. `trace_id` is never read.
 
 The Claude Agent SDK requires `session_id` to be a UUID when you
 pass one. Anything else exits with an invalid session ID error.
+Reusing the same id on a second `query()` exits as already in use.
 
 ```py
 options = ClaudeAgentOptions(
     session_id=conversation_id,
-    hooks=guard_hooks(guard=arcjet, session_id=conversation_id),
+    hooks=guard_hooks(
+        guard=arcjet,
+        session_id=conversation_id,
+        inbound={
+            "action": "message.received",
+            "rules": lambda arguments: [inbound(arguments["prompt"])],
+        },
+    ),
 )
 ```
 
@@ -399,8 +420,8 @@ guard_tool(
 
 ### Correlate the run
 
-Pass the caller-owned UUID on `ClaudeAgentOptions(session_id=...)`
-and to `guard_hooks`. Don't mint an ID.
+Pass the caller-owned UUID on `ClaudeAgentOptions(session_id=...)`,
+`guard_hooks`, and `guard_tool`. Don't mint an ID.
 
 ## Related
 
@@ -420,3 +441,5 @@ and to `guard_hooks`. Don't mint an ID.
 - <Link.Page href="/guards">Agent guards</Link.Page>
 - Example:
   [examples/fastapi-claude-agent-sdk-guard](https://github.com/arcjet/arcjet-py/tree/main/examples/fastapi-claude-agent-sdk-guard)
+- Adapter:
+  [`9ea0b06a`](https://github.com/arcjet/arcjet-py/commit/9ea0b06a87bcee77b8df0664338c712c4668b87b)
