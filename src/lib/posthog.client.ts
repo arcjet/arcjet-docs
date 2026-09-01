@@ -8,6 +8,10 @@ import {
 // See https://posthog.com/docs/libraries/js#option-2-install-via-package-manager
 import posthog, { type PostHog } from "posthog-js/dist/module.no-external";
 
+import {
+  isHubSpotAnalyticsAllowed,
+  subscribeToHubSpotConsent,
+} from "@/lib/hubspot";
 import { POSTHOG_EVENTS_UPSTREAM, POSTHOG_PROXY_PATH } from "@/lib/posthog";
 
 /**
@@ -19,7 +23,6 @@ const POSTHOG_SYMBOL = Symbol.for("arcjet:posthog");
 declare global {
   interface Window {
     [POSTHOG_SYMBOL]: PostHog | undefined;
-    _hsp?: unknown[][];
   }
 }
 
@@ -67,17 +70,13 @@ export function initializePostHog() {
   // listener fires immediately with current consent state (replays for
   // visitors who already accepted on another .arcjet.com subdomain) and
   // again whenever consent changes.
-  const _hsp = (window._hsp = window._hsp || []);
-  _hsp.push([
-    "addPrivacyConsentListener",
-    (consent: { categories: { analytics: boolean } }) => {
-      if (consent.categories.analytics) {
-        instance.opt_in_capturing();
-      } else {
-        instance.opt_out_capturing();
-      }
-    },
-  ]);
+  subscribeToHubSpotConsent((consent) => {
+    if (isHubSpotAnalyticsAllowed(consent)) {
+      instance.opt_in_capturing();
+    } else {
+      instance.opt_out_capturing();
+    }
+  });
 
   window[POSTHOG_SYMBOL] = instance;
 }
