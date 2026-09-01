@@ -175,14 +175,19 @@ test.describe("sdkSwitcherOptions", () => {
       "next-js",
       "crewai",
       "langchain",
+      "claude-agent-sdk-py",
     ]);
     const fromNextLabels = fromNext.map((option) => option.label);
     expect(fromNextLabels).toContain("Next.js");
     expect(fromNextLabels).toContain("CrewAI");
     expect(fromNextLabels).toContain("LangChain");
+    expect(fromNextLabels).toContain("Claude Agent SDK Python");
     expect(fromNext.find((option) => option.sdkKey === "crewai")?.href).toBe(
       "/sdk/crewai/get-started/",
     );
+    expect(
+      fromNext.find((option) => option.sdkKey === "claude-agent-sdk-py")?.href,
+    ).toBe("/sdk/claude-agent-sdk-py/get-started/");
 
     const fromCrewai = sdkSwitcherOptions("/sdk/crewai/get-started/", [
       "next-js",
@@ -301,10 +306,10 @@ test.describe("pathnameForLegacyFrameworkKey", () => {
     );
   });
 
-  test("maps Claude Agent SDK Python get-started to the adapter page", () => {
+  test("maps Claude Agent SDK Python get-started to the SDK get-started route", () => {
     expect(
       pathnameForLegacyFrameworkKey("claude-agent-sdk-py", "/get-started"),
-    ).toBe("/guards/claude-agent-sdk-py/");
+    ).toBe("/sdk/claude-agent-sdk-py/get-started/");
   });
 
   test("maps guard frameworks on the agent guards quick start to SDK routes", () => {
@@ -377,13 +382,13 @@ test.describe("legacyFrameworkVercelRedirects", () => {
     expect(match).toBeDefined();
   });
 
-  test("redirects Claude Agent SDK Python get-started to the adapter page", () => {
+  test("redirects Claude Agent SDK Python get-started to the SDK get-started route", () => {
     const redirects = legacyFrameworkVercelRedirects();
     const match = redirects.find(
       (r) =>
         r.source === "/get-started" &&
         r.has[0]?.value === "claude-agent-sdk-py" &&
-        r.destination === "/guards/claude-agent-sdk-py/",
+        r.destination === "/sdk/claude-agent-sdk-py/get-started/",
     );
     expect(match).toBeDefined();
   });

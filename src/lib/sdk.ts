@@ -737,12 +737,6 @@ export function pathnameForLegacyFrameworkKey(
     docHref = docPathFromSdkPathname(docHref);
   }
 
-  // This adapter has no HTTP get-started slots. Send the legacy
-  // get-started picker to the agent guard page instead of a 404.
-  if (legacyKey === "claude-agent-sdk-py" && docHref === "/get-started/") {
-    return "/guards/claude-agent-sdk-py/";
-  }
-
   const sdkPrefix = sdkRoutePrefixFromLegacyFrameworkKey(legacyKey);
 
   if (sdkPrefix) {
