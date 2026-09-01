@@ -4,7 +4,10 @@ import Default from '@astrojs/starlight/components/PageFrame.astro';
 
 <script>
     import { initializePostHog } from "@/lib/posthog.client";
+    import { initializeConsentGatedReo } from "@/lib/reo.client";
+
     initializePostHog();
+    initializeConsentGatedReo();
 </script>
 <Default>
 	<slot name="header" slot="header" />
