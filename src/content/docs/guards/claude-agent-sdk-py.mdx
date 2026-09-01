@@ -13,16 +13,10 @@ deny the action before a side effect runs.
 
 <FrameworkPrimer />
 
-Vercel AI SDK, Python LangChain, LangChain JS, CrewAI, LangGraph JS,
-Genkit, Eve, Mastra, OpenAI Agents JS, OpenAI Agents Python, Strands
-Agents, and the JavaScript Claude Agent SDK wrapper are on
-<Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>.
-
 This adapter is the Python `claude-agent-sdk` package plus
 `guard_tool`, `guard_hooks`, and `claude_agent_context`. It is not
 the JavaScript `@arcjet/guard/claude-agent-sdk/v0` adapter. Don't
-wrap these tools with `@arcjet/guard/claude-agent-sdk/v0` or
-`@arcjet/guard/vercel-ai/v7`.
+wrap these tools with `@arcjet/guard/claude-agent-sdk/v0`.
 
 ## Install
 
@@ -35,8 +29,7 @@ pip install "arcjet[claude-agent-sdk] @ git+https://github.com/arcjet/arcjet-py@
 ```
 
 `arcjet[claude-agent-sdk]` depends on `claude-agent-sdk>=0.2.127,<1`.
-Unlike CrewAI, this extra is safe to install – it does not pull
-`chromadb`. CPython 3.10 or later.
+CPython 3.10 or later.
 
 Import helpers from `arcjet.guard.claude_agent_sdk`:
 
@@ -85,14 +78,13 @@ inbound helper. Screen prompt injection on the hooks inbound path.
 `claude_agent_context` reads a caller-owned UUID `session_id` from
 hook input, then the `session_id=` fallback. It never mints an ID.
 It never reads `trace_id`. If the caller did not pass a UUID
-session id, the call is uncorrelated.
+`session_id`, the call is uncorrelated.
 
 There is no `guard_inbound`. There is no `guard_can_use_tool` and no
 `guard_approval`. `can_use_tool` is human-in-the-loop (HITL)
 confirmation, not policy.
 
-Don't also wrap these tools with `@arcjet/guard/claude-agent-sdk/v0`
-or `@arcjet/guard/vercel-ai/v7`.
+Don't also wrap these tools with `@arcjet/guard/claude-agent-sdk/v0`.
 
 ## Helper options
 
@@ -139,7 +131,7 @@ legitimate choice on inbound, because failing closed there stops the
 agent answering during an outage.
 
 Pass the UUID `session_id` that you already have. Don't mint one.
-If you omit a UUID session id, the call is uncorrelated.
+If you omit a UUID `session_id`, the call is uncorrelated.
 
 ```py
 from claude_agent_sdk import ClaudeAgentOptions, query
@@ -183,13 +175,12 @@ On `DENY` the handler does not run. The helper returns JSON of
 }
 ```
 
-Python does not forward `structuredContent`. Don't depend on the
-JavaScript MCP `CallToolResult` envelope. The model reads JSON from
-content. Don't raise. A raise is a raw exception. Omitting
+Python does not forward `structuredContent`. The model reads JSON
+from content. Don't raise. A raise is a raw exception. Omitting
 `is_error` looks like success.
 
 Scan free-text args (a note, reason, or body). An opaque `order_id`
-does not trip email / phone / card / IP, so don't pass it to
+does not trip email, phone, card, or IP, so don't pass it to
 `LocalDetectSensitiveInfo`. That helper runs on a local ML model
 backend.
 
@@ -286,13 +277,9 @@ authored name does not match every server's tool of that name.
 
 ## Human approval is not a policy gate
 
-`can_use_tool` pauses the run for human-in-the-loop (HITL)
-confirmation. `allowed_tools`, allow rules, and
-`bypassPermissions` / `acceptEdits` can skip that callback. That is
-the same trap as CrewAI `human_input`, LangChain JS
-`humanInTheLoopMiddleware`, Mastra `requireApproval`, Claude JS
-`canUseTool`, LangGraph `interrupt()`, Genkit `interrupt()`, and
-OpenAI `needs_approval`.
+`can_use_tool` pauses the run for HITL confirmation.
+`allowed_tools`, allow rules, and `bypassPermissions` /
+`acceptEdits` can skip that callback.
 
 There is no approval helper. Don't wrap `can_use_tool` as Guard.
 `permissionDecision: "ask"` is HITL, not deny. Use `guard_tool` on
@@ -302,11 +289,10 @@ authored `@tool` handlers you own, or `PreToolUse` through
 ## Fail-closed default
 
 `guard_tool` and `guard_hooks` default to
-`on_guard_error="deny"`, matching the LangChain and CrewAI
-wrappers. If Guard cannot be evaluated, `guard_tool` returns JSON
-of `ArcjetDenialResult` in content with `is_error: True` and the
-tool handler does not run. Inbound `UserPromptSubmit` blocks the
-prompt.
+`on_guard_error="deny"`. If Guard cannot be evaluated, `guard_tool`
+returns JSON of `ArcjetDenialResult` in content with
+`is_error: True` and the tool handler does not run. Inbound
+`UserPromptSubmit` blocks the prompt.
 
 Set `on_guard_error="allow"` only when you can accept running the
 action without a complete security decision. `"allow"` is a
@@ -330,7 +316,7 @@ Pass the UUID `session_id` that you already have. Don't mint an
 ID. `claude_agent_context` reads hook `session_id`, then the
 `session_id=` fallback. An authored handler has no
 `extra.session_id`, so pass `session_id=` on `guard_tool`. If you
-omit a UUID session id, the call is uncorrelated rather than
+omit a UUID `session_id`, the call is uncorrelated rather than
 joined to a generated ID. `trace_id` is never read.
 
 The Claude Agent SDK requires `session_id` to be a UUID when you
@@ -351,15 +337,15 @@ options = ClaudeAgentOptions(
 )
 ```
 
-Derive the ID from a session the caller already has. A generated ID
-still joins this run's events, but it builds a Sequence that nobody
-searches for.
+Derive the ID from a session that the caller already has. A
+generated ID still joins this run's events. It does not match an
+ID that you already search for.
 
 ## What not to use
 
 - There is no inbound helper. Screen prompt injection on
   `guard_hooks` inbound in `UserPromptSubmit`.
-- There is no approval helper. `can_use_tool` is human HITL
+- There is no approval helper. `can_use_tool` is HITL
   confirmation, not policy.
 - Don't raise from `guard_tool` to signal a denial. Return JSON in
   content with `is_error: True`.
@@ -368,9 +354,7 @@ searches for.
   tool.
 - Don't mint a session ID. If the caller did not pass a UUID
   `session_id`, leave the call uncorrelated.
-- Don't wrap these tools with `@arcjet/guard/claude-agent-sdk/v0` or
-  `@arcjet/guard/vercel-ai/v7`.
-- Don't use this adapter with the JavaScript Claude Agent SDK.
+- Don't wrap these tools with `@arcjet/guard/claude-agent-sdk/v0`.
 
 ## Common patterns
 
@@ -426,17 +410,6 @@ Pass the caller-owned UUID on `ClaudeAgentOptions(session_id=...)`,
 ## Related
 
 - <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
-- <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>
-- <Link.Page href="/guards/openai-agents-py">OpenAI Agents Python agent guard</Link.Page>
-- <Link.Page href="/guards/crewai">CrewAI agent guard</Link.Page>
-- <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
-- <Link.Page href="/guards/langchain-js">LangChain JS agent guard</Link.Page>
-- <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>
-- <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>
-- <Link.Page href="/guards/genkit">Genkit agent guard</Link.Page>
-- <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>
-- <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>
-- <Link.Page href="/guards/strands-agents">Strands Agents agent guard</Link.Page>
 - <Link.Page href="/reference/python#guard">Python Guard SDK reference</Link.Page>
 - <Link.Page href="/guards">Agent guards</Link.Page>
 - Example:

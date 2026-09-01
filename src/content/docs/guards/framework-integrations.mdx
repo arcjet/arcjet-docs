@@ -318,7 +318,7 @@ This is the Python `claude-agent-sdk` adapter. It is not
 Claude Agent SDK Python agents call authored `@tool` handlers,
 built-in tools, and MCP tools. There is no inbound helper. Screen
 inbound prompts with `guard_hooks` on `UserPromptSubmit`.
-`can_use_tool` is human HITL confirmation, not policy. Use
+`can_use_tool` is human-in-the-loop confirmation, not policy. Use
 `guard_tool` for authored `@tool` handlers. Use `PreToolUse` through
 `guard_hooks` for unwrapped built-ins and MCP tools.
 
@@ -327,8 +327,7 @@ content with `is_error: True`. Python does not forward
 `structuredContent`. Don't raise.
 
 The `arcjet[claude-agent-sdk]` extra depends on
-`claude-agent-sdk>=0.2.127,<1`. The extra is safe to install – it
-does not pull `chromadb`.
+`claude-agent-sdk>=0.2.127,<1`.
 
 For more information about inbound screening, authored tools, and
 `PreToolUse` denials, see the
