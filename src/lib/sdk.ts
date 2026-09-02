@@ -445,6 +445,56 @@ export type SdkSwitcherOption = {
 };
 
 /**
+ * Returns an href for a switcher row. SDK-scoped paths keep the current doc
+ * and swap the SDK prefix. Hub paths such as `/get-started/` map through the
+ * legacy framework key so the same menu works on both surfaces.
+ */
+function hrefForSwitcherSdk(
+  pathname: string,
+  targetSdk: ArcjetRouteSdkKey,
+): string {
+  if (sdkFromPathname(pathname)) {
+    return pathnameForSdk(pathname, targetSdk);
+  }
+
+  if (isGuardSdkKey(targetSdk)) {
+    return pathnameForLegacyFrameworkKey(targetSdk, pathname);
+  }
+
+  const legacyKey = ARCJET_SDKS[targetSdk].legacyFrameworkKey;
+  if (legacyKey) {
+    return pathnameForLegacyFrameworkKey(legacyKey, pathname);
+  }
+
+  const defaultVariant = sdkVariants(targetSdk)[0];
+  if (defaultVariant) {
+    return pathnameForLegacyFrameworkKey(
+      defaultVariant.legacyFrameworkKey,
+      pathname,
+    );
+  }
+
+  return pathname;
+}
+
+function hrefForSwitcherVariant(
+  pathname: string,
+  sdkKey: ArcjetSdkKey,
+  variantKey: ArcjetSdkVariantKey,
+): string {
+  if (sdkFromPathname(pathname)) {
+    return pathnameForSdkVariant(pathname, sdkKey, variantKey);
+  }
+
+  const variant = sdkVariants(sdkKey).find((item) => item.key === variantKey);
+  if (variant) {
+    return pathnameForLegacyFrameworkKey(variant.legacyFrameworkKey, pathname);
+  }
+
+  return pathname;
+}
+
+/**
  * Returns SDK switcher menu options for the current pathname.
  *
  * SDKs with a base legacy framework key appear once (e.g. Next.js). SDKs that
@@ -460,7 +510,12 @@ export function sdkSwitcherOptions(
   const options: SdkSwitcherOption[] = [];
   const currentSdk = sdkFromPathname(pathname);
   const mixed = pageListsGuardAndHttpFrameworks(pageFrameworks);
-  const guardOnlyPage = !!currentSdk && isGuardSdkKey(currentSdk) && !mixed;
+  const pageIsGuardOnly =
+    !!pageFrameworks?.length &&
+    pageFrameworks.every((key) => isGuardSdkKey(key));
+  const guardOnlyPage =
+    !mixed &&
+    (pageIsGuardOnly || (!!currentSdk && isGuardSdkKey(currentSdk)));
 
   if (!guardOnlyPage) {
     for (const sdkItem of sdks()) {
@@ -470,7 +525,7 @@ export function sdkSwitcherOptions(
         options.push({
           id: sdkItem.key,
           label: sdkItem.label,
-          href: pathnameForSdk(pathname, sdkItem.key),
+          href: hrefForSwitcherSdk(pathname, sdkItem.key),
           sdkKey: sdkItem.key,
         });
       }
@@ -479,7 +534,7 @@ export function sdkSwitcherOptions(
         options.push({
           id: `${sdkItem.key}+${variant.key}`,
           label: `${sdkItem.label} + ${variant.label}`,
-          href: pathnameForSdkVariant(pathname, sdkItem.key, variant.key),
+          href: hrefForSwitcherVariant(pathname, sdkItem.key, variant.key),
           sdkKey: sdkItem.key,
           variantKey: variant.key,
         });
@@ -496,9 +551,7 @@ export function sdkSwitcherOptions(
       options.push({
         id: guardKey,
         label: guardSdkLabel(guardKey),
-        href: currentSdk
-          ? pathnameForSdk(pathname, guardKey)
-          : pathnameForLegacyFrameworkKey(guardKey, pathname),
+        href: hrefForSwitcherSdk(pathname, guardKey),
         sdkKey: guardKey,
       });
     }
@@ -539,6 +592,34 @@ export function isSdkSwitcherOptionCurrent(
   }
 
   return activeVariant === undefined;
+}
+
+/**
+ * Returns the switcher option that corresponds to a legacy framework key.
+ *
+ * Used on hub pages where the path has no SDK prefix, so the visible selection
+ * comes from the displayed-framework store instead of the URL.
+ */
+export function sdkSwitcherOptionForLegacyKey(
+  options: readonly SdkSwitcherOption[],
+  legacyKey: FrameworkKey,
+): SdkSwitcherOption | undefined {
+  return options.find((option) => {
+    if (option.variantKey) {
+      if (!isSdkKey(option.sdkKey)) return false;
+      return sdkVariants(option.sdkKey).some(
+        (variant) =>
+          variant.key === option.variantKey &&
+          variant.legacyFrameworkKey === legacyKey,
+      );
+    }
+
+    if (isGuardSdkKey(option.sdkKey)) {
+      return option.sdkKey === legacyKey;
+    }
+
+    return sdk(option.sdkKey).legacyFrameworkKey === legacyKey;
+  });
 }
 
 /**

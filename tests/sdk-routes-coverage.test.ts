@@ -1,9 +1,13 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import {
   LEGACY_FRAMEWORK_HUB_PATHS,
   sdks,
   sdkVariants,
 } from "@/lib/sdk";
+
+function visibleSdkToggle(page: Page) {
+  return page.locator(".toc-toggle, .mtoc-sdk-toggle").filter({ visible: true });
+}
 
 const SITE = "https://docs.arcjet.com";
 
@@ -273,7 +277,9 @@ test.describe("SDK switcher labels on plus-variant pages", () => {
       waitUntil: "domcontentloaded",
     });
 
-    await expect(page.locator(".toc-toggle")).toContainText("Bun + Hono");
+    const switcher = visibleSdkToggle(page);
+    await expect(switcher).toBeVisible({ timeout: 15_000 });
+    await expect(switcher).toContainText("Bun + Hono");
   });
 
   test("/sdk/python/plus/fastapi/get-started/ lists Python variants in the SDK switcher", async ({
@@ -283,13 +289,15 @@ test.describe("SDK switcher labels on plus-variant pages", () => {
       waitUntil: "domcontentloaded",
     });
 
-    await page.locator(".toc-toggle").click();
-    const menu = page.locator("#toc-sdk");
-    await expect(menu.getByRole("link", { name: "Python + FastAPI" })).toBeVisible();
-    await expect(menu.getByRole("link", { name: "Python + Flask" })).toBeVisible();
-    await expect(menu.getByRole("link", { name: "Python", exact: true })).toHaveCount(
-      0,
-    );
+    const switcher = visibleSdkToggle(page);
+    await expect(switcher).toBeVisible({ timeout: 15_000 });
+    await expect(switcher).toContainText("Python + FastAPI");
+
+    await switcher.click();
+    const labels = await page.locator("#toc-sdk a").allTextContents();
+    expect(labels).toContain("Python + FastAPI");
+    expect(labels).toContain("Python + Flask");
+    expect(labels.filter((label) => label === "Python")).toHaveLength(0);
   });
 });
 

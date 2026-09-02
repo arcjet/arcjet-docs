@@ -18,12 +18,17 @@ import {
   sdkDisplayLabelFromPathname,
   sdkFromPathname,
   sdkRoutePrefixFromLegacyFrameworkKey,
+  sdkSwitcherOptionForLegacyKey,
   sdkSwitcherOptions,
   sdkVariantFromPathname,
   shouldExcludeFromSitemap,
   variantOnlySdkRedirectTarget,
   variantOnlySdkAstroRedirects,
 } from "@/lib/sdk";
+import {
+  moveActiveIndex,
+  typeaheadIndex,
+} from "@/lib/sdk-switcher-keyboard";
 
 test.describe("isRouteSdkKey", () => {
   test("accepts HTTP SDK keys and guard adapters", () => {
@@ -223,6 +228,61 @@ test.describe("sdkSwitcherOptions", () => {
     );
     expect(httpLabels).toEqual(
       [...httpLabels].sort((a, b) => a.localeCompare(b, "en")),
+    );
+  });
+
+  test("builds SDK-scoped hrefs from hub pathnames", () => {
+    const options = sdkSwitcherOptions("/get-started/", [
+      "next-js",
+      "crewai",
+      "python-fastapi",
+    ]);
+    expect(options.find((option) => option.sdkKey === "next")?.href).toBe(
+      "/sdk/next/get-started/",
+    );
+    expect(options.find((option) => option.sdkKey === "crewai")?.href).toBe(
+      "/sdk/crewai/get-started/",
+    );
+    expect(
+      options.find((option) => option.label === "Python + FastAPI")?.href,
+    ).toBe("/sdk/python/plus/fastapi/get-started/");
+    expect(options.map((option) => option.label)).toEqual(
+      [...options.map((option) => option.label)].sort((a, b) =>
+        a.localeCompare(b, "en"),
+      ),
+    );
+  });
+
+  test("lists only guard adapters on hub guard pages", () => {
+    const options = sdkSwitcherOptions("/guards/quick-start/", [
+      "langchain",
+      "langchain-js",
+      "claude-agent-sdk-py",
+    ]);
+    expect(options.map((option) => option.label)).toEqual([
+      "Claude Agent SDK Python",
+      "LangChain",
+      "LangChain JS",
+    ]);
+    expect(
+      options.find((option) => option.sdkKey === "langchain")?.href,
+    ).toBe("/sdk/langchain/guards/quick-start/");
+    expect(options.some((option) => option.sdkKey === "next")).toBe(false);
+  });
+});
+
+test.describe("sdkSwitcherOptionForLegacyKey", () => {
+  test("matches plus-variant and guard keys", () => {
+    const options = sdkSwitcherOptions("/get-started/", [
+      "next-js",
+      "python-fastapi",
+      "crewai",
+    ]);
+    expect(
+      sdkSwitcherOptionForLegacyKey(options, "python-fastapi")?.label,
+    ).toBe("Python + FastAPI");
+    expect(sdkSwitcherOptionForLegacyKey(options, "crewai")?.sdkKey).toBe(
+      "crewai",
     );
   });
 });
@@ -503,5 +563,24 @@ test.describe("docPathFromSdkPathname", () => {
     expect(docPathFromSdkPathname("/sdk/bun/plus/hono/get-started/")).toBe(
       "/get-started/",
     );
+  });
+});
+
+test.describe("sdk switcher keyboard helpers", () => {
+  test("moveActiveIndex does not wrap", () => {
+    expect(moveActiveIndex(5, 0, -1)).toBe(0);
+    expect(moveActiveIndex(5, 4, 1)).toBe(4);
+    expect(moveActiveIndex(5, 2, 10)).toBe(4);
+    expect(moveActiveIndex(5, 2, 1)).toBe(3);
+  });
+
+  test("typeaheadIndex matches prefixes and cycles repeated letters", () => {
+    const labels = ["Astro", "Bun", "NestJS", "Next.js", "Node.js"];
+    expect(typeaheadIndex(labels, 0, "n")).toBe(2);
+    expect(typeaheadIndex(labels, 2, "ne")).toBe(2);
+    expect(typeaheadIndex(labels, 2, "nex")).toBe(3);
+    expect(typeaheadIndex(labels, 2, "nn")).toBe(3);
+    expect(typeaheadIndex(labels, 3, "nn")).toBe(4);
+    expect(typeaheadIndex(labels, 4, "nn")).toBe(2);
   });
 });

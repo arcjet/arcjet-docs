@@ -1,22 +1,59 @@
 ---
-import TOC from "@/components/TOC";
 import { sdkFromPathname } from "@/lib/sdk";
 import Default from "@astrojs/starlight/components/PageSidebar.astro";
+import MobileTableOfContents from "./MobileTableOfContents.astro";
+import TableOfContents from "./TableOfContents.astro";
 
 // TODO: Remove this override once client-side framework switching has been
 //       removed in favor of route-based sdks.
 const sdk = sdkFromPathname(Astro.url.pathname);
 
 const props = Astro.locals.starlightRoute;
-const isAjToc = props.entry.data.ajToc != undefined;
+const isAjTocHub = props.entry.data.ajToc != undefined && !sdk;
 ---
 
 {
-  isAjToc && !sdk ? (
-<TOC client:load astroEntry={props.entry} />
+  /* Hub pages with `ajToc` used to replace this sidebar with `TOC.tsx`,
+     which hosted a second SDK menu. Always use the Starlight chrome — or
+     the same panel markup when Starlight has no heading TOC — so the
+     switcher is the same component in the same wrapper as SDK routes. */
+  isAjTocHub && !props.toc ? (
+    <>
+      <div class="lg:sl-hidden">
+        <MobileTableOfContents />
+      </div>
+      <div class="right-sidebar-panel sl-hidden lg:sl-block">
+        <div class="sl-container">
+          <TableOfContents />
+        </div>
+      </div>
+    </>
   ) : (
-<Default>
-  <slot />
-</Default>
+    <Default>
+      <slot />
+    </Default>
   )
 }
+
+<style>
+  @layer starlight.core {
+    .right-sidebar-panel {
+      padding: 1rem var(--sl-sidebar-pad-x);
+    }
+    .sl-container {
+      width: calc(var(--sl-sidebar-width) - 2 * var(--sl-sidebar-pad-x));
+    }
+    @media (min-width: 72rem) {
+      .sl-container {
+        max-width: calc(
+          (
+              (
+                  100vw - var(--sl-sidebar-width) - 2 * var(--sl-content-pad-x) -
+                    2 * var(--sl-sidebar-pad-x)
+                ) * 0.25
+            )
+        );
+      }
+    }
+  }
+</style>

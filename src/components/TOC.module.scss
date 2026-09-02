@@ -5,7 +5,8 @@
 
 .TOC {
   .NavDesktop {
-    padding: calc(var(--sp) * 5) calc(var(--sp) * 4);
+    // Starlight's `.right-sidebar-panel` already applies this padding.
+    padding: 0;
 
     .Switcher {
       margin-bottom: calc(var(--sp) * 3);
@@ -13,6 +14,11 @@
       display: flex;
       flex-flow: column;
       row-gap: calc(var(--sp) * 0.5);
+
+      :global([data-sdk-switcher="desktop"]) {
+        width: 100%;
+        margin-bottom: 0;
+      }
     }
 
     .OnThisPageLabel {
