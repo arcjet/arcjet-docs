@@ -20,6 +20,7 @@ import { ReactRouter as IconReactRouter } from "@/components/icons/tech/ReactRou
 import { Remix as IconRemix } from "@/components/icons/tech/Remix";
 import { StrandsAgents as IconStrandsAgents } from "@/components/icons/tech/StrandsAgents";
 import { SvelteKit as IconSvelteKit } from "@/components/icons/tech/SvelteKit";
+import { TanStackAi as IconTanStackAi } from "@/components/icons/tech/TanStackAi";
 import { VercelAi as IconVercelAi } from "@/components/icons/tech/VercelAi";
 import { VercelEve as IconVercelEve } from "@/components/icons/tech/VercelEve";
 import { frameworks, getStoredFramework, type FrameworkKey } from "@/lib/prefs";
@@ -151,6 +152,9 @@ const FrameworkLinks = forwardRef(
                   break;
                 case "sveltekit":
                   icon = <IconSvelteKit />;
+                  break;
+                case "tanstack-ai":
+                  icon = <IconTanStackAi />;
                   break;
                 case "claude-agent-sdk":
                   icon = <IconClaudeAgentSdk />;

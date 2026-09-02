@@ -22,6 +22,7 @@ import { ReactRouter } from "@/components/icons/tech/ReactRouter";
 import { Remix } from "@/components/icons/tech/Remix";
 import { StrandsAgents } from "@/components/icons/tech/StrandsAgents";
 import { SvelteKit } from "@/components/icons/tech/SvelteKit";
+import { TanStackAi } from "@/components/icons/tech/TanStackAi";
 import { VercelAi } from "@/components/icons/tech/VercelAi";
 import { VercelEve } from "@/components/icons/tech/VercelEve";
 import type { ArcjetRouteSdkKey, ArcjetSdkVariantKey } from "@/lib/sdk";
@@ -53,6 +54,7 @@ const sdkIcons: Record<ArcjetRouteSdkKey, IconComponent> = {
   remix: Remix,
   "strands-agents": StrandsAgents,
   sveltekit: SvelteKit,
+  "tanstack-ai": TanStackAi,
   "vercel-ai": VercelAi,
   "vercel-eve": VercelEve,
 };

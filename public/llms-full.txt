@@ -2161,6 +2161,7 @@ For the full API reference, read the installed library source:
 - [OpenAI Agents agent guard](https://docs.arcjet.com/guards/openai-agents)
 - [OpenAI Agents Python agent guard](https://docs.arcjet.com/guards/openai-agents-py)
 - [Strands Agents agent guard](https://docs.arcjet.com/guards/strands-agents)
+- [TanStack AI agent guard](https://docs.arcjet.com/guards/tanstack-ai)
 - [Vercel Eve agent guard](https://docs.arcjet.com/guards/vercel-eve)
 - [Mastra agent guard](https://docs.arcjet.com/guards/mastra)
 - [Claude Agent SDK agent guard](https://docs.arcjet.com/guards/claude-agent-sdk)

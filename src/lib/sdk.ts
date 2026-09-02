@@ -38,6 +38,7 @@ export type ArcjetGuardSdkKey =
   | "openai-agents"
   | "openai-agents-py"
   | "strands-agents"
+  | "tanstack-ai"
   | "vercel-ai"
   | "vercel-eve";
 
@@ -56,6 +57,7 @@ export const GUARD_SDK_KEYS = [
   "openai-agents",
   "openai-agents-py",
   "strands-agents",
+  "tanstack-ai",
   "vercel-ai",
   "vercel-eve",
 ] as const satisfies readonly ArcjetGuardSdkKey[];
@@ -72,6 +74,7 @@ const GUARD_SDK_LABELS = {
   "openai-agents": "OpenAI Agents",
   "openai-agents-py": "OpenAI Agents Python",
   "strands-agents": "Strands Agents",
+  "tanstack-ai": "TanStack AI",
   "vercel-ai": "Vercel AI SDK",
   "vercel-eve": "Vercel Eve",
 } as const satisfies Record<ArcjetGuardSdkKey, string>;

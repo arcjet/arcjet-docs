@@ -53,6 +53,7 @@ const PATHS_FROM_SITEMAP = [
   "/guards/openai-agents-py/",
   "/guards/quick-start/",
   "/guards/strands-agents/",
+  "/guards/tanstack-ai/",
   "/guards/vercel-ai/",
   "/guards/vercel-eve/",
   "/inspect/",
@@ -122,7 +123,7 @@ test.describe("Screenshots", () => {
         const actualUrl = new URL(page.url());
         expect(actualUrl.pathname).toBe(path);
 
-        await page.evaluate(() => {
+        await page.evaluate(async () => {
           // Astro dev toolbar interferes with screenshots.
           for (const el of document.querySelectorAll("astro-dev-toolbar")) {
             el.remove();
@@ -144,6 +145,34 @@ test.describe("Screenshots", () => {
               "<p>Giscus comments removed for screenshot test</p>",
             );
             el.remove();
+          }
+
+          // npm version badges are masked, but a missed shields.io load
+          // collapses their height and shifts the article. Wait for each
+          // image, then keep a 20px box if it still has no intrinsic size.
+          const badges = [
+            ...document.querySelectorAll<HTMLImageElement>("picture.badge img"),
+          ];
+          await Promise.all(
+            badges.map((img) => {
+              if (img.complete) {
+                return Promise.resolve();
+              }
+              return new Promise<void>((resolve) => {
+                img.addEventListener("load", () => resolve(), { once: true });
+                img.addEventListener("error", () => resolve(), { once: true });
+              });
+            }),
+          );
+          for (const img of badges) {
+            if (img.naturalHeight > 0) {
+              continue;
+            }
+            const picture = img.closest("picture");
+            if (picture instanceof HTMLElement) {
+              picture.style.display = "inline-block";
+              picture.style.height = "20px";
+            }
           }
         });
 
