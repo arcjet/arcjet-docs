@@ -50,6 +50,51 @@ test.describe("SDK link migration", () => {
     expect(hrefs.some((href) => href?.startsWith("/guards/"))).toBe(false);
   });
 
+  test("SDK and framework pages share a native switcher with alphabetical options", async ({
+    page,
+  }) => {
+    await page.goto("/get-started/");
+    await page.waitForSelector(".FrameworkSwitcher select", {
+      timeout: 15_000,
+    });
+
+    const hubSwitcher = page
+      .locator(".right-sidebar .FrameworkSwitcher select")
+      .first();
+    const hubLabels = await hubSwitcher.locator("option").allTextContents();
+    expect(hubLabels.length).toBeGreaterThan(1);
+    expect(hubLabels).toEqual(
+      [...hubLabels].sort((a, b) => a.localeCompare(b, "en")),
+    );
+
+    await page.goto("/sdk/astro/get-started/");
+    await page.waitForSelector(".right-sidebar .FrameworkSwitcher select", {
+      timeout: 15_000,
+    });
+
+    const sdkSwitcher = page.locator(".right-sidebar .FrameworkSwitcher select");
+    await expect(sdkSwitcher).toHaveValue("astro");
+
+    const sdkLabels = await sdkSwitcher.locator("option").allTextContents();
+    expect(sdkLabels).toEqual(hubLabels);
+    expect(page.locator("#toc-sdk")).toHaveCount(0);
+  });
+
+  test("framework switcher navigates between SDK routes", async ({ page }) => {
+    await page.goto("/sdk/astro/get-started/");
+    await page.waitForSelector(".FrameworkSwitcher select", {
+      timeout: 15_000,
+    });
+
+    await page.selectOption(".FrameworkSwitcher select", "next-js");
+    await page.waitForURL(/\/sdk\/next\/get-started\/?/, { timeout: 15_000 });
+
+    expect(page.url()).toMatch(/\/sdk\/next\/get-started\/?$/);
+    await expect(page.locator(".FrameworkSwitcher select")).toHaveValue(
+      "next-js",
+    );
+  });
+
   test("framework switcher navigates to SDK route on get-started", async ({
     page,
   }) => {

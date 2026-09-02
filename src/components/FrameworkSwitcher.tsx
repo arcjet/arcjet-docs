@@ -3,12 +3,10 @@ import { Bun as IconBun } from "@/components/icons/tech/Bun";
 import { ClaudeAgentSdk as IconClaudeAgentSdk } from "@/components/icons/tech/ClaudeAgentSdk";
 import { CrewAi as IconCrewAi } from "@/components/icons/tech/CrewAi";
 import { Deno as IconDeno } from "@/components/icons/tech/Deno";
-import { Express as IconExpress } from "@/components/icons/tech/Express";
 import { FastApi as IconFastApi } from "@/components/icons/tech/FastApi";
 import { Fastify as IconFastify } from "@/components/icons/tech/Fastify";
 import { Flask as IconFlask } from "@/components/icons/tech/Flask";
 import { Genkit as IconGenkit } from "@/components/icons/tech/Genkit";
-import { Hono as IconHono } from "@/components/icons/tech/Hono";
 import { LangChain as IconLangChain } from "@/components/icons/tech/LangChain";
 import { LangGraph as IconLangGraph } from "@/components/icons/tech/LangGraph";
 import { Mastra as IconMastra } from "@/components/icons/tech/Mastra";
@@ -37,6 +35,7 @@ import {
 import {
   docPathFromSdkPathname,
   hrefForLegacyFrameworkKey,
+  legacyKeyFromPathname,
   sdkFromPathname,
 } from "@/lib/sdk";
 import {
@@ -45,29 +44,33 @@ import {
   queryParamFramework,
 } from "@/store";
 import { useStore } from "@nanostores/react";
-import { forwardRef, useEffect, useState, type ForwardedRef } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useState,
+  type ForwardedRef,
+  type ReactNode,
+} from "react";
 
-const frameworkIcon = {
+const frameworkIcon: Record<FrameworkKey, ReactNode> = {
   astro: <IconAstro />,
-  "bun-hono": <IconBun />,
   bun: <IconBun />,
+  "bun-hono": <IconBun />,
   "claude-agent-sdk": <IconClaudeAgentSdk />,
   "claude-agent-sdk-py": <IconClaudeAgentSdk />,
   crewai: <IconCrewAi />,
   deno: <IconDeno />,
-  express: <IconExpress />,
   fastify: <IconFastify />,
   genkit: <IconGenkit />,
-  hono: <IconHono />,
   langchain: <IconLangChain />,
   "langchain-js": <IconLangChain />,
   langgraph: <IconLangGraph />,
   mastra: <IconMastra />,
   "nest-js": <IconNestJs />,
   "next-js": <IconNextJs />,
+  "node-js": <IconNodeJs />,
   "node-js-express": <IconNodeJs />,
   "node-js-hono": <IconNodeJs />,
-  "node-js": <IconNodeJs />,
   nuxt: <IconNuxt />,
   "openai-agents": <IconOpenAiAgents />,
   "openai-agents-py": <IconOpenAiAgents />,
@@ -134,15 +137,26 @@ const FrameworkSwitcher = forwardRef(
       }
     }, [frameworks]);
 
-    // Sync with query param for framework or local storage value if present
+    // Sync with the SDK path, query param, or stored preference
     useEffect(() => {
       let framework: FrameworkKey | undefined = undefined;
+
+      const fromPath = legacyKeyFromPathname(window.location.pathname);
+      if (fromPath) {
+        framework = fromPath;
+        storeFramework(fromPath);
+      }
 
       // Get the framework to display from query params
       const params = new URLSearchParams(window.location.search);
       const f = params.get("f");
 
-      if (f && f != $queryParamFramework && isValidFrameworkKey(f)) {
+      if (
+        !framework &&
+        f &&
+        f != $queryParamFramework &&
+        isValidFrameworkKey(f)
+      ) {
         framework = f as FrameworkKey;
         queryParamFramework.set(f as FrameworkKey);
         storeFramework(f);

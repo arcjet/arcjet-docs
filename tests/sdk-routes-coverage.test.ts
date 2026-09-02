@@ -273,7 +273,12 @@ test.describe("SDK switcher labels on plus-variant pages", () => {
       waitUntil: "domcontentloaded",
     });
 
-    await expect(page.locator(".toc-toggle")).toContainText("Bun + Hono");
+    const switcher = page.locator(".right-sidebar .FrameworkSwitcher select");
+    await expect(switcher).toBeVisible({ timeout: 15_000 });
+    await expect(switcher).toHaveValue("bun-hono");
+    await expect(page.locator(".right-sidebar .FrameworkSwitcher")).toContainText(
+      "Bun + Hono",
+    );
   });
 
   test("/sdk/python/plus/fastapi/get-started/ lists Python variants in the SDK switcher", async ({
@@ -283,13 +288,14 @@ test.describe("SDK switcher labels on plus-variant pages", () => {
       waitUntil: "domcontentloaded",
     });
 
-    await page.locator(".toc-toggle").click();
-    const menu = page.locator("#toc-sdk");
-    await expect(menu.getByRole("link", { name: "Python + FastAPI" })).toBeVisible();
-    await expect(menu.getByRole("link", { name: "Python + Flask" })).toBeVisible();
-    await expect(menu.getByRole("link", { name: "Python", exact: true })).toHaveCount(
-      0,
-    );
+    const switcher = page.locator(".right-sidebar .FrameworkSwitcher select");
+    await expect(switcher).toBeVisible({ timeout: 15_000 });
+    await expect(switcher).toHaveValue("python-fastapi");
+
+    const labels = await switcher.locator("option").allTextContents();
+    expect(labels).toContain("Python + FastAPI");
+    expect(labels).toContain("Python + Flask");
+    expect(labels.filter((label) => label === "Python")).toHaveLength(0);
   });
 });
 

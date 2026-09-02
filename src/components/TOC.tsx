@@ -91,8 +91,16 @@ const TOC = forwardRef(
     const switcher = useMemo(() => {
       return (
         <div className={styles.Switcher}>
-          <div className="toc-label sl-hidden lg:sl-block">Framework</div>
-          <FrameworkSwitcher frameworks={astroEntry.data.frameworks} />
+          <div
+            className="toc-label sl-hidden lg:sl-block"
+            id="framework-switcher-label"
+          >
+            SDK
+          </div>
+          <FrameworkSwitcher
+            frameworks={astroEntry.data.frameworks}
+            aria-labelledby="framework-switcher-label"
+          />
         </div>
       );
     }, [astroEntry.data.frameworks]);
