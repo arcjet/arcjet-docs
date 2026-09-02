@@ -5,8 +5,8 @@ import {
   sdkVariants,
 } from "@/lib/sdk";
 
-function visibleFrameworkSwitcher(page: Page) {
-  return page.locator(".FrameworkSwitcher select").filter({ visible: true });
+function visibleSdkToggle(page: Page) {
+  return page.locator(".toc-toggle, .mtoc-sdk-toggle").filter({ visible: true });
 }
 
 const SITE = "https://docs.arcjet.com";
@@ -277,10 +277,9 @@ test.describe("SDK switcher labels on plus-variant pages", () => {
       waitUntil: "domcontentloaded",
     });
 
-    const switcher = visibleFrameworkSwitcher(page);
+    const switcher = visibleSdkToggle(page);
     await expect(switcher).toBeVisible({ timeout: 15_000 });
-    await expect(switcher).toHaveValue("bun-hono");
-    await expect(switcher.locator("option:checked")).toHaveText("Bun + Hono");
+    await expect(switcher).toContainText("Bun + Hono");
   });
 
   test("/sdk/python/plus/fastapi/get-started/ lists Python variants in the SDK switcher", async ({
@@ -290,11 +289,12 @@ test.describe("SDK switcher labels on plus-variant pages", () => {
       waitUntil: "domcontentloaded",
     });
 
-    const switcher = visibleFrameworkSwitcher(page);
+    const switcher = visibleSdkToggle(page);
     await expect(switcher).toBeVisible({ timeout: 15_000 });
-    await expect(switcher).toHaveValue("python-fastapi");
+    await expect(switcher).toContainText("Python + FastAPI");
 
-    const labels = await switcher.locator("option").allTextContents();
+    await switcher.click();
+    const labels = await page.locator("#toc-sdk a").allTextContents();
     expect(labels).toContain("Python + FastAPI");
     expect(labels).toContain("Python + Flask");
     expect(labels.filter((label) => label === "Python")).toHaveLength(0);

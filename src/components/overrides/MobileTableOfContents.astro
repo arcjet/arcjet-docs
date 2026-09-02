@@ -1,5 +1,5 @@
 ---
-import FrameworkSwitcher from "@/components/FrameworkSwitcher";
+import SdkSwitcher from "@/components/SdkSwitcher";
 import { sdkFromPathname } from "@/lib/sdk";
 import Default from "@astrojs/starlight/components/MobileTableOfContents.astro";
 
@@ -20,11 +20,11 @@ const pageFrameworks = Astro.locals.starlightRoute.entry.data.frameworks;
         <div class="mtoc-wrapper">
             <div class="mtoc-container">
                 <div class="mtoc-sdk-control">
-                    <FrameworkSwitcher
+                    <SdkSwitcher
                         client:load
-                        frameworks={pageFrameworks}
-                        aria-label="SDK"
-                        select={{ trigger: { size: "sm" } }}
+                        pathname={Astro.url.pathname}
+                        pageFrameworks={pageFrameworks}
+                        variant="mobile"
                     />
                 </div>
                 <Default />
@@ -146,16 +146,11 @@ const pageFrameworks = Astro.locals.starlightRoute.entry.data.frameworks;
             display: flex;
             flex: 1 1 auto;
             min-width: 0;
-
-            :global(.FrameworkSwitcher) {
-                max-width: 100%;
-                min-width: 0;
-                width: 100%;
-            }
         }
 
-        /* Disable mtoc gradient when .dropdown open */
-        .mtoc-container:has(mobile-starlight-toc details:not([open])) {
+        /* Disable mtoc gradient when sdk popover or .dropdown open */
+        :root:not(:has(#mtoc-sdk:popover-open))
+            .mtoc-container:has(mobile-starlight-toc details:not([open])) {
             backdrop-filter: blur(var(--blur1));
             background: linear-gradient(
                 rgba(var(--sl-color-bg-rgb) / 1) 8px,

@@ -1,7 +1,30 @@
 import { expect, test, type Page } from "@playwright/test";
 
-function visibleFrameworkSwitcher(page: Page) {
-  return page.locator(".FrameworkSwitcher select").filter({ visible: true });
+function visibleSdkToggle(page: Page) {
+  return page.locator(".toc-toggle, .mtoc-sdk-toggle").filter({ visible: true });
+}
+
+function visibleSdkMenu(page: Page) {
+  return page.locator("#toc-sdk, #mtoc-sdk").filter({ visible: true });
+}
+
+async function openSdkMenu(page: Page) {
+  const toggle = visibleSdkToggle(page);
+  await expect(toggle).toBeVisible({ timeout: 15_000 });
+  await toggle.click();
+  const menu = visibleSdkMenu(page);
+  await expect(menu).toBeVisible({ timeout: 15_000 });
+  return menu;
+}
+
+async function sdkMenuLabels(page: Page) {
+  const menu = await openSdkMenu(page);
+  return menu.locator("a").allTextContents();
+}
+
+async function selectSdkOption(page: Page, name: string) {
+  const menu = await openSdkMenu(page);
+  await menu.getByRole("link", { name, exact: true }).click();
 }
 
 test.describe("SDK link migration", () => {
@@ -54,108 +77,64 @@ test.describe("SDK link migration", () => {
     expect(hrefs.some((href) => href?.startsWith("/guards/"))).toBe(false);
   });
 
-  test("SDK and framework pages share a native switcher with alphabetical options", async ({
+  test("SDK and hub pages share a custom switcher with alphabetical options", async ({
     page,
   }) => {
     await page.goto("/get-started/");
-    const hubSwitcher = visibleFrameworkSwitcher(page);
-    await expect(hubSwitcher).toBeVisible({ timeout: 15_000 });
-
-    const hubLabels = await hubSwitcher.locator("option").allTextContents();
+    const hubLabels = await sdkMenuLabels(page);
     expect(hubLabels.length).toBeGreaterThan(1);
     expect(hubLabels).toEqual(
       [...hubLabels].sort((a, b) => a.localeCompare(b, "en")),
     );
 
     await page.goto("/sdk/astro/get-started/");
-    const sdkSwitcher = visibleFrameworkSwitcher(page);
-    await expect(sdkSwitcher).toBeVisible({ timeout: 15_000 });
-    await expect(sdkSwitcher).toHaveValue("astro");
+    await expect(visibleSdkToggle(page)).toBeVisible({ timeout: 15_000 });
+    await expect(visibleSdkToggle(page)).toContainText("Astro");
 
-    const sdkLabels = await sdkSwitcher.locator("option").allTextContents();
+    const sdkLabels = await sdkMenuLabels(page);
     expect(sdkLabels).toEqual(hubLabels);
-    expect(page.locator("#toc-sdk")).toHaveCount(0);
+    await expect(page.locator("#toc-sdk")).toHaveCount(1);
+
+    const icons = page.locator("#toc-sdk a svg");
+    expect(await icons.count()).toBe(sdkLabels.length);
   });
 
-  test("framework switcher navigates between SDK routes", async ({ page }) => {
+  test("SDK switcher navigates between SDK routes", async ({ page }) => {
     await page.goto("/sdk/astro/get-started/");
-    const switcher = visibleFrameworkSwitcher(page);
-    await expect(switcher).toBeVisible({ timeout: 15_000 });
-
-    await switcher.selectOption("next-js");
+    await selectSdkOption(page, "Next.js");
     await page.waitForURL(/\/sdk\/next\/get-started\/?/, { timeout: 15_000 });
 
     expect(page.url()).toMatch(/\/sdk\/next\/get-started\/?$/);
-    await expect(visibleFrameworkSwitcher(page)).toHaveValue("next-js");
+    await expect(visibleSdkToggle(page)).toContainText("Next.js");
   });
 
-  test("hub page uses a stored framework when the path has no SDK", async ({
+  test("SDK switcher navigates to SDK route on get-started", async ({
     page,
   }) => {
     await page.goto("/get-started/");
-    await page.evaluate(() => {
-      localStorage.setItem("selected-framework", "bun");
-    });
-    await page.reload({ waitUntil: "domcontentloaded" });
-
-    const switcher = visibleFrameworkSwitcher(page);
-    await expect(switcher).toBeVisible({ timeout: 15_000 });
-    await expect(switcher).toHaveValue("bun");
-  });
-
-  test("SDK path persists so the hub switcher shows the same framework", async ({
-    page,
-  }) => {
-    await page.goto("/sdk/deno/get-started/");
-    const sdkSwitcher = visibleFrameworkSwitcher(page);
-    await expect(sdkSwitcher).toBeVisible({ timeout: 15_000 });
-    await expect(sdkSwitcher).toHaveValue("deno");
-
-    await page.goto("/get-started/");
-    const hubSwitcher = visibleFrameworkSwitcher(page);
-    await expect(hubSwitcher).toBeVisible({ timeout: 15_000 });
-    await expect(hubSwitcher).toHaveValue("deno");
-  });
-
-  test("framework switcher navigates to SDK route on get-started", async ({
-    page,
-  }) => {
-    await page.goto("/get-started/");
-    await page.waitForSelector(".FrameworkSwitcher select", {
-      timeout: 15_000,
-    });
-
-    await page.selectOption(".FrameworkSwitcher select", "next-js");
+    await selectSdkOption(page, "Next.js");
     await page.waitForURL(/\/sdk\/next\/get-started\/?/, { timeout: 15_000 });
 
     expect(page.url()).toMatch(/\/sdk\/next\/get-started\/?$/);
     expect(page.url()).not.toContain("?f=");
   });
 
-  test("framework switcher navigates guard adapters to get-started routes", async ({
+  test("SDK switcher navigates guard adapters to get-started routes", async ({
     page,
   }) => {
     await page.goto("/get-started/");
-    await page.waitForSelector(".FrameworkSwitcher select", {
-      timeout: 15_000,
-    });
-
-    await page.selectOption(".FrameworkSwitcher select", "crewai");
+    await selectSdkOption(page, "CrewAI");
     await page.waitForURL(/\/sdk\/crewai\/get-started\/?/, { timeout: 15_000 });
 
     expect(page.url()).toMatch(/\/sdk\/crewai\/get-started\/?$/);
     expect(page.url()).not.toContain("?f=");
   });
 
-  test("framework switcher navigates to Claude Agent SDK Python get-started", async ({
+  test("SDK switcher navigates to Claude Agent SDK Python get-started", async ({
     page,
   }) => {
     await page.goto("/get-started/");
-    await page.waitForSelector(".FrameworkSwitcher select", {
-      timeout: 15_000,
-    });
-
-    await page.selectOption(".FrameworkSwitcher select", "claude-agent-sdk-py");
+    await selectSdkOption(page, "Claude Agent SDK Python");
     await page.waitForURL(/\/sdk\/claude-agent-sdk-py\/get-started\/?/, {
       timeout: 15_000,
     });
@@ -168,15 +147,11 @@ test.describe("SDK link migration", () => {
     );
   });
 
-  test("framework switcher navigates to SDK route on guards quick start", async ({
+  test("SDK switcher navigates to SDK route on guards quick start", async ({
     page,
   }) => {
     await page.goto("/guards/quick-start/");
-    await page.waitForSelector(".FrameworkSwitcher select", {
-      timeout: 15_000,
-    });
-
-    await page.selectOption(".FrameworkSwitcher select", "langchain");
+    await selectSdkOption(page, "LangChain");
     await page.waitForURL(/\/sdk\/langchain\/guards\/quick-start\/?/, {
       timeout: 15_000,
     });
@@ -185,15 +160,11 @@ test.describe("SDK link migration", () => {
     expect(page.url()).not.toContain("?f=");
   });
 
-  test("framework switcher navigates to Claude Agent SDK Python guards quick start", async ({
+  test("SDK switcher navigates to Claude Agent SDK Python guards quick start", async ({
     page,
   }) => {
     await page.goto("/guards/quick-start/");
-    await page.waitForSelector(".FrameworkSwitcher select", {
-      timeout: 15_000,
-    });
-
-    await page.selectOption(".FrameworkSwitcher select", "claude-agent-sdk-py");
+    await selectSdkOption(page, "Claude Agent SDK Python");
     await page.waitForURL(/\/sdk\/claude-agent-sdk-py\/guards\/quick-start\/?/, {
       timeout: 15_000,
     });
@@ -208,6 +179,33 @@ test.describe("SDK link migration", () => {
     );
     await expect(page.locator("body")).toContainText(
       "11111111-1111-4111-8111-111111111111",
+    );
+  });
+
+  test("SDK menu scrolls independently on a short viewport", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 400 });
+    await page.goto("/sdk/astro/get-started/");
+    const menu = await openSdkMenu(page);
+
+    const metrics = await menu.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        overflowY: style.overflowY,
+        clientHeight: element.clientHeight,
+        scrollHeight: element.scrollHeight,
+      };
+    });
+
+    expect(["auto", "scroll", "overlay"]).toContain(metrics.overflowY);
+    expect(metrics.scrollHeight).toBeGreaterThan(metrics.clientHeight);
+
+    await menu.evaluate((element) => {
+      element.scrollTop = element.scrollHeight;
+    });
+    expect(await menu.evaluate((element) => element.scrollTop)).toBeGreaterThan(
+      0,
     );
   });
 });

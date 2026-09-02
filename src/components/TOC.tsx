@@ -1,8 +1,15 @@
-import FrameworkSwitcher from "@/components/FrameworkSwitcher";
+import SdkSwitcher from "@/components/SdkSwitcher";
 import type { TocNode } from "@/content.config";
 import useElementInView from "@/effects/useElementInView";
 import type { FrameworkKey } from "@/lib/prefs";
-import { displayedFramework } from "@/store";
+import {
+  defaultSelectedFramework,
+  getClosestFrameworkMatch,
+  getFrameworks,
+  getStoredFramework,
+  isValidFrameworkKey,
+} from "@/lib/prefs";
+import { availableFrameworks, displayedFramework } from "@/store";
 import { useStore } from "@nanostores/react";
 import type { CollectionEntry } from "astro:content"; // Import CollectionEntry from astro:content
 import { onSet } from "nanostores";
@@ -14,6 +21,7 @@ import styles from "./TOC.module.scss";
 
 interface Props extends PropsWithChildren {
   astroEntry: StarlightRouteData["entry"];
+  pathname: string;
 }
 
 /**
@@ -24,7 +32,10 @@ interface Props extends PropsWithChildren {
  * @param astroEntry - The Astro.locals.starlightRoute.entry
  */
 const TOC = forwardRef(
-  ({ astroEntry, ...props }: Props, ref: ForwardedRef<HTMLDivElement>) => {
+  (
+    { astroEntry, pathname, ...props }: Props,
+    ref: ForwardedRef<HTMLDivElement>,
+  ) => {
     const cls = "TOC " + styles.TOC;
 
     // The toc data
@@ -46,6 +57,32 @@ const TOC = forwardRef(
         setSelectedFramework(newValue);
       });
     }, []);
+
+    // Keep hub slot content in sync with the page framework list and the
+    // stored or default selection. The custom SDK menu navigates away, so
+    // this does not persist the current SDK path into storage.
+    useEffect(() => {
+      const pageFrameworks = astroEntry.data.frameworks;
+      if (pageFrameworks && pageFrameworks.length > 0) {
+        availableFrameworks.set(getFrameworks(pageFrameworks));
+      }
+    }, [astroEntry.data.frameworks]);
+
+    useEffect(() => {
+      const pageFrameworks = astroEntry.data.frameworks;
+      if (!pageFrameworks || pageFrameworks.length === 0) return;
+
+      const params = new URLSearchParams(window.location.search);
+      const queryFramework = params.get("f");
+      const framework =
+        queryFramework && isValidFrameworkKey(queryFramework)
+          ? (queryFramework as FrameworkKey)
+          : (getStoredFramework() ?? defaultSelectedFramework);
+
+      displayedFramework.set(
+        getClosestFrameworkMatch(framework, pageFrameworks),
+      );
+    }, [astroEntry.data.frameworks]);
 
     // The selected TOC link
     const [selectedEntry, setSelectedEntry] = useState<TocNode>();
@@ -87,23 +124,27 @@ const TOC = forwardRef(
       [selectedFramework, selectedEntry],
     );
 
-    // Render framework switcher
-    const switcher = useMemo(() => {
+    const desktopSwitcher = useMemo(() => {
       return (
         <div className={styles.Switcher}>
-          <div
-            className="toc-label sl-hidden lg:sl-block"
-            id="framework-switcher-label"
-          >
-            SDK
-          </div>
-          <FrameworkSwitcher
-            frameworks={astroEntry.data.frameworks}
-            aria-labelledby="framework-switcher-label"
+          <SdkSwitcher
+            pathname={pathname}
+            pageFrameworks={astroEntry.data.frameworks}
+            variant="desktop"
           />
         </div>
       );
-    }, [astroEntry.data.frameworks]);
+    }, [astroEntry.data.frameworks, pathname]);
+
+    const mobileSwitcher = useMemo(() => {
+      return (
+        <SdkSwitcher
+          pathname={pathname}
+          pageFrameworks={astroEntry.data.frameworks}
+          variant="mobile"
+        />
+      );
+    }, [astroEntry.data.frameworks, pathname]);
 
     // Mobile drodpwon state
     const [mobileDropdownVisible, setMobileDropdownVisible] =
@@ -157,7 +198,7 @@ const TOC = forwardRef(
       !loading && (
         <div className={cls} ref={ref} {...props}>
           <div className={styles.NavDesktop + " sl-hidden lg:sl-block"}>
-            {switcher}
+            {desktopSwitcher}
             <div
               className={
                 styles.OnThisPageLabel + " toc-label sl-hidden lg:sl-block"
@@ -169,7 +210,7 @@ const TOC = forwardRef(
           </div>
           <div className={styles.NavMobile + " lg:sl-hidden"}>
             <summary className="sl-flex">
-              {switcher}
+              {mobileSwitcher}
               <div
                 className={
                   "toggle sl-flex" + (mobileDropdownVisible ? " open" : "")

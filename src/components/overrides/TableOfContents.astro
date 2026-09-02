@@ -1,5 +1,5 @@
 ---
-import FrameworkSwitcher from "@/components/FrameworkSwitcher";
+import SdkSwitcher from "@/components/SdkSwitcher";
 import { sdkFromPathname } from "@/lib/sdk";
 import Default from "@astrojs/starlight/components/TableOfContents.astro";
 
@@ -9,39 +9,12 @@ const pageFrameworks = Astro.locals.starlightRoute.entry.data.frameworks;
 
 {
     activeSdkKey && (
-        <div class="toc-wrapper">
-            <h2 class="toc-label" id="sdk-switcher-label">
-                SDK
-            </h2>
-            <FrameworkSwitcher
-                client:load
-                frameworks={pageFrameworks}
-                aria-labelledby="sdk-switcher-label"
-            />
-        </div>
+        <SdkSwitcher
+            client:load
+            pathname={Astro.url.pathname}
+            pageFrameworks={pageFrameworks}
+            variant="desktop"
+        />
     )
 }
 <Default />
-
-<style>
-    @layer arcjet.components {
-        .toc-wrapper {
-            display: flex;
-            flex-flow: column;
-            margin-bottom: calc(var(--sp) * 3);
-            row-gap: calc(var(--sp) * 0.5);
-        }
-
-        .toc-label {
-            color: var(--aj-palette-txt-quaternary);
-            font-family: var(--sl-heading);
-            font-size: calc(var(--sp) * 1.5);
-            font-weight: var(--aj-fontWeight-md);
-            text-transform: uppercase;
-        }
-
-        .toc-wrapper :global(.FrameworkSwitcher) {
-            width: 100%;
-        }
-    }
-</style>

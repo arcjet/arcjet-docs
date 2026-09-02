@@ -18,6 +18,7 @@ import {
   sdkDisplayLabelFromPathname,
   sdkFromPathname,
   sdkRoutePrefixFromLegacyFrameworkKey,
+  sdkSwitcherOptionForLegacyKey,
   sdkSwitcherOptions,
   sdkVariantFromPathname,
   shouldExcludeFromSitemap,
@@ -223,6 +224,57 @@ test.describe("sdkSwitcherOptions", () => {
     );
     expect(httpLabels).toEqual(
       [...httpLabels].sort((a, b) => a.localeCompare(b, "en")),
+    );
+  });
+
+  test("builds SDK-scoped hrefs from hub pathnames", () => {
+    const options = sdkSwitcherOptions("/get-started/", [
+      "next-js",
+      "crewai",
+      "python-fastapi",
+    ]);
+    expect(options.find((option) => option.sdkKey === "next")?.href).toBe(
+      "/sdk/next/get-started/",
+    );
+    expect(options.find((option) => option.sdkKey === "crewai")?.href).toBe(
+      "/sdk/crewai/get-started/",
+    );
+    expect(
+      options.find((option) => option.label === "Python + FastAPI")?.href,
+    ).toBe("/sdk/python/plus/fastapi/get-started/");
+    expect(options.map((option) => option.label)).toEqual(
+      [...options.map((option) => option.label)].sort((a, b) =>
+        a.localeCompare(b, "en"),
+      ),
+    );
+  });
+
+  test("lists only guard adapters on hub guard pages", () => {
+    const options = sdkSwitcherOptions("/guards/quick-start/", [
+      "langchain",
+      "langchain-js",
+      "claude-agent-sdk-py",
+    ]);
+    expect(options.map((option) => option.label)).toEqual([
+      "Claude Agent SDK Python",
+      "LangChain",
+      "LangChain JS",
+    ]);
+    expect(
+      options.find((option) => option.sdkKey === "langchain")?.href,
+    ).toBe("/sdk/langchain/guards/quick-start/");
+    expect(options.some((option) => option.sdkKey === "next")).toBe(false);
+  });
+});
+
+test.describe("sdkSwitcherOptionForLegacyKey", () => {
+  test("matches plus-variant and guard keys", () => {
+    const options = sdkSwitcherOptions("/get-started/");
+    expect(
+      sdkSwitcherOptionForLegacyKey(options, "python-fastapi")?.label,
+    ).toBe("Python + FastAPI");
+    expect(sdkSwitcherOptionForLegacyKey(options, "crewai")?.sdkKey).toBe(
+      "crewai",
     );
   });
 });

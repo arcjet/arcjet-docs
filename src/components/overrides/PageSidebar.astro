@@ -13,7 +13,7 @@ const isAjToc = props.entry.data.ajToc != undefined;
 
 {
   isAjToc && !sdk ? (
-<TOC client:load astroEntry={props.entry} />
+<TOC client:load astroEntry={props.entry} pathname={Astro.url.pathname} />
   ) : (
 <Default>
   <slot />
