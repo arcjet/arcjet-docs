@@ -2,6 +2,12 @@ import { SelectChevron } from "@/components/icons/SelectChevron";
 import { SdkIcon } from "@/components/SdkIcon";
 import type { FrameworkKey } from "@/lib/prefs";
 import {
+  defaultSelectedFramework,
+  getClosestFrameworkMatch,
+  getStoredFramework,
+  isValidFrameworkKey,
+} from "@/lib/prefs";
+import {
   isSdkSwitcherOptionCurrent,
   sdkDisplayLabelFromPathname,
   sdkFromPathname,
@@ -83,6 +89,25 @@ export function SdkSwitcher({
   variant = "desktop",
 }: SdkSwitcherProps) {
   const $displayedFramework = useStore(displayedFramework);
+
+  // Hub pages have no SDK prefix, so the current option comes from the
+  // stored or default framework. Keep that in the switcher so it does not
+  // depend on TOC.tsx being mounted.
+  useEffect(() => {
+    if (sdkFromPathname(pathname) || !pageFrameworks?.length) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const queryFramework = params.get("f");
+    const framework =
+      queryFramework && isValidFrameworkKey(queryFramework)
+        ? (queryFramework as FrameworkKey)
+        : (getStoredFramework() ?? defaultSelectedFramework);
+
+    displayedFramework.set(
+      getClosestFrameworkMatch(framework, pageFrameworks),
+    );
+  }, [pageFrameworks, pathname]);
+
   const options = useMemo(
     () => sdkSwitcherOptions(pathname, pageFrameworks),
     [pathname, pageFrameworks],

@@ -22,6 +22,11 @@ import styles from "./TOC.module.scss";
 interface Props extends PropsWithChildren {
   astroEntry: StarlightRouteData["entry"];
   pathname: string;
+  /** Which TOC chrome to render. Desktop lives in Starlight's sidebar panel. */
+  surface?: "desktop" | "mobile" | "all";
+  /** When true, render the SDK popover. Desktop hub pages pass false because
+   *  `TableOfContents.astro` already mounts the shared switcher. */
+  includeSwitcher?: boolean;
 }
 
 /**
@@ -33,7 +38,13 @@ interface Props extends PropsWithChildren {
  */
 const TOC = forwardRef(
   (
-    { astroEntry, pathname, ...props }: Props,
+    {
+      astroEntry,
+      pathname,
+      surface = "all",
+      includeSwitcher = false,
+      ...props
+    }: Props,
     ref: ForwardedRef<HTMLDivElement>,
   ) => {
     const cls = "TOC " + styles.TOC;
@@ -125,6 +136,7 @@ const TOC = forwardRef(
     );
 
     const desktopSwitcher = useMemo(() => {
+      if (!includeSwitcher) return null;
       return (
         <div className={styles.Switcher}>
           <SdkSwitcher
@@ -134,9 +146,10 @@ const TOC = forwardRef(
           />
         </div>
       );
-    }, [astroEntry.data.frameworks, pathname]);
+    }, [astroEntry.data.frameworks, includeSwitcher, pathname]);
 
     const mobileSwitcher = useMemo(() => {
+      if (!includeSwitcher) return null;
       return (
         <SdkSwitcher
           pathname={pathname}
@@ -144,7 +157,10 @@ const TOC = forwardRef(
           variant="mobile"
         />
       );
-    }, [astroEntry.data.frameworks, pathname]);
+    }, [astroEntry.data.frameworks, includeSwitcher, pathname]);
+
+    const showDesktop = surface === "desktop" || surface === "all";
+    const showMobile = surface === "mobile" || surface === "all";
 
     // Mobile drodpwon state
     const [mobileDropdownVisible, setMobileDropdownVisible] =
@@ -197,7 +213,8 @@ const TOC = forwardRef(
     return (
       !loading && (
         <div className={cls} ref={ref} {...props}>
-          <div className={styles.NavDesktop + " sl-hidden lg:sl-block"}>
+          {showDesktop && (
+          <div className={styles.NavDesktop + (surface === "all" ? " sl-hidden lg:sl-block" : "")}>
             {desktopSwitcher}
             <div
               className={
@@ -208,7 +225,9 @@ const TOC = forwardRef(
             </div>
             {recursiveRenderTocList(toc)}
           </div>
-          <div className={styles.NavMobile + " lg:sl-hidden"}>
+          )}
+          {showMobile && (
+          <div className={styles.NavMobile + (surface === "all" ? " lg:sl-hidden" : "")}>
             <summary className="sl-flex">
               {mobileSwitcher}
               <div
@@ -237,6 +256,7 @@ const TOC = forwardRef(
               </div>
             )}
           </div>
+          )}
         </div>
       )
     );

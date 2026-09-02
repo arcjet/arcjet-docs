@@ -99,6 +99,24 @@ test.describe("SDK link migration", () => {
     expect(await icons.count()).toBe(sdkLabels.length);
   });
 
+  test("hub and SDK pages mount the desktop switcher in the Starlight sidebar", async ({
+    page,
+  }) => {
+    const desktopSwitcher = page.locator(
+      ".right-sidebar-panel [data-sdk-switcher='desktop']",
+    );
+
+    await page.goto("/get-started/");
+    await expect(desktopSwitcher).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator("#toc-sdk")).toBeHidden();
+    await expect(desktopSwitcher.locator(".toc-toggle")).toBeVisible();
+
+    await page.goto("/sdk/astro/get-started/");
+    await expect(desktopSwitcher).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator("#toc-sdk")).toBeHidden();
+    await expect(desktopSwitcher.locator(".toc-toggle")).toContainText("Astro");
+  });
+
   test("SDK switcher navigates between SDK routes", async ({ page }) => {
     await page.goto("/sdk/astro/get-started/");
     await selectSdkOption(page, "Next.js");

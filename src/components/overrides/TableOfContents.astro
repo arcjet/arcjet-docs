@@ -1,20 +1,51 @@
 ---
 import SdkSwitcher from "@/components/SdkSwitcher";
-import { sdkFromPathname } from "@/lib/sdk";
+import TOC from "@/components/TOC";
+import { sdkFromPathname, sdkSwitcherOptions } from "@/lib/sdk";
 import Default from "@astrojs/starlight/components/TableOfContents.astro";
 
-const activeSdkKey = sdkFromPathname(Astro.url.pathname);
+const pathname = Astro.url.pathname;
+const activeSdkKey = sdkFromPathname(pathname);
 const pageFrameworks = Astro.locals.starlightRoute.entry.data.frameworks;
+const isAjTocHub =
+    Astro.locals.starlightRoute.entry.data.ajToc != undefined && !activeSdkKey;
+const showSwitcher =
+    (!!activeSdkKey || isAjTocHub) &&
+    sdkSwitcherOptions(pathname, pageFrameworks).length > 0;
 ---
 
 {
-    activeSdkKey && (
+    showSwitcher && (
         <SdkSwitcher
             client:load
-            pathname={Astro.url.pathname}
+            pathname={pathname}
             pageFrameworks={pageFrameworks}
             variant="desktop"
         />
     )
 }
-<Default />
+{
+    isAjTocHub ? (
+        <TOC
+            client:load
+            astroEntry={Astro.locals.starlightRoute.entry}
+            pathname={pathname}
+            surface="desktop"
+        />
+    ) : (
+        <Default />
+    )
+}
+
+<style>
+    @layer arcjet.overrides {
+        /* Starlight's PageSidebar styles every `a` in the panel as a TOC
+           link (`display: block`). Keep switcher rows on the custom menu
+           layout on both hub and SDK pages. */
+        :global(.right-sidebar-panel) :global([data-sdk-switcher]) :global(a) {
+            display: flex;
+            font-size: var(--sl-text-sm);
+            overflow-wrap: normal;
+        }
+    }
+</style>

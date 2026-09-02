@@ -1,34 +1,45 @@
 ---
 import SdkSwitcher from "@/components/SdkSwitcher";
-import { sdkFromPathname } from "@/lib/sdk";
+import TOC from "@/components/TOC";
+import { sdkFromPathname, sdkSwitcherOptions } from "@/lib/sdk";
 import Default from "@astrojs/starlight/components/MobileTableOfContents.astro";
 
-const activeSdkKey = sdkFromPathname(Astro.url.pathname);
+const pathname = Astro.url.pathname;
+const activeSdkKey = sdkFromPathname(pathname);
 const pageFrameworks = Astro.locals.starlightRoute.entry.data.frameworks;
+const isAjTocHub =
+    Astro.locals.starlightRoute.entry.data.ajToc != undefined && !activeSdkKey;
+const showSwitcher =
+    (!!activeSdkKey || isAjTocHub) &&
+    sdkSwitcherOptions(pathname, pageFrameworks).length > 0;
 ---
 
-{/* TODO: Remove once framework switching is removed. */}
 {
-    !activeSdkKey && (
-        <div class="todo-remove">
-            <Default />
-        </div>
-    )
-}
-{
-    activeSdkKey && (
+    isAjTocHub ? (
+        <TOC
+            client:load
+            astroEntry={Astro.locals.starlightRoute.entry}
+            pathname={pathname}
+            surface="mobile"
+            includeSwitcher={showSwitcher}
+        />
+    ) : showSwitcher ? (
         <div class="mtoc-wrapper">
             <div class="mtoc-container">
                 <div class="mtoc-sdk-control">
                     <SdkSwitcher
                         client:load
-                        pathname={Astro.url.pathname}
+                        pathname={pathname}
                         pageFrameworks={pageFrameworks}
                         variant="mobile"
                     />
                 </div>
                 <Default />
             </div>
+        </div>
+    ) : (
+        <div class="todo-remove">
+            <Default />
         </div>
     )
 }
