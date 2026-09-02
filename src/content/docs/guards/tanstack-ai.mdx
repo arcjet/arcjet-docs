@@ -72,7 +72,8 @@ The integration exposes two surfaces:
   `guardTool`.
 - `tanstackAiContext()` reads a caller-owned ID from helper options
   or `chat({ context })`: `correlationId`, then `sessionId`, then
-  `conversationId`. It never mints an ID. It never reads
+  `conversationId`, then `init.sessionId` or
+  `init.correlationId`. It never mints an ID. It never reads
   `threadId`, `requestId`, `streamId`, or `traceId`. TanStack
   generates a `threadId` when you omit one; that value isn't a
   correlation source. If the caller didn't pass an ID, then the
@@ -116,18 +117,20 @@ It isn't a throw. It isn't `needsApproval`. It isn't
 `execute` is swallowed.
 
 ```ts
-{
+import type { ArcjetDenialResult } from "@arcjet/guard/tanstack-ai/v0";
+
+const denial: ArcjetDenialResult = {
   arcjetDenied: true,
   reason: "RATE_LIMIT", // or PROMPT_INJECTION, SENSITIVE_INFO, ERROR
   message:
     "Arcjet denied this call (RATE_LIMIT). It may be retried after 30 seconds.",
   retryable: true,
   retryAfterSeconds: 30,
-}
+};
 ```
 
-You can import `ArcjetDenialResult` from
-`@arcjet/guard/tanstack-ai/v0`.
+`ArcjetDenialResult` is a type export from
+`@arcjet/guard/tanstack-ai/v0` at the pin in Install.
 
 Only rate-limit denials set `retryable: true` and include
 `retryAfterSeconds`. Other reasons tell the model not to retry.
@@ -166,13 +169,15 @@ const lookupLimit = tokenBucket({
 const detectPii = localDetectSensitiveInfo();
 const inbound = detectPromptInjection();
 
+const lookupOrderInput = z.object({
+  orderNumber: z.string(),
+  note: z.string(),
+});
+
 const lookupOrder = toolDefinition({
   name: "lookup_order",
   description: "Look up an order by number",
-  inputSchema: z.object({
-    orderNumber: z.string(),
-    note: z.string(),
-  }),
+  inputSchema: lookupOrderInput,
 }).server(({ orderNumber, note }) => ({
   orderNumber,
   note,
@@ -210,10 +215,10 @@ export async function runAgent(
           if (toolName !== "lookup_order") {
             return [];
           }
-          const args = input as { orderNumber: string; note: string };
+          const { orderNumber, note } = lookupOrderInput.parse(input);
           return [
-            lookupLimit({ key: args.orderNumber, requested: 1 }),
-            detectPii(args.note),
+            lookupLimit({ key: orderNumber, requested: 1 }),
+            detectPii(note),
           ];
         },
       }),
@@ -423,8 +428,10 @@ const stream = chat({
         if (toolName !== "lookup_order") {
           return [];
         }
-        const args = input as { orderNumber: string };
-        return [lookupLimit({ key: args.orderNumber, requested: 1 })];
+        const { orderNumber } = z
+          .object({ orderNumber: z.string() })
+          .parse(input);
+        return [lookupLimit({ key: orderNumber, requested: 1 })];
       },
     }),
   ],
@@ -459,10 +466,12 @@ const stream = chat({
         if (toolName !== "lookup_order") {
           return [];
         }
-        const args = input as { orderNumber: string; note: string };
+        const { orderNumber, note } = z
+          .object({ orderNumber: z.string(), note: z.string() })
+          .parse(input);
         return [
-          lookupLimit({ key: args.orderNumber, requested: 1 }),
-          detectPii(args.note),
+          lookupLimit({ key: orderNumber, requested: 1 }),
+          detectPii(note),
         ];
       },
     }),

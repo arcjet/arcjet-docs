@@ -16,10 +16,12 @@ const lookupLimit = tokenBucket({
 });
 const inbound = detectPromptInjection();
 
+const lookupOrderInput = z.object({ orderId: z.string() });
+
 export const lookupOrder = toolDefinition({
   name: "lookup_order",
   description: "Look up an order by ID",
-  inputSchema: z.object({ orderId: z.string() }),
+  inputSchema: lookupOrderInput,
 }).server(({ orderId }) => ({ orderId, status: "shipped" }));
 
 export async function runAgent(
@@ -50,8 +52,8 @@ export async function runAgent(
           if (toolName !== "lookup_order") {
             return [];
           }
-          const args = input as { orderId: string };
-          return [lookupLimit({ key: args.orderId, requested: 5 })];
+          const { orderId } = lookupOrderInput.parse(input);
+          return [lookupLimit({ key: orderId, requested: 1 })];
         },
       }),
     ],
