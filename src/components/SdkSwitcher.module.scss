@@ -29,6 +29,15 @@
     user-select: none;
     width: 100%;
 
+    &:focus {
+      outline: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--sl-color-accent, currentColor);
+      outline-offset: 2px;
+    }
+
     svg {
       color: var(--aj-palette-txt-primary);
       height: 16px;
@@ -63,17 +72,6 @@
     width: anchor-size(width);
     z-index: 1;
 
-    ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    li {
-      margin: 0;
-      padding: 0;
-    }
-
     a {
       align-items: center;
       border-radius: calc(var(--sp) * 0.5);
@@ -102,17 +100,28 @@
     }
 
     a:hover,
-    a:focus {
+    a:focus-visible,
+    a[data-active="true"] {
       background: var(--sidebar-link-hoverBg);
+    }
+
+    a:focus-visible {
+      outline: 2px solid var(--sl-color-accent, currentColor);
+      outline-offset: -2px;
     }
 
     a:active {
       background: var(--sidebar-link-activeBg);
     }
 
-    a[aria-current="true"] {
+    a[aria-current="page"] {
       background: var(--sidebar-link-selectedBg);
       color: var(--aj-palette-txt-primary);
+    }
+
+    a[aria-current="page"][data-active="true"] {
+      outline: 2px solid var(--sl-color-accent, currentColor);
+      outline-offset: -2px;
     }
   }
 }
@@ -152,6 +161,15 @@
     padding-inline-end: 0.5rem;
     padding-inline-start: 0.5rem;
 
+    &:focus {
+      outline: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--sl-color-accent, currentColor);
+      outline-offset: 2px;
+    }
+
     &:active {
       color: var(--aj-palette-txt-primary);
     }
@@ -185,17 +203,6 @@
     width: calc(100vw - var(--mtoc-left, 0px));
     z-index: 1;
 
-    ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    li {
-      margin: 0;
-      padding: 0;
-    }
-
     a {
       align-items: center;
       border-radius: calc(var(--sp) * 0.5);
@@ -225,18 +232,29 @@
     }
 
     a:hover,
-    a:focus {
+    a:focus-visible,
+    a[data-active="true"] {
       background: var(--sidebar-link-hoverBg);
       color: var(--aj-palette-txt-secondary);
+    }
+
+    a:focus-visible {
+      outline: 2px solid var(--sl-color-accent, currentColor);
+      outline-offset: -2px;
     }
 
     a:active {
       background: var(--sidebar-link-activeBg);
     }
 
-    a[aria-current="true"] {
+    a[aria-current="page"] {
       background: var(--sidebar-link-selectedBg);
       color: var(--aj-palette-txt-primary);
+    }
+
+    a[aria-current="page"][data-active="true"] {
+      outline: 2px solid var(--sl-color-accent, currentColor);
+      outline-offset: -2px;
     }
   }
 }

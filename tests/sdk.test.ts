@@ -25,6 +25,10 @@ import {
   variantOnlySdkRedirectTarget,
   variantOnlySdkAstroRedirects,
 } from "@/lib/sdk";
+import {
+  moveActiveIndex,
+  typeaheadIndex,
+} from "@/lib/sdk-switcher-keyboard";
 
 test.describe("isRouteSdkKey", () => {
   test("accepts HTTP SDK keys and guard adapters", () => {
@@ -559,5 +563,24 @@ test.describe("docPathFromSdkPathname", () => {
     expect(docPathFromSdkPathname("/sdk/bun/plus/hono/get-started/")).toBe(
       "/get-started/",
     );
+  });
+});
+
+test.describe("sdk switcher keyboard helpers", () => {
+  test("moveActiveIndex does not wrap", () => {
+    expect(moveActiveIndex(5, 0, -1)).toBe(0);
+    expect(moveActiveIndex(5, 4, 1)).toBe(4);
+    expect(moveActiveIndex(5, 2, 10)).toBe(4);
+    expect(moveActiveIndex(5, 2, 1)).toBe(3);
+  });
+
+  test("typeaheadIndex matches prefixes and cycles repeated letters", () => {
+    const labels = ["Astro", "Bun", "NestJS", "Next.js", "Node.js"];
+    expect(typeaheadIndex(labels, 0, "n")).toBe(2);
+    expect(typeaheadIndex(labels, 2, "ne")).toBe(2);
+    expect(typeaheadIndex(labels, 2, "nex")).toBe(3);
+    expect(typeaheadIndex(labels, 2, "nn")).toBe(3);
+    expect(typeaheadIndex(labels, 3, "nn")).toBe(4);
+    expect(typeaheadIndex(labels, 4, "nn")).toBe(2);
   });
 });

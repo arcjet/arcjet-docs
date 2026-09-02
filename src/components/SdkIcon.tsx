@@ -78,5 +78,5 @@ export type SdkIconProps = {
  */
 export function SdkIcon({ sdk, variant, className }: SdkIconProps) {
   const Icon = (variant && variantIcons[variant]) || sdkIcons[sdk] || Python;
-  return <Icon className={className} />;
+  return <Icon className={className} aria-hidden="true" />;
 }

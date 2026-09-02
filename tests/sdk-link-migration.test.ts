@@ -24,7 +24,7 @@ async function sdkMenuLabels(page: Page) {
 
 async function selectSdkOption(page: Page, name: string) {
   const menu = await openSdkMenu(page);
-  await menu.getByRole("link", { name, exact: true }).click();
+  await menu.getByRole("option", { name, exact: true }).click();
 }
 
 test.describe("SDK link migration", () => {
