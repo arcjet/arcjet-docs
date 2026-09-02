@@ -1,13 +1,13 @@
 import { expect, test, type Page } from "@playwright/test";
-
-function visibleFrameworkSwitcher(page: Page) {
-  return page.locator(".FrameworkSwitcher select").filter({ visible: true });
-}
 import {
   LEGACY_FRAMEWORK_HUB_PATHS,
   sdks,
   sdkVariants,
 } from "@/lib/sdk";
+
+function visibleFrameworkSwitcher(page: Page) {
+  return page.locator(".FrameworkSwitcher select").filter({ visible: true });
+}
 
 const SITE = "https://docs.arcjet.com";
 

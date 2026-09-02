@@ -89,6 +89,34 @@ test.describe("SDK link migration", () => {
     await expect(visibleFrameworkSwitcher(page)).toHaveValue("next-js");
   });
 
+  test("hub page uses a stored framework when the path has no SDK", async ({
+    page,
+  }) => {
+    await page.goto("/get-started/");
+    await page.evaluate(() => {
+      localStorage.setItem("selected-framework", "bun");
+    });
+    await page.reload({ waitUntil: "domcontentloaded" });
+
+    const switcher = visibleFrameworkSwitcher(page);
+    await expect(switcher).toBeVisible({ timeout: 15_000 });
+    await expect(switcher).toHaveValue("bun");
+  });
+
+  test("SDK path persists so the hub switcher shows the same framework", async ({
+    page,
+  }) => {
+    await page.goto("/sdk/deno/get-started/");
+    const sdkSwitcher = visibleFrameworkSwitcher(page);
+    await expect(sdkSwitcher).toBeVisible({ timeout: 15_000 });
+    await expect(sdkSwitcher).toHaveValue("deno");
+
+    await page.goto("/get-started/");
+    const hubSwitcher = visibleFrameworkSwitcher(page);
+    await expect(hubSwitcher).toBeVisible({ timeout: 15_000 });
+    await expect(hubSwitcher).toHaveValue("deno");
+  });
+
   test("framework switcher navigates to SDK route on get-started", async ({
     page,
   }) => {

@@ -141,6 +141,9 @@ const FrameworkSwitcher = forwardRef(
     useEffect(() => {
       let framework: FrameworkKey | undefined = undefined;
 
+      // SDK-scoped URLs are the source of truth. Persist that choice so hub
+      // pages such as /get-started/ stay in sync. Hub paths return undefined
+      // here, so a stored or query-param preference still wins.
       const fromPath = legacyKeyFromPathname(window.location.pathname);
       if (fromPath) {
         framework = fromPath;
