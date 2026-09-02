@@ -1,4 +1,8 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+function visibleFrameworkSwitcher(page: Page) {
+  return page.locator(".FrameworkSwitcher select").filter({ visible: true });
+}
 import {
   LEGACY_FRAMEWORK_HUB_PATHS,
   sdks,
@@ -273,12 +277,10 @@ test.describe("SDK switcher labels on plus-variant pages", () => {
       waitUntil: "domcontentloaded",
     });
 
-    const switcher = page.locator(".right-sidebar .FrameworkSwitcher select");
+    const switcher = visibleFrameworkSwitcher(page);
     await expect(switcher).toBeVisible({ timeout: 15_000 });
     await expect(switcher).toHaveValue("bun-hono");
-    await expect(page.locator(".right-sidebar .FrameworkSwitcher")).toContainText(
-      "Bun + Hono",
-    );
+    await expect(switcher.locator("option:checked")).toHaveText("Bun + Hono");
   });
 
   test("/sdk/python/plus/fastapi/get-started/ lists Python variants in the SDK switcher", async ({
@@ -288,7 +290,7 @@ test.describe("SDK switcher labels on plus-variant pages", () => {
       waitUntil: "domcontentloaded",
     });
 
-    const switcher = page.locator(".right-sidebar .FrameworkSwitcher select");
+    const switcher = visibleFrameworkSwitcher(page);
     await expect(switcher).toBeVisible({ timeout: 15_000 });
     await expect(switcher).toHaveValue("python-fastapi");
 

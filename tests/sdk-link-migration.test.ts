@@ -1,4 +1,8 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+function visibleFrameworkSwitcher(page: Page) {
+  return page.locator(".FrameworkSwitcher select").filter({ visible: true });
+}
 
 test.describe("SDK link migration", () => {
   test("index Get started buttons link to SDK routes", async ({ page }) => {
@@ -54,13 +58,9 @@ test.describe("SDK link migration", () => {
     page,
   }) => {
     await page.goto("/get-started/");
-    await page.waitForSelector(".FrameworkSwitcher select", {
-      timeout: 15_000,
-    });
+    const hubSwitcher = visibleFrameworkSwitcher(page);
+    await expect(hubSwitcher).toBeVisible({ timeout: 15_000 });
 
-    const hubSwitcher = page
-      .locator(".right-sidebar .FrameworkSwitcher select")
-      .first();
     const hubLabels = await hubSwitcher.locator("option").allTextContents();
     expect(hubLabels.length).toBeGreaterThan(1);
     expect(hubLabels).toEqual(
@@ -68,11 +68,8 @@ test.describe("SDK link migration", () => {
     );
 
     await page.goto("/sdk/astro/get-started/");
-    await page.waitForSelector(".right-sidebar .FrameworkSwitcher select", {
-      timeout: 15_000,
-    });
-
-    const sdkSwitcher = page.locator(".right-sidebar .FrameworkSwitcher select");
+    const sdkSwitcher = visibleFrameworkSwitcher(page);
+    await expect(sdkSwitcher).toBeVisible({ timeout: 15_000 });
     await expect(sdkSwitcher).toHaveValue("astro");
 
     const sdkLabels = await sdkSwitcher.locator("option").allTextContents();
@@ -82,17 +79,14 @@ test.describe("SDK link migration", () => {
 
   test("framework switcher navigates between SDK routes", async ({ page }) => {
     await page.goto("/sdk/astro/get-started/");
-    await page.waitForSelector(".FrameworkSwitcher select", {
-      timeout: 15_000,
-    });
+    const switcher = visibleFrameworkSwitcher(page);
+    await expect(switcher).toBeVisible({ timeout: 15_000 });
 
-    await page.selectOption(".FrameworkSwitcher select", "next-js");
+    await switcher.selectOption("next-js");
     await page.waitForURL(/\/sdk\/next\/get-started\/?/, { timeout: 15_000 });
 
     expect(page.url()).toMatch(/\/sdk\/next\/get-started\/?$/);
-    await expect(page.locator(".FrameworkSwitcher select")).toHaveValue(
-      "next-js",
-    );
+    await expect(visibleFrameworkSwitcher(page)).toHaveValue("next-js");
   });
 
   test("framework switcher navigates to SDK route on get-started", async ({
