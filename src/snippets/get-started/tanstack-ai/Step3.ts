@@ -50,7 +50,8 @@ export async function runAgent(
           if (toolName !== "lookup_order") {
             return [];
           }
-          return [lookupLimit({ key: input.orderId, requested: 5 })];
+          const args = input as { orderId: string };
+          return [lookupLimit({ key: args.orderId, requested: 5 })];
         },
       }),
     ],

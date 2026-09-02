@@ -210,9 +210,10 @@ export async function runAgent(
           if (toolName !== "lookup_order") {
             return [];
           }
+          const args = input as { orderNumber: string; note: string };
           return [
-            lookupLimit({ key: input.orderNumber, requested: 1 }),
-            detectPii(input.note),
+            lookupLimit({ key: args.orderNumber, requested: 1 }),
+            detectPii(args.note),
           ];
         },
       }),
@@ -422,7 +423,8 @@ const stream = chat({
         if (toolName !== "lookup_order") {
           return [];
         }
-        return [lookupLimit({ key: input.orderNumber, requested: 1 })];
+        const args = input as { orderNumber: string };
+        return [lookupLimit({ key: args.orderNumber, requested: 1 })];
       },
     }),
   ],
@@ -438,6 +440,12 @@ email, phone, card, or IP detection, so don't pass it to
 ```ts
 import { localDetectSensitiveInfo, tokenBucket } from "@arcjet/guard";
 
+const lookupLimit = tokenBucket({
+  bucket: "lookups",
+  refillRate: 10,
+  intervalSeconds: 60,
+  maxTokens: 10,
+});
 const detectPii = localDetectSensitiveInfo();
 
 const stream = chat({
@@ -451,9 +459,10 @@ const stream = chat({
         if (toolName !== "lookup_order") {
           return [];
         }
+        const args = input as { orderNumber: string; note: string };
         return [
-          lookupLimit({ key: input.orderNumber, requested: 1 }),
-          detectPii(input.note),
+          lookupLimit({ key: args.orderNumber, requested: 1 }),
+          detectPii(args.note),
         ];
       },
     }),
