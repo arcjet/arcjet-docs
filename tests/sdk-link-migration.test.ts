@@ -95,7 +95,7 @@ test.describe("SDK link migration", () => {
     expect(sdkLabels).toEqual(hubLabels);
     await expect(page.locator("#toc-sdk")).toHaveCount(1);
 
-    const icons = page.locator("#toc-sdk a svg");
+    const icons = page.locator("#toc-sdk a > svg:first-child");
     expect(await icons.count()).toBe(sdkLabels.length);
   });
 

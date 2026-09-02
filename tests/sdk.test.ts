@@ -269,7 +269,11 @@ test.describe("sdkSwitcherOptions", () => {
 
 test.describe("sdkSwitcherOptionForLegacyKey", () => {
   test("matches plus-variant and guard keys", () => {
-    const options = sdkSwitcherOptions("/get-started/");
+    const options = sdkSwitcherOptions("/get-started/", [
+      "next-js",
+      "python-fastapi",
+      "crewai",
+    ]);
     expect(
       sdkSwitcherOptionForLegacyKey(options, "python-fastapi")?.label,
     ).toBe("Python + FastAPI");
