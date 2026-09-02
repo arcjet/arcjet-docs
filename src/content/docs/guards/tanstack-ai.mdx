@@ -1,6 +1,6 @@
 ---
 title: "TanStack AI agent guard"
-description: "Screen user text before chat runs, attach Guard on chat middleware, and treat `needsApproval` as confirmation, not policy."
+description: "Screen user text before `chat()` runs, attach Guard on `chat({ middleware })`, and treat `needsApproval` as confirmation, not policy."
 ---
 
 import { Link } from "@/components/link";
@@ -19,8 +19,8 @@ Agents, and Claude wrappers are on
 <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>.
 
 This adapter is TanStack AI `chat({ middleware })` plus
-`onBeforeToolCall` skip. It is not Vercel AI SDK
-(`@arcjet/guard/vercel-ai/v7`). It is not TanStack Start HTTP
+`onBeforeToolCall` skip. It isn't Vercel AI SDK
+(`@arcjet/guard/vercel-ai/v7`). It isn't TanStack Start HTTP
 `protect()`. TanStack's own `contentGuardMiddleware` is TanStack's
 content guard, not Arcjet Guard. Don't use it as the Arcjet gate.
 There is no `guardTool`. TanStack AI swallows an `execute` throw, so
@@ -32,7 +32,7 @@ a tool wrapper is the wrong gate. Don't also wrap these tools with
 Until `@arcjet/guard/tanstack-ai/v0` is published, pin
 `@arcjet/guard` to
 [`3e81a91c`](https://github.com/arcjet/arcjet-js/commit/3e81a91c5a97832b523305f2f7df281c12cf58d3).
-Published `@arcjet/guard` 1.11.0 does not export
+Published `@arcjet/guard` 1.11.0 doesn't export
 `./tanstack-ai/v0`.
 
 ```bash
@@ -45,7 +45,7 @@ follows, install `@arcjet/guard` on its own so your pins don't move.
 
 Import helpers from the versioned path
 `@arcjet/guard/tanstack-ai/v0`. There is no unversioned alias.
-`@arcjet/guard/tanstack-ai` does not resolve. The version
+`@arcjet/guard/tanstack-ai` doesn't resolve. The version
 segment is the TanStack AI SDK major. `@tanstack/ai`
 (`>=0.8.0 <1`) is an optional peer. The integration requires
 Node.js 22 or later.
@@ -65,18 +65,18 @@ The integration exposes two surfaces:
 - `guardMiddleware()` is the chat-wide gate. Pass it first on
   `chat({ middleware })`. Its `onBeforeToolCall` hook denies by
   returning `{ type: "skip", result }` with an
-  `ArcjetDenialResult`. The original tool never runs. It does not
-  throw. Optional `onDeny: "abort"` returns
-  `{ type: "abort", reason }` and stops the run. That is not the
+  `ArcjetDenialResult`. The original tool never runs. The hook
+  doesn't throw. Optional `onDeny: "abort"` returns
+  `{ type: "abort", reason }` and stops the run. Skip is the
   default. A throw from `execute` is swallowed, so there is no
   `guardTool`.
-- `tanstackAiContext()` reads a caller-owned id from helper options
+- `tanstackAiContext()` reads a caller-owned ID from helper options
   or `chat({ context })`: `correlationId`, then `sessionId`, then
   `conversationId`. It never mints an ID. It never reads
   `threadId`, `requestId`, `streamId`, or `traceId`. TanStack
-  generates a `threadId` when you omit one; that value is not a
-  correlation source. If the caller did not pass an id, the call is
-  uncorrelated rather than joined to a generated ID.
+  generates a `threadId` when you omit one; that value isn't a
+  correlation source. If the caller didn't pass an ID, then the
+  call is uncorrelated rather than joined to a generated ID.
 
 There is no `guardTool`. There is no `guardInbound`. There is no
 inbound hook. Screen user text with a direct `guard()` call before
@@ -93,7 +93,7 @@ Don't use this adapter for TanStack Start HTTP `protect()`.
 | `action` | `guardMiddleware` | Guard label and capture name. Use `resource.verb` in the past tense. A string, or a function of `{ toolName, input }`. Defaults to `tool.invoked`. |
 | `rules` | `guardMiddleware` | SDK rules, or a function of `{ toolName, input }`. Omit to submit none. The guard call still happens. |
 | `metadata` | `guardMiddleware` | Nested JSON, or a function of the same input as `rules`. |
-| `sessionId` | `guardMiddleware` | Caller-owned fallback when `chat({ context })` does not carry one. A string, or a function of the same input as `rules`. Prefer putting the id on `chat({ context: { sessionId } })`. |
+| `sessionId` | `guardMiddleware` | Caller-owned fallback when `chat({ context })` doesn't carry one. A string, or a function of the same input as `rules`. Prefer putting the ID on `chat({ context: { sessionId } })`. |
 | `onGuardError` | `guardMiddleware` | `"deny"` (default) or `"allow"`. |
 | `onDeny` | `guardMiddleware` | Omit for the default skip. Set `"abort"` to stop the chat run with `{ type: "abort", reason }`. |
 
@@ -107,11 +107,11 @@ On `DENY` the original tool never runs. The payload shape is one
 `onBeforeToolCall` skip:
 
 - `guardMiddleware` returns `{ type: "skip", result }` where
-  `result` is that object.
+  `result` is the `ArcjetDenialResult`.
 - Optional `onDeny: "abort"` returns `{ type: "abort", reason }`
-  and stops the chat run. That is not the default.
+  and stops the chat run. Skip is the default.
 
-It is not a throw. It is not `needsApproval`. It is not
+It isn't a throw. It isn't `needsApproval`. It isn't
 `defineInterrupt` or `onInterruptBoundary`. A throw from
 `execute` is swallowed.
 
@@ -227,16 +227,17 @@ There is no inbound hook, so there is no `guardInbound`. Put
 prompt-injection and other inbound rules in the application before
 `chat()`.
 
-TanStack `contentGuardMiddleware` is not Arcjet Guard. It redacts
+TanStack `contentGuardMiddleware` isn't Arcjet Guard. It redacts
 or blocks streamed text. Policy sits on `onBeforeToolCall` skip
 only.
 
 Direct
 `client.guard({ label, rules, ...tanstackAiContext({ context }) })`
 is the inbound pattern. Act on that decision. Direct `guard()`
-fails open, so an `ALLOW` is not proof the rules ran. Gate inbound
-on `decision.hasFailedOpen()` if this call site must fail closed.
-`guardMiddleware` already defaults to that.
+fails open, so an `ALLOW` isn't proof the rules ran. If this call
+site must fail closed, then gate inbound on
+`decision.hasFailedOpen()`. `guardMiddleware` already defaults to
+fail closed.
 
 On `DENY`, don't call `chat()`.
 
@@ -259,10 +260,10 @@ if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
 }
 ```
 
-## Human approval is not a policy gate
+## Human approval isn't a policy gate
 
 `needsApproval`, `defineInterrupt`, and `onInterruptBoundary` are
-human-in-the-loop (HITL) confirmation. They are not a policy gate.
+human-in-the-loop (HITL) confirmation. They aren't a policy gate.
 Same trap as LangChain JS `humanInTheLoopMiddleware`, Strands
 `event.interrupt()`, Genkit `interrupt()`, OpenAI `needsApproval`,
 Mastra `requireApproval`, and Claude `canUseTool`. There is no
@@ -274,20 +275,21 @@ never runs a side effect. `guardMiddleware` skips with a plain
 `ArcjetDenialResult`. Don't throw. Don't call `needsApproval`,
 `defineInterrupt`, or `onInterruptBoundary`. Don't pause for a
 human to approve a denied call. Scan free-text args (a note,
-reason, or body). An opaque `orderNumber` or tool-call ID will not
-trip email / phone / card / IP, so don't pass it to
+reason, or body). An opaque `orderNumber` or tool-call ID doesn't
+trip email, phone, card, or IP detection, so don't pass it to
 `localDetectSensitiveInfo`. That helper runs on a local ML model
 backend.
 
 ## Deny chat-wide via `guardMiddleware`
 
 `guardMiddleware` is the `chat({ middleware })` gate. Put it first
-in the middleware array. `onBeforeToolCall` is first-win: if
-another middleware skips first, Guard never runs.
+in the middleware array. `onBeforeToolCall` uses the first
+decision that a middleware returns. If another middleware skips
+first, then Guard never runs.
 
 The hook denies by returning `{ type: "skip", result }` without
 calling the tool. `result` is the `ArcjetDenialResult`. Optional
-`onDeny: "abort"` stops the run instead. That is not the default.
+`onDeny: "abort"` stops the run instead. Skip is the default.
 Policy sits on `onBeforeToolCall` only.
 
 There is no `guardTool`. TanStack AI swallows an `execute` throw,
@@ -295,9 +297,9 @@ so wrapping the tool handler is the wrong gate.
 
 Client tools and provider-native tools with no local `execute` are
 out of scope. Already-branded tools skip the middleware gate so a
-preceding `guard()` is not double-called.
+preceding `guard()` isn't double-called.
 
-This is not Vercel AI SDK `tool({ execute })`. Don't pass
+This isn't Vercel AI SDK `tool({ execute })`. Don't pass
 `guardTool` from `@arcjet/guard/vercel-ai/v7` to TanStack AI.
 Don't pass TanStack `contentGuardMiddleware` as the Arcjet gate.
 
@@ -329,23 +331,23 @@ guardMiddleware(arcjet, {
 
 ## Correlation
 
-`tanstackAiContext` reads a caller-owned id from
+`tanstackAiContext` reads a caller-owned ID from
 `chat({ context })` or a bare app object: `correlationId` first,
-then `sessionId`, then `conversationId`, then `init.sessionId` /
+then `sessionId`, then `conversationId`, then `init.sessionId` or
 `init.correlationId`. It never mints an ID. It never reads
 `threadId`, `requestId`, `streamId`, or `traceId`. TanStack
 generates a `threadId` when you omit one. That auto-generated
-value is not a correlation source. Don't derive an ID from it.
-Don't mint one. If the caller did not pass an id, the call is
+value isn't a correlation source. Don't derive an ID from it.
+Don't mint one. If the caller didn't pass an ID, then the call is
 uncorrelated rather than joined to a generated ID.
 
 A run that pauses on `needsApproval`, `defineInterrupt`, or
 `onInterruptBoundary` resumes through a later `chat()`. Pass the
-same caller-owned id on that resume call so later Guard decisions
+same caller-owned ID on that resume call so later Guard decisions
 stay on the Sequence that started it. The interrupt and its resume
-value are not correlation sources.
+value aren't correlation sources.
 
-Put the same id on `chat({ context })` and as `sessionId` on
+Put the same ID on `chat({ context })` and as `sessionId` on
 `guardMiddleware`.
 
 ```ts
@@ -381,8 +383,8 @@ await chat({
 - Don't turn a deny into `needsApproval` or a human approval
   pause.
 - Don't mint a correlation ID. Don't use `threadId`, `requestId`,
-  `streamId`, or `traceId`. If the caller did not pass an id, leave
-  the call uncorrelated.
+  `streamId`, or `traceId`. If the caller didn't pass an ID, then
+  leave the call uncorrelated.
 - Don't put Arcjet after another `onBeforeToolCall` middleware.
   The first skip wins.
 - Don't treat `onDeny: "abort"` as the default. Default DENY is
@@ -396,7 +398,7 @@ await chat({
 
 ## Common patterns
 
-### Rate limit a tool per trusted id
+### Rate limit a tool by a trusted ID
 
 Key the bucket on a trusted identifier such as `orderNumber`. Don't
 key it on free-text user input.
@@ -429,7 +431,7 @@ const stream = chat({
 
 ### Scan a free-text note for sensitive information
 
-Scan a note, reason, or body. An opaque `orderNumber` does not trip
+Scan a note, reason, or body. An opaque `orderNumber` doesn't trip
 email, phone, card, or IP detection, so don't pass it to
 `localDetectSensitiveInfo`.
 
@@ -462,9 +464,9 @@ const stream = chat({
 ## Fail-closed default
 
 `guardMiddleware` defaults to `onGuardError: "deny"`. If Guard
-cannot be evaluated, `onBeforeToolCall` skips the tool instead of
-calling it. `onDeny: "abort"` applies to a policy `DENY`, not to
-that unavailable path.
+cannot be evaluated, then `onBeforeToolCall` skips the tool
+instead of calling it. `onDeny: "abort"` applies to a policy
+`DENY`, not to that unavailable path.
 
 Set `onGuardError: "allow"` only when executing without a complete
 security decision is acceptable, such as a read-only lookup. Direct
