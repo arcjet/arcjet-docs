@@ -632,6 +632,10 @@ export const main = [
         link: "/guards/claude-agent-sdk",
       },
       {
+        label: "Claude Agent SDK Python",
+        link: "/guards/claude-agent-sdk-py",
+      },
+      {
         label: "Clerk",
         link: "/integrations/clerk",
       },

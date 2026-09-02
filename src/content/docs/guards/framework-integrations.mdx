@@ -1,6 +1,6 @@
 ---
 title: "Agent guard framework integrations"
-description: "Guard Vercel AI SDK, LangChain, LangChain JS, CrewAI, LangGraph, Genkit, OpenAI Agents, OpenAI Agents Python, Strands Agents, Vercel Eve, Mastra, and Claude Agent SDK tools, processors, and inbound messages."
+description: "Guard Vercel AI SDK, LangChain, LangChain JS, CrewAI, LangGraph, Genkit, OpenAI Agents, OpenAI Agents Python, Strands Agents, Vercel Eve, Mastra, Claude Agent SDK, and Claude Agent SDK Python tools, processors, and inbound messages."
 ---
 
 import { Aside } from "@astrojs/starlight/components";
@@ -50,6 +50,7 @@ Pick the page that matches the object you hold when the effect runs:
 | Vercel Eve | `@arcjet/guard/vercel-eve/v0` | <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page> |
 | Mastra | `@arcjet/guard/mastra/v1` | <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page> |
 | Claude Agent SDK | `@arcjet/guard/claude-agent-sdk/v0` | <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page> |
+| Claude Agent SDK (Python) | `arcjet.guard.claude_agent_sdk` | <Link.Page href="/guards/claude-agent-sdk-py">Claude Agent SDK Python agent guard</Link.Page> |
 
 Each JavaScript path is versioned. Unversioned aliases such as
 `@arcjet/guard/vercel-ai` do not resolve.
@@ -57,10 +58,11 @@ Each JavaScript path is versioned. Unversioned aliases such as
 Don't mix adapters. Don't wrap a Mastra `createTool`, Eve
 `defineTool`, LangGraph `tool()`, LangChain JS `createAgent` tool,
 OpenAI Agents `tool()`, Python OpenAI Agents `function_tool`,
-Claude Agent SDK `tool()`, Genkit `ai.defineTool`, Strands Agents
-`tool()`, or official CrewAI `@tool` with
-`@arcjet/guard/vercel-ai/v7`. The wrapper throws or misses the
-real execute path. Don't use an npm CrewAI port with
+Claude Agent SDK `tool()`, Python Claude Agent SDK `@tool`, Genkit
+`ai.defineTool`, Strands Agents `tool()`, or official CrewAI `@tool`
+with `@arcjet/guard/vercel-ai/v7` or
+`@arcjet/guard/claude-agent-sdk/v0`. The wrapper throws or misses
+the real execute path. Don't use an npm CrewAI port with
 `arcjet.guard.crewai`.
 
 ## Vercel AI SDK
@@ -308,6 +310,29 @@ payload on `structuredContent`. Don't throw. For more information about
 inbound screening, authored tools, and `PreToolUse` denials, see the
 <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>.
 
+## Claude Agent SDK Python
+
+This is the Python `claude-agent-sdk` adapter. It is not
+`@arcjet/guard/claude-agent-sdk/v0`.
+
+Claude Agent SDK Python agents call authored `@tool` handlers,
+built-in tools, and MCP tools. There is no inbound helper. Screen
+inbound prompts with `guard_hooks` on `UserPromptSubmit`.
+`can_use_tool` is human-in-the-loop confirmation, not policy. Use
+`guard_tool` for authored `@tool` handlers. Use `PreToolUse` through
+`guard_hooks` for unwrapped built-ins and MCP tools.
+
+On `DENY`, `guard_tool` returns JSON of `ArcjetDenialResult` in
+content with `is_error: True`. Python does not forward
+`structuredContent`. Don't raise.
+
+The `arcjet[claude-agent-sdk]` extra depends on
+`claude-agent-sdk>=0.2.127,<1`.
+
+For more information about inbound screening, authored tools, and
+`PreToolUse` denials, see the
+<Link.Page href="/guards/claude-agent-sdk-py">Claude Agent SDK Python agent guard</Link.Page>.
+
 ## Denial responses
 
 Every JavaScript adapter uses one payload, `ArcjetDenialResult`. The fields,
@@ -325,6 +350,7 @@ in a different way:
 | LangChain JS | `guardTool` returns `{ arcjetDenied: true, … }`. `guardMiddleware` returns a real `ToolMessage` (JSON `content`, default status) | A throw drops the fields. `wrapToolCall` cannot return a bare object. Don't set `status: "error"` |
 | Genkit | Return `{ arcjetDenied: true, … }` as completed `toolResponse.output` | A throw / `interrupt()` is HITL and the wrong envelope |
 | Claude Agent SDK | MCP `CallToolResult` with `isError: true` and the payload on `structuredContent` | A throw is a raw exception. Omitting `isError` looks like success |
+| Claude Agent SDK (Python) | JSON in content + `is_error: True` | Python does not forward `structuredContent`. A raise is a raw exception. Omitting `is_error` looks like success |
 | Vercel Eve | Throw `ArcjetDeniedError`. Opt in to a returned payload with `onDeny: "result"` | Eve projects a throw as a failed `action.result`. A silent return can violate `outputSchema` |
 
 ```ts
@@ -379,6 +405,13 @@ The wrappers default to fail closed when Guard is unavailable:
   returns an MCP `CallToolResult` with `isError: true` and the payload on
   `structuredContent`. On inbound `UserPromptSubmit`, `"allow"` is a
   legitimate choice because failing closed stops the agent answering.
+- Claude Agent SDK Python `guard_tool` and `guard_hooks` default to
+  `on_guard_error="deny"`. `guard_tool` returns JSON of
+  `ArcjetDenialResult` in content with `is_error: True`. Python does
+  not forward `structuredContent`. On inbound `UserPromptSubmit`,
+  `"allow"` is a legitimate choice because failing closed stops the
+  agent answering. Direct `guard()` fails open. Check
+  `decision.has_failed_open()` when that call site must fail closed.
 - LangGraph helpers default to `onGuardError: "deny"`. `guardTool` returns the
   plain payload. `ToolNode` wraps a `ToolMessage` whose `status` is
   `success`. Direct `guard()` before `invoke` fails open. Check

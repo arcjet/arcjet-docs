@@ -69,7 +69,7 @@ Use these stable URLs when linking to a framework-specific guide. They replace `
 - [Filters](https://docs.arcjet.com/filters): country / VPN / ASN allow + deny rules.
 - [Agent guards](https://docs.arcjet.com/guards): protect tool calls and other agent actions without an HTTP request.
 - [Agent guard quick start](https://docs.arcjet.com/guards/quick-start): guard one tool call.
-- [Agent guard integrations](https://docs.arcjet.com/guards/framework-integrations): Vercel AI SDK, LangChain, LangChain JS, CrewAI, LangGraph, Genkit, OpenAI Agents, OpenAI Agents Python, Strands Agents, Vercel Eve, Mastra, and Claude Agent SDK. One `ArcjetDenialResult` payload; per-framework envelopes.
+- [Agent guard integrations](https://docs.arcjet.com/guards/framework-integrations): Vercel AI SDK, LangChain, LangChain JS, CrewAI, LangGraph, Genkit, OpenAI Agents, OpenAI Agents Python, Strands Agents, Vercel Eve, Mastra, Claude Agent SDK, and Claude Agent SDK Python. One `ArcjetDenialResult` payload; per-framework envelopes.
 - [Vercel AI SDK agent guard](https://docs.arcjet.com/guards/vercel-ai): `guardTool`, `aiToolsContext`, `guardAction`, and inbound `guard()` before `generateText`. Wrappers take `action`, not `label`.
 - [LangChain agent guard](https://docs.arcjet.com/guards/langchain): Python `guard_action`, `guard_tool`, `ArcjetMiddleware`, and observe-only capture handlers.
 - [LangChain JS agent guard](https://docs.arcjet.com/guards/langchain-js): inbound `guard()` before `invoke`, `guardTool` on `tool()`, and `guardMiddleware` (`createAgent` + `wrapToolCall`).
@@ -82,6 +82,7 @@ Use these stable URLs when linking to a framework-specific guide. They replace `
 - [Vercel Eve agent guard](https://docs.arcjet.com/guards/vercel-eve): inbound screening, authored tools, connection approvals, and observe-only hooks.
 - [Mastra agent guard](https://docs.arcjet.com/guards/mastra): `guardProcessor`, `guardTool`, and `guardHooks`.
 - [Claude Agent SDK agent guard](https://docs.arcjet.com/guards/claude-agent-sdk): inbound `UserPromptSubmit`, authored `guardTool`, and `PreToolUse`.
+- [Claude Agent SDK Python agent guard](https://docs.arcjet.com/guards/claude-agent-sdk-py): inbound `UserPromptSubmit` via `guard_hooks`, authored `guard_tool` (JSON in content + `is_error: True`), and `PreToolUse`. Python does not forward `structuredContent`.
 - [Agent guard remote policies](https://docs.arcjet.com/guards/remote-policies): centrally managed action policies using labels, actors, and typed inputs.
 - [Capture events](https://docs.arcjet.com/guards/capture): record that an allowed action happened; batched, best-effort, never a security decision.
 - [Agent guard testing and reference](https://docs.arcjet.com/guards/reference): decisions, availability, fail behavior, nested JSON metadata, `registerArcjet` / `register_arcjet`, and the test client. Free `guard()` fail-opens if no client is registered.

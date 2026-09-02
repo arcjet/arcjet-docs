@@ -2164,6 +2164,7 @@ For the full API reference, read the installed library source:
 - [Vercel Eve agent guard](https://docs.arcjet.com/guards/vercel-eve)
 - [Mastra agent guard](https://docs.arcjet.com/guards/mastra)
 - [Claude Agent SDK agent guard](https://docs.arcjet.com/guards/claude-agent-sdk)
+- [Claude Agent SDK Python agent guard](https://docs.arcjet.com/guards/claude-agent-sdk-py)
 - [Capture events](https://docs.arcjet.com/guards/capture)
 
 ### SDKs
