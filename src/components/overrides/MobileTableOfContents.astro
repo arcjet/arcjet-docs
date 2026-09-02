@@ -15,15 +15,7 @@ const showSwitcher =
 ---
 
 {
-    isAjTocHub ? (
-        <TOC
-            client:load
-            astroEntry={Astro.locals.starlightRoute.entry}
-            pathname={pathname}
-            surface="mobile"
-            includeSwitcher={showSwitcher}
-        />
-    ) : showSwitcher ? (
+    showSwitcher ? (
         <div class="mtoc-wrapper">
             <div class="mtoc-container">
                 <div class="mtoc-sdk-control">
@@ -37,6 +29,13 @@ const showSwitcher =
                 <Default />
             </div>
         </div>
+    ) : isAjTocHub ? (
+        <TOC
+            client:load
+            astroEntry={Astro.locals.starlightRoute.entry}
+            pathname={pathname}
+            surface="mobile"
+        />
     ) : (
         <div class="todo-remove">
             <Default />

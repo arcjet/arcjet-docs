@@ -1,4 +1,3 @@
-import SdkSwitcher from "@/components/SdkSwitcher";
 import type { TocNode } from "@/content.config";
 import useElementInView from "@/effects/useElementInView";
 import type { FrameworkKey } from "@/lib/prefs";
@@ -14,7 +13,7 @@ import { useStore } from "@nanostores/react";
 import type { CollectionEntry } from "astro:content"; // Import CollectionEntry from astro:content
 import { onSet } from "nanostores";
 import type { ForwardedRef, PropsWithChildren } from "react";
-import { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
+import { forwardRef, useCallback, useEffect, useState } from "react";
 import type { StarlightRouteData } from "@astrojs/starlight/route-data";
 
 import styles from "./TOC.module.scss";
@@ -24,9 +23,6 @@ interface Props extends PropsWithChildren {
   pathname: string;
   /** Which TOC chrome to render. Desktop lives in Starlight's sidebar panel. */
   surface?: "desktop" | "mobile" | "all";
-  /** When true, render the SDK popover. Desktop hub pages pass false because
-   *  `TableOfContents.astro` already mounts the shared switcher. */
-  includeSwitcher?: boolean;
 }
 
 /**
@@ -40,9 +36,8 @@ const TOC = forwardRef(
   (
     {
       astroEntry,
-      pathname,
+      pathname: _pathname,
       surface = "all",
-      includeSwitcher = false,
       ...props
     }: Props,
     ref: ForwardedRef<HTMLDivElement>,
@@ -135,30 +130,6 @@ const TOC = forwardRef(
       [selectedFramework, selectedEntry],
     );
 
-    const desktopSwitcher = useMemo(() => {
-      if (!includeSwitcher) return null;
-      return (
-        <div className={styles.Switcher}>
-          <SdkSwitcher
-            pathname={pathname}
-            pageFrameworks={astroEntry.data.frameworks}
-            variant="desktop"
-          />
-        </div>
-      );
-    }, [astroEntry.data.frameworks, includeSwitcher, pathname]);
-
-    const mobileSwitcher = useMemo(() => {
-      if (!includeSwitcher) return null;
-      return (
-        <SdkSwitcher
-          pathname={pathname}
-          pageFrameworks={astroEntry.data.frameworks}
-          variant="mobile"
-        />
-      );
-    }, [astroEntry.data.frameworks, includeSwitcher, pathname]);
-
     const showDesktop = surface === "desktop" || surface === "all";
     const showMobile = surface === "mobile" || surface === "all";
 
@@ -215,7 +186,6 @@ const TOC = forwardRef(
         <div className={cls} ref={ref} {...props}>
           {showDesktop && (
           <div className={styles.NavDesktop + (surface === "all" ? " sl-hidden lg:sl-block" : "")}>
-            {desktopSwitcher}
             <div
               className={
                 styles.OnThisPageLabel + " toc-label sl-hidden lg:sl-block"
@@ -229,7 +199,6 @@ const TOC = forwardRef(
           {showMobile && (
           <div className={styles.NavMobile + (surface === "all" ? " lg:sl-hidden" : "")}>
             <summary className="sl-flex">
-              {mobileSwitcher}
               <div
                 className={
                   "toggle sl-flex" + (mobileDropdownVisible ? " open" : "")
