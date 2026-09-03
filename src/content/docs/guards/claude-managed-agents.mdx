@@ -39,7 +39,8 @@ The gates you can enforce are the following:
 - **Custom tools on `agent.custom_tool_use`:** Wrap the handler your
   app runs with `guardCustomTool` / `guard_custom_tool`. On `DENY`,
   the handler does not run. Return the denial as
-  `user.custom_tool_result`. Don't throw.
+  `user.custom_tool_result` with `is_error` set. `is_error` is on
+  the events schema. Don't throw.
 
 `always_ask` plus `user.tool_confirmation` is opt-in. It is not the
 default. It is human-in-the-loop (HITL) confirmation, not policy. Don't
@@ -87,16 +88,17 @@ export const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 </TabItem>
 <TabItem label="Python">
 
-Until `arcjet.guard.claude_managed_agents` is published, pin `arcjet`
-to `ADAPTER_SHA`. Published `arcjet` 1.0.0 on PyPI does not include
-this extra.
+Until `arcjet.guard.claude_managed_agents` is published, pin `arcjet` to
+[`40ea4896`](https://github.com/arcjet/arcjet-py/commit/40ea4896962a90a24cdbc4cfbfc80729c096da36).
+Published `arcjet` 1.0.0 on PyPI does not include this extra.
 
 ```bash
-pip install "arcjet[claude-managed-agents] @ git+https://github.com/arcjet/arcjet-py@ADAPTER_SHA"
+pip install "arcjet[claude-managed-agents] @ git+https://github.com/arcjet/arcjet-py@40ea4896962a90a24cdbc4cfbfc80729c096da36"
 ```
 
-`arcjet[claude-managed-agents]` depends on `anthropic`. CPython 3.10
-or later.
+`arcjet[claude-managed-agents]` depends on `anthropic>=0.92.0,<2`.
+CPython 3.10 or later. The peer is `anthropic`, not
+`claude-agent-sdk`.
 
 Import helpers from `arcjet.guard.claude_managed_agents`:
 
@@ -140,7 +142,9 @@ hook on this product.
 when the session emits `agent.custom_tool_use`. On `DENY`, or when
 Guard cannot be evaluated and `onGuardError` / `on_guard_error` is
 `"deny"`, the handler does not run. Return the denial as
-`user.custom_tool_result`. Don't throw. A throw is a raw exception.
+`user.custom_tool_result` with `is_error` set. `is_error` is on
+the events schema. Don't invent a second field. Don't throw. A
+throw is a raw exception.
 
 `claudeManagedAgentsContext` / `claude_managed_agents_context` reads
 a caller-owned session ID. It never mints an ID. It never calls
@@ -299,8 +303,9 @@ Permission policies do not apply to them. When the session emits
 `agent.custom_tool_use`, wrap the handler you are about to run.
 
 On `DENY` the handler does not run. Send `user.custom_tool_result`
-with the denial payload so the model can inspect it. Don't throw. A
-throw is a raw exception.
+with `is_error` set and the denial payload in the result text so
+the model can inspect it. `is_error` is on the events schema.
+Don't throw. A throw is a raw exception.
 
 Scan free-text args (a note, reason, or body). An opaque `orderId` /
 `order_id` does not trip email, phone, card, or IP detection, so
@@ -385,7 +390,7 @@ guarded_lookup = guard_custom_tool(
 
 Call `guarded_lookup` from your `agent.custom_tool_use` handler.
 Then send `user.custom_tool_result` with `custom_tool_use_id` set
-to the triggering event `id`.
+to the triggering event `id`. On `DENY`, set `is_error`.
 
 </TabItem>
 </Tabs>
@@ -514,7 +519,8 @@ Replace the following:
 - Don't expect a customer pre-exec hook for built-in bash or files.
   The default is `always_allow`.
 - Don't throw from `guardCustomTool` / `guard_custom_tool` to
-  signal a denial. Return `user.custom_tool_result`.
+  signal a denial. Return `user.custom_tool_result` with
+  `is_error` set.
 - Don't mint a session ID. Pass the Anthropic session `id`. If you
   omit one, leave the call uncorrelated.
 - Don't wrap these tools with `@arcjet/guard/claude-agent-sdk/v0` or
@@ -544,4 +550,5 @@ Replace the following:
   (different product: local `query()` / `PreToolUse`)
 - <Link.Page href="/guards">Agent guards</Link.Page>
 - Adapter JS: `ADAPTER_SHA`
-- Adapter Python: `ADAPTER_SHA`
+- Adapter Python:
+  [`40ea4896`](https://github.com/arcjet/arcjet-py/commit/40ea4896962a90a24cdbc4cfbfc80729c096da36)

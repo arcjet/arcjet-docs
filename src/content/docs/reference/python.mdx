@@ -776,10 +776,11 @@ Unavailability raises `ArcjetUnavailableError` or
   no inbound helper. `can_use_tool` is HITL, not policy.
 - **Claude Managed Agents custom tools** – `guard_custom_tool` plus
   `guard_events` (`arcjet[claude-managed-agents]`,
-  `arcjet.guard.claude_managed_agents`, `anthropic`). Inbound is
-  `user.message` before send. Custom tools are gated on
-  `agent.custom_tool_use` before your app executes. Built-in bash
-  and files default to `always_allow` with no customer pre-exec.
+  `arcjet.guard.claude_managed_agents`, `anthropic>=0.92.0,<2`).
+  Inbound is `user.message` before send. Custom tools are gated on
+  `agent.custom_tool_use` before your app executes. On `DENY`, send
+  `user.custom_tool_result` with `is_error`. Built-in bash and
+  files default to `always_allow` with no customer pre-exec.
   `always_ask` is HITL, not policy. This is not the Claude Agent
   SDK.
 

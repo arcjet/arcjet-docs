@@ -386,13 +386,16 @@ The peer is `@anthropic-ai/sdk`, not `@anthropic-ai/claude-agent-sdk`.
 Python imports `arcjet.guard.claude_managed_agents`
 (`guard_custom_tool`, `guard_events`,
 `claude_managed_agents_context`) from the
-`arcjet[claude-managed-agents]` extra. The peer is `anthropic`, not
-`claude-agent-sdk`.
+`arcjet[claude-managed-agents]` extra. The peer is
+`anthropic>=0.92.0,<2`, not `claude-agent-sdk`. Until the extra is
+published, pin `arcjet` to
+[`40ea4896`](https://github.com/arcjet/arcjet-py/commit/40ea4896962a90a24cdbc4cfbfc80729c096da36).
 
 For MCP, Anthropic is the client. Put Guard on servers you host.
 
 On `DENY`, don't send inbound `user.message`. For a custom tool, the
-handler does not run; return `user.custom_tool_result`. Don't throw.
+handler does not run; return `user.custom_tool_result` with
+`is_error` set. `is_error` is on the events schema. Don't throw.
 
 For more information about install, helpers, fail-closed behavior, and
 correlation, see the
@@ -417,7 +420,7 @@ in a different way:
 | Genkit | Return `{ arcjetDenied: true, … }` as completed `toolResponse.output` | A throw / `interrupt()` is HITL and the wrong envelope |
 | Claude Agent SDK | MCP `CallToolResult` with `isError: true` and the payload on `structuredContent` | A throw is a raw exception. Omitting `isError` looks like success |
 | Claude Agent SDK (Python) | JSON in content + `is_error: True` | Python does not forward `structuredContent`. A raise is a raw exception. Omitting `is_error` looks like success |
-| Claude Managed Agents | Don't send `user.message` on inbound `DENY`. On custom-tool `DENY`, don't execute; return `user.custom_tool_result` | Built-in tools already ran under Anthropic. `user.tool_confirmation` is opt-in HITL, not policy. A throw is a raw exception |
+| Claude Managed Agents | Don't send `user.message` on inbound `DENY`. On custom-tool `DENY`, don't execute; return `user.custom_tool_result` with `is_error` | Built-in tools already ran under Anthropic. `user.tool_confirmation` is opt-in HITL, not policy. A throw is a raw exception. `is_error` is on the events schema |
 | Vercel Eve | Throw `ArcjetDeniedError`. Opt in to a returned payload with `onDeny: "result"` | Eve projects a throw as a failed `action.result`. A silent return can violate `outputSchema` |
 
 ```ts
@@ -481,8 +484,9 @@ The wrappers default to fail closed when Guard is unavailable:
   `decision.has_failed_open()` when that call site must fail closed.
 - Claude Managed Agents helpers default to `onGuardError: "deny"` /
   `on_guard_error="deny"`. Inbound `user.message` is not sent. The
-  custom-tool handler does not run. Return `user.custom_tool_result`.
-  Don't throw. On inbound `user.message`, `"allow"` is a legitimate
+  custom-tool handler does not run. Return `user.custom_tool_result`
+  with `is_error` set. Don't throw. On inbound `user.message`,
+  `"allow"` is a legitimate
   choice because failing closed stops the agent answering. Direct
   `guard()` fails open.
 - LangGraph helpers default to `onGuardError: "deny"`. `guardTool` returns the
