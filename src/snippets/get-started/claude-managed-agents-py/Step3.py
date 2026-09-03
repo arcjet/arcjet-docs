@@ -32,7 +32,7 @@ async def run_agent(session_id: str, user_text: str):
         action="order.looked-up",
         session_id=session_id,
         rules=lambda arguments: [
-            lookup_limit(key=arguments["order_id"], requested=5)
+            lookup_limit(key=arguments["order_id"], requested=1)
         ],
     )
     await guard_events(

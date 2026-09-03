@@ -17,6 +17,11 @@ const detectPii = localDetectSensitiveInfo({
 });
 const client = new Anthropic();
 
+// Placeholder for your mail transport.
+const emailProvider = {
+  send: async (_: { to: string; body: string }) => ({ ok: true }),
+};
+
 export function emailTools(user: {
   record: {
     name: string;
@@ -26,8 +31,8 @@ export function emailTools(user: {
 }) {
   const getClientRecord = async () => user.record;
 
-  // This adapter accepts action and rules. It doesn't accept
-  // inputs.
+  // This adapter submits action and rules. The recipient
+  // allow list is not enforced in this sample.
   const sendEmail = guardCustomTool(
     arcjet,
     async ({ recipient, body }: { recipient: string; body: string }) => {

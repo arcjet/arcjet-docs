@@ -22,7 +22,7 @@ export const lookupOrder = guardCustomTool(
   },
   {
     action: "order.looked-up",
-    rules: (input) => [lookupLimit({ key: input.orderId, requested: 5 })],
+    rules: (input) => [lookupLimit({ key: input.orderId, requested: 1 })],
   },
 );
 
