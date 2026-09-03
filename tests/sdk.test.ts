@@ -367,6 +367,12 @@ test.describe("pathnameForLegacyFrameworkKey", () => {
     expect(pathnameForLegacyFrameworkKey("tanstack-ai", "/get-started")).toBe(
       "/sdk/tanstack-ai/get-started/",
     );
+    expect(pathnameForLegacyFrameworkKey("google-adk", "/get-started")).toBe(
+      "/sdk/google-adk/get-started/",
+    );
+    expect(
+      pathnameForLegacyFrameworkKey("strands-agents-py", "/get-started"),
+    ).toBe("/sdk/strands-agents-py/get-started/");
   });
 
   test("maps Claude Agent SDK Python get-started to the SDK get-started route", () => {
@@ -456,6 +462,26 @@ test.describe("legacyFrameworkVercelRedirects", () => {
     expect(match).toBeDefined();
   });
 
+  test("redirects Google ADK and Strands Agents Python get-started to SDK routes", () => {
+    const redirects = legacyFrameworkVercelRedirects();
+    expect(
+      redirects.find(
+        (r) =>
+          r.source === "/get-started" &&
+          r.has[0]?.value === "google-adk" &&
+          r.destination === "/sdk/google-adk/get-started/",
+      ),
+    ).toBeDefined();
+    expect(
+      redirects.find(
+        (r) =>
+          r.source === "/get-started" &&
+          r.has[0]?.value === "strands-agents-py" &&
+          r.destination === "/sdk/strands-agents-py/get-started/",
+      ),
+    ).toBeDefined();
+  });
+
   test("strips ?f= from SDK routes", () => {
     const redirects = legacyFrameworkVercelRedirects();
     expect(
@@ -499,6 +525,26 @@ test.describe("legacyFrameworkVercelRedirects", () => {
         r.destination === "/sdk/claude-agent-sdk-py/guards/quick-start/",
     );
     expect(match).toBeDefined();
+  });
+
+  test("redirects Google ADK and Strands Agents Python guards quick-start URLs", () => {
+    const redirects = legacyFrameworkVercelRedirects();
+    expect(
+      redirects.find(
+        (r) =>
+          r.source === "/guards/quick-start" &&
+          r.has[0]?.value === "google-adk" &&
+          r.destination === "/sdk/google-adk/guards/quick-start/",
+      ),
+    ).toBeDefined();
+    expect(
+      redirects.find(
+        (r) =>
+          r.source === "/guards/quick-start" &&
+          r.has[0]?.value === "strands-agents-py" &&
+          r.destination === "/sdk/strands-agents-py/guards/quick-start/",
+      ),
+    ).toBeDefined();
   });
 
   for (const docPath of [

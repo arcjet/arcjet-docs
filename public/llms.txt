@@ -69,16 +69,18 @@ Use these stable URLs when linking to a framework-specific guide. They replace `
 - [Filters](https://docs.arcjet.com/filters): country / VPN / ASN allow + deny rules.
 - [Agent guards](https://docs.arcjet.com/guards): protect tool calls and other agent actions without an HTTP request.
 - [Agent guard quick start](https://docs.arcjet.com/guards/quick-start): guard one tool call.
-- [Agent guard integrations](https://docs.arcjet.com/guards/framework-integrations): Vercel AI SDK, LangChain, LangChain JS, CrewAI, LangGraph, Genkit, OpenAI Agents, OpenAI Agents Python, Strands Agents, TanStack AI, Vercel Eve, Mastra, Claude Agent SDK, and Claude Agent SDK Python. One `ArcjetDenialResult` payload; per-framework envelopes.
+- [Agent guard integrations](https://docs.arcjet.com/guards/framework-integrations): Vercel AI SDK, LangChain, LangChain JS, CrewAI, LangGraph, Genkit, Google ADK, OpenAI Agents, OpenAI Agents Python, Strands Agents, Strands Agents Python, TanStack AI, Vercel Eve, Mastra, Claude Agent SDK, and Claude Agent SDK Python. One `ArcjetDenialResult` payload; per-framework envelopes.
 - [Vercel AI SDK agent guard](https://docs.arcjet.com/guards/vercel-ai): `guardTool`, `aiToolsContext`, `guardAction`, and inbound `guard()` before `generateText`. Wrappers take `action`, not `label`.
 - [LangChain agent guard](https://docs.arcjet.com/guards/langchain): Python `guard_action`, `guard_tool`, `ArcjetMiddleware`, and observe-only capture handlers.
 - [LangChain JS agent guard](https://docs.arcjet.com/guards/langchain-js): inbound `guard()` before `invoke`, `guardTool` on `tool()`, and `guardMiddleware` (`createAgent` + `wrapToolCall`).
 - [CrewAI agent guard](https://docs.arcjet.com/guards/crewai): official CrewAI `register_arcjet_hooks` on `PRE_TOOL_CALL` plus `HookAborted(reason=..., source="arcjet")`. `guard_tool` for a standalone `BaseTool`. `POST_TOOL_CALL` is not registered. There is no `arcjet[crewai]` extra.
 - [LangGraph agent guard](https://docs.arcjet.com/guards/langgraph): inbound `guard()` before `invoke`, `guardTool`, and `guardToolNode`.
 - [Genkit agent guard](https://docs.arcjet.com/guards/genkit): inbound `guard()` before `generate()`, `guardTool` on `ai.defineTool`, and `guardMiddleware`.
+- [Google ADK agent guard](https://docs.arcjet.com/guards/google-adk): inbound `guard()` before `runAsync`, `guardPlugin` (`beforeToolCallback` deny dict). There is no `guardTool`.
 - [OpenAI Agents agent guard](https://docs.arcjet.com/guards/openai-agents): inbound `guard()` before `run()` and `guardTool` on authored `FunctionTool.invoke`.
 - [OpenAI Agents Python agent guard](https://docs.arcjet.com/guards/openai-agents-py): inbound `guard()` before `Runner.run` and `guard_tool` on `FunctionTool.tool_input_guardrails` plus `reject_content`.
 - [Strands Agents agent guard](https://docs.arcjet.com/guards/strands-agents): inbound `guard()` before `invoke`, `guardTool` on `tool()`, and `guardHooks` (`BeforeToolCallEvent.cancel`).
+- [Strands Agents Python agent guard](https://docs.arcjet.com/guards/strands-agents-py): inbound `guard()` before the agent runs, `guard_tool` on `@tool`, and `guard_hooks` (`BeforeToolCallEvent.cancel_tool` True or str). This is not `@arcjet/guard/strands-agents/v1`.
 - [TanStack AI agent guard](https://docs.arcjet.com/guards/tanstack-ai): inbound `guard()` before `chat()`, `guardMiddleware` (`onBeforeToolCall` skip). There is no `guardTool`.
 - [Vercel Eve agent guard](https://docs.arcjet.com/guards/vercel-eve): inbound screening, authored tools, connection approvals, and observe-only hooks.
 - [Mastra agent guard](https://docs.arcjet.com/guards/mastra): `guardProcessor`, `guardTool`, and `guardHooks`.

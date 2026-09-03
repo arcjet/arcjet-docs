@@ -8,6 +8,7 @@ import { FastApi as IconFastApi } from "@/components/icons/tech/FastApi";
 import { Fastify as IconFastify } from "@/components/icons/tech/Fastify";
 import { Flask as IconFlask } from "@/components/icons/tech/Flask";
 import { Genkit as IconGenkit } from "@/components/icons/tech/Genkit";
+import { GoogleAdk as IconGoogleAdk } from "@/components/icons/tech/GoogleAdk";
 import { Hono as IconHono } from "@/components/icons/tech/Hono";
 import { LangChain as IconLangChain } from "@/components/icons/tech/LangChain";
 import { LangGraph as IconLangGraph } from "@/components/icons/tech/LangGraph";
@@ -59,6 +60,7 @@ const frameworkIcon = {
   express: <IconExpress />,
   fastify: <IconFastify />,
   genkit: <IconGenkit />,
+  "google-adk": <IconGoogleAdk />,
   hono: <IconHono />,
   langchain: <IconLangChain />,
   "langchain-js": <IconLangChain />,
@@ -77,6 +79,7 @@ const frameworkIcon = {
   "react-router": <IconReactRouter />,
   remix: <IconRemix />,
   "strands-agents": <IconStrandsAgents />,
+  "strands-agents-py": <IconStrandsAgents />,
   sveltekit: <IconSvelteKit />,
   "tanstack-ai": <IconTanStackAi />,
   "vercel-ai": <IconVercelAi />,

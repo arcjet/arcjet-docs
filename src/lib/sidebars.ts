@@ -653,6 +653,10 @@ export const main = [
         link: "/guards/genkit",
       },
       {
+        label: "Google ADK",
+        link: "/guards/google-adk",
+      },
+      {
         label: "LangChain",
         link: "/guards/langchain",
       },
@@ -688,6 +692,10 @@ export const main = [
       {
         label: "Strands Agents",
         link: "/guards/strands-agents",
+      },
+      {
+        label: "Strands Agents Python",
+        link: "/guards/strands-agents-py",
       },
       {
         label: "TanStack AI",
