@@ -172,13 +172,15 @@ Then install the correct package:
 | Python FastAPI | `pip install arcjet` or `uv add arcjet`         |
 | Python Flask   | `pip install arcjet` or `uv add arcjet`         |
 | Go             | `go get github.com/arcjet/arcjet-go@latest`     |
-| Claude Managed Agents | JavaScript: `npm i @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#ADAPTER_SHA @anthropic-ai/sdk`. Python: `pip install "arcjet[claude-managed-agents] @ git+https://github.com/arcjet/arcjet-py@40ea4896962a90a24cdbc4cfbfc80729c096da36"` or `uv add` the same spec. One adapter, both languages. |
+| Claude Managed Agents | JavaScript: `npm i @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#cb35c8f92c3a2fb63fbeb9b386d79b1878c19d92 @anthropic-ai/sdk`. Python: `pip install "arcjet[claude-managed-agents] @ git+https://github.com/arcjet/arcjet-py@40ea4896962a90a24cdbc4cfbfc80729c096da36"` or `uv add` the same spec. One adapter, both languages. |
 
 Claude Managed Agents is Anthropic's hosted harness. It is not the Claude
 Agent SDK. Don't install `claude-agent-sdk` or
 `@anthropic-ai/claude-agent-sdk` for this adapter. Until the JavaScript
-adapter is published, pin `@arcjet/guard` to `ADAPTER_SHA`. Until the
-Python adapter is published, pin `arcjet` to
+adapter is published, pin `@arcjet/guard` to
+[`cb35c8f9`](https://github.com/arcjet/arcjet-js/commit/cb35c8f92c3a2fb63fbeb9b386d79b1878c19d92)
+(`@anthropic-ai/sdk` `>=0.86.0 <1`). Until the Python adapter is
+published, pin `arcjet` to
 [`40ea4896`](https://github.com/arcjet/arcjet-py/commit/40ea4896962a90a24cdbc4cfbfc80729c096da36)
 (`anthropic>=0.92.0,<2`). Published packages do not export it. Import
 `@arcjet/guard/claude-managed-agents/v0`

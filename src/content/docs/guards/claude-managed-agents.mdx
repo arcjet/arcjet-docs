@@ -50,9 +50,9 @@ For MCP, Anthropic is the MCP client. Put Guard on MCP servers you host.
 You cannot intercept an MCP call that Anthropic executes against a
 server you don't run.
 
-The peer packages are `@anthropic-ai/sdk` (JavaScript) and `anthropic`
-(Python). Don't install `claude-agent-sdk` or
-`@anthropic-ai/claude-agent-sdk` for this adapter.
+The peer packages are `@anthropic-ai/sdk` (`>=0.86.0 <1`, JavaScript)
+and `anthropic>=0.92.0,<2` (Python). Don't install `claude-agent-sdk`
+or `@anthropic-ai/claude-agent-sdk` for this adapter.
 
 ## Install
 
@@ -60,16 +60,18 @@ The peer packages are `@anthropic-ai/sdk` (JavaScript) and `anthropic`
 <TabItem label="JavaScript / TypeScript">
 
 Until `@arcjet/guard/claude-managed-agents/v0` is published, pin
-`@arcjet/guard` to `ADAPTER_SHA`. Published `@arcjet/guard` does not
-export `./claude-managed-agents/v0`.
+`@arcjet/guard` to
+[`cb35c8f9`](https://github.com/arcjet/arcjet-js/commit/cb35c8f92c3a2fb63fbeb9b386d79b1878c19d92).
+Published `@arcjet/guard` does not export `./claude-managed-agents/v0`.
 
 ```bash
-npm install @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#ADAPTER_SHA @anthropic-ai/sdk
+npm install @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#cb35c8f92c3a2fb63fbeb9b386d79b1878c19d92 @anthropic-ai/sdk
 ```
 
-`@anthropic-ai/sdk` is an optional peer, not a dependency of
-`@arcjet/guard`. If your project already has it, install
-`@arcjet/guard` on its own so your pins don't move.
+`@anthropic-ai/sdk` (`>=0.86.0 <1`) is an optional peer, not a
+dependency of `@arcjet/guard`. If your project already has it, install
+`@arcjet/guard` on its own so your pins don't move. The peer is
+`@anthropic-ai/sdk`, not `@anthropic-ai/claude-agent-sdk`.
 
 Import helpers from the versioned path
 `@arcjet/guard/claude-managed-agents/v0`. There is no unversioned
@@ -549,6 +551,7 @@ Replace the following:
 - <Link.Page href="/guards/claude-agent-sdk-py">Claude Agent SDK Python agent guard</Link.Page>
   (different product: local `query()` / `PreToolUse`)
 - <Link.Page href="/guards">Agent guards</Link.Page>
-- Adapter JS: `ADAPTER_SHA`
+- Adapter JS:
+  [`cb35c8f9`](https://github.com/arcjet/arcjet-js/commit/cb35c8f92c3a2fb63fbeb9b386d79b1878c19d92)
 - Adapter Python:
   [`40ea4896`](https://github.com/arcjet/arcjet-py/commit/40ea4896962a90a24cdbc4cfbfc80729c096da36)
