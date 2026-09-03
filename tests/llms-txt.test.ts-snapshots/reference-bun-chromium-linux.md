@@ -127,7 +127,7 @@ const aj = arcjet({
         characteristics: ['http.request.headers["x-api-key"]'],
         window: "1h",
         // max could also be a dynamic value applied after looking up a limit
-        // elsewhere e.g. in a database for the authenticated user
+        // elsewhere, such as in a database for the authenticated user
         max: 600,
       },
     ),
@@ -520,7 +520,7 @@ import { env } from "bun";
 const aj = arcjet({
   key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
-    // Shield protects your app from common attacks e.g. SQL injection
+    // Shield protects your app from common attacks such as SQL injection
     shield({ mode: "LIVE" }),
     // Create a bot detection rule
     detectBot({
@@ -531,7 +531,7 @@ const aj = arcjet({
         // Uncomment to allow these other common bot categories
         // See the full list at https://arcjet.com/bot-list
         //"CATEGORY:MONITOR", // Uptime monitoring services
-        //"CATEGORY:PREVIEW", // Link previews e.g. Slack, Discord
+        //"CATEGORY:PREVIEW", // Link previews such as Slack, Discord
       ],
     }),
     // Create a token bucket rate limit. Other algorithms are supported.

@@ -144,6 +144,7 @@ Remote rules are managed via the MCP server or Console – no code changes or re
 - Detecting prompt injection in agent tool results? → guard() with detectPromptInjection
 - Recording that an allowed action happened? → capture() / Capture (batched, best-effort)
 - Moderating untrusted text at a tool boundary? → moderateContent() (JS), ModerateContent() (Python), or GuardModerateContent (Go).
+- Using an agent framework that owns the tool loop? → the framework adapter, not a raw guard() call. See "Agent framework adapters".
 
 Add guard protection with the skill:
 ```bash
@@ -356,12 +357,12 @@ import { convertToModelMessages, isTextUIPart, streamText } from "ai";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
-  // Track budgets per user — replace "userId" with any stable identifier
+  // Track budgets per user – replace "userId" with any stable identifier
   characteristics: ["userId"],
   rules: [
-    // Shield protects against common web attacks e.g. SQL injection
+    // Shield protects against common web attacks such as SQL injection
     shield({ mode: "LIVE" }),
-    // Block all automated clients — bots inflate AI costs
+    // Block all automated clients – bots inflate AI costs
     detectBot({
       mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
       allow: [], // Block all bots. See https://arcjet.com/bot-list
@@ -377,7 +378,7 @@ const aj = arcjet({
     sensitiveInfo({
       mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
       // Block PII types that should never appear in AI prompts.
-      // Remove types your app legitimately handles (e.g. EMAIL for a support bot).
+      // Remove types your app legitimately handles (for example, EMAIL for a support bot).
       deny: ["CREDIT_CARD_NUMBER", "EMAIL"],
     }),
     // Detect prompt injection attacks before they reach your AI model
@@ -428,7 +429,7 @@ export async function POST(req: Request) {
       return new Response("Sensitive information detected", { status: 400 });
     } else if (decision.reason.isPromptInjection()) {
       return new Response(
-        "Prompt injection detected — please rephrase your message",
+        "Prompt injection detected – rephrase your message",
         { status: 400 },
       );
     } else {
@@ -1819,7 +1820,7 @@ if (decision.isDenied()) {
 
 ```ts
 if (decision.isErrored()) {
-  // Arcjet fails open — log the error and allow the request
+  // Arcjet fails open – log the error and allow the request
   console.error("Arcjet error", decision.reason.message);
 }
 ```
@@ -1915,7 +1916,7 @@ key, characteristics, and transport. The original client is unchanged.
 rule factories require `mode`. This method is on Python SDK `main`.
 
 ```ts
-// lib/arcjet.ts — create and export a base instance
+// lib/arcjet.ts – create and export a base instance
 import arcjet, {
   detectBot,
   fixedWindow,
@@ -1934,7 +1935,7 @@ export default arcjet({
 ```
 
 ```ts
-// app/api/chat/route.ts — add route-specific rules
+// app/api/chat/route.ts – add route-specific rules
 import arcjet, { detectBot, fixedWindow } from "@/lib/arcjet";
 
 const aj = arcjet
@@ -2137,6 +2138,48 @@ For the full API reference, read the installed library source:
 - JS/TS: `node_modules/@arcjet/guard`
 - Python: `arcjet.guard` module
 
+### Agent framework adapters
+
+The examples above call `guard()` directly. When the agent framework owns the
+tool loop, use its adapter instead: the wrapper sits between the model's
+generated arguments and the tool's own handler, so a denial stops the side
+effect and returns an envelope the model can read. Framework wrappers take
+`action`; direct `guard()` calls take `label` for the same slug.
+
+Every adapter page below documents one integration and selects the language
+with a tab where both a JavaScript and a Python adapter exist.
+
+| Framework | JavaScript import | Python import | Deny point |
+| --- | --- | --- | --- |
+| Vercel AI SDK | `@arcjet/guard/vercel-ai/v7` | – | `guardTool`, `guardAction` |
+| LangChain | `@arcjet/guard/langchain/v1` | `arcjet.guard.langchain` | `guardTool` / `guard_tool`, `guardMiddleware` / `ArcjetMiddleware` |
+| LangGraph | `@arcjet/guard/langgraph/v1` | – | `guardTool`, `guardToolNode` |
+| CrewAI | – | `arcjet.guard.crewai` | `register_arcjet_hooks` on `PRE_TOOL_CALL`, `guard_tool` |
+| Genkit | `@arcjet/guard/genkit/v1` | – | `guardTool`, `guardMiddleware` |
+| Google ADK | `@arcjet/guard/google-adk/v2` | – | `guardPlugin` (`beforeToolCallback`). No `guardTool` |
+| OpenAI Agents | `@arcjet/guard/openai-agents/v0` | `arcjet.guard.openai_agents` | `guardTool` on `invoke` / `guard_tool` on `tool_input_guardrails` |
+| Strands Agents | `@arcjet/guard/strands-agents/v1` | `arcjet.guard.strands_agents` | `guardTool` / `guard_tool`, `guardHooks` / `guard_hooks` |
+| TanStack AI | `@arcjet/guard/tanstack-ai/v0` | – | `guardMiddleware` (`onBeforeToolCall`). No `guardTool` |
+| Mastra | `@arcjet/guard/mastra/v1` | – | `guardProcessor`, `guardTool`, `guardHooks` |
+| Vercel Eve | `@arcjet/guard/vercel-eve/v0` | – | inbound screening, authored tools, connection approvals |
+| Claude Agent SDK | `@arcjet/guard/claude-agent-sdk/v0` | `arcjet.guard.claude_agent_sdk` | `guardTool` / `guard_tool`, `guardHooks` / `guard_hooks` (`UserPromptSubmit`, `PreToolUse`) |
+| Claude Managed Agents | `@arcjet/guard/claude-managed-agents/v0` | `arcjet.guard.claude_managed_agents` | `guardEvents` / `guard_events`, `guardCustomTool` / `guard_custom_tool` |
+
+Every JavaScript path is versioned. Unversioned aliases such as
+`@arcjet/guard/vercel-ai` do not resolve. Don't wrap the same tool with two
+adapters, and don't mix the JavaScript and Python adapter for one framework.
+
+Human-in-the-loop confirmation is not a policy gate. `needsApproval`,
+`humanInTheLoopMiddleware`, `interrupt()`, `requireApproval`, `human_input`,
+`can_use_tool`, and `always_ask` all pause a run for a person. The runtime can
+skip some of them, and none of them evaluates a policy. There is no approval
+helper in any adapter.
+
+The wrappers fail closed: if Guard cannot be evaluated the tool does not run.
+Direct `guard()` fails open and reports `hasFailedOpen()` /
+`has_failed_open()`, so an `ALLOW` from a direct call is not proof the rules
+ran.
+
 ## Reference guides
 
 ### Features
@@ -2150,26 +2193,28 @@ For the full API reference, read the installed library source:
 - [Content moderation](https://docs.arcjet.com/content-moderation)
 - [Signup form protection](https://docs.arcjet.com/signup-protection)
 - [Filters](https://docs.arcjet.com/filters)
+- [AI protection](https://docs.arcjet.com/ai-protection)
 - [Guards](https://docs.arcjet.com/guards)
+- [Agent guard quick start](https://docs.arcjet.com/guards/quick-start)
 - [Agent guard integrations](https://docs.arcjet.com/guards/framework-integrations)
+- [Agent guard remote policies](https://docs.arcjet.com/guards/remote-policies)
+- [Agent guard testing and reference](https://docs.arcjet.com/guards/reference)
+- [Capture events](https://docs.arcjet.com/guards/capture)
 - [Vercel AI SDK agent guard](https://docs.arcjet.com/guards/vercel-ai)
 - [LangChain agent guard](https://docs.arcjet.com/guards/langchain)
-- [LangChain JS agent guard](https://docs.arcjet.com/guards/langchain-js)
 - [CrewAI agent guard](https://docs.arcjet.com/guards/crewai)
 - [LangGraph agent guard](https://docs.arcjet.com/guards/langgraph)
 - [Genkit agent guard](https://docs.arcjet.com/guards/genkit)
 - [Google ADK agent guard](https://docs.arcjet.com/guards/google-adk)
 - [OpenAI Agents agent guard](https://docs.arcjet.com/guards/openai-agents)
-- [OpenAI Agents Python agent guard](https://docs.arcjet.com/guards/openai-agents-py)
 - [Strands Agents agent guard](https://docs.arcjet.com/guards/strands-agents)
-- [Strands Agents Python agent guard](https://docs.arcjet.com/guards/strands-agents-py)
 - [TanStack AI agent guard](https://docs.arcjet.com/guards/tanstack-ai)
 - [Vercel Eve agent guard](https://docs.arcjet.com/guards/vercel-eve)
 - [Mastra agent guard](https://docs.arcjet.com/guards/mastra)
 - [Claude Agent SDK agent guard](https://docs.arcjet.com/guards/claude-agent-sdk)
-- [Claude Agent SDK Python agent guard](https://docs.arcjet.com/guards/claude-agent-sdk-py)
 - [Claude Managed Agents agent guard](https://docs.arcjet.com/guards/claude-managed-agents)
-- [Capture events](https://docs.arcjet.com/guards/capture)
+- [Nosecone security headers](https://docs.arcjet.com/nosecone/quick-start)
+- [`@arcjet/redact`](https://docs.arcjet.com/redact/quick-start)
 
 ### SDKs
 
