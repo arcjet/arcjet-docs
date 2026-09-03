@@ -739,8 +739,10 @@ To wrap an effect instead of handling the decision yourself, use the
 checkpoint helpers. They fail closed by default
 (`on_guard_error="deny"`). A `DENY` raises `ArcjetDeniedError` or
 `ArcjetToolDeniedError`, except the OpenAI Agents Python helper,
-which calls `reject_content(...)`, and the Claude Agent SDK Python
-helper, which returns JSON in content with `is_error: True`.
+which calls `reject_content(...)`, the Claude Agent SDK Python
+helper, which returns JSON in content with `is_error: True`, and
+the Strands Agents Python helper, which returns a plain
+`ArcjetDenialResult` dict.
 Unavailability raises `ArcjetUnavailableError` or
 `ArcjetToolUnavailableError` on the LangChain and CrewAI surfaces.
 
@@ -774,13 +776,12 @@ Unavailability raises `ArcjetUnavailableError` or
   no inbound helper. `can_use_tool` is HITL, not policy.
 - **Strands Agents Python `@tool`** – `guard_tool` plus
   `guard_hooks` (`arcjet[strands-agents]`,
-  `arcjet.guard.strands_agents`). Authored `@tool` returns JSON of
-  `ArcjetDenialResult`. Unwrapped tools are
-  `BeforeToolCallEvent.cancel_tool` (`True` or a string). The
-  extra pulls the Strands Agents SDK. A peer version floor is not
-  published yet. There is no inbound helper.
-  `event.interrupt()` is HITL, not policy. This is not
-  `@arcjet/guard/strands-agents/v1`.
+  `arcjet.guard.strands_agents`, `strands-agents>=1.11.0,<2`).
+  Authored `@tool` returns a plain `ArcjetDenialResult` dict.
+  Unwrapped tools are `BeforeToolCallEvent.cancel_tool` (`True`
+  or a string). Don't set `BeforeToolsEvent.cancel`. There is no
+  inbound helper. `event.interrupt()` is HITL, not policy. This
+  is not `@arcjet/guard/strands-agents/v1`.
 
 For install, examples, correlation, and the configure-before-wrap rule,
 see the <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.

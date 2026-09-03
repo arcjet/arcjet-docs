@@ -21,16 +21,15 @@ Don't wrap these tools with `@arcjet/guard/strands-agents/v1`.
 ## Install
 
 Until `arcjet.guard.strands_agents` is published, pin `arcjet` to
-`ADAPTER_SHA`. Published `arcjet` 1.0.0 on PyPI does not include
-this extra.
+[`a6308061`](https://github.com/arcjet/arcjet-py/commit/a630806169b92757192f3f5cce2e305827b26567).
+Published `arcjet` 1.0.0 on PyPI does not include this extra.
 
 ```bash
-pip install "arcjet[strands-agents] @ git+https://github.com/arcjet/arcjet-py@ADAPTER_SHA"
+pip install "arcjet[strands-agents] @ git+https://github.com/arcjet/arcjet-py@a630806169b92757192f3f5cce2e305827b26567"
 ```
 
-`arcjet[strands-agents]` is an extra. The extra pulls the Strands
-Agents SDK. A peer version floor is not published yet. CPython
-3.10 or later.
+`arcjet[strands-agents]` depends on `strands-agents>=1.11.0,<2`.
+CPython 3.10 or later.
 
 Import helpers from `arcjet.guard.strands_agents`:
 
@@ -63,21 +62,29 @@ Pick the surface that matches what you hold when the effect runs:
 | An unwrapped or MCP tool | `guard_hooks` (`BeforeToolCallEvent`) | `arcjet[strands-agents]` | Yes |
 | A session or conversation ID you already have | `strands_agent_context` | `arcjet[strands-agents]` | No |
 
-`guard_tool` wraps an authored `@tool`. On `DENY`, or when Guard
-cannot be evaluated and `on_guard_error` is `"deny"`, the helper
-returns JSON of `ArcjetDenialResult`. The tool handler does not
-run. Don't raise.
+`guard_tool` wraps an authored `@tool` /
+`DecoratedFunctionTool`. On `DENY`, or when Guard cannot be
+evaluated and `on_guard_error` is `"deny"`, the helper returns a
+plain `ArcjetDenialResult` dict. The tool handler does not run.
+Don't raise. A raise is swallowed into
+`Error: {Type} - {message}`.
 
 `guard_hooks` is a hook provider. Pass it on
-`Agent(hooks=[...])`. On `DENY` it sets
-`event.cancel_tool` to a JSON string of `ArcjetDenialResult`, or
-`True` for the default cancel message. That cancels the tool
-call. It does not call `event.interrupt()`. Fail closed always
-sets `cancel_tool` on error.
+`Agent(hooks=[...])`. On `DENY` it sets `event.cancel_tool` to a
+JSON string of `ArcjetDenialResult`. The SDK also accepts `True`
+for the default cancel text. That cancels the tool call. Policy
+sits on per-tool `cancel_tool` only. Don't set
+`BeforeToolsEvent.cancel`. That skips per-tool hooks. It does
+not call `event.interrupt()`. Fail closed always sets
+`cancel_tool` on error.
 
-`strands_agent_context` reads a caller-owned `correlation_id`,
-then `session_id`, then `request_id` from the object you pass. It
-never mints an ID. If the caller did not pass one of those keys,
+`strands_agent_context` reads a caller-owned `correlationId`,
+then `sessionId`, then `requestId` from `invocation_state` or a
+bare mapping. Snake-case aliases `correlation_id`, `session_id`,
+and `request_id` are also read. Keyword fallbacks are
+`correlation_id=`, `session_id=`, and `request_id=`. It never
+mints an ID. It never reads `trace_id` or `traceId`. It never
+reads `agent.id`. If the caller did not pass one of those keys,
 the call is uncorrelated rather than joined to a generated ID.
 
 There is no inbound helper. Screen user text with a direct
@@ -97,6 +104,9 @@ Don't also wrap these tools with
 | `guard` | Yes | Client from `launch_arcjet` or `launch_arcjet_sync`. |
 | `action` | Yes | Guard label and capture name. Use `resource.verb` in the past tense, such as `email.sent`. |
 | `rules` | No | Bound SDK rule inputs, or a function of the parsed tool arguments. Omit to submit none. |
+| `correlation_id` | No | Caller-owned fallback when the object you pass to `strands_agent_context` has no ID. Never minted. |
+| `session_id` | No | Same, when the application calls the ID a session. Ignored when `correlation_id` is set. |
+| `request_id` | No | Same, when the application calls the ID a request. Ignored when `correlation_id` or `session_id` is set. |
 | `on_guard_error` | No | `"deny"` (default) or `"allow"`. A real `DENY` always blocks. |
 
 `guard_hooks` accepts this contract:
@@ -104,16 +114,20 @@ Don't also wrap these tools with
 | Option | Required | Description |
 | --- | --- | --- |
 | `guard` | Yes | Client from `launch_arcjet` or `launch_arcjet_sync`. |
-| `action` | No | Guard label and capture name. A string, or a function of the hook input. Defaults to `tool.invoked`. |
-| `rules` | No | Bound SDK rule inputs, or a function of `{ tool_name, input }`. Omit to submit none. |
-| `session_id` | No | Caller-owned fallback when the object you pass to `strands_agent_context` has no ID. Never minted. |
+| `action` | No | Guard label and capture name. A string, or a function of the tool-call envelope. Defaults to `{tool_name}.invoked`. |
+| `rules` | No | Bound SDK rule inputs, or a function of `tool_use.input` plus `tool_name`. Omit to submit none. |
+| `correlation_id` | No | Caller-owned fallback when `invocation_state` has no ID. Never minted. |
+| `session_id` | No | Same, when the application calls the ID a session. Ignored when `correlation_id` is set. |
+| `request_id` | No | Same, when the application calls the ID a request. Ignored when `correlation_id` or `session_id` is set. |
 | `on_guard_error` | No | `"deny"` (default) or `"allow"`. A real `DENY` always blocks. |
 
 Inbound screening uses direct `guard()`, which takes `label` (not
 `action`) and fails open. See the following section.
 
-`strands_agent_context` reads a caller-owned `correlation_id`,
-then `session_id`, then `request_id`. It never mints an ID.
+`strands_agent_context` reads a caller-owned `correlationId`,
+then `sessionId`, then `requestId`, plus the snake-case aliases.
+It never mints an ID. It never reads `trace_id` or `traceId`. It
+never reads `agent.id`.
 
 ## Screen user text before the agent runs
 
@@ -158,11 +172,12 @@ agent(user_text)
 
 ## Gate authored `@tool` handlers
 
-`guard_tool` wraps an authored `@tool`. That authored handler is
-the local side effect this helper can stop.
+`guard_tool` wraps an authored `@tool` /
+`DecoratedFunctionTool`. That authored handler is the local side
+effect this helper can stop.
 
-On `DENY` the handler does not run. The helper returns JSON of
-`ArcjetDenialResult`:
+On `DENY` the handler does not run. The helper returns a plain
+`ArcjetDenialResult` dict:
 
 ```json
 {
@@ -174,7 +189,8 @@ On `DENY` the handler does not run. The helper returns JSON of
 }
 ```
 
-Don't raise from the wrapper. A raise is a raw exception.
+Don't raise from the wrapper. A raise is swallowed into
+`Error: {Type} - {message}`.
 
 Scan free-text args (a note, reason, or body). An opaque
 `order_id` does not trip email / phone / card / IP, so don't pass
@@ -219,18 +235,23 @@ guarded_lookup = guard_tool(
 
 Pass wrapped tools on the `Agent` `tools` list.
 
-## Deny invoke-wide via `guard_hooks`
+## Deny unwrapped tools via `guard_hooks`
 
 `guard_hooks` is a hook provider. Pass it on
-`Agent(hooks=[...])`. `BeforeToolCallEvent` is the invoke-wide
+`Agent(hooks=[...])`. `BeforeToolCallEvent` is the per-tool
 gate. The callback denies by setting `event.cancel_tool` to a
-JSON string of `ArcjetDenialResult`, or `True` for the default
-cancel message. The tool does not run. Policy sits on
-`cancel_tool` only. Don't call `event.interrupt()`.
+JSON string of `ArcjetDenialResult`. The SDK also accepts `True`
+for the default cancel text. The tool does not run. Policy sits
+on per-tool `cancel_tool` only. Don't set
+`BeforeToolsEvent.cancel`. That skips per-tool hooks. It skips
+branded (`guard_tool`) tools. Tools that are not branded are
+still gated. `AfterToolCallEvent` is capture only. Don't call
+`event.interrupt()`.
 
 MCP and vended tools skip an unwrapped handler. Those tools are
 not a `@tool` deny. `guard_hooks` still gates a tool call that
-Strands executes through `BeforeToolCallEvent`.
+Strands executes through `BeforeToolCallEvent`. Branded
+`guard_tool` wrappers are skipped on the before path.
 
 This is not the JavaScript `@arcjet/guard/strands-agents/v1`
 adapter. Don't pass `guardHooks` from that package to a Python
@@ -266,9 +287,9 @@ Guard. Use `guard_tool` on authored `@tool` handlers you own, or
 
 `guard_tool` and `guard_hooks` default to
 `on_guard_error="deny"`. If Guard cannot be evaluated,
-`guard_tool` returns JSON of `ArcjetDenialResult` and the tool
-handler does not run. `guard_hooks` sets `event.cancel_tool`
-instead of calling the tool.
+`guard_tool` returns a plain `ArcjetDenialResult` dict and the
+tool handler does not run. `guard_hooks` sets
+`event.cancel_tool` instead of calling the tool.
 
 Set `on_guard_error="allow"` only when you can accept running the
 action without a complete security decision. The helpers reject
@@ -290,10 +311,13 @@ The agent has no conversation or session ID unless you put one on
 the object you already have. Pass the ID that you already have.
 Don't mint an ID.
 
-`strands_agent_context` reads a caller-owned `correlation_id`,
-then `session_id`, then `request_id` from that object. If nothing
-is a valid ID, the call is uncorrelated rather than joined to a
-generated ID.
+`strands_agent_context` reads a caller-owned `correlationId`
+first, then `sessionId`, then `requestId` from `invocation_state`
+or a bare mapping. Snake-case aliases `correlation_id`,
+`session_id`, and `request_id` are also read. It never mints an
+ID. It never reads `trace_id` or `traceId`. It never reads
+`agent.id`. If nothing is a valid ID, the call is uncorrelated
+rather than joined to a generated ID.
 
 ```py
 app_context = {"session_id": conversation_id}
@@ -313,12 +337,16 @@ nobody searches for.
   confirmation, not policy.
 - Don't raise from `guard_tool` or the `BeforeToolCallEvent`
   callback to signal a denial. Denial is `cancel_tool` (`True` or
-  a string) on the hooks, or the JSON payload from `guard_tool`.
+  a string) on the hooks, or the `ArcjetDenialResult` dict from
+  `guard_tool`. A raise is swallowed into
+  `Error: {Type} - {message}`.
 - Don't treat `event.interrupt()` as Guard. Policy sits on
   `BeforeToolCallEvent.cancel_tool` only.
-- Don't mint a session or conversation ID. If the caller did not
-  pass a `correlation_id`, `session_id`, or `request_id`, leave
-  the call uncorrelated.
+- Don't set `BeforeToolsEvent.cancel`. That skips per-tool hooks.
+- Don't mint a session or conversation ID. Don't read `trace_id`
+  or `traceId`. Don't read `agent.id`. If the caller did not
+  pass a `correlationId`, `sessionId`, or `requestId` (or the
+  snake-case aliases), leave the call uncorrelated.
 - Don't wrap these tools with `@arcjet/guard/strands-agents/v1`.
 - Don't use this page for the JavaScript Strands Agents adapter.
   For that adapter, see
@@ -386,4 +414,5 @@ Put `{"session_id": conversation_id}` on the object you pass to
 - <Link.Page href="/guards">Agent guards</Link.Page>
 - Example:
   [examples/fastapi-strands-agents-guard](https://github.com/arcjet/arcjet-py/tree/main/examples/fastapi-strands-agents-guard)
-- Adapter: `ADAPTER_SHA`
+- Adapter:
+  [`a6308061`](https://github.com/arcjet/arcjet-py/commit/a630806169b92757192f3f5cce2e305827b26567)

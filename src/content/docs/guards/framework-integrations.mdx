@@ -311,11 +311,10 @@ is human HITL confirmation, not policy. Use `guard_tool` on
 authored `@tool` handlers and `guard_hooks` on
 `Agent(hooks=[...])`. On `DENY`, `guard_hooks` sets
 `event.cancel_tool` to `True` or a string (JSON of
-`ArcjetDenialResult`). Don't raise. Don't call
-`event.interrupt()`.
+`ArcjetDenialResult`). Don't set `BeforeToolsEvent.cancel`.
+Don't raise. Don't call `event.interrupt()`.
 
-The extra pulls the Strands Agents SDK. A peer version floor is
-not published yet.
+`arcjet[strands-agents]` depends on `strands-agents>=1.11.0,<2`.
 
 For more information about inbound screening, authored tools, and
 `cancel_tool` denials, see the
