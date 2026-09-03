@@ -229,7 +229,7 @@ information about inbound screening, authored tools, and
 Google ADK JS `LlmAgent` workflows call authored `FunctionTool`
 handlers from `Runner.runAsync`. There is no `guardInbound`.
 Screen inbound text with a direct `guard()` call before
-`runAsync`. `requestConfirmation` and `toolConfirmation` are
+`runAsync`. `requireConfirmation` and `requestConfirmation` are
 human HITL confirmation, not policy. There is no `guardTool`.
 Use `guardPlugin()` as a Runner `BasePlugin`. Put it first in
 the plugin list. `beforeToolCallback` denies by returning a deny

@@ -29,11 +29,12 @@ The gate is the plugin callback: a deny dict skips the tool
 ## Install
 
 Until `@arcjet/guard/google-adk/v2` is published, pin
-`@arcjet/guard` to `ADAPTER_SHA`. Published `@arcjet/guard`
-1.11.0 doesn't export `./google-adk/v2`.
+`@arcjet/guard` to
+[`41ef3681`](https://github.com/arcjet/arcjet-js/commit/41ef36816e7174f1b0288d28217e63fa14114307).
+Published `@arcjet/guard` 1.11.0 doesn't export `./google-adk/v2`.
 
 ```bash
-npm install @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#ADAPTER_SHA @google/adk
+npm install @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#41ef36816e7174f1b0288d28217e63fa14114307 @google/adk
 ```
 
 `@google/adk` is a peer of `@arcjet/guard`, not a dependency of
@@ -67,9 +68,10 @@ The integration exposes two surfaces:
 - `googleAdkContext()` reads a caller-owned ID you pass:
   `correlationId`, then `sessionId`, then `conversationId`. It
   never mints an ID. It never reads `traceId`. It never reads an
-  ADK-generated `invocationId`. If the caller didn't pass an ID,
-  then the call is uncorrelated rather than joined to a generated
-  ID.
+  ADK-generated `invocationId`. It never reads
+  `toolContext.sessionId` or `session.id`. If the caller didn't
+  pass an ID, then the call is uncorrelated rather than joined to
+  a generated ID.
 
 There is no `guardTool`. There is no `guardInbound`. There is no
 inbound hook. Screen user text with a direct `guard()` call before
@@ -101,8 +103,8 @@ On `DENY` the original tool never runs. The payload shape is one
 - `guardPlugin` returns that object to skip `runAsync`.
 - `undefined` executes the tool.
 
-It isn't a throw. It isn't `requestConfirmation` or
-`toolConfirmation`. A throw is the wrong envelope. An
+It isn't a throw. It isn't `requireConfirmation` or
+`requestConfirmation`. A throw is the wrong envelope. An
 undefined-on-error executes the tool.
 
 ```ts
@@ -270,13 +272,14 @@ if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
 
 ## Human approval isn't a policy gate
 
-`requestConfirmation` and `toolConfirmation` are
+`requireConfirmation` and `requestConfirmation` are
 human-in-the-loop (HITL) confirmation. They aren't a policy gate.
 Same trap as LangChain JS `humanInTheLoopMiddleware`, Strands
 `event.interrupt()`, Genkit `interrupt()`, OpenAI `needsApproval`,
 Mastra `requireApproval`, TanStack `needsApproval`, and Claude
 `canUseTool`. There is no `guardApproval`. Don't wrap HITL as
-Guard. Don't deny by pausing for a human. Policy sits on
+Guard. Don't use ADK `SecurityPlugin` as the Arcjet policy gate.
+Don't deny by pausing for a human. Policy sits on
 `beforeToolCallback` only.
 
 On `DENY` the original tool never runs, so the inner `execute`
@@ -323,8 +326,9 @@ const runner = new InMemoryRunner({
 `googleAdkContext` reads a caller-owned ID from the object you
 pass: `correlationId` first, then `sessionId`, then
 `conversationId`. It never mints an ID. It never reads `traceId`.
-It never reads an ADK-generated `invocationId`. ADK can generate
-a session or invocation ID when you omit one. That auto-generated
+It never reads an ADK-generated `invocationId`. It never reads
+`toolContext.sessionId` or `session.id`. ADK can generate a
+session or invocation ID when you omit one. That auto-generated
 value isn't a correlation source. Don't derive an ID from it.
 Don't mint one. If the caller didn't pass an ID, then the call is
 uncorrelated rather than joined to a generated ID.
@@ -358,15 +362,17 @@ await runner.runAsync({
   `runner.runAsync`.
 - There is no `guardTool`. The gate is
   `beforeToolCallback` on `guardPlugin`.
-- There is no `guardApproval`. `requestConfirmation` and
-  `toolConfirmation` are human HITL confirmation, not policy.
+- There is no `guardApproval`. `requireConfirmation` and
+  `requestConfirmation` are human HITL confirmation, not policy.
+- Don't use ADK `SecurityPlugin` as the Arcjet policy gate.
 - Don't treat this adapter as Google GenAI (`@google/genai`).
 - Don't treat this adapter as Python ADK.
 - Don't turn a deny into `requestConfirmation` or a human
   approval pause.
-- Don't mint a correlation ID. Don't use `traceId` or an
-  ADK-generated `invocationId`. If the caller didn't pass an ID,
-  then leave the call uncorrelated.
+- Don't mint a correlation ID. Don't use `traceId`, an
+  ADK-generated `invocationId`, `toolContext.sessionId`, or
+  `session.id`. If the caller didn't pass an ID, then leave the
+  call uncorrelated.
 - Don't put Arcjet after another `beforeToolCallback` plugin.
   The first deny dict wins.
 - Don't throw from `beforeToolCallback` to signal a denial.
@@ -479,4 +485,5 @@ versus fail-closed behavior, see
 - <Link.Page href="/guards">Agent guards</Link.Page>
 - Example:
   [examples/google-adk-agent](https://github.com/arcjet/examples/tree/main/examples/google-adk-agent)
-- Adapter: `ADAPTER_SHA`
+- Adapter:
+  [`41ef3681`](https://github.com/arcjet/arcjet-js/commit/41ef36816e7174f1b0288d28217e63fa14114307)
