@@ -772,6 +772,15 @@ Unavailability raises `ArcjetUnavailableError` or
   `structuredContent`. Unwrapped tools are `PreToolUse` deny.
   Inbound is `UserPromptSubmit` block via `guard_hooks`. There is
   no inbound helper. `can_use_tool` is HITL, not policy.
+- **Strands Agents Python `@tool`** – `guard_tool` plus
+  `guard_hooks` (`arcjet[strands-agents]`,
+  `arcjet.guard.strands_agents`). Authored `@tool` returns JSON of
+  `ArcjetDenialResult`. Unwrapped tools are
+  `BeforeToolCallEvent.cancel_tool` (`True` or a string). The
+  extra pulls the Strands Agents SDK. A peer version floor is not
+  published yet. There is no inbound helper.
+  `event.interrupt()` is HITL, not policy. This is not
+  `@arcjet/guard/strands-agents/v1`.
 
 For install, examples, correlation, and the configure-before-wrap rule,
 see the <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
@@ -781,6 +790,8 @@ For OpenAI Agents Python, see the
 <Link.Page href="/guards/openai-agents-py">OpenAI Agents Python agent guard</Link.Page>.
 For Claude Agent SDK Python, see the
 <Link.Page href="/guards/claude-agent-sdk-py">Claude Agent SDK Python agent guard</Link.Page>.
+For Strands Agents Python, see the
+<Link.Page href="/guards/strands-agents-py">Strands Agents Python agent guard</Link.Page>.
 
 ### Rules
 

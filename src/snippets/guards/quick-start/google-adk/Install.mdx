@@ -1,0 +1,30 @@
+import SelectableContent from "@/components/SelectableContent";
+
+Until `@arcjet/guard/google-adk/v2` is published, pin
+`@arcjet/guard` to `ADAPTER_SHA`. Published `@arcjet/guard`
+1.11.0 doesn't export `./google-adk/v2`.
+
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="packageManager">
+<div slot="npm" slotIdx="1">
+
+```sh
+npm i @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#ADAPTER_SHA @arcjet/sensitive-info-rampart @google/adk zod
+```
+
+</div>
+<div slot="pnpm" slotIdx="2">
+
+```sh
+pnpm add @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#ADAPTER_SHA @arcjet/sensitive-info-rampart @google/adk zod
+```
+
+</div>
+<div slot="yarn" slotIdx="3">
+
+```sh
+yarn add @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#ADAPTER_SHA @arcjet/sensitive-info-rampart @google/adk zod
+```
+
+</div>
+</SelectableContent>

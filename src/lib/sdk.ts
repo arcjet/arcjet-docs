@@ -31,6 +31,7 @@ export type ArcjetGuardSdkKey =
   | "claude-agent-sdk-py"
   | "crewai"
   | "genkit"
+  | "google-adk"
   | "langchain"
   | "langchain-js"
   | "langgraph"
@@ -38,6 +39,7 @@ export type ArcjetGuardSdkKey =
   | "openai-agents"
   | "openai-agents-py"
   | "strands-agents"
+  | "strands-agents-py"
   | "tanstack-ai"
   | "vercel-ai"
   | "vercel-eve";
@@ -50,6 +52,7 @@ export const GUARD_SDK_KEYS = [
   "claude-agent-sdk-py",
   "crewai",
   "genkit",
+  "google-adk",
   "langchain",
   "langchain-js",
   "langgraph",
@@ -57,6 +60,7 @@ export const GUARD_SDK_KEYS = [
   "openai-agents",
   "openai-agents-py",
   "strands-agents",
+  "strands-agents-py",
   "tanstack-ai",
   "vercel-ai",
   "vercel-eve",
@@ -67,6 +71,7 @@ const GUARD_SDK_LABELS = {
   "claude-agent-sdk-py": "Claude Agent SDK Python",
   crewai: "CrewAI",
   genkit: "Genkit",
+  "google-adk": "Google ADK",
   langchain: "LangChain",
   "langchain-js": "LangChain JS",
   langgraph: "LangGraph",
@@ -74,6 +79,7 @@ const GUARD_SDK_LABELS = {
   "openai-agents": "OpenAI Agents",
   "openai-agents-py": "OpenAI Agents Python",
   "strands-agents": "Strands Agents",
+  "strands-agents-py": "Strands Agents Python",
   "tanstack-ai": "TanStack AI",
   "vercel-ai": "Vercel AI SDK",
   "vercel-eve": "Vercel Eve",

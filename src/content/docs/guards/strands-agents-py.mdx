@@ -1,0 +1,389 @@
+---
+title: "Strands Agents Python agent guard"
+description: "Screen user text before the agent runs, wrap authored tools, and treat `event.interrupt()` as confirmation, not policy."
+---
+
+import { Link } from "@/components/link";
+import FrameworkPrimer from "@/snippets/guards/FrameworkPrimer.mdx";
+
+[Strands Agents](https://strandsagents.com/docs/user-guide/quickstart/)
+Python `Agent` workflows call authored `@tool` handlers from the
+agent loop. Arcjet Guard sits at those boundaries so a policy can
+allow or deny the action before a side effect runs.
+
+<FrameworkPrimer />
+
+This adapter is the Python `arcjet[strands-agents]` extra plus
+`guard_tool`, `guard_hooks`, and `strands_agent_context`. It is
+not the JavaScript `@arcjet/guard/strands-agents/v1` adapter.
+Don't wrap these tools with `@arcjet/guard/strands-agents/v1`.
+
+## Install
+
+Until `arcjet.guard.strands_agents` is published, pin `arcjet` to
+`ADAPTER_SHA`. Published `arcjet` 1.0.0 on PyPI does not include
+this extra.
+
+```bash
+pip install "arcjet[strands-agents] @ git+https://github.com/arcjet/arcjet-py@ADAPTER_SHA"
+```
+
+`arcjet[strands-agents]` is an extra. The extra pulls the Strands
+Agents SDK. A peer version floor is not published yet. CPython
+3.10 or later.
+
+Import helpers from `arcjet.guard.strands_agents`:
+
+```py
+from arcjet.guard.strands_agents import (
+    guard_hooks,
+    guard_tool,
+    strands_agent_context,
+)
+```
+
+Launch one client at module scope:
+
+```py
+from arcjet.guard import launch_arcjet
+
+arcjet = launch_arcjet(key=ARCJET_KEY)
+```
+
+Use `launch_arcjet_sync` with Flask, Django, or other sync code.
+
+## Helpers
+
+Pick the surface that matches what you hold when the effect runs:
+
+| You have | Use | Needs | Blocks a call? |
+| --- | --- | --- | --- |
+| Any Python callable | `guard_action` / `guard_action_sync` | `arcjet` | Yes |
+| An authored `@tool` | `guard_tool` | `arcjet[strands-agents]` | Yes |
+| An unwrapped or MCP tool | `guard_hooks` (`BeforeToolCallEvent`) | `arcjet[strands-agents]` | Yes |
+| A session or conversation ID you already have | `strands_agent_context` | `arcjet[strands-agents]` | No |
+
+`guard_tool` wraps an authored `@tool`. On `DENY`, or when Guard
+cannot be evaluated and `on_guard_error` is `"deny"`, the helper
+returns JSON of `ArcjetDenialResult`. The tool handler does not
+run. Don't raise.
+
+`guard_hooks` is a hook provider. Pass it on
+`Agent(hooks=[...])`. On `DENY` it sets
+`event.cancel_tool` to a JSON string of `ArcjetDenialResult`, or
+`True` for the default cancel message. That cancels the tool
+call. It does not call `event.interrupt()`. Fail closed always
+sets `cancel_tool` on error.
+
+`strands_agent_context` reads a caller-owned `correlation_id`,
+then `session_id`, then `request_id` from the object you pass. It
+never mints an ID. If the caller did not pass one of those keys,
+the call is uncorrelated rather than joined to a generated ID.
+
+There is no inbound helper. Screen user text with a direct
+`guard()` call before the agent runs. There is no approval
+helper. `event.interrupt()` is human-in-the-loop (HITL)
+confirmation, not policy.
+
+Don't also wrap these tools with
+`@arcjet/guard/strands-agents/v1`.
+
+## Helper options
+
+`guard_tool` accepts this contract:
+
+| Option | Required | Description |
+| --- | --- | --- |
+| `guard` | Yes | Client from `launch_arcjet` or `launch_arcjet_sync`. |
+| `action` | Yes | Guard label and capture name. Use `resource.verb` in the past tense, such as `email.sent`. |
+| `rules` | No | Bound SDK rule inputs, or a function of the parsed tool arguments. Omit to submit none. |
+| `on_guard_error` | No | `"deny"` (default) or `"allow"`. A real `DENY` always blocks. |
+
+`guard_hooks` accepts this contract:
+
+| Option | Required | Description |
+| --- | --- | --- |
+| `guard` | Yes | Client from `launch_arcjet` or `launch_arcjet_sync`. |
+| `action` | No | Guard label and capture name. A string, or a function of the hook input. Defaults to `tool.invoked`. |
+| `rules` | No | Bound SDK rule inputs, or a function of `{ tool_name, input }`. Omit to submit none. |
+| `session_id` | No | Caller-owned fallback when the object you pass to `strands_agent_context` has no ID. Never minted. |
+| `on_guard_error` | No | `"deny"` (default) or `"allow"`. A real `DENY` always blocks. |
+
+Inbound screening uses direct `guard()`, which takes `label` (not
+`action`) and fails open. See the following section.
+
+`strands_agent_context` reads a caller-owned `correlation_id`,
+then `session_id`, then `request_id`. It never mints an ID.
+
+## Screen user text before the agent runs
+
+There is no inbound hook, so there is no inbound helper. Put
+prompt-injection and other inbound rules in the application
+before you call the agent.
+
+Direct `guard()` fails open, so an `ALLOW` is not proof the
+rules ran. Gate inbound on `decision.has_failed_open()` if this
+call site must fail closed. `guard_tool` and `guard_hooks`
+already default to that.
+
+On `DENY`, don't call the agent.
+
+```py
+from strands import Agent
+from arcjet.guard import DetectPromptInjection, launch_arcjet
+from arcjet.guard.strands_agents import (
+    guard_hooks,
+    strands_agent_context,
+)
+
+arcjet = launch_arcjet(key=ARCJET_KEY)
+inbound = DetectPromptInjection()
+app_context = {"session_id": conversation_id}
+derived = strands_agent_context(app_context)
+
+decision = await arcjet.guard(
+    label="message.received",
+    rules=[inbound(user_text)],
+    correlation_id=derived.correlation_id,
+)
+if decision.conclusion == "DENY" or decision.has_failed_open():
+    raise RuntimeError("message blocked")
+
+agent = Agent(
+    tools=[lookup_order],
+    hooks=[guard_hooks(guard=arcjet, session_id=conversation_id)],
+)
+agent(user_text)
+```
+
+## Gate authored `@tool` handlers
+
+`guard_tool` wraps an authored `@tool`. That authored handler is
+the local side effect this helper can stop.
+
+On `DENY` the handler does not run. The helper returns JSON of
+`ArcjetDenialResult`:
+
+```json
+{
+  "arcjetDenied": true,
+  "reason": "RATE_LIMIT",
+  "message": "Arcjet denied this call (RATE_LIMIT). It may be retried after 30 seconds.",
+  "retryable": true,
+  "retryAfterSeconds": 30
+}
+```
+
+Don't raise from the wrapper. A raise is a raw exception.
+
+Scan free-text args (a note, reason, or body). An opaque
+`order_id` does not trip email / phone / card / IP, so don't pass
+it to `LocalDetectSensitiveInfo`. That helper runs on a local ML
+model backend.
+
+```py
+from strands import tool
+from arcjet.guard import (
+    LocalDetectSensitiveInfo,
+    TokenBucket,
+    launch_arcjet,
+)
+from arcjet.guard.strands_agents import guard_tool
+
+arcjet = launch_arcjet(key=ARCJET_KEY)
+lookup_limit = TokenBucket(
+    refill_rate=10,
+    interval_seconds=60,
+    max_tokens=10,
+    bucket="lookups",
+)
+detect_pii = LocalDetectSensitiveInfo()
+
+
+@tool
+def lookup_order(order_id: str, note: str) -> dict:
+    """Look up an order by ID."""
+    return {"order_id": order_id, "note": note, "status": "shipped"}
+
+
+guarded_lookup = guard_tool(
+    guard=arcjet,
+    tool=lookup_order,
+    action="order.looked-up",
+    rules=lambda arguments: [
+        lookup_limit(key="orders", requested=1),
+        detect_pii(arguments["note"]),
+    ],
+)
+```
+
+Pass wrapped tools on the `Agent` `tools` list.
+
+## Deny invoke-wide via `guard_hooks`
+
+`guard_hooks` is a hook provider. Pass it on
+`Agent(hooks=[...])`. `BeforeToolCallEvent` is the invoke-wide
+gate. The callback denies by setting `event.cancel_tool` to a
+JSON string of `ArcjetDenialResult`, or `True` for the default
+cancel message. The tool does not run. Policy sits on
+`cancel_tool` only. Don't call `event.interrupt()`.
+
+MCP and vended tools skip an unwrapped handler. Those tools are
+not a `@tool` deny. `guard_hooks` still gates a tool call that
+Strands executes through `BeforeToolCallEvent`.
+
+This is not the JavaScript `@arcjet/guard/strands-agents/v1`
+adapter. Don't pass `guardHooks` from that package to a Python
+`Agent`.
+
+```py
+from strands import Agent
+from arcjet.guard.strands_agents import guard_hooks
+from arcjet.guard import launch_arcjet
+
+arcjet = launch_arcjet(key=ARCJET_KEY)
+
+agent = Agent(
+    tools=[guarded_lookup],
+    hooks=[guard_hooks(guard=arcjet, session_id=conversation_id)],
+)
+```
+
+## Human approval is not a policy gate
+
+`event.interrupt()` pauses the run for human-in-the-loop (HITL)
+confirmation. It is not a policy gate. Same trap as CrewAI
+`human_input`, LangChain JS `humanInTheLoopMiddleware`, Mastra
+`requireApproval`, Claude `can_use_tool`, LangGraph
+`interrupt()`, Genkit `interrupt()`, and OpenAI
+`needs_approval`.
+
+There is no approval helper. Don't wrap `event.interrupt()` as
+Guard. Use `guard_tool` on authored `@tool` handlers you own, or
+`cancel_tool` through `guard_hooks` for unwrapped tools.
+
+## Fail-closed default
+
+`guard_tool` and `guard_hooks` default to
+`on_guard_error="deny"`. If Guard cannot be evaluated,
+`guard_tool` returns JSON of `ArcjetDenialResult` and the tool
+handler does not run. `guard_hooks` sets `event.cancel_tool`
+instead of calling the tool.
+
+Set `on_guard_error="allow"` only when you can accept running the
+action without a complete security decision. The helpers reject
+any other value.
+
+A `DENY` conclusion always blocks, regardless of
+`on_guard_error`.
+
+The core `guard()` call still fails open. It returns `ALLOW`, and
+`has_failed_open()` returns `True`. The wrappers that sit around
+an effect fail closed.
+
+For more information about fail-open versus fail-closed behavior, see
+<Link.Page href="/guards/reference#availability-and-fail-behavior">Availability and fail behavior</Link.Page>.
+
+## Correlation
+
+The agent has no conversation or session ID unless you put one on
+the object you already have. Pass the ID that you already have.
+Don't mint an ID.
+
+`strands_agent_context` reads a caller-owned `correlation_id`,
+then `session_id`, then `request_id` from that object. If nothing
+is a valid ID, the call is uncorrelated rather than joined to a
+generated ID.
+
+```py
+app_context = {"session_id": conversation_id}
+
+agent(user_text)
+```
+
+Derive the ID from a session the caller already has. A generated
+ID still joins this run's events, but it builds a Sequence that
+nobody searches for.
+
+## What not to use
+
+- There is no inbound helper. Screen prompt injection before you
+  call the agent.
+- There is no approval helper. `event.interrupt()` is human HITL
+  confirmation, not policy.
+- Don't raise from `guard_tool` or the `BeforeToolCallEvent`
+  callback to signal a denial. Denial is `cancel_tool` (`True` or
+  a string) on the hooks, or the JSON payload from `guard_tool`.
+- Don't treat `event.interrupt()` as Guard. Policy sits on
+  `BeforeToolCallEvent.cancel_tool` only.
+- Don't mint a session or conversation ID. If the caller did not
+  pass a `correlation_id`, `session_id`, or `request_id`, leave
+  the call uncorrelated.
+- Don't wrap these tools with `@arcjet/guard/strands-agents/v1`.
+- Don't use this page for the JavaScript Strands Agents adapter.
+  For that adapter, see
+  <Link.Page href="/guards/strands-agents">Strands Agents agent guard</Link.Page>.
+
+## Common patterns
+
+### Rate limit a tool per trusted key
+
+Key the bucket on a trusted identifier you own. Don't key it on
+free-text user input.
+
+```py
+lookup_limit = TokenBucket(
+    refill_rate=10,
+    interval_seconds=60,
+    max_tokens=10,
+    bucket="lookups",
+)
+
+guard_tool(
+    guard=arcjet,
+    tool=lookup_order,
+    action="order.looked-up",
+    rules=[lookup_limit(key="orders", requested=1)],
+)
+```
+
+### Scan a free-text note for sensitive information
+
+Scan a note, reason, or body from the parsed tool arguments. An
+opaque `order_id` is not a PII sample, so don't pass it to
+`LocalDetectSensitiveInfo`.
+
+```py
+from arcjet.guard import LocalDetectSensitiveInfo, TokenBucket
+from arcjet.guard.strands_agents import guard_tool
+
+detect_pii = LocalDetectSensitiveInfo()
+
+guard_tool(
+    guard=arcjet,
+    tool=lookup_order,
+    action="order.looked-up",
+    rules=lambda arguments: [
+        lookup_limit(key="orders", requested=1),
+        detect_pii(arguments["note"]),
+    ],
+)
+```
+
+### Correlate the run
+
+Put `{"session_id": conversation_id}` on the object you pass to
+`strands_agent_context`. Don't mint an ID.
+
+## Related
+
+- <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
+- <Link.Page href="/guards/strands-agents">Strands Agents agent guard</Link.Page>
+- <Link.Page href="/guards/openai-agents-py">OpenAI Agents Python agent guard</Link.Page>
+- <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
+- <Link.Page href="/guards/crewai">CrewAI agent guard</Link.Page>
+- <Link.Page href="/reference/python#guard">Python Guard SDK reference</Link.Page>
+- <Link.Page href="/guards">Agent guards</Link.Page>
+- Example:
+  [examples/fastapi-strands-agents-guard](https://github.com/arcjet/arcjet-py/tree/main/examples/fastapi-strands-agents-guard)
+- Adapter: `ADAPTER_SHA`
