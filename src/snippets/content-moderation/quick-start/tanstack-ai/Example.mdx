@@ -1,0 +1,25 @@
+import Step from "./Example.ts?raw";
+import { Code } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+This example screens inbound text with content moderation before the agent continues.
+
+We assume you already have a TanStack AI project set up. For helper options and
+denial behavior, see the <Link.Page href="/guards/tanstack-ai">TanStack AI agent guard</Link.Page>.
+
+Install the dependencies:
+
+```shell
+# Export your Arcjet API key from https://console.arcjet.com
+export ARCJET_KEY="ajkey_..."
+
+npm install @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#3e81a91c5a97832b523305f2f7df281c12cf58d3 @tanstack/ai @tanstack/ai-openai zod
+```
+
+Create the example:
+
+<Code code={Step} lang="ts" title="agent.ts" />
+
+Then start or invoke the agent with a test prompt.
+
+Requests appear in your [Arcjet dashboard](https://console.arcjet.com) in real time.

@@ -4,7 +4,10 @@ description: "Reference guide for adding Arcjet rate limiting to your Next.js, N
 frameworks:
   - bun
   - claude-agent-sdk
+  - claude-managed-agents
+  - crewai
   - genkit
+  - google-adk
   - langchain
   - langgraph
   - mastra
@@ -15,7 +18,9 @@ frameworks:
   - python-fastapi
   - python-flask
   - remix
+  - strands-agents
   - sveltekit
+  - tanstack-ai
   - vercel-ai
   - vercel-eve
 ajToc:
@@ -221,11 +226,41 @@ import DecisionLogLanggraph from "@/snippets/rate-limiting/reference/langgraph/D
 import GuardAlgoLanggraph from "@/snippets/rate-limiting/reference/langgraph/GuardAlgo.mdx";
 
 import TokenBucketMastra from "@/snippets/rate-limiting/reference/mastra/TokenBucket.mdx";
+import TokenBucketClaudeManagedAgents from "@/snippets/rate-limiting/reference/claude-managed-agents/TokenBucket.mdx";
+import TokenBucketCrewai from "@/snippets/rate-limiting/reference/crewai/TokenBucket.mdx";
+import TokenBucketGoogleAdk from "@/snippets/rate-limiting/reference/google-adk/TokenBucket.mdx";
+import TokenBucketStrandsAgents from "@/snippets/rate-limiting/reference/strands-agents/TokenBucket.mdx";
+import TokenBucketTanstackAi from "@/snippets/rate-limiting/reference/tanstack-ai/TokenBucket.mdx";
 import TokenBucketRequestMastra from "@/snippets/rate-limiting/reference/mastra/TokenBucketRequest.mdx";
+import TokenBucketRequestClaudeManagedAgents from "@/snippets/rate-limiting/reference/claude-managed-agents/TokenBucketRequest.mdx";
+import TokenBucketRequestCrewai from "@/snippets/rate-limiting/reference/crewai/TokenBucketRequest.mdx";
+import TokenBucketRequestGoogleAdk from "@/snippets/rate-limiting/reference/google-adk/TokenBucketRequest.mdx";
+import TokenBucketRequestStrandsAgents from "@/snippets/rate-limiting/reference/strands-agents/TokenBucketRequest.mdx";
+import TokenBucketRequestTanstackAi from "@/snippets/rate-limiting/reference/tanstack-ai/TokenBucketRequest.mdx";
 import ByUserIdMastra from "@/snippets/rate-limiting/reference/mastra/ByUserId.mdx";
+import ByUserIdClaudeManagedAgents from "@/snippets/rate-limiting/reference/claude-managed-agents/ByUserId.mdx";
+import ByUserIdCrewai from "@/snippets/rate-limiting/reference/crewai/ByUserId.mdx";
+import ByUserIdGoogleAdk from "@/snippets/rate-limiting/reference/google-adk/ByUserId.mdx";
+import ByUserIdStrandsAgents from "@/snippets/rate-limiting/reference/strands-agents/ByUserId.mdx";
+import ByUserIdTanstackAi from "@/snippets/rate-limiting/reference/tanstack-ai/ByUserId.mdx";
 import ErrorsMastra from "@/snippets/rate-limiting/reference/mastra/Errors.mdx";
+import ErrorsClaudeManagedAgents from "@/snippets/rate-limiting/reference/claude-managed-agents/Errors.mdx";
+import ErrorsCrewai from "@/snippets/rate-limiting/reference/crewai/Errors.mdx";
+import ErrorsGoogleAdk from "@/snippets/rate-limiting/reference/google-adk/Errors.mdx";
+import ErrorsStrandsAgents from "@/snippets/rate-limiting/reference/strands-agents/Errors.mdx";
+import ErrorsTanstackAi from "@/snippets/rate-limiting/reference/tanstack-ai/Errors.mdx";
 import DecisionLogMastra from "@/snippets/rate-limiting/reference/mastra/DecisionLog.mdx";
+import DecisionLogClaudeManagedAgents from "@/snippets/rate-limiting/reference/claude-managed-agents/DecisionLog.mdx";
+import DecisionLogCrewai from "@/snippets/rate-limiting/reference/crewai/DecisionLog.mdx";
+import DecisionLogGoogleAdk from "@/snippets/rate-limiting/reference/google-adk/DecisionLog.mdx";
+import DecisionLogStrandsAgents from "@/snippets/rate-limiting/reference/strands-agents/DecisionLog.mdx";
+import DecisionLogTanstackAi from "@/snippets/rate-limiting/reference/tanstack-ai/DecisionLog.mdx";
 import GuardAlgoMastra from "@/snippets/rate-limiting/reference/mastra/GuardAlgo.mdx";
+import GuardAlgoClaudeManagedAgents from "@/snippets/rate-limiting/reference/claude-managed-agents/GuardAlgo.mdx";
+import GuardAlgoCrewai from "@/snippets/rate-limiting/reference/crewai/GuardAlgo.mdx";
+import GuardAlgoGoogleAdk from "@/snippets/rate-limiting/reference/google-adk/GuardAlgo.mdx";
+import GuardAlgoStrandsAgents from "@/snippets/rate-limiting/reference/strands-agents/GuardAlgo.mdx";
+import GuardAlgoTanstackAi from "@/snippets/rate-limiting/reference/tanstack-ai/GuardAlgo.mdx";
 
 import TokenBucketOpenaiAgents from "@/snippets/rate-limiting/reference/openai-agents/TokenBucket.mdx";
 import TokenBucketRequestOpenaiAgents from "@/snippets/rate-limiting/reference/openai-agents/TokenBucketRequest.mdx";
@@ -310,19 +345,24 @@ def fixed_window(
 
 <SlotByFramework>
   <FixedWindowBun slot="bun" />
-  <FixedWindowNestJs slot="nest-js" />
-  <FixedWindowNextJs slot="next-js" />
-  <FixedWindowNodeJs slot="node-js" />
-  <FixedWindowPythonFastapi slot="python-fastapi" />
-  <FixedWindowPythonFlask slot="python-flask" />
-  <FixedWindowRemix slot="remix" />
-  <FixedWindowSvelteKit slot="sveltekit" />
   <GuardAlgoClaudeAgentSdk slot="claude-agent-sdk" />
+  <GuardAlgoClaudeManagedAgents slot="claude-managed-agents" />
+  <GuardAlgoCrewai slot="crewai" />
   <GuardAlgoGenkit slot="genkit" />
+  <GuardAlgoGoogleAdk slot="google-adk" />
   <GuardAlgoLangchain slot="langchain" />
   <GuardAlgoLanggraph slot="langgraph" />
   <GuardAlgoMastra slot="mastra" />
+  <FixedWindowNestJs slot="nest-js" />
+  <FixedWindowNextJs slot="next-js" />
+  <FixedWindowNodeJs slot="node-js" />
   <GuardAlgoOpenaiAgents slot="openai-agents" />
+  <FixedWindowPythonFastapi slot="python-fastapi" />
+  <FixedWindowPythonFlask slot="python-flask" />
+  <FixedWindowRemix slot="remix" />
+  <GuardAlgoStrandsAgents slot="strands-agents" />
+  <FixedWindowSvelteKit slot="sveltekit" />
+  <GuardAlgoTanstackAi slot="tanstack-ai" />
   <GuardAlgoVercelAi slot="vercel-ai" />
   <GuardAlgoVercelEve slot="vercel-eve" />
 </SlotByFramework>
@@ -373,19 +413,24 @@ def sliding_window(
 
 <SlotByFramework>
   <SlidingWindowBun slot="bun" />
-  <SlidingWindowNestJs slot="nest-js" />
-  <SlidingWindowNextJs slot="next-js" />
-  <SlidingWindowNodeJs slot="node-js" />
-  <SlidingWindowPythonFastapi slot="python-fastapi" />
-  <SlidingWindowPythonFlask slot="python-flask" />
-  <SlidingWindowRemix slot="remix" />
-  <SlidingWindowSvelteKit slot="sveltekit" />
   <GuardAlgoClaudeAgentSdk slot="claude-agent-sdk" />
+  <GuardAlgoClaudeManagedAgents slot="claude-managed-agents" />
+  <GuardAlgoCrewai slot="crewai" />
   <GuardAlgoGenkit slot="genkit" />
+  <GuardAlgoGoogleAdk slot="google-adk" />
   <GuardAlgoLangchain slot="langchain" />
   <GuardAlgoLanggraph slot="langgraph" />
   <GuardAlgoMastra slot="mastra" />
+  <SlidingWindowNestJs slot="nest-js" />
+  <SlidingWindowNextJs slot="next-js" />
+  <SlidingWindowNodeJs slot="node-js" />
   <GuardAlgoOpenaiAgents slot="openai-agents" />
+  <SlidingWindowPythonFastapi slot="python-fastapi" />
+  <SlidingWindowPythonFlask slot="python-flask" />
+  <SlidingWindowRemix slot="remix" />
+  <GuardAlgoStrandsAgents slot="strands-agents" />
+  <SlidingWindowSvelteKit slot="sveltekit" />
+  <GuardAlgoTanstackAi slot="tanstack-ai" />
   <GuardAlgoVercelAi slot="vercel-ai" />
   <GuardAlgoVercelEve slot="vercel-eve" />
 </SlotByFramework>
@@ -449,19 +494,24 @@ request example](#token-bucket-request).
 
 <SlotByFramework>
   <TokenBucketBun slot="bun" />
-  <TokenBucketNestJs slot="nest-js" />
-  <TokenBucketNextJs slot="next-js" />
-  <TokenBucketNodeJs slot="node-js" />
-  <TokenBucketPythonFastapi slot="python-fastapi" />
-  <TokenBucketPythonFlask slot="python-flask" />
-  <TokenBucketRemix slot="remix" />
-  <TokenBucketSvelteKit slot="sveltekit" />
   <TokenBucketClaudeAgentSdk slot="claude-agent-sdk" />
+  <TokenBucketClaudeManagedAgents slot="claude-managed-agents" />
+  <TokenBucketCrewai slot="crewai" />
   <TokenBucketGenkit slot="genkit" />
+  <TokenBucketGoogleAdk slot="google-adk" />
   <TokenBucketLangchain slot="langchain" />
   <TokenBucketLanggraph slot="langgraph" />
   <TokenBucketMastra slot="mastra" />
+  <TokenBucketNestJs slot="nest-js" />
+  <TokenBucketNextJs slot="next-js" />
+  <TokenBucketNodeJs slot="node-js" />
   <TokenBucketOpenaiAgents slot="openai-agents" />
+  <TokenBucketPythonFastapi slot="python-fastapi" />
+  <TokenBucketPythonFlask slot="python-flask" />
+  <TokenBucketRemix slot="remix" />
+  <TokenBucketStrandsAgents slot="strands-agents" />
+  <TokenBucketSvelteKit slot="sveltekit" />
+  <TokenBucketTanstackAi slot="tanstack-ai" />
   <TokenBucketVercelAi slot="vercel-ai" />
   <TokenBucketVercelEve slot="vercel-eve" />
 </SlotByFramework>
@@ -509,19 +559,24 @@ The custom characteristic is `userId` with the value passed as a prop on the
 
 <SlotByFramework>
   <ByUserIdBun slot="bun" />
-  <ByUserIdNestJs slot="nest-js" />
-  <ByUserIdNextJs slot="next-js" />
-  <ByUserIdNodeJs slot="node-js" />
-  <ByUserIdPythonFastapi slot="python-fastapi" />
-  <ByUserIdPythonFlask slot="python-flask" />
-  <ByUserIdRemix slot="remix" />
-  <ByUserIdSvelteKit slot="sveltekit" />
   <ByUserIdClaudeAgentSdk slot="claude-agent-sdk" />
+  <ByUserIdClaudeManagedAgents slot="claude-managed-agents" />
+  <ByUserIdCrewai slot="crewai" />
   <ByUserIdGenkit slot="genkit" />
+  <ByUserIdGoogleAdk slot="google-adk" />
   <ByUserIdLangchain slot="langchain" />
   <ByUserIdLanggraph slot="langgraph" />
   <ByUserIdMastra slot="mastra" />
+  <ByUserIdNestJs slot="nest-js" />
+  <ByUserIdNextJs slot="next-js" />
+  <ByUserIdNodeJs slot="node-js" />
   <ByUserIdOpenaiAgents slot="openai-agents" />
+  <ByUserIdPythonFastapi slot="python-fastapi" />
+  <ByUserIdPythonFlask slot="python-flask" />
+  <ByUserIdRemix slot="remix" />
+  <ByUserIdStrandsAgents slot="strands-agents" />
+  <ByUserIdSvelteKit slot="sveltekit" />
+  <ByUserIdTanstackAi slot="tanstack-ai" />
   <ByUserIdVercelAi slot="vercel-ai" />
   <ByUserIdVercelEve slot="vercel-eve" />
 </SlotByFramework>
@@ -593,19 +648,24 @@ This example logs the full result as well as each rate limit rule:
 
 <SlotByFramework>
   <DecisionLogBun slot="bun" />
-  <DecisionLogNestJs slot="nest-js" />
-  <DecisionLogNextJs slot="next-js" />
-  <DecisionLogNodeJs slot="node-js" />
-  <DecisionLogPythonFastapi slot="python-fastapi" />
-  <DecisionLogPythonFlask slot="python-flask" />
-  <DecisionLogRemix slot="remix" />
-  <DecisionLogSvelteKit slot="sveltekit" />
   <DecisionLogClaudeAgentSdk slot="claude-agent-sdk" />
+  <DecisionLogClaudeManagedAgents slot="claude-managed-agents" />
+  <DecisionLogCrewai slot="crewai" />
   <DecisionLogGenkit slot="genkit" />
+  <DecisionLogGoogleAdk slot="google-adk" />
   <DecisionLogLangchain slot="langchain" />
   <DecisionLogLanggraph slot="langgraph" />
   <DecisionLogMastra slot="mastra" />
+  <DecisionLogNestJs slot="nest-js" />
+  <DecisionLogNextJs slot="next-js" />
+  <DecisionLogNodeJs slot="node-js" />
   <DecisionLogOpenaiAgents slot="openai-agents" />
+  <DecisionLogPythonFastapi slot="python-fastapi" />
+  <DecisionLogPythonFlask slot="python-flask" />
+  <DecisionLogRemix slot="remix" />
+  <DecisionLogStrandsAgents slot="strands-agents" />
+  <DecisionLogSvelteKit slot="sveltekit" />
+  <DecisionLogTanstackAi slot="tanstack-ai" />
   <DecisionLogVercelAi slot="vercel-ai" />
   <DecisionLogVercelEve slot="vercel-eve" />
 </SlotByFramework>
@@ -618,19 +678,24 @@ requesting to withdraw from the bucket.
 
 <SlotByFramework>
   <TokenBucketRequestBun slot="bun" />
-  <TokenBucketRequestNestJs slot="nest-js" />
-  <TokenBucketRequestNextJs slot="next-js" />
-  <TokenBucketRequestNodeJs slot="node-js" />
-  <TokenBucketRequestPythonFastapi slot="python-fastapi" />
-  <TokenBucketRequestPythonFlask slot="python-flask" />
-  <TokenBucketRequestRemix slot="remix" />
-  <TokenBucketRequestSvelteKit slot="sveltekit" />
   <TokenBucketRequestClaudeAgentSdk slot="claude-agent-sdk" />
+  <TokenBucketRequestClaudeManagedAgents slot="claude-managed-agents" />
+  <TokenBucketRequestCrewai slot="crewai" />
   <TokenBucketRequestGenkit slot="genkit" />
+  <TokenBucketRequestGoogleAdk slot="google-adk" />
   <TokenBucketRequestLangchain slot="langchain" />
   <TokenBucketRequestLanggraph slot="langgraph" />
   <TokenBucketRequestMastra slot="mastra" />
+  <TokenBucketRequestNestJs slot="nest-js" />
+  <TokenBucketRequestNextJs slot="next-js" />
+  <TokenBucketRequestNodeJs slot="node-js" />
   <TokenBucketRequestOpenaiAgents slot="openai-agents" />
+  <TokenBucketRequestPythonFastapi slot="python-fastapi" />
+  <TokenBucketRequestPythonFlask slot="python-flask" />
+  <TokenBucketRequestRemix slot="remix" />
+  <TokenBucketRequestStrandsAgents slot="strands-agents" />
+  <TokenBucketRequestSvelteKit slot="sveltekit" />
+  <TokenBucketRequestTanstackAi slot="tanstack-ai" />
   <TokenBucketRequestVercelAi slot="vercel-ai" />
   <TokenBucketRequestVercelEve slot="vercel-eve" />
 </SlotByFramework>
@@ -698,19 +763,24 @@ Arcjet conclusion is `ERROR`.
 
 <SlotByFramework>
   <ErrorsBun slot="bun" />
-  <ErrorsNestJs slot="nest-js" />
-  <ErrorsNextJs slot="next-js" />
-  <ErrorsNodeJs slot="node-js" />
-  <ErrorsPythonFastapi slot="python-fastapi" />
-  <ErrorsPythonFlask slot="python-flask" />
-  <ErrorsRemix slot="remix" />
-  <ErrorsSvelteKit slot="sveltekit" />
   <ErrorsClaudeAgentSdk slot="claude-agent-sdk" />
+  <ErrorsClaudeManagedAgents slot="claude-managed-agents" />
+  <ErrorsCrewai slot="crewai" />
   <ErrorsGenkit slot="genkit" />
+  <ErrorsGoogleAdk slot="google-adk" />
   <ErrorsLangchain slot="langchain" />
   <ErrorsLanggraph slot="langgraph" />
   <ErrorsMastra slot="mastra" />
+  <ErrorsNestJs slot="nest-js" />
+  <ErrorsNextJs slot="next-js" />
+  <ErrorsNodeJs slot="node-js" />
   <ErrorsOpenaiAgents slot="openai-agents" />
+  <ErrorsPythonFastapi slot="python-fastapi" />
+  <ErrorsPythonFlask slot="python-flask" />
+  <ErrorsRemix slot="remix" />
+  <ErrorsStrandsAgents slot="strands-agents" />
+  <ErrorsSvelteKit slot="sveltekit" />
+  <ErrorsTanstackAi slot="tanstack-ai" />
   <ErrorsVercelAi slot="vercel-ai" />
   <ErrorsVercelEve slot="vercel-eve" />
 </SlotByFramework>

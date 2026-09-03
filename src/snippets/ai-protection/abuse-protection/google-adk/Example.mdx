@@ -1,0 +1,25 @@
+import Step from "./Example.ts?raw";
+import { Code } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+Bot detection is a request-based rule. On an agent, abuse control is a rate limit plus inbound prompt-injection screening so a single actor cannot loop tools or jailbreak the model.
+
+We assume you already have a Google ADK project set up. For helper options and
+denial behavior, see the <Link.Page href="/guards/google-adk">Google ADK agent guard</Link.Page>.
+
+Install the dependencies:
+
+```shell
+# Export your Arcjet API key from https://console.arcjet.com
+export ARCJET_KEY="ajkey_..."
+
+npm install @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#41ef36816e7174f1b0288d28217e63fa14114307 @google/adk zod
+```
+
+Create the example:
+
+<Code code={Step} lang="ts" title="agent.ts" />
+
+Then start or invoke the agent with a test prompt.
+
+Requests appear in your [Arcjet dashboard](https://console.arcjet.com) in real time.

@@ -4,7 +4,10 @@ titleByFramework:
   default: "Sensitive information detection"
   bun: "Sensitive information detection for Bun"
   claude-agent-sdk: "Sensitive information detection for Claude Agent SDK"
+  claude-managed-agents: "Sensitive information detection for Claude Managed Agents"
+  crewai: "Sensitive information detection for CrewAI"
   genkit: "Sensitive information detection for Genkit"
+  google-adk: "Sensitive information detection for Google ADK"
   langchain: "Sensitive information detection for LangChain"
   langgraph: "Sensitive information detection for LangGraph"
   mastra: "Sensitive information detection for Mastra"
@@ -15,14 +18,19 @@ titleByFramework:
   python-fastapi: "Sensitive information detection for Python + FastAPI"
   python-flask: "Sensitive information detection for Python + Flask"
   remix: "Sensitive information detection for Remix"
+  strands-agents: "Sensitive information detection for Strands Agents"
   sveltekit: "Sensitive information detection for SvelteKit"
+  tanstack-ai: "Sensitive information detection for TanStack AI"
   vercel-ai: "Sensitive information detection for Vercel AI SDK"
   vercel-eve: "Sensitive information detection for Vercel Eve"
 description: "Quick start guide for detecting sensitive information with Arcjet in your Next.js, Node.js, Bun, Remix, or SvelteKit app."
 frameworks:
   - bun
   - claude-agent-sdk
+  - claude-managed-agents
+  - crewai
   - genkit
+  - google-adk
   - langchain
   - langgraph
   - mastra
@@ -33,7 +41,9 @@ frameworks:
   - python-fastapi
   - python-flask
   - remix
+  - strands-agents
   - sveltekit
+  - tanstack-ai
   - vercel-ai
   - vercel-eve
 ajToc:
@@ -124,9 +134,29 @@ import Step3Langgraph from "@/snippets/sensitive-info/quick-start/langgraph/Step
 import Step4Langgraph from "@/snippets/sensitive-info/quick-start/langgraph/Step4.mdx";
 
 import Step1Mastra from "@/snippets/sensitive-info/quick-start/mastra/Step1.mdx";
+import Step1ClaudeManagedAgents from "@/snippets/sensitive-info/quick-start/claude-managed-agents/Step1.mdx";
+import Step1Crewai from "@/snippets/sensitive-info/quick-start/crewai/Step1.mdx";
+import Step1GoogleAdk from "@/snippets/sensitive-info/quick-start/google-adk/Step1.mdx";
+import Step1StrandsAgents from "@/snippets/sensitive-info/quick-start/strands-agents/Step1.mdx";
+import Step1TanstackAi from "@/snippets/sensitive-info/quick-start/tanstack-ai/Step1.mdx";
 import Step2Mastra from "@/snippets/sensitive-info/quick-start/mastra/Step2.mdx";
+import Step2ClaudeManagedAgents from "@/snippets/sensitive-info/quick-start/claude-managed-agents/Step2.mdx";
+import Step2Crewai from "@/snippets/sensitive-info/quick-start/crewai/Step2.mdx";
+import Step2GoogleAdk from "@/snippets/sensitive-info/quick-start/google-adk/Step2.mdx";
+import Step2StrandsAgents from "@/snippets/sensitive-info/quick-start/strands-agents/Step2.mdx";
+import Step2TanstackAi from "@/snippets/sensitive-info/quick-start/tanstack-ai/Step2.mdx";
 import Step3Mastra from "@/snippets/sensitive-info/quick-start/mastra/Step3.mdx";
+import Step3ClaudeManagedAgents from "@/snippets/sensitive-info/quick-start/claude-managed-agents/Step3.mdx";
+import Step3Crewai from "@/snippets/sensitive-info/quick-start/crewai/Step3.mdx";
+import Step3GoogleAdk from "@/snippets/sensitive-info/quick-start/google-adk/Step3.mdx";
+import Step3StrandsAgents from "@/snippets/sensitive-info/quick-start/strands-agents/Step3.mdx";
+import Step3TanstackAi from "@/snippets/sensitive-info/quick-start/tanstack-ai/Step3.mdx";
 import Step4Mastra from "@/snippets/sensitive-info/quick-start/mastra/Step4.mdx";
+import Step4ClaudeManagedAgents from "@/snippets/sensitive-info/quick-start/claude-managed-agents/Step4.mdx";
+import Step4Crewai from "@/snippets/sensitive-info/quick-start/crewai/Step4.mdx";
+import Step4GoogleAdk from "@/snippets/sensitive-info/quick-start/google-adk/Step4.mdx";
+import Step4StrandsAgents from "@/snippets/sensitive-info/quick-start/strands-agents/Step4.mdx";
+import Step4TanstackAi from "@/snippets/sensitive-info/quick-start/tanstack-ai/Step4.mdx";
 
 import Step1OpenaiAgents from "@/snippets/sensitive-info/quick-start/openai-agents/Step1.mdx";
 import Step2OpenaiAgents from "@/snippets/sensitive-info/quick-start/openai-agents/Step2.mdx";
@@ -167,19 +197,24 @@ In your project root, install the SDK:
 
 <SlotByFramework>
   <Step1Bun slot="bun" />
-  <Step1NestJs slot="nest-js" />
-  <Step1NextJs slot="next-js" />
-  <Step1NodeJs slot="node-js" />
-  <Step1PythonFastapi slot="python-fastapi" />
-  <Step1PythonFlask slot="python-flask" />
-  <StepRemix slot="remix" />
-  <Step1SvelteKit slot="sveltekit" />
   <Step1ClaudeAgentSdk slot="claude-agent-sdk" />
+  <Step1ClaudeManagedAgents slot="claude-managed-agents" />
+  <Step1Crewai slot="crewai" />
   <Step1Genkit slot="genkit" />
+  <Step1GoogleAdk slot="google-adk" />
   <Step1Langchain slot="langchain" />
   <Step1Langgraph slot="langgraph" />
   <Step1Mastra slot="mastra" />
+  <Step1NestJs slot="nest-js" />
+  <Step1NextJs slot="next-js" />
+  <Step1NodeJs slot="node-js" />
   <Step1OpenaiAgents slot="openai-agents" />
+  <Step1PythonFastapi slot="python-fastapi" />
+  <Step1PythonFlask slot="python-flask" />
+  <StepRemix slot="remix" />
+  <Step1StrandsAgents slot="strands-agents" />
+  <Step1SvelteKit slot="sveltekit" />
+  <Step1TanstackAi slot="tanstack-ai" />
   <Step1VercelAi slot="vercel-ai" />
   <Step1VercelEve slot="vercel-eve" />
 </SlotByFramework>
@@ -192,19 +227,24 @@ project root.
 
 <SlotByFramework>
   <Step2SetEnv slot="bun" />
-  <Step2SetEnv slot="nest-js" />
-  <Step2 slot="next-js" />
-  <Step2SetEnv slot="node-js" />
-  <Step2PythonFastapi slot="python-fastapi" />
-  <Step2PythonFlask slot="python-flask" />
-  <Step2 slot="remix" />
-  <Step2 slot="sveltekit" />
   <Step2ClaudeAgentSdk slot="claude-agent-sdk" />
+  <Step2ClaudeManagedAgents slot="claude-managed-agents" />
+  <Step2Crewai slot="crewai" />
   <Step2Genkit slot="genkit" />
+  <Step2GoogleAdk slot="google-adk" />
   <Step2Langchain slot="langchain" />
   <Step2Langgraph slot="langgraph" />
   <Step2Mastra slot="mastra" />
+  <Step2SetEnv slot="nest-js" />
+  <Step2 slot="next-js" />
+  <Step2SetEnv slot="node-js" />
   <Step2OpenaiAgents slot="openai-agents" />
+  <Step2PythonFastapi slot="python-fastapi" />
+  <Step2PythonFlask slot="python-flask" />
+  <Step2 slot="remix" />
+  <Step2StrandsAgents slot="strands-agents" />
+  <Step2 slot="sveltekit" />
+  <Step2TanstackAi slot="tanstack-ai" />
   <Step2VercelAi slot="vercel-ai" />
   <Step2VercelEve slot="vercel-eve" />
 </SlotByFramework>
@@ -219,19 +259,24 @@ change which entity types to detect. For details, see the
 
 <SlotByFramework>
   <Step3Bun slot="bun" />
-  <Step3NestJs slot="nest-js" />
-  <Step3NextJs slot="next-js" />
-  <Step3NodeJs slot="node-js" />
-  <Step3PythonFastapi slot="python-fastapi" />
-  <Step3PythonFlask slot="python-flask" />
-  <Step3Remix slot="remix" />
-  <Step3SvelteKit slot="sveltekit" />
   <Step3ClaudeAgentSdk slot="claude-agent-sdk" />
+  <Step3ClaudeManagedAgents slot="claude-managed-agents" />
+  <Step3Crewai slot="crewai" />
   <Step3Genkit slot="genkit" />
+  <Step3GoogleAdk slot="google-adk" />
   <Step3Langchain slot="langchain" />
   <Step3Langgraph slot="langgraph" />
   <Step3Mastra slot="mastra" />
+  <Step3NestJs slot="nest-js" />
+  <Step3NextJs slot="next-js" />
+  <Step3NodeJs slot="node-js" />
   <Step3OpenaiAgents slot="openai-agents" />
+  <Step3PythonFastapi slot="python-fastapi" />
+  <Step3PythonFlask slot="python-flask" />
+  <Step3Remix slot="remix" />
+  <Step3StrandsAgents slot="strands-agents" />
+  <Step3SvelteKit slot="sveltekit" />
+  <Step3TanstackAi slot="tanstack-ai" />
   <Step3VercelAi slot="vercel-ai" />
   <Step3VercelEve slot="vercel-eve" />
 </SlotByFramework>
@@ -243,19 +288,24 @@ request:
 
 <SlotByFramework>
   <Step4Bun slot="bun" />
-  <Step4NestJs slot="nest-js" />
-  <Step4NextJs slot="next-js" />
-  <Step4NodeJs slot="node-js" />
-  <Step4PythonFastapi slot="python-fastapi" />
-  <Step4PythonFlask slot="python-flask" />
-  <Step4Remix slot="remix" />
-  <Step4SvelteKit slot="sveltekit" />
   <Step4ClaudeAgentSdk slot="claude-agent-sdk" />
+  <Step4ClaudeManagedAgents slot="claude-managed-agents" />
+  <Step4Crewai slot="crewai" />
   <Step4Genkit slot="genkit" />
+  <Step4GoogleAdk slot="google-adk" />
   <Step4Langchain slot="langchain" />
   <Step4Langgraph slot="langgraph" />
   <Step4Mastra slot="mastra" />
+  <Step4NestJs slot="nest-js" />
+  <Step4NextJs slot="next-js" />
+  <Step4NodeJs slot="node-js" />
   <Step4OpenaiAgents slot="openai-agents" />
+  <Step4PythonFastapi slot="python-fastapi" />
+  <Step4PythonFlask slot="python-flask" />
+  <Step4Remix slot="remix" />
+  <Step4StrandsAgents slot="strands-agents" />
+  <Step4SvelteKit slot="sveltekit" />
+  <Step4TanstackAi slot="tanstack-ai" />
   <Step4VercelAi slot="vercel-ai" />
   <Step4VercelEve slot="vercel-eve" />
 </SlotByFramework>

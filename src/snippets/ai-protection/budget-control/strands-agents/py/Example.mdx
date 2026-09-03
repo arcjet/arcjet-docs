@@ -1,0 +1,26 @@
+import Step from "./Example.py?raw";
+import { Code } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+This example deducts an estimated token cost from a per-user bucket before a tool runs. When the bucket is empty, the tool does not execute.
+
+We assume you already have a Strands Agents project set up. For helper options and
+denial behavior, see the <Link.Page href="/guards/strands-agents">Strands Agents agent guard</Link.Page>.
+
+Install the dependencies:
+
+```shell
+# Export your Arcjet API key from https://console.arcjet.com
+export ARCJET_KEY="ajkey_..."
+export ARCJET_ENV=development
+
+pip install "arcjet[strands-agents] @ git+https://github.com/arcjet/arcjet-py@a630806169b92757192f3f5cce2e305827b26567"
+```
+
+Create the example:
+
+<Code code={Step} lang="py" title="agent.py" />
+
+Then start or invoke the agent with a test prompt.
+
+Requests appear in your [Arcjet dashboard](https://console.arcjet.com) in real time.

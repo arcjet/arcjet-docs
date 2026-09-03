@@ -1,0 +1,26 @@
+import Step from "./Example.py?raw";
+import { Code } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+This example screens inbound text with content moderation before the agent continues.
+
+We assume you already have a Claude Managed Agents project set up. For helper options and
+denial behavior, see the <Link.Page href="/guards/claude-managed-agents">Claude Managed Agents agent guard</Link.Page>.
+
+Install the dependencies:
+
+```shell
+# Export your Arcjet API key from https://console.arcjet.com
+export ARCJET_KEY="ajkey_..."
+export ARCJET_ENV=development
+
+pip install "arcjet[claude-managed-agents] @ git+https://github.com/arcjet/arcjet-py@40ea4896962a90a24cdbc4cfbfc80729c096da36" anthropic
+```
+
+Create the example:
+
+<Code code={Step} lang="py" title="agent.py" />
+
+Then start or invoke the agent with a test prompt.
+
+Requests appear in your [Arcjet dashboard](https://console.arcjet.com) in real time.

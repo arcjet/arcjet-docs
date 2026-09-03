@@ -2,15 +2,20 @@
 title: "AI data loss prevention"
 titleByFramework:
   default: "AI data loss prevention"
-  next-js: "AI data loss prevention for Next.js"
   claude-agent-sdk: "AI data loss prevention for Claude Agent SDK"
+  claude-managed-agents: "AI data loss prevention for Claude Managed Agents"
+  crewai: "AI data loss prevention for CrewAI"
   genkit: "AI data loss prevention for Genkit"
+  google-adk: "AI data loss prevention for Google ADK"
   langchain: "AI data loss prevention for LangChain"
   langgraph: "AI data loss prevention for LangGraph"
   mastra: "AI data loss prevention for Mastra"
+  next-js: "AI data loss prevention for Next.js"
   openai-agents: "AI data loss prevention for OpenAI Agents"
   python-fastapi: "AI data loss prevention for Python + FastAPI"
   python-flask: "AI data loss prevention for Python + Flask"
+  strands-agents: "AI data loss prevention for Strands Agents"
+  tanstack-ai: "AI data loss prevention for TanStack AI"
   vercel-ai: "AI data loss prevention for Vercel AI SDK"
   vercel-eve: "AI data loss prevention for Vercel Eve"
 description: "Stop PII from reaching your AI provider. Arcjet sensitive info detection blocks card numbers, emails, names, addresses, and other personal data in AI prompts – locally, before it leaves your app."
@@ -18,7 +23,10 @@ prev: true
 next: true
 frameworks:
   - claude-agent-sdk
+  - claude-managed-agents
+  - crewai
   - genkit
+  - google-adk
   - langchain
   - langgraph
   - mastra
@@ -26,6 +34,8 @@ frameworks:
   - openai-agents
   - python-fastapi
   - python-flask
+  - strands-agents
+  - tanstack-ai
   - vercel-ai
   - vercel-eve
 ajToc:
@@ -64,6 +74,11 @@ import GenkitStep from "@/snippets/ai-protection/data-loss-prevention/genkit/Exa
 import LangchainStep from "@/snippets/ai-protection/data-loss-prevention/langchain/Example.mdx";
 import LanggraphStep from "@/snippets/ai-protection/data-loss-prevention/langgraph/Example.mdx";
 import MastraStep from "@/snippets/ai-protection/data-loss-prevention/mastra/Example.mdx";
+import ClaudeManagedAgentsStep from "@/snippets/ai-protection/data-loss-prevention/claude-managed-agents/Example.mdx";
+import CrewaiStep from "@/snippets/ai-protection/data-loss-prevention/crewai/Example.mdx";
+import GoogleAdkStep from "@/snippets/ai-protection/data-loss-prevention/google-adk/Example.mdx";
+import StrandsAgentsStep from "@/snippets/ai-protection/data-loss-prevention/strands-agents/Example.mdx";
+import TanstackAiStep from "@/snippets/ai-protection/data-loss-prevention/tanstack-ai/Example.mdx";
 import OpenaiAgentsStep from "@/snippets/ai-protection/data-loss-prevention/openai-agents/Example.mdx";
 import VercelAiStep from "@/snippets/ai-protection/data-loss-prevention/vercel-ai/Example.mdx";
 import VercelEveStep from "@/snippets/ai-protection/data-loss-prevention/vercel-eve/Example.mdx";
@@ -89,15 +104,20 @@ choose what happens next: block the request, strip the data, or warn the user.
 />
 
 <SlotByFramework>
-  <NextJsStep slot="next-js" />
-  <PythonFastapiStep slot="python-fastapi" />
-  <PythonFlaskStep slot="python-flask" />
   <ClaudeAgentSdkStep slot="claude-agent-sdk" />
+  <ClaudeManagedAgentsStep slot="claude-managed-agents" />
+  <CrewaiStep slot="crewai" />
   <GenkitStep slot="genkit" />
+  <GoogleAdkStep slot="google-adk" />
   <LangchainStep slot="langchain" />
   <LanggraphStep slot="langgraph" />
   <MastraStep slot="mastra" />
+  <NextJsStep slot="next-js" />
   <OpenaiAgentsStep slot="openai-agents" />
+  <PythonFastapiStep slot="python-fastapi" />
+  <PythonFlaskStep slot="python-flask" />
+  <StrandsAgentsStep slot="strands-agents" />
+  <TanstackAiStep slot="tanstack-ai" />
   <VercelAiStep slot="vercel-ai" />
   <VercelEveStep slot="vercel-eve" />
 </SlotByFramework>
