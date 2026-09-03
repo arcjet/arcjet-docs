@@ -55,6 +55,8 @@ const frameworkIcon = {
   bun: <IconBun />,
   "claude-agent-sdk": <IconClaudeAgentSdk />,
   "claude-agent-sdk-py": <IconClaudeAgentSdk />,
+  "claude-managed-agents": <IconClaudeAgentSdk />,
+  "claude-managed-agents-py": <IconClaudeAgentSdk />,
   crewai: <IconCrewAi />,
   deno: <IconDeno />,
   express: <IconExpress />,

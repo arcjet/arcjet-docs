@@ -36,6 +36,8 @@ const sdkIcons: Record<ArcjetRouteSdkKey, IconComponent> = {
   bun: Bun,
   "claude-agent-sdk": ClaudeAgentSdk,
   "claude-agent-sdk-py": ClaudeAgentSdk,
+  "claude-managed-agents": ClaudeAgentSdk,
+  "claude-managed-agents-py": ClaudeAgentSdk,
   crewai: CrewAi,
   deno: Deno,
   fastify: Fastify,

@@ -741,6 +741,8 @@ checkpoint helpers. They fail closed by default
 `ArcjetToolDeniedError`, except the OpenAI Agents Python helper,
 which calls `reject_content(...)`, the Claude Agent SDK Python
 helper, which returns JSON in content with `is_error: True`, and
+the Claude Managed Agents helper, which does not send
+`user.message` and returns `user.custom_tool_result`, and
 the Strands Agents Python helper, which returns a plain
 `ArcjetDenialResult` dict.
 Unavailability raises `ArcjetUnavailableError` or
@@ -774,6 +776,15 @@ Unavailability raises `ArcjetUnavailableError` or
   `structuredContent`. Unwrapped tools are `PreToolUse` deny.
   Inbound is `UserPromptSubmit` block via `guard_hooks`. There is
   no inbound helper. `can_use_tool` is HITL, not policy.
+- **Claude Managed Agents custom tools** – `guard_custom_tool` plus
+  `guard_events` (`arcjet[claude-managed-agents]`,
+  `arcjet.guard.claude_managed_agents`, `anthropic>=0.92.0,<2`).
+  Inbound is `user.message` before send. Custom tools are gated on
+  `agent.custom_tool_use` before your app executes. On `DENY`, send
+  `user.custom_tool_result` with `is_error`. Built-in bash and
+  files default to `always_allow` with no customer pre-exec.
+  `always_ask` is HITL, not policy. This is not the Claude Agent
+  SDK.
 - **Strands Agents Python `@tool`** – `guard_tool` plus
   `guard_hooks` (`arcjet[strands-agents]`,
   `arcjet.guard.strands_agents`, `strands-agents>=1.11.0,<2`).
@@ -791,6 +802,8 @@ For OpenAI Agents Python, see the
 <Link.Page href="/guards/openai-agents-py">OpenAI Agents Python agent guard</Link.Page>.
 For Claude Agent SDK Python, see the
 <Link.Page href="/guards/claude-agent-sdk-py">Claude Agent SDK Python agent guard</Link.Page>.
+For Claude Managed Agents, see the
+<Link.Page href="/guards/claude-managed-agents">Claude Managed Agents agent guard</Link.Page>.
 For Strands Agents Python, see the
 <Link.Page href="/guards/strands-agents-py">Strands Agents Python agent guard</Link.Page>.
 

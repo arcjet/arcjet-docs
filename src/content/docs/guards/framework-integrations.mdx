@@ -1,6 +1,6 @@
 ---
 title: "Agent guard framework integrations"
-description: "Guard Vercel AI SDK, LangChain, LangChain JS, CrewAI, LangGraph, Genkit, Google ADK, OpenAI Agents, OpenAI Agents Python, Strands Agents, Strands Agents Python, TanStack AI, Vercel Eve, Mastra, Claude Agent SDK, and Claude Agent SDK Python tools, processors, and inbound messages."
+description: "Guard Vercel AI SDK, LangChain, LangChain JS, CrewAI, LangGraph, Genkit, Google ADK, OpenAI Agents, OpenAI Agents Python, Strands Agents, Strands Agents Python, TanStack AI, Vercel Eve, Mastra, Claude Agent SDK, Claude Agent SDK Python, and Claude Managed Agents tools, processors, and inbound messages."
 ---
 
 import { Aside } from "@astrojs/starlight/components";
@@ -54,6 +54,7 @@ Pick the page that matches the object you hold when the effect runs:
 | Mastra | `@arcjet/guard/mastra/v1` | <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page> |
 | Claude Agent SDK | `@arcjet/guard/claude-agent-sdk/v0` | <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page> |
 | Claude Agent SDK (Python) | `arcjet.guard.claude_agent_sdk` | <Link.Page href="/guards/claude-agent-sdk-py">Claude Agent SDK Python agent guard</Link.Page> |
+| Claude Managed Agents | `@arcjet/guard/claude-managed-agents/v0` / `arcjet.guard.claude_managed_agents` | <Link.Page href="/guards/claude-managed-agents">Claude Managed Agents agent guard</Link.Page> |
 
 Each JavaScript path is versioned. Unversioned aliases such as
 `@arcjet/guard/vercel-ai` do not resolve.
@@ -61,13 +62,15 @@ Each JavaScript path is versioned. Unversioned aliases such as
 Don't mix adapters. Don't wrap a Mastra `createTool`, Eve
 `defineTool`, LangGraph `tool()`, LangChain JS `createAgent` tool,
 OpenAI Agents `tool()`, Python OpenAI Agents `function_tool`,
-Claude Agent SDK `tool()`, Python Claude Agent SDK `@tool`, Genkit
+Claude Agent SDK `tool()`, Python Claude Agent SDK `@tool`, Claude
+Managed Agents custom tools, Genkit
 `ai.defineTool`, Google ADK `FunctionTool`, Strands Agents
 `tool()`, Python Strands Agents `@tool`, TanStack AI
 `toolDefinition`, or official CrewAI `@tool` with
-`@arcjet/guard/vercel-ai/v7` or
-`@arcjet/guard/claude-agent-sdk/v0`. The wrapper throws or misses
-the real execute path. Don't use an npm CrewAI port with
+`@arcjet/guard/vercel-ai/v7`,
+`@arcjet/guard/claude-agent-sdk/v0`, or
+`@arcjet/guard/claude-managed-agents/v0`. The wrapper throws or
+misses the real execute path. Don't use an npm CrewAI port with
 `arcjet.guard.crewai`.
 
 ## Vercel AI SDK
@@ -406,6 +409,46 @@ For more information about inbound screening, authored tools, and
 `PreToolUse` denials, see the
 <Link.Page href="/guards/claude-agent-sdk-py">Claude Agent SDK Python agent guard</Link.Page>.
 
+## Claude Managed Agents
+
+This is Anthropic's hosted harness. It is not the local Claude Agent
+SDK `query()` / `PreToolUse` product. For that adapter, see
+<Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>
+and
+<Link.Page href="/guards/claude-agent-sdk-py">Claude Agent SDK Python agent guard</Link.Page>.
+
+Anthropic runs built-in tools. The agent toolset defaults to
+`always_allow`, so your application does not get a pre-exec hook for
+bash or files. The gates you can enforce are inbound `user.message`
+before `events.send`, and custom tools on `agent.custom_tool_use`
+before your app executes them. `always_ask` plus
+`user.tool_confirmation` is opt-in HITL confirmation, not policy.
+
+JavaScript imports `@arcjet/guard/claude-managed-agents/v0`
+(`guardCustomTool`, `guardEvents`, `claudeManagedAgentsContext`).
+The peer is `@anthropic-ai/sdk` (`>=0.86.0 <1`), not
+`@anthropic-ai/claude-agent-sdk`. Until the adapter is published,
+pin `@arcjet/guard` to
+[`cb35c8f9`](https://github.com/arcjet/arcjet-js/commit/cb35c8f92c3a2fb63fbeb9b386d79b1878c19d92).
+
+Python imports `arcjet.guard.claude_managed_agents`
+(`guard_custom_tool`, `guard_events`,
+`claude_managed_agents_context`) from the
+`arcjet[claude-managed-agents]` extra. The peer is
+`anthropic>=0.92.0,<2`, not `claude-agent-sdk`. Until the extra is
+published, pin `arcjet` to
+[`40ea4896`](https://github.com/arcjet/arcjet-py/commit/40ea4896962a90a24cdbc4cfbfc80729c096da36).
+
+For MCP, Anthropic is the client. Put Guard on servers you host.
+
+On `DENY`, don't send inbound `user.message`. For a custom tool, the
+handler does not run; return `user.custom_tool_result` with
+`is_error` set. `is_error` is on the events schema. Don't throw.
+
+For more information about install, helpers, fail-closed behavior, and
+correlation, see the
+<Link.Page href="/guards/claude-managed-agents">Claude Managed Agents agent guard</Link.Page>.
+
 ## Denial responses
 
 Every JavaScript adapter uses one payload, `ArcjetDenialResult`. The fields,
@@ -427,6 +470,7 @@ in a different way:
 | Google ADK | Deny dict from `beforeToolCallback`. `undefined` executes | A throw is the wrong envelope. `undefined` on error executes the tool |
 | Claude Agent SDK | MCP `CallToolResult` with `isError: true` and the payload on `structuredContent` | A throw is a raw exception. Omitting `isError` looks like success |
 | Claude Agent SDK (Python) | JSON in content + `is_error: True` | Python does not forward `structuredContent`. A raise is a raw exception. Omitting `is_error` looks like success |
+| Claude Managed Agents | Don't send `user.message` on inbound `DENY`. On custom-tool `DENY`, don't execute; return `user.custom_tool_result` with `is_error` | Built-in tools already ran under Anthropic. `user.tool_confirmation` is opt-in HITL, not policy. A throw is a raw exception. `is_error` is on the events schema |
 | Vercel Eve | Throw `ArcjetDeniedError`. Opt in to a returned payload with `onDeny: "result"` | Eve projects a throw as a failed `action.result`. A silent return can violate `outputSchema` |
 
 ```ts
@@ -488,6 +532,13 @@ The wrappers default to fail closed when Guard is unavailable:
   `"allow"` is a legitimate choice because failing closed stops the
   agent answering. Direct `guard()` fails open. Check
   `decision.has_failed_open()` when that call site must fail closed.
+- Claude Managed Agents helpers default to `onGuardError: "deny"` /
+  `on_guard_error="deny"`. Inbound `user.message` is not sent. The
+  custom-tool handler does not run. Return `user.custom_tool_result`
+  with `is_error` set. Don't throw. On inbound `user.message`,
+  `"allow"` is a legitimate
+  choice because failing closed stops the agent answering. Direct
+  `guard()` fails open.
 - LangGraph helpers default to `onGuardError: "deny"`. `guardTool` returns the
   plain payload. `ToolNode` wraps a `ToolMessage` whose `status` is
   `success`. Direct `guard()` before `invoke` fails open. Check
