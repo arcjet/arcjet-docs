@@ -8,6 +8,7 @@ import { FastApi as IconFastApi } from "@/components/icons/tech/FastApi";
 import { Fastify as IconFastify } from "@/components/icons/tech/Fastify";
 import { Flask as IconFlask } from "@/components/icons/tech/Flask";
 import { Genkit as IconGenkit } from "@/components/icons/tech/Genkit";
+import { GoogleAdk as IconGoogleAdk } from "@/components/icons/tech/GoogleAdk";
 import { LangChain as IconLangChain } from "@/components/icons/tech/LangChain";
 import { LangGraph as IconLangGraph } from "@/components/icons/tech/LangGraph";
 import { Mastra as IconMastra } from "@/components/icons/tech/Mastra";
@@ -149,6 +150,12 @@ const FrameworkLinks = forwardRef(
                   break;
                 case "strands-agents":
                   icon = <IconStrandsAgents />;
+                  break;
+                case "strands-agents-py":
+                  icon = <IconStrandsAgents />;
+                  break;
+                case "google-adk":
+                  icon = <IconGoogleAdk />;
                   break;
                 case "sveltekit":
                   icon = <IconSvelteKit />;

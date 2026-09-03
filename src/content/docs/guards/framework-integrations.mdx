@@ -1,6 +1,6 @@
 ---
 title: "Agent guard framework integrations"
-description: "Guard Vercel AI SDK, LangChain, LangChain JS, CrewAI, LangGraph, Genkit, OpenAI Agents, OpenAI Agents Python, Strands Agents, TanStack AI, Vercel Eve, Mastra, Claude Agent SDK, Claude Agent SDK Python, and Claude Managed Agents tools, processors, and inbound messages."
+description: "Guard Vercel AI SDK, LangChain, LangChain JS, CrewAI, LangGraph, Genkit, Google ADK, OpenAI Agents, OpenAI Agents Python, Strands Agents, Strands Agents Python, TanStack AI, Vercel Eve, Mastra, Claude Agent SDK, Claude Agent SDK Python, and Claude Managed Agents tools, processors, and inbound messages."
 ---
 
 import { Aside } from "@astrojs/starlight/components";
@@ -44,9 +44,11 @@ Pick the page that matches the object you hold when the effect runs:
 | CrewAI (Python) | `arcjet.guard.crewai` | <Link.Page href="/guards/crewai">CrewAI agent guard</Link.Page> |
 | LangGraph JS | `@arcjet/guard/langgraph/v1` | <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page> |
 | Genkit JS | `@arcjet/guard/genkit/v1` | <Link.Page href="/guards/genkit">Genkit agent guard</Link.Page> |
+| Google ADK | `@arcjet/guard/google-adk/v2` | <Link.Page href="/guards/google-adk">Google ADK agent guard</Link.Page> |
 | OpenAI Agents | `@arcjet/guard/openai-agents/v0` | <Link.Page href="/guards/openai-agents">OpenAI Agents agent guard</Link.Page> |
 | OpenAI Agents (Python) | `arcjet.guard.openai_agents` | <Link.Page href="/guards/openai-agents-py">OpenAI Agents Python agent guard</Link.Page> |
 | Strands Agents | `@arcjet/guard/strands-agents/v1` | <Link.Page href="/guards/strands-agents">Strands Agents agent guard</Link.Page> |
+| Strands Agents (Python) | `arcjet.guard.strands_agents` | <Link.Page href="/guards/strands-agents-py">Strands Agents Python agent guard</Link.Page> |
 | TanStack AI | `@arcjet/guard/tanstack-ai/v0` | <Link.Page href="/guards/tanstack-ai">TanStack AI agent guard</Link.Page> |
 | Vercel Eve | `@arcjet/guard/vercel-eve/v0` | <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page> |
 | Mastra | `@arcjet/guard/mastra/v1` | <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page> |
@@ -62,7 +64,8 @@ Don't mix adapters. Don't wrap a Mastra `createTool`, Eve
 OpenAI Agents `tool()`, Python OpenAI Agents `function_tool`,
 Claude Agent SDK `tool()`, Python Claude Agent SDK `@tool`, Claude
 Managed Agents custom tools, Genkit
-`ai.defineTool`, Strands Agents `tool()`, TanStack AI
+`ai.defineTool`, Google ADK `FunctionTool`, Strands Agents
+`tool()`, Python Strands Agents `@tool`, TanStack AI
 `toolDefinition`, or official CrewAI `@tool` with
 `@arcjet/guard/vercel-ai/v7`,
 `@arcjet/guard/claude-agent-sdk/v0`, or
@@ -224,6 +227,27 @@ information about inbound screening, authored tools, and
 `generate()`-wide denials, see the
 <Link.Page href="/guards/genkit">Genkit agent guard</Link.Page>.
 
+## Google ADK
+
+Google ADK JS `LlmAgent` workflows call authored `FunctionTool`
+handlers from `Runner.runAsync`. There is no `guardInbound`.
+Screen inbound text with a direct `guard()` call before
+`runAsync`. `requireConfirmation` and `requestConfirmation` are
+human HITL confirmation, not policy. There is no `guardTool`.
+Use `guardPlugin()` as a Runner `BasePlugin`. Put it first in
+the plugin list. `beforeToolCallback` denies by returning a deny
+dict. Return `undefined` to execute. Don't also wrap these tools
+with `@arcjet/guard/vercel-ai/v7` or `@arcjet/guard/genkit/v1`.
+
+This is not Google GenAI. It is not Python ADK.
+
+`guardPlugin` defaults to fail closed. On error it always
+returns the deny dict. It never throws. It never returns
+`undefined` on error. Policy sits on `beforeToolCallback` only.
+For more information about inbound screening and Runner-wide
+denials, see the
+<Link.Page href="/guards/google-adk">Google ADK agent guard</Link.Page>.
+
 ## OpenAI Agents
 
 OpenAI Agents text `Agent` workflows (`run()` + authored `tool()`) have no
@@ -277,6 +301,27 @@ Don't throw. Don't call `event.interrupt()`. For more information
 about inbound screening, authored tools, and `BeforeToolCallEvent`
 denials, see the
 <Link.Page href="/guards/strands-agents">Strands Agents agent guard</Link.Page>.
+
+## Strands Agents Python
+
+This is the Python `arcjet[strands-agents]` extra. It is not
+`@arcjet/guard/strands-agents/v1`.
+
+Strands Agents Python `Agent` workflows call authored `@tool`
+handlers. There is no inbound helper. Screen user text with a
+direct `guard()` call before the agent runs. `event.interrupt()`
+is human HITL confirmation, not policy. Use `guard_tool` on
+authored `@tool` handlers and `guard_hooks` on
+`Agent(hooks=[...])`. On `DENY`, `guard_hooks` sets
+`event.cancel_tool` to `True` or a string (JSON of
+`ArcjetDenialResult`). Don't set `BeforeToolsEvent.cancel`.
+Don't raise. Don't call `event.interrupt()`.
+
+`arcjet[strands-agents]` depends on `strands-agents>=1.11.0,<2`.
+
+For more information about inbound screening, authored tools, and
+`cancel_tool` denials, see the
+<Link.Page href="/guards/strands-agents-py">Strands Agents Python agent guard</Link.Page>.
 
 ## TanStack AI
 
@@ -417,10 +462,12 @@ in a different way:
 | OpenAI Agents | Return `{ arcjetDenied: true, … }` from `invoke` | A throw hits `errorFunction` or `ToolCallError` and can kill the run |
 | OpenAI Agents (Python) | `reject_content(...)` with JSON of `ArcjetDenialResult` | A raise becomes a tripwire halt, or `default_tool_error_function` swallows it |
 | Strands Agents | `guardTool` returns `{ arcjetDenied: true, … }`. `guardHooks` sets `event.cancel` to a JSON string of that object | A throw drops the fields. `event.interrupt()` is HITL, not policy |
+| Strands Agents (Python) | `guard_tool` returns JSON of `ArcjetDenialResult`. `guard_hooks` sets `cancel_tool` to `True` or a string | A raise is a raw exception. `event.interrupt()` is HITL, not policy |
 | TanStack AI | `onBeforeToolCall` skip with `ArcjetDenialResult` (`{ type: "skip", result }`). Optional `onDeny: "abort"` | A throw from `execute` is swallowed. There is no `guardTool`. Abort is not the default |
 | LangGraph | Return `{ arcjetDenied: true, … }`. `ToolNode` wraps a `ToolMessage` with `status: "success"` | Fabricating a `ToolMessage` to force `status: "error"` crashes the graph reducer |
 | LangChain JS | `guardTool` returns `{ arcjetDenied: true, … }`. `guardMiddleware` returns a real `ToolMessage` (JSON `content`, default status) | A throw drops the fields. `wrapToolCall` cannot return a bare object. Don't set `status: "error"` |
 | Genkit | Return `{ arcjetDenied: true, … }` as completed `toolResponse.output` | A throw / `interrupt()` is HITL and the wrong envelope |
+| Google ADK | Deny dict from `beforeToolCallback`. `undefined` executes | A throw is the wrong envelope. `undefined` on error executes the tool |
 | Claude Agent SDK | MCP `CallToolResult` with `isError: true` and the payload on `structuredContent` | A throw is a raw exception. Omitting `isError` looks like success |
 | Claude Agent SDK (Python) | JSON in content + `is_error: True` | Python does not forward `structuredContent`. A raise is a raw exception. Omitting `is_error` looks like success |
 | Claude Managed Agents | Don't send `user.message` on inbound `DENY`. On custom-tool `DENY`, don't execute; return `user.custom_tool_result` with `is_error` | Built-in tools already ran under Anthropic. `user.tool_confirmation` is opt-in HITL, not policy. A throw is a raw exception. `is_error` is on the events schema |
@@ -507,6 +554,15 @@ The wrappers default to fail closed when Guard is unavailable:
   throw. Don't call `interrupt()`. Direct `guard()` before
   `generate()` / `send()` fails open. Check `decision.hasFailedOpen()`
   when that call site must fail closed.
+- Google ADK helpers default to `onGuardError: "deny"`.
+  `guardPlugin` returns a deny dict from `beforeToolCallback`.
+  `undefined` executes. Fail closed always returns the deny dict
+  on error. It never throws. It never returns `undefined` on
+  error. There is no `guardTool`. Don't throw. Policy sits on
+  `beforeToolCallback` only. Put Arcjet first in the plugin
+  list. Direct `guard()` before `runAsync` fails open. Check
+  `decision.hasFailedOpen()` when that call site must fail
+  closed.
 - OpenAI Agents helpers default to `onGuardError: "deny"`. `guardTool`
   returns a plain `ArcjetDenialResult` and does not throw. A throw hits
   `ToolCallError` and drops the fields. The runner stringifies the payload
@@ -527,6 +583,14 @@ The wrappers default to fail closed when Guard is unavailable:
   `BeforeToolCallEvent.cancel` only. Direct `guard()` before
   `invoke` / `stream` fails open. Check `decision.hasFailedOpen()`
   when that call site must fail closed.
+- Strands Agents Python `guard_tool` and `guard_hooks` default to
+  `on_guard_error="deny"`. `guard_tool` returns JSON of
+  `ArcjetDenialResult`. `guard_hooks` sets
+  `BeforeToolCallEvent.cancel_tool` to `True` or a string. Don't
+  raise. Don't call `event.interrupt()`. Policy sits on
+  `cancel_tool` only. Direct `guard()` before the agent runs
+  fails open. Check `decision.has_failed_open()` when that call
+  site must fail closed.
 - TanStack AI helpers default to `onGuardError: "deny"`.
   `guardMiddleware` skips with `{ type: "skip", result }` and an
   `ArcjetDenialResult`. Optional `onDeny: "abort"` stops the run.

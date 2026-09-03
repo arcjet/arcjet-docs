@@ -8,6 +8,7 @@ import { FastApi } from "@/components/icons/tech/FastApi";
 import { Fastify } from "@/components/icons/tech/Fastify";
 import { Flask } from "@/components/icons/tech/Flask";
 import { Genkit } from "@/components/icons/tech/Genkit";
+import { GoogleAdk } from "@/components/icons/tech/GoogleAdk";
 import { Hono } from "@/components/icons/tech/Hono";
 import { LangChain } from "@/components/icons/tech/LangChain";
 import { LangGraph } from "@/components/icons/tech/LangGraph";
@@ -41,6 +42,7 @@ const sdkIcons: Record<ArcjetRouteSdkKey, IconComponent> = {
   deno: Deno,
   fastify: Fastify,
   genkit: Genkit,
+  "google-adk": GoogleAdk,
   langchain: LangChain,
   "langchain-js": LangChain,
   langgraph: LangGraph,
@@ -55,6 +57,7 @@ const sdkIcons: Record<ArcjetRouteSdkKey, IconComponent> = {
   "react-router": ReactRouter,
   remix: Remix,
   "strands-agents": StrandsAgents,
+  "strands-agents-py": StrandsAgents,
   sveltekit: SvelteKit,
   "tanstack-ai": TanStackAi,
   "vercel-ai": VercelAi,
