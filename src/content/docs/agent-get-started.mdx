@@ -138,8 +138,16 @@ Detect the framework by checking the project files:
 
 - **`package.json`** – look for `next`, `express`, `fastify`, `@nestjs/core`,
   `@sveltejs/kit`, `hono`, `@remix-run/node`, `react-router`, `astro`, `nuxt`,
-  or check whether the runtime is Bun or Deno.
+  or check whether the runtime is Bun or Deno. If you see `@anthropic-ai/sdk`
+  and the app calls hosted Managed Agents `sessions` / `events.send`, use
+  Claude Managed Agents. If you see `@anthropic-ai/claude-agent-sdk` and a
+  local `query()` loop, that is a different product – see
+  <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>.
 - **`pyproject.toml` / `requirements.txt`** – look for `fastapi` or `flask`.
+  If you see `anthropic` and hosted Managed Agents sessions, use Claude
+  Managed Agents. If you see `claude-agent-sdk`, that is a different product
+  – see
+  <Link.Page href="/guards/claude-agent-sdk-py">Claude Agent SDK Python agent guard</Link.Page>.
 - **`go.mod`** – use the Go SDK with `net/http` or any router that exposes
   `*http.Request`.
 
@@ -164,6 +172,19 @@ Then install the correct package:
 | Python FastAPI | `pip install arcjet` or `uv add arcjet`         |
 | Python Flask   | `pip install arcjet` or `uv add arcjet`         |
 | Go             | `go get github.com/arcjet/arcjet-go@latest`     |
+| Claude Managed Agents | JavaScript: `npm i @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#ADAPTER_SHA @anthropic-ai/sdk`. Python: `pip install "arcjet[claude-managed-agents] @ git+https://github.com/arcjet/arcjet-py@ADAPTER_SHA"` or `uv add` the same spec. One adapter, both languages. |
+
+Claude Managed Agents is Anthropic's hosted harness. It is not the Claude
+Agent SDK. Don't install `claude-agent-sdk` or
+`@anthropic-ai/claude-agent-sdk` for this adapter. Until the adapter is
+published, pin `@arcjet/guard` / `arcjet` to `ADAPTER_SHA`. Published
+packages do not export it. Import
+`@arcjet/guard/claude-managed-agents/v0`
+(`guardEvents`, `guardCustomTool`, `claudeManagedAgentsContext`) or
+`arcjet.guard.claude_managed_agents` (`guard_events`,
+`guard_custom_tool`, `claude_managed_agents_context`). For more
+information about install, helpers, and denial handling, see
+<Link.Page href="/guards/claude-managed-agents">Claude Managed Agents agent guard</Link.Page>.
 
 ## Add protection
 
@@ -191,6 +212,16 @@ Go Guard rule constructors require `Mode` (`ModeLive` or `ModeDryRun`). An
 empty `Mode` returns `ErrInvalidMode`. HTTP `Protect` rules default an empty
 `Mode` to `ModeDryRun`.
 
+For Claude Managed Agents, don't call `protect()`. Screen inbound
+`user.message` with `guardEvents` / `guard_events` before `events.send`.
+Wrap custom tools with `guardCustomTool` / `guard_custom_tool` before
+your app executes them. Anthropic runs built-in tools; the default is
+`always_allow`, so you don't get a pre-exec hook for bash or files.
+`always_ask` plus `user.tool_confirmation` is opt-in HITL confirmation,
+not policy. For MCP, put Guard on servers you host. For more information,
+see
+<Link.Page href="/guards/claude-managed-agents">Claude Managed Agents agent guard</Link.Page>.
+
 <Aside type="caution">
   **Do not** create a new Arcjet instance per request – this defeats caching.
   **Do not** call `protect()` multiple times for the same request. **Do not**
@@ -209,6 +240,7 @@ empty `Mode` returns `ErrInvalidMode`. HTTP `Protect` rules default an empty
 | AI agent tool call (Guard)             | `tokenBucket` + `detectPromptInjection` + `localDetectSensitiveInfo`                 |
 | MCP tool handler (Guard)               | `tokenBucket` (keyed by session) + `detectPromptInjection`                           |
 | Queue worker or background job (Guard) | `tokenBucket` (keyed by user) + `detectPromptInjection` + `localDetectSensitiveInfo` |
+| Claude Managed Agents (Guard)          | `tokenBucket` + `detectPromptInjection` + `localDetectSensitiveInfo` on inbound `user.message` and custom tools |
 
 ## Verify
 
@@ -231,7 +263,9 @@ After adding protection and starting the app:
 
 If decisions are not appearing, verify that `ARCJET_KEY` and `ARCJET_ENV` are
 set correctly and that `protect()` / `guard()` (or `Protect` / `Guard`) is
-being called.
+being called. For Claude Managed Agents, confirm `guardEvents` /
+`guard_events` ran before `events.send` and `guardCustomTool` /
+`guard_custom_tool` ran before each custom tool.
 
 ## Common agent prompts
 
@@ -260,6 +294,11 @@ alternative for Claude Code and Cursor users):
 - **"Protect my queue worker from prompt injection"** – uses the sync guard
   client (`launchArcjet` / `launch_arcjet_sync`) with prompt injection
   detection on job payloads.
+- **"Protect my Claude Managed Agents session"** – screens inbound
+  `user.message` before `events.send` and gates custom tools on
+  `agent.custom_tool_use`. Uses the Claude Managed Agents adapter, not the
+  Claude Agent SDK. For more information, see
+  <Link.Page href="/guards/claude-managed-agents">Claude Managed Agents agent guard</Link.Page>.
 - **"Block PII in agent tool outputs before they reach the model"** – uses
   `localDetectSensitiveInfo` on tool _results_ in a guard call so PII in
   tool outputs doesn't leak back into the model context. Add the on-device
@@ -286,6 +325,9 @@ alternative for Claude Code and Cursor users):
   framework-specific setup with full code examples
 - <Link.Page href="/guards">Guards</Link.Page> – protect tool calls, queues, and
   agentic pipelines without an HTTP request
+- <Link.Page href="/guards/claude-managed-agents">Claude Managed Agents agent guard</Link.Page>
+  – inbound `user.message` and custom tools for Anthropic's hosted harness
+  (JavaScript and Python)
 - <Link.Page href="/cli">Arcjet CLI</Link.Page> – manage sites, keys, and rules
   from the terminal
 - <Link.Page href="/mcp-server">MCP server</Link.Page> – full MCP tool reference
