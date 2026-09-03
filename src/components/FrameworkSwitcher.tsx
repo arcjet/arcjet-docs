@@ -1,6 +1,7 @@
 import { Astro as IconAstro } from "@/components/icons/tech/Astro";
 import { Bun as IconBun } from "@/components/icons/tech/Bun";
 import { ClaudeAgentSdk as IconClaudeAgentSdk } from "@/components/icons/tech/ClaudeAgentSdk";
+import { CloudflareThink as IconCloudflareThink } from "@/components/icons/tech/CloudflareThink";
 import { CrewAi as IconCrewAi } from "@/components/icons/tech/CrewAi";
 import { Deno as IconDeno } from "@/components/icons/tech/Deno";
 import { Express as IconExpress } from "@/components/icons/tech/Express";
@@ -55,12 +56,14 @@ const frameworkIcon = {
   bun: <IconBun />,
   "claude-agent-sdk": <IconClaudeAgentSdk />,
   "claude-managed-agents": <IconClaudeAgentSdk />,
+  "cloudflare-think": <IconCloudflareThink />,
   crewai: <IconCrewAi />,
   deno: <IconDeno />,
   express: <IconExpress />,
   fastify: <IconFastify />,
   genkit: <IconGenkit />,
   "google-adk": <IconGoogleAdk />,
+  "google-adk-py": <IconGoogleAdk />,
   hono: <IconHono />,
   langchain: <IconLangChain />,
   langgraph: <IconLangGraph />,

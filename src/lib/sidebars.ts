@@ -640,6 +640,10 @@ export const main = [
         link: "/integrations/clerk",
       },
       {
+        label: "Cloudflare Think",
+        link: "/guards/cloudflare-think",
+      },
+      {
         label: "CrewAI",
         link: "/guards/crewai",
       },
@@ -655,6 +659,10 @@ export const main = [
       {
         label: "Google ADK",
         link: "/guards/google-adk",
+      },
+      {
+        label: "Google ADK Python",
+        link: "/guards/google-adk-py",
       },
       {
         label: "LangChain",

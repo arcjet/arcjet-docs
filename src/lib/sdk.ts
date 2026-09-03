@@ -29,9 +29,11 @@ export type ArcjetSdkKey =
 export type ArcjetGuardSdkKey =
   | "claude-agent-sdk"
   | "claude-managed-agents"
+  | "cloudflare-think"
   | "crewai"
   | "genkit"
   | "google-adk"
+  | "google-adk-py"
   | "langchain"
   | "langgraph"
   | "mastra"
@@ -47,9 +49,11 @@ export type ArcjetRouteSdkKey = ArcjetSdkKey | ArcjetGuardSdkKey;
 export const GUARD_SDK_KEYS = [
   "claude-agent-sdk",
   "claude-managed-agents",
+  "cloudflare-think",
   "crewai",
   "genkit",
   "google-adk",
+  "google-adk-py",
   "langchain",
   "langgraph",
   "mastra",
@@ -63,9 +67,11 @@ export const GUARD_SDK_KEYS = [
 const GUARD_SDK_LABELS = {
   "claude-agent-sdk": "Claude Agent SDK",
   "claude-managed-agents": "Claude Managed Agents",
+  "cloudflare-think": "Cloudflare Think",
   crewai: "CrewAI",
   genkit: "Genkit",
   "google-adk": "Google ADK",
+  "google-adk-py": "Google ADK Python",
   langchain: "LangChain",
   langgraph: "LangGraph",
   mastra: "Mastra",
