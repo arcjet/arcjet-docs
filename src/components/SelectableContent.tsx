@@ -3,7 +3,7 @@ import { getStoredSyncKey, storeSyncKey } from "@/lib/prefs";
 import { syncKeys as storedSyncKeys } from "@/store";
 import { useStore } from "@nanostores/react";
 import type { HTMLProps, ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import styles from "./SelectableContent.module.scss";
@@ -150,7 +150,18 @@ const SelectableContent = ({
           </Select>
         )}
       </div>
-      {selectedSlot?.value}
+      {/*
+        The slots arrive as Astro's `StaticHtml`, which is
+        `memo(StaticHtml, () => true)` – it never re-renders on an update,
+        because Astro assumes slot content is static for the life of an
+        island. Swapping one slot for another is an update, so without a
+        changing key React keeps the previous slot's HTML in the DOM and the
+        selection appears to do nothing. Keying on the slot forces a remount,
+        and a mount is not something the memo can skip.
+      */}
+      {selectedSlot && (
+        <Fragment key={selectedSlot.key}>{selectedSlot.value}</Fragment>
+      )}
       {children}
     </div>
   );

@@ -1,16 +1,17 @@
-import { Tabs, TabItem } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
 import JsStep1 from "./js/Step1.mdx";
 import PyStep1 from "./py/Step1.mdx";
 
-<Tabs syncKey="language">
-<TabItem label="JavaScript / TypeScript">
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language">
+<div slot="JavaScript / TypeScript" slotIdx="1">
 
 <JsStep1 />
 
-</TabItem>
-<TabItem label="Python">
+</div>
+<div slot="Python" slotIdx="2">
 
 <PyStep1 />
 
-</TabItem>
-</Tabs>
+</div>
+</SelectableContent>

@@ -1,16 +1,17 @@
-import { Tabs, TabItem } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
 import JsTokenBucket from "./js/TokenBucket.mdx";
 import PyTokenBucket from "./py/TokenBucket.mdx";
 
-<Tabs syncKey="language">
-<TabItem label="JavaScript / TypeScript">
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language">
+<div slot="JavaScript / TypeScript" slotIdx="1">
 
 <JsTokenBucket />
 
-</TabItem>
-<TabItem label="Python">
+</div>
+<div slot="Python" slotIdx="2">
 
 <PyTokenBucket />
 
-</TabItem>
-</Tabs>
+</div>
+</SelectableContent>

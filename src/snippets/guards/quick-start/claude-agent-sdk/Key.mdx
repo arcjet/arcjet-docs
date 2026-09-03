@@ -1,16 +1,17 @@
-import { Tabs, TabItem } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
 import JsKey from "@/snippets/get-started/claude-agent-sdk/js/Step2.mdx";
 import PyKey from "./py/Key.mdx";
 
-<Tabs syncKey="language">
-<TabItem label="JavaScript / TypeScript">
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language">
+<div slot="JavaScript / TypeScript" slotIdx="1">
 
 <JsKey />
 
-</TabItem>
-<TabItem label="Python">
+</div>
+<div slot="Python" slotIdx="2">
 
 <PyKey />
 
-</TabItem>
-</Tabs>
+</div>
+</SelectableContent>

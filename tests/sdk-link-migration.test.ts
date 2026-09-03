@@ -150,7 +150,7 @@ test.describe("SDK link migration", () => {
     expect(page.url()).not.toContain("?f=");
   });
 
-  test("SDK switcher navigates to Claude Agent SDK get-started with both languages", async ({
+  test("SDK switcher navigates to Claude Agent SDK get-started", async ({
     page,
   }) => {
     await page.goto("/get-started/");
@@ -161,14 +161,17 @@ test.describe("SDK link migration", () => {
 
     expect(page.url()).toMatch(/\/sdk\/claude-agent-sdk\/get-started\/?$/);
     expect(page.url()).not.toContain("?f=");
-    // Both language tabs render, so the JavaScript and Python installs are
-    // both in the DOM on the merged page.
+    // The merged page renders the selected language only, so the JavaScript
+    // install is present and the language switcher offers Python.
     await expect(page.locator("body")).toContainText(
       "@anthropic-ai/claude-agent-sdk",
     );
-    await expect(page.locator("body")).toContainText(
-      "arcjet[claude-agent-sdk]",
-    );
+    await expect(
+      page
+        .locator(".SelectableContent select")
+        .filter({ has: page.locator('option[value="Python"]') })
+        .first(),
+    ).toBeVisible();
   });
 
   test("SDK switcher navigates to SDK route on guards quick start", async ({
@@ -184,7 +187,7 @@ test.describe("SDK link migration", () => {
     expect(page.url()).not.toContain("?f=");
   });
 
-  test("SDK switcher navigates to Claude Agent SDK guards quick start with both languages", async ({
+  test("SDK switcher navigates to Claude Agent SDK guards quick start", async ({
     page,
   }) => {
     await page.goto("/guards/quick-start/");
@@ -197,10 +200,9 @@ test.describe("SDK link migration", () => {
       /\/sdk\/claude-agent-sdk\/guards\/quick-start\/?$/,
     );
     expect(page.url()).not.toContain("?f=");
-    await expect(page.locator("body")).toContainText("create_sdk_mcp_server");
-    await expect(page.locator("body")).toContainText(
-      "arcjet[claude-agent-sdk,sensitive-info-rampart]",
-    );
+    // The merged page renders the selected language only. Switching to Python
+    // is covered by tests/selectable-content.test.ts.
+    await expect(page.locator("body")).toContainText("createSdkMcpServer");
   });
 
   test("retired language-specific guard URLs redirect to the merged page", async ({
