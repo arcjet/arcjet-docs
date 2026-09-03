@@ -198,6 +198,13 @@ test.describe("Screenshots", () => {
             // headroom for minor font-rendering differences across CI runners.
             maxDiffPixels: 300,
             mask: [page.locator("[data-playwright-mask]")],
+            // The reference pages are tens of thousands of pixels tall and
+            // the default 5s budget is not enough to capture one on a loaded
+            // runner. A timeout here is worse than slow: with
+            // `--update-snapshots=changed` the partial capture is written to
+            // disk as the new expectation, so a page that was only slow
+            // silently becomes a wrong snapshot.
+            timeout: 20_000,
             threshold: 0.1,
           },
         );
