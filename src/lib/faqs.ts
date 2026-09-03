@@ -9,7 +9,7 @@ export type Faq = {
  */
 export const faqs: Faq[] = [
   {
-    question: "Do I need to run any infrastructure e.g. Redis?",
+    question: "Do I need to run any infrastructure, such as Redis?",
     answer: [
       "No, Arcjet handles all the infrastructure for you so you don't need to worry about deploying global Redis clusters, designing data structures to track rate limits, or keeping security detection rules up to date.",
     ],
@@ -24,7 +24,7 @@ export const faqs: Faq[] = [
   {
     question: "What happens if Arcjet is unavailable?",
     answer: [
-      "Where a decision has been cached locally e.g. blocking a client, Arcjet will continue to function even if the service is unavailable.",
+      "Where a decision has been cached locally, such as blocking a client, Arcjet will continue to function even if the service is unavailable.",
       "If a call to the Cloud API is needed and there is a network problem or Arcjet is unavailable, the default behavior is to fail open and allow the request. You have control over how to handle errors, including choosing to fail close if you prefer. See the reference docs for details.",
     ],
   },
@@ -33,7 +33,7 @@ export const faqs: Faq[] = [
     answer: [
       "Network layer attacks tend to be generic and high volume, so these are best handled by your hosting platform. Most cloud providers include network DDoS protection by default.",
       "Arcjet sits closer to your application so it can understand the context. This is important because some types of traffic may not look like a DDoS attack, but can still have the same effect. For example, a customer making too many API requests and affecting other customers, or large numbers of signups from disposable email addresses.",
-      "Network-level DDoS protection tools find it difficult to protect against this type of traffic because they don't understand the structure of your application. Arcjet can help you to identify and block this traffic by integrating with your codebase and understanding the context of the request e.g. the customer ID or sensitivity of the API route.",
+      "Network-level DDoS protection tools find it difficult to protect against this type of traffic because they don't understand the structure of your application. Arcjet can help you to identify and block this traffic by integrating with your codebase and understanding the context of the request, such as the customer ID or the sensitivity of the API route.",
       "Volumetric network attacks are best handled by your hosting provider. Application level attacks need to be handled by the application. That's where Arcjet helps.",
     ],
   },

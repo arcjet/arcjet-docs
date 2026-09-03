@@ -119,7 +119,35 @@ function siteNodes() {
       url: "https://arcjet.com",
       description: ARCJET_DESCRIPTION,
       applicationCategory: "SecurityApplication",
+      // Arcjet is a library, so it runs wherever the application runs.
+      operatingSystem: "Any",
       publisher: { "@id": ORGANIZATION_ID },
+      author: { "@id": ORGANIZATION_ID },
+      // This site is the product's documentation, so an assistant that lands
+      // on any page can find the rest of it.
+      softwareHelp: { "@id": WEBSITE_ID },
+      // The security building blocks the SDK exposes. Keep this list factual:
+      // every entry maps to a documented rule or helper.
+      featureList: [
+        "Prompt injection detection",
+        "Agent tool-call authorization with remote policies",
+        "Sensitive information and PII detection",
+        "Content moderation",
+        "Rate limiting with token bucket, fixed window, and sliding window",
+        "Bot detection",
+        "Email validation",
+        "Signup form protection",
+        "Country, VPN, and ASN filters",
+        "Shield WAF for common attacks",
+        "Security headers with Nosecone",
+      ],
+      sameAs: [
+        "https://github.com/arcjet/arcjet-js",
+        "https://github.com/arcjet/arcjet-py",
+        "https://github.com/arcjet/arcjet-go",
+        "https://www.npmjs.com/package/@arcjet/next",
+        "https://pypi.org/project/arcjet/",
+      ],
     },
     {
       "@type": "WebSite",
