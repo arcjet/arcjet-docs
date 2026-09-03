@@ -1,6 +1,6 @@
 ---
 title: "Agent guard framework integrations"
-description: "Pick the Arcjet Guard adapter for your agent framework, and see the import path, deny point, and denial envelope for each. Covers Vercel AI SDK, LangChain, CrewAI, LangGraph, Genkit, Google ADK, OpenAI Agents, Strands Agents, TanStack AI, Vercel Eve, Mastra, Claude Agent SDK, and Claude Managed Agents, in JavaScript and Python."
+description: "Pick the Arcjet Guard adapter for your agent framework, and see the import path, deny point, and denial envelope for each. Covers Vercel AI SDK, LangChain, CrewAI, LangGraph, Genkit, Google ADK, Google ADK Python, OpenAI Agents, Strands Agents, TanStack AI, Vercel Eve, Mastra, Claude Agent SDK, Claude Managed Agents, and Cloudflare Think, in JavaScript and Python."
 ---
 
 import { Aside, Tabs, TabItem } from "@astrojs/starlight/components";
@@ -44,6 +44,7 @@ Pick the page that matches the object you hold when the effect runs:
 | LangGraph JS | `@arcjet/guard/langgraph/v1` | <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page> |
 | Genkit JS | `@arcjet/guard/genkit/v1` | <Link.Page href="/guards/genkit">Genkit agent guard</Link.Page> |
 | Google ADK | `@arcjet/guard/google-adk/v2` | <Link.Page href="/guards/google-adk">Google ADK agent guard</Link.Page> |
+| Google ADK (Python) | `arcjet.guard.google_adk` | <Link.Page href="/guards/google-adk-py">Google ADK Python agent guard</Link.Page> |
 | OpenAI Agents | `@arcjet/guard/openai-agents/v0` / `arcjet.guard.openai_agents` | <Link.Page href="/guards/openai-agents">OpenAI Agents agent guard</Link.Page> |
 | Strands Agents | `@arcjet/guard/strands-agents/v1` / `arcjet.guard.strands_agents` | <Link.Page href="/guards/strands-agents">Strands Agents agent guard</Link.Page> |
 | TanStack AI | `@arcjet/guard/tanstack-ai/v0` | <Link.Page href="/guards/tanstack-ai">TanStack AI agent guard</Link.Page> |
@@ -51,6 +52,7 @@ Pick the page that matches the object you hold when the effect runs:
 | Mastra | `@arcjet/guard/mastra/v1` | <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page> |
 | Claude Agent SDK | `@arcjet/guard/claude-agent-sdk/v0` / `arcjet.guard.claude_agent_sdk` | <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page> |
 | Claude Managed Agents | `@arcjet/guard/claude-managed-agents/v0` / `arcjet.guard.claude_managed_agents` | <Link.Page href="/guards/claude-managed-agents">Claude Managed Agents agent guard</Link.Page> |
+| Cloudflare Think | `@arcjet/guard/cloudflare-think/v0` | <Link.Page href="/guards/cloudflare-think">Cloudflare Think agent guard</Link.Page> |
 
 Each JavaScript path is versioned. Unversioned aliases such as
 `@arcjet/guard/vercel-ai` do not resolve.
@@ -59,13 +61,16 @@ Don't mix adapters. Don't wrap a Mastra `createTool`, Eve
 `defineTool`, LangGraph `tool()`, LangChain `createAgent` tool,
 OpenAI Agents `tool()` or `function_tool`, Claude Agent SDK `tool()`
 or `@tool`, Claude Managed Agents custom tools, Genkit
-`ai.defineTool`, Google ADK `FunctionTool`, Strands Agents `tool()`
-or `@tool`, TanStack AI `toolDefinition`, or official CrewAI `@tool`
+`ai.defineTool`, Google ADK `FunctionTool`, Python Google ADK
+`FunctionTool`, Strands Agents `tool()`
+or `@tool`, TanStack AI `toolDefinition`, Cloudflare Think
+`getTools()`, or official CrewAI `@tool`
 with `@arcjet/guard/vercel-ai/v7`,
 `@arcjet/guard/claude-agent-sdk/v0`, or
 `@arcjet/guard/claude-managed-agents/v0`. The wrapper throws or
 misses the real execute path. Don't use an npm CrewAI port with
-`arcjet.guard.crewai`.
+`arcjet.guard.crewai`. Don't mix Cloudflare Think with
+`@arcjet/guard/vercel-ai/v7`.
 
 ## Vercel AI SDK
 
@@ -233,7 +238,9 @@ the plugin list. `beforeToolCallback` denies by returning a deny
 dict. Return `undefined` to execute. Don't also wrap these tools
 with `@arcjet/guard/vercel-ai/v7` or `@arcjet/guard/genkit/v1`.
 
-This is not Google GenAI. It is not Python ADK.
+This is not Google GenAI. It is not Python ADK. For the Python
+adapter, see
+<Link.Page href="/guards/google-adk-py">Google ADK Python agent guard</Link.Page>.
 
 `guardPlugin` defaults to fail closed. On error it always
 returns the deny dict. It never throws. It never returns
@@ -241,6 +248,33 @@ returns the deny dict. It never throws. It never returns
 For more information about inbound screening and Runner-wide
 denials, see the
 <Link.Page href="/guards/google-adk">Google ADK agent guard</Link.Page>.
+
+## Google ADK Python
+
+This is the Python `arcjet[google-adk]` extra. It is not
+`@arcjet/guard/google-adk/v2`.
+
+Google ADK Python `LlmAgent` workflows call authored tools from
+`run_async`. There is no inbound helper. Screen inbound text with
+a direct `guard()` call before `run_async`.
+`require_confirmation` and `request_confirmation` are human HITL
+confirmation, not policy. Use `guard_tool` as
+`LlmAgent.before_tool_callback`, or `guard_plugin` as a Runner
+plugin. Put the plugin first in the plugin list.
+`before_tool_callback` denies by returning a skip dict with
+`arcjetDenied`. Return `None` to execute. Don't also wrap these
+tools with `@arcjet/guard/google-adk/v2` or
+`@arcjet/guard/vercel-ai/v7`.
+
+This is not Google GenAI. It is not JavaScript ADK.
+
+`arcjet[google-adk]` depends on `google-adk>=2.0.0,<3`.
+`guard_tool` and `guard_plugin` default to fail closed. On error
+they always return the deny dict. They never raise. They never
+return `None` on error. Policy sits on `before_tool_callback`
+only. For more information about inbound screening, the agent
+callback, and Runner-wide denials, see the
+<Link.Page href="/guards/google-adk-py">Google ADK Python agent guard</Link.Page>.
 
 ## OpenAI Agents
 
@@ -448,6 +482,32 @@ For more information about install, helpers, fail-closed behavior, and
 correlation, see the
 <Link.Page href="/guards/claude-managed-agents">Claude Managed Agents agent guard</Link.Page>.
 
+## Cloudflare Think
+
+This is Cloudflare Think `@cloudflare/think`. It is not Vercel AI
+SDK `@arcjet/guard/vercel-ai/v7`. Mixing those adapters is
+disallowed.
+
+Think `Think` agents call authored tools from the agent loop.
+There is no `guardInbound`. Screen inbound text with a direct
+`guard()` call before the Think turn starts. HITL confirmation is
+not policy. There is no `guardTool`. Use `guardHooks()` as
+`beforeToolCall` on a `Think` subclass. The hook denies by
+returning `{ action: "block" | "substitute" }`. Return `void` to
+execute. Don't also wrap these tools with
+`@arcjet/guard/vercel-ai/v7`.
+
+`@cloudflare/think` (`>=0.3.0 <1`) is an optional peer. Until the
+adapter is published, pin `@arcjet/guard` to
+[`58a7d8b8`](https://github.com/arcjet/arcjet-js/commit/58a7d8b82f2a360c67eced13e9899f0c1799289f).
+`guardHooks` defaults to fail closed. On error it always
+substitutes. `onDeny: "block"` is real `DENY` only. It never
+throws. It never returns `void` on error. Policy sits on
+`beforeToolCall` only.
+For more information about inbound screening and Think-wide
+denials, see the
+<Link.Page href="/guards/cloudflare-think">Cloudflare Think agent guard</Link.Page>.
+
 ## Denial responses
 
 Every JavaScript adapter uses one payload, `ArcjetDenialResult`. The fields,
@@ -467,6 +527,8 @@ in a different way:
 | LangChain (JavaScript) | `guardTool` returns `{ arcjetDenied: true, … }`. `guardMiddleware` returns a real `ToolMessage` (JSON `content`, default status) | A throw drops the fields. `wrapToolCall` cannot return a bare object. Don't set `status: "error"` |
 | Genkit | Return `{ arcjetDenied: true, … }` as completed `toolResponse.output` | A throw / `interrupt()` is HITL and the wrong envelope |
 | Google ADK | Deny dict from `beforeToolCallback`. `undefined` executes | A throw is the wrong envelope. `undefined` on error executes the tool |
+| Google ADK (Python) | Skip dict with `arcjetDenied` from `before_tool_callback`. `None` executes | A raise is the wrong envelope. `None` on error executes the tool. `{}` also skips |
+| Cloudflare Think | Default `{ action: "substitute", output }` from `beforeToolCall`. `onDeny: "block"` is real `DENY` only. `void` executes | A throw is the wrong envelope. Fail closed substitutes. Not Vercel AI SDK |
 | Claude Agent SDK (JavaScript) | MCP `CallToolResult` with `isError: true` and the payload on `structuredContent` | A throw is a raw exception. Omitting `isError` looks like success |
 | Claude Agent SDK (Python) | JSON in content + `is_error: True` | Python does not forward `structuredContent`. A raise is a raw exception. Omitting `is_error` looks like success |
 | Claude Managed Agents | Don't send `user.message` on inbound `DENY`. On custom-tool `DENY`, don't execute; return `user.custom_tool_result` with `is_error` | Built-in tools already ran under Anthropic. `user.tool_confirmation` is opt-in HITL, not policy. A throw is a raw exception. `is_error` is on the events schema |
@@ -562,6 +624,24 @@ The wrappers default to fail closed when Guard is unavailable:
   list. Direct `guard()` before `runAsync` fails open. Check
   `decision.hasFailedOpen()` when that call site must fail
   closed.
+- Google ADK Python `guard_tool` and `guard_plugin` default to
+  `on_guard_error="deny"`. `before_tool_callback` returns a skip
+  dict with `arcjetDenied`. `None` executes. Fail closed always
+  returns the deny dict on error. It never raises. It never
+  returns `None` on error. Don't raise. Policy sits on
+  `before_tool_callback` only. Put `guard_plugin` first in the
+  plugin list. Direct `guard()` before `run_async` fails open.
+  Check `decision.has_failed_open()` when that call site must
+  fail closed.
+- Cloudflare Think helpers default to `onGuardError: "deny"`.
+  `guardHooks` defaults to substitute from `beforeToolCall`.
+  `onDeny: "block"` is real `DENY` only. `void` executes. Fail
+  closed always substitutes on error. It never throws. It never
+  returns `void` on error. There is no `guardTool`. Don't throw.
+  Policy sits on `beforeToolCall` only. Don't mix with
+  `@arcjet/guard/vercel-ai/v7`. Direct `guard()` before the Think
+  turn fails open. Check `decision.hasFailedOpen()` when that
+  call site must fail closed.
 - OpenAI Agents (JavaScript) helpers default to `onGuardError: "deny"`. `guardTool`
   returns a plain `ArcjetDenialResult` and does not throw. A throw hits
   `ToolCallError` and drops the fields. The runner stringifies the payload

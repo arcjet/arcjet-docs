@@ -4,9 +4,11 @@ titleByFramework:
   default: "Agent guards"
   claude-agent-sdk: "Agent guards for Claude Agent SDK"
   claude-managed-agents: "Agent guards for Claude Managed Agents"
+  cloudflare-think: "Agent guards for Cloudflare Think"
   crewai: "Agent guards for CrewAI"
   genkit: "Agent guards for Genkit"
   google-adk: "Agent guards for Google ADK"
+  google-adk-py: "Agent guards for Google ADK Python"
   langchain: "Agent guards for LangChain"
   langgraph: "Agent guards for LangGraph"
   mastra: "Agent guards for Mastra"
@@ -15,13 +17,15 @@ titleByFramework:
   tanstack-ai: "Agent guards for TanStack AI"
   vercel-ai: "Agent guards for Vercel AI SDK"
   vercel-eve: "Agent guards for Vercel Eve"
-description: "Quick start guide for guarding an AI agent tool with an Arcjet remote policy in Vercel AI SDK, LangChain, CrewAI, LangGraph, Genkit, Google ADK, OpenAI Agents, Strands Agents, TanStack AI, Mastra, Vercel Eve, Claude Agent SDK, and Claude Managed Agents, in JavaScript and Python."
+description: "Quick start guide for guarding an AI agent tool with an Arcjet remote policy in Vercel AI SDK, LangChain, CrewAI, LangGraph, Genkit, Google ADK, Google ADK Python, OpenAI Agents, Strands Agents, TanStack AI, Mastra, Vercel Eve, Claude Agent SDK, Claude Managed Agents, and Cloudflare Think, in JavaScript and Python."
 frameworks:
   - claude-agent-sdk
   - claude-managed-agents
+  - cloudflare-think
   - crewai
   - genkit
   - google-adk
+  - google-adk-py
   - langchain
   - langgraph
   - mastra
@@ -75,6 +79,12 @@ import GenkitTry from "@/snippets/guards/quick-start/genkit/Try.mdx";
 import GoogleAdkInstall from "@/snippets/guards/quick-start/google-adk/Install.mdx";
 import GoogleAdkWrap from "@/snippets/guards/quick-start/google-adk/Wrap.mdx";
 import GoogleAdkTry from "@/snippets/guards/quick-start/google-adk/Try.mdx";
+import GoogleAdkPyInstall from "@/snippets/guards/quick-start/google-adk-py/Install.mdx";
+import GoogleAdkPyWrap from "@/snippets/guards/quick-start/google-adk-py/Wrap.mdx";
+import GoogleAdkPyTry from "@/snippets/guards/quick-start/google-adk-py/Try.mdx";
+import CloudflareThinkInstall from "@/snippets/guards/quick-start/cloudflare-think/Install.mdx";
+import CloudflareThinkWrap from "@/snippets/guards/quick-start/cloudflare-think/Wrap.mdx";
+import CloudflareThinkTry from "@/snippets/guards/quick-start/cloudflare-think/Try.mdx";
 import LangchainInstall from "@/snippets/guards/quick-start/langchain/Install.mdx";
 import LangchainWrap from "@/snippets/guards/quick-start/langchain/Wrap.mdx";
 import LangchainTry from "@/snippets/guards/quick-start/langchain/Try.mdx";
@@ -107,6 +117,8 @@ import ClaudeManagedKey from "@/snippets/guards/quick-start/claude-managed-agent
 import CrewaiKey from "@/snippets/get-started/crewai/Step2.mdx";
 import GenkitKey from "@/snippets/get-started/genkit/Step2.mdx";
 import GoogleAdkKey from "@/snippets/get-started/google-adk/Step2.mdx";
+import GoogleAdkPyKey from "@/snippets/guards/quick-start/google-adk-py/Key.mdx";
+import CloudflareThinkKey from "@/snippets/get-started/cloudflare-think/Step2.mdx";
 import LangchainKey from "@/snippets/guards/quick-start/langchain/Key.mdx";
 import LanggraphKey from "@/snippets/get-started/langgraph/Step2.mdx";
 import MastraKey from "@/snippets/get-started/mastra/Step2.mdx";
@@ -172,6 +184,8 @@ In your project root, install the SDK:
   <CrewaiInstall slot="crewai" />
   <GenkitInstall slot="genkit" />
   <GoogleAdkInstall slot="google-adk" />
+  <GoogleAdkPyInstall slot="google-adk-py" />
+  <CloudflareThinkInstall slot="cloudflare-think" />
   <LangchainInstall slot="langchain" />
   <LanggraphInstall slot="langgraph" />
   <MastraInstall slot="mastra" />
@@ -193,6 +207,8 @@ instructions to add a site and get a key.
   <CrewaiKey slot="crewai" />
   <GenkitKey slot="genkit" />
   <GoogleAdkKey slot="google-adk" />
+  <GoogleAdkPyKey slot="google-adk-py" />
+  <CloudflareThinkKey slot="cloudflare-think" />
   <LangchainKey slot="langchain" />
   <LanggraphKey slot="langgraph" />
   <MastraKey slot="mastra" />
@@ -214,6 +230,8 @@ provider runs.
   <CrewaiWrap slot="crewai" />
   <GenkitWrap slot="genkit" />
   <GoogleAdkWrap slot="google-adk" />
+  <GoogleAdkPyWrap slot="google-adk-py" />
+  <CloudflareThinkWrap slot="cloudflare-think" />
   <LangchainWrap slot="langchain" />
   <LanggraphWrap slot="langgraph" />
   <MastraWrap slot="mastra" />
@@ -235,6 +253,8 @@ browser sends only the scenario name.
   <CrewaiTry slot="crewai" />
   <GenkitTry slot="genkit" />
   <GoogleAdkTry slot="google-adk" />
+  <GoogleAdkPyTry slot="google-adk-py" />
+  <CloudflareThinkTry slot="cloudflare-think" />
   <LangchainTry slot="langchain" />
   <LanggraphTry slot="langgraph" />
   <MastraTry slot="mastra" />
@@ -251,6 +271,8 @@ browser sends only the scenario name.
   <DemoPage slot="crewai" />
   <DemoPage slot="genkit" />
   <DemoPage slot="google-adk" />
+  <DemoPage slot="google-adk-py" />
+  <DemoPage slot="cloudflare-think" />
   <DemoPage slot="langchain" />
   <DemoPage slot="langgraph" />
   <DemoPage slot="mastra" />
