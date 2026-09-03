@@ -1,4 +1,16 @@
-import { Code } from "@astrojs/starlight/components";
-import Step from "./TokenBucketRequest.py?raw";
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import JsTokenBucketRequest from "./js/TokenBucketRequest.mdx";
+import PyTokenBucketRequest from "./py/TokenBucketRequest.mdx";
 
-<Code code={Step} lang="py" />
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+<JsTokenBucketRequest />
+
+</TabItem>
+<TabItem label="Python">
+
+<PyTokenBucketRequest />
+
+</TabItem>
+</Tabs>

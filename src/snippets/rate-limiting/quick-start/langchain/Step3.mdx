@@ -1,7 +1,16 @@
-import Step from "./Step3.py?raw";
-import { Code } from "@astrojs/starlight/components";
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import JsStep3 from "./js/Step3.mdx";
+import PyStep3 from "./py/Step3.mdx";
 
-Wrap a tool so each call withdraws tokens from a bucket. The bucket holds 10
-tokens and refills 5 tokens every 10 seconds. This call withdraws 5 tokens.
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
-<Code code={Step} lang="py" title="agent.py" />
+<JsStep3 />
+
+</TabItem>
+<TabItem label="Python">
+
+<PyStep3 />
+
+</TabItem>
+</Tabs>

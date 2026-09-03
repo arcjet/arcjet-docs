@@ -1,26 +1,16 @@
-import SelectableContent from "@/components/SelectableContent";
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import JsStep1 from "./js/Step1.mdx";
+import PyStep1 from "./py/Step1.mdx";
 
-{/* prettier-ignore */}
-<SelectableContent client:load syncKey="packageManager">
-<div slot="npm" slotIdx="1">
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
-```sh
-npm i @arcjet/guard @strands-agents/sdk
-```
+<JsStep1 />
 
-</div>
-<div slot="pnpm" slotIdx="2">
+</TabItem>
+<TabItem label="Python">
 
-```sh
-pnpm add @arcjet/guard @strands-agents/sdk
-```
+<PyStep1 />
 
-</div>
-<div slot="yarn" slotIdx="3">
-
-```sh
-yarn add @arcjet/guard @strands-agents/sdk
-```
-
-</div>
-</SelectableContent>
+</TabItem>
+</Tabs>

@@ -1,10 +1,16 @@
-import { Link } from "@/components/link";
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import JsGuardAlgo from "./js/GuardAlgo.mdx";
+import PyGuardAlgo from "./py/GuardAlgo.mdx";
 
-Guard rate limits use `tokenBucket` / `TokenBucket`. There is no
-`fixedWindow` or `slidingWindow` helper on `@arcjet/guard`. Set
-`maxTokens` to the burst you want and `refillRate` / `intervalSeconds`
-to the sustained allowance.
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
-For a complete tool example, see the token bucket example on this page. For
-adapter-specific options, see the
-<Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
+<JsGuardAlgo />
+
+</TabItem>
+<TabItem label="Python">
+
+<PyGuardAlgo />
+
+</TabItem>
+</Tabs>

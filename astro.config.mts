@@ -13,7 +13,11 @@ import {
   isShallowRepository,
   sitemapLastmodSerializer,
 } from "./src/lib/content-dates";
-import { shouldExcludeFromSitemap, variantOnlySdkAstroRedirects } from "./src/lib/sdk";
+import {
+  mergedGuardSdkAstroRedirects,
+  shouldExcludeFromSitemap,
+  variantOnlySdkAstroRedirects,
+} from "./src/lib/sdk";
 import { main as sidebar } from "./src/lib/sidebars";
 
 /*
@@ -248,10 +252,8 @@ export default defineConfig({
     "/shield/reference/sveltekit": "/sdk/sveltekit/shield/reference/",
     "/rate-limiting/concepts": "/rate-limiting",
     "/rate-limiting/quick-start/bun": "/sdk/bun/rate-limiting/quick-start/",
-    "/rate-limiting/quick-start/nextjs":
-      "/sdk/next/rate-limiting/quick-start/",
-    "/rate-limiting/quick-start/nodejs":
-      "/sdk/node/rate-limiting/quick-start/",
+    "/rate-limiting/quick-start/nextjs": "/sdk/next/rate-limiting/quick-start/",
+    "/rate-limiting/quick-start/nodejs": "/sdk/node/rate-limiting/quick-start/",
     "/rate-limiting/quick-start/sveltekit":
       "/sdk/sveltekit/rate-limiting/quick-start/",
     "/bot-protection/quick-start/bun": "/sdk/bun/bot-protection/quick-start/",
@@ -305,6 +307,7 @@ export default defineConfig({
     // do not collapse /sdk/{framework}/ sitemap entries.
     "/sitemap.xml": "/sitemap-index.xml",
     ...variantOnlySdkAstroRedirects(),
+    ...mergedGuardSdkAstroRedirects(),
     ...withComparisonSdkScopes(comparisonMarketingRedirects),
   },
 });

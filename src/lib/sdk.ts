@@ -28,20 +28,15 @@ export type ArcjetSdkKey =
  */
 export type ArcjetGuardSdkKey =
   | "claude-agent-sdk"
-  | "claude-agent-sdk-py"
   | "claude-managed-agents"
-  | "claude-managed-agents-py"
   | "crewai"
   | "genkit"
   | "google-adk"
   | "langchain"
-  | "langchain-js"
   | "langgraph"
   | "mastra"
   | "openai-agents"
-  | "openai-agents-py"
   | "strands-agents"
-  | "strands-agents-py"
   | "tanstack-ai"
   | "vercel-ai"
   | "vercel-eve";
@@ -51,20 +46,15 @@ export type ArcjetRouteSdkKey = ArcjetSdkKey | ArcjetGuardSdkKey;
 
 export const GUARD_SDK_KEYS = [
   "claude-agent-sdk",
-  "claude-agent-sdk-py",
   "claude-managed-agents",
-  "claude-managed-agents-py",
   "crewai",
   "genkit",
   "google-adk",
   "langchain",
-  "langchain-js",
   "langgraph",
   "mastra",
   "openai-agents",
-  "openai-agents-py",
   "strands-agents",
-  "strands-agents-py",
   "tanstack-ai",
   "vercel-ai",
   "vercel-eve",
@@ -72,20 +62,15 @@ export const GUARD_SDK_KEYS = [
 
 const GUARD_SDK_LABELS = {
   "claude-agent-sdk": "Claude Agent SDK",
-  "claude-agent-sdk-py": "Claude Agent SDK Python",
   "claude-managed-agents": "Claude Managed Agents",
-  "claude-managed-agents-py": "Claude Managed Agents Python",
   crewai: "CrewAI",
   genkit: "Genkit",
   "google-adk": "Google ADK",
   langchain: "LangChain",
-  "langchain-js": "LangChain JS",
   langgraph: "LangGraph",
   mastra: "Mastra",
   "openai-agents": "OpenAI Agents",
-  "openai-agents-py": "OpenAI Agents Python",
   "strands-agents": "Strands Agents",
-  "strands-agents-py": "Strands Agents Python",
   "tanstack-ai": "TanStack AI",
   "vercel-ai": "Vercel AI SDK",
   "vercel-eve": "Vercel Eve",
@@ -337,7 +322,9 @@ export function legacyKeyFromPathname(
 /**
  * Extracts an Arcjet SDK key from a given pathname, if possible.
  */
-export function sdkFromPathname(pathname: string): ArcjetRouteSdkKey | undefined {
+export function sdkFromPathname(
+  pathname: string,
+): ArcjetRouteSdkKey | undefined {
   // Some of our callers from mdx / astro files don't have the _best_ static
   // type checking support, so we defensively check the type here.
   if (typeof pathname !== "string") {
@@ -388,7 +375,10 @@ export function pathnameForSdk(
     cleanPathname = pathname.replace(`/plus/${plusVariant.key}`, "");
   }
 
-  let result = cleanPathname.replace(`/sdk/${previousSdk}`, `/sdk/${targetSdk}`);
+  let result = cleanPathname.replace(
+    `/sdk/${previousSdk}`,
+    `/sdk/${targetSdk}`,
+  );
 
   if (!isGuardSdkKey(targetSdk) && !ARCJET_SDKS[targetSdk].legacyFrameworkKey) {
     const defaultVariant = sdkVariants(targetSdk)[0];
@@ -529,8 +519,7 @@ export function sdkSwitcherOptions(
     !!pageFrameworks?.length &&
     pageFrameworks.every((key) => isGuardSdkKey(key));
   const guardOnlyPage =
-    !mixed &&
-    (pageIsGuardOnly || (!!currentSdk && isGuardSdkKey(currentSdk)));
+    !mixed && (pageIsGuardOnly || (!!currentSdk && isGuardSdkKey(currentSdk)));
 
   if (!guardOnlyPage) {
     for (const sdkItem of sdks()) {
@@ -641,7 +630,9 @@ export function sdkSwitcherOptionForLegacyKey(
  * Returns a redirect target when `pathname` is a bare SDK route for an SDK
  * that requires a plus-variant (e.g. `/sdk/python/get-started/`).
  */
-export function variantOnlySdkRedirectTarget(pathname: string): string | undefined {
+export function variantOnlySdkRedirectTarget(
+  pathname: string,
+): string | undefined {
   const sdkKey = sdkFromPathname(pathname);
   if (!sdkKey || sdkVariantFromPathname(pathname)) {
     return undefined;
@@ -695,6 +686,56 @@ export function variantOnlySdkAstroRedirects(): Record<string, string> {
   return redirects;
 }
 
+/**
+ * Retired guard adapter keys and the merged adapter that replaced each one.
+ *
+ * Some adapters ship in more than one language. Those used to be separate
+ * pages and separate `/sdk/:sdk/` routes, one per language. They are now a
+ * single page with language tabs, so the retired key redirects to the merged
+ * one and every published URL keeps working.
+ */
+export const MERGED_GUARD_SDK_KEYS = {
+  "claude-agent-sdk-py": "claude-agent-sdk",
+  "claude-managed-agents-py": "claude-managed-agents",
+  "langchain-js": "langchain",
+  "openai-agents-py": "openai-agents",
+  "strands-agents-py": "strands-agents",
+} as const satisfies Record<string, ArcjetGuardSdkKey>;
+
+/** Returns whether a value is a retired, merged guard adapter key. */
+export function isMergedGuardSdkKey(
+  value: string,
+): value is keyof typeof MERGED_GUARD_SDK_KEYS {
+  return Object.hasOwn(MERGED_GUARD_SDK_KEYS, value);
+}
+
+/**
+ * Astro redirects from retired language-specific guard routes to the merged
+ * adapter. Covers the `/guards/:adapter-py` page and every `/sdk/:adapter-py/`
+ * route.
+ */
+export function mergedGuardSdkAstroRedirects(): Record<string, string> {
+  const redirects: Record<string, string> = {};
+
+  // `trailingSlash` is `ignore`, so one key per route covers both `/x` and
+  // `/x/`. Emitting both forms makes Astro report a route collision.
+  for (const [retired, merged] of Object.entries(MERGED_GUARD_SDK_KEYS)) {
+    redirects[`/guards/${retired}`] = `/guards/${merged}/`;
+    // Guard adapters have no `/sdk/:sdk/` index, so the bare route lands on
+    // the get-started guide for the merged adapter.
+    redirects[`/sdk/${retired}`] = `/sdk/${merged}/get-started/`;
+
+    for (const hubPath of LEGACY_FRAMEWORK_HUB_PATHS) {
+      const withSlash = normalizeDocHref(hubPath);
+      const withoutSlash = withSlash.replace(/\/$/, "") || withSlash;
+      redirects[`/sdk/${retired}${withoutSlash}`] =
+        `/sdk/${merged}${withSlash}`;
+    }
+  }
+
+  return redirects;
+}
+
 export type VercelSdkBaseRedirect = {
   source: string;
   destination: string;
@@ -719,6 +760,36 @@ export function variantOnlySdkVercelRedirects(): VercelSdkBaseRedirect[] {
     redirects.push({
       source: `/sdk/${sdkConfig.key}/:path((?!plus/).*)`,
       destination: `/sdk/${sdkConfig.key}/plus/${defaultVariant.key}/:path`,
+      permanent: true,
+    });
+  }
+
+  return redirects;
+}
+
+/**
+ * Vercel redirect rules for retired language-specific guard adapter routes.
+ *
+ * Kept in sync with `/vercel.json` by
+ * `scripts/generate-legacy-f-redirects.ts`.
+ */
+export function mergedGuardSdkVercelRedirects(): VercelSdkBaseRedirect[] {
+  const redirects: VercelSdkBaseRedirect[] = [];
+
+  for (const [retired, merged] of Object.entries(MERGED_GUARD_SDK_KEYS)) {
+    redirects.push({
+      source: `/guards/${retired}`,
+      destination: `/guards/${merged}`,
+      permanent: true,
+    });
+    redirects.push({
+      source: `/sdk/${retired}`,
+      destination: `/sdk/${merged}`,
+      permanent: true,
+    });
+    redirects.push({
+      source: `/sdk/${retired}/:path*`,
+      destination: `/sdk/${merged}/:path*`,
       permanent: true,
     });
   }
@@ -1127,6 +1198,19 @@ export function legacyFrameworkVercelRedirects(): VercelLegacyFrameworkRedirect[
       destination,
       permanent: true,
     });
+  }
+
+  // Retired language-specific guard keys still appear in published `?f=` URLs.
+  // Send each one to the merged adapter rather than dropping the redirect.
+  for (const [retired, merged] of Object.entries(MERGED_GUARD_SDK_KEYS)) {
+    for (const docPath of ["/get-started", "/guards/quick-start"] as const) {
+      redirects.push({
+        source: docPath,
+        has: [{ type: "query", key: "f", value: retired }],
+        destination: pathnameForLegacyFrameworkKey(merged, docPath),
+        permanent: true,
+      });
+    }
   }
 
   redirects.push({

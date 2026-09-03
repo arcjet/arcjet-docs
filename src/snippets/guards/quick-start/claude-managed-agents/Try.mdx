@@ -1,7 +1,16 @@
-import Step from "./Try.ts?raw";
-import { Code } from "@astrojs/starlight/components";
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import JsTry from "./js/Try.mdx";
+import PyTry from "./py/Try.mdx";
 
-Expose a small server endpoint. The browser sends only the scenario name.
-Pass the Anthropic session `id` from `sessions.create`. Don't mint one:
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
-<Code code={Step} lang="ts" title="app/api/agent/route.ts" />
+<JsTry />
+
+</TabItem>
+<TabItem label="Python">
+
+<PyTry />
+
+</TabItem>
+</Tabs>

@@ -1,8 +1,16 @@
-import Step from "./Step3.py?raw";
-import { Code } from "@astrojs/starlight/components";
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import JsStep3 from "./js/Step3.mdx";
+import PyStep3 from "./py/Step3.mdx";
 
-Scan a free-text tool argument with `localDetectSensitiveInfo` /
-`LocalDetectSensitiveInfo`. Don't pass an opaque ID such as an order
-number – those values don't contain personal information.
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
-<Code code={Step} lang="py" title="agent.py" />
+<JsStep3 />
+
+</TabItem>
+<TabItem label="Python">
+
+<PyStep3 />
+
+</TabItem>
+</Tabs>

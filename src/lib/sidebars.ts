@@ -632,10 +632,6 @@ export const main = [
         link: "/guards/claude-agent-sdk",
       },
       {
-        label: "Claude Agent SDK Python",
-        link: "/guards/claude-agent-sdk-py",
-      },
-      {
         label: "Claude Managed Agents",
         link: "/guards/claude-managed-agents",
       },
@@ -665,10 +661,6 @@ export const main = [
         link: "/guards/langchain",
       },
       {
-        label: "LangChain JS",
-        link: "/guards/langchain-js",
-      },
-      {
         label: "LangGraph",
         link: "/guards/langgraph",
       },
@@ -690,16 +682,8 @@ export const main = [
         link: "/guards/openai-agents",
       },
       {
-        label: "OpenAI Agents Python",
-        link: "/guards/openai-agents-py",
-      },
-      {
         label: "Strands Agents",
         link: "/guards/strands-agents",
-      },
-      {
-        label: "Strands Agents Python",
-        link: "/guards/strands-agents-py",
       },
       {
         label: "TanStack AI",

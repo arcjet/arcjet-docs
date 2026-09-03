@@ -1,4 +1,16 @@
-import { Code } from "@astrojs/starlight/components";
-import Step from "./ByUserId.py?raw";
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import JsByUserId from "./js/ByUserId.mdx";
+import PyByUserId from "./py/ByUserId.mdx";
 
-<Code code={Step} lang="py" />
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+<JsByUserId />
+
+</TabItem>
+<TabItem label="Python">
+
+<PyByUserId />
+
+</TabItem>
+</Tabs>

@@ -1,9 +1,16 @@
-import Step from "./Wrap.py?raw";
-import { Code } from "@astrojs/starlight/components";
-import AcceptsInputs from "../shared/AcceptsInputs.mdx";
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import JsWrap from "./js/Wrap.mdx";
+import PyWrap from "./py/Wrap.mdx";
 
-<AcceptsInputs />
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
-Create one client and wrap `send_email` with `guard_tool`:
+<JsWrap />
 
-<Code code={Step} lang="py" title="agent.py" />
+</TabItem>
+<TabItem label="Python">
+
+<PyWrap />
+
+</TabItem>
+</Tabs>

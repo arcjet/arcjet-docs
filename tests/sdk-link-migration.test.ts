@@ -1,7 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 
 function visibleSdkToggle(page: Page) {
-  return page.locator(".toc-toggle, .mtoc-sdk-toggle").filter({ visible: true });
+  return page
+    .locator(".toc-toggle, .mtoc-sdk-toggle")
+    .filter({ visible: true });
 }
 
 function visibleSdkMenu(page: Page) {
@@ -40,15 +42,15 @@ test.describe("SDK link migration", () => {
 
     expect(hrefs.length).toBeGreaterThan(0);
     expect(hrefs.every((href) => !href?.includes("?f="))).toBe(true);
-    expect(hrefs.some((href) => href?.startsWith("/sdk/next/get-started"))).toBe(
-      true,
-    );
+    expect(
+      hrefs.some((href) => href?.startsWith("/sdk/next/get-started")),
+    ).toBe(true);
     expect(
       hrefs.some((href) => href?.startsWith("/sdk/crewai/get-started")),
     ).toBe(true);
     expect(
       hrefs.some((href) =>
-        href?.startsWith("/sdk/claude-agent-sdk-py/get-started"),
+        href?.startsWith("/sdk/claude-agent-sdk/get-started"),
       ),
     ).toBe(true);
     expect(hrefs.some((href) => href?.startsWith("/guards/"))).toBe(false);
@@ -66,12 +68,12 @@ test.describe("SDK link migration", () => {
       .locator(".FrameworkLinks a")
       .evaluateAll((anchors) => anchors.map((a) => a.getAttribute("href")));
 
-    expect(hrefs.some((href) => href?.startsWith("/sdk/crewai/get-started"))).toBe(
-      true,
-    );
+    expect(
+      hrefs.some((href) => href?.startsWith("/sdk/crewai/get-started")),
+    ).toBe(true);
     expect(
       hrefs.some((href) =>
-        href?.startsWith("/sdk/claude-agent-sdk-py/get-started"),
+        href?.startsWith("/sdk/claude-agent-sdk/get-started"),
       ),
     ).toBe(true);
     expect(hrefs.some((href) => href?.startsWith("/guards/"))).toBe(false);
@@ -148,18 +150,22 @@ test.describe("SDK link migration", () => {
     expect(page.url()).not.toContain("?f=");
   });
 
-  test("SDK switcher navigates to Claude Agent SDK Python get-started", async ({
+  test("SDK switcher navigates to Claude Agent SDK get-started with both languages", async ({
     page,
   }) => {
     await page.goto("/get-started/");
-    await selectSdkOption(page, "Claude Agent SDK Python");
-    await page.waitForURL(/\/sdk\/claude-agent-sdk-py\/get-started\/?/, {
+    await selectSdkOption(page, "Claude Agent SDK");
+    await page.waitForURL(/\/sdk\/claude-agent-sdk\/get-started\/?/, {
       timeout: 15_000,
     });
 
-    expect(page.url()).toMatch(/\/sdk\/claude-agent-sdk-py\/get-started\/?$/);
+    expect(page.url()).toMatch(/\/sdk\/claude-agent-sdk\/get-started\/?$/);
     expect(page.url()).not.toContain("?f=");
-    await expect(page.locator("body")).toContainText("create_sdk_mcp_server");
+    // Both language tabs render, so the JavaScript and Python installs are
+    // both in the DOM on the merged page.
+    await expect(page.locator("body")).toContainText(
+      "@anthropic-ai/claude-agent-sdk",
+    );
     await expect(page.locator("body")).toContainText(
       "arcjet[claude-agent-sdk]",
     );
@@ -178,26 +184,39 @@ test.describe("SDK link migration", () => {
     expect(page.url()).not.toContain("?f=");
   });
 
-  test("SDK switcher navigates to Claude Agent SDK Python guards quick start", async ({
+  test("SDK switcher navigates to Claude Agent SDK guards quick start with both languages", async ({
     page,
   }) => {
     await page.goto("/guards/quick-start/");
-    await selectSdkOption(page, "Claude Agent SDK Python");
-    await page.waitForURL(/\/sdk\/claude-agent-sdk-py\/guards\/quick-start\/?/, {
+    await selectSdkOption(page, "Claude Agent SDK");
+    await page.waitForURL(/\/sdk\/claude-agent-sdk\/guards\/quick-start\/?/, {
       timeout: 15_000,
     });
 
     expect(page.url()).toMatch(
-      /\/sdk\/claude-agent-sdk-py\/guards\/quick-start\/?$/,
+      /\/sdk\/claude-agent-sdk\/guards\/quick-start\/?$/,
     );
     expect(page.url()).not.toContain("?f=");
     await expect(page.locator("body")).toContainText("create_sdk_mcp_server");
     await expect(page.locator("body")).toContainText(
       "arcjet[claude-agent-sdk,sensitive-info-rampart]",
     );
-    await expect(page.locator("body")).toContainText(
-      "11111111-1111-4111-8111-111111111111",
-    );
+  });
+
+  test("retired language-specific guard URLs redirect to the merged page", async ({
+    page,
+  }) => {
+    await page.goto("/guards/claude-agent-sdk-py/");
+    await page.waitForURL(/\/guards\/claude-agent-sdk\/?$/, {
+      timeout: 15_000,
+    });
+    expect(page.url()).toMatch(/\/guards\/claude-agent-sdk\/?$/);
+
+    await page.goto("/sdk/langchain-js/guards/quick-start/");
+    await page.waitForURL(/\/sdk\/langchain\/guards\/quick-start\/?$/, {
+      timeout: 15_000,
+    });
+    expect(page.url()).toMatch(/\/sdk\/langchain\/guards\/quick-start\/?$/);
   });
 
   test("SDK menu scrolls independently on a short viewport", async ({

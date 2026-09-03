@@ -1,9 +1,16 @@
-import Step from "./Wrap.ts?raw";
-import { Code } from "@astrojs/starlight/components";
-import ActionAndRules from "../shared/ActionAndRules.mdx";
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import JsWrap from "./js/Wrap.mdx";
+import PyWrap from "./py/Wrap.mdx";
 
-<ActionAndRules />
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
-Create one client, wrap `send_email` with `guardTool`, and register the tools on an in-process MCP server:
+<JsWrap />
 
-<Code code={Step} lang="ts" title="agent.ts" />
+</TabItem>
+<TabItem label="Python">
+
+<PyWrap />
+
+</TabItem>
+</Tabs>

@@ -1,7 +1,16 @@
-Add your key to a `.env.local` file in your project root.
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import JsStep2 from "./js/Step2.mdx";
+import PyStep2 from "./py/Step2.mdx";
 
-```ini title=".env.local"
-ARCJET_KEY=ajkey_yourkey
-ARCJET_ENV=development
-ANTHROPIC_API_KEY=sk-yourkey
-```
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+<JsStep2 />
+
+</TabItem>
+<TabItem label="Python">
+
+<PyStep2 />
+
+</TabItem>
+</Tabs>
