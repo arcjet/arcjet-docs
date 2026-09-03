@@ -19,7 +19,7 @@ const arcjet = arcjetReactRouter({
         // Uncomment to allow these other common bot categories
         // See the full list at https://arcjet.com/bot-list
         //"CATEGORY:MONITOR", // Uptime monitoring services
-        //"CATEGORY:PREVIEW", // Link previews e.g. Slack, Discord
+        //"CATEGORY:PREVIEW", // Link previews such as Slack, Discord
       ],
       mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
     }),
@@ -31,7 +31,7 @@ const arcjet = arcjetReactRouter({
       deny: ["ip.src.hosting"],
       mode: "LIVE",
     }),
-    // Shield protects your app from common attacks e.g. SQL injection
+    // Shield protects your app from common attacks such as SQL injection
     shield({ mode: "LIVE" }),
     // Create a token bucket rate limit. Other algorithms are supported.
     tokenBucket({

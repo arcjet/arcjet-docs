@@ -26,7 +26,7 @@ def index():
     print("Arcjet decision", decision)
 
     if decision.is_denied():
-        # The email rule denied this request — return 400 because the email is
+        # The email rule denied this request – return 400 because the email is
         # invalid rather than 403 which implies the user is forbidden.
         if decision.reason_v2.type == "EMAIL":
             return jsonify(error="Invalid email"), 400

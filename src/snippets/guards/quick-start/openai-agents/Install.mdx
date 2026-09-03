@@ -1,26 +1,17 @@
 import SelectableContent from "@/components/SelectableContent";
+import JsInstall from "./js/Install.mdx";
+import PyInstall from "./py/Install.mdx";
 
 {/* prettier-ignore */}
-<SelectableContent client:load syncKey="packageManager">
-<div slot="npm" slotIdx="1">
+<SelectableContent client:load syncKey="language">
+<div slot="JavaScript / TypeScript" slotIdx="1">
 
-```sh
-npm i @arcjet/guard @arcjet/sensitive-info-rampart @openai/agents zod
-```
+<JsInstall />
 
 </div>
-<div slot="pnpm" slotIdx="2">
+<div slot="Python" slotIdx="2">
 
-```sh
-pnpm add @arcjet/guard @arcjet/sensitive-info-rampart @openai/agents zod
-```
-
-</div>
-<div slot="yarn" slotIdx="3">
-
-```sh
-yarn add @arcjet/guard @arcjet/sensitive-info-rampart @openai/agents zod
-```
+<PyInstall />
 
 </div>
 </SelectableContent>

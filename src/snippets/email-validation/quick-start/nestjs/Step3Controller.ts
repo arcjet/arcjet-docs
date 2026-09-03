@@ -24,7 +24,7 @@ export class SignupDto {
   email: string;
 }
 
-// This would normally go in your service file e.g.
+// This would normally go in your service file, such as:
 // src/signup/signup.service.ts
 @Injectable()
 export class SignupService {
@@ -39,7 +39,7 @@ export class SignupService {
   }
 }
 
-// This would normally go in your controller file e.g.
+// This would normally go in your controller file, such as:
 // src/signup/signup.controller.ts
 @Controller("signup")
 export class SignupController {
@@ -48,7 +48,7 @@ export class SignupController {
   constructor(
     private readonly signupService: SignupService,
     @Inject(ARCJET) private readonly arcjet: ArcjetNest,
-  ) { }
+  ) {}
 
   // Implement a form handler following
   // https://docs.nestjs.com/techniques/file-upload#no-files. Note this isn't

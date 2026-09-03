@@ -1,6 +1,17 @@
-import Step from "./Try.py?raw";
-import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import JsTry from "./js/Try.mdx";
+import PyTry from "./py/Try.mdx";
 
-Expose a small server endpoint. The browser sends only the scenario name:
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language">
+<div slot="JavaScript / TypeScript" slotIdx="1">
 
-<Code code={Step} lang="py" title="app.py" />
+<JsTry />
+
+</div>
+<div slot="Python" slotIdx="2">
+
+<PyTry />
+
+</div>
+</SelectableContent>

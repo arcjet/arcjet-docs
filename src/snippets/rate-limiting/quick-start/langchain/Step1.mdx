@@ -1,11 +1,17 @@
-Install the Guard SDK and LangChain extras:
+import SelectableContent from "@/components/SelectableContent";
+import JsStep1 from "./js/Step1.mdx";
+import PyStep1 from "./py/Step1.mdx";
 
-```shell
-pip install "arcjet[langchain-agents]" langchain langchain-openai
-```
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language">
+<div slot="JavaScript / TypeScript" slotIdx="1">
 
-Or with [uv](https://docs.astral.sh/uv/):
+<JsStep1 />
 
-```shell
-uv add "arcjet[langchain-agents]" langchain langchain-openai
-```
+</div>
+<div slot="Python" slotIdx="2">
+
+<PyStep1 />
+
+</div>
+</SelectableContent>

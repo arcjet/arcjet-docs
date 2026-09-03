@@ -1,8 +1,17 @@
-Set your environment variables:
+import SelectableContent from "@/components/SelectableContent";
+import JsStep2 from "./js/Step2.mdx";
+import PyStep2 from "./py/Step2.mdx";
 
-```ini title=".env"
-# Export your Arcjet API key from https://console.arcjet.com
-ARCJET_KEY=ajkey_yourkey
-ARCJET_ENV=development
-OPENAI_API_KEY=sk-yourkey
-```
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language">
+<div slot="JavaScript / TypeScript" slotIdx="1">
+
+<JsStep2 />
+
+</div>
+<div slot="Python" slotIdx="2">
+
+<PyStep2 />
+
+</div>
+</SelectableContent>

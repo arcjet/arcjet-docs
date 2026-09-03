@@ -29,6 +29,10 @@
         {
           "key": "Content-Security-Policy",
           "value": "default-src 'self'; img-src 'self' data: https://vercel.live https://vercel.com https://i.ytimg.com https://img.shields.io https://track.hubspot.com https://forms.hsforms.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://giscus.app https://js.hs-scripts.com/45932667.js https://js.hs-analytics.net https://js.hs-banner.com https://js.hscollectedforms.net/collectedforms.js https://static.reo.dev; style-src 'self' 'unsafe-inline' https://vercel.live https://giscus.app; connect-src 'self' https://vercel.live wss://ws-us3.pusher.com https://track.hubspot.com https://js.hs-banner.com https://forms.hscollectedforms.net https://api.reo.dev; frame-src https://vercel.live https://www.youtube-nocookie.com https://giscus.app; font-src 'self' https://vercel.live https://assets.vercel.com; frame-ancestors https://us.posthog.com;"
+        },
+        {
+          "key": "Link",
+          "value": "<https://docs.arcjet.com/llms.txt>; rel=\"describedby\"; type=\"text/plain\", <https://docs.arcjet.com/llms-full.txt>; rel=\"describedby\"; type=\"text/plain\""
         }
       ]
     }
@@ -42,6 +46,81 @@
     {
       "source": "/sdk/python/:path((?!plus/).*)",
       "destination": "/sdk/python/plus/fastapi/:path",
+      "permanent": true
+    },
+    {
+      "source": "/guards/claude-agent-sdk-py",
+      "destination": "/guards/claude-agent-sdk",
+      "permanent": true
+    },
+    {
+      "source": "/sdk/claude-agent-sdk-py",
+      "destination": "/sdk/claude-agent-sdk/get-started",
+      "permanent": true
+    },
+    {
+      "source": "/sdk/claude-agent-sdk-py/:path*",
+      "destination": "/sdk/claude-agent-sdk/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/guards/claude-managed-agents-py",
+      "destination": "/guards/claude-managed-agents",
+      "permanent": true
+    },
+    {
+      "source": "/sdk/claude-managed-agents-py",
+      "destination": "/sdk/claude-managed-agents/get-started",
+      "permanent": true
+    },
+    {
+      "source": "/sdk/claude-managed-agents-py/:path*",
+      "destination": "/sdk/claude-managed-agents/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/guards/langchain-js",
+      "destination": "/guards/langchain",
+      "permanent": true
+    },
+    {
+      "source": "/sdk/langchain-js",
+      "destination": "/sdk/langchain/get-started",
+      "permanent": true
+    },
+    {
+      "source": "/sdk/langchain-js/:path*",
+      "destination": "/sdk/langchain/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/guards/openai-agents-py",
+      "destination": "/guards/openai-agents",
+      "permanent": true
+    },
+    {
+      "source": "/sdk/openai-agents-py",
+      "destination": "/sdk/openai-agents/get-started",
+      "permanent": true
+    },
+    {
+      "source": "/sdk/openai-agents-py/:path*",
+      "destination": "/sdk/openai-agents/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/guards/strands-agents-py",
+      "destination": "/guards/strands-agents",
+      "permanent": true
+    },
+    {
+      "source": "/sdk/strands-agents-py",
+      "destination": "/sdk/strands-agents/get-started",
+      "permanent": true
+    },
+    {
+      "source": "/sdk/strands-agents-py/:path*",
+      "destination": "/sdk/strands-agents/:path*",
       "permanent": true
     },
     {
@@ -254,34 +333,10 @@
         {
           "type": "query",
           "key": "f",
-          "value": "claude-agent-sdk-py"
-        }
-      ],
-      "destination": "/sdk/claude-agent-sdk-py/get-started/",
-      "permanent": true
-    },
-    {
-      "source": "/get-started",
-      "has": [
-        {
-          "type": "query",
-          "key": "f",
           "value": "claude-managed-agents"
         }
       ],
       "destination": "/sdk/claude-managed-agents/get-started/",
-      "permanent": true
-    },
-    {
-      "source": "/get-started",
-      "has": [
-        {
-          "type": "query",
-          "key": "f",
-          "value": "claude-managed-agents-py"
-        }
-      ],
-      "destination": "/sdk/claude-managed-agents-py/get-started/",
       "permanent": true
     },
     {
@@ -338,18 +393,6 @@
         {
           "type": "query",
           "key": "f",
-          "value": "langchain-js"
-        }
-      ],
-      "destination": "/sdk/langchain-js/get-started/",
-      "permanent": true
-    },
-    {
-      "source": "/get-started",
-      "has": [
-        {
-          "type": "query",
-          "key": "f",
           "value": "langgraph"
         }
       ],
@@ -386,34 +429,10 @@
         {
           "type": "query",
           "key": "f",
-          "value": "openai-agents-py"
-        }
-      ],
-      "destination": "/sdk/openai-agents-py/get-started/",
-      "permanent": true
-    },
-    {
-      "source": "/get-started",
-      "has": [
-        {
-          "type": "query",
-          "key": "f",
           "value": "strands-agents"
         }
       ],
       "destination": "/sdk/strands-agents/get-started/",
-      "permanent": true
-    },
-    {
-      "source": "/get-started",
-      "has": [
-        {
-          "type": "query",
-          "key": "f",
-          "value": "strands-agents-py"
-        }
-      ],
-      "destination": "/sdk/strands-agents-py/get-started/",
       "permanent": true
     },
     {
@@ -3542,34 +3561,10 @@
         {
           "type": "query",
           "key": "f",
-          "value": "claude-agent-sdk-py"
-        }
-      ],
-      "destination": "/sdk/claude-agent-sdk-py/guards/quick-start/",
-      "permanent": true
-    },
-    {
-      "source": "/guards/quick-start",
-      "has": [
-        {
-          "type": "query",
-          "key": "f",
           "value": "claude-managed-agents"
         }
       ],
       "destination": "/sdk/claude-managed-agents/guards/quick-start/",
-      "permanent": true
-    },
-    {
-      "source": "/guards/quick-start",
-      "has": [
-        {
-          "type": "query",
-          "key": "f",
-          "value": "claude-managed-agents-py"
-        }
-      ],
-      "destination": "/sdk/claude-managed-agents-py/guards/quick-start/",
       "permanent": true
     },
     {
@@ -3626,18 +3621,6 @@
         {
           "type": "query",
           "key": "f",
-          "value": "langchain-js"
-        }
-      ],
-      "destination": "/sdk/langchain-js/guards/quick-start/",
-      "permanent": true
-    },
-    {
-      "source": "/guards/quick-start",
-      "has": [
-        {
-          "type": "query",
-          "key": "f",
           "value": "langgraph"
         }
       ],
@@ -3674,34 +3657,10 @@
         {
           "type": "query",
           "key": "f",
-          "value": "openai-agents-py"
-        }
-      ],
-      "destination": "/sdk/openai-agents-py/guards/quick-start/",
-      "permanent": true
-    },
-    {
-      "source": "/guards/quick-start",
-      "has": [
-        {
-          "type": "query",
-          "key": "f",
           "value": "strands-agents"
         }
       ],
       "destination": "/sdk/strands-agents/guards/quick-start/",
-      "permanent": true
-    },
-    {
-      "source": "/guards/quick-start",
-      "has": [
-        {
-          "type": "query",
-          "key": "f",
-          "value": "strands-agents-py"
-        }
-      ],
-      "destination": "/sdk/strands-agents-py/guards/quick-start/",
       "permanent": true
     },
     {
@@ -3738,6 +3697,222 @@
         }
       ],
       "destination": "/sdk/vercel-eve/guards/quick-start/",
+      "permanent": true
+    },
+    {
+      "source": "/get-started",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "claude-agent-sdk-py"
+        }
+      ],
+      "destination": "/sdk/claude-agent-sdk/get-started/",
+      "permanent": true
+    },
+    {
+      "source": "/guards/quick-start",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "claude-agent-sdk-py"
+        }
+      ],
+      "destination": "/sdk/claude-agent-sdk/guards/quick-start/",
+      "permanent": true
+    },
+    {
+      "source": "/get-started",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "claude-managed-agents-py"
+        }
+      ],
+      "destination": "/sdk/claude-managed-agents/get-started/",
+      "permanent": true
+    },
+    {
+      "source": "/guards/quick-start",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "claude-managed-agents-py"
+        }
+      ],
+      "destination": "/sdk/claude-managed-agents/guards/quick-start/",
+      "permanent": true
+    },
+    {
+      "source": "/ai-protection/abuse-protection",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "langchain-js"
+        }
+      ],
+      "destination": "/sdk/langchain/ai-protection/abuse-protection/",
+      "permanent": true
+    },
+    {
+      "source": "/ai-protection/budget-control",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "langchain-js"
+        }
+      ],
+      "destination": "/sdk/langchain/ai-protection/budget-control/",
+      "permanent": true
+    },
+    {
+      "source": "/ai-protection/data-loss-prevention",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "langchain-js"
+        }
+      ],
+      "destination": "/sdk/langchain/ai-protection/data-loss-prevention/",
+      "permanent": true
+    },
+    {
+      "source": "/ai-protection/prompt-injection",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "langchain-js"
+        }
+      ],
+      "destination": "/sdk/langchain/ai-protection/prompt-injection/",
+      "permanent": true
+    },
+    {
+      "source": "/content-moderation/quick-start",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "langchain-js"
+        }
+      ],
+      "destination": "/sdk/langchain/content-moderation/quick-start/",
+      "permanent": true
+    },
+    {
+      "source": "/get-started",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "langchain-js"
+        }
+      ],
+      "destination": "/sdk/langchain/get-started/",
+      "permanent": true
+    },
+    {
+      "source": "/guards/quick-start",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "langchain-js"
+        }
+      ],
+      "destination": "/sdk/langchain/guards/quick-start/",
+      "permanent": true
+    },
+    {
+      "source": "/prompt-injection/quick-start",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "langchain-js"
+        }
+      ],
+      "destination": "/sdk/langchain/prompt-injection/quick-start/",
+      "permanent": true
+    },
+    {
+      "source": "/rate-limiting/quick-start",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "langchain-js"
+        }
+      ],
+      "destination": "/sdk/langchain/rate-limiting/quick-start/",
+      "permanent": true
+    },
+    {
+      "source": "/rate-limiting/reference",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "langchain-js"
+        }
+      ],
+      "destination": "/sdk/langchain/rate-limiting/reference/",
+      "permanent": true
+    },
+    {
+      "source": "/sensitive-info/quick-start",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "langchain-js"
+        }
+      ],
+      "destination": "/sdk/langchain/sensitive-info/quick-start/",
+      "permanent": true
+    },
+    {
+      "source": "/guards/quick-start",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "openai-agents-py"
+        }
+      ],
+      "destination": "/sdk/openai-agents/guards/quick-start/",
+      "permanent": true
+    },
+    {
+      "source": "/get-started",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "strands-agents-py"
+        }
+      ],
+      "destination": "/sdk/strands-agents/get-started/",
+      "permanent": true
+    },
+    {
+      "source": "/guards/quick-start",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "strands-agents-py"
+        }
+      ],
+      "destination": "/sdk/strands-agents/guards/quick-start/",
       "permanent": true
     },
     {

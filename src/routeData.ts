@@ -87,6 +87,55 @@ function addOpenGraphMetadata(
 }
 
 /**
+ * Advertises the machine-readable copies of the docs.
+ *
+ * `/llms.txt` and `/llms-full.txt` are only discoverable by guessing the
+ * well-known path. Pages that opt into `generateMarkdownRoute` also serve a
+ * `text/markdown` copy that nothing links to. A `rel="alternate"` link makes
+ * both findable from the HTML an agent already fetched.
+ */
+function addMachineReadableAlternates(
+  routeData: StarlightRouteData,
+  pathname: string,
+) {
+  routeData.head.push(
+    {
+      tag: "link",
+      attrs: {
+        rel: "alternate",
+        type: "text/plain",
+        href: `${SITE_URL}/llms.txt`,
+        title: "llms.txt",
+      },
+    },
+    {
+      tag: "link",
+      attrs: {
+        rel: "alternate",
+        type: "text/plain",
+        href: `${SITE_URL}/llms-full.txt`,
+        title: "llms-full.txt",
+      },
+    },
+  );
+
+  // The markdown route drops the trailing slash and appends `.md`, including
+  // for the `/sdk/...` copies of a page.
+  const docPath = pathname.replace(/\/$/, "");
+  if (routeData.entry.data.generateMarkdownRoute && docPath) {
+    routeData.head.push({
+      tag: "link",
+      attrs: {
+        rel: "alternate",
+        type: "text/markdown",
+        href: `${SITE_URL}${docPath}.md`,
+        title: "Markdown",
+      },
+    });
+  }
+}
+
+/**
  * Adds the JSON-LD graph describing Arcjet, the docs site, and this page.
  */
 function addStructuredData(
@@ -191,5 +240,6 @@ export const onRequest = defineRouteMiddleware(async (context) => {
 
   // Runs after the sidebar scoping above so breadcrumbs see the final `isCurrent`.
   addOpenGraphMetadata(routeData, isLandingPage);
+  addMachineReadableAlternates(routeData, pathname);
   addStructuredData(routeData, pathname, isLandingPage);
 });

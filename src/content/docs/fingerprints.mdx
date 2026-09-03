@@ -1,5 +1,6 @@
 ---
 title: "Arcjet fingerprints"
+description: "How Arcjet identifies a client when you don't supply a key, and how to set `characteristics` so rate limits and other rules track the identity you care about."
 next: false
 ---
 
@@ -101,7 +102,7 @@ const decision = await aj.protect(req, { userId: "user123" });
 </TabItem>
 <TabItem label="Python">
 ```py
-# Pass userId via the `characteristics` dict to identify the user. Values can be
+# Pass userId in the `characteristics` dict to identify the user. Values can be
 # any string, number, or boolean. Multiple values will be combined.
 decision = await aj.protect(request, characteristics={"userId": "user123"})
 ```

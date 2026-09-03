@@ -6,7 +6,7 @@ import { convertToModelMessages, isTextUIPart, streamText } from "ai";
 const aj = arcjet({
   key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
-    // Shield protects against common web attacks e.g. SQL injection
+    // Shield protects against common web attacks such as SQL injection
     shield({ mode: "LIVE" }),
     // Detect prompt injection attacks before they reach your AI model
     detectPromptInjection({
@@ -32,15 +32,14 @@ export async function POST(req: Request) {
   if (decision.isDenied()) {
     if (decision.reason.isPromptInjection()) {
       console.warn("Request blocked due to prompt injection");
-      return new Response(
-        "Prompt injection detected — please rephrase your message",
-        { status: 403 },
-      );
+      return new Response("Prompt injection detected – rephrase your message", {
+        status: 403,
+      });
     }
     return new Response("Forbidden", { status: 403 });
   }
 
-  // Arcjet approved — call your AI provider
+  // Arcjet approved – call your AI provider
   const result = await streamText({
     model: openai("gpt-4o"),
     messages: await convertToModelMessages(messages),

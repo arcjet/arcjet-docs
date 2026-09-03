@@ -24,11 +24,12 @@ import {
   shouldExcludeFromSitemap,
   variantOnlySdkRedirectTarget,
   variantOnlySdkAstroRedirects,
+  isMergedGuardSdkKey,
+  MERGED_GUARD_SDK_KEYS,
+  mergedGuardSdkAstroRedirects,
+  mergedGuardSdkVercelRedirects,
 } from "@/lib/sdk";
-import {
-  moveActiveIndex,
-  typeaheadIndex,
-} from "@/lib/sdk-switcher-keyboard";
+import { moveActiveIndex, typeaheadIndex } from "@/lib/sdk-switcher-keyboard";
 
 test.describe("isRouteSdkKey", () => {
   test("accepts HTTP SDK keys and guard adapters", () => {
@@ -155,23 +156,23 @@ test.describe("sdkSwitcherOptions", () => {
   test("lists guard adapters on guard-scoped pages", () => {
     const options = sdkSwitcherOptions("/sdk/langchain/guards/quick-start/", [
       "langchain",
-      "langchain-js",
+      "crewai",
       "claude-agent-sdk",
-      "claude-agent-sdk-py",
+      "claude-managed-agents",
     ]);
     const labels = options.map((option) => option.label);
     expect(labels).toEqual([
       "Claude Agent SDK",
-      "Claude Agent SDK Python",
+      "Claude Managed Agents",
+      "CrewAI",
       "LangChain",
-      "LangChain JS",
     ]);
+    expect(options.find((option) => option.sdkKey === "langchain")?.href).toBe(
+      "/sdk/langchain/guards/quick-start/",
+    );
     expect(
-      options.find((option) => option.sdkKey === "langchain")?.href,
-    ).toBe("/sdk/langchain/guards/quick-start/");
-    expect(
-      options.find((option) => option.sdkKey === "claude-agent-sdk-py")?.href,
-    ).toBe("/sdk/claude-agent-sdk-py/guards/quick-start/");
+      options.find((option) => option.sdkKey === "claude-agent-sdk")?.href,
+    ).toBe("/sdk/claude-agent-sdk/guards/quick-start/");
     expect(labels).not.toContain("Next.js");
   });
 
@@ -180,19 +181,19 @@ test.describe("sdkSwitcherOptions", () => {
       "next-js",
       "crewai",
       "langchain",
-      "claude-agent-sdk-py",
+      "claude-agent-sdk",
     ]);
     const fromNextLabels = fromNext.map((option) => option.label);
     expect(fromNextLabels).toContain("Next.js");
     expect(fromNextLabels).toContain("CrewAI");
     expect(fromNextLabels).toContain("LangChain");
-    expect(fromNextLabels).toContain("Claude Agent SDK Python");
+    expect(fromNextLabels).toContain("Claude Agent SDK");
     expect(fromNext.find((option) => option.sdkKey === "crewai")?.href).toBe(
       "/sdk/crewai/get-started/",
     );
     expect(
-      fromNext.find((option) => option.sdkKey === "claude-agent-sdk-py")?.href,
-    ).toBe("/sdk/claude-agent-sdk-py/get-started/");
+      fromNext.find((option) => option.sdkKey === "claude-agent-sdk")?.href,
+    ).toBe("/sdk/claude-agent-sdk/get-started/");
 
     const fromCrewai = sdkSwitcherOptions("/sdk/crewai/get-started/", [
       "next-js",
@@ -210,16 +211,16 @@ test.describe("sdkSwitcherOptions", () => {
       [
         "vercel-eve",
         "claude-agent-sdk",
-        "claude-agent-sdk-py",
-        "langchain-js",
+        "claude-managed-agents",
+        "langchain",
         "crewai",
       ],
     ).map((option) => option.label);
     expect(guardLabels).toEqual([
       "Claude Agent SDK",
-      "Claude Agent SDK Python",
+      "Claude Managed Agents",
       "CrewAI",
-      "LangChain JS",
+      "LangChain",
       "Vercel Eve",
     ]);
 
@@ -256,17 +257,17 @@ test.describe("sdkSwitcherOptions", () => {
   test("lists only guard adapters on hub guard pages", () => {
     const options = sdkSwitcherOptions("/guards/quick-start/", [
       "langchain",
-      "langchain-js",
-      "claude-agent-sdk-py",
+      "crewai",
+      "claude-agent-sdk",
     ]);
     expect(options.map((option) => option.label)).toEqual([
-      "Claude Agent SDK Python",
+      "Claude Agent SDK",
+      "CrewAI",
       "LangChain",
-      "LangChain JS",
     ]);
-    expect(
-      options.find((option) => option.sdkKey === "langchain")?.href,
-    ).toBe("/sdk/langchain/guards/quick-start/");
+    expect(options.find((option) => option.sdkKey === "langchain")?.href).toBe(
+      "/sdk/langchain/guards/quick-start/",
+    );
     expect(options.some((option) => option.sdkKey === "next")).toBe(false);
   });
 });
@@ -290,7 +291,9 @@ test.describe("sdkSwitcherOptionForLegacyKey", () => {
 test.describe("isSdkSwitcherOptionCurrent", () => {
   test("matches plus-variant paths", () => {
     const options = sdkSwitcherOptions("/sdk/python/plus/fastapi/get-started/");
-    const fastapi = options.find((option) => option.label === "Python + FastAPI");
+    const fastapi = options.find(
+      (option) => option.label === "Python + FastAPI",
+    );
     expect(fastapi).toBeDefined();
     expect(
       isSdkSwitcherOptionCurrent(
@@ -315,7 +318,9 @@ test.describe("variantOnlySdkRedirectTarget", () => {
   });
 
   test("leaves SDKs with base legacy keys unchanged", () => {
-    expect(variantOnlySdkRedirectTarget("/sdk/next/get-started/")).toBeUndefined();
+    expect(
+      variantOnlySdkRedirectTarget("/sdk/next/get-started/"),
+    ).toBeUndefined();
   });
 });
 
@@ -371,26 +376,20 @@ test.describe("pathnameForLegacyFrameworkKey", () => {
       "/sdk/google-adk/get-started/",
     );
     expect(
-      pathnameForLegacyFrameworkKey("strands-agents-py", "/get-started"),
-    ).toBe("/sdk/strands-agents-py/get-started/");
+      pathnameForLegacyFrameworkKey("strands-agents", "/get-started"),
+    ).toBe("/sdk/strands-agents/get-started/");
   });
 
-  test("maps Claude Agent SDK Python get-started to the SDK get-started route", () => {
+  test("maps Claude Agent SDK get-started to the SDK get-started route", () => {
     expect(
-      pathnameForLegacyFrameworkKey("claude-agent-sdk-py", "/get-started"),
-    ).toBe("/sdk/claude-agent-sdk-py/get-started/");
+      pathnameForLegacyFrameworkKey("claude-agent-sdk", "/get-started"),
+    ).toBe("/sdk/claude-agent-sdk/get-started/");
   });
 
   test("maps Claude Managed Agents get-started to the SDK get-started route", () => {
     expect(
       pathnameForLegacyFrameworkKey("claude-managed-agents", "/get-started"),
     ).toBe("/sdk/claude-managed-agents/get-started/");
-    expect(
-      pathnameForLegacyFrameworkKey(
-        "claude-managed-agents-py",
-        "/get-started",
-      ),
-    ).toBe("/sdk/claude-managed-agents-py/get-started/");
   });
 
   test("maps guard frameworks on the agent guards quick start to SDK routes", () => {
@@ -414,9 +413,9 @@ test.describe("hrefForLegacyFrameworkKey", () => {
   });
 
   test("uses SDK routes for guard frameworks on the agent guards quick start", () => {
-    expect(
-      hrefForLegacyFrameworkKey("langchain", "/guards/quick-start/"),
-    ).toBe("/sdk/langchain/guards/quick-start/");
+    expect(hrefForLegacyFrameworkKey("langchain", "/guards/quick-start/")).toBe(
+      "/sdk/langchain/guards/quick-start/",
+    );
   });
 
   test("uses SDK get-started routes for guard frameworks", () => {
@@ -463,18 +462,18 @@ test.describe("legacyFrameworkVercelRedirects", () => {
     expect(match).toBeDefined();
   });
 
-  test("redirects Claude Agent SDK Python get-started to the SDK get-started route", () => {
+  test("redirects retired Python guard get-started keys to the merged adapter", () => {
     const redirects = legacyFrameworkVercelRedirects();
     const match = redirects.find(
       (r) =>
         r.source === "/get-started" &&
         r.has[0]?.value === "claude-agent-sdk-py" &&
-        r.destination === "/sdk/claude-agent-sdk-py/get-started/",
+        r.destination === "/sdk/claude-agent-sdk/get-started/",
     );
     expect(match).toBeDefined();
   });
 
-  test("redirects Google ADK and Strands Agents Python get-started to SDK routes", () => {
+  test("redirects Google ADK and retired Strands Agents Python get-started to SDK routes", () => {
     const redirects = legacyFrameworkVercelRedirects();
     expect(
       redirects.find(
@@ -489,7 +488,7 @@ test.describe("legacyFrameworkVercelRedirects", () => {
         (r) =>
           r.source === "/get-started" &&
           r.has[0]?.value === "strands-agents-py" &&
-          r.destination === "/sdk/strands-agents-py/get-started/",
+          r.destination === "/sdk/strands-agents/get-started/",
       ),
     ).toBeDefined();
   });
@@ -528,13 +527,13 @@ test.describe("legacyFrameworkVercelRedirects", () => {
     expect(match).toBeDefined();
   });
 
-  test("redirects Claude Agent SDK Python guards quick-start URLs", () => {
+  test("redirects retired Python guard quick-start keys to the merged adapter", () => {
     const redirects = legacyFrameworkVercelRedirects();
     const match = redirects.find(
       (r) =>
         r.source === "/guards/quick-start" &&
         r.has[0]?.value === "claude-agent-sdk-py" &&
-        r.destination === "/sdk/claude-agent-sdk-py/guards/quick-start/",
+        r.destination === "/sdk/claude-agent-sdk/guards/quick-start/",
     );
     expect(match).toBeDefined();
   });
@@ -546,8 +545,7 @@ test.describe("legacyFrameworkVercelRedirects", () => {
         (r) =>
           r.source === "/guards/quick-start" &&
           r.has[0]?.value === "claude-managed-agents" &&
-          r.destination ===
-            "/sdk/claude-managed-agents/guards/quick-start/",
+          r.destination === "/sdk/claude-managed-agents/guards/quick-start/",
       ),
     ).toBeDefined();
     expect(
@@ -555,13 +553,12 @@ test.describe("legacyFrameworkVercelRedirects", () => {
         (r) =>
           r.source === "/guards/quick-start" &&
           r.has[0]?.value === "claude-managed-agents-py" &&
-          r.destination ===
-            "/sdk/claude-managed-agents-py/guards/quick-start/",
+          r.destination === "/sdk/claude-managed-agents/guards/quick-start/",
       ),
     ).toBeDefined();
   });
 
-  test("redirects Google ADK and Strands Agents Python guards quick-start URLs", () => {
+  test("redirects Google ADK and retired Strands Agents Python guards quick-start URLs", () => {
     const redirects = legacyFrameworkVercelRedirects();
     expect(
       redirects.find(
@@ -576,7 +573,7 @@ test.describe("legacyFrameworkVercelRedirects", () => {
         (r) =>
           r.source === "/guards/quick-start" &&
           r.has[0]?.value === "strands-agents-py" &&
-          r.destination === "/sdk/strands-agents-py/guards/quick-start/",
+          r.destination === "/sdk/strands-agents/guards/quick-start/",
       ),
     ).toBeDefined();
   });
@@ -609,9 +606,9 @@ test.describe("legacyFrameworkVercelRedirects", () => {
 
 test.describe("shouldExcludeFromSitemap", () => {
   test("excludes plus-variant SDK routes", () => {
-    expect(
-      shouldExcludeFromSitemap("/sdk/bun/plus/hono/get-started/"),
-    ).toBe(true);
+    expect(shouldExcludeFromSitemap("/sdk/bun/plus/hono/get-started/")).toBe(
+      true,
+    );
     expect(shouldExcludeFromSitemap("/sdk/next/get-started/")).toBe(false);
   });
 
@@ -665,5 +662,111 @@ test.describe("sdk switcher keyboard helpers", () => {
     expect(typeaheadIndex(labels, 2, "nn")).toBe(3);
     expect(typeaheadIndex(labels, 3, "nn")).toBe(4);
     expect(typeaheadIndex(labels, 4, "nn")).toBe(2);
+  });
+});
+
+test.describe("merged guard adapters", () => {
+  test("retired language-specific keys are recognized", () => {
+    expect(isMergedGuardSdkKey("claude-agent-sdk-py")).toBe(true);
+    expect(isMergedGuardSdkKey("langchain-js")).toBe(true);
+    expect(isMergedGuardSdkKey("claude-agent-sdk")).toBe(false);
+    expect(isMergedGuardSdkKey("next-js")).toBe(false);
+  });
+
+  test("retired keys are no longer valid SDK route keys", () => {
+    for (const retired of Object.keys(MERGED_GUARD_SDK_KEYS)) {
+      expect(isRouteSdkKey(retired)).toBe(false);
+    }
+  });
+
+  test("each retired key maps to a live guard adapter", () => {
+    for (const merged of Object.values(MERGED_GUARD_SDK_KEYS)) {
+      expect(isRouteSdkKey(merged)).toBe(true);
+    }
+  });
+
+  test("Astro redirects cover the guard page and SDK-scoped routes", () => {
+    const redirects = mergedGuardSdkAstroRedirects();
+    expect(redirects["/guards/claude-agent-sdk-py"]).toBe(
+      "/guards/claude-agent-sdk/",
+    );
+    expect(redirects["/guards/langchain-js"]).toBe("/guards/langchain/");
+    expect(redirects["/sdk/claude-agent-sdk-py/get-started"]).toBe(
+      "/sdk/claude-agent-sdk/get-started/",
+    );
+    expect(redirects["/sdk/langchain-js/guards/quick-start"]).toBe(
+      "/sdk/langchain/guards/quick-start/",
+    );
+    expect(redirects["/sdk/strands-agents-py"]).toBe(
+      "/sdk/strands-agents/get-started/",
+    );
+  });
+
+  test("Vercel redirects are permanent and cover every retired key", () => {
+    const redirects = mergedGuardSdkVercelRedirects();
+    for (const [retired, merged] of Object.entries(MERGED_GUARD_SDK_KEYS)) {
+      expect(
+        redirects.find(
+          (r) =>
+            r.source === `/guards/${retired}` &&
+            r.destination === `/guards/${merged}`,
+        ),
+      ).toBeDefined();
+      expect(
+        redirects.find(
+          (r) =>
+            r.source === `/sdk/${retired}/:path*` &&
+            r.destination === `/sdk/${merged}/:path*`,
+        ),
+      ).toBeDefined();
+    }
+    expect(redirects.every((r) => r.permanent)).toBe(true);
+  });
+
+  test("the bare retired SDK route lands on a page that exists", () => {
+    // Guard adapters have no `/sdk/:sdk/` index, so `/sdk/${merged}` is a 404.
+    for (const [retired, merged] of Object.entries(MERGED_GUARD_SDK_KEYS)) {
+      expect(
+        mergedGuardSdkVercelRedirects().find(
+          (r) => r.source === `/sdk/${retired}`,
+        )?.destination,
+      ).toBe(`/sdk/${merged}/get-started`);
+      expect(mergedGuardSdkAstroRedirects()[`/sdk/${retired}`]).toBe(
+        `/sdk/${merged}/get-started/`,
+      );
+    }
+  });
+
+  test("every page that accepted a retired ?f= value still redirects", () => {
+    const redirects = legacyFrameworkVercelRedirects();
+
+    // `langchain-js` was selectable on the building blocks, not just the two
+    // hub pages, so those URLs have to keep working too.
+    const langchainJsPaths = [
+      "/ai-protection/abuse-protection",
+      "/ai-protection/budget-control",
+      "/ai-protection/data-loss-prevention",
+      "/ai-protection/prompt-injection",
+      "/content-moderation/quick-start",
+      "/get-started",
+      "/guards/quick-start",
+      "/prompt-injection/quick-start",
+      "/rate-limiting/quick-start",
+      "/rate-limiting/reference",
+      "/sensitive-info/quick-start",
+    ];
+
+    for (const docPath of langchainJsPaths) {
+      expect(
+        redirects.find(
+          (r) => r.source === docPath && r.has[0]?.value === "langchain-js",
+        )?.destination,
+      ).toBe(`/sdk/langchain${docPath}/`);
+    }
+
+    // Every retired key has at least one `?f=` redirect.
+    for (const retired of Object.keys(MERGED_GUARD_SDK_KEYS)) {
+      expect(redirects.some((r) => r.has[0]?.value === retired)).toBe(true);
+    }
   });
 });

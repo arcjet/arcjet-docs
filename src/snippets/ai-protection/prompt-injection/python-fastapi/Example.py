@@ -44,7 +44,7 @@ class ChatRequest(BaseModel):
 aj = arcjet(
     key=arcjet_key,  # Get your key from https://console.arcjet.com
     rules=[
-        # Shield protects against common web attacks e.g. SQL injection
+        # Shield protects against common web attacks such as SQL injection
         shield(mode=Mode.LIVE),
         # Detect prompt injection attacks before they reach your AI model
         detect_prompt_injection(
@@ -65,13 +65,13 @@ async def chat(request: Request, body: ChatRequest):
         if decision.reason_v2.type == "PROMPT_INJECTION":
             logger.warning("Request blocked due to prompt injection")
             return JSONResponse(
-                {"error": "Prompt injection detected — please rephrase your message"},
+                {"error": "Prompt injection detected – rephrase your message"},
                 status_code=400,
             )
         # SHIELD or any other denial
         return JSONResponse({"error": "Forbidden"}, status_code=403)
 
-    # Arcjet approved — call the AI model
+    # Arcjet approved – call the AI model
     reply = await chain.ainvoke({"message": body.message})
 
     return {"reply": reply}

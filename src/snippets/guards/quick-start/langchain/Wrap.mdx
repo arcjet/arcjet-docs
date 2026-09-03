@@ -1,9 +1,17 @@
-import Step from "./Wrap.py?raw";
-import { Code } from "@astrojs/starlight/components";
-import AcceptsInputs from "../shared/AcceptsInputs.mdx";
+import SelectableContent from "@/components/SelectableContent";
+import JsWrap from "./js/Wrap.mdx";
+import PyWrap from "./py/Wrap.mdx";
 
-<AcceptsInputs />
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language">
+<div slot="JavaScript / TypeScript" slotIdx="1">
 
-Create one client and wrap `send_email` with `guard_tool`:
+<JsWrap />
 
-<Code code={Step} lang="py" title="agent.py" />
+</div>
+<div slot="Python" slotIdx="2">
+
+<PyWrap />
+
+</div>
+</SelectableContent>

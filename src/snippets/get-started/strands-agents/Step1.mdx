@@ -1,26 +1,17 @@
 import SelectableContent from "@/components/SelectableContent";
+import JsStep1 from "./js/Step1.mdx";
+import PyStep1 from "./py/Step1.mdx";
 
 {/* prettier-ignore */}
-<SelectableContent client:load syncKey="packageManager">
-<div slot="npm" slotIdx="1">
+<SelectableContent client:load syncKey="language">
+<div slot="JavaScript / TypeScript" slotIdx="1">
 
-```sh
-npm i @arcjet/guard @strands-agents/sdk
-```
+<JsStep1 />
 
 </div>
-<div slot="pnpm" slotIdx="2">
+<div slot="Python" slotIdx="2">
 
-```sh
-pnpm add @arcjet/guard @strands-agents/sdk
-```
-
-</div>
-<div slot="yarn" slotIdx="3">
-
-```sh
-yarn add @arcjet/guard @strands-agents/sdk
-```
+<PyStep1 />
 
 </div>
 </SelectableContent>

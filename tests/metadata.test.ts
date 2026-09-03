@@ -52,10 +52,7 @@ test.describe("routeForSitemapUrl", () => {
       "https://docs.arcjet.com/sdk/react-router/shield/quick-start/",
       "/shield/quick-start/",
     ],
-    [
-      "https://docs.arcjet.com/sdk/bun/plus/hono/get-started/",
-      "/get-started/",
-    ],
+    ["https://docs.arcjet.com/sdk/bun/plus/hono/get-started/", "/get-started/"],
     ["https://docs.arcjet.com/sdk/astro/", "/"],
     ["https://docs.arcjet.com/sdk/astro", "/"],
     // Guard adapters share `/sdk/:sdk/` routes with HTTP SDKs.
@@ -119,11 +116,37 @@ test.describe("pageJsonLd", () => {
     expect(nodes.get("ImageObject")?.["@id"]).toBe("https://arcjet.com/#logo");
   });
 
+  test("describes the product so a single page enumerates what Arcjet does", () => {
+    const software = nodesByType(pageJsonLd(base)).get(
+      "SoftwareApplication",
+    ) as
+      | {
+          featureList?: string[];
+          sameAs?: string[];
+          softwareHelp?: { "@id": string };
+          operatingSystem?: string;
+        }
+      | undefined;
+
+    expect(software?.featureList?.length).toBeGreaterThan(5);
+    expect(software?.featureList).toContain("Prompt injection detection");
+    expect(software?.softwareHelp).toEqual({ "@id": WEBSITE_ID });
+    expect(software?.operatingSystem).toBe("Any");
+    expect(software?.sameAs).toContain("https://github.com/arcjet/arcjet-js");
+    // Claiming a price or a rating we cannot verify would be a fabrication,
+    // so the node deliberately carries neither.
+    expect(software).not.toHaveProperty("offers");
+    expect(software).not.toHaveProperty("aggregateRating");
+  });
+
   test("builds a breadcrumb trail of real pages, each with an item URL", () => {
     const graph = pageJsonLd({
       ...base,
       breadcrumbs: [
-        { name: "Rate limiting", url: "https://docs.arcjet.com/rate-limiting/" },
+        {
+          name: "Rate limiting",
+          url: "https://docs.arcjet.com/rate-limiting/",
+        },
       ],
     });
     const breadcrumb = nodesByType(graph).get("BreadcrumbList") as

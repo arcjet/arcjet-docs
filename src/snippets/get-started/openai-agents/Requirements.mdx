@@ -1,2 +1,17 @@
-- Node.js 22 or later.
-- CommonJS is not supported. Arcjet is ESM only.
+import SelectableContent from "@/components/SelectableContent";
+import JsRequirements from "./js/Requirements.mdx";
+import PyRequirements from "./py/Requirements.mdx";
+
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language">
+<div slot="JavaScript / TypeScript" slotIdx="1">
+
+<JsRequirements />
+
+</div>
+<div slot="Python" slotIdx="2">
+
+<PyRequirements />
+
+</div>
+</SelectableContent>

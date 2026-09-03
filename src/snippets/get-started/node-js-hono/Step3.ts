@@ -6,7 +6,7 @@ import { Hono } from "hono";
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
   rules: [
-    // Shield protects your app from common attacks e.g. SQL injection
+    // Shield protects your app from common attacks such as SQL injection
     shield({ mode: "LIVE" }),
     // Create a bot detection rule
     detectBot({
@@ -17,7 +17,7 @@ const aj = arcjet({
         // Uncomment to allow these other common bot categories
         // See the full list at https://arcjet.com/bot-list
         //"CATEGORY:MONITOR", // Uptime monitoring services
-        //"CATEGORY:PREVIEW", // Link previews e.g. Slack, Discord
+        //"CATEGORY:PREVIEW", // Link previews such as Slack, Discord
       ],
     }),
     // Create a token bucket rate limit. Other algorithms are supported.

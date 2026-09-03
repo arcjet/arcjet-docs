@@ -44,9 +44,9 @@ class ChatRequest(BaseModel):
 aj = arcjet(
     key=arcjet_key,  # Get your key from https://console.arcjet.com
     rules=[
-        # Shield protects against common web attacks e.g. SQL injection
+        # Shield protects against common web attacks such as SQL injection
         shield(mode=Mode.LIVE),
-        # Block all automated clients — bots inflate AI costs
+        # Block all automated clients – bots inflate AI costs
         detect_bot(
             mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
             allow=[
@@ -54,7 +54,7 @@ aj = arcjet(
                 # Uncomment to allow these other common bot categories
                 # See the full list at https://arcjet.com/bot-list
                 # BotCategory.MONITOR, # Uptime monitoring services
-                # BotCategory.PREVIEW, # Link previews e.g. Slack, Discord
+                # BotCategory.PREVIEW, # Link previews such as Slack, Discord
             ],
         ),
     ],
@@ -72,7 +72,7 @@ async def chat(request: Request, body: ChatRequest):
             )
         return JSONResponse({"error": "Forbidden"}, status_code=403)
 
-    # Arcjet approved — proceed with the AI call
+    # Arcjet approved – proceed with the AI call
     reply = await chain.ainvoke({"message": body.message})
 
     return {"reply": reply}

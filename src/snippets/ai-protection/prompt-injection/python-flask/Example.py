@@ -37,7 +37,7 @@ chain = prompt | llm | StrOutputParser()
 aj = arcjet_sync(
     key=arcjet_key,  # Get your key from https://console.arcjet.com
     rules=[
-        # Shield protects against common web attacks e.g. SQL injection
+        # Shield protects against common web attacks such as SQL injection
         shield(mode=Mode.LIVE),
         # Detect prompt injection attacks before they reach your AI model
         detect_prompt_injection(
@@ -59,12 +59,12 @@ def chat():
         if decision.reason_v2.type == "PROMPT_INJECTION":
             logger.warning("Request blocked due to prompt injection")
             return jsonify(
-                error="Prompt injection detected — please rephrase your message"
+                error="Prompt injection detected – rephrase your message"
             ), 400
         # SHIELD or any other denial
         return jsonify(error="Forbidden"), 403
 
-    # Arcjet approved — call the AI model
+    # Arcjet approved – call the AI model
     reply = chain.invoke({"message": message})
 
     return jsonify(reply=reply)

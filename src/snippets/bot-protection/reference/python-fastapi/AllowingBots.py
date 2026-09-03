@@ -8,7 +8,7 @@ aj = arcjet(
         detect_bot(
             mode=Mode.LIVE,
             # configured with a list of bots to allow from
-            # https://arcjet.com/bot-list — all other detected bots will be blocked
+            # https://arcjet.com/bot-list – all other detected bots will be blocked
             allow=[
                 # Google has multiple crawlers, each with a different user-agent,
                 # so we allow the entire Google category

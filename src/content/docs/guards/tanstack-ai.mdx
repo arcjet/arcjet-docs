@@ -13,9 +13,8 @@ effect runs.
 
 <FrameworkPrimer />
 
-Vercel AI SDK, Python LangChain, CrewAI, Eve, Mastra, LangGraph,
-OpenAI Agents, OpenAI Agents Python, Genkit, LangChain JS, Strands
-Agents, and Claude wrappers are on
+Vercel AI SDK, LangChain, CrewAI, Eve, Mastra, LangGraph, OpenAI
+Agents, Genkit, Strands Agents, and Claude wrappers are on
 <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>.
 
 This adapter is TanStack AI `chat({ middleware })` plus
@@ -270,7 +269,7 @@ if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
 
 `needsApproval`, `defineInterrupt`, and `onInterruptBoundary` are
 human-in-the-loop (HITL) confirmation. They aren't a policy gate.
-Same trap as LangChain JS `humanInTheLoopMiddleware`, Strands
+Same trap as LangChain `humanInTheLoopMiddleware`, Strands
 `event.interrupt()`, Genkit `interrupt()`, OpenAI `needsApproval`,
 Mastra `requireApproval`, and Claude `canUseTool`. There is no
 `guardApproval`. Don't wrap HITL as Guard. Don't deny by pausing
@@ -286,7 +285,7 @@ trip email, phone, card, or IP detection, so don't pass it to
 `localDetectSensitiveInfo`. That helper runs on a local ML model
 backend.
 
-## Deny chat-wide via `guardMiddleware`
+## Gate every tool call with the chat middleware
 
 `guardMiddleware` is the `chat({ middleware })` gate. Put it first
 in the middleware array. `onBeforeToolCall` uses the first
@@ -496,16 +495,14 @@ versus fail-closed behavior, see
 
 - <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
 - <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>
-- <Link.Page href="/guards/langchain-js">LangChain JS agent guard</Link.Page>
+- <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
 - <Link.Page href="/guards/strands-agents">Strands Agents agent guard</Link.Page>
 - <Link.Page href="/guards/genkit">Genkit agent guard</Link.Page>
 - <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>
 - <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>
 - <Link.Page href="/guards/openai-agents">OpenAI Agents agent guard</Link.Page>
-- <Link.Page href="/guards/openai-agents-py">OpenAI Agents Python agent guard</Link.Page>
 - <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>
 - <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>
-- <Link.Page href="/guards/claude-agent-sdk-py">Claude Agent SDK Python agent guard</Link.Page>
 - <Link.Page href="/guards">Agent guards</Link.Page>
 - Example:
   [examples/tanstack-agent](https://github.com/arcjet/examples/tree/main/examples/tanstack-agent)

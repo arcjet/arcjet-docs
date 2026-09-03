@@ -1,2 +1,17 @@
-- Python 3.10 or later.
-- A LangChain 1.x project with `create_agent`.
+import SelectableContent from "@/components/SelectableContent";
+import JsRequirements from "./js/Requirements.mdx";
+import PyRequirements from "./py/Requirements.mdx";
+
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language">
+<div slot="JavaScript / TypeScript" slotIdx="1">
+
+<JsRequirements />
+
+</div>
+<div slot="Python" slotIdx="2">
+
+<PyRequirements />
+
+</div>
+</SelectableContent>

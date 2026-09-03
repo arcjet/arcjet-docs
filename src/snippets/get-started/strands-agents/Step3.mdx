@@ -1,7 +1,17 @@
-import Step from "./Step3.ts?raw";
-import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import JsStep3 from "./js/Step3.mdx";
+import PyStep3 from "./py/Step3.mdx";
 
-Create a client, screen inbound text, wrap a tool, and pass
-`guardHooks` on `new Agent({ plugins })`:
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language">
+<div slot="JavaScript / TypeScript" slotIdx="1">
 
-<Code code={Step} lang="ts" title="agent.ts" />
+<JsStep3 />
+
+</div>
+<div slot="Python" slotIdx="2">
+
+<PyStep3 />
+
+</div>
+</SelectableContent>

@@ -1,5 +1,17 @@
-- Node.js 22 or later.
-- CommonJS is not supported. Arcjet is ESM only.
-- `@anthropic-ai/sdk` (`>=0.86.0 <1`) is an optional peer of
-  `@arcjet/guard`. The peer is `@anthropic-ai/sdk`, not
-  `@anthropic-ai/claude-agent-sdk`.
+import SelectableContent from "@/components/SelectableContent";
+import JsRequirements from "./js/Requirements.mdx";
+import PyRequirements from "./py/Requirements.mdx";
+
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language">
+<div slot="JavaScript / TypeScript" slotIdx="1">
+
+<JsRequirements />
+
+</div>
+<div slot="Python" slotIdx="2">
+
+<PyRequirements />
+
+</div>
+</SelectableContent>

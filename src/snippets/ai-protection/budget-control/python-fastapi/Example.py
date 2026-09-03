@@ -48,7 +48,7 @@ aj = arcjet(
         # Token bucket rate limiting is best for AI budget control
         token_bucket(
             mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
-            # Track budgets per user — replace "userId" with any stable
+            # Track budgets per user – replace "userId" with any stable
             # identifier. Removing this falls back to IP-based rate limiting.
             characteristics=["userId"],
             refill_rate=2_000,  # Refill 2,000 tokens per interval

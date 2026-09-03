@@ -1,10 +1,17 @@
-import Step from "./Wrap.ts?raw";
-import { Code } from "@astrojs/starlight/components";
-import ActionAndRules from "../shared/ActionAndRules.mdx";
+import SelectableContent from "@/components/SelectableContent";
+import JsWrap from "./js/Wrap.mdx";
+import PyWrap from "./py/Wrap.mdx";
 
-<ActionAndRules />
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language">
+<div slot="JavaScript / TypeScript" slotIdx="1">
 
-Create one client, wrap `send_email` with `guardCustomTool`, and handle
-`agent.custom_tool_use` in your session loop:
+<JsWrap />
 
-<Code code={Step} lang="ts" title="agent.ts" />
+</div>
+<div slot="Python" slotIdx="2">
+
+<PyWrap />
+
+</div>
+</SelectableContent>

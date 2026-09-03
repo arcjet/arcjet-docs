@@ -1,0 +1,26 @@
+import Step from "./Example.py?raw";
+import { Code } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+Bot detection is a request-based rule. On an agent, abuse control is a rate limit plus inbound prompt-injection screening so a single actor cannot loop tools or jailbreak the model.
+
+We assume you already have a LangChain project set up. For helper options and
+denial behavior, see the <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
+
+Install the dependencies:
+
+```shell
+# Export your Arcjet API key from https://console.arcjet.com
+export ARCJET_KEY="ajkey_..."
+export ARCJET_ENV=development
+
+pip install "arcjet[langchain-agents]" langchain langchain-openai
+```
+
+Create the example:
+
+<Code code={Step} lang="py" title="agent.py" />
+
+Then start or invoke the agent with a test prompt.
+
+Requests appear in your [Arcjet dashboard](https://console.arcjet.com) in real time.

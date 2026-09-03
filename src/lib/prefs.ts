@@ -51,16 +51,13 @@ export const frameworks = [
   { key: "bun", label: "Bun" },
   { key: "bun-hono", label: "Bun + Hono" },
   { key: "claude-agent-sdk", label: "Claude Agent SDK" },
-  { key: "claude-agent-sdk-py", label: "Claude Agent SDK Python" },
   { key: "claude-managed-agents", label: "Claude Managed Agents" },
-  { key: "claude-managed-agents-py", label: "Claude Managed Agents Python" },
   { key: "crewai", label: "CrewAI" },
   { key: "deno", label: "Deno" },
   { key: "fastify", label: "Fastify" },
   { key: "genkit", label: "Genkit" },
   { key: "google-adk", label: "Google ADK" },
   { key: "langchain", label: "LangChain" },
-  { key: "langchain-js", label: "LangChain JS" },
   { key: "langgraph", label: "LangGraph" },
   { key: "mastra", label: "Mastra" },
   { key: "nest-js", label: "NestJS" },
@@ -70,13 +67,11 @@ export const frameworks = [
   { key: "node-js-hono", label: "Node.js + Hono" },
   { key: "nuxt", label: "Nuxt" },
   { key: "openai-agents", label: "OpenAI Agents" },
-  { key: "openai-agents-py", label: "OpenAI Agents Python" },
   { key: "python-fastapi", label: "Python + FastAPI" },
   { key: "python-flask", label: "Python + Flask" },
   { key: "react-router", label: "React Router" },
   { key: "remix", label: "Remix" },
   { key: "strands-agents", label: "Strands Agents" },
-  { key: "strands-agents-py", label: "Strands Agents Python" },
   { key: "sveltekit", label: "SvelteKit" },
   { key: "tanstack-ai", label: "TanStack AI" },
   { key: "vercel-ai", label: "Vercel AI SDK" },
@@ -103,7 +98,7 @@ export const getFrameworks = (
   return frameworks
     .filter((f) => keys.includes(f.key))
     .toSorted((a, b) => a.label.localeCompare(b.label, "en"));
-}
+};
 
 /**
  * Type guard utility for sanitizing interaction input

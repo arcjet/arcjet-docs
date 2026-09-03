@@ -3,40 +3,30 @@ title: "Agent guards"
 titleByFramework:
   default: "Agent guards"
   claude-agent-sdk: "Agent guards for Claude Agent SDK"
-  claude-agent-sdk-py: "Agent guards for Claude Agent SDK Python"
   claude-managed-agents: "Agent guards for Claude Managed Agents"
-  claude-managed-agents-py: "Agent guards for Claude Managed Agents Python"
   crewai: "Agent guards for CrewAI"
   genkit: "Agent guards for Genkit"
   google-adk: "Agent guards for Google ADK"
   langchain: "Agent guards for LangChain"
-  langchain-js: "Agent guards for LangChain JS"
   langgraph: "Agent guards for LangGraph"
   mastra: "Agent guards for Mastra"
   openai-agents: "Agent guards for OpenAI Agents"
-  openai-agents-py: "Agent guards for OpenAI Agents Python"
   strands-agents: "Agent guards for Strands Agents"
-  strands-agents-py: "Agent guards for Strands Agents Python"
   tanstack-ai: "Agent guards for TanStack AI"
   vercel-ai: "Agent guards for Vercel AI SDK"
   vercel-eve: "Agent guards for Vercel Eve"
-description: "Quick start guide for guarding an AI agent tool with an Arcjet remote policy in Vercel AI SDK, LangChain, LangChain JS, CrewAI, LangGraph, Genkit, Google ADK, OpenAI Agents, OpenAI Agents Python, Strands Agents, Strands Agents Python, TanStack AI, Mastra, Vercel Eve, Claude Agent SDK, Claude Agent SDK Python, and Claude Managed Agents."
+description: "Quick start guide for guarding an AI agent tool with an Arcjet remote policy in Vercel AI SDK, LangChain, CrewAI, LangGraph, Genkit, Google ADK, OpenAI Agents, Strands Agents, TanStack AI, Mastra, Vercel Eve, Claude Agent SDK, and Claude Managed Agents, in JavaScript and Python."
 frameworks:
   - claude-agent-sdk
-  - claude-agent-sdk-py
   - claude-managed-agents
-  - claude-managed-agents-py
   - crewai
   - genkit
   - google-adk
   - langchain
-  - langchain-js
   - langgraph
   - mastra
   - openai-agents
-  - openai-agents-py
   - strands-agents
-  - strands-agents-py
   - tanstack-ai
   - vercel-ai
   - vercel-eve
@@ -73,17 +63,9 @@ import SdkReferenceLinkByFramework from "@/components/SdkReferenceLinkByFramewor
 import ClaudeInstall from "@/snippets/guards/quick-start/claude-agent-sdk/Install.mdx";
 import ClaudeWrap from "@/snippets/guards/quick-start/claude-agent-sdk/Wrap.mdx";
 import ClaudeTry from "@/snippets/guards/quick-start/claude-agent-sdk/Try.mdx";
-import ClaudePyInstall from "@/snippets/guards/quick-start/claude-agent-sdk-py/Install.mdx";
-import ClaudePyWrap from "@/snippets/guards/quick-start/claude-agent-sdk-py/Wrap.mdx";
-import ClaudePyTry from "@/snippets/guards/quick-start/claude-agent-sdk-py/Try.mdx";
-import ClaudePyKey from "@/snippets/guards/quick-start/claude-agent-sdk-py/Key.mdx";
 import ClaudeManagedInstall from "@/snippets/guards/quick-start/claude-managed-agents/Install.mdx";
 import ClaudeManagedWrap from "@/snippets/guards/quick-start/claude-managed-agents/Wrap.mdx";
 import ClaudeManagedTry from "@/snippets/guards/quick-start/claude-managed-agents/Try.mdx";
-import ClaudeManagedPyInstall from "@/snippets/guards/quick-start/claude-managed-agents-py/Install.mdx";
-import ClaudeManagedPyWrap from "@/snippets/guards/quick-start/claude-managed-agents-py/Wrap.mdx";
-import ClaudeManagedPyTry from "@/snippets/guards/quick-start/claude-managed-agents-py/Try.mdx";
-import ClaudeManagedPyKey from "@/snippets/guards/quick-start/claude-managed-agents-py/Key.mdx";
 import CrewaiInstall from "@/snippets/guards/quick-start/crewai/Install.mdx";
 import CrewaiWrap from "@/snippets/guards/quick-start/crewai/Wrap.mdx";
 import CrewaiTry from "@/snippets/guards/quick-start/crewai/Try.mdx";
@@ -96,9 +78,6 @@ import GoogleAdkTry from "@/snippets/guards/quick-start/google-adk/Try.mdx";
 import LangchainInstall from "@/snippets/guards/quick-start/langchain/Install.mdx";
 import LangchainWrap from "@/snippets/guards/quick-start/langchain/Wrap.mdx";
 import LangchainTry from "@/snippets/guards/quick-start/langchain/Try.mdx";
-import LangchainJsInstall from "@/snippets/guards/quick-start/langchain-js/Install.mdx";
-import LangchainJsWrap from "@/snippets/guards/quick-start/langchain-js/Wrap.mdx";
-import LangchainJsTry from "@/snippets/guards/quick-start/langchain-js/Try.mdx";
 import LanggraphInstall from "@/snippets/guards/quick-start/langgraph/Install.mdx";
 import LanggraphWrap from "@/snippets/guards/quick-start/langgraph/Wrap.mdx";
 import LanggraphTry from "@/snippets/guards/quick-start/langgraph/Try.mdx";
@@ -108,17 +87,9 @@ import MastraTry from "@/snippets/guards/quick-start/mastra/Try.mdx";
 import OpenaiAgentsInstall from "@/snippets/guards/quick-start/openai-agents/Install.mdx";
 import OpenaiAgentsWrap from "@/snippets/guards/quick-start/openai-agents/Wrap.mdx";
 import OpenaiAgentsTry from "@/snippets/guards/quick-start/openai-agents/Try.mdx";
-import OpenaiAgentsPyInstall from "@/snippets/guards/quick-start/openai-agents-py/Install.mdx";
-import OpenaiAgentsPyWrap from "@/snippets/guards/quick-start/openai-agents-py/Wrap.mdx";
-import OpenaiAgentsPyTry from "@/snippets/guards/quick-start/openai-agents-py/Try.mdx";
-import OpenaiAgentsPyKey from "@/snippets/guards/quick-start/openai-agents-py/Key.mdx";
 import StrandsInstall from "@/snippets/guards/quick-start/strands-agents/Install.mdx";
 import StrandsWrap from "@/snippets/guards/quick-start/strands-agents/Wrap.mdx";
 import StrandsTry from "@/snippets/guards/quick-start/strands-agents/Try.mdx";
-import StrandsPyInstall from "@/snippets/guards/quick-start/strands-agents-py/Install.mdx";
-import StrandsPyWrap from "@/snippets/guards/quick-start/strands-agents-py/Wrap.mdx";
-import StrandsPyTry from "@/snippets/guards/quick-start/strands-agents-py/Try.mdx";
-import StrandsPyKey from "@/snippets/guards/quick-start/strands-agents-py/Key.mdx";
 import TanstackAiInstall from "@/snippets/guards/quick-start/tanstack-ai/Install.mdx";
 import TanstackAiWrap from "@/snippets/guards/quick-start/tanstack-ai/Wrap.mdx";
 import TanstackAiTry from "@/snippets/guards/quick-start/tanstack-ai/Try.mdx";
@@ -131,17 +102,16 @@ import VercelEveTry from "@/snippets/guards/quick-start/vercel-eve/Try.mdx";
 import DemoPage from "@/snippets/guards/quick-start/shared/DemoPage.mdx";
 import EveDemoNote from "@/snippets/guards/quick-start/vercel-eve/DemoNote.mdx";
 
-import ClaudeKey from "@/snippets/get-started/claude-agent-sdk/Step2.mdx";
-import ClaudeManagedKey from "@/snippets/get-started/claude-managed-agents/Step2.mdx";
+import ClaudeKey from "@/snippets/guards/quick-start/claude-agent-sdk/Key.mdx";
+import ClaudeManagedKey from "@/snippets/guards/quick-start/claude-managed-agents/Key.mdx";
 import CrewaiKey from "@/snippets/get-started/crewai/Step2.mdx";
 import GenkitKey from "@/snippets/get-started/genkit/Step2.mdx";
 import GoogleAdkKey from "@/snippets/get-started/google-adk/Step2.mdx";
-import LangchainKey from "@/snippets/get-started/langchain/Step2.mdx";
-import LangchainJsKey from "@/snippets/get-started/langchain-js/Step2.mdx";
+import LangchainKey from "@/snippets/guards/quick-start/langchain/Key.mdx";
 import LanggraphKey from "@/snippets/get-started/langgraph/Step2.mdx";
 import MastraKey from "@/snippets/get-started/mastra/Step2.mdx";
-import OpenaiAgentsKey from "@/snippets/get-started/openai-agents/Step2.mdx";
-import StrandsKey from "@/snippets/get-started/strands-agents/Step2.mdx";
+import OpenaiAgentsKey from "@/snippets/guards/quick-start/openai-agents/Key.mdx";
+import StrandsKey from "@/snippets/guards/quick-start/strands-agents/Key.mdx";
 import TanstackAiKey from "@/snippets/get-started/tanstack-ai/Step2.mdx";
 import VercelAiKey from "@/snippets/get-started/vercel-ai/Step2.mdx";
 import VercelEveKey from "@/snippets/get-started/vercel-eve/Step2.mdx";
@@ -198,20 +168,15 @@ In your project root, install the SDK:
 
 <SlotByFramework>
   <ClaudeInstall slot="claude-agent-sdk" />
-  <ClaudePyInstall slot="claude-agent-sdk-py" />
   <ClaudeManagedInstall slot="claude-managed-agents" />
-  <ClaudeManagedPyInstall slot="claude-managed-agents-py" />
   <CrewaiInstall slot="crewai" />
   <GenkitInstall slot="genkit" />
   <GoogleAdkInstall slot="google-adk" />
   <LangchainInstall slot="langchain" />
-  <LangchainJsInstall slot="langchain-js" />
   <LanggraphInstall slot="langgraph" />
   <MastraInstall slot="mastra" />
   <OpenaiAgentsInstall slot="openai-agents" />
-  <OpenaiAgentsPyInstall slot="openai-agents-py" />
   <StrandsInstall slot="strands-agents" />
-  <StrandsPyInstall slot="strands-agents-py" />
   <TanstackAiInstall slot="tanstack-ai" />
   <VercelAiInstall slot="vercel-ai" />
   <VercelEveInstall slot="vercel-eve" />
@@ -224,20 +189,15 @@ instructions to add a site and get a key.
 
 <SlotByFramework>
   <ClaudeKey slot="claude-agent-sdk" />
-  <ClaudePyKey slot="claude-agent-sdk-py" />
   <ClaudeManagedKey slot="claude-managed-agents" />
-  <ClaudeManagedPyKey slot="claude-managed-agents-py" />
   <CrewaiKey slot="crewai" />
   <GenkitKey slot="genkit" />
   <GoogleAdkKey slot="google-adk" />
   <LangchainKey slot="langchain" />
-  <LangchainJsKey slot="langchain-js" />
   <LanggraphKey slot="langgraph" />
   <MastraKey slot="mastra" />
   <OpenaiAgentsKey slot="openai-agents" />
-  <OpenaiAgentsPyKey slot="openai-agents-py" />
   <StrandsKey slot="strands-agents" />
-  <StrandsPyKey slot="strands-agents-py" />
   <TanstackAiKey slot="tanstack-ai" />
   <VercelAiKey slot="vercel-ai" />
   <VercelEveKey slot="vercel-eve" />
@@ -250,20 +210,15 @@ provider runs.
 
 <SlotByFramework>
   <ClaudeWrap slot="claude-agent-sdk" />
-  <ClaudePyWrap slot="claude-agent-sdk-py" />
   <ClaudeManagedWrap slot="claude-managed-agents" />
-  <ClaudeManagedPyWrap slot="claude-managed-agents-py" />
   <CrewaiWrap slot="crewai" />
   <GenkitWrap slot="genkit" />
   <GoogleAdkWrap slot="google-adk" />
   <LangchainWrap slot="langchain" />
-  <LangchainJsWrap slot="langchain-js" />
   <LanggraphWrap slot="langgraph" />
   <MastraWrap slot="mastra" />
   <OpenaiAgentsWrap slot="openai-agents" />
-  <OpenaiAgentsPyWrap slot="openai-agents-py" />
   <StrandsWrap slot="strands-agents" />
-  <StrandsPyWrap slot="strands-agents-py" />
   <TanstackAiWrap slot="tanstack-ai" />
   <VercelAiWrap slot="vercel-ai" />
   <VercelEveWrap slot="vercel-eve" />
@@ -276,20 +231,15 @@ browser sends only the scenario name.
 
 <SlotByFramework>
   <ClaudeTry slot="claude-agent-sdk" />
-  <ClaudePyTry slot="claude-agent-sdk-py" />
   <ClaudeManagedTry slot="claude-managed-agents" />
-  <ClaudeManagedPyTry slot="claude-managed-agents-py" />
   <CrewaiTry slot="crewai" />
   <GenkitTry slot="genkit" />
   <GoogleAdkTry slot="google-adk" />
   <LangchainTry slot="langchain" />
-  <LangchainJsTry slot="langchain-js" />
   <LanggraphTry slot="langgraph" />
   <MastraTry slot="mastra" />
   <OpenaiAgentsTry slot="openai-agents" />
-  <OpenaiAgentsPyTry slot="openai-agents-py" />
   <StrandsTry slot="strands-agents" />
-  <StrandsPyTry slot="strands-agents-py" />
   <TanstackAiTry slot="tanstack-ai" />
   <VercelAiTry slot="vercel-ai" />
   <VercelEveTry slot="vercel-eve" />
@@ -297,20 +247,15 @@ browser sends only the scenario name.
 
 <SlotByFramework>
   <DemoPage slot="claude-agent-sdk" />
-  <DemoPage slot="claude-agent-sdk-py" />
   <DemoPage slot="claude-managed-agents" />
-  <DemoPage slot="claude-managed-agents-py" />
   <DemoPage slot="crewai" />
   <DemoPage slot="genkit" />
   <DemoPage slot="google-adk" />
   <DemoPage slot="langchain" />
-  <DemoPage slot="langchain-js" />
   <DemoPage slot="langgraph" />
   <DemoPage slot="mastra" />
   <DemoPage slot="openai-agents" />
-  <DemoPage slot="openai-agents-py" />
   <DemoPage slot="strands-agents" />
-  <DemoPage slot="strands-agents-py" />
   <DemoPage slot="tanstack-ai" />
   <DemoPage slot="vercel-ai" />
   <EveDemoNote slot="vercel-eve" />

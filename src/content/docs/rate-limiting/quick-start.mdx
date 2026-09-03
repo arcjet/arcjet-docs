@@ -4,9 +4,11 @@ titleByFramework:
   default: "Rate limiting"
   bun: "Rate limiting for Bun"
   claude-agent-sdk: "Rate limiting for Claude Agent SDK"
+  claude-managed-agents: "Rate limiting for Claude Managed Agents"
+  crewai: "Rate limiting for CrewAI"
   genkit: "Rate limiting for Genkit"
+  google-adk: "Rate limiting for Google ADK"
   langchain: "Rate limiting for LangChain"
-  langchain-js: "Rate limiting for LangChain JS"
   langgraph: "Rate limiting for LangGraph"
   mastra: "Rate limiting for Mastra"
   nest-js: "Rate limiting for NestJS"
@@ -16,16 +18,20 @@ titleByFramework:
   python-fastapi: "Rate limiting for Python + FastAPI"
   python-flask: "Rate limiting for Python + Flask"
   remix: "Rate limiting for Remix"
+  strands-agents: "Rate limiting for Strands Agents"
   sveltekit: "Rate limiting for SvelteKit"
+  tanstack-ai: "Rate limiting for TanStack AI"
   vercel-ai: "Rate limiting for Vercel AI SDK"
   vercel-eve: "Rate limiting for Vercel Eve"
 description: "Quick start guide for adding Arcjet rate limiting to your Next.js, NestJS, Node.js, Bun, Python, Remix, or SvelteKit app."
 frameworks:
   - bun
   - claude-agent-sdk
+  - claude-managed-agents
+  - crewai
   - genkit
+  - google-adk
   - langchain
-  - langchain-js
   - langgraph
   - mastra
   - nest-js
@@ -35,7 +41,9 @@ frameworks:
   - python-fastapi
   - python-flask
   - remix
+  - strands-agents
   - sveltekit
+  - tanstack-ai
   - vercel-ai
   - vercel-eve
 ajToc:
@@ -56,7 +64,7 @@ ajToc:
         framework: ["bun", "node-js", "python-fastapi", "python-flask"]
       - text: 4. Start app
         anchor: "4-start-app"
-        framework: ["claude-agent-sdk", "genkit", "langchain", "langchain-js", "langgraph", "mastra", "nest-js", "next-js", "openai-agents", "remix", "sveltekit", "vercel-ai", "vercel-eve"]
+        framework: ["claude-agent-sdk", "genkit", "langchain", "langgraph", "mastra", "nest-js", "next-js", "openai-agents", "remix", "sveltekit", "vercel-ai", "vercel-eve"]
   - text: "FAQs"
     anchor: "faqs"
   - text: "What next?"
@@ -132,20 +140,35 @@ import LangchainStep2 from "@/snippets/rate-limiting/quick-start/langchain/Step2
 import LangchainStep3 from "@/snippets/rate-limiting/quick-start/langchain/Step3.mdx";
 import LangchainStep4 from "@/snippets/rate-limiting/quick-start/langchain/Step4.mdx";
 
-import LangchainJsStep1 from "@/snippets/rate-limiting/quick-start/langchain-js/Step1.mdx";
-import LangchainJsStep2 from "@/snippets/rate-limiting/quick-start/langchain-js/Step2.mdx";
-import LangchainJsStep3 from "@/snippets/rate-limiting/quick-start/langchain-js/Step3.mdx";
-import LangchainJsStep4 from "@/snippets/rate-limiting/quick-start/langchain-js/Step4.mdx";
-
 import LanggraphStep1 from "@/snippets/rate-limiting/quick-start/langgraph/Step1.mdx";
 import LanggraphStep2 from "@/snippets/rate-limiting/quick-start/langgraph/Step2.mdx";
 import LanggraphStep3 from "@/snippets/rate-limiting/quick-start/langgraph/Step3.mdx";
 import LanggraphStep4 from "@/snippets/rate-limiting/quick-start/langgraph/Step4.mdx";
 
 import MastraStep1 from "@/snippets/rate-limiting/quick-start/mastra/Step1.mdx";
+import ClaudeManagedAgentsStep1 from "@/snippets/rate-limiting/quick-start/claude-managed-agents/Step1.mdx";
+import CrewaiStep1 from "@/snippets/rate-limiting/quick-start/crewai/Step1.mdx";
+import GoogleAdkStep1 from "@/snippets/rate-limiting/quick-start/google-adk/Step1.mdx";
+import StrandsAgentsStep1 from "@/snippets/rate-limiting/quick-start/strands-agents/Step1.mdx";
+import TanstackAiStep1 from "@/snippets/rate-limiting/quick-start/tanstack-ai/Step1.mdx";
 import MastraStep2 from "@/snippets/rate-limiting/quick-start/mastra/Step2.mdx";
+import ClaudeManagedAgentsStep2 from "@/snippets/rate-limiting/quick-start/claude-managed-agents/Step2.mdx";
+import CrewaiStep2 from "@/snippets/rate-limiting/quick-start/crewai/Step2.mdx";
+import GoogleAdkStep2 from "@/snippets/rate-limiting/quick-start/google-adk/Step2.mdx";
+import StrandsAgentsStep2 from "@/snippets/rate-limiting/quick-start/strands-agents/Step2.mdx";
+import TanstackAiStep2 from "@/snippets/rate-limiting/quick-start/tanstack-ai/Step2.mdx";
 import MastraStep3 from "@/snippets/rate-limiting/quick-start/mastra/Step3.mdx";
+import ClaudeManagedAgentsStep3 from "@/snippets/rate-limiting/quick-start/claude-managed-agents/Step3.mdx";
+import CrewaiStep3 from "@/snippets/rate-limiting/quick-start/crewai/Step3.mdx";
+import GoogleAdkStep3 from "@/snippets/rate-limiting/quick-start/google-adk/Step3.mdx";
+import StrandsAgentsStep3 from "@/snippets/rate-limiting/quick-start/strands-agents/Step3.mdx";
+import TanstackAiStep3 from "@/snippets/rate-limiting/quick-start/tanstack-ai/Step3.mdx";
 import MastraStep4 from "@/snippets/rate-limiting/quick-start/mastra/Step4.mdx";
+import ClaudeManagedAgentsStep4 from "@/snippets/rate-limiting/quick-start/claude-managed-agents/Step4.mdx";
+import CrewaiStep4 from "@/snippets/rate-limiting/quick-start/crewai/Step4.mdx";
+import GoogleAdkStep4 from "@/snippets/rate-limiting/quick-start/google-adk/Step4.mdx";
+import StrandsAgentsStep4 from "@/snippets/rate-limiting/quick-start/strands-agents/Step4.mdx";
+import TanstackAiStep4 from "@/snippets/rate-limiting/quick-start/tanstack-ai/Step4.mdx";
 
 import OpenaiAgentsStep1 from "@/snippets/rate-limiting/quick-start/openai-agents/Step1.mdx";
 import OpenaiAgentsStep2 from "@/snippets/rate-limiting/quick-start/openai-agents/Step2.mdx";
@@ -189,20 +212,24 @@ In your project root, install the SDK:
 
 <SlotByFramework>
   <BunStep1 slot="bun" />
+  <ClaudeAgentSdkStep1 slot="claude-agent-sdk" />
+  <ClaudeManagedAgentsStep1 slot="claude-managed-agents" />
+  <CrewaiStep1 slot="crewai" />
+  <GenkitStep1 slot="genkit" />
+  <GoogleAdkStep1 slot="google-adk" />
+  <LangchainStep1 slot="langchain" />
+  <LanggraphStep1 slot="langgraph" />
+  <MastraStep1 slot="mastra" />
   <NestJsStep1 slot="nest-js" />
   <NextJsStep1 slot="next-js" />
   <NodeJsStep1 slot="node-js" />
+  <OpenaiAgentsStep1 slot="openai-agents" />
   <PythonFastapiStep1 slot="python-fastapi" />
   <PythonFlaskStep1 slot="python-flask" />
   <RemixStep1 slot="remix" />
+  <StrandsAgentsStep1 slot="strands-agents" />
   <SvelteKitStep1 slot="sveltekit" />
-  <ClaudeAgentSdkStep1 slot="claude-agent-sdk" />
-  <GenkitStep1 slot="genkit" />
-  <LangchainStep1 slot="langchain" />
-  <LangchainJsStep1 slot="langchain-js" />
-  <LanggraphStep1 slot="langgraph" />
-  <MastraStep1 slot="mastra" />
-  <OpenaiAgentsStep1 slot="openai-agents" />
+  <TanstackAiStep1 slot="tanstack-ai" />
   <VercelAiStep1 slot="vercel-ai" />
   <VercelEveStep1 slot="vercel-eve" />
 </SlotByFramework>
@@ -214,20 +241,24 @@ instructions to add a site and get a key.
 
 <SlotByFramework>
   <BunStep2 slot="bun" />
+  <ClaudeAgentSdkStep2 slot="claude-agent-sdk" />
+  <ClaudeManagedAgentsStep2 slot="claude-managed-agents" />
+  <CrewaiStep2 slot="crewai" />
+  <GenkitStep2 slot="genkit" />
+  <GoogleAdkStep2 slot="google-adk" />
+  <LangchainStep2 slot="langchain" />
+  <LanggraphStep2 slot="langgraph" />
+  <MastraStep2 slot="mastra" />
   <NestJsStep2 slot="nest-js" />
   <NextJsStep2 slot="next-js" />
   <NodeJsStep2 slot="node-js" />
+  <OpenaiAgentsStep2 slot="openai-agents" />
   <PythonFastapiStep2 slot="python-fastapi" />
   <PythonFlaskStep2 slot="python-flask" />
   <RemixStep2 slot="remix" />
+  <StrandsAgentsStep2 slot="strands-agents" />
   <SvelteKitStep2 slot="sveltekit" />
-  <ClaudeAgentSdkStep2 slot="claude-agent-sdk" />
-  <GenkitStep2 slot="genkit" />
-  <LangchainStep2 slot="langchain" />
-  <LangchainJsStep2 slot="langchain-js" />
-  <LanggraphStep2 slot="langgraph" />
-  <MastraStep2 slot="mastra" />
-  <OpenaiAgentsStep2 slot="openai-agents" />
+  <TanstackAiStep2 slot="tanstack-ai" />
   <VercelAiStep2 slot="vercel-ai" />
   <VercelEveStep2 slot="vercel-eve" />
 </SlotByFramework>
@@ -241,40 +272,48 @@ tokens every 10 seconds. Each request consumes 5 tokens.
 
 <SlotByFramework>
   <BunStep3 slot="bun" />
+  <ClaudeAgentSdkStep3 slot="claude-agent-sdk" />
+  <ClaudeManagedAgentsStep3 slot="claude-managed-agents" />
+  <CrewaiStep3 slot="crewai" />
+  <GenkitStep3 slot="genkit" />
+  <GoogleAdkStep3 slot="google-adk" />
+  <LangchainStep3 slot="langchain" />
+  <LanggraphStep3 slot="langgraph" />
+  <MastraStep3 slot="mastra" />
   <NestJsStep3 slot="nest-js" />
   <NextJsStep3 slot="next-js" />
   <NodeJsStep3 slot="node-js" />
+  <OpenaiAgentsStep3 slot="openai-agents" />
   <PythonFastapiStep3 slot="python-fastapi" />
   <PythonFlaskStep3 slot="python-flask" />
   <RemixStep3 slot="remix" />
+  <StrandsAgentsStep3 slot="strands-agents" />
   <SvelteKitStep3 slot="sveltekit" />
-  <ClaudeAgentSdkStep3 slot="claude-agent-sdk" />
-  <GenkitStep3 slot="genkit" />
-  <LangchainStep3 slot="langchain" />
-  <LangchainJsStep3 slot="langchain-js" />
-  <LanggraphStep3 slot="langgraph" />
-  <MastraStep3 slot="mastra" />
-  <OpenaiAgentsStep3 slot="openai-agents" />
+  <TanstackAiStep3 slot="tanstack-ai" />
   <VercelAiStep3 slot="vercel-ai" />
   <VercelEveStep3 slot="vercel-eve" />
 </SlotByFramework>
 
 <SlotByFramework>
   <BunStep4 slot="bun" />
+  <ClaudeAgentSdkStep4 slot="claude-agent-sdk" />
+  <ClaudeManagedAgentsStep4 slot="claude-managed-agents" />
+  <CrewaiStep4 slot="crewai" />
+  <GenkitStep4 slot="genkit" />
+  <GoogleAdkStep4 slot="google-adk" />
+  <LangchainStep4 slot="langchain" />
+  <LanggraphStep4 slot="langgraph" />
+  <MastraStep4 slot="mastra" />
   <NestJsStep4 slot="nest-js" />
   <NextJsStep4 slot="next-js" />
   <NodeJsStep4 slot="node-js" />
+  <OpenaiAgentsStep4 slot="openai-agents" />
   <PythonFastapiStep4 slot="python-fastapi" />
   <PythonFlaskStep4 slot="python-flask" />
   <RemixStep4 slot="remix" />
+  <StrandsAgentsStep4 slot="strands-agents" />
   <SvelteKitStep4 slot="sveltekit" />
-  <ClaudeAgentSdkStep4 slot="claude-agent-sdk" />
-  <GenkitStep4 slot="genkit" />
-  <LangchainStep4 slot="langchain" />
-  <LangchainJsStep4 slot="langchain-js" />
-  <LanggraphStep4 slot="langgraph" />
-  <MastraStep4 slot="mastra" />
-  <OpenaiAgentsStep4 slot="openai-agents" />
+  <TanstackAiStep4 slot="tanstack-ai" />
   <VercelAiStep4 slot="vercel-ai" />
   <VercelEveStep4 slot="vercel-eve" />
 </SlotByFramework>

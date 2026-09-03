@@ -5,7 +5,7 @@ import arcjet, { detectBot, request, shield } from "@arcjet/next";
 const aj = arcjet({
   key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
-    // Shield protects your app from common attacks e.g. SQL injection
+    // Shield protects your app from common attacks such as SQL injection
     shield({ mode: "LIVE" }),
     // Create a bot detection rule
     detectBot({

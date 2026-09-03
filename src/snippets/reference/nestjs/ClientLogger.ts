@@ -2,7 +2,7 @@ import { ArcjetModule } from "@arcjet/nest";
 import { type LoggerService, Injectable, Logger } from "@nestjs/common";
 
 // Sets up the built-in Arcjet logger to use the NestJS logger. This could go in
-// a separate file e.g. src/arcjet-logger.ts See
+// a separate file, such as src/arcjet-logger.ts. See
 // https://github.com/arcjet/example-nestjs/blob/main/src/arcjet-logger.ts for
 // an example.
 @Injectable()

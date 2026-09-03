@@ -29,7 +29,7 @@ def index():
             logger.info("detected + denied bots %s", result.reason_v2.denied)
 
             # Arcjet Pro plan verifies the authenticity of common bots using
-            # IP data — see https://docs.arcjet.com/bot-protection/reference#bot-verification
+            # IP data – see https://docs.arcjet.com/bot-protection/reference#bot-verification
             if result.reason_v2.spoofed:
                 logger.info("spoofed bot detected")
 

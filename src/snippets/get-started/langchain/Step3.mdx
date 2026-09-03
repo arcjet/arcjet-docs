@@ -1,6 +1,17 @@
-import Step from "./Step3.py?raw";
-import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import JsStep3 from "./js/Step3.mdx";
+import PyStep3 from "./py/Step3.mdx";
 
-Create a client, screen inbound text, and wrap a tool with a token budget:
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language">
+<div slot="JavaScript / TypeScript" slotIdx="1">
 
-<Code code={Step} lang="py" title="agent.py" />
+<JsStep3 />
+
+</div>
+<div slot="Python" slotIdx="2">
+
+<PyStep3 />
+
+</div>
+</SelectableContent>

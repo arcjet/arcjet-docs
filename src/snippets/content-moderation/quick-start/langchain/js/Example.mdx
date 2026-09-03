@@ -1,0 +1,26 @@
+import Step from "./Example.ts?raw";
+import { Code } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+This example screens inbound user text for harmful content before the model runs.
+
+We assume you already have a LangChain JS `createAgent` project set up. For
+helper options and denial behavior, see the
+<Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
+
+Install the dependencies:
+
+```shell
+# Export your Arcjet API key from https://console.arcjet.com
+export ARCJET_KEY="ajkey_..."
+
+npm install @arcjet/guard langchain @langchain/core
+```
+
+Create the example:
+
+<Code code={Step} lang="ts" title="agent.ts" />
+
+Then start or invoke the agent with a test prompt.
+
+Requests appear in your [Arcjet dashboard](https://console.arcjet.com) in real time.

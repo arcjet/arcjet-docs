@@ -151,9 +151,6 @@ const FrameworkLinks = forwardRef(
                 case "strands-agents":
                   icon = <IconStrandsAgents />;
                   break;
-                case "strands-agents-py":
-                  icon = <IconStrandsAgents />;
-                  break;
                 case "google-adk":
                   icon = <IconGoogleAdk />;
                   break;
@@ -166,22 +163,13 @@ const FrameworkLinks = forwardRef(
                 case "claude-agent-sdk":
                   icon = <IconClaudeAgentSdk />;
                   break;
-                case "claude-agent-sdk-py":
-                  icon = <IconClaudeAgentSdk />;
-                  break;
                 case "claude-managed-agents":
-                  icon = <IconClaudeAgentSdk />;
-                  break;
-                case "claude-managed-agents-py":
                   icon = <IconClaudeAgentSdk />;
                   break;
                 case "crewai":
                   icon = <IconCrewAi />;
                   break;
                 case "langchain":
-                  icon = <IconLangChain />;
-                  break;
-                case "langchain-js":
                   icon = <IconLangChain />;
                   break;
                 case "langgraph":
@@ -191,9 +179,6 @@ const FrameworkLinks = forwardRef(
                   icon = <IconMastra />;
                   break;
                 case "openai-agents":
-                  icon = <IconOpenAiAgents />;
-                  break;
-                case "openai-agents-py":
                   icon = <IconOpenAiAgents />;
                   break;
                 case "vercel-ai":
@@ -214,7 +199,10 @@ const FrameworkLinks = forwardRef(
                   key={f.key + idx}
                   as="link"
                   size="lg"
-                  href={hrefForLegacyFrameworkKey(f.key, basePath || path || "/")}
+                  href={hrefForLegacyFrameworkKey(
+                    f.key,
+                    basePath || path || "/",
+                  )}
                   decoratorLeft={icon}
                 >
                   {f.label}

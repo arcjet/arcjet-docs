@@ -16,7 +16,7 @@ const aj = arcjet({
 });
 
 function shouldSampleRequest(sampleRate) {
-  // sampleRate should be between 0 and 1, e.g., 0.1 for 10%, 0.5 for 50%
+  // sampleRate should be between 0 and 1, for example, 0.1 for 10%, 0.5 for 50%
   return Math.random() < sampleRate;
 }
 

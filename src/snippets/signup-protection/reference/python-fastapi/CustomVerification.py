@@ -85,7 +85,7 @@ async def signup(request: Request, email: str = Form(...)):
     )
 
     # User creation code goes here. You can use `require_additional_verification`
-    # to e.g. send a confirmation email or call an external email-verification
+    # to send a confirmation email or call an external email-verification
     # API before activating the account.
 
     return {

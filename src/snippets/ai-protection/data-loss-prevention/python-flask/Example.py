@@ -45,7 +45,7 @@ aj = arcjet_sync(
         detect_sensitive_info(
             mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
             # Block PII types that should never appear in AI prompts.
-            # Remove types your app legitimately handles (e.g. EMAIL for a
+            # Remove types your app legitimately handles (for example, EMAIL for a
             # support bot).
             deny=[
                 SensitiveInfoEntityType.CREDIT_CARD_NUMBER,
@@ -68,10 +68,10 @@ def chat():
     if decision.is_denied() and decision.reason_v2.type == "SENSITIVE_INFO":
         logger.warning("Request blocked due to sensitive information")
         return jsonify(
-            error="Sensitive information detected — please remove it from your prompt"
+            error="Sensitive information detected – remove it from your prompt"
         ), 400
 
-    # Arcjet approved — call the AI model
+    # Arcjet approved – call the AI model
     reply = chain.invoke({"message": message})
 
     return jsonify(reply=reply)

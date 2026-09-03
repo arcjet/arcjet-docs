@@ -2,16 +2,20 @@
 title: "AI budget control"
 titleByFramework:
   default: "AI budget control"
-  next-js: "AI budget control for Next.js"
   claude-agent-sdk: "AI budget control for Claude Agent SDK"
+  claude-managed-agents: "AI budget control for Claude Managed Agents"
+  crewai: "AI budget control for CrewAI"
   genkit: "AI budget control for Genkit"
+  google-adk: "AI budget control for Google ADK"
   langchain: "AI budget control for LangChain"
-  langchain-js: "AI budget control for LangChain JS"
   langgraph: "AI budget control for LangGraph"
   mastra: "AI budget control for Mastra"
+  next-js: "AI budget control for Next.js"
   openai-agents: "AI budget control for OpenAI Agents"
   python-fastapi: "AI budget control for Python + FastAPI"
   python-flask: "AI budget control for Python + Flask"
+  strands-agents: "AI budget control for Strands Agents"
+  tanstack-ai: "AI budget control for TanStack AI"
   vercel-ai: "AI budget control for Vercel AI SDK"
   vercel-eve: "AI budget control for Vercel Eve"
 description: "Enforce per-user AI token budgets with Arcjet rate limiting. Stop cost explosions and free-tier abuse with token bucket rate limits."
@@ -19,15 +23,19 @@ prev: true
 next: true
 frameworks:
   - claude-agent-sdk
+  - claude-managed-agents
+  - crewai
   - genkit
+  - google-adk
   - langchain
-  - langchain-js
   - langgraph
   - mastra
   - next-js
   - openai-agents
   - python-fastapi
   - python-flask
+  - strands-agents
+  - tanstack-ai
   - vercel-ai
   - vercel-eve
 ajToc:
@@ -50,9 +58,13 @@ import PythonFlaskStep from "@/snippets/ai-protection/budget-control/python-flas
 import ClaudeAgentSdkStep from "@/snippets/ai-protection/budget-control/claude-agent-sdk/Example.mdx";
 import GenkitStep from "@/snippets/ai-protection/budget-control/genkit/Example.mdx";
 import LangchainStep from "@/snippets/ai-protection/budget-control/langchain/Example.mdx";
-import LangchainJsStep from "@/snippets/ai-protection/budget-control/langchain-js/Example.mdx";
 import LanggraphStep from "@/snippets/ai-protection/budget-control/langgraph/Example.mdx";
 import MastraStep from "@/snippets/ai-protection/budget-control/mastra/Example.mdx";
+import ClaudeManagedAgentsStep from "@/snippets/ai-protection/budget-control/claude-managed-agents/Example.mdx";
+import CrewaiStep from "@/snippets/ai-protection/budget-control/crewai/Example.mdx";
+import GoogleAdkStep from "@/snippets/ai-protection/budget-control/google-adk/Example.mdx";
+import StrandsAgentsStep from "@/snippets/ai-protection/budget-control/strands-agents/Example.mdx";
+import TanstackAiStep from "@/snippets/ai-protection/budget-control/tanstack-ai/Example.mdx";
 import OpenaiAgentsStep from "@/snippets/ai-protection/budget-control/openai-agents/Example.mdx";
 import VercelAiStep from "@/snippets/ai-protection/budget-control/vercel-ai/Example.mdx";
 import VercelEveStep from "@/snippets/ai-protection/budget-control/vercel-eve/Example.mdx";
@@ -84,16 +96,20 @@ or external state store required.
 />
 
 <SlotByFramework>
-  <NextJsStep slot="next-js" />
-  <PythonFastapiStep slot="python-fastapi" />
-  <PythonFlaskStep slot="python-flask" />
   <ClaudeAgentSdkStep slot="claude-agent-sdk" />
+  <ClaudeManagedAgentsStep slot="claude-managed-agents" />
+  <CrewaiStep slot="crewai" />
   <GenkitStep slot="genkit" />
+  <GoogleAdkStep slot="google-adk" />
   <LangchainStep slot="langchain" />
-  <LangchainJsStep slot="langchain-js" />
   <LanggraphStep slot="langgraph" />
   <MastraStep slot="mastra" />
+  <NextJsStep slot="next-js" />
   <OpenaiAgentsStep slot="openai-agents" />
+  <PythonFastapiStep slot="python-fastapi" />
+  <PythonFlaskStep slot="python-flask" />
+  <StrandsAgentsStep slot="strands-agents" />
+  <TanstackAiStep slot="tanstack-ai" />
   <VercelAiStep slot="vercel-ai" />
   <VercelEveStep slot="vercel-eve" />
 </SlotByFramework>

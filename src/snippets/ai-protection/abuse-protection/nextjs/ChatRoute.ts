@@ -6,9 +6,9 @@ import { convertToModelMessages, streamText } from "ai";
 const aj = arcjet({
   key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
-    // Shield protects against common web attacks e.g. SQL injection
+    // Shield protects against common web attacks such as SQL injection
     shield({ mode: "LIVE" }),
-    // Block all automated clients — bots inflate AI costs
+    // Block all automated clients – bots inflate AI costs
     detectBot({
       mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
       allow: [], // Block all bots. See https://arcjet.com/bot-list

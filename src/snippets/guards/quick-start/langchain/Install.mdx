@@ -1,11 +1,17 @@
-Install the Guard SDK with the LangChain and Rampart extras:
+import SelectableContent from "@/components/SelectableContent";
+import JsInstall from "./js/Install.mdx";
+import PyInstall from "./py/Install.mdx";
 
-```shell
-pip install "arcjet[langchain,sensitive-info-rampart]" langchain langchain-openai
-```
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language">
+<div slot="JavaScript / TypeScript" slotIdx="1">
 
-Or with [uv](https://docs.astral.sh/uv/):
+<JsInstall />
 
-```shell
-uv add "arcjet[langchain,sensitive-info-rampart]" langchain langchain-openai
-```
+</div>
+<div slot="Python" slotIdx="2">
+
+<PyInstall />
+
+</div>
+</SelectableContent>

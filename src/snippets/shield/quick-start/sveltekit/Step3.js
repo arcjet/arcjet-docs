@@ -5,7 +5,7 @@ import { error } from "@sveltejs/kit";
 const aj = arcjet({
   key: env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
   rules: [
-    // Shield protects your app from common attacks e.g. SQL injection
+    // Shield protects your app from common attacks such as SQL injection
     // DRY_RUN mode logs only. Use "LIVE" to block
     shield({
       mode: "LIVE",

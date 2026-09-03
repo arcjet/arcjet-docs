@@ -1,13 +1,23 @@
+import SelectableContent from "@/components/SelectableContent";
 import { Link } from "@/components/link";
+import JsStep4 from "./js/Step4.mdx";
+import PyStep4 from "./py/Step4.mdx";
 
 ## 4. Start app
 
-```shell
-python -c "import asyncio; from agent import run_agent; asyncio.run(run_agent('user123', 'Look up order 1001'))"
-```
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language">
+<div slot="JavaScript / TypeScript" slotIdx="1">
 
-Then invoke the agent. Denied prompts and tool calls appear in your
-[Arcjet dashboard](https://console.arcjet.com) in real time.
+<JsStep4 />
+
+</div>
+<div slot="Python" slotIdx="2">
+
+<PyStep4 />
+
+</div>
+</SelectableContent>
 
 For helper options, denial payloads, and correlation, see the
 <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
