@@ -1,6 +1,7 @@
 import { Astro as AstroIcon } from "@/components/icons/tech/Astro";
 import { Bun } from "@/components/icons/tech/Bun";
 import { ClaudeAgentSdk } from "@/components/icons/tech/ClaudeAgentSdk";
+import { CloudflareThink } from "@/components/icons/tech/CloudflareThink";
 import { CrewAi } from "@/components/icons/tech/CrewAi";
 import { Deno } from "@/components/icons/tech/Deno";
 import { Express } from "@/components/icons/tech/Express";
@@ -36,11 +37,13 @@ const sdkIcons: Record<ArcjetRouteSdkKey, IconComponent> = {
   bun: Bun,
   "claude-agent-sdk": ClaudeAgentSdk,
   "claude-managed-agents": ClaudeAgentSdk,
+  "cloudflare-think": CloudflareThink,
   crewai: CrewAi,
   deno: Deno,
   fastify: Fastify,
   genkit: Genkit,
   "google-adk": GoogleAdk,
+  "google-adk-py": GoogleAdk,
   langchain: LangChain,
   langgraph: LangGraph,
   mastra: Mastra,

@@ -13,7 +13,7 @@ How Arcjet compares to other AI agent security approaches: [AI agent security pl
 Arcjet protects several entry points:
 
 - **Coding agents** - apply policies and enforce security controls directly within the development environment. Protect prompts from injection, redact sensitive data, and ensure that agent actions comply with organizational policies. Supported coding agents include: Claude Code and GitHub Copilot.
-- **Custom agents** - tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input in custom agents you've built and deployed yourself. Protect HTTP requests from bots and abuse, and enforce security policies consistently across all agent interactions. Supported AI agent frameworks include: Claude Agent SDK, Claude Managed Agents, CrewAI, Genkit, Google ADK, LangChain, LangGraph, Mastra, OpenAI Agents, Strands Agents, TanStack AI, Vercel AI SDK, Vercel Eve.
+- **Custom agents** - tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input in custom agents you've built and deployed yourself. Protect HTTP requests from bots and abuse, and enforce security policies consistently across all agent interactions. Supported AI agent frameworks include: Claude Agent SDK, Claude Managed Agents, Cloudflare Think, CrewAI, Genkit, Google ADK, Google ADK Python, LangChain, LangGraph, Mastra, OpenAI Agents, Strands Agents, TanStack AI, Vercel AI SDK, Vercel Eve.
 - **Web applications** - protect HTTP routes, API endpoints, and middleware within web applications. Bot protection, email validation, WAF, and other security building blocks applied directly in-code. Supported languages and frameworks include: Astro, Bun, Deno, Fastify, NestJS, Next.js, Node.js, Express, Hono, Nuxt, Python, FastAPI, Flask, React Router, Remix, SvelteKit, Go.
 
 ## Get started
@@ -2160,6 +2160,7 @@ with a tab where both a JavaScript and a Python adapter exist.
 | CrewAI | – | `arcjet.guard.crewai` | `register_arcjet_hooks` on `PRE_TOOL_CALL`, `guard_tool` |
 | Genkit | `@arcjet/guard/genkit/v1` | – | `guardTool`, `guardMiddleware` |
 | Google ADK | `@arcjet/guard/google-adk/v2` | – | `guardPlugin` (`beforeToolCallback`). No `guardTool` |
+| Google ADK Python | – | `arcjet.guard.google_adk` | `guard_tool`, `guard_plugin` (`before_tool_callback` skip dict). |
 | OpenAI Agents | `@arcjet/guard/openai-agents/v0` | `arcjet.guard.openai_agents` | `guardTool` on `invoke` / `guard_tool` on `tool_input_guardrails` |
 | Strands Agents | `@arcjet/guard/strands-agents/v1` | `arcjet.guard.strands_agents` | `guardTool` / `guard_tool`, `guardHooks` / `guard_hooks` |
 | TanStack AI | `@arcjet/guard/tanstack-ai/v0` | – | `guardMiddleware` (`onBeforeToolCall`). No `guardTool` |
@@ -2167,6 +2168,7 @@ with a tab where both a JavaScript and a Python adapter exist.
 | Vercel Eve | `@arcjet/guard/vercel-eve/v0` | – | `guardInbound`, `guardTool`, `guardApproval` (connections) |
 | Claude Agent SDK | `@arcjet/guard/claude-agent-sdk/v0` | `arcjet.guard.claude_agent_sdk` | `guardTool` / `guard_tool`, `guardHooks` / `guard_hooks` (`UserPromptSubmit`, `PreToolUse`) |
 | Claude Managed Agents | `@arcjet/guard/claude-managed-agents/v0` | `arcjet.guard.claude_managed_agents` | `guardEvents` / `guard_events`, `guardCustomTool` / `guard_custom_tool` |
+| Cloudflare Think | `@arcjet/guard/cloudflare-think/v0` | – | `guardHooks` (`beforeToolCall`). No `guardTool`. Not Vercel AI SDK |
 
 Every JavaScript path is versioned. Unversioned aliases such as
 `@arcjet/guard/vercel-ai` do not resolve. Don't wrap the same tool with two
@@ -2331,6 +2333,7 @@ blocking one makes the wrapper synchronous.
 - [LangGraph agent guard](https://docs.arcjet.com/guards/langgraph)
 - [Genkit agent guard](https://docs.arcjet.com/guards/genkit)
 - [Google ADK agent guard](https://docs.arcjet.com/guards/google-adk)
+- [Google ADK Python agent guard](https://docs.arcjet.com/guards/google-adk-py)
 - [OpenAI Agents agent guard](https://docs.arcjet.com/guards/openai-agents)
 - [Strands Agents agent guard](https://docs.arcjet.com/guards/strands-agents)
 - [TanStack AI agent guard](https://docs.arcjet.com/guards/tanstack-ai)
@@ -2338,6 +2341,7 @@ blocking one makes the wrapper synchronous.
 - [Mastra agent guard](https://docs.arcjet.com/guards/mastra)
 - [Claude Agent SDK agent guard](https://docs.arcjet.com/guards/claude-agent-sdk)
 - [Claude Managed Agents agent guard](https://docs.arcjet.com/guards/claude-managed-agents)
+- [Cloudflare Think agent guard](https://docs.arcjet.com/guards/cloudflare-think)
 - [Nosecone security headers](https://docs.arcjet.com/nosecone/quick-start)
 - [`@arcjet/redact`](https://docs.arcjet.com/redact/quick-start)
 

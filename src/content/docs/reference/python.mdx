@@ -755,7 +755,8 @@ helper, which returns JSON in content with `is_error: True`, and
 the Claude Managed Agents helper, which does not send
 `user.message` and returns `user.custom_tool_result`, and
 the Strands Agents Python helper, which returns a plain
-`ArcjetDenialResult` dict.
+`ArcjetDenialResult` dict, and the Google ADK Python helpers,
+which return a skip dict with `arcjetDenied`.
 Unavailability raises `ArcjetUnavailableError`, except on the LangChain
 `guard_tool` surface, which raises `ArcjetToolUnavailableError`. That class and
 `ArcjetToolDeniedError` subclass LangChain's `ToolException`, so a wrapped
@@ -844,6 +845,14 @@ To record that an allowed action happened without gating it, use
   or a string). Don't set `BeforeToolsEvent.cancel`. There is no
   inbound helper. `event.interrupt()` is HITL, not policy. This
   is not `@arcjet/guard/strands-agents/v1`.
+- **Google ADK Python `LlmAgent`** – `guard_tool` plus
+  `guard_plugin` (`arcjet[google-adk]`,
+  `arcjet.guard.google_adk`, `google-adk>=2.0.0,<3`).
+  `LlmAgent.before_tool_callback` and Runner
+  `before_tool_callback` return a skip dict with `arcjetDenied`.
+  `None` executes. Empty `{}` also skips. There is no inbound
+  helper. `require_confirmation` is HITL, not policy. This is
+  not `@arcjet/guard/google-adk/v2`.
 
 For install, examples, correlation, and the configure-before-wrap rule,
 see the <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
@@ -857,6 +866,8 @@ For Claude Managed Agents, see the
 <Link.Page href="/guards/claude-managed-agents">Claude Managed Agents agent guard</Link.Page>.
 For Strands Agents Python, see the
 <Link.Page href="/guards/strands-agents">Strands Agents agent guard</Link.Page>.
+For Google ADK Python, see the
+<Link.Page href="/guards/google-adk-py">Google ADK Python agent guard</Link.Page>.
 
 ### Rules
 

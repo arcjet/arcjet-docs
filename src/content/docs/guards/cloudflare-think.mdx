@@ -1,0 +1,477 @@
+---
+title: "Cloudflare Think agent guard"
+description: "Screen user text before a Think turn, attach Guard on `beforeToolCall`, and treat confirmation as confirmation, not policy."
+---
+
+import { Link } from "@/components/link";
+import FrameworkPrimer from "@/snippets/guards/FrameworkPrimer.mdx";
+
+[Cloudflare Think](https://developers.cloudflare.com/agents/think/)
+`Think` agents call authored tools from the agent loop. Arcjet Guard
+sits at those boundaries so a policy can allow or deny the action
+before a side effect runs.
+
+<FrameworkPrimer />
+
+This adapter is Cloudflare Think `@cloudflare/think` plus
+`beforeToolCall`. It isn't Vercel AI SDK
+(`@arcjet/guard/vercel-ai/v7`). Think uses the AI SDK under the
+hood; that shared runtime is not a reason to mix adapters. Don't
+also wrap these tools with `@arcjet/guard/vercel-ai/v7`. There is
+no `guardTool`. Think's skip point is the hook: a
+`{ action: "block" | "substitute" }` decision skips `execute`.
+
+## Install
+
+Until `@arcjet/guard/cloudflare-think/v0` is published, pin
+`@arcjet/guard` to
+[`58a7d8b8`](https://github.com/arcjet/arcjet-js/commit/58a7d8b82f2a360c67eced13e9899f0c1799289f).
+Published `@arcjet/guard` 1.11.0 doesn't export
+`./cloudflare-think/v0`.
+
+```bash
+npm install @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#58a7d8b82f2a360c67eced13e9899f0c1799289f @cloudflare/think
+```
+
+`@cloudflare/think` is a peer of `@arcjet/guard`, not a
+dependency of it. If your project already has it in the range that
+follows, install `@arcjet/guard` on its own so your pins don't
+move.
+
+Import helpers from the versioned path
+`@arcjet/guard/cloudflare-think/v0`. There is no unversioned
+alias. `@arcjet/guard/cloudflare-think` doesn't resolve. The
+version segment is `v0` because Think is pre-1.0.
+`@cloudflare/think` (`>=0.3.0 <1`) is an optional peer. The
+integration requires Node.js 22 or later.
+
+Launch one client at module scope:
+
+```ts
+import { launchArcjet } from "@arcjet/guard";
+
+export const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+```
+
+## Helpers
+
+The integration exposes two surfaces:
+
+- `guardHooks()` is the Think-wide gate. Assign its
+  `beforeToolCall` on a `Think` subclass, or call it from your
+  own `beforeToolCall`. The hook denies by returning
+  `{ action: "block" | "substitute" }`. The original tool
+  `execute` never runs. Return `void` (or `{ action: "allow" }`)
+  to execute. The hook doesn't throw. There is no `guardTool`.
+- `cloudflareThinkContext()` reads a caller-owned ID you pass:
+  `correlationId`, then `sessionId`, then `conversationId`. It
+  never mints an ID. It never reads `traceId`. It never reads a
+  Durable Object id, Think-generated session id, or stream id. If
+  the caller didn't pass an ID, then the call is uncorrelated
+  rather than joined to a generated ID.
+
+There is no `guardTool`. There is no `guardInbound`. There is no
+inbound hook. Screen user text with a direct `guard()` call before
+the Think turn starts. There is no `guardApproval`.
+
+Don't call `createAgentContext` inside a Think hook. Don't also
+wrap these tools with `@arcjet/guard/vercel-ai/v7`.
+
+## Helper options
+
+| Option | Helpers | Description |
+| --- | --- | --- |
+| `action` | `guardHooks` | Guard label and capture name. Use `resource.verb` in the past tense. A string, or a function of `{ toolName, input }`. Defaults to `tool.invoked`. |
+| `rules` | `guardHooks` | SDK rules, or a function of `{ toolName, input }`. Omit to submit none. The guard call still happens. |
+| `metadata` | `guardHooks` | Nested JSON, or a function of the same input as `rules`. |
+| `sessionId` | `guardHooks` | Caller-owned fallback when the object you pass to `cloudflareThinkContext` doesn't carry one. A string, or a function of the same input as `rules`. Prefer putting the ID on the context helper. |
+| `onGuardError` | `guardHooks` | `"deny"` (default) or `"allow"`. |
+| `onDeny` | `guardHooks` | Default substitute. `"block"` is real `DENY` only. Fail-closed unavailability always substitutes. |
+
+Inbound screening uses direct `guard()`, which takes `label` (not
+`action`) and fails open. See the following section.
+
+## Denial payload
+
+On `DENY` the original tool never runs. The payload shape is one
+`ArcjetDenialResult`. The envelope is a Think
+`ToolCallDecision`:
+
+- Default substitute returns
+  `{ action: "substitute", output }` where `output` is the
+  `ArcjetDenialResult`. The model reads that object as the tool
+  result.
+- `onDeny: "block"` is real `DENY` only. It returns
+  `{ action: "block", reason }` where `reason` is the denial
+  message. The model reads that string as the tool result.
+
+It isn't a throw. It isn't human confirmation. A throw is the
+wrong envelope. `void` on error executes the tool.
+
+```ts
+import type { ArcjetDenialResult } from "@arcjet/guard/cloudflare-think/v0";
+
+const denial: ArcjetDenialResult = {
+  arcjetDenied: true,
+  reason: "RATE_LIMIT", // or PROMPT_INJECTION, SENSITIVE_INFO, ERROR
+  message:
+    "Arcjet denied this call (RATE_LIMIT). It may be retried after 30 seconds.",
+  retryable: true,
+  retryAfterSeconds: 30,
+};
+
+// Default envelope
+const substitute = { action: "substitute" as const, output: denial };
+
+// Optional block envelope
+const block = { action: "block" as const, reason: denial.message };
+```
+
+`ArcjetDenialResult` is a type export from
+`@arcjet/guard/cloudflare-think/v0` at the pin in Install.
+
+Only rate-limit denials set `retryable: true` and include
+`retryAfterSeconds`. Other reasons tell the model not to retry.
+
+When Guard is unavailable and `onGuardError` is `"deny"`, the
+model receives `reason: "ERROR"`, `retryable: true`, and
+`retryAfterSeconds: 5` in a substitute envelope. Fail closed
+always substitutes on error, even when `onDeny` is `"block"`. It
+never throws. It never returns `void` on error.
+
+## Run a guarded Think agent
+
+Screen inbound text and assign `guardHooks().beforeToolCall` on
+the Think subclass:
+
+```ts
+import {
+  launchArcjet,
+  detectPromptInjection,
+  localDetectSensitiveInfo,
+  tokenBucket,
+} from "@arcjet/guard";
+import {
+  cloudflareThinkContext,
+  guardHooks,
+} from "@arcjet/guard/cloudflare-think/v0";
+import { Think } from "@cloudflare/think";
+import { tool } from "ai";
+import { z } from "zod";
+
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+
+const lookupLimit = tokenBucket({
+  bucket: "lookups",
+  refillRate: 10,
+  intervalSeconds: 60,
+  maxTokens: 10,
+});
+const detectPii = localDetectSensitiveInfo();
+const inbound = detectPromptInjection();
+
+const lookupOrderInput = z.object({
+  orderNumber: z.string(),
+  note: z.string(),
+});
+
+const hooks = guardHooks(arcjet, {
+  action: "order.looked-up",
+  onGuardError: "deny",
+  rules: ({ toolName, input }) => {
+    if (toolName !== "lookup_order") {
+      return [];
+    }
+    const { orderNumber, note } = lookupOrderInput.parse(input);
+    return [
+      lookupLimit({ key: orderNumber, requested: 1 }),
+      detectPii(note),
+    ];
+  },
+});
+
+export class OrderAgent extends Think<Env> {
+  getModel() {
+    return "@cf/moonshotai/kimi-k2.7-code";
+  }
+
+  getSystemPrompt() {
+    return "Look up orders with lookup_order.";
+  }
+
+  getTools() {
+    return {
+      lookup_order: tool({
+        description: "Look up an order by number",
+        inputSchema: lookupOrderInput,
+        execute: ({ orderNumber, note }) => ({
+          orderNumber,
+          note,
+          status: "shipped",
+        }),
+      }),
+    };
+  }
+
+  beforeToolCall = hooks.beforeToolCall;
+}
+
+export async function screenInbound(
+  conversationId: string,
+  userText: string,
+) {
+  const appContext = { sessionId: conversationId };
+  const decision = await arcjet.guard({
+    label: "message.received",
+    rules: [inbound(userText)],
+    ...cloudflareThinkContext(appContext),
+  });
+
+  if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+    throw new Error("message blocked");
+  }
+}
+```
+
+## Screen user text before the Think turn
+
+There is no inbound hook, so there is no `guardInbound`. Put
+prompt-injection and other inbound rules in the application before
+the Think turn starts (`chat()`, a messenger reply, or
+`submitMessages()`).
+
+Direct
+`client.guard({ label, rules, ...cloudflareThinkContext(appContext) })`
+is the inbound pattern. Act on that decision. Direct `guard()`
+fails open, so an `ALLOW` isn't proof the rules ran. If this call
+site must fail closed, then gate inbound on
+`decision.hasFailedOpen()`. `guardHooks` already defaults to fail
+closed.
+
+On `DENY`, don't start the Think turn.
+
+```ts
+import { detectPromptInjection } from "@arcjet/guard";
+import { cloudflareThinkContext } from "@arcjet/guard/cloudflare-think/v0";
+import { arcjet } from "./arcjet.js";
+
+const inbound = detectPromptInjection();
+const appContext = { sessionId: conversationId };
+
+const decision = await arcjet.guard({
+  label: "message.received",
+  rules: [inbound(userText)],
+  ...cloudflareThinkContext(appContext),
+});
+
+if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+  throw new Error("message blocked");
+}
+```
+
+## Human approval isn't a policy gate
+
+Human-in-the-loop (HITL) confirmation is out of scope. There is no
+`guardApproval`. Don't wrap HITL as Guard. Don't deny by pausing
+for a human. Policy sits on `beforeToolCall` only.
+
+On `DENY` the original tool never runs, so the inner `execute`
+never runs a side effect. `guardHooks` skips with
+`{ action: "block" | "substitute" }`. Don't throw. Don't pause for
+a human to approve a denied call. Scan free-text args (a note,
+reason, or body). An opaque `orderNumber` or tool-call ID doesn't
+trip email, phone, card, or IP detection, so don't pass it to
+`localDetectSensitiveInfo`. That helper runs on a local ML model
+backend.
+
+## Deny via `beforeToolCall`
+
+`guardHooks` is the Think `beforeToolCall` gate. Assign it on the
+subclass, or call it from your own hook and return its decision.
+
+The hook denies by returning `{ action: "block" | "substitute" }`
+without calling the tool. `substitute` carries an
+`ArcjetDenialResult` as `output`. `block` carries a reason
+string. Return `void` to execute. Policy sits on `beforeToolCall`
+only.
+
+There is no `guardTool`. Wrapping `tool({ execute })` is the wrong
+gate. Think wraps each server-side `execute` so the hook can skip
+it. A Vercel AI SDK wrapper misses that path or double-wraps it.
+
+Client tools have no server `execute`. They are not a deny point.
+Workspace tools that Think injects (`read`, `write`, `bash`) still
+go through `beforeToolCall` when they run on the server.
+
+This isn't Vercel AI SDK `tool({ execute })`. Don't pass
+`guardTool` from `@arcjet/guard/vercel-ai/v7` to Think.
+
+```ts
+import { Think } from "@cloudflare/think";
+import { guardHooks } from "@arcjet/guard/cloudflare-think/v0";
+import { arcjet } from "./arcjet.js";
+
+const hooks = guardHooks(arcjet, { sessionId: conversationId });
+
+export class OrderAgent extends Think<Env> {
+  beforeToolCall = hooks.beforeToolCall;
+}
+```
+
+To return Think's `block` envelope instead of `substitute` on a
+real `DENY`:
+
+```ts
+guardHooks(arcjet, {
+  sessionId: conversationId,
+  onDeny: "block",
+});
+```
+
+Fail closed still substitutes. `onDeny: "block"` does not apply
+to unavailability.
+
+If you also implement `beforeToolCall` on the subclass, call the
+helper first and return its decision when it is a `block` or
+`substitute`. Don't run `execute` after a deny.
+
+## Correlation
+
+`cloudflareThinkContext` reads a caller-owned ID from the object
+you pass: `correlationId` first, then `sessionId`, then
+`conversationId`. It never mints an ID. It never reads `traceId`.
+It never reads a Durable Object id, Think-generated session id, or
+stream id. Think persists chat in Durable Object SQLite. That
+storage id isn't a correlation source. Don't derive an ID from
+it. Don't mint one. If the caller didn't pass an ID, then the
+call is uncorrelated rather than joined to a generated ID.
+
+Put the same caller-owned ID on inbound `guard()` and as
+`sessionId` on `guardHooks`.
+
+```ts
+const appContext = { sessionId: conversationId };
+
+await arcjet.guard({
+  label: "message.received",
+  ...cloudflareThinkContext(appContext),
+});
+
+const hooks = guardHooks(arcjet, { sessionId: conversationId });
+```
+
+## What not to use
+
+- There is no `guardInbound`. Screen prompt injection before the
+  Think turn starts.
+- There is no `guardTool`. The gate is `beforeToolCall` on
+  `guardHooks`.
+- There is no `guardApproval`. HITL confirmation is not policy.
+- Don't treat this adapter as Vercel AI SDK
+  (`@arcjet/guard/vercel-ai/v7`). Mixing those adapters is
+  disallowed.
+- Don't turn a deny into a human approval pause.
+- Don't mint a correlation ID. Don't use `traceId`, a Durable
+  Object id, a Think-generated session id, or a stream id. If the
+  caller didn't pass an ID, then leave the call uncorrelated.
+- Don't throw from `beforeToolCall` to signal a denial.
+- Don't return `void` on a Guard error. Fail closed always
+  substitutes.
+- Don't call `createAgentContext` inside a Think hook.
+- Don't also wrap these tools with `@arcjet/guard/vercel-ai/v7`.
+- Don't import `@arcjet/guard/cloudflare-think`. The path is
+  `@arcjet/guard/cloudflare-think/v0`.
+
+## Common patterns
+
+### Rate limit a tool by a trusted ID
+
+Key the bucket on a trusted identifier such as `orderNumber`. Don't
+key it on free-text user input.
+
+```ts
+const lookupLimit = tokenBucket({
+  bucket: "lookups",
+  refillRate: 10,
+  intervalSeconds: 60,
+  maxTokens: 10,
+});
+
+const hooks = guardHooks(arcjet, {
+  action: "order.looked-up",
+  rules: ({ toolName, input }) => {
+    if (toolName !== "lookup_order") {
+      return [];
+    }
+    const { orderNumber } = z
+      .object({ orderNumber: z.string() })
+      .parse(input);
+    return [lookupLimit({ key: orderNumber, requested: 1 })];
+  },
+});
+```
+
+### Scan a free-text note for sensitive information
+
+Scan a note, reason, or body. An opaque `orderNumber` doesn't trip
+email, phone, card, or IP detection, so don't pass it to
+`localDetectSensitiveInfo`.
+
+```ts
+import { localDetectSensitiveInfo, tokenBucket } from "@arcjet/guard";
+import { guardHooks } from "@arcjet/guard/cloudflare-think/v0";
+
+const lookupLimit = tokenBucket({
+  bucket: "lookups",
+  refillRate: 10,
+  intervalSeconds: 60,
+  maxTokens: 10,
+});
+const detectPii = localDetectSensitiveInfo();
+
+const hooks = guardHooks(arcjet, {
+  action: "order.looked-up",
+  rules: ({ toolName, input }) => {
+    if (toolName !== "lookup_order") {
+      return [];
+    }
+    const { orderNumber, note } = z
+      .object({ orderNumber: z.string(), note: z.string() })
+      .parse(input);
+    return [
+      lookupLimit({ key: orderNumber, requested: 1 }),
+      detectPii(note),
+    ];
+  },
+});
+```
+
+## Fail-closed default
+
+`guardHooks` defaults to `onGuardError: "deny"`. If Guard
+cannot be evaluated, then `beforeToolCall` returns
+`{ action: "substitute", output }` instead of calling the tool.
+Fail closed always substitutes. `onDeny: "block"` does not apply
+to unavailability. It never throws. It never returns `void` on
+that path.
+
+Set `onGuardError: "allow"` only when executing without a complete
+security decision is acceptable, such as a read-only lookup. Direct
+`guard()` still fails open. For more information about fail-open
+versus fail-closed behavior, see
+<Link.Page href="/guards/reference#availability-and-fail-behavior">Availability and fail behavior</Link.Page>.
+
+## Related
+
+- <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
+- <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>
+- <Link.Page href="/guards/tanstack-ai">TanStack AI agent guard</Link.Page>
+- <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>
+- <Link.Page href="/guards/vercel-eve">Vercel Eve agent guard</Link.Page>
+- <Link.Page href="/guards">Agent guards</Link.Page>
+- Example:
+  [examples/cloudflare-think-agent](https://github.com/arcjet/examples/tree/main/examples/cloudflare-think-agent)
+- Adapter: pin
+  [`58a7d8b8`](https://github.com/arcjet/arcjet-js/commit/58a7d8b82f2a360c67eced13e9899f0c1799289f)
+  on [arcjet-js](https://github.com/arcjet/arcjet-js) until
+  `@arcjet/guard/cloudflare-think/v0` lands
