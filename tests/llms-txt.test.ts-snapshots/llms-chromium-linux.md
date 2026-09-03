@@ -66,9 +66,11 @@ block such as `rate-limiting/quick-start`, `sensitive-info/quick-start`,
 
 - [Claude Agent SDK](https://docs.arcjet.com/sdk/claude-agent-sdk/get-started/)
 - [Claude Managed Agents](https://docs.arcjet.com/sdk/claude-managed-agents/get-started/)
+- [Cloudflare Think](https://docs.arcjet.com/sdk/cloudflare-think/get-started/)
 - [CrewAI](https://docs.arcjet.com/sdk/crewai/get-started/)
 - [Genkit](https://docs.arcjet.com/sdk/genkit/get-started/)
 - [Google ADK](https://docs.arcjet.com/sdk/google-adk/get-started/)
+- [Google ADK Python](https://docs.arcjet.com/sdk/google-adk-py/get-started/)
 - [LangChain](https://docs.arcjet.com/sdk/langchain/get-started/)
 - [LangGraph](https://docs.arcjet.com/sdk/langgraph/get-started/)
 - [Mastra](https://docs.arcjet.com/sdk/mastra/get-started/)
@@ -97,13 +99,14 @@ merged page, which selects the language with a tab.
 - [Filters](https://docs.arcjet.com/filters): country / VPN / ASN allow + deny rules.
 - [Agent guards](https://docs.arcjet.com/guards): protect tool calls and other agent actions without an HTTP request. Rate limiting, sensitive information, prompt injection, content moderation, and the AI protection guides each carry a worked example for every agent adapter as well as the HTTP SDKs.
 - [Agent guard quick start](https://docs.arcjet.com/guards/quick-start): guard one tool call.
-- [Agent guard integrations](https://docs.arcjet.com/guards/framework-integrations): Vercel AI SDK, LangChain, CrewAI, LangGraph, Genkit, Google ADK, OpenAI Agents, Strands Agents, TanStack AI, Vercel Eve, Mastra, Claude Agent SDK, and Claude Managed Agents. One `ArcjetDenialResult` payload; per-framework envelopes. Each integration page has JavaScript and Python tabs where both adapters exist.
+- [Agent guard integrations](https://docs.arcjet.com/guards/framework-integrations): Vercel AI SDK, LangChain, CrewAI, LangGraph, Genkit, Google ADK, Google ADK Python, OpenAI Agents, Strands Agents, TanStack AI, Vercel Eve, Mastra, Claude Agent SDK, Claude Managed Agents, and Cloudflare Think. One `ArcjetDenialResult` payload; per-framework envelopes. Each integration page has JavaScript and Python tabs where both adapters exist. Google ADK Python and Cloudflare Think are separate adapters, not language tabs on another page.
 - [Vercel AI SDK agent guard](https://docs.arcjet.com/guards/vercel-ai): JavaScript. `guardTool`, `aiToolsContext`, `guardAction`, and inbound `guard()` before `generateText`. Wrappers take `action`, not `label`.
 - [LangChain agent guard](https://docs.arcjet.com/guards/langchain): JavaScript `guardTool` on `tool()` plus `guardMiddleware` (`createAgent` + `wrapToolCall`); Python `guard_action`, `guard_tool`, `ArcjetMiddleware`, and observe-only capture handlers. Inbound `guard()` before the agent runs in both. Not the LangGraph Graph API adapter.
 - [CrewAI agent guard](https://docs.arcjet.com/guards/crewai): Python. Official CrewAI `register_arcjet_hooks` on `PRE_TOOL_CALL` plus `HookAborted(reason=..., source="arcjet")`. `guard_tool` for a standalone `BaseTool`. `POST_TOOL_CALL` is not registered. There is no `arcjet[crewai]` extra.
 - [LangGraph agent guard](https://docs.arcjet.com/guards/langgraph): JavaScript. Inbound `guard()` before `invoke`, `guardTool`, and `guardToolNode`.
 - [Genkit agent guard](https://docs.arcjet.com/guards/genkit): JavaScript. Inbound `guard()` before `generate()`, `guardTool` on `ai.defineTool`, and `guardMiddleware`.
 - [Google ADK agent guard](https://docs.arcjet.com/guards/google-adk): JavaScript. Inbound `guard()` before `runAsync`, `guardPlugin` (`beforeToolCallback` deny dict). There is no `guardTool`.
+- [Google ADK Python agent guard](https://docs.arcjet.com/guards/google-adk-py): Python. Inbound `guard()` before `run_async`, `guard_tool` (`LlmAgent.before_tool_callback`), and `guard_plugin` (`before_tool_callback` skip dict with `arcjetDenied`). This is not `@arcjet/guard/google-adk/v2`.
 - [OpenAI Agents agent guard](https://docs.arcjet.com/guards/openai-agents): JavaScript `guardTool` on authored `FunctionTool.invoke`; Python `guard_tool` on `FunctionTool.tool_input_guardrails` plus `reject_content`. Inbound `guard()` before the runner in both.
 - [Strands Agents agent guard](https://docs.arcjet.com/guards/strands-agents): JavaScript `guardTool` plus `guardHooks` (`BeforeToolCallEvent.cancel`); Python `guard_tool` on `@tool` plus `guard_hooks` (`BeforeToolCallEvent.cancel_tool` True or str). Inbound `guard()` before the agent runs in both.
 - [TanStack AI agent guard](https://docs.arcjet.com/guards/tanstack-ai): JavaScript. Inbound `guard()` before `chat()`, `guardMiddleware` (`onBeforeToolCall` skip). There is no `guardTool`.
@@ -111,6 +114,7 @@ merged page, which selects the language with a tab.
 - [Mastra agent guard](https://docs.arcjet.com/guards/mastra): JavaScript. `guardProcessor`, `guardTool`, and `guardHooks`.
 - [Claude Agent SDK agent guard](https://docs.arcjet.com/guards/claude-agent-sdk): JavaScript `guardTool` (MCP `CallToolResult` with `isError: true` plus `structuredContent`); Python `guard_tool` (JSON in content plus `is_error: True`, no `structuredContent`). Inbound `UserPromptSubmit` and `PreToolUse` through the hooks helper in both. A tool permission callback is not a policy gate.
 - [Claude Managed Agents agent guard](https://docs.arcjet.com/guards/claude-managed-agents): hosted harness, JavaScript and Python. Inbound `user.message` via `guardEvents` / `guard_events` before send, and custom tools via `guardCustomTool` / `guard_custom_tool` on `agent.custom_tool_use`. Default `always_allow` means no customer pre-exec for built-in bash or files. `always_ask` is opt-in HITL, not policy. Not the Claude Agent SDK.
+- [Cloudflare Think agent guard](https://docs.arcjet.com/guards/cloudflare-think): JavaScript. Inbound `guard()` before the Think turn, `guardHooks` (`beforeToolCall` `{ action: "block" | "substitute" }`). There is no `guardTool`. This is not `@arcjet/guard/vercel-ai/v7`.
 - [Agent guard remote policies](https://docs.arcjet.com/guards/remote-policies): centrally managed action policies using labels, actors, and typed inputs.
 - [Capture events](https://docs.arcjet.com/guards/capture): record that an allowed action happened; batched, best-effort, never a security decision.
 - [Agent guard testing and reference](https://docs.arcjet.com/guards/reference): decisions, availability, fail behavior, nested JSON metadata, `registerArcjet` / `register_arcjet`, and the test client. Free `guard()` fail-opens if no client is registered.
