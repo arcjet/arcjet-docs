@@ -16,6 +16,15 @@ detect_pii = LocalDetectSensitiveInfo(
 )
 
 
+class EmailProvider:
+    def send(self, *, to: str, body: str) -> None:
+        return None
+
+
+# Placeholder for your mail transport.
+email_provider = EmailProvider()
+
+
 def email_tools(user):
     @tool
     def get_client_record() -> dict:

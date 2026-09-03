@@ -19,49 +19,19 @@ const detectPii = localDetectSensitiveInfo({
   deny: ["BANK_ACCOUNT", "ROUTING_NUMBER"],
 });
 
+// Placeholder for your mail transport.
+const emailProvider = {
+  send: async (_: { to: string; body: string }) => ({ ok: true }),
+};
+
 const sendEmailInput = z.object({
   recipient: z.string(),
   body: z.string(),
 });
 
-const getClientRecord = new FunctionTool({
-  name: "get_client_record",
-  description:
-    "Get the account details on file for the current customer",
-  parameters: z.object({}),
-  execute: () => currentUser.record,
-});
-
-const sendEmail = new FunctionTool({
-  name: "send_email",
-  description: "Send an email",
-  parameters: sendEmailInput,
-  execute: ({ recipient, body }) =>
-    emailProvider.send({ to: recipient, body }),
-});
-
-const agent = new LlmAgent({
-  name: "support_agent",
-  model: "gemini-flash-latest",
-  instruction:
-    "Use get_client_record when the user asks for account details. Use send_email exactly once to complete the request.",
-  tools: [getClientRecord, sendEmail],
-});
-
-let currentUser: {
-  id: string;
-  allowedRecipients: string[];
-  record: {
-    name: string;
-    bankAccount: string;
-    routingNumber: string;
-  };
-};
-
 export async function runEmailAgent(
   user: {
     id: string;
-    allowedRecipients: string[];
     record: {
       name: string;
       bankAccount: string;
@@ -70,7 +40,29 @@ export async function runEmailAgent(
   },
   prompt: string,
 ) {
-  currentUser = user;
+  const getClientRecord = new FunctionTool({
+    name: "get_client_record",
+    description:
+      "Get the account details on file for the current customer",
+    parameters: z.object({}),
+    execute: () => user.record,
+  });
+
+  const sendEmail = new FunctionTool({
+    name: "send_email",
+    description: "Send an email",
+    parameters: sendEmailInput,
+    execute: ({ recipient, body }) =>
+      emailProvider.send({ to: recipient, body }),
+  });
+
+  const agent = new LlmAgent({
+    name: "support_agent",
+    model: "gemini-flash-latest",
+    instruction:
+      "Use get_client_record when the user asks for account details. Use send_email exactly once to complete the request.",
+    tools: [getClientRecord, sendEmail],
+  });
 
   // This adapter accepts action and rules. It doesn't accept
   // inputs. There is no guardTool.
