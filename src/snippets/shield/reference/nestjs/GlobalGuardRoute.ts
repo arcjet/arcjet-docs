@@ -1,7 +1,7 @@
 import { ArcjetGuard } from "@arcjet/nest";
 import { Controller, Get, Injectable, UseGuards } from "@nestjs/common";
 
-// This would normally go in your controller file e.g.
+// This would normally go in your controller file, such as:
 // src/page/page.controller.ts
 @Controller("page")
 // Uses the ArcjetGuard to protect the controller with the default rules defined
@@ -17,7 +17,7 @@ export class PageController {
   }
 }
 
-// This would normally go in your service file e.g.
+// This would normally go in your service file, such as:
 // src/page/page.service.ts
 @Injectable()
 export class PageService {

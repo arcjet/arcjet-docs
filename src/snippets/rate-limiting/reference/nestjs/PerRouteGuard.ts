@@ -1,7 +1,7 @@
 import { WithArcjetRules, fixedWindow } from "@arcjet/nest";
 import { Injectable, Get } from "@nestjs/common";
 
-// This would normally go in your controller file e.g.
+// This would normally go in your controller file, such as:
 // src/page/page.controller.ts
 // Attaches the ArcjetGuard to the controller to protect it with the specified
 // rules extended from the global rules defined in app.module.ts.
@@ -21,7 +21,7 @@ export class PageController {
   }
 }
 
-// This would normally go in your service file e.g.
+// This would normally go in your service file, such as:
 // src/page/page.service.ts
 @Injectable()
 export class PageService {

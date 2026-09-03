@@ -30,7 +30,7 @@ export class SignupDto {
   email: string;
 }
 
-// This would normally go in your service file e.g.
+// This would normally go in your service file, such as:
 // src/signup/signup.service.ts
 @Injectable()
 export class SignupService {
@@ -45,7 +45,7 @@ export class SignupService {
   }
 }
 
-// This would normally go in your controller file e.g.
+// This would normally go in your controller file, such as:
 // src/signup/signup.controller.ts
 
 // If the signup was coming from a proxy or Tor IP address this is suspicious,

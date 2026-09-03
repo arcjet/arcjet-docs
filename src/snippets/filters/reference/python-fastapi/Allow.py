@@ -15,7 +15,7 @@ aj = arcjet(
                 # requests will be denied.
                 'http.request.method eq "GET" and ip.src.country eq "US" and not ip.src.vpn',
                 # `local.*` fields come from the `filter_local` mapping passed
-                # to `aj.protect()` below — use them to allow trusted users.
+                # to `aj.protect()` below – use them to allow trusted users.
                 'local.userId eq "admin"',
             ],
             mode=Mode.LIVE,

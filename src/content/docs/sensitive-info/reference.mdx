@@ -227,8 +227,8 @@ def detect_sensitive_info(
 # - SensitiveInfoEntityType.CREDIT_CARD_NUMBER
 #
 # The enum also defines backend-only types (GIVEN_NAME, SURNAME, SSN, URL,
-# TAX_ID, and more — see the entity detection table below). Listing one without
-# a `backend` that supports it — such as `rampart()` — raises an error.
+# TAX_ID, and more – see the entity detection table below). Listing one without
+# a `backend` that supports it – such as `rampart()` – raises an error.
 ```
 
 </TabItem>
@@ -398,7 +398,7 @@ rampart({
   threshold: 0.6,
   // Deterministic recognizers to run alongside the model (default:
   // `defaultRecognizers`). This is the extension point for custom detection
-  // with this backend — add a recognizer that returns matched spans. Pass `[]`
+  // with this backend – add a recognizer that returns matched spans. Pass `[]`
   // to rely on the model alone.
   recognizers: [
     ...defaultRecognizers,
@@ -436,7 +436,7 @@ rampart(
         max_input_chars=100_000,
         # Deterministic recognizers to run alongside the model (default:
         # `default_recognizers`). This is the extension point for custom
-        # detection with this backend — add a recognizer that returns matched
+        # detection with this backend – add a recognizer that returns matched
         # spans. Pass () to rely on the model alone.
         recognizers=(
             *default_recognizers,

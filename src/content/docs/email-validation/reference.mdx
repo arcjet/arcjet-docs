@@ -338,11 +338,11 @@ type ArcjetEmailType =
 from arcjet import EmailType
 
 # EmailType is a str Enum with the same values:
-# - EmailType.DISPOSABLE — Disposable email from a throwaway service
-# - EmailType.FREE — Email from a free provider (e.g. Gmail)
-# - EmailType.NO_MX_RECORDS — Domain has no MX records (undeliverable)
-# - EmailType.NO_GRAVATAR — No Gravatar profile
-# - EmailType.INVALID — Address fails syntax / format validation
+# - EmailType.DISPOSABLE – Disposable email from a throwaway service
+# - EmailType.FREE – Email from a free provider (for example, Gmail)
+# - EmailType.NO_MX_RECORDS – Domain has no MX records (undeliverable)
+# - EmailType.NO_GRAVATAR – No Gravatar profile
+# - EmailType.INVALID – Address fails syntax / format validation
 ```
 
 </TabItem>
@@ -362,7 +362,7 @@ if (decision.reason.emailTypes.includes("DISPOSABLE")) {
   message = "We do not allow disposable email addresses.";
 } else if (decision.reason.emailTypes.includes("FREE")) {
   message =
-    "We do not allow free email addresses, please use a business address.";
+    "Free email addresses aren't allowed. Use a business address.";
 } else if (decision.reason.emailTypes.includes("NO_MX_RECORDS")) {
   message = "Your email domain does not have an MX record. Is there a typo?";
 } else if (decision.reason.emailTypes.includes("NO_GRAVATAR")) {
@@ -386,7 +386,7 @@ if "DISPOSABLE" in email_types:
     message = "We do not allow disposable email addresses."
 elif "FREE" in email_types:
     message = (
-        "We do not allow free email addresses, please use a business address."
+        "Free email addresses aren't allowed. Use a business address."
     )
 elif "NO_MX_RECORDS" in email_types:
     message = "Your email domain does not have an MX record. Is there a typo?"

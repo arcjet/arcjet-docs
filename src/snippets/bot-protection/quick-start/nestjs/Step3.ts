@@ -27,7 +27,7 @@ import { APP_GUARD, NestFactory } from "@nestjs/core";
             // Uncomment to allow these other common bot categories
             // See the full list at https://arcjet.com/bot-list
             //"CATEGORY:MONITOR", // Uptime monitoring services
-            //"CATEGORY:PREVIEW", // Link previews e.g. Slack, Discord
+            //"CATEGORY:PREVIEW", // Link previews such as Slack, Discord
           ],
         }),
       ],
@@ -41,7 +41,7 @@ import { APP_GUARD, NestFactory } from "@nestjs/core";
     },
   ],
 })
-class AppModule { }
+class AppModule {}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

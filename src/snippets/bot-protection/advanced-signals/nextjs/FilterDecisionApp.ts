@@ -20,9 +20,9 @@ export async function POST(req: Request) {
 
   if (decision.isDenied()) {
     if (decision.reason.isFilter()) {
-      // The aj_signals cookie is missing — the request didn't come from a
+      // The aj_signals cookie is missing – the request didn't come from a
       // browser that loaded the signals script. Redirect with a helpful error
-      // rather than a silent 403 so the user can take action (e.g. enable
+      // rather than a silent 403 so the user can take action (for example, enable
       // cookies).
       return NextResponse.redirect(
         new URL("/?error=CookiesRequired", req.url),

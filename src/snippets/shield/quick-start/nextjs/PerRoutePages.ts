@@ -4,7 +4,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
   rules: [
-    // Shield protects your app from common attacks e.g. SQL injection
+    // Shield protects your app from common attacks such as SQL injection
     // DRY_RUN mode logs only. Use "LIVE" to block
     shield({
       mode: "DRY_RUN",

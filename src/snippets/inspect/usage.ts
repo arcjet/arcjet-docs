@@ -1,4 +1,4 @@
-// Replace with the framework SDK you're using e.g. `@arcjet/node`
+// Replace with the framework SDK you're using, such as `@arcjet/node`
 import arcjet, { detectBot } from "@arcjet/next";
 import {
   isVerifiedBot,

@@ -11,7 +11,7 @@ import {
 } from "@nestjs/common";
 import type { Request } from "express";
 
-// This would normally go in your service file e.g.
+// This would normally go in your service file, such as:
 // src/page/page.service.ts
 @Injectable()
 export class PageAdvancedService {
@@ -22,7 +22,7 @@ export class PageAdvancedService {
   }
 }
 
-// This would normally go in your controller file e.g.
+// This would normally go in your controller file, such as:
 // src/page/page.controller.ts
 @Controller("page")
 // Sets up the Arcjet protection without using a guard so we can access the

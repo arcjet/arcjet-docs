@@ -18,7 +18,7 @@ const aj = arcjet({
       characteristics: ['http.request.headers["x-api-key"]'],
       window: "1h",
       // max could also be a dynamic value applied after looking up a limit
-      // elsewhere e.g. in a database for the authenticated user
+      // elsewhere, such as in a database for the authenticated user
       max: 600,
     }),
   ],

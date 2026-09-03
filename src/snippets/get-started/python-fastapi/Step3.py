@@ -50,7 +50,7 @@ class ChatRequest(BaseModel):
 aj = arcjet(
     key=arcjet_key,  # Get your key from https://console.arcjet.com
     rules=[
-        # Shield protects your app from common attacks e.g. SQL injection
+        # Shield protects your app from common attacks such as SQL injection
         shield(mode=Mode.LIVE),
         # Create a bot detection rule
         detect_bot(
@@ -62,7 +62,7 @@ aj = arcjet(
                 # Uncomment to allow these other common bot categories
                 # See the full list at https://arcjet.com/bot-list
                 # BotCategory.MONITOR, # Uptime monitoring services
-                # BotCategory.PREVIEW, # Link previews e.g. Slack, Discord
+                # BotCategory.PREVIEW, # Link previews such as Slack, Discord
             ],
         ),
         # Create a token bucket rate limit. Other algorithms are supported
@@ -104,7 +104,7 @@ async def chat(request: Request, body: ChatRequest):
     if decision.is_denied():
         if decision.reason_v2.type == "PROMPT_INJECTION":
             return JSONResponse(
-                {"error": "Prompt injection detected — please rephrase your message"},
+                {"error": "Prompt injection detected – rephrase your message"},
                 status_code=400,
             )
         status = 429 if decision.reason_v2.type == "RATE_LIMIT" else 403

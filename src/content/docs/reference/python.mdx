@@ -189,10 +189,10 @@ throughout your application. This is because the SDK caches decisions and
 configuration to improve performance.
 
 ```py
-# Good — one instance, created once at startup
+# Good – one instance, created once at startup
 aj = arcjet(key=arcjet_key, rules=[...])
 
-# Bad — new instance per request wastes resources
+# Bad – new instance per request wastes resources
 @app.get("/")
 async def index(request: Request):
     aj = arcjet(key=arcjet_key, rules=[...])  # don't do this
@@ -625,7 +625,7 @@ Arcjet returns IP metadata with every decision – no extra API calls needed.
 ```py
 # High-level helpers on decision.ip
 if decision.ip.is_hosting():
-    # likely a cloud / hosting provider — often suspicious for bots
+    # likely a cloud / hosting provider – often suspicious for bots
     pass
 
 if decision.ip.is_vpn() or decision.ip.is_proxy() or decision.ip.is_tor():
@@ -636,7 +636,7 @@ if decision.ip.is_abuser():
     # IP is associated with known abuse
     pass
 
-# Typed field access via decision.ip_details
+# Typed field access through decision.ip_details
 ip = decision.ip_details
 if ip:
     print(ip.city, ip.country_name)   # geolocation
@@ -709,7 +709,7 @@ You can check for errors at the top level too:
 decision = await aj.protect(request)
 
 if decision.is_error():
-    # Arcjet service error — fail open or apply a fallback policy
+    # Arcjet service error – fail open or apply a fallback policy
     pass
 elif decision.is_denied():
     return JSONResponse({"error": "Denied"}, status_code=403)
@@ -774,7 +774,7 @@ Unavailability raises `ArcjetUnavailableError` or
   Authored `@tool` returns JSON of `ArcjetDenialResult` in content
   with `is_error: True`. Python does not forward
   `structuredContent`. Unwrapped tools are `PreToolUse` deny.
-  Inbound is `UserPromptSubmit` block via `guard_hooks`. There is
+  Inbound is a `UserPromptSubmit` block through `guard_hooks`. There is
   no inbound helper. `can_use_tool` is HITL, not policy.
 - **Claude Managed Agents custom tools** – `guard_custom_tool` plus
   `guard_events` (`arcjet[claude-managed-agents]`,
@@ -967,7 +967,7 @@ if decision.conclusion == "DENY":
         retry_in = max(
             0, rate_limited.reset_at_unix_seconds - int(time.time())
         )
-        raise TaskBlocked(f"rate limited — retry in {retry_in}s")
+        raise TaskBlocked(f"rate limited – retry in {retry_in}s")
     raise TaskBlocked("blocked")
 ```
 

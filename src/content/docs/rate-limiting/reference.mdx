@@ -314,7 +314,7 @@ type FixedWindowRateLimitOptions = {
   mode?: "LIVE" | "DRY_RUN";
   // How the client is identified. See https://docs.arcjet.com/fingerprints
   characteristics?: string[];
-  // Time window the rate limit applies to (e.g. "1h", "60s", or seconds as a number)
+  // Time window the rate limit applies to (for example, "1h", "60s", or seconds as a number)
   window: string | number;
   // Maximum number of requests allowed in the time window
   max: number;
@@ -329,7 +329,7 @@ def fixed_window(
     *,
     # Required. Mode.LIVE blocks requests; Mode.DRY_RUN logs only.
     mode: Mode,
-    # Time window in seconds the rate limit applies to (integer only — Python
+    # Time window in seconds the rate limit applies to (integer only – Python
     # does not accept the "1h"/"60s" duration strings that the JS SDK does).
     window: int,
     # Maximum number of requests allowed in the time window

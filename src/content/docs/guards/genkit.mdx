@@ -301,7 +301,7 @@ const lookupOrder = guardTool(
 );
 ```
 
-## Deny inside `ai.defineTool` via `guardTool`, and generate()-wide via `guardMiddleware`
+## Gate authored tools and every generate call
 
 `guardTool` wraps the returned `ToolAction` callable and `.run`, not the
 inner `defineTool` handler. That action is the deny point for tools you

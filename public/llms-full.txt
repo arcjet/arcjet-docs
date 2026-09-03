@@ -357,12 +357,12 @@ import { convertToModelMessages, isTextUIPart, streamText } from "ai";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
-  // Track budgets per user — replace "userId" with any stable identifier
+  // Track budgets per user – replace "userId" with any stable identifier
   characteristics: ["userId"],
   rules: [
-    // Shield protects against common web attacks e.g. SQL injection
+    // Shield protects against common web attacks such as SQL injection
     shield({ mode: "LIVE" }),
-    // Block all automated clients — bots inflate AI costs
+    // Block all automated clients – bots inflate AI costs
     detectBot({
       mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
       allow: [], // Block all bots. See https://arcjet.com/bot-list
@@ -378,7 +378,7 @@ const aj = arcjet({
     sensitiveInfo({
       mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
       // Block PII types that should never appear in AI prompts.
-      // Remove types your app legitimately handles (e.g. EMAIL for a support bot).
+      // Remove types your app legitimately handles (for example, EMAIL for a support bot).
       deny: ["CREDIT_CARD_NUMBER", "EMAIL"],
     }),
     // Detect prompt injection attacks before they reach your AI model
@@ -429,7 +429,7 @@ export async function POST(req: Request) {
       return new Response("Sensitive information detected", { status: 400 });
     } else if (decision.reason.isPromptInjection()) {
       return new Response(
-        "Prompt injection detected — please rephrase your message",
+        "Prompt injection detected – rephrase your message",
         { status: 400 },
       );
     } else {
@@ -1820,7 +1820,7 @@ if (decision.isDenied()) {
 
 ```ts
 if (decision.isErrored()) {
-  // Arcjet fails open — log the error and allow the request
+  // Arcjet fails open – log the error and allow the request
   console.error("Arcjet error", decision.reason.message);
 }
 ```
@@ -1916,7 +1916,7 @@ key, characteristics, and transport. The original client is unchanged.
 rule factories require `mode`. This method is on Python SDK `main`.
 
 ```ts
-// lib/arcjet.ts — create and export a base instance
+// lib/arcjet.ts – create and export a base instance
 import arcjet, {
   detectBot,
   fixedWindow,
@@ -1935,7 +1935,7 @@ export default arcjet({
 ```
 
 ```ts
-// app/api/chat/route.ts — add route-specific rules
+// app/api/chat/route.ts – add route-specific rules
 import arcjet, { detectBot, fixedWindow } from "@/lib/arcjet";
 
 const aj = arcjet

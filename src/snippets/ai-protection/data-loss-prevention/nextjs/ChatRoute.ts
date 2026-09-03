@@ -9,7 +9,7 @@ const aj = arcjet({
     sensitiveInfo({
       mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
       // Block PII types that should never appear in AI prompts.
-      // Remove types your app legitimately handles (e.g. EMAIL for a support bot).
+      // Remove types your app legitimately handles (for example, EMAIL for a support bot).
       deny: ["CREDIT_CARD_NUMBER", "EMAIL"],
     }),
   ],
@@ -30,12 +30,12 @@ export async function POST(req: Request) {
   if (decision.isDenied() && decision.reason.isSensitiveInfo()) {
     console.warn("Request blocked due to sensitive information");
     return new Response(
-      "Sensitive information detected — please remove it from your prompt",
+      "Sensitive information detected – remove it from your prompt",
       { status: 400 },
     );
   }
 
-  // Arcjet approved — call your AI provider
+  // Arcjet approved – call your AI provider
   const result = await streamText({
     model: openai("gpt-4o"),
     messages: await convertToModelMessages(messages),

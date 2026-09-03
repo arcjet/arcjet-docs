@@ -8,7 +8,7 @@ app = Flask(__name__)
 aj = arcjet_sync(
     key=os.environ["ARCJET_KEY"],  # Get your site key from https://console.arcjet.com
     rules=[
-        # Shield protects your app from common attacks (e.g. SQL injection).
+        # Shield protects your app from common attacks (for example, SQL injection).
         shield(mode=Mode.LIVE),
         *protect_signup(
             rate_limit={
