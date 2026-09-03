@@ -722,4 +722,51 @@ test.describe("merged guard adapters", () => {
     }
     expect(redirects.every((r) => r.permanent)).toBe(true);
   });
+
+  test("the bare retired SDK route lands on a page that exists", () => {
+    // Guard adapters have no `/sdk/:sdk/` index, so `/sdk/${merged}` is a 404.
+    for (const [retired, merged] of Object.entries(MERGED_GUARD_SDK_KEYS)) {
+      expect(
+        mergedGuardSdkVercelRedirects().find(
+          (r) => r.source === `/sdk/${retired}`,
+        )?.destination,
+      ).toBe(`/sdk/${merged}/get-started`);
+      expect(mergedGuardSdkAstroRedirects()[`/sdk/${retired}`]).toBe(
+        `/sdk/${merged}/get-started/`,
+      );
+    }
+  });
+
+  test("every page that accepted a retired ?f= value still redirects", () => {
+    const redirects = legacyFrameworkVercelRedirects();
+
+    // `langchain-js` was selectable on the building blocks, not just the two
+    // hub pages, so those URLs have to keep working too.
+    const langchainJsPaths = [
+      "/ai-protection/abuse-protection",
+      "/ai-protection/budget-control",
+      "/ai-protection/data-loss-prevention",
+      "/ai-protection/prompt-injection",
+      "/content-moderation/quick-start",
+      "/get-started",
+      "/guards/quick-start",
+      "/prompt-injection/quick-start",
+      "/rate-limiting/quick-start",
+      "/rate-limiting/reference",
+      "/sensitive-info/quick-start",
+    ];
+
+    for (const docPath of langchainJsPaths) {
+      expect(
+        redirects.find(
+          (r) => r.source === docPath && r.has[0]?.value === "langchain-js",
+        )?.destination,
+      ).toBe(`/sdk/langchain${docPath}/`);
+    }
+
+    // Every retired key has at least one `?f=` redirect.
+    for (const retired of Object.keys(MERGED_GUARD_SDK_KEYS)) {
+      expect(redirects.some((r) => r.has[0]?.value === retired)).toBe(true);
+    }
+  });
 });

@@ -702,6 +702,36 @@ export const MERGED_GUARD_SDK_KEYS = {
   "strands-agents-py": "strands-agents",
 } as const satisfies Record<string, ArcjetGuardSdkKey>;
 
+/**
+ * Doc paths that each retired key accepted as a `?f=` value before the merge.
+ *
+ * This is a record of URLs that were published, so it is frozen rather than
+ * derived: the set cannot change now that the keys are gone. Taken from the
+ * `frameworks` frontmatter each page carried when the key was retired.
+ */
+const MERGED_GUARD_SDK_LEGACY_DOC_PATHS = {
+  "claude-agent-sdk-py": ["/get-started", "/guards/quick-start"],
+  "claude-managed-agents-py": ["/get-started", "/guards/quick-start"],
+  "langchain-js": [
+    "/ai-protection/abuse-protection",
+    "/ai-protection/budget-control",
+    "/ai-protection/data-loss-prevention",
+    "/ai-protection/prompt-injection",
+    "/content-moderation/quick-start",
+    "/get-started",
+    "/guards/quick-start",
+    "/prompt-injection/quick-start",
+    "/rate-limiting/quick-start",
+    "/rate-limiting/reference",
+    "/sensitive-info/quick-start",
+  ],
+  "openai-agents-py": ["/guards/quick-start"],
+  "strands-agents-py": ["/get-started", "/guards/quick-start"],
+} as const satisfies Record<
+  keyof typeof MERGED_GUARD_SDK_KEYS,
+  readonly string[]
+>;
+
 /** Returns whether a value is a retired, merged guard adapter key. */
 export function isMergedGuardSdkKey(
   value: string,
@@ -782,9 +812,11 @@ export function mergedGuardSdkVercelRedirects(): VercelSdkBaseRedirect[] {
       destination: `/guards/${merged}`,
       permanent: true,
     });
+    // Guard adapters have no `/sdk/:sdk/` index, so the bare route has to
+    // land on a real page. `/sdk/${merged}` would be a 404.
     redirects.push({
       source: `/sdk/${retired}`,
-      destination: `/sdk/${merged}`,
+      destination: `/sdk/${merged}/get-started`,
       permanent: true,
     });
     redirects.push({
@@ -1201,9 +1233,16 @@ export function legacyFrameworkVercelRedirects(): VercelLegacyFrameworkRedirect[
   }
 
   // Retired language-specific guard keys still appear in published `?f=` URLs.
-  // Send each one to the merged adapter rather than dropping the redirect.
+  // Send each one to the merged adapter on every page that accepted it, not
+  // just the two hub pages, or a shared building block URL lands on the page
+  // with no framework selected.
   for (const [retired, merged] of Object.entries(MERGED_GUARD_SDK_KEYS)) {
-    for (const docPath of ["/get-started", "/guards/quick-start"] as const) {
+    const docPaths =
+      MERGED_GUARD_SDK_LEGACY_DOC_PATHS[
+        retired as keyof typeof MERGED_GUARD_SDK_LEGACY_DOC_PATHS
+      ];
+
+    for (const docPath of docPaths) {
       redirects.push({
         source: docPath,
         has: [{ type: "query", key: "f", value: retired }],
