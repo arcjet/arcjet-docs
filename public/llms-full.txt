@@ -2166,6 +2166,7 @@ For the full API reference, read the installed library source:
 - [Mastra agent guard](https://docs.arcjet.com/guards/mastra)
 - [Claude Agent SDK agent guard](https://docs.arcjet.com/guards/claude-agent-sdk)
 - [Claude Agent SDK Python agent guard](https://docs.arcjet.com/guards/claude-agent-sdk-py)
+- [Claude Managed Agents agent guard](https://docs.arcjet.com/guards/claude-managed-agents)
 - [Capture events](https://docs.arcjet.com/guards/capture)
 
 ### SDKs

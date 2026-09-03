@@ -739,8 +739,10 @@ To wrap an effect instead of handling the decision yourself, use the
 checkpoint helpers. They fail closed by default
 (`on_guard_error="deny"`). A `DENY` raises `ArcjetDeniedError` or
 `ArcjetToolDeniedError`, except the OpenAI Agents Python helper,
-which calls `reject_content(...)`, and the Claude Agent SDK Python
-helper, which returns JSON in content with `is_error: True`.
+which calls `reject_content(...)`, the Claude Agent SDK Python
+helper, which returns JSON in content with `is_error: True`, and
+the Claude Managed Agents helper, which does not send
+`user.message` and returns `user.custom_tool_result`.
 Unavailability raises `ArcjetUnavailableError` or
 `ArcjetToolUnavailableError` on the LangChain and CrewAI surfaces.
 
@@ -772,6 +774,14 @@ Unavailability raises `ArcjetUnavailableError` or
   `structuredContent`. Unwrapped tools are `PreToolUse` deny.
   Inbound is `UserPromptSubmit` block via `guard_hooks`. There is
   no inbound helper. `can_use_tool` is HITL, not policy.
+- **Claude Managed Agents custom tools** – `guard_custom_tool` plus
+  `guard_events` (`arcjet[claude-managed-agents]`,
+  `arcjet.guard.claude_managed_agents`, `anthropic`). Inbound is
+  `user.message` before send. Custom tools are gated on
+  `agent.custom_tool_use` before your app executes. Built-in bash
+  and files default to `always_allow` with no customer pre-exec.
+  `always_ask` is HITL, not policy. This is not the Claude Agent
+  SDK.
 
 For install, examples, correlation, and the configure-before-wrap rule,
 see the <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
@@ -781,6 +791,8 @@ For OpenAI Agents Python, see the
 <Link.Page href="/guards/openai-agents-py">OpenAI Agents Python agent guard</Link.Page>.
 For Claude Agent SDK Python, see the
 <Link.Page href="/guards/claude-agent-sdk-py">Claude Agent SDK Python agent guard</Link.Page>.
+For Claude Managed Agents, see the
+<Link.Page href="/guards/claude-managed-agents">Claude Managed Agents agent guard</Link.Page>.
 
 ### Rules
 

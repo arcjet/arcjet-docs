@@ -375,6 +375,18 @@ test.describe("pathnameForLegacyFrameworkKey", () => {
     ).toBe("/sdk/claude-agent-sdk-py/get-started/");
   });
 
+  test("maps Claude Managed Agents get-started to the SDK get-started route", () => {
+    expect(
+      pathnameForLegacyFrameworkKey("claude-managed-agents", "/get-started"),
+    ).toBe("/sdk/claude-managed-agents/get-started/");
+    expect(
+      pathnameForLegacyFrameworkKey(
+        "claude-managed-agents-py",
+        "/get-started",
+      ),
+    ).toBe("/sdk/claude-managed-agents-py/get-started/");
+  });
+
   test("maps guard frameworks on the agent guards quick start to SDK routes", () => {
     expect(
       pathnameForLegacyFrameworkKey("langchain", "/guards/quick-start"),
@@ -499,6 +511,28 @@ test.describe("legacyFrameworkVercelRedirects", () => {
         r.destination === "/sdk/claude-agent-sdk-py/guards/quick-start/",
     );
     expect(match).toBeDefined();
+  });
+
+  test("redirects Claude Managed Agents guards quick-start URLs", () => {
+    const redirects = legacyFrameworkVercelRedirects();
+    expect(
+      redirects.find(
+        (r) =>
+          r.source === "/guards/quick-start" &&
+          r.has[0]?.value === "claude-managed-agents" &&
+          r.destination ===
+            "/sdk/claude-managed-agents/guards/quick-start/",
+      ),
+    ).toBeDefined();
+    expect(
+      redirects.find(
+        (r) =>
+          r.source === "/guards/quick-start" &&
+          r.has[0]?.value === "claude-managed-agents-py" &&
+          r.destination ===
+            "/sdk/claude-managed-agents-py/guards/quick-start/",
+      ),
+    ).toBeDefined();
   });
 
   for (const docPath of [

@@ -162,6 +162,12 @@ const FrameworkLinks = forwardRef(
                 case "claude-agent-sdk-py":
                   icon = <IconClaudeAgentSdk />;
                   break;
+                case "claude-managed-agents":
+                  icon = <IconClaudeAgentSdk />;
+                  break;
+                case "claude-managed-agents-py":
+                  icon = <IconClaudeAgentSdk />;
+                  break;
                 case "crewai":
                   icon = <IconCrewAi />;
                   break;
