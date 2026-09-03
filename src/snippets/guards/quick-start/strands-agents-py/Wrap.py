@@ -40,7 +40,7 @@ def email_tools(user):
     return get_client_record, guarded_send_email
 
 
-def run_email_agent(user, prompt: str):
+async def run_email_agent(user, prompt: str):
     get_client_record, send_email = email_tools(user)
     agent = Agent(
         tools=[get_client_record, send_email],

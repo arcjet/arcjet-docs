@@ -1,6 +1,6 @@
 ---
 title: "Google ADK agent guard"
-description: "Screen user text before `Runner.runAsync`, put `guardPlugin` first on the Runner, and treat `requestConfirmation` as confirmation, not policy."
+description: "Screen user text before `Runner.runAsync`, put `guardPlugin` first on the Runner, and treat `requireConfirmation` as confirmation, not policy."
 ---
 
 import { Link } from "@/components/link";
@@ -100,7 +100,7 @@ On `DENY` the original tool never runs. The payload shape is one
 `ArcjetDenialResult`. The envelope is the deny dict from
 `beforeToolCallback`:
 
-- `guardPlugin` returns that object to skip `runAsync`.
+- `guardPlugin` returns that object to skip the tool `runAsync`.
 - `undefined` executes the tool.
 
 It isn't a throw. It isn't `requireConfirmation` or
