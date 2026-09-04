@@ -16,4 +16,4 @@ const [redacted] = await redact(text, {
 });
 
 console.log(redacted);
-// my <Redacted contains-dash #1> is <Redacted email #2>
+// my <Redacted contains-dash #0> is <Redacted email #1>

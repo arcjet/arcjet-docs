@@ -44,6 +44,8 @@ ajToc:
         anchor: "4-wrap-the-tool"
       - text: 5. Try the policy
         anchor: "5-try-the-policy"
+      - text: Read the decision, not the absence of an email
+        anchor: "read-the-decision-not-the-absence-of-an-email"
   - text: "What next?"
     anchor: "what-next"
   - text: "Get help"
@@ -155,9 +157,15 @@ Then add:
    `BANK_ACCOUNT` and `ROUTING_NUMBER`.
 
 The examples configure the on-device Rampart backend, which detects these
-entity types locally.
+entity types locally, so the `body` never leaves your application. The first
+guarded call loads the Rampart model, so it takes noticeably longer than the
+ones after it.
 
-Publish the policy before running the example.
+Publish the policy before running the example. Until you do, the label
+matches nothing and every guard call comes back `NOT_CONFIGURED`, which
+falls through to the SDK rule decision rather than denying. See
+<Link.Page href="/guards/reference">Testing and reference</Link.Page> for
+the other policy statuses.
 
 Framework wrappers take `action` for the same slug you configured as the
 policy label. Direct `guard()` calls still use the field name `label`.
@@ -207,6 +215,12 @@ instructions to add a site and get a key.
 
 Wrap the send-email tool so Arcjet evaluates the remote policy before the email
 provider runs.
+
+Guarding one tool only helps if it is the only way to reach the capability.
+If the same agent session also exposes an unguarded path to sending mail –
+an MCP server it inherited, a built-in tool, a second tool you didn't wrap –
+the model can take that path instead. Keep the session's tool surface to
+what you wrapped.
 
 <SlotByFramework>
   <ClaudeWrap slot="claude-agent-sdk" />
@@ -264,15 +278,39 @@ browser sends only the scenario name.
 Each scenario demonstrates a different result from the same guarded tool:
 
 - **Allowed recipient:** The recipient is on the allow list and the body has no
-  sensitive data, so `sendEmail` can reach the email provider.
-- **Blocked recipient:** The model calls the same tool with an external address.
-  When the adapter maps `inputs`, the remote membership policy denies the call
-  before the provider runs, and the model receives the denial result.
+  sensitive data, so `sendEmail` reaches the email provider.
+- **Blocked recipient:** The model calls the same tool with an external
+  address, and the remote membership rule denies the call before the provider
+  runs. The model receives the denial result and explains it. This scenario
+  needs an adapter that maps `inputs`; on the others the send goes through,
+  because the recipient never reaches the policy.
 - **Sensitive information:** The recipient is allowed, but the agent first
   calls `getClientRecord` and receives test bank account and routing numbers.
-  When the model includes that tool result in the email body, local sensitive
-  information policy blocks `sendEmail` before the data leaves the
-  application.
+  When the model puts that tool result in the email body, the check denies
+  `sendEmail` before the data leaves the application – through the remote
+  policy's `body` rule where the adapter maps `inputs`, and through the SDK
+  rule where it doesn't.
+
+### Read the decision, not the absence of an email
+
+The samples give the agent a system prompt for a reason. Without one the
+model asks a clarifying question, or masks the account numbers itself,
+instead of calling `sendEmail` with them. Nothing is sent, no guard call is
+made, and no decision is returned.
+
+That is the outcome to watch for, because it looks like the guard worked. A
+reader with a broken policy, a wrong label, or a missing key sees "nothing
+was sent" and concludes the guard is enforcing. Check the decision in the
+[Arcjet dashboard](https://console.arcjet.com) or in your logs. No decision
+means the model declined, not that the guard denied.
+
+The same distinction is the reason to guard the tool at all. An unguarded
+agent often refuses the sensitive-information scenario on its own, because
+sending bank details over email looks wrong to the model. That refusal is
+judgement: it is non-deterministic, and a different prompt can talk the
+model out of it. The blocked-recipient scenario is the deterministic
+contrast, since nothing about an external address looks unsafe to the
+model.
 
 ## What next?
 

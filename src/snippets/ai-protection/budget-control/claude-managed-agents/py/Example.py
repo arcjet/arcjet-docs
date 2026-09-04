@@ -13,13 +13,16 @@ token_budget = TokenBucket(
 )
 
 
-async def complete_prompt(arguments: dict) -> dict:
-    return {"prompt": arguments["prompt"]}
+async def complete_prompt(event) -> dict:
+    return {"prompt": event.input["prompt"]}
 
 
+# Pass run= for the hosted path. Call the result with the
+# agent.custom_tool_use event, the send callable, and the Anthropic session
+# id, so a denial can be posted as the tool result.
 guarded_complete_prompt = guard_custom_tool(
     guard=arcjet,
-    tool=complete_prompt,
+    run=complete_prompt,
     action="prompt.completed",
     rules=lambda arguments: [
         token_budget(

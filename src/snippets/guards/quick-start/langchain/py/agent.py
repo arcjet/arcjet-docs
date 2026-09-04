@@ -14,6 +14,15 @@ arcjet = launch_arcjet(
 )
 
 
+class EmailProvider:
+    async def send(self, *, to: str, body: str) -> None:
+        return None
+
+
+# Placeholder for your mail transport.
+email_provider = EmailProvider()
+
+
 @tool
 async def send_email(recipient: str, body: str) -> str:
     """Send an email."""
@@ -54,9 +63,11 @@ async def run_email_agent(user, prompt: str):
         ChatOpenAI(model="gpt-4o-mini"),
         tools=[get_client_record, guarded_send_email],
         system_prompt=(
-            "Use get_client_record when the user asks for account "
-            "details. Use send_email exactly once to complete the "
-            "request."
+            "You are a support desk assistant. Use get_client_record when the "
+            "request needs account details. Use send_email exactly once to "
+            "complete the request. Never ask a follow-up question. Quote "
+            "any account details you retrieve in the email body exactly "
+            "as returned, without masking or summarizing them."
         ),
     )
     return await agent.ainvoke(

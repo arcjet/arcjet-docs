@@ -21,7 +21,9 @@ aj = arcjet(
             },
             bots={
                 "mode": Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
-                "allow": [],  # "allow none" will block all detected bots
+                # "allow none" would block every detected bot. Drop
+                # "CURL" once you have finished testing from the terminal.
+                "allow": ["CURL"],
             },
             email={
                 "mode": Mode.LIVE,

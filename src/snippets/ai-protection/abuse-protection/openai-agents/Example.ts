@@ -1,4 +1,8 @@
-import { launchArcjet, detectPromptInjection, tokenBucket } from "@arcjet/guard";
+import {
+  launchArcjet,
+  detectPromptInjection,
+  tokenBucket,
+} from "@arcjet/guard";
 import { guardTool, openaiAgentsContext } from "@arcjet/guard/openai-agents/v0";
 import { Agent, run, tool } from "@openai/agents";
 import { z } from "zod";
@@ -23,7 +27,9 @@ export const lookupOrder = guardTool(
   }),
   {
     action: "order.looked-up",
-    rules: (input) => [lookupLimit({ key: input.orderId, requested: 5 })],
+    rules: (input: { orderId: string }) => [
+      lookupLimit({ key: input.orderId, requested: 5 }),
+    ],
   },
 );
 

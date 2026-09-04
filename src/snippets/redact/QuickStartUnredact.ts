@@ -7,9 +7,9 @@ const [redacted, unredact] = await redact(text, {
 });
 
 console.log(redacted);
-// My email address is <Redacted email #1>
+// My email address is <Redacted email #0>
 
-const unredacted = unredact("Your email address is <Redacted email #1>");
+const unredacted = unredact("Your email address is <Redacted email #0>");
 
 console.log(unredacted);
 // Your email address is test@example.com

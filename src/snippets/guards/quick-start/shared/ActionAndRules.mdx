@@ -1,3 +1,14 @@
-This adapter submits `action` and SDK `rules` for the local
-sensitive-information check. The recipient allow list is not enforced in this
-sample.
+import { Aside } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+<Aside type="caution" title="This adapter can't map policy inputs">
+  This adapter takes `action` and SDK `rules`, but not `inputs`. The guard call
+  carries no inputs, so the remote policy has nothing to evaluate and neither
+  rule you configured in step 1 fires. What blocks the send here is the SDK
+  rule in `rules`, which checks the body on this machine. The recipient allow
+  list is not enforced.
+
+  To have the remote policy decide, use an adapter that maps `inputs`. Every
+  Python adapter does, as does the
+  <Link.Page href="/guards/vercel-ai">Vercel AI SDK adapter</Link.Page>.
+</Aside>

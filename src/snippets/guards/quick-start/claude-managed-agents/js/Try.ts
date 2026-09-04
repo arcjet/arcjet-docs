@@ -1,6 +1,10 @@
 import { runEmailAgent } from "./agent.js";
 
+// Keep identity and sensitive records on the server.
 const user = {
+  // Your own conversation id. Arcjet correlates on this, not on the
+  // Anthropic session id.
+  conversationId: "conversation-123",
   record: {
     name: "Alex Morgan",
     bankAccount: "0123456789",
@@ -22,7 +26,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Unknown scenario" }, { status: 400 });
   }
 
-  // Pass the Anthropic session id from sessions.create. Don't mint one.
+  // The Anthropic session id from sessions.create.
   const sessionId = process.env.ANTHROPIC_SESSION_ID!;
   const output = await runEmailAgent(user, sessionId, scenarios[scenario]);
   return Response.json({ output: output ?? "Agent run completed." });

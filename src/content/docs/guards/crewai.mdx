@@ -196,7 +196,9 @@ lookup_limit = TokenBucket(
     max_tokens=10,
     bucket="lookups",
 )
-detect_pii = LocalDetectSensitiveInfo()
+detect_pii = LocalDetectSensitiveInfo(
+    deny=["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+)
 
 
 @tool("lookup_order")
@@ -350,7 +352,9 @@ Scan a note, reason, or body from `free_text_arguments`. An opaque
 from arcjet.guard import LocalDetectSensitiveInfo, TokenBucket
 from arcjet.guard.crewai import free_text_arguments, register_arcjet_hooks
 
-detect_pii = LocalDetectSensitiveInfo()
+detect_pii = LocalDetectSensitiveInfo(
+    deny=["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+)
 
 register_arcjet_hooks(
     guard=arcjet,

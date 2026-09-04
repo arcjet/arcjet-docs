@@ -2,6 +2,15 @@ import Step from "./Try.ts?raw";
 import { Code } from "@astrojs/starlight/components";
 
 Expose a small server endpoint. The browser sends only the scenario name.
-Pass the Anthropic session `id` from `sessions.create`. Don't mint one:
+Arcjet correlates on your own conversation id, never on the Anthropic
+session id, which addresses the session you created with `sessions.create`.
+
+Steer the agent when you create the session, or it asks a clarifying
+question instead of calling the tool and the guard never gets a decision to
+make. Pass `agent` as `agent_with_overrides` with a `system` prompt telling
+it to complete the request without follow-up questions, and quote retrieved
+account details verbatim. Keep `mcp_servers` empty there too: an unguarded
+server on the hosted agent can offer the model another way to send mail,
+straight past the tool you guarded:
 
 <Code code={Step} lang="ts" title="app/api/agent/route.ts" />

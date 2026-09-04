@@ -1,11 +1,10 @@
-import { launchArcjet, detectPromptInjection, tokenBucket } from "@arcjet/guard";
-import { guardPlugin, googleAdkContext } from "@arcjet/guard/google-adk/v2";
 import {
-  FunctionTool,
-  InMemoryRunner,
-  LlmAgent,
-  createUserContent,
-} from "@google/adk";
+  launchArcjet,
+  detectPromptInjection,
+  tokenBucket,
+} from "@arcjet/guard";
+import { guardPlugin, googleAdkContext } from "@arcjet/guard/google-adk/v2";
+import { FunctionTool, InMemoryRunner, LlmAgent } from "@google/adk";
 import { z } from "zod";
 
 const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
@@ -34,10 +33,7 @@ const agent = new LlmAgent({
   tools: [lookupOrder],
 });
 
-export async function runAgent(
-  conversationId: string,
-  userText: string,
-) {
+export async function runAgent(conversationId: string, userText: string) {
   const appContext = { sessionId: conversationId };
   const decision = await arcjet.guard({
     label: "message.received",
@@ -69,6 +65,6 @@ export async function runAgent(
   return runner.runAsync({
     userId: conversationId,
     sessionId: conversationId,
-    newMessage: createUserContent(userText),
+    newMessage: { parts: [{ text: userText }] },
   });
 }

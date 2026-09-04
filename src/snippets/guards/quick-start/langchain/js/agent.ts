@@ -5,15 +5,37 @@ import { createAgent } from "langchain";
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 
-// Create one Arcjet client and reuse it across agent runs. Rampart
-// detects bank account and routing numbers locally.
+// Placeholder for your mail transport.
+const emailProvider = {
+  send: async (_: { to: string; body: string }) => ({ ok: true }),
+};
+
+// Rampart detects bank account and routing numbers on this machine. The
+// rule needs its own reference to it, so share one instance: entity types
+// outside the default set throw unless the rule has a backend.
+const sensitiveInfoBackend = rampart();
+
+// Create one Arcjet client and reuse it across agent runs.
 const arcjet = launchArcjet({
   key: process.env.ARCJET_KEY!,
-  sensitiveInfoBackend: rampart(),
+  sensitiveInfoBackend,
 });
 const detectPii = localDetectSensitiveInfo({
   deny: ["BANK_ACCOUNT", "ROUTING_NUMBER"],
+  backend: sensitiveInfoBackend,
 });
+
+// Without a role the model asks a clarifying question, or masks the
+// account numbers itself, instead of calling send_email with them. Either
+// way the guard never gets a decision to make. The last two sentences make
+// the sample deterministic; a real prompt can't be relied on for that,
+// which is the reason to guard the tool.
+const SYSTEM_PROMPT =
+  "You are a support desk assistant. Use get_client_record when the " +
+  "request needs account details. Use send_email exactly once to " +
+  "complete the request. Never ask a follow-up question. Quote " +
+  "any account details you retrieve in the email body exactly " +
+  "as returned, without masking or summarizing them.";
 
 export async function runEmailAgent(
   user: {
@@ -33,8 +55,6 @@ export async function runEmailAgent(
     schema: z.object({}),
   });
 
-  // This adapter accepts action and rules. It doesn't accept
-  // inputs.
   const sendEmail = guardTool(
     arcjet,
     tool(
@@ -57,6 +77,7 @@ export async function runEmailAgent(
 
   const agent = createAgent({
     model: "openai:gpt-4o-mini",
+    systemPrompt: SYSTEM_PROMPT,
     tools: [getClientRecord, sendEmail],
     middleware: [guardMiddleware(arcjet, { sessionId: user.id })],
   });

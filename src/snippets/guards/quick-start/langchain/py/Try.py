@@ -1,6 +1,7 @@
 from typing import Literal
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from agent import run_email_agent
@@ -46,3 +47,8 @@ class AgentRequest(BaseModel):
 async def run_agent(request: AgentRequest):
     result = await run_email_agent(user, scenarios[request.scenario])
     return {"output": result["messages"][-1].content}
+
+
+# Serve the demo page in the next step from public/ at the site root. Mount
+# it after the route, so /api/agent still resolves.
+app.mount("/", StaticFiles(directory="public", html=True), name="public")

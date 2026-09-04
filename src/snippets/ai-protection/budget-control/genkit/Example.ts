@@ -29,7 +29,7 @@ export const completePrompt = guardTool(
   ),
   {
     action: "prompt.completed",
-    rules: (input) => [
+    rules: (input: { estimatedTokens: number }) => [
       tokenBudget({
         key: "user123", // Replace with your authenticated user ID
         requested: Math.max(1, Math.ceil(input.estimatedTokens)),

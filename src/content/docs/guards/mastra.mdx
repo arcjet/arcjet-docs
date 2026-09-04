@@ -147,7 +147,9 @@ const lookupLimit = tokenBucket({
   maxTokens: 10,
 });
 // Factory then text – same shape as `detectPromptInjection()(text)`.
-const detectPii = localDetectSensitiveInfo();
+const detectPii = localDetectSensitiveInfo({
+  deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+});
 
 export const lookupOrder = guardTool(
   arcjet,

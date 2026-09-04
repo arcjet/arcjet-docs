@@ -6,7 +6,9 @@ const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 const ai = genkit({
   // Configure your model plugin.
 });
-const detectPii = localDetectSensitiveInfo();
+const detectPii = localDetectSensitiveInfo({
+  deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+});
 
 export const saveNote = guardTool(
   arcjet,
@@ -20,6 +22,6 @@ export const saveNote = guardTool(
   ),
   {
     action: "note.saved",
-    rules: (input) => [detectPii(input.note)],
+    rules: (input: { note: string }) => [detectPii(input.note)],
   },
 );

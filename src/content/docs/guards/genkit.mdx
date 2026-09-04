@@ -150,7 +150,9 @@ const lookupLimit = tokenBucket({
   intervalSeconds: 60,
   maxTokens: 10,
 });
-const detectPii = localDetectSensitiveInfo();
+const detectPii = localDetectSensitiveInfo({
+  deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+});
 const inbound = detectPromptInjection();
 
 const lookupOrder = guardTool(
@@ -271,7 +273,9 @@ const lookupLimit = tokenBucket({
   intervalSeconds: 60,
   maxTokens: 10,
 });
-const detectPii = localDetectSensitiveInfo();
+const detectPii = localDetectSensitiveInfo({
+  deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+});
 
 const lookupOrder = guardTool(
   arcjet,
@@ -430,7 +434,9 @@ email, phone, card, or IP detection, so don't pass it to
 ```ts
 import { localDetectSensitiveInfo, tokenBucket } from "@arcjet/guard";
 
-const detectPii = localDetectSensitiveInfo();
+const detectPii = localDetectSensitiveInfo({
+  deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+});
 
 const lookupOrder = guardTool(
   arcjet,

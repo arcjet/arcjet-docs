@@ -4,12 +4,7 @@ import {
   tokenBucket,
 } from "@arcjet/guard";
 import { guardPlugin, googleAdkContext } from "@arcjet/guard/google-adk/v2";
-import {
-  FunctionTool,
-  InMemoryRunner,
-  LlmAgent,
-  createUserContent,
-} from "@google/adk";
+import { FunctionTool, InMemoryRunner, LlmAgent } from "@google/adk";
 import { z } from "zod";
 
 const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
@@ -73,6 +68,6 @@ export async function runAgent(conversationId: string, userText: string) {
   return runner.runAsync({
     userId: conversationId,
     sessionId: conversationId,
-    newMessage: createUserContent(userText),
+    newMessage: { parts: [{ text: userText }] },
   });
 }

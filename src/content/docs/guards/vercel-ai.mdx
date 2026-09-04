@@ -351,7 +351,9 @@ card, or IP detection, so do not pass it to `localDetectSensitiveInfo`.
 ```ts
 import { localDetectSensitiveInfo, tokenBucket } from "@arcjet/guard";
 
-const detectPii = localDetectSensitiveInfo();
+const detectPii = localDetectSensitiveInfo({
+  deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+});
 
 const lookupOrder = guardTool(arcjet, lookupOrderTool, {
   action: "order.looked-up",

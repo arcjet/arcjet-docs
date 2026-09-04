@@ -59,12 +59,8 @@ export const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 </TabItem>
 <TabItem label="Python">
 
-Until `arcjet.guard.strands_agents` is published, pin `arcjet` to
-[`a6308061`](https://github.com/arcjet/arcjet-py/commit/a630806169b92757192f3f5cce2e305827b26567).
-Published `arcjet` 1.0.0 on PyPI does not include this extra.
-
 ```bash
-pip install "arcjet[strands-agents] @ git+https://github.com/arcjet/arcjet-py@a630806169b92757192f3f5cce2e305827b26567"
+pip install "arcjet[strands-agents]"
 ```
 
 `arcjet[strands-agents]` depends on `strands-agents>=1.11.0,<2`.
@@ -314,7 +310,9 @@ const lookupLimit = tokenBucket({
   intervalSeconds: 60,
   maxTokens: 10,
 });
-const detectPii = localDetectSensitiveInfo();
+const detectPii = localDetectSensitiveInfo({
+  deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+});
 const inbound = detectPromptInjection();
 
 const lookupOrder = guardTool(
@@ -433,7 +431,9 @@ const lookupLimit = tokenBucket({
   intervalSeconds: 60,
   maxTokens: 10,
 });
-const detectPii = localDetectSensitiveInfo();
+const detectPii = localDetectSensitiveInfo({
+  deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+});
 
 const lookupOrder = guardTool(
   arcjet,
@@ -484,7 +484,9 @@ lookup_limit = TokenBucket(
     max_tokens=10,
     bucket="lookups",
 )
-detect_pii = LocalDetectSensitiveInfo()
+detect_pii = LocalDetectSensitiveInfo(
+    deny=["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+)
 
 
 @tool

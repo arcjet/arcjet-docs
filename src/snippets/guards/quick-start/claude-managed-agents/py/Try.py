@@ -1,6 +1,8 @@
+import os
 from typing import Literal
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from agent import run_email_agent
@@ -8,11 +10,14 @@ from agent import run_email_agent
 app = FastAPI()
 
 
+# Keep identity, allowed recipients, and sensitive records on the server.
 class User:
     def __init__(self):
-        # Caller-owned Anthropic session id from sessions.create.
-        # Replace SESSION_ID. Don't mint one in the handler.
-        self.session_id = "SESSION_ID"
+        self.id = "customer-123"
+        # Your own conversation id. Arcjet correlates on this, not on the
+        # Anthropic session id.
+        self.session_id = "conversation-123"
+        self.allowed_recipients = ["approved@example.com"]
         self.record = {
             "name": "Alex Morgan",
             "bank_account": "0123456789",
@@ -43,5 +48,15 @@ class AgentRequest(BaseModel):
 
 @app.post("/api/agent")
 async def run_agent(request: AgentRequest):
-    result = await run_email_agent(user, scenarios[request.scenario])
+    # The Anthropic session id from sessions.create.
+    result = await run_email_agent(
+        user,
+        os.environ["ANTHROPIC_SESSION_ID"],
+        scenarios[request.scenario],
+    )
     return {"output": str(result)}
+
+
+# Serve the demo page in the next step from public/ at the site root. Mount
+# it after the route, so /api/agent still resolves.
+app.mount("/", StaticFiles(directory="public", html=True), name="public")

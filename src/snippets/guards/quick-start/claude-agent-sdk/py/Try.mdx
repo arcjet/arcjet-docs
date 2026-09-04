@@ -1,6 +1,11 @@
 import Step from "./Try.py?raw";
 import { Code } from "@astrojs/starlight/components";
 
-Expose a small server endpoint. The browser sends only the scenario name. Pass the caller-owned UUID `session_id` that you already have. Don't mint one:
+Expose a small server endpoint. The browser sends only the scenario name.
+
+This demo uses two ids that do different jobs. The guard `session_id` is
+the caller-owned id you already have for the actor, and it can be
+long-lived. `ClaudeAgentOptions.session_id` names a new SDK session, so it
+has to be a fresh UUID per run:
 
 <Code code={Step} lang="py" title="app.py" />

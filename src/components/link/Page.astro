@@ -1,13 +1,14 @@
 ---
 import type { HTMLAttributes } from "astro/types";
-import { scopeHrefToCurrentSdk } from "@/lib/sdk";
+import { resolveHrefForCurrentSdk } from "@/lib/doc-routes";
 
 type Props = HTMLAttributes<"a"> & {
   /**
    * Internal absolute path to link to e.g. `"/get-started"`.
    *
-   * On SDK-scoped pages this is automatically prefixed with
-   * `/sdk/{currentSdk}/`. On non-SDK pages the href is used as-is.
+   * On SDK-scoped pages this is prefixed with `/sdk/{currentSdk}/` when that
+   * page has an SDK-scoped route. Shared pages, and non-SDK pages, use the
+   * href as-is.
    */
   href: string;
 };
@@ -18,7 +19,7 @@ if (!href) {
   throw new Error(`<Link.Page> requires an href prop.`);
 }
 
-const resolvedHref = scopeHrefToCurrentSdk(Astro.url.pathname, href);
+const resolvedHref = await resolveHrefForCurrentSdk(Astro.url.pathname, href);
 ---
 
 <a href={resolvedHref} {...rest}><slot /></a>

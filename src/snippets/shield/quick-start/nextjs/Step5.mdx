@@ -2,14 +2,16 @@
 curl -v -H "x-arcjet-suspicious: true" http://localhost:3000
 ```
 
-After the fifth request, your logs show this:
+After a few requests, Shield triggers and your logs show this:
 
 ```text
 Rule Result ArcjetRuleResult {
-   ttl: 0,
-   state: 'DRY_RUN',
-   conclusion: 'DENY',
-   reason: ArcjetShieldReason { type: 'SHIELD', shieldTriggered: true }
+  ruleId: '',
+  fingerprint: 'fp::2::4c3e0a...',
+  ttl: 0,
+  state: 'DRY_RUN',
+  conclusion: 'DENY',
+  reason: ArcjetShieldReason { type: 'SHIELD', shieldTriggered: true }
 }
 Conclusion ALLOW
 ```

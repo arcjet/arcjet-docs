@@ -6,7 +6,9 @@ from crewai.tools import tool
 
 # CrewAI hooks are synchronous, so use launch_arcjet_sync.
 arcjet = launch_arcjet_sync(key=os.environ["ARCJET_KEY"])
-detect_pii = LocalDetectSensitiveInfo()
+detect_pii = LocalDetectSensitiveInfo(
+    deny=["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+)
 
 
 @tool("save_note")

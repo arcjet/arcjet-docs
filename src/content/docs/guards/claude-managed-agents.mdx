@@ -57,13 +57,8 @@ or `@anthropic-ai/claude-agent-sdk` for this adapter.
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
 
-Until `@arcjet/guard/claude-managed-agents/v0` is published, pin
-`@arcjet/guard` to
-[`cb35c8f9`](https://github.com/arcjet/arcjet-js/commit/cb35c8f92c3a2fb63fbeb9b386d79b1878c19d92).
-Published `@arcjet/guard` does not export `./claude-managed-agents/v0`.
-
 ```bash
-npm install @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#cb35c8f92c3a2fb63fbeb9b386d79b1878c19d92 @anthropic-ai/sdk
+npm install @arcjet/guard @anthropic-ai/sdk
 ```
 
 `@anthropic-ai/sdk` (`>=0.86.0 <1`) is an optional peer, not a
@@ -88,12 +83,8 @@ export const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 </TabItem>
 <TabItem label="Python">
 
-Until `arcjet.guard.claude_managed_agents` is published, pin `arcjet` to
-[`40ea4896`](https://github.com/arcjet/arcjet-py/commit/40ea4896962a90a24cdbc4cfbfc80729c096da36).
-Published `arcjet` 1.0.0 on PyPI does not include this extra.
-
 ```bash
-pip install "arcjet[claude-managed-agents] @ git+https://github.com/arcjet/arcjet-py@40ea4896962a90a24cdbc4cfbfc80729c096da36"
+pip install "arcjet[claude-managed-agents]"
 ```
 
 `arcjet[claude-managed-agents]` depends on `anthropic>=0.92.0,<2`.
@@ -131,7 +122,7 @@ Pick the surface that matches what you hold when the effect runs:
 | --- | --- | --- | --- |
 | Inbound user text, before `events.send` | `guardEvents` | `guard_events` | Yes |
 | A custom tool your app executes | `guardCustomTool` | `guard_custom_tool` | Yes |
-| A caller-owned session ID | `claudeManagedAgentsContext` | `claude_managed_agents_context` | No |
+| A caller-owned correlation ID | `claudeManagedAgentsContext` | `claude_managed_agents_context` | No |
 
 `guardEvents` / `guard_events` screens inbound text on
 `user.message` before you send it. There is no `guardInbound` and no
@@ -147,10 +138,12 @@ the events schema. Don't invent a second field. Don't throw. A
 throw is a raw exception.
 
 `claudeManagedAgentsContext` / `claude_managed_agents_context` reads
-a caller-owned session ID. It never mints an ID. It never calls
-`createAgentContext`. Pass the `id` Anthropic returned from
-`sessions.create`. If you omit a session ID, the call is uncorrelated
-rather than joined to a generated ID.
+a correlation ID your application owns, such as a conversation ID. It
+never mints an ID and it never calls `createAgentContext`. Don't pass
+the `id` Anthropic returned from `sessions.create`: Anthropic session
+and event IDs are dropped, because they aren't IDs you created. If you
+omit a correlation ID, the call is uncorrelated rather than joined to a
+generated ID.
 
 There is no `guardTool`, `guardHooks`, `PreToolUse`, or
 `canUseTool` on this adapter. Those names belong to the Claude Agent
@@ -163,13 +156,34 @@ SDK. Don't wrap these tools with
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
 
-| Option | Helpers | Description |
-| --- | --- | --- |
-| `action` | `guardCustomTool`, `guardEvents` | Guard label and capture name. Use `resource.verb` in the past tense, such as `email.sent`. |
-| `rules` | `guardCustomTool`, `guardEvents` | SDK rules, or a function of the tool input or `{ prompt }`. Omit to submit none. |
-| `inbound` | `guardEvents` | Policy for `user.message`. Uses `{ prompt }` in `rules`. |
-| `sessionId` | Both | Caller-owned Anthropic session `id`. Never minted. |
-| `onGuardError` | Both | `"deny"` (default) or `"allow"`. |
+`guardCustomTool(client, call, policy)` takes the call as
+`{ event, execute, send }` and this policy:
+
+| Option | Description |
+| --- | --- |
+| `action` | Guard label and capture name. Use `resource.verb` in the past tense, such as `email.sent`. |
+| `rules` | SDK rules, or a function of the tool input. Omit to submit none. |
+| `metadata` | Merged over the context's, as an object or a function of the input. |
+| `context` | Correlation from `claudeManagedAgentsContext`. |
+| `onGuardError` | `"deny"` (default) or `"allow"`. |
+
+It answers `{ allowed: true, output }`, or `{ allowed: false, result }`
+after it has already sent the denial through `send`.
+
+`guardEvents(client, policy, send)` takes this policy and a `send`
+callback it invokes only on allow:
+
+| Option | Description |
+| --- | --- |
+| `events` | The events you would send. Only `user.message` is screened. |
+| `inbound.action` | Guard label and capture name. Defaults to `"message.received"`. |
+| `inbound.rules` | SDK rules, or a function of `{ text, events }`. Omit to submit none. |
+| `inbound.onGuardError` | `"deny"` (default) or `"allow"`. |
+| `context` | Correlation from `claudeManagedAgentsContext`. |
+| `metadata` | Merged over the context's. |
+
+It answers `{ allowed: true, sent }`, or
+`{ allowed: false, outcome, message }` without calling `send`.
 
 </TabItem>
 <TabItem label="Python">
@@ -180,23 +194,41 @@ SDK. Don't wrap these tools with
 | --- | --- | --- |
 | `guard` | Yes | Client from `launch_arcjet` or `launch_arcjet_sync`. |
 | `action` | Yes | Guard label and capture name. Use `resource.verb` in the past tense, such as `email.sent`. |
-| `rules` | No | Bound SDK rule inputs, or a function of the parsed tool arguments. Omit to submit none. |
-| `session_id` | No | Caller-owned Anthropic session `id`. Never minted. |
+| `run` | One of | Hosted custom-tool body. Called with the `agent.custom_tool_use` event. |
+| `tool` | One of | Self-hosted worker tool with a callable `run`, such as a `@beta_tool`. |
+| `actor` | No | Who is acting, or a callable of the tool arguments. |
+| `inputs` | No | Typed remote-policy inputs, or a callable of the tool arguments. |
+| `rules` | No | Bound SDK rule inputs, or a callable of the tool arguments. Omit to submit none. |
+| `metadata` | No | Capture metadata, or a callable of the tool arguments. |
+| `session_id` | No | Correlation ID your application owns. Never minted, and never an Anthropic session or event ID. |
 | `on_guard_error` | No | `"deny"` (default) or `"allow"`. A real `DENY` always blocks. |
 
-`guard_events` accepts this contract:
+Pass `run` for the hosted path. The handler it returns is called as
+`await handler(event, send=..., session_id=...)`, where `session_id` is
+the Anthropic session the denial is posted to. On `DENY` it sends
+`user.custom_tool_result` itself and answers `None`, so don't send a
+second result. On `ALLOW` it answers what `run` returned, and you send
+the success result.
+
+`guard_events` wraps `sessions.events.send`:
 
 | Option | Required | Description |
 | --- | --- | --- |
 | `guard` | Yes | Client from `launch_arcjet` or `launch_arcjet_sync`. |
-| `action` | No | Guard label and capture name. |
-| `rules` | No | Bound SDK rule inputs, or a function of `{ "prompt": ... }`. Omit to submit none. |
-| `inbound` | No | Policy for `user.message`. Requires `action`. `rules` receives `{"prompt": ...}`. |
-| `session_id` | No | Caller-owned Anthropic session `id`. Never minted. |
+| `send` | Yes | `client.beta.sessions.events.send`, or another callable with the same `events=` / `initial_events=` keywords. |
+| `action` | Yes | Guard label and capture name, such as `message.received`. |
+| `actor` | No | Who is acting, or a callable of the message arguments. |
+| `inputs` | No | Typed remote-policy inputs, or a callable of the message arguments. |
+| `rules` | No | Bound SDK rule inputs, or a callable of `{"prompt": ..., "content": ..., "type": ...}`. Omit to submit none. |
+| `metadata` | No | Capture metadata, or a callable of the message arguments. |
+| `session_id` | No | Correlation ID your application owns. Never minted, and never an Anthropic session or event ID. |
 | `on_guard_error` | No | `"deny"` (default) or `"allow"`. A real `DENY` always blocks. |
 
-`guard_events` needs an `inbound` policy. There is no inbound
-helper. Screen prompt injection on the events inbound path.
+There is no `inbound` option in Python and no inbound helper: `action`
+and `rules` sit at the top level, and the returned callable replaces
+`send`. On `DENY` it raises `ArcjetDeniedError` and never calls the real
+`send`. Pass an async client, because a blocking one makes the wrapper
+synchronous and it can't be awaited from a coroutine.
 
 </TabItem>
 </Tabs>
@@ -215,8 +247,9 @@ Helpers default to `onGuardError: "deny"` /
 inbound, because failing closed there stops the agent answering during
 an outage.
 
-Pass the Anthropic session `id` that you already have. Don't mint
-one. If you omit a session ID, the call is uncorrelated.
+Correlate on an ID your application owns, such as a conversation ID.
+Don't mint one per call, and don't reuse the Anthropic session `id`.
+If you omit it, the call is uncorrelated.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -224,74 +257,88 @@ one. If you omit a session ID, the call is uncorrelated.
 ```ts
 import Anthropic from "@anthropic-ai/sdk";
 import { detectPromptInjection } from "@arcjet/guard";
-import { guardEvents } from "@arcjet/guard/claude-managed-agents/v0";
+import {
+  claudeManagedAgentsContext,
+  guardEvents,
+} from "@arcjet/guard/claude-managed-agents/v0";
 import { arcjet } from "./arcjet.js";
 
 const client = new Anthropic();
 
 export async function sendTurn(
   sessionId: string,
+  conversationId: string,
   userText: string,
 ) {
-  await guardEvents(arcjet, {
-    sessionId,
-    inbound: {
-      action: "message.received",
-      rules: ({ prompt }) => [detectPromptInjection()(prompt)],
-    },
-    prompt: userText,
-  });
-
-  await client.beta.sessions.events.send(sessionId, {
-    events: [
-      {
-        type: "user.message",
-        content: [{ type: "text", text: userText }],
+  const inbound = await guardEvents(
+    arcjet,
+    {
+      events: [
+        { type: "user.message", content: [{ type: "text", text: userText }] },
+      ],
+      inbound: {
+        action: "message.received",
+        rules: ({ text }) => [detectPromptInjection()(text)],
       },
-    ],
-  });
+      context: claudeManagedAgentsContext({ correlationId: conversationId }),
+    },
+    (body) => client.beta.sessions.events.send(sessionId, body),
+  );
+
+  if (!inbound.allowed) {
+    return inbound.message;
+  }
 }
 ```
 
-Replace `sessionId` with the `id` returned by
-`client.beta.sessions.create`.
+`sessionId` is the `id` returned by `client.beta.sessions.create`.
+`conversationId` is an ID your application owns, and it is what Arcjet
+correlates on.
 
 </TabItem>
 <TabItem label="Python">
 
 ```py
-from anthropic import Anthropic
-from arcjet.guard import DetectPromptInjection, launch_arcjet
+from anthropic import AsyncAnthropic
+from arcjet.guard import (
+    ArcjetDeniedError,
+    DetectPromptInjection,
+    launch_arcjet,
+)
 from arcjet.guard.claude_managed_agents import guard_events
 
-client = Anthropic()
+client = AsyncAnthropic()
 arcjet = launch_arcjet(key=ARCJET_KEY)
 inbound = DetectPromptInjection()
 
+send = guard_events(
+    guard=arcjet,
+    send=client.beta.sessions.events.send,
+    action="message.received",
+    session_id=CONVERSATION_ID,
+    rules=lambda arguments: [inbound(arguments["prompt"])],
+)
 
-async def send_turn(session_id: str, user_text: str) -> None:
-    await guard_events(
-        guard=arcjet,
-        session_id=session_id,
-        inbound={
-            "action": "message.received",
-            "rules": lambda arguments: [inbound(arguments["prompt"])],
-        },
-        prompt=user_text,
-    )
-    client.beta.sessions.events.send(
-        session_id,
-        events=[
-            {
-                "type": "user.message",
-                "content": [{"type": "text", "text": user_text}],
-            }
-        ],
-    )
+
+async def send_turn(session_id: str, user_text: str) -> bool:
+    try:
+        await send(
+            session_id,
+            events=[
+                {
+                    "type": "user.message",
+                    "content": [{"type": "text", "text": user_text}],
+                }
+            ],
+        )
+    except ArcjetDeniedError:
+        return False
+    return True
 ```
 
-Replace `session_id` with the `id` returned by
-`client.beta.sessions.create`.
+`session_id` is the `id` returned by `client.beta.sessions.create`.
+`CONVERSATION_ID` is an ID your application owns, and it is what Arcjet
+correlates on.
 
 </TabItem>
 </Tabs>
@@ -317,9 +364,16 @@ backend.
 <TabItem label="JavaScript / TypeScript">
 
 ```ts
-import { guardCustomTool } from "@arcjet/guard/claude-managed-agents/v0";
+import Anthropic from "@anthropic-ai/sdk";
+import {
+  claudeManagedAgentsContext,
+  guardCustomTool,
+} from "@arcjet/guard/claude-managed-agents/v0";
+import type { AgentCustomToolUseEvent } from "@arcjet/guard/claude-managed-agents/v0";
 import { tokenBucket, localDetectSensitiveInfo } from "@arcjet/guard";
 import { arcjet } from "./arcjet.js";
+
+const client = new Anthropic();
 
 const lookupLimit = tokenBucket({
   bucket: "lookups",
@@ -327,26 +381,42 @@ const lookupLimit = tokenBucket({
   intervalSeconds: 60,
   maxTokens: 10,
 });
-const detectPii = localDetectSensitiveInfo();
+const detectPii = localDetectSensitiveInfo({
+  deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+});
 
-export const lookupOrder = guardCustomTool(
-  arcjet,
-  async (input: { orderId: string; note: string }) => {
-    return { orderId: input.orderId, status: `shipped (${input.note})` };
-  },
-  {
-    action: "order.looked-up",
-    rules: (input) => [
-      lookupLimit({ key: input.orderId, requested: 1 }),
-      detectPii(input.note),
-    ],
-  },
-);
+export function lookupOrder(
+  event: AgentCustomToolUseEvent,
+  sessionId: string,
+  conversationId: string,
+) {
+  return guardCustomTool(
+    arcjet,
+    {
+      event,
+      execute: async (input) => ({
+        orderId: String(input.orderId),
+        status: `shipped (${String(input.note)})`,
+      }),
+      send: (result) =>
+        client.beta.sessions.events.send(sessionId, { events: [result] }),
+    },
+    {
+      action: "order.looked-up",
+      rules: (input) => [
+        lookupLimit({ key: String(input.orderId), requested: 1 }),
+        detectPii(String(input.note)),
+      ],
+      context: claudeManagedAgentsContext({ correlationId: conversationId }),
+    },
+  );
+}
 ```
 
-Call `lookupOrder` from your `agent.custom_tool_use` handler. Then
-send `user.custom_tool_result` with `custom_tool_use_id` set to the
-triggering event `id`.
+Call `lookupOrder` from your `agent.custom_tool_use` handler. On deny it
+sends the error result itself, so only send `user.custom_tool_result` when
+the answer is `allowed`, with `custom_tool_use_id` set to the triggering
+event `id`.
 
 </TabItem>
 <TabItem label="Python">
@@ -366,21 +436,23 @@ lookup_limit = TokenBucket(
     max_tokens=10,
     bucket="lookups",
 )
-detect_pii = LocalDetectSensitiveInfo()
+detect_pii = LocalDetectSensitiveInfo(
+    deny=["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+)
 
 
-async def lookup_order(arguments: dict) -> dict:
+async def lookup_order(event) -> dict:
     return {
-        "order_id": arguments["order_id"],
-        "status": f"shipped ({arguments['note']})",
+        "order_id": event.input["order_id"],
+        "status": f"shipped ({event.input['note']})",
     }
 
 
 guarded_lookup = guard_custom_tool(
     guard=arcjet,
-    tool=lookup_order,
+    run=lookup_order,
     action="order.looked-up",
-    session_id=session_id,
+    session_id=CONVERSATION_ID,
     rules=lambda arguments: [
         lookup_limit(key="orders", requested=1),
         detect_pii(arguments["note"]),
@@ -388,9 +460,11 @@ guarded_lookup = guard_custom_tool(
 )
 ```
 
-Call `guarded_lookup` from your `agent.custom_tool_use` handler.
-Then send `user.custom_tool_result` with `custom_tool_use_id` set
-to the triggering event `id`. On `DENY`, set `is_error`.
+Call `guarded_lookup` from your `agent.custom_tool_use` handler as
+`await guarded_lookup(event, send=..., session_id=...)`. On `DENY` it
+sends `user.custom_tool_result` with `is_error` set and answers `None`.
+When it answers a result, send that as `user.custom_tool_result` with
+`custom_tool_use_id` set to the triggering event `id`.
 
 </TabItem>
 </Tabs>
@@ -445,14 +519,17 @@ For more information about fail-open versus fail-closed behavior, see
 
 ## Correlation
 
-`claudeManagedAgentsContext` / `claude_managed_agents_context` reads
-the caller-owned session ID you pass. It never mints an ID. It never
-reads a generated request or trace ID. If you omit a session ID, the
-call is uncorrelated rather than joined to a generated ID.
+`claudeManagedAgentsContext` / `claude_managed_agents_context` reads a
+correlation ID your application owns, such as the conversation ID you
+already store against the user. It never mints an ID and it never reads
+a generated request or trace ID. If you omit one, the call is
+uncorrelated rather than joined to a generated ID.
 
-Use the `id` Anthropic returned from `sessions.create`. Don't
-generate a UUID for Arcjet and don't call `createAgentContext`
-inside a session callback.
+Don't pass an Anthropic session or event ID (`sesn_…`, `sevt_…`, or an
+`agent.custom_tool_use` `id`). Those are Anthropic's identifiers rather
+than ones you created, so the helper drops them. Anthropic's session ID
+still addresses the session you send events to, which is a separate job
+from correlation.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -463,14 +540,26 @@ const session = await client.beta.sessions.create({
   environment_id: ENVIRONMENT_ID,
 });
 
-await guardEvents(arcjet, {
-  sessionId: session.id,
-  inbound: {
-    action: "message.received",
-    rules: ({ prompt }) => [detectPromptInjection()(prompt)],
-  },
-  prompt: userText,
+// session.id addresses the session. conversationId correlates the
+// decisions, and it is yours.
+const context = claudeManagedAgentsContext({
+  correlationId: conversationId,
 });
+
+const inbound = await guardEvents(
+  arcjet,
+  {
+    events: [
+      { type: "user.message", content: [{ type: "text", text: userText }] },
+    ],
+    inbound: {
+      action: "message.received",
+      rules: ({ text }) => [detectPromptInjection()(text)],
+    },
+    context,
+  },
+  (body) => client.beta.sessions.events.send(session.id, body),
+);
 ```
 
 Replace the following:
@@ -478,24 +567,35 @@ Replace the following:
 - `AGENT_ID`: the agent `id` returned by `agents.create`.
 - `ENVIRONMENT_ID`: the environment `id` returned by
   `environments.create`.
+- `conversationId`: an ID your application owns.
 
 </TabItem>
 <TabItem label="Python">
 
 ```py
-session = client.beta.sessions.create(
+session = await client.beta.sessions.create(
     agent=AGENT_ID,
     environment_id=ENVIRONMENT_ID,
 )
 
-await guard_events(
+# session.id addresses the session. CONVERSATION_ID correlates the
+# decisions, and it is yours.
+send = guard_events(
     guard=arcjet,
-    session_id=session.id,
-    inbound={
-        "action": "message.received",
-        "rules": lambda arguments: [inbound(arguments["prompt"])],
-    },
-    prompt=user_text,
+    send=client.beta.sessions.events.send,
+    action="message.received",
+    session_id=CONVERSATION_ID,
+    rules=lambda arguments: [inbound(arguments["prompt"])],
+)
+
+await send(
+    session.id,
+    events=[
+        {
+            "type": "user.message",
+            "content": [{"type": "text", "text": user_text}],
+        }
+    ],
 )
 ```
 
@@ -504,6 +604,7 @@ Replace the following:
 - `AGENT_ID`: the agent `id` returned by `agents.create`.
 - `ENVIRONMENT_ID`: the environment `id` returned by
   `environments.create`.
+- `CONVERSATION_ID`: an ID your application owns.
 
 </TabItem>
 </Tabs>
@@ -521,8 +622,9 @@ Replace the following:
 - Don't throw from `guardCustomTool` / `guard_custom_tool` to
   signal a denial. Return `user.custom_tool_result` with
   `is_error` set.
-- Don't mint a session ID. Pass the Anthropic session `id`. If you
-  omit one, leave the call uncorrelated.
+- Don't mint a correlation ID, and don't reuse the Anthropic session
+  `id` as one. Pass an ID your application owns, or leave the call
+  uncorrelated.
 - Don't wrap these tools with `@arcjet/guard/claude-agent-sdk/v0` or
   `arcjet.guard.claude_agent_sdk`.
 - Don't wrap these tools with `@arcjet/guard/vercel-ai/v7`.

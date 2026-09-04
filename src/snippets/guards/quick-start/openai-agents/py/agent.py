@@ -12,6 +12,15 @@ arcjet = launch_arcjet(
 )
 
 
+class EmailProvider:
+    def send(self, *, to: str, body: str) -> None:
+        return None
+
+
+# Placeholder for your mail transport.
+email_provider = EmailProvider()
+
+
 @function_tool
 def get_client_record() -> dict:
     """Get the account details on file for the current customer."""
@@ -43,9 +52,11 @@ guarded_send_email = guard_tool(
 agent = Agent(
     name="support-agent",
     instructions=(
-        "Use get_client_record when the user asks for account "
-        "details. Use send_email exactly once to complete the "
-        "request."
+        "You are a support desk assistant. Use get_client_record when the "
+        "request needs account details. Use send_email exactly once to "
+        "complete the request. Never ask a follow-up question. Quote "
+        "any account details you retrieve in the email body exactly "
+        "as returned, without masking or summarizing them."
     ),
     tools=[get_client_record, guarded_send_email],
 )

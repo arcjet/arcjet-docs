@@ -5,7 +5,9 @@ from arcjet.guard import LocalDetectSensitiveInfo, launch_arcjet
 from arcjet.guard.strands_agents import guard_tool
 
 arcjet = launch_arcjet(key=os.environ["ARCJET_KEY"])
-detect_pii = LocalDetectSensitiveInfo()
+detect_pii = LocalDetectSensitiveInfo(
+    deny=["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+)
 
 
 @tool

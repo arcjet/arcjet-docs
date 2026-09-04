@@ -140,7 +140,10 @@ Remote rules are managed via the MCP server or Console – no code changes or re
 ### Guards (tool calls, agentic pipelines, queues)
 - Securing MCP server tool handlers? → guard() with rate limiting + prompt injection detection
 - Rate limiting per-user tool calls? → guard() with tokenBucket
-- Scanning tool inputs/outputs for PII? → guard() with sensitiveInfo
+- Scanning tool inputs/outputs for PII? → guard() with `localDetectSensitiveInfo()`
+  (JS) or `LocalDetectSensitiveInfo()` (Python). The HTTP `sensitiveInfo` /
+  `detect_sensitive_info` rule is not exported by the Guard SDK. Pass `allow`
+  or `deny`, and a `backend` for any entity type beyond the default four.
 - Detecting prompt injection in agent tool results? → guard() with detectPromptInjection
 - Recording that an allowed action happened? → capture() / Capture (batched, best-effort)
 - Moderating untrusted text at a tool boundary? → moderateContent() (JS), ModerateContent() (Python), or GuardModerateContent (Go).
@@ -456,7 +459,7 @@ tokenizer like `tiktoken` for accurate counts.
 ### Install
 
 ```shell
-npm i @arcjet/node @arcjet/inspect
+npm i @arcjet/node @arcjet/inspect express
 ```
 
 ### Configure
@@ -1251,9 +1254,9 @@ wrap the fetch handler with `aj.handler()`.
 ### Install
 
 ```shell
-pip install arcjet
+pip install arcjet fastapi uvicorn
 # or with uv:
-uv add arcjet fastapi uvicorn langchain langchain-openai
+uv add arcjet fastapi uvicorn
 ```
 
 ### Configure
@@ -1348,7 +1351,7 @@ uvicorn main:app --reload
 ```shell
 pip install arcjet flask
 # or with uv:
-uv add arcjet flask langchain langchain-openai
+uv add arcjet flask
 ```
 
 ### Configure
@@ -1444,8 +1447,8 @@ flask run
 Every rule accepts `mode: "LIVE" | "DRY_RUN"`. In `DRY_RUN` mode the rule
 evaluates and returns a decision but never blocks. Use `DRY_RUN` for testing.
 
-On Python SDK `main`, HTTP rule factories require `mode`. Omitting it raises
-`TypeError`. Guard constructors still default to `Mode.LIVE`. JavaScript HTTP
+In Python, HTTP rule factories require `mode`. Omitting it raises
+`TypeError`. Guard constructors default to `Mode.LIVE`. JavaScript HTTP
 rules default to `"DRY_RUN"`.
 
 ### shield(options)
@@ -1658,10 +1661,9 @@ The verdict is binary: `decision.reason.isPromptInjection()` or
 
 Python: `detect_prompt_injection(mode=Mode.LIVE)` with
 `detect_prompt_injection_message=message` at protect() time. `mode` is
-required. On Python SDK `main`, omitting `mode` or passing `threshold=`
-raises `TypeError`. Drop `threshold`.
-`PromptInjectionReason.score` remains deprecated. Guard
-`DetectPromptInjection` still defaults to `LIVE`.
+required: omitting it or passing `threshold=` raises `TypeError`. Drop
+`threshold`. `PromptInjectionReason.score` remains deprecated. Guard
+`DetectPromptInjection` defaults to `LIVE`.
 
 ### validateEmail(options)
 
@@ -1756,8 +1758,7 @@ aj = arcjet(
 )
 ```
 
-At protect() time: `email="user@example.com"`. The helper is on the Python SDK
-`main` branch. It is not in published `arcjet` 0.9.0 or `0.10.0b1`.
+At protect() time: `email="user@example.com"`.
 
 ### filter(options)
 
@@ -1913,7 +1914,7 @@ Create one Arcjet instance and add route-specific rules with `withRule()`
 (JS) or `with_rule()` (Python). The Python clone shares `DecisionCache`,
 key, characteristics, and transport. The original client is unchanged.
 `with_rule()` accepts a single rule or a sequence of rules. HTTP Python
-rule factories require `mode`. This method is on Python SDK `main`.
+rule factories require `mode`.
 
 ```ts
 // lib/arcjet.ts – create and export a base instance
@@ -2045,7 +2046,7 @@ Guards apply Arcjet security rules inside AI agent tool calls, MCP tool
 handlers, queue workers, and anywhere else you process untrusted input without an
 HTTP request. Pass inputs directly, get a decision back.
 
-Supported languages: **JavaScript / TypeScript** (`@arcjet/guard` >= 1.4.0), **Python** (`arcjet` >= 0.7.0), and **Go** (`arcjet-go` >= 0.1.0, pre-release).
+Supported languages: **JavaScript / TypeScript** (`@arcjet/guard`), **Python** (the `arcjet` package), and **Go** (`arcjet-go`, pre-release).
 
 ### JavaScript / TypeScript example
 
@@ -2161,7 +2162,7 @@ with a tab where both a JavaScript and a Python adapter exist.
 | Strands Agents | `@arcjet/guard/strands-agents/v1` | `arcjet.guard.strands_agents` | `guardTool` / `guard_tool`, `guardHooks` / `guard_hooks` |
 | TanStack AI | `@arcjet/guard/tanstack-ai/v0` | – | `guardMiddleware` (`onBeforeToolCall`). No `guardTool` |
 | Mastra | `@arcjet/guard/mastra/v1` | – | `guardProcessor`, `guardTool`, `guardHooks` |
-| Vercel Eve | `@arcjet/guard/vercel-eve/v0` | – | inbound screening, authored tools, connection approvals |
+| Vercel Eve | `@arcjet/guard/vercel-eve/v0` | – | `guardInbound`, `guardTool`, `guardApproval` (connections) |
 | Claude Agent SDK | `@arcjet/guard/claude-agent-sdk/v0` | `arcjet.guard.claude_agent_sdk` | `guardTool` / `guard_tool`, `guardHooks` / `guard_hooks` (`UserPromptSubmit`, `PreToolUse`) |
 | Claude Managed Agents | `@arcjet/guard/claude-managed-agents/v0` | `arcjet.guard.claude_managed_agents` | `guardEvents` / `guard_events`, `guardCustomTool` / `guard_custom_tool` |
 
@@ -2169,16 +2170,111 @@ Every JavaScript path is versioned. Unversioned aliases such as
 `@arcjet/guard/vercel-ai` do not resolve. Don't wrap the same tool with two
 adapters, and don't mix the JavaScript and Python adapter for one framework.
 
-Human-in-the-loop confirmation is not a policy gate. `needsApproval`,
-`humanInTheLoopMiddleware`, `interrupt()`, `requireApproval`, `human_input`,
-`can_use_tool`, and `always_ask` all pause a run for a person. The runtime can
-skip some of them, and none of them evaluates a policy. There is no approval
-helper in any adapter.
+A framework's human-in-the-loop confirmation is not a policy gate.
+`needsApproval`, `humanInTheLoopMiddleware`, `interrupt()`, `requireApproval`,
+`human_input`, `can_use_tool`, and `always_ask` all pause a run for a person.
+The runtime can skip some of them, and none of them evaluates a policy. Don't
+put Arcjet policy on any of them.
+
+The one exception is `guardApproval` on `@arcjet/guard/vercel-eve/v0`, which
+evaluates a policy on an Eve connection's `approval` field. A connection's
+tools have no local handler to wrap, so this is the only enforcement point
+that reaches them. `onAllow: "user-approval"` still requires a person after
+the policy passes. No other adapter has an approval helper.
 
 The wrappers fail closed: if Guard cannot be evaluated the tool does not run.
 Direct `guard()` fails open and reports `hasFailedOpen()` /
 `has_failed_open()`, so an `ALLOW` from a direct call is not proof the rules
 ran.
+
+### Common mistakes when writing Guard code
+
+These are the traps that produce code which looks correct, runs without an
+error, and enforces nothing.
+
+**Configure the local sensitive-information rule.** In Python,
+`LocalDetectSensitiveInfo()` with neither `allow` nor `deny` fails during
+local evaluation. The rule result is
+`RuleResultError(conclusion='ALLOW', reason='ERROR', code='AJ1203')` and the
+decision conclusion is `ALLOW`, so the check looks configured and blocks
+nothing. Only `has_failed_open()` reveals it. JavaScript
+`localDetectSensitiveInfo()` does work with no arguments. Always pass an
+explicit list in both languages.
+
+**The rule needs its own `backend`.** The default WASM backend detects
+`EMAIL`, `PHONE_NUMBER`, `IP_ADDRESS`, and `CREDIT_CARD_NUMBER`. Every other
+entity type needs a backend that supports it, such as Rampart. The rule does
+not inherit the client's `sensitiveInfoBackend` / `sensitive_info_backend`,
+so listing `BANK_ACCOUNT` or `ROUTING_NUMBER` without passing `backend` to
+the rule itself throws at construction. Share one instance:
+
+```ts
+const sensitiveInfoBackend = rampart();
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY!, sensitiveInfoBackend });
+const detectPii = localDetectSensitiveInfo({
+  deny: ["BANK_ACCOUNT", "ROUTING_NUMBER"],
+  backend: sensitiveInfoBackend,
+});
+```
+
+**Only some adapters map typed `inputs`.** A remote policy evaluates the
+typed inputs a guard call submits. In JavaScript only
+`@arcjet/guard/vercel-ai/v7` accepts `inputs` and `actor`; every other
+JavaScript adapter takes `action` and SDK `rules` only, so a remote policy
+has nothing to evaluate and none of its rules fire. Every Python adapter
+accepts `inputs`. Use SDK `rules` where `inputs` is unavailable, and don't
+assume a published policy is enforcing.
+
+The builders differ by language. JavaScript uses one `policyInput` namespace
+(`policyInput.server.string`, `policyInput.server.stringList`,
+`policyInput.local.string`). Python uses two module-level objects,
+`server_input` and `local_input` (`server_input.string`,
+`server_input.string_list`, `local_input.string`). `SERVER` inputs go to
+Arcjet; `LOCAL` inputs are evaluated on your machine, so the value never
+leaves your application.
+
+**The `inputs` and `actor` resolver arity varies by surface.** Python
+`guard_tool` calls the resolver with the arguments mapping alone. CrewAI's
+`register_arcjet_hooks` calls it with `(arguments, ctx)`, and LangChain's
+`guard_tool` with `(arguments, config)`.
+
+**Annotate the `rules` callback where `TInput` defaults to `unknown`.** On
+the Genkit, OpenAI Agents, and Strands Agents JavaScript adapters,
+`guardTool` cannot infer the tool input, so destructuring it is a type error.
+Write `rules: (input: { body: string }) => [detectPii(input.body)]`.
+
+**A missing decision is not a denial.** If the model asks a clarifying
+question instead of calling the guarded tool, nothing is sent, no guard call
+happens, and no decision is returned. That looks identical to a working
+guard. When verifying an integration, read the decision in the Console or
+your logs rather than concluding from the absence of a side effect. Give a
+test agent a system prompt that tells it to complete the request without
+follow-up questions, and to quote retrieved values verbatim: a model that
+masks sensitive values itself leaves the rule nothing to detect, and the
+guard then correctly allows.
+
+**Guarding one tool only helps if it is the only path.** If the same session
+also exposes an unguarded route to the capability, the model can take it. On
+the Claude Agent SDK, `settingSources: []` / `setting_sources=[]` drops
+CLAUDE.md and filesystem settings, and `strictMcpConfig: true` /
+`strict_mcp_config=True` drops inherited MCP servers. Both are needed.
+
+**Claude Agent SDK uses two distinct ids.** `ClaudeAgentOptions.sessionId` /
+`session_id` names a new SDK session and must be unique per run; reusing one
+fails with `Session ID ... is already in use`. The guard `sessionId` /
+`session_id` identifies the actor and can be long-lived. An authored
+`tool()` handler carries no session id of its own, so pass one to
+`guardTool`.
+
+**Claude Managed Agents correlates on your own id.**
+`claudeManagedAgentsContext` / `claude_managed_agents_context` drops
+Anthropic session and event ids (`sesn_…`, `sevt_…`), because they are not
+ids you created. Pass a conversation id your application owns. Anthropic's
+session id still addresses the session you send events to. In Python,
+`guard_events` has no `inbound` option: `action` and `rules` sit at the top
+level, it takes `send=`, and the callable it returns replaces `send` and
+raises `ArcjetDeniedError` on a denial. Pass an async client, because a
+blocking one makes the wrapper synchronous.
 
 ## Reference guides
 

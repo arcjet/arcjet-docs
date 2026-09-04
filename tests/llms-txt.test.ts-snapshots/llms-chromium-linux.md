@@ -107,13 +107,25 @@ merged page, which selects the language with a tab.
 - [OpenAI Agents agent guard](https://docs.arcjet.com/guards/openai-agents): JavaScript `guardTool` on authored `FunctionTool.invoke`; Python `guard_tool` on `FunctionTool.tool_input_guardrails` plus `reject_content`. Inbound `guard()` before the runner in both.
 - [Strands Agents agent guard](https://docs.arcjet.com/guards/strands-agents): JavaScript `guardTool` plus `guardHooks` (`BeforeToolCallEvent.cancel`); Python `guard_tool` on `@tool` plus `guard_hooks` (`BeforeToolCallEvent.cancel_tool` True or str). Inbound `guard()` before the agent runs in both.
 - [TanStack AI agent guard](https://docs.arcjet.com/guards/tanstack-ai): JavaScript. Inbound `guard()` before `chat()`, `guardMiddleware` (`onBeforeToolCall` skip). There is no `guardTool`.
-- [Vercel Eve agent guard](https://docs.arcjet.com/guards/vercel-eve): JavaScript. Inbound screening, authored tools, connection approvals, and observe-only hooks.
+- [Vercel Eve agent guard](https://docs.arcjet.com/guards/vercel-eve): JavaScript. `guardInbound`, `guardTool`, and `guardApproval` for connections, plus observe-only hooks. A connection's tools have no local handler, so `guardApproval` is the only enforcement point that reaches them.
 - [Mastra agent guard](https://docs.arcjet.com/guards/mastra): JavaScript. `guardProcessor`, `guardTool`, and `guardHooks`.
 - [Claude Agent SDK agent guard](https://docs.arcjet.com/guards/claude-agent-sdk): JavaScript `guardTool` (MCP `CallToolResult` with `isError: true` plus `structuredContent`); Python `guard_tool` (JSON in content plus `is_error: True`, no `structuredContent`). Inbound `UserPromptSubmit` and `PreToolUse` through the hooks helper in both. A tool permission callback is not a policy gate.
 - [Claude Managed Agents agent guard](https://docs.arcjet.com/guards/claude-managed-agents): hosted harness, JavaScript and Python. Inbound `user.message` via `guardEvents` / `guard_events` before send, and custom tools via `guardCustomTool` / `guard_custom_tool` on `agent.custom_tool_use`. Default `always_allow` means no customer pre-exec for built-in bash or files. `always_ask` is opt-in HITL, not policy. Not the Claude Agent SDK.
 - [Agent guard remote policies](https://docs.arcjet.com/guards/remote-policies): centrally managed action policies using labels, actors, and typed inputs.
 - [Capture events](https://docs.arcjet.com/guards/capture): record that an allowed action happened; batched, best-effort, never a security decision.
 - [Agent guard testing and reference](https://docs.arcjet.com/guards/reference): decisions, availability, fail behavior, nested JSON metadata, `registerArcjet` / `register_arcjet`, and the test client. Free `guard()` fail-opens if no client is registered.
+
+## Notes for agents writing Guard code
+
+Read the "Common mistakes when writing Guard code" section of
+https://docs.arcjet.com/llms-full.txt before generating an integration. The
+traps that produce code which runs without error and enforces nothing:
+
+- Python `LocalDetectSensitiveInfo()` with neither `allow` nor `deny` fails local evaluation and the decision still concludes `ALLOW`. Always pass a list.
+- The sensitive-information rule does not inherit the client's backend. Entity types beyond `EMAIL`, `PHONE_NUMBER`, `IP_ADDRESS`, and `CREDIT_CARD_NUMBER` need `backend` on the rule too; share one Rampart instance with the client.
+- Typed `inputs` reach a remote policy from every Python adapter, but in JavaScript only from `@arcjet/guard/vercel-ai/v7`. Elsewhere use SDK `rules`; a published policy will not fire.
+- No decision is not a denial. A model that declines to call the tool, or masks the values itself, leaves the guard nothing to evaluate and looks exactly like enforcement. Verify by reading the decision.
+- Guarding one tool only helps if it is the only path to the capability. On the Claude Agent SDK that needs `settingSources: []` and `strictMcpConfig: true` together.
 
 ## SDK reference
 

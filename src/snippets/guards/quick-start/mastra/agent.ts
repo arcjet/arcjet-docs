@@ -5,14 +5,24 @@ import { Agent } from "@mastra/core/agent";
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
 
-// Create one Arcjet client and reuse it across agent runs. Rampart
-// detects bank account and routing numbers locally.
+// Placeholder for your mail transport.
+const emailProvider = {
+  send: async (_: { to: string; body: string }) => ({ ok: true }),
+};
+
+// Rampart detects bank account and routing numbers on this machine. The
+// rule needs its own reference to it, so share one instance: entity types
+// outside the default set throw unless the rule has a backend.
+const sensitiveInfoBackend = rampart();
+
+// Create one Arcjet client and reuse it across agent runs.
 const arcjet = launchArcjet({
   key: process.env.ARCJET_KEY!,
-  sensitiveInfoBackend: rampart(),
+  sensitiveInfoBackend,
 });
 const detectPii = localDetectSensitiveInfo({
   deny: ["BANK_ACCOUNT", "ROUTING_NUMBER"],
+  backend: sensitiveInfoBackend,
 });
 
 export function createEmailAgent(user: {
@@ -26,16 +36,13 @@ export function createEmailAgent(user: {
 }) {
   const getClientRecord = createTool({
     id: "get-client-record",
-    description:
-      "Get the account details on file for the current customer",
+    description: "Get the account details on file for the current customer",
     inputSchema: z.object({}),
     async execute() {
       return user.record;
     },
   });
 
-  // This adapter accepts action and rules. It doesn't accept
-  // inputs.
   const sendEmail = guardTool(
     arcjet,
     createTool({
@@ -59,9 +66,11 @@ export function createEmailAgent(user: {
     id: "support-agent",
     name: "support-agent",
     instructions:
-      "Use get-client-record when the user asks for account " +
-      "details. Use send-email exactly once to complete the " +
-      "request.",
+      "You are a support desk assistant. Use get-client-record when the " +
+      "request needs account details. Use send-email exactly once to " +
+      "complete the request. Never ask a follow-up question. Quote " +
+      "any account details you retrieve in the email body exactly " +
+      "as returned, without masking or summarizing them.",
     model: "openai/gpt-4o-mini",
     tools: { getClientRecord, sendEmail },
   });
