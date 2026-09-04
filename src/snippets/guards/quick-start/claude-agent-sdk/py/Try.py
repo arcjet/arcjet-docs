@@ -1,6 +1,8 @@
+import uuid
 from typing import Literal
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from agent import run_email_agent
@@ -8,10 +10,13 @@ from agent import run_email_agent
 app = FastAPI()
 
 
+# Keep identity, allowed recipients, and sensitive records on the server.
 class User:
     def __init__(self):
-        # Caller-owned UUID. Don't mint one in the handler.
+        self.id = "customer-123"
+        # Caller-owned id for the guard. Don't mint one in the handler.
         self.session_id = "11111111-1111-4111-8111-111111111111"
+        self.allowed_recipients = ["approved@example.com"]
         self.record = {
             "name": "Alex Morgan",
             "bank_account": "0123456789",
@@ -42,5 +47,14 @@ class AgentRequest(BaseModel):
 
 @app.post("/api/agent")
 async def run_agent(request: AgentRequest):
-    result = await run_email_agent(user, scenarios[request.scenario])
+    # ClaudeAgentOptions.session_id names a new SDK session, so mint a
+    # fresh UUID per run. Reusing one fails with "already in use".
+    result = await run_email_agent(
+        user, str(uuid.uuid4()), scenarios[request.scenario]
+    )
     return {"output": str(result)}
+
+
+# Serve the demo page in the next step from public/ at the site root. Mount
+# it after the route, so /api/agent still resolves.
+app.mount("/", StaticFiles(directory="public", html=True), name="public")

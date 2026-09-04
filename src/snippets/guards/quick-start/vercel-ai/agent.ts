@@ -8,8 +8,14 @@ import {
 import { generateText, stepCountIs, tool } from "ai";
 import { z } from "zod";
 
+// Placeholder for your mail transport.
+const emailProvider = {
+  send: async (_: { to: string; body: string }) => ({ ok: true }),
+};
+
 // Create one Arcjet client and reuse it across agent runs. Rampart
-// detects bank account and routing numbers locally.
+// evaluates the policy's LOCAL inputs on this machine, so the email body
+// never leaves your application.
 const arcjet = launchArcjet({
   key: process.env.ARCJET_KEY!,
   sensitiveInfoBackend: rampart(),
@@ -30,8 +36,7 @@ export async function runEmailAgent(
   // This read-only tool gives the model the current customer's
   // account data.
   const getClientRecord = tool({
-    description:
-      "Get the account details on file for the current customer",
+    description: "Get the account details on file for the current customer",
     inputSchema: z.object({}),
     execute: () => user.record,
   });
@@ -73,9 +78,11 @@ export async function runEmailAgent(
   return generateText({
     model: "openai/gpt-4o-mini",
     system:
-      "Use getClientRecord when the user asks for account " +
-      "details. Use sendEmail exactly once to complete the " +
-      "request.",
+      "You are a support desk assistant. Use getClientRecord when the " +
+      "request needs account details. Use sendEmail exactly once to " +
+      "complete the request. Never ask a follow-up question. Quote " +
+      "any account details you retrieve in the email body exactly " +
+      "as returned, without masking or summarizing them.",
     prompt,
     tools,
     toolsContext: aiToolsContext(context, tools),

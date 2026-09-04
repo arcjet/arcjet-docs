@@ -1,13 +1,25 @@
-Until `arcjet.guard.claude_agent_sdk` is published, pin `arcjet` to
-[`9ea0b06a`](https://github.com/arcjet/arcjet-py/commit/9ea0b06a87bcee77b8df0664338c712c4668b87b).
-Published `arcjet` 1.0.0 on PyPI does not include this extra.
+import { Aside } from "@astrojs/starlight/components";
+
+<Aside type="note" title="This SDK runs the Claude Code CLI">
+  `claude_agent_sdk` runs the Claude Code CLI as a subprocess. It ships a
+  binary for most platforms, so `query()` works with nothing else installed.
+  Where it doesn't, every `query()` call fails until `claude` is on your
+  `PATH`:
+
+  ```shell
+  curl -fsSL https://claude.ai/install.sh | bash
+  ```
+
+  Or point at an install you already have with
+  `ClaudeAgentOptions(cli_path="/path/to/claude")`.
+</Aside>
 
 ```shell
-pip install "arcjet[claude-agent-sdk,sensitive-info-rampart] @ git+https://github.com/arcjet/arcjet-py@9ea0b06a87bcee77b8df0664338c712c4668b87b"
+pip install "arcjet[claude-agent-sdk,sensitive-info-rampart]"
 ```
 
 Or with [uv](https://docs.astral.sh/uv/):
 
 ```shell
-uv add "arcjet[claude-agent-sdk,sensitive-info-rampart] @ git+https://github.com/arcjet/arcjet-py@9ea0b06a87bcee77b8df0664338c712c4668b87b"
+uv add "arcjet[claude-agent-sdk,sensitive-info-rampart]"
 ```

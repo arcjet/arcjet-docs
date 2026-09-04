@@ -28,14 +28,10 @@ a tool wrapper is the wrong gate. Don't also wrap these tools with
 
 ## Install
 
-Until `@arcjet/guard/tanstack-ai/v0` is published, pin
-`@arcjet/guard` to
-[`3e81a91c`](https://github.com/arcjet/arcjet-js/commit/3e81a91c5a97832b523305f2f7df281c12cf58d3).
-Published `@arcjet/guard` 1.11.0 doesn't export
 `./tanstack-ai/v0`.
 
 ```bash
-npm install @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#3e81a91c5a97832b523305f2f7df281c12cf58d3 @tanstack/ai
+npm install @arcjet/guard @tanstack/ai
 ```
 
 `@tanstack/ai` is a peer of `@arcjet/guard`, not a
@@ -165,7 +161,9 @@ const lookupLimit = tokenBucket({
   intervalSeconds: 60,
   maxTokens: 10,
 });
-const detectPii = localDetectSensitiveInfo();
+const detectPii = localDetectSensitiveInfo({
+  deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+});
 const inbound = detectPromptInjection();
 
 const lookupOrderInput = z.object({
@@ -452,7 +450,9 @@ const lookupLimit = tokenBucket({
   intervalSeconds: 60,
   maxTokens: 10,
 });
-const detectPii = localDetectSensitiveInfo();
+const detectPii = localDetectSensitiveInfo({
+  deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+});
 
 const stream = chat({
   adapter,

@@ -29,31 +29,26 @@ The gate is the plugin callback: a deny dict skips the tool
 
 ## Install
 
-Until `@arcjet/guard/google-adk/v2` is published, pin
-`@arcjet/guard` to
-[`41ef3681`](https://github.com/arcjet/arcjet-js/commit/41ef36816e7174f1b0288d28217e63fa14114307).
-Published `@arcjet/guard` 1.11.0 doesn't export `./google-adk/v2`.
-
 {/* prettier-ignore */}
 <SelectableContent client:load syncKey="packageManager">
 <div slot="npm" slotIdx="1">
 
 ```sh
-npm i @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#41ef36816e7174f1b0288d28217e63fa14114307 @google/adk
+npm i @arcjet/guard @google/adk
 ```
 
 </div>
 <div slot="pnpm" slotIdx="2">
 
 ```sh
-pnpm add @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#41ef36816e7174f1b0288d28217e63fa14114307 @google/adk
+pnpm add @arcjet/guard @google/adk
 ```
 
 </div>
 <div slot="yarn" slotIdx="3">
 
 ```sh
-yarn add @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#41ef36816e7174f1b0288d28217e63fa14114307 @google/adk
+yarn add @arcjet/guard @google/adk
 ```
 
 </div>
@@ -169,12 +164,7 @@ import {
   guardPlugin,
   googleAdkContext,
 } from "@arcjet/guard/google-adk/v2";
-import {
-  FunctionTool,
-  InMemoryRunner,
-  LlmAgent,
-  createUserContent,
-} from "@google/adk";
+import { FunctionTool, InMemoryRunner, LlmAgent } from "@google/adk";
 import { z } from "zod";
 
 const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
@@ -185,7 +175,9 @@ const lookupLimit = tokenBucket({
   intervalSeconds: 60,
   maxTokens: 10,
 });
-const detectPii = localDetectSensitiveInfo();
+const detectPii = localDetectSensitiveInfo({
+  deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+});
 const inbound = detectPromptInjection();
 
 const lookupOrderInput = z.object({
@@ -252,7 +244,7 @@ export async function runAgent(
   return runner.runAsync({
     userId: conversationId,
     sessionId: conversationId,
-    newMessage: createUserContent(userText),
+    newMessage: { parts: [{ text: userText }] },
   });
 }
 ```
@@ -374,7 +366,7 @@ await arcjet.guard({
 await runner.runAsync({
   userId: conversationId,
   sessionId: conversationId,
-  newMessage: createUserContent(userText),
+  newMessage: { parts: [{ text: userText }] },
 });
 ```
 
@@ -456,7 +448,9 @@ const lookupLimit = tokenBucket({
   intervalSeconds: 60,
   maxTokens: 10,
 });
-const detectPii = localDetectSensitiveInfo();
+const detectPii = localDetectSensitiveInfo({
+  deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+});
 
 const runner = new InMemoryRunner({
   agent,

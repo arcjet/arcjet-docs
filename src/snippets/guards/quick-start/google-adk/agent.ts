@@ -1,22 +1,22 @@
 import { launchArcjet, localDetectSensitiveInfo } from "@arcjet/guard";
 import { rampart } from "@arcjet/sensitive-info-rampart";
 import { guardPlugin } from "@arcjet/guard/google-adk/v2";
-import {
-  FunctionTool,
-  InMemoryRunner,
-  LlmAgent,
-  createUserContent,
-} from "@google/adk";
+import { FunctionTool, InMemoryRunner, LlmAgent } from "@google/adk";
 import { z } from "zod";
 
-// Create one Arcjet client and reuse it across agent runs. Rampart
-// detects bank account and routing numbers locally.
+// Rampart detects bank account and routing numbers on this machine. The
+// rule needs its own reference to it, so share one instance: entity types
+// outside the default set throw unless the rule has a backend.
+const sensitiveInfoBackend = rampart();
+
+// Create one Arcjet client and reuse it across agent runs.
 const arcjet = launchArcjet({
   key: process.env.ARCJET_KEY!,
-  sensitiveInfoBackend: rampart(),
+  sensitiveInfoBackend,
 });
 const detectPii = localDetectSensitiveInfo({
   deny: ["BANK_ACCOUNT", "ROUTING_NUMBER"],
+  backend: sensitiveInfoBackend,
 });
 
 // Placeholder for your mail transport.
@@ -42,8 +42,7 @@ export async function runEmailAgent(
 ) {
   const getClientRecord = new FunctionTool({
     name: "get_client_record",
-    description:
-      "Get the account details on file for the current customer",
+    description: "Get the account details on file for the current customer",
     parameters: z.object({}),
     execute: () => user.record,
   });
@@ -60,12 +59,15 @@ export async function runEmailAgent(
     name: "support_agent",
     model: "gemini-flash-latest",
     instruction:
-      "Use get_client_record when the user asks for account details. Use send_email exactly once to complete the request.",
+      "You are a support desk assistant. Use get_client_record when the " +
+      "request needs account details. Use send_email exactly once to " +
+      "complete the request. Never ask a follow-up question. Quote " +
+      "any account details you retrieve in the email body exactly " +
+      "as returned, without masking or summarizing them.",
     tools: [getClientRecord, sendEmail],
   });
 
-  // This adapter accepts action and rules. It doesn't accept
-  // inputs. There is no guardTool.
+  // guardPlugin gates every tool call. There is no guardTool for ADK.
   const runner = new InMemoryRunner({
     agent,
     appName: "support",
@@ -88,6 +90,6 @@ export async function runEmailAgent(
   return runner.runAsync({
     userId: user.id,
     sessionId: user.id,
-    newMessage: createUserContent(prompt),
+    newMessage: { parts: [{ text: prompt }] },
   });
 }

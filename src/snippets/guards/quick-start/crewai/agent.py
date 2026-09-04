@@ -13,6 +13,15 @@ arcjet = launch_arcjet_sync(
 )
 
 
+class EmailProvider:
+    def send(self, *, to: str, body: str) -> None:
+        return None
+
+
+# Placeholder for your mail transport.
+email_provider = EmailProvider()
+
+
 @tool("get_client_record")
 def get_client_record() -> dict:
     """Get the account details on file for the current customer."""
@@ -44,7 +53,11 @@ register_arcjet_hooks(
 agent = Agent(
     role="Support clerk",
     goal="Look up the customer record and send approved email",
-    backstory="You send email only to approved recipients.",
+    backstory=(
+        "You send email only to approved recipients. You never ask a "
+        "follow-up question, and you quote any account details you "
+        "retrieve exactly as returned, without masking them."
+    ),
     tools=[get_client_record, send_email],
 )
 task = Task(
