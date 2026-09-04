@@ -5,7 +5,9 @@ from arcjet.guard.langchain import guard_tool
 from langchain_core.tools import tool
 
 arcjet = launch_arcjet(key=os.environ["ARCJET_KEY"])
-detect_pii = LocalDetectSensitiveInfo()
+detect_pii = LocalDetectSensitiveInfo(
+    deny=["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+)
 
 
 @tool

@@ -1,4 +1,8 @@
-import { launchArcjet, detectPromptInjection, tokenBucket } from "@arcjet/guard";
+import {
+  launchArcjet,
+  detectPromptInjection,
+  tokenBucket,
+} from "@arcjet/guard";
 import {
   guardTool,
   guardMiddleware,
@@ -31,7 +35,9 @@ export const lookupOrder = guardTool(
   ),
   {
     action: "order.looked-up",
-    rules: (input) => [lookupLimit({ key: input.orderId, requested: 5 })],
+    rules: (input: { orderId: string }) => [
+      lookupLimit({ key: input.orderId, requested: 5 }),
+    ],
   },
 );
 

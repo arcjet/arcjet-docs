@@ -15,7 +15,9 @@ const aj = arcjet({
         mode: "LIVE",
         // configured with a list of bots to allow from
         // https://arcjet.com/bot-list
-        allow: [], // "allow none" will block all detected bots
+        // "allow none" would block every detected bot. Drop "CURL"
+        // once you have finished testing from the terminal.
+        allow: ["CURL"],
       },
       // It would be unusual for a form to be submitted more than 5 times in 10
       // minutes from the same IP address

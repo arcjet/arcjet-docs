@@ -5,6 +5,7 @@ import {
   tokenBucket,
 } from "@arcjet/guard";
 import {
+  claudeManagedAgentsContext,
   guardCustomTool,
   guardEvents,
 } from "@arcjet/guard/claude-managed-agents/v0";
@@ -19,49 +20,74 @@ const lookupLimit = tokenBucket({
   maxTokens: 10,
 });
 
-export const lookupOrder = guardCustomTool(
-  arcjet,
-  async (input: { orderId: string }) => {
-    return { orderId: input.orderId, status: "shipped" };
-  },
-  {
-    action: "order.looked-up",
-    rules: (input) => [lookupLimit({ key: input.orderId, requested: 1 })],
-  },
-);
+async function lookupOrder(input: { [key: string]: unknown }) {
+  return { orderId: String(input.orderId), status: "shipped" };
+}
 
-export async function runAgent(sessionId: string, userText: string) {
-  await guardEvents(arcjet, {
-    sessionId,
-    inbound: {
-      action: "message.received",
-      rules: ({ prompt }) => [detectPromptInjection()(prompt)],
-    },
-    prompt: userText,
+export async function runAgent(
+  conversationId: string,
+  sessionId: string,
+  userText: string,
+) {
+  // Correlation is your own conversation id, never the Anthropic session id.
+  const context = claudeManagedAgentsContext({
+    correlationId: conversationId,
   });
 
   const stream = await client.beta.sessions.events.stream(sessionId);
-  await client.beta.sessions.events.send(sessionId, {
-    events: [
-      {
-        type: "user.message",
-        content: [{ type: "text", text: userText }],
+
+  // Anthropic runs the tool loop, so there is no PreToolUse hook. This
+  // screens the prompt and sends it only if the guard allows.
+  const inbound = await guardEvents(
+    arcjet,
+    {
+      events: [
+        { type: "user.message", content: [{ type: "text", text: userText }] },
+      ],
+      inbound: {
+        action: "message.received",
+        rules: ({ text }) => [detectPromptInjection()(text)],
       },
-    ],
-  });
+      context,
+    },
+    (body) => client.beta.sessions.events.send(sessionId, body),
+  );
+  if (!inbound.allowed) {
+    throw new Error(inbound.message);
+  }
 
   for await (const event of stream) {
     if (event.type === "agent.custom_tool_use") {
-      const result = await lookupOrder(event.input);
-      await client.beta.sessions.events.send(sessionId, {
-        events: [
-          {
-            type: "user.custom_tool_result",
-            custom_tool_use_id: event.id,
-            content: [{ type: "text", text: JSON.stringify(result) }],
-          },
-        ],
-      });
+      // On deny, guardCustomTool sends the error result itself and
+      // lookupOrder never runs.
+      const gated = await guardCustomTool(
+        arcjet,
+        {
+          event,
+          execute: lookupOrder,
+          send: (result) =>
+            client.beta.sessions.events.send(sessionId, { events: [result] }),
+        },
+        {
+          action: "order.looked-up",
+          rules: (input) => [
+            lookupLimit({ key: String(input.orderId), requested: 1 }),
+          ],
+          context,
+        },
+      );
+
+      if (gated.allowed) {
+        await client.beta.sessions.events.send(sessionId, {
+          events: [
+            {
+              type: "user.custom_tool_result",
+              custom_tool_use_id: event.id,
+              content: [{ type: "text", text: JSON.stringify(gated.output) }],
+            },
+          ],
+        });
+      }
     }
   }
 }

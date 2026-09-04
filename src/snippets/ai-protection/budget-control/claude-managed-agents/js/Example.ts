@@ -1,7 +1,13 @@
+import Anthropic from "@anthropic-ai/sdk";
 import { launchArcjet, tokenBucket } from "@arcjet/guard";
-import { guardCustomTool } from "@arcjet/guard/claude-managed-agents/v0";
+import {
+  claudeManagedAgentsContext,
+  guardCustomTool,
+} from "@arcjet/guard/claude-managed-agents/v0";
+import type { AgentCustomToolUseEvent } from "@arcjet/guard/claude-managed-agents/v0";
 
 const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+const client = new Anthropic();
 
 const tokenBudget = tokenBucket({
   bucket: "ai-tokens",
@@ -10,18 +16,30 @@ const tokenBudget = tokenBucket({
   maxTokens: 5000,
 });
 
-export const completePrompt = guardCustomTool(
-  arcjet,
-  async ({ prompt }: { prompt: string; estimatedTokens: number }) => ({
-    prompt,
-  }),
-  {
-    action: "prompt.completed",
-    rules: ({ estimatedTokens }) => [
-      tokenBudget({
-        key: "user123", // Replace with your authenticated user ID
-        requested: Math.max(1, Math.ceil(estimatedTokens)),
-      }),
-    ],
-  },
-);
+export function completePrompt(
+  event: AgentCustomToolUseEvent,
+  sessionId: string,
+  conversationId: string,
+) {
+  return guardCustomTool(
+    arcjet,
+    {
+      event,
+      execute: async (input) => ({ prompt: String(input.prompt) }),
+      send: (result) =>
+        client.beta.sessions.events.send(sessionId, { events: [result] }),
+    },
+    {
+      action: "prompt.completed",
+      rules: (input) => [
+        tokenBudget({
+          key: "user123", // Replace with your authenticated user ID
+          requested: Math.max(1, Math.ceil(Number(input.estimatedTokens))),
+        }),
+      ],
+      // Correlation is your own conversation id, never the Anthropic
+      // session id.
+      context: claudeManagedAgentsContext({ correlationId: conversationId }),
+    },
+  );
+}
