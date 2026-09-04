@@ -20,22 +20,20 @@
   "exclude": [
     "dist",
     "snippets",
-    // Guard adapter snippets import packages that this repo does not install
-    // (`@arcjet/guard` and each framework SDK). They are shown as raw source
-    // in the docs, so they are excluded from `astro check` until those
-    // packages are added as dependencies.
-    "src/snippets/**/claude-agent-sdk/**/*.ts",
+    // Guard adapter snippets are typechecked against the real SDKs, so
+    // `@arcjet/guard` and each framework SDK is a dependency. These three
+    // adapters are not in a published `@arcjet/guard`, so nothing here can
+    // resolve their import paths yet.
     "src/snippets/**/claude-managed-agents/**/*.ts",
-    "src/snippets/**/genkit/**/*.ts",
     "src/snippets/**/google-adk/**/*.ts",
-    "src/snippets/**/langchain/**/*.ts",
-    "src/snippets/**/langgraph/**/*.ts",
-    "src/snippets/**/mastra/**/*.ts",
-    "src/snippets/**/openai-agents/**/*.ts",
-    "src/snippets/**/strands-agents/**/*.ts",
     "src/snippets/**/tanstack-ai/**/*.ts",
-    "src/snippets/**/vercel-ai/**/*.ts",
-    "src/snippets/**/vercel-eve/**/*.ts",
-    "src/snippets/content-moderation/**/*.ts"
+    // `@strands-agents/sdk` wants `openai@^6.45.0`, which conflicts with the
+    // `openai` that `@openai/agents` resolves. Only one of the two can be
+    // installed, so the Strands Agents snippets stay unchecked.
+    "src/snippets/**/strands-agents/**/*.ts",
+    // `genkit` pulls in `@genkit-ai/firebase`, and with it `firebase-admin`
+    // and `@google-cloud/storage`. That tree carries around 60 transitive
+    // advisories for one adapter's coverage, so it is not a dependency.
+    "src/snippets/**/genkit/**/*.ts"
   ]
 }
