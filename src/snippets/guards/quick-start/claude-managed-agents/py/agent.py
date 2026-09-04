@@ -88,30 +88,41 @@ async def run_email_agent(user, session_id: str, prompt: str):
         ],
     )
 
+    # Every tool result goes back on the same event, so build it in one place.
+    async def send_tool_result(custom_tool_use_id, output, is_error=False):
+        await send(
+            session_id,
+            events=[
+                {
+                    "type": "user.custom_tool_result",
+                    "custom_tool_use_id": custom_tool_use_id,
+                    "content": [{"type": "text", "text": json.dumps(output)}],
+                    "is_error": is_error,
+                }
+            ],
+        )
+
     async for event in stream:
         if event.type == "agent.custom_tool_use":
-            if event.name == "send_email":
+            # Dispatch on the tool name and treat anything else as an error.
+            # Without this, an unrecognized name falls through to whichever
+            # tool the branch ends on, which here would return the client
+            # record. Name every tool you accept.
+            if event.name == "get_client_record":
+                record = await get_client_record(event)
+                await send_tool_result(event.id, record)
+            elif event.name == "send_email":
                 # The wrapper sends the denial itself and returns None.
                 result = await send_email(
                     event,
                     send=client.beta.sessions.events.send,
                     session_id=session_id,
                 )
-                if result is None:
-                    continue
+                if result is not None:
+                    await send_tool_result(event.id, result)
             else:
-                result = await get_client_record(event)
-            await send(
-                session_id,
-                events=[
-                    {
-                        "type": "user.custom_tool_result",
-                        "custom_tool_use_id": event.id,
-                        "content": [
-                            {"type": "text", "text": json.dumps(result)}
-                        ],
-                    }
-                ],
-            )
+                await send_tool_result(
+                    event.id, f"Unknown tool: {event.name}", is_error=True
+                )
         if event.type == "session.status_idle":
             return "Agent run completed."

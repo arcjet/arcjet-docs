@@ -57,6 +57,9 @@ export async function runAgent(
   }
 
   for await (const event of stream) {
+    // This agent has one tool. Once you add a second, dispatch on
+    // `event.name` and return an error for names you do not recognize,
+    // so an unexpected name cannot reach a tool that was not meant for it.
     if (event.type === "agent.custom_tool_use") {
       // On deny, guardCustomTool sends the error result itself and
       // lookupOrder never runs.

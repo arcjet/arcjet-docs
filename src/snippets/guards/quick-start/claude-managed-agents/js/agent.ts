@@ -48,6 +48,23 @@ export async function runEmailAgent(
 
   const stream = await client.beta.sessions.events.stream(sessionId);
 
+  // Every tool result goes back on the same event, so build it in one place.
+  const sendToolResult = (
+    customToolUseId: string,
+    output: unknown,
+    isError = false,
+  ) =>
+    client.beta.sessions.events.send(sessionId, {
+      events: [
+        {
+          type: "user.custom_tool_result",
+          custom_tool_use_id: customToolUseId,
+          content: [{ type: "text", text: JSON.stringify(output) }],
+          is_error: isError,
+        },
+      ],
+    });
+
   // Anthropic runs the tool loop, so there is no PreToolUse hook. This
   // screens the prompt and sends it only if the guard allows.
   const inbound = await guardEvents(
@@ -67,50 +84,38 @@ export async function runEmailAgent(
 
   for await (const event of stream) {
     if (event.type === "agent.custom_tool_use") {
+      // Dispatch on the tool name and treat anything else as an error. A
+      // fallback here would hand an unknown name to whichever tool the
+      // branch happens to end on, so name every tool you accept.
       if (event.name === "get_client_record") {
-        await client.beta.sessions.events.send(sessionId, {
-          events: [
-            {
-              type: "user.custom_tool_result",
-              custom_tool_use_id: event.id,
-              content: [{ type: "text", text: JSON.stringify(user.record) }],
-            },
-          ],
-        });
-        continue;
-      }
+        await sendToolResult(event.id, user.record);
+      } else if (event.name === "send_email") {
+        // On deny, guardCustomTool sends the error result itself and
+        // emailProvider is never called.
+        const gated = await guardCustomTool(
+          arcjet,
+          {
+            event,
+            execute: async (input) =>
+              emailProvider.send({
+                to: String(input.recipient),
+                body: String(input.body),
+              }),
+            send: (result) =>
+              client.beta.sessions.events.send(sessionId, { events: [result] }),
+          },
+          {
+            action: "email.sent",
+            rules: (input) => [detectPii(String(input.body))],
+            context,
+          },
+        );
 
-      // On deny, guardCustomTool sends the error result itself and
-      // emailProvider is never called.
-      const gated = await guardCustomTool(
-        arcjet,
-        {
-          event,
-          execute: async (input) =>
-            emailProvider.send({
-              to: String(input.recipient),
-              body: String(input.body),
-            }),
-          send: (result) =>
-            client.beta.sessions.events.send(sessionId, { events: [result] }),
-        },
-        {
-          action: "email.sent",
-          rules: (input) => [detectPii(String(input.body))],
-          context,
-        },
-      );
-
-      if (gated.allowed) {
-        await client.beta.sessions.events.send(sessionId, {
-          events: [
-            {
-              type: "user.custom_tool_result",
-              custom_tool_use_id: event.id,
-              content: [{ type: "text", text: JSON.stringify(gated.output) }],
-            },
-          ],
-        });
+        if (gated.allowed) {
+          await sendToolResult(event.id, gated.output);
+        }
+      } else {
+        await sendToolResult(event.id, `Unknown tool: ${event.name}`, true);
       }
     }
 

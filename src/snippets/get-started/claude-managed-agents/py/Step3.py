@@ -64,6 +64,9 @@ async def run_agent(session_id: str, conversation_id: str, user_text: str):
     )
 
     async for event in stream:
+        # This agent has one tool. Once you add a second, dispatch on
+        # event.name and return an error for names you do not recognize, so
+        # an unexpected name cannot reach a tool that was not meant for it.
         if event.type == "agent.custom_tool_use":
             result = await guarded_lookup(
                 event,

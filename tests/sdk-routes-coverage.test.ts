@@ -364,3 +364,43 @@ test.describe("SDK-scoped pages link only to routes that exist", () => {
     });
   }
 });
+
+test.describe("SDK-scoped links keep their anchors", () => {
+  /**
+   * `resolveHrefForCurrentSdk` splits `#anchor` and `?query` off the href
+   * before it resolves the path, so the crawl above skips those hrefs by
+   * design. These cover both outcomes of that split: a path that scopes and
+   * one that does not, each of which has to carry its suffix through. No
+   * content links to a query suffix, and the split treats `#` and `?`
+   * alike, so the anchors exercise the same code path.
+   */
+  test("an anchor to a duplicated page is scoped and keeps the anchor", async ({
+    request,
+  }) => {
+    const response = await request.get("/sdk/next/bot-protection/quick-start/");
+    expect(response.status()).toBe(200);
+
+    const body = await response.text();
+    expect(body).toContain(
+      'href="/sdk/next/bot-protection/reference#allow-specific-bots"',
+    );
+    expect(body).not.toContain(
+      'href="/bot-protection/reference#allow-specific-bots"',
+    );
+  });
+
+  test("an anchor to a shared page stays unscoped and keeps the anchor", async ({
+    request,
+  }) => {
+    const response = await request.get("/sdk/next/filters/reference/");
+    expect(response.status()).toBe(200);
+
+    const body = await response.text();
+    // `/architecture` is not duplicated under `/sdk/`, so scoping it would
+    // 404 and the resolver has to fall back to the unscoped path.
+    expect(body).toContain('href="/architecture#arcjet-cloud-api"');
+    expect(body).not.toContain(
+      'href="/sdk/next/architecture#arcjet-cloud-api"',
+    );
+  });
+});
