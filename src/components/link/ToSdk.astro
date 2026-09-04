@@ -1,6 +1,7 @@
 ---
 import type { HTMLAttributes } from "astro/types";
-import { scopeHrefToSdk, isSdkKey, type ArcjetSdkKey } from "@/lib/sdk";
+import { isSdkKey, type ArcjetSdkKey } from "@/lib/sdk";
+import { resolveHrefForSdk } from "@/lib/doc-routes";
 
 type Props = HTMLAttributes<"a"> & {
   /**
@@ -10,8 +11,8 @@ type Props = HTMLAttributes<"a"> & {
   /**
    * The target SDK key to scope the link to e.g. `"node"`, `"next"`.
    *
-   * On SDK-scoped pages this produces `/sdk/{sdk}/{path}`. On non-SDK pages
-   * it produces the matching `/sdk/{sdk}/...` route when one exists.
+   * Produces `/sdk/{sdk}/{path}` when the target SDK publishes that page.
+   * Shared pages, which have no per-SDK route, use the href as-is.
    */
   sdk: ArcjetSdkKey;
 };
@@ -24,7 +25,7 @@ if (!sdk || !isSdkKey(sdk)) {
   );
 }
 
-const resolvedHref = scopeHrefToSdk(Astro.url.pathname, href, sdk);
+const resolvedHref = await resolveHrefForSdk(Astro.url.pathname, href, sdk);
 ---
 
 <a href={resolvedHref} {...rest}><slot /></a>

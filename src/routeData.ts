@@ -1,11 +1,11 @@
 import { defineRouteMiddleware } from "@astrojs/starlight/route-data";
 import {
   isFrameworkSpecificEntry,
-  isGuardSdkKey,
   legacyKeyFromPathname,
   sdkFromPathname,
   sdkVariantFromPathname,
 } from "@/lib/sdk";
+import { docPathnameExists, loadDocRoutes } from "@/lib/doc-routes";
 import {
   breadcrumbsFromSidebar,
   pageJsonLd,
@@ -16,6 +16,12 @@ type StarlightRouteData = App.Locals["starlightRoute"];
 type SidebarEntry = StarlightRouteData["sidebar"][number];
 
 const SITE_URL = "https://docs.arcjet.com";
+
+/** Compares two site-absolute paths, ignoring the trailing slash. */
+function samePath(a: string, b: string): boolean {
+  const trim = (value: string) => value.replace(/\/+$/, "") || "/";
+  return trim(a) === trim(b);
+}
 
 /** Social card images, shared with the marketing site. */
 const OG_IMAGE = "https://arcjet.com/social/arcjet-og-image.png";
@@ -211,12 +217,22 @@ export const onRequest = defineRouteMiddleware(async (context) => {
           break;
         }
         case "link": {
-          const sdkPrefix = variant
-            ? `/sdk/${sdk}/plus/${variant.key}`
-            : `/sdk/${sdk}`;
-          const href = `${sdkPrefix}${entry.href}`;
-          entry.href = href;
-          entry.isCurrent = context.url.pathname === href;
+          // External links (`https://github.com/...`) and anchors are not
+          // routes on this site, so prefixing them produces nonsense.
+          if (entry.href.startsWith("/")) {
+            const sdkPrefix = variant
+              ? `/sdk/${sdk}/plus/${variant.key}`
+              : `/sdk/${sdk}`;
+            const scoped = `${sdkPrefix}${entry.href}`;
+            // Only framework-specific pages are duplicated under `/sdk/`.
+            // Shared pages such as `/testing` stay unscoped so they resolve.
+            if (docPathnameExists(scoped)) {
+              entry.href = scoped;
+            }
+          }
+          // `trailingSlash` is `ignore`, so the request path and the sidebar
+          // href can disagree on the trailing slash for the same page.
+          entry.isCurrent = samePath(context.url.pathname, entry.href);
           break;
         }
         default:
@@ -225,12 +241,10 @@ export const onRequest = defineRouteMiddleware(async (context) => {
       }
     }
 
-    // Guard adapter routes only duplicate pages that list that adapter.
-    // Leave sidebar links unscoped so they do not 404.
-    if (!isGuardSdkKey(sdk)) {
-      for (const entry of routeData.sidebar) {
-        updateSidebarEntry(entry);
-      }
+    await loadDocRoutes();
+
+    for (const entry of routeData.sidebar) {
+      updateSidebarEntry(entry);
     }
   }
 

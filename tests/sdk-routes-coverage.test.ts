@@ -1,12 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
-import {
-  LEGACY_FRAMEWORK_HUB_PATHS,
-  sdks,
-  sdkVariants,
-} from "@/lib/sdk";
+import { LEGACY_FRAMEWORK_HUB_PATHS, sdks, sdkVariants } from "@/lib/sdk";
 
 function visibleSdkToggle(page: Page) {
-  return page.locator(".toc-toggle, .mtoc-sdk-toggle").filter({ visible: true });
+  return page
+    .locator(".toc-toggle, .mtoc-sdk-toggle")
+    .filter({ visible: true });
 }
 
 const SITE = "https://docs.arcjet.com";
@@ -104,9 +102,10 @@ test.describe("Plus-variant routes render variant-specific guides", () => {
         expect(text, `expected "${marker}" in main content`).toContain(marker);
       }
       for (const marker of spec.baseOnlyMarkers) {
-        expect(text, `did not expect "${marker}" in variant content`).not.toContain(
-          marker,
-        );
+        expect(
+          text,
+          `did not expect "${marker}" in variant content`,
+        ).not.toContain(marker);
       }
     });
 
@@ -138,7 +137,9 @@ test.describe("Indexable SDK route SEO metadata", () => {
       }
 
       await expect(page.locator("h1").first()).not.toBeEmpty();
-      await expect(page.locator("title")).not.toHaveText(/Arcjet Docs \| Arcjet Docs/);
+      await expect(page.locator("title")).not.toHaveText(
+        /Arcjet Docs \| Arcjet Docs/,
+      );
     });
   }
 });
@@ -227,7 +228,9 @@ test.describe("SDK routes in sitemap", () => {
     }
   });
 
-  test("representative SDK get-started URLs are listed", async ({ request }) => {
+  test("representative SDK get-started URLs are listed", async ({
+    request,
+  }) => {
     const response = await request.get("/sitemap-0.xml");
     expect(response.status()).toBe(200);
 
@@ -264,7 +267,9 @@ test.describe("llms-full.txt agent discovery", () => {
 
     const body = await response.text();
     expect(body).toContain("https://docs.arcjet.com/sdk/next/get-started/");
-    expect(body).toContain("https://docs.arcjet.com/sdk/bun/plus/hono/get-started/");
+    expect(body).toContain(
+      "https://docs.arcjet.com/sdk/bun/plus/hono/get-started/",
+    );
     expect(body).not.toMatch(/https:\/\/docs\.arcjet\.com\/[^\s)]*\?f=/);
   });
 });
@@ -303,10 +308,59 @@ test.describe("SDK switcher labels on plus-variant pages", () => {
 
 test.describe("Variant-only SDK redirects", () => {
   test("/sdk/python/get-started/ redirects to FastAPI", async ({ page }) => {
-    await page.goto("/sdk/python/get-started/", { waitUntil: "domcontentloaded" });
+    await page.goto("/sdk/python/get-started/", {
+      waitUntil: "domcontentloaded",
+    });
 
-    await expect(page).toHaveURL(/\/sdk\/python\/plus\/fastapi\/get-started\/?$/);
-    await expect(page.locator("h1")).toHaveText("Get started with Python + FastAPI");
+    await expect(page).toHaveURL(
+      /\/sdk\/python\/plus\/fastapi\/get-started\/?$/,
+    );
+    await expect(page.locator("h1")).toHaveText(
+      "Get started with Python + FastAPI",
+    );
     await expect(page.locator("main")).toContainText("arcjet-fastapi");
   });
+});
+
+test.describe("SDK-scoped pages link only to routes that exist", () => {
+  /**
+   * Guide pages are duplicated under `/sdk/:sdk/`, but only pages with
+   * `frameworks` or `titleByFramework` frontmatter are. Scoping an href or a
+   * sidebar link to a shared page such as `/testing` used to produce a 404 on
+   * every SDK-scoped page, so check the whole page, sidebar included.
+   */
+  const SCOPED_GUIDES = [
+    "/sdk/next/get-started/",
+    "/sdk/next/bot-protection/quick-start/",
+    "/sdk/node/plus/express/get-started/",
+    "/sdk/python/plus/fastapi/sensitive-info/quick-start/",
+    "/sdk/claude-agent-sdk/guards/quick-start/",
+    "/sdk/vercel-ai/guards/quick-start/",
+  ] as const;
+
+  for (const guide of SCOPED_GUIDES) {
+    test(`${guide} has no internal links that 404`, async ({ request }) => {
+      const response = await request.get(guide);
+      expect(response.status()).toBe(200);
+
+      const body = await response.text();
+      const hrefs = [
+        ...new Set([...body.matchAll(/href="(\/[^"#?]*)"/g)].map((m) => m[1])),
+      ].filter((href) => !/\.[a-z0-9]{2,5}$/i.test(href));
+
+      // Guard against a selector that silently matches nothing.
+      expect(hrefs.length).toBeGreaterThan(10);
+
+      const broken: string[] = [];
+      for (const href of hrefs) {
+        const target = await request.get(href);
+        // A missing docs route renders the 404 page with a 200 in preview.
+        const missing =
+          target.status() >= 400 || /<title>404\s*\|/.test(await target.text());
+        if (missing) broken.push(href);
+      }
+
+      expect(broken).toEqual([]);
+    });
+  }
 });
