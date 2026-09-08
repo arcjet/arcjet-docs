@@ -11,32 +11,20 @@ export const VercelEve = forwardRef(
     return (
       <svg
         ref={ref}
-        viewBox="0 28 102 46"
+        viewBox="0 0 128 128"
         width="128"
         height="128"
         fill="currentColor"
         className={cls}
         {...props}
       >
-        <path d="M49.2811 66.9377L75.0311 34.9622H68.1393L47.9096 60.1058L42.4236 66.9377H49.2811Z" />
-        <path d="M0 34.9622H42.4048V40.0704H0V34.9622Z" />
-        <rect y="48.2844" width="27.6587" height="5.10824" />
-        <rect y="61.816" width="27.6588" height="5.10824" />
-        <rect
-          width="32.2696"
-          height="5.10824"
-          transform="matrix(-1 0 0 1 101.9 34.9622)"
-        />
-        <rect
-          width="27.6587"
-          height="5.10824"
-          transform="matrix(-1 0 0 1 101.9 48.2844)"
-        />
-        <rect
-          width="27.6588"
-          height="5.10824"
-          transform="matrix(-1 0 0 1 101.9 61.816)"
-        />
+        <path d="M61.8428 84.0001L94.1565 43.874H85.5079L60.1217 75.4267L53.2373 84.0001H61.8428Z" />
+        <path d="M0 43.874H53.2138V50.2843H0V43.874Z" />
+        <path d="M34.7089 60.592H0V67.0024H34.7089V60.592Z" />
+        <path d="M34.709 77.5729H0V83.9832H34.709V77.5729Z" />
+        <path d="M87.3789 43.874H127.874V50.2844H87.3789V43.874Z" />
+        <path d="M93.1651 60.592H127.874V67.0024H93.1651V60.592Z" />
+        <path d="M93.165 77.5729H127.874V83.9832H93.165V77.5729Z" />
       </svg>
     );
   },
