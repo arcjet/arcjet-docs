@@ -1,5 +1,6 @@
 import type { AstroUserConfig } from "astro";
 import fs from "node:fs";
+import { unified } from "@astrojs/markdown-remark";
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import starlight from "@astrojs/starlight";
@@ -75,6 +76,8 @@ function withComparisonSdkScopes(redirects: Record<string, string>) {
 // https://astro.build/config
 export default defineConfig({
   adapter,
+  // Preserve spaces between inline elements after Astro 7's JSX default change.
+  compressHTML: true,
   env: {
     schema: {
       PUBLIC_POSTHOG_KEY: envField.string({
@@ -100,7 +103,8 @@ export default defineConfig({
   output: "server",
   prefetch: true,
   markdown: {
-    // Temporary workaround for Astro 6.4 GFM table rendering regression: https://github.com/withastro/astro/issues/16971
+    // Keep the existing Markdown/MDX pipeline for code examples and .md routes.
+    processor: unified(),
     gfm: true,
   },
   // This is a fix for https://github.com/withastro/astro/issues/8297
