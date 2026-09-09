@@ -192,6 +192,8 @@ Don't also wrap these tools with `@arcjet/guard/openai-agents/v0` or
 | --- | --- | --- |
 | `action` | `guardTool` | Guard label and capture name. Use `resource.verb` in the past tense. |
 | `rules` | `guardTool` | SDK rules, or a function of the parsed tool input. Omit to submit none. |
+| `actor` | `guardTool` | Trusted identity, or a function resolved per call. Take it from authenticated application state, never from a model-produced argument. |
+| `inputs` | `guardTool` | Named values built with `policyInput.server.*` or `policyInput.local.*`, or a function resolved per call. |
 | `metadata` | `guardTool` | Nested JSON, or a function of the tool input. |
 | `onGuardError` | `guardTool` | `"deny"` (default) or `"allow"`. |
 | `onDeny` | `guardTool` | Reshape the denial object the runner stringifies onto the tool result. |
@@ -565,46 +567,37 @@ await Runner.run(agent, user_text, context=app_context)
 
 ## Send values to a policy
 
-A policy reads the actor and the typed inputs the call carries, and the two
-adapters differ in whether they can map them.
+A policy reads the actor and the typed inputs the call carries. Both
+adapters map them.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
 
-`guardTool` selects a policy with `action` and submits the SDK rules you
-configure. It doesn't map an actor or typed policy inputs, so a policy for this
-label can't declare inputs. A call that arrives without a declared input
-reports `AJP1003`, and a live rule that depends on it fails closed.
-
-Where an action needs a policy that reads values, call `guard()` directly in
-the handler instead:
+`guardTool` takes `actor` and `inputs`, each as a value or a function
+resolved per call. A resolver receives the parsed tool input, then the agent
+context.
 
 ```ts
-const decision = await arcjet.guard({
-  label: "email.sent",
+const sendEmail = guardTool(arcjet, sendEmailTool, {
+  action: "email.sent",
   actor: currentUser.id,
-  inputs: {
+  inputs: ({ recipient, body }) => ({
     recipient: policyInput.server.string(recipient),
     team_domains: policyInput.server.stringList(currentUser.teamDomains),
-  },
-  rules: [],
+    body: policyInput.local.string(body),
+  }),
 });
-
-if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
-  throw new Error("Blocked by policy");
-}
 ```
 
-For the full API, see
-<Link.Page href="/guards/reference#direct-guard-api">Direct Guard API</Link.Page>.
+Build every input explicitly with `policyInput.server.*` or
+`policyInput.local.*`. Plain values are rejected, and the adapter never
+discovers arguments for you.
 
 </TabItem>
 <TabItem label="Python">
 
-`guard_tool` takes `actor` and `inputs`, each as a value or a callable of the
-call's arguments. Build every input explicitly with `server_input.*` or
-`local_input.*`; plain values are rejected, and the adapter never discovers
-arguments for you.
+`guard_tool` takes `actor` and `inputs`, each as a value or a callable of
+the call's arguments.
 
 ```py
 guarded_send_email = guard_tool(
@@ -615,6 +608,7 @@ guarded_send_email = guard_tool(
     inputs=lambda arguments: {
         "recipient": server_input.string(arguments["recipient"]),
         "team_domains": server_input.string_list(current_user.team_domains),
+        "body": local_input.string(arguments["body"]),
     },
 )
 ```
@@ -622,9 +616,9 @@ guarded_send_email = guard_tool(
 </TabItem>
 </Tabs>
 
-The policy behind these calls declares `recipient` as a `SERVER` string and
-`team_domains` as a `SERVER` string list, and denies a recipient outside the
-team:
+The policy these calls feed declares `recipient` as a `SERVER` string,
+`team_domains` as a `SERVER` string list, and `body` as a `LOCAL` string, then
+denies a recipient outside the team:
 
 ```rego
 package arcjet.guard
@@ -639,7 +633,9 @@ deny contains "external-recipient" if {
 ```
 
 Map only what a policy needs. Take the actor and any allow list from
-authenticated application state, not from the model's arguments.
+authenticated application state, never from the model's arguments: a policy can
+be conditioned on the actor, so a model that controls it can leave its own
+policy scope.
 
 For the names, kinds, and exposures a policy declares, see
 <Link.Page href="/guards/remote-policies">Policy contract</Link.Page>. For more

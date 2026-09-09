@@ -88,6 +88,8 @@ Don't use this adapter for TanStack Start HTTP `protect()`.
 | --- | --- | --- |
 | `action` | `guardMiddleware` | Guard label and capture name. Use `resource.verb` in the past tense. A string, or a function of `{ toolName, input }`. Defaults to `tool.invoked`. |
 | `rules` | `guardMiddleware` | SDK rules, or a function of `{ toolName, input }`. Omit to submit none. The guard call still happens. |
+| `actor` | `guardMiddleware` | Trusted identity, or a function resolved per call. Take it from authenticated application state, never from a model-produced argument. |
+| `inputs` | `guardMiddleware` | Named values built with `policyInput.server.*` or `policyInput.local.*`, or a function resolved per call. |
 | `metadata` | `guardMiddleware` | Nested JSON, or a function of the same input as `rules`. |
 | `sessionId` | `guardMiddleware` | Caller-owned fallback when `chat({ context })` doesn't carry one. A string, or a function of the same input as `rules`. Prefer putting the ID on `chat({ context: { sessionId } })`. |
 | `onGuardError` | `guardMiddleware` | `"deny"` (default) or `"allow"`. |
@@ -401,33 +403,37 @@ await chat({
 
 ## Send values to a policy
 
-This adapter selects a policy with `action` and submits the SDK rules you
-configure. It doesn't map an actor or typed policy inputs, so a policy for this
-label can't declare inputs. A call that arrives without a declared input
-reports `AJP1003`, and a live rule that depends on it fails closed.
+`guardMiddleware` takes `actor` and `inputs`, each as a value or a function
+resolved per call. A resolver receives `{ toolName, input }`, then the chat
+middleware context.
 
-Where an action needs a policy that reads values, call `guard()` directly in
-the handler rather than relying on the wrapper alone:
+Because the helper gates tools it did not wrap, including MCP and
+runtime-discovered tools, `input` is unknown at the type level. Narrow it
+before you read a field, and return nothing for a tool the policy does not
+cover:
 
 ```ts
-const decision = await arcjet.guard({
-  label: "email.sent",
+const guarded = guardMiddleware(arcjet, {
+  action: ({ toolName }) => `${toolName}.invoked`,
   actor: currentUser.id,
-  inputs: {
-    recipient: policyInput.server.string(recipient),
-    team_domains: policyInput.server.stringList(currentUser.teamDomains),
+  inputs: ({ toolName, input }) => {
+    if (toolName !== "sendEmail") return {};
+    const { recipient, body } = input as { recipient: string; body: string };
+    return {
+      recipient: policyInput.server.string(recipient),
+      team_domains: policyInput.server.stringList(currentUser.teamDomains),
+      body: policyInput.local.string(body),
+    };
   },
-  rules: [],
 });
-
-if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
-  throw new Error("Blocked by policy");
-}
 ```
 
-The policy behind that call declares `recipient` as a `SERVER` string and
-`team_domains` as a `SERVER` string list, and denies a recipient outside the
-team:
+Derive the actor from the context you passed to `chat({ context })`, never
+from a model-produced tool input.
+
+The policy these calls feed declares `recipient` as a `SERVER` string,
+`team_domains` as a `SERVER` string list, and `body` as a `LOCAL` string, then
+denies a recipient outside the team:
 
 ```rego
 package arcjet.guard
@@ -441,9 +447,10 @@ deny contains "external-recipient" if {
 }
 ```
 
-Use the wrapper for actions that don't need policy inputs, and a direct
-`guard()` call for the ones that do. For the full API, see
-<Link.Page href="/guards/reference#direct-guard-api">Direct Guard API</Link.Page>.
+Map only what a policy needs. Take the actor and any allow list from
+authenticated application state, never from the model's arguments: a policy can
+be conditioned on the actor, so a model that controls it can leave its own
+policy scope.
 
 For the names, kinds, and exposures a policy declares, see
 <Link.Page href="/guards/remote-policies">Policy contract</Link.Page>. For more

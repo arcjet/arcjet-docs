@@ -324,11 +324,8 @@ For more information about fail-open versus fail-closed behavior, see
 
 ## Send values to a policy
 
-Both surfaces take `actor` and `inputs`, each as a value or a callable. On
-`guard_tool` the callable receives the call's arguments; on
-`register_arcjet_hooks` it receives `(arguments, ctx)`. Build every input
-explicitly with `server_input.*` or `local_input.*`; plain values are rejected,
-and the adapter never discovers arguments for you.
+`guard_tool` takes `actor` and `inputs`, each as a value or a callable of
+the call's arguments.
 
 ```py
 guarded_send_email = guard_tool(
@@ -339,13 +336,16 @@ guarded_send_email = guard_tool(
     inputs=lambda arguments: {
         "recipient": server_input.string(arguments["recipient"]),
         "team_domains": server_input.string_list(current_user.team_domains),
+        "body": local_input.string(arguments["body"]),
     },
 )
 ```
 
-The policy behind that call declares `recipient` as a `SERVER` string and
-`team_domains` as a `SERVER` string list, and denies a recipient outside the
-team:
+`register_arcjet_hooks` takes them too, with callables of `(arguments, ctx)`.
+
+The policy these calls feed declares `recipient` as a `SERVER` string,
+`team_domains` as a `SERVER` string list, and `body` as a `LOCAL` string, then
+denies a recipient outside the team:
 
 ```rego
 package arcjet.guard
@@ -360,7 +360,9 @@ deny contains "external-recipient" if {
 ```
 
 Map only what a policy needs. Take the actor and any allow list from
-authenticated application state, not from the model's arguments.
+authenticated application state, never from the model's arguments: a policy can
+be conditioned on the actor, so a model that controls it can leave its own
+policy scope.
 
 For the names, kinds, and exposures a policy declares, see
 <Link.Page href="/guards/remote-policies">Policy contract</Link.Page>. For more

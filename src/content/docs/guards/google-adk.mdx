@@ -104,6 +104,8 @@ wrap these tools with `@arcjet/guard/vercel-ai/v7` or
 | --- | --- | --- |
 | `action` | `guardPlugin` | Guard label and capture name. Use `resource.verb` in the past tense. A string, or a function of `{ toolName, input }`. Defaults to `tool.invoked`. |
 | `rules` | `guardPlugin` | SDK rules, or a function of `{ toolName, input }`. Omit to submit none. The guard call still happens. |
+| `actor` | `guardPlugin` | Trusted identity, or a function resolved per call. Take it from authenticated application state, never from a model-produced argument. |
+| `inputs` | `guardPlugin` | Named values built with `policyInput.server.*` or `policyInput.local.*`, or a function resolved per call. |
 | `metadata` | `guardPlugin` | Nested JSON, or a function of the same input as `rules`. |
 | `sessionId` | `guardPlugin` | Caller-owned fallback when the object you pass to `googleAdkContext` doesn't carry one. A string, or a function of the same input as `rules`. Prefer putting the ID on `runAsync` and the context helper. |
 | `onGuardError` | `guardPlugin` | `"deny"` (default) or `"allow"`. |
@@ -400,33 +402,37 @@ await runner.runAsync({
 
 ## Send values to a policy
 
-This adapter selects a policy with `action` and submits the SDK rules you
-configure. It doesn't map an actor or typed policy inputs, so a policy for this
-label can't declare inputs. A call that arrives without a declared input
-reports `AJP1003`, and a live rule that depends on it fails closed.
+`guardPlugin` takes `actor` and `inputs`, each as a value or a function
+resolved per call. A resolver receives `{ toolName, input }`, then the ADK tool
+context.
 
-Where an action needs a policy that reads values, call `guard()` directly in
-the handler rather than relying on the wrapper alone:
+Because the helper gates tools it did not wrap, including MCP and
+runtime-discovered tools, `input` is unknown at the type level. Narrow it
+before you read a field, and return nothing for a tool the policy does not
+cover:
 
 ```ts
-const decision = await arcjet.guard({
-  label: "email.sent",
+const guarded = guardPlugin(arcjet, {
+  action: ({ toolName }) => `${toolName}.invoked`,
   actor: currentUser.id,
-  inputs: {
-    recipient: policyInput.server.string(recipient),
-    team_domains: policyInput.server.stringList(currentUser.teamDomains),
+  inputs: ({ toolName, input }) => {
+    if (toolName !== "sendEmail") return {};
+    const { recipient, body } = input as { recipient: string; body: string };
+    return {
+      recipient: policyInput.server.string(recipient),
+      team_domains: policyInput.server.stringList(currentUser.teamDomains),
+      body: policyInput.local.string(body),
+    };
   },
-  rules: [],
 });
-
-if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
-  throw new Error("Blocked by policy");
-}
 ```
 
-The policy behind that call declares `recipient` as a `SERVER` string and
-`team_domains` as a `SERVER` string list, and denies a recipient outside the
-team:
+Derive the actor from the tool context or the session state, never from a
+model-produced tool input.
+
+The policy these calls feed declares `recipient` as a `SERVER` string,
+`team_domains` as a `SERVER` string list, and `body` as a `LOCAL` string, then
+denies a recipient outside the team:
 
 ```rego
 package arcjet.guard
@@ -440,9 +446,10 @@ deny contains "external-recipient" if {
 }
 ```
 
-Use the wrapper for actions that don't need policy inputs, and a direct
-`guard()` call for the ones that do. For the full API, see
-<Link.Page href="/guards/reference#direct-guard-api">Direct Guard API</Link.Page>.
+Map only what a policy needs. Take the actor and any allow list from
+authenticated application state, never from the model's arguments: a policy can
+be conditioned on the actor, so a model that controls it can leave its own
+policy scope.
 
 For the names, kinds, and exposures a policy declares, see
 <Link.Page href="/guards/remote-policies">Policy contract</Link.Page>. For more

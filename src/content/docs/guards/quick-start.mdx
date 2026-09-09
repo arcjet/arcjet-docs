@@ -351,16 +351,14 @@ Each scenario demonstrates a different result from the same guarded tool:
 - **Allowed recipient:** The recipient is on the allow list and the body has no
   sensitive data, so `sendEmail` reaches the email provider.
 - **Blocked recipient:** The model calls the same tool with an external
-  address, and the remote membership rule denies the call before the provider
-  runs. The model receives the denial result and explains it. This scenario
-  needs an adapter that maps `inputs`; on the others the send goes through,
-  because the recipient never reaches the policy.
+  address, and the policy's `external-recipient` rule denies the call before
+  the provider runs. The model receives the denial result and explains it.
 - **Sensitive information:** The recipient is allowed, but the agent first
   calls `getClientRecord` and receives test bank account and routing numbers.
-  When the model puts that tool result in the email body, the check denies
-  `sendEmail` before the data leaves the application – through the remote
-  policy's `body` rule where the adapter maps `inputs`, and through the SDK
-  rule where it doesn't.
+  When the model puts that tool result in the email body, the policy's
+  `sensitive-body` rule denies `sendEmail` before the data leaves the
+  application. The detector runs in the SDK, so the body is never sent to
+  Arcjet.
 
 ### Read the decision, not the absence of an email
 

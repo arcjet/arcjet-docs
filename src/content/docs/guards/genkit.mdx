@@ -87,6 +87,8 @@ Genkit with this adapter.
 | --- | --- | --- |
 | `action` | `guardTool`, `guardMiddleware` | Guard label and capture name. Use `resource.verb` in the past tense. For `guardMiddleware`, a string or a function of `{ toolName, input }`. Middleware defaults to `tool.invoked`. |
 | `rules` | `guardTool`, `guardMiddleware` | SDK rules, or a function of the parsed tool input (or `{ toolName, input }` on the middleware). Omit to submit none. |
+| `actor` | `guardTool`, `guardMiddleware` | Trusted identity, or a function resolved per call. Take it from authenticated application state, never from a model-produced argument. |
+| `inputs` | `guardTool`, `guardMiddleware` | Named values built with `policyInput.server.*` or `policyInput.local.*`, or a function resolved per call. |
 | `metadata` | `guardTool`, `guardMiddleware` | Nested JSON, or a function of the same input as `rules`. |
 | `sessionId` | `guardTool`, `guardMiddleware` | Caller-owned fallback when the tool options or hook `ctx` do not carry one. Put the same ID on `generate({ context })` and on `guardMiddleware` for tool-time correlation. |
 | `onGuardError` | `guardTool`, `guardMiddleware` | `"deny"` (default) or `"allow"`. |
@@ -395,33 +397,32 @@ await arcjet.guard({
 
 ## Send values to a policy
 
-This adapter selects a policy with `action` and submits the SDK rules you
-configure. It doesn't map an actor or typed policy inputs, so a policy for this
-label can't declare inputs. A call that arrives without a declared input
-reports `AJP1003`, and a live rule that depends on it fails closed.
-
-Where an action needs a policy that reads values, call `guard()` directly in
-the handler rather than relying on the wrapper alone:
+`guardTool` takes `actor` and `inputs`, each as a value or a function
+resolved per call. A resolver receives the parsed tool input, then the agent
+context.
 
 ```ts
-const decision = await arcjet.guard({
-  label: "email.sent",
+const sendEmail = guardTool(arcjet, sendEmailTool, {
+  action: "email.sent",
   actor: currentUser.id,
-  inputs: {
+  inputs: ({ recipient, body }) => ({
     recipient: policyInput.server.string(recipient),
     team_domains: policyInput.server.stringList(currentUser.teamDomains),
-  },
-  rules: [],
+    body: policyInput.local.string(body),
+  }),
 });
-
-if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
-  throw new Error("Blocked by policy");
-}
 ```
 
-The policy behind that call declares `recipient` as a `SERVER` string and
-`team_domains` as a `SERVER` string list, and denies a recipient outside the
-team:
+Build every input explicitly with `policyInput.server.*` or
+`policyInput.local.*`. Plain values are rejected, and the adapter never
+discovers arguments for you.
+
+`guardMiddleware` takes the same two options. Its resolvers receive
+`{ toolName, input }`, then the Genkit context.
+
+The policy these calls feed declares `recipient` as a `SERVER` string,
+`team_domains` as a `SERVER` string list, and `body` as a `LOCAL` string, then
+denies a recipient outside the team:
 
 ```rego
 package arcjet.guard
@@ -435,9 +436,10 @@ deny contains "external-recipient" if {
 }
 ```
 
-Use the wrapper for actions that don't need policy inputs, and a direct
-`guard()` call for the ones that do. For the full API, see
-<Link.Page href="/guards/reference#direct-guard-api">Direct Guard API</Link.Page>.
+Map only what a policy needs. Take the actor and any allow list from
+authenticated application state, never from the model's arguments: a policy can
+be conditioned on the actor, so a model that controls it can leave its own
+policy scope.
 
 For the names, kinds, and exposures a policy declares, see
 <Link.Page href="/guards/remote-policies">Policy contract</Link.Page>. For more
