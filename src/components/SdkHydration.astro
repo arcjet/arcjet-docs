@@ -2,6 +2,8 @@
 /**
  * Seeds Astro island hydration on SDK routes that otherwise only contain
  * static framework wrappers plus `SelectableContent` islands.
+ * Place it in the MDX body before framework slots: rendering an unused
+ * alternative can otherwise consume Astro's deduplicated runtime scripts.
  */
 import { sdkFromPathname } from "@/lib/sdk";
 import FrameworkName from "@/components/FrameworkName";
