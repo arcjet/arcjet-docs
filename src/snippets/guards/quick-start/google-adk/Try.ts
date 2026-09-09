@@ -2,6 +2,7 @@ import { runEmailAgent } from "./agent.js";
 
 const user = {
   id: "customer-123",
+  allowedRecipients: ["approved@example.com"],
   record: {
     name: "Alex Morgan",
     bankAccount: "0123456789",

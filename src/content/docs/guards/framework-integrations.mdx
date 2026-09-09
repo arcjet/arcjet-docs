@@ -95,7 +95,9 @@ const sendEmail = guardTool(arcjet, sendEmailTool, {
   actor: currentUser.id,
   inputs: ({ recipient, body }) => ({
     recipient: policyInput.server.string(recipient),
-    team_domains: policyInput.server.stringList(currentUser.teamDomains),
+    allowed_recipients: policyInput.server.stringList(
+      currentUser.allowedRecipients,
+    ),
     body: policyInput.local.string(body),
   }),
 });

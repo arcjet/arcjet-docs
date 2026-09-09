@@ -421,7 +421,9 @@ const guarded = guardMiddleware(arcjet, {
     const { recipient, body } = input as { recipient: string; body: string };
     return {
       recipient: policyInput.server.string(recipient),
-      team_domains: policyInput.server.stringList(currentUser.teamDomains),
+      allowed_recipients: policyInput.server.stringList(
+        currentUser.allowedRecipients,
+      ),
       body: policyInput.local.string(body),
     };
   },
@@ -432,8 +434,8 @@ Derive the actor from the context you passed to `chat({ context })`, never
 from a model-produced tool input.
 
 The policy these calls feed declares `recipient` as a `SERVER` string,
-`team_domains` as a `SERVER` string list, and `body` as a `LOCAL` string, then
-denies a recipient outside the team:
+`allowed_recipients` as a `SERVER` string list, and `body` as a `LOCAL` string,
+then denies a recipient that isn't on the list:
 
 ```rego
 package arcjet.guard
@@ -441,9 +443,7 @@ package arcjet.guard
 import rego.v1
 
 deny contains "external-recipient" if {
-	parts := split(input.values.recipient, "@")
-	count(parts) == 2
-	not lower(parts[1]) in input.values.team_domains
+	not input.values.recipient in input.values.allowed_recipients
 }
 ```
 

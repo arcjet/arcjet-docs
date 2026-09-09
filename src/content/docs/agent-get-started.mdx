@@ -350,9 +350,9 @@ alternative for Claude Code and Cursor users):
   `localDetectSensitiveInfo` on tool _results_ in a guard call so PII in
   tool outputs doesn't leak back into the model context. Add the on-device
   Rampart backend (`backend: rampart()`) to also catch names and addresses.
-- **"Only let this agent email people at our domain"** – declares `recipient`
-  and `team_domains` inputs on an `email.sent` policy and generates the Rego
-  that denies an external recipient.
+- **"Only let this agent email approved recipients"** – declares `recipient`
+  and `allowed_recipients` inputs on an `email.sent` policy and generates the
+  Rego that denies anything else.
 - **"Show me the policy behind this guard label"** – calls `get-guard-policy`
   and writes the `guard()` call from the contract it returns.
 - **"Test this policy before publishing it"** – calls `validate-guard-policy`
