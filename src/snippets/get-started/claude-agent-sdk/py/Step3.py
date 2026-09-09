@@ -6,17 +6,10 @@ from claude_agent_sdk import (
     query,
     tool,
 )
-from arcjet.guard import DetectPromptInjection, TokenBucket, launch_arcjet
+from arcjet.guard import launch_arcjet, server_input
 from arcjet.guard.claude_agent_sdk import guard_hooks, guard_tool
 
 arcjet = launch_arcjet(key=os.environ["ARCJET_KEY"])
-inbound = DetectPromptInjection()
-lookup_limit = TokenBucket(
-    refill_rate=5,
-    interval_seconds=10,
-    max_tokens=10,
-    bucket="lookups",
-)
 
 
 @tool("lookup_order", "Look up an order by ID", {"order_id": str})
@@ -31,15 +24,25 @@ async def lookup_order(args: dict) -> dict:
     }
 
 
-async def run_agent(session_id: str, user_text: str):
+async def run_agent(
+    user_id: str,
+    owned_orders: list[str],
+    session_id: str,
+    user_text: str,
+):
     guarded_lookup = guard_tool(
         guard=arcjet,
         tool=lookup_order,
+        # The action selects the policy you published.
         action="order.looked-up",
         session_id=session_id,
-        rules=lambda arguments: [
-            lookup_limit(key=arguments["order_id"], requested=5)
-        ],
+        # Actor and the order list come from trusted application state.
+        actor=user_id,
+        # Map only the values the policy needs.
+        inputs=lambda arguments: {
+            "order_id": server_input.string(arguments["order_id"]),
+            "owned_orders": server_input.string_list(owned_orders),
+        },
     )
     server = create_sdk_mcp_server(
         name="orders",
@@ -53,16 +56,11 @@ async def run_agent(session_id: str, user_text: str):
             session_id=session_id,
             mcp_servers={"orders": server},
             allowed_tools=["mcp__orders__lookup_order"],
+            # The hooks gate built-in and MCP tools this file did not wrap.
             hooks=guard_hooks(
                 guard=arcjet,
                 session_id=session_id,
                 exclude=[{"server": "orders", "name": "lookup_order"}],
-                inbound={
-                    "action": "message.received",
-                    "rules": lambda arguments: [
-                        inbound(arguments["prompt"])
-                    ],
-                },
             ),
         ),
     ):

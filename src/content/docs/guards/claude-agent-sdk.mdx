@@ -165,6 +165,8 @@ Don't also wrap these tools with `@arcjet/guard/claude-agent-sdk/v0`.
 | --- | --- | --- |
 | `action` | `guardTool`, `guardHooks` | Guard label and capture name. A string, or for hooks a function of `{ toolName }`. |
 | `rules` | `guardTool`, `guardHooks` | SDK rules, or a function of the tool input or `{ toolName }`. Omit to submit none. |
+| `actor` | `guardTool`, `guardHooks` | Trusted identity, or a function resolved per call. Take it from authenticated application state, never from a model-produced argument. |
+| `inputs` | `guardTool`, `guardHooks` | Named values built with `policyInput.server.*` or `policyInput.local.*`, or a function resolved per call. |
 | `inbound` | `guardHooks` | Policy for `UserPromptSubmit`. Uses `{ prompt }` in `rules`. |
 | `exclude` | `guardHooks` | Tools already wrapped with `guardTool`. Pass `{ server, name }` for authored MCP tools or a bare string for a built-in such as `"Bash"`. |
 | `sessionId` | `guardHooks` | Fallback correlation ID. Must be a UUID if you also pass it to `query()`. |
@@ -179,6 +181,8 @@ Don't also wrap these tools with `@arcjet/guard/claude-agent-sdk/v0`.
 | --- | --- | --- |
 | `guard` | Yes | Client from `launch_arcjet` or `launch_arcjet_sync`. |
 | `action` | Yes | Guard label and capture name. Use `resource.verb` in the past tense, such as `email.sent`. |
+| `actor` | No | Trusted identity, or a callable of the parsed tool arguments. |
+| `inputs` | No | Named values built with `server_input.*` or `local_input.*`, or a callable of the parsed tool arguments. |
 | `rules` | No | Bound SDK rule inputs, or a function of the parsed tool arguments. Omit to submit none. |
 | `session_id` | No | Caller-owned UUID. An authored handler has no `extra.session_id`, so pass the same id you give `ClaudeAgentOptions`. Never minted. |
 | `on_guard_error` | No | `"deny"` (default) or `"allow"`. A real `DENY` always blocks. |
@@ -189,6 +193,8 @@ Don't also wrap these tools with `@arcjet/guard/claude-agent-sdk/v0`.
 | --- | --- | --- |
 | `guard` | Yes | Client from `launch_arcjet` or `launch_arcjet_sync`. |
 | `action` | No | Guard label and capture name. A string, or a function of the hook input. Defaults to `{tool_name}.invoked` when a tool hook is registered. |
+| `actor` | No | Trusted identity, or a callable of the hook envelope. |
+| `inputs` | No | Named values built with `server_input.*` or `local_input.*`, or a callable of the hook envelope. |
 | `rules` | No | Bound SDK rule inputs, or a function of the tool arguments. Omit to submit none. |
 | `inbound` | No | Policy for `UserPromptSubmit`. Requires `action`. `rules` receives `{"prompt": ...}`. |
 | `exclude` | No | Tools already wrapped with `guard_tool`. Pass `{"server": ..., "name": ...}` to match `mcp__{server}__{name}`, or a bare string for a built-in such as `"Bash"`. |
@@ -691,6 +697,89 @@ ID that you already search for.
 
 </TabItem>
 </Tabs>
+
+## Send values to a policy
+
+A policy reads the actor and the typed inputs the call carries. Both
+adapters map them.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+`guardTool` takes `actor` and `inputs`, each as a value or a function
+resolved per call. A resolver receives the parsed tool input, then the agent
+context.
+
+```ts
+const sendEmail = guardTool(arcjet, sendEmailTool, {
+  action: "email.sent",
+  actor: currentUser.id,
+  inputs: ({ recipient, body }) => ({
+    recipient: policyInput.server.string(recipient),
+    allowed_recipients: policyInput.server.stringList(
+      currentUser.allowedRecipients,
+    ),
+    body: policyInput.local.string(body),
+  }),
+});
+```
+
+Build every input explicitly with `policyInput.server.*` or
+`policyInput.local.*`. Plain values are rejected, and the adapter never
+discovers arguments for you.
+
+`guardHooks` takes the same two options. Its tool resolvers receive
+`{ toolName, input }` and its inbound resolvers receive `{ prompt }`, each
+followed by the hook input.
+
+</TabItem>
+<TabItem label="Python">
+
+`guard_tool` takes `actor` and `inputs`, each as a value or a callable of
+the call's arguments.
+
+```py
+guarded_send_email = guard_tool(
+    guard=arcjet,
+    tool=send_email_tool,
+    action="email.sent",
+    actor=current_user.id,
+    inputs=lambda arguments: {
+        "recipient": server_input.string(arguments["recipient"]),
+        "allowed_recipients": server_input.string_list(
+            current_user.allowed_recipients
+        ),
+        "body": local_input.string(arguments["body"]),
+    },
+)
+```
+
+</TabItem>
+</Tabs>
+
+The policy these calls feed declares `recipient` as a `SERVER` string,
+`allowed_recipients` as a `SERVER` string list, and `body` as a `LOCAL` string,
+then denies a recipient that isn't on the list:
+
+```rego
+package arcjet.guard
+
+import rego.v1
+
+deny contains "external-recipient" if {
+	not input.values.recipient in input.values.allowed_recipients
+}
+```
+
+Map only what a policy needs. Take the actor and any allow list from
+authenticated application state, never from the model's arguments: a policy can
+be conditioned on the actor, so a model that controls it can leave its own
+policy scope.
+
+For the names, kinds, and exposures a policy declares, see
+<Link.Page href="/guards/remote-policies">Policy contract</Link.Page>. For more
+worked policies, see
+<Link.Page href="/guards/policy-examples">Policy examples</Link.Page>.
 
 ## Common patterns
 

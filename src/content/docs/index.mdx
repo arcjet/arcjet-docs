@@ -1,13 +1,13 @@
 ---
 title: Welcome to Arcjet
-description: "Arcjet documentation. Install the SDK, then enforce budgets, detect prompt injection, authorize agent tool calls, protect personal information, and block bots from inside your application code."
+description: "Arcjet documentation. Secure AI agents at runtime: discover the agents you run, enforce policy on every tool call before it executes, and keep the evidence to prove what happened."
 head:
   # Use a custom <title> tag
   - tag: title
     content: Arcjet docs
 tableOfContents: false
 hero:
-  tagline: Arcjet is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
+  tagline: Arcjet is agent runtime security that ships with your code. Discover the agents running in your organization, enforce policy on every tool call before it executes, and keep the evidence to prove what happened.
   image:
     alt: Arcjet space object.
     dark: "/src/assets/arcjet-space-obj-v2-5-dark.png"
@@ -15,11 +15,39 @@ hero:
 ---
 
 import { YouTube } from "astro-embed";
+import { CardGrid } from "@astrojs/starlight/components";
 import FrameworkLinks from "@/components/FrameworkLinks.astro";
 import Launch from "@/components/Launch";
+import { Link } from "@/components/link";
+
+## Secure your agents
+
+An AI agent that can send email, refund a payment, or write to a database needs
+a security check at each of those boundaries. Arcjet covers the three questions
+that follow, and you can start with any of them.
+
+<CardGrid>
+  <Link.Card
+    title="Observe"
+    href="/observe"
+    description="Discover which agents run in your organization, with no code change. Send OpenTelemetry data to Arcjet or connect the Claude Compliance API."
+  />
+  <Link.Card
+    title="Enforce"
+    href="/guards/quick-start"
+    description="Put an ALLOW or DENY decision in front of every tool call. Security teams change the policy centrally; developers own the enforcement point."
+  />
+  <Link.Card
+    title="Audit"
+    href="/guards/capture"
+    description="Record what your agents actually did. Every decision keeps the policy that ran and the values it read, so you can reconstruct an answer."
+  />
+</CardGrid>
+
+## Protect requests
 
 <FrameworkLinks
-  title="Get started"
+  title="Get started with an HTTP framework"
   path="/get-started"
   alwaysShow
   exclude={[]}

@@ -7,6 +7,7 @@ next: false
 
 import { Aside } from "@astrojs/starlight/components";
 import Comments from "/src/components/Comments.astro";
+import { Link } from "@/components/link";
 
 [Arcjet](https://arcjet.com) is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
 
@@ -179,6 +180,56 @@ Once connected, the following tools are available to your AI assistant:
 - **`update-rule`** – Replaces an existing remote rule configuration. All fields must be provided (full replacement).
 - **`delete-rule`** – Deletes a remote rule, immediately stopping it from being evaluated.
 - **`promote-rule`** – Promotes a remote rule from `DRY_RUN` to `LIVE` mode after verification.
+- **`list-guard-policies`** – Lists the site's agent guard policies with their labels and declared contracts.
+- **`get-guard-policy`** – Returns one policy, including every declared input with its kind and exposure.
+- **`validate-guard-policy`** – Compiles a draft policy and runs its stored tests, reporting one result per test.
+- **`evaluate-guard-policy`** – Runs one sample input through the official Open Policy Agent evaluator.
+- **`describe-guard-policy`** – Turns a description in plain English into a draft policy.
+- **`suggest-guard-policies`** – Proposes policies from the input shapes the site's own traffic carries.
+- **`put-guard-policy`** – Creates or replaces a policy.
+- **`delete-guard-policy`** – Deletes a policy, immediately stopping it from being evaluated.
+- **`retry-guard-policy`** – Retries a failed publication.
+
+### Guard policies
+
+Agent guard policies decide whether a tool call or other action runs. They're
+selected by the `label` on a `guard()` call, so they reach work that never
+arrives over HTTP: a queue job, a workflow step, a tool call.
+
+The tools back the same service the Arcjet Console uses, so an agent and the
+Console compile and publish through one implementation. A typical flow:
+
+1. Call `get-guard-policy` to read the policy's contract – its label, and every
+   input with its kind and exposure. Write the `guard()` call from that
+   contract, because a policy does nothing until the application sends values
+   under exactly the names it declares.
+2. Call `describe-guard-policy` with a Guard label and a description of what
+   the action should refuse. The model emits a structured builder
+   specification, never policy source, and every candidate is compiled before
+   it comes back.
+3. Call `validate-guard-policy` to compile the draft and run its stored tests.
+   It reports every failure at once.
+4. Call `put-guard-policy` to publish. A live rule can't publish without at
+   least one stored test.
+
+When authoring is rejected, the tool names `validate-guard-policy` for the
+detail rather than relaying the message. A compiler diagnostic quotes the
+author's own policy source, so it travels in a field labeled as untrusted.
+
+For the policy contract, the language, and the publication gates, see
+<Link.Page href="/guards/authoring">Author and publish policies</Link.Page>.
+
+### Rules or policies
+
+The two remote configuration systems are separated by which SDK call evaluates
+them. A remote rule is site-wide and evaluated on every `protect()` call. A
+policy is selected by label on a `guard()` call. Both are configured remotely
+and neither needs a deployment, but a remote rule only runs where the
+application already calls `protect()`.
+
+Getting this wrong costs a whole session: a rate limit written as a policy
+needs a `guard()` call the application doesn't make, and a spend cap written as
+a filter rule can't see the amount.
 
 ### Remote rules
 

@@ -1,7 +1,7 @@
 ```shell
-python -c "import asyncio; from agent import run_agent; asyncio.run(run_agent('conversation-123', 'Look up order 1001'))"
+python -c "from agent import run_agent; print(run_agent('user123', ['1001'], 'Look up order 1001'))"
 ```
 
 Pass the caller-owned `session_id` that you already have. Don't mint
-one. Denied prompts and tool calls appear in your
+one. Denied tool calls appear in your
 [Arcjet dashboard](https://console.arcjet.com) in real time.

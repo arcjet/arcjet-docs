@@ -88,6 +88,8 @@ Don't use this adapter for TanStack Start HTTP `protect()`.
 | --- | --- | --- |
 | `action` | `guardMiddleware` | Guard label and capture name. Use `resource.verb` in the past tense. A string, or a function of `{ toolName, input }`. Defaults to `tool.invoked`. |
 | `rules` | `guardMiddleware` | SDK rules, or a function of `{ toolName, input }`. Omit to submit none. The guard call still happens. |
+| `actor` | `guardMiddleware` | Trusted identity, or a function resolved per call. Take it from authenticated application state, never from a model-produced argument. |
+| `inputs` | `guardMiddleware` | Named values built with `policyInput.server.*` or `policyInput.local.*`, or a function resolved per call. |
 | `metadata` | `guardMiddleware` | Nested JSON, or a function of the same input as `rules`. |
 | `sessionId` | `guardMiddleware` | Caller-owned fallback when `chat({ context })` doesn't carry one. A string, or a function of the same input as `rules`. Prefer putting the ID on `chat({ context: { sessionId } })`. |
 | `onGuardError` | `guardMiddleware` | `"deny"` (default) or `"allow"`. |
@@ -398,6 +400,62 @@ await chat({
 - Don't also wrap these tools with `@arcjet/guard/vercel-ai/v7`.
 - Don't import `@arcjet/guard/tanstack-ai`. The path is
   `@arcjet/guard/tanstack-ai/v0`.
+
+## Send values to a policy
+
+`guardMiddleware` takes `actor` and `inputs`, each as a value or a function
+resolved per call. A resolver receives `{ toolName, input }`, then the chat
+middleware context.
+
+Because the helper gates tools it did not wrap, including MCP and
+runtime-discovered tools, `input` is unknown at the type level. Narrow it
+before you read a field, and return nothing for a tool the policy does not
+cover:
+
+```ts
+const guarded = guardMiddleware(arcjet, {
+  action: ({ toolName }) => `${toolName}.invoked`,
+  actor: currentUser.id,
+  inputs: ({ toolName, input }) => {
+    if (toolName !== "sendEmail") return {};
+    const { recipient, body } = input as { recipient: string; body: string };
+    return {
+      recipient: policyInput.server.string(recipient),
+      allowed_recipients: policyInput.server.stringList(
+        currentUser.allowedRecipients,
+      ),
+      body: policyInput.local.string(body),
+    };
+  },
+});
+```
+
+Derive the actor from the context you passed to `chat({ context })`, never
+from a model-produced tool input.
+
+The policy these calls feed declares `recipient` as a `SERVER` string,
+`allowed_recipients` as a `SERVER` string list, and `body` as a `LOCAL` string,
+then denies a recipient that isn't on the list:
+
+```rego
+package arcjet.guard
+
+import rego.v1
+
+deny contains "external-recipient" if {
+	not input.values.recipient in input.values.allowed_recipients
+}
+```
+
+Map only what a policy needs. Take the actor and any allow list from
+authenticated application state, never from the model's arguments: a policy can
+be conditioned on the actor, so a model that controls it can leave its own
+policy scope.
+
+For the names, kinds, and exposures a policy declares, see
+<Link.Page href="/guards/remote-policies">Policy contract</Link.Page>. For more
+worked policies, see
+<Link.Page href="/guards/policy-examples">Policy examples</Link.Page>.
 
 ## Common patterns
 

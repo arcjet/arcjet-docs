@@ -1,0 +1,275 @@
+---
+title: "Author and publish policies"
+description: "Build an Arcjet agent guard policy with the visual builder, plain English, or Rego, then test and publish it."
+---
+
+import { Aside } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+A policy changes what a guarded action is allowed to do without changing the
+application. You author it in the Arcjet Console, or from a coding agent over
+MCP, then publish it. The next guard call carrying that label is decided by the
+new policy.
+
+This page covers authoring, testing, and publication. For the contract a policy
+declares, see <Link.Page href="/guards/remote-policies">Policy contract</Link.Page>.
+For the expression language, see
+<Link.Page href="/guards/rego">Write policies in Rego</Link.Page>.
+
+## Where policies live
+
+Policies are scoped to a site and addressed in the Console at
+**Policies**. Each policy has a generated ID that never changes, and a Guard
+label that you can edit. The label is what the runtime selects on and what the
+SDK call passes; the ID is what the Console page is addressed by, so renaming a
+policy isn't a move.
+
+Site membership authorizes policy operations. Validation and evaluation write
+nothing, so they need only read permission.
+
+## Choose an authoring mode
+
+A policy's conditions come from either a builder specification or Rego source,
+never both.
+
+| Mode              | Use it when                                                                        |
+| ----------------- | ----------------------------------------------------------------------------------- |
+| Visual builder    | The rule is a list of comparisons over declared inputs. This is where a policy starts. |
+| Plain English     | You know what to refuse but not which comparisons express it.                      |
+| Rego              | You need boolean grouping, a comparison between two inputs, a derived value, or logic over a collection. |
+
+<Aside type="caution">
+  Converting a builder policy to Rego is one-way. Setting the Rego source
+  clears the specification, and Rego can't be turned back into one. The Console
+  asks you to confirm, because from then on you own the program.
+</Aside>
+
+### Build a policy visually
+
+The builder edits a flat list of conditions for each expression rule, joined by
+a single **AND** or **OR**. There's no nesting: a rule that needs grouping is a
+rule for Rego.
+
+The builder reads declared `SERVER` inputs and detector results only. A `LOCAL`
+value never reaches Arcjet, so no condition can compare against one.
+
+Comparisons are filtered by the kind of the input you pick, so a length
+comparison isn't offered for an integer. Each comparison is offered alongside
+its negated form, so "the domain is not ours" is one condition rather than a
+workaround. The email-domain comparisons lowercase both the address and the
+configured domain and require exactly one `@`, which is what makes
+`alice@EXAMPLE.ORG` match `example.org` and
+`attacker@evil.example@example.org` not match it.
+
+The Rego the builder generates is shown beneath it, read-only, and refreshed
+when you validate. Read it before you convert: it's the program you'd be taking
+on.
+
+### Describe a policy in English
+
+Describe what the action should refuse, and Arcjet writes the conditions. In
+the Console, enter a Guard label and a description on the **Policies** page,
+and the builder opens filled in.
+
+The model never writes Rego. It emits a builder specification – the same
+structured form the builder edits – which Arcjet renders to Rego
+deterministically. A model can't inject policy source because it never produces
+any, and every shape it can emit is one you could have built by hand.
+
+Three further bounds apply:
+
+- **A generated policy compiles.** Every candidate is compiled, and one that
+  fails goes back to the model with the compiler's own diagnostic. You receive
+  a document that compiled, or an error.
+- **A description can't widen a policy's reach.** The label and the detectors
+  come from the site, not from the model, and so do the inputs of a policy that
+  already declares some. A description can't make an existing policy read
+  something new or retarget it at another action. A policy that declares
+  nothing is the exception: there the model proposes the input contract too,
+  because otherwise you'd have to guess the names it was about to write
+  conditions against.
+- **Every generated rule is in dry run.** A generated policy is a draft nobody
+  has read. It reaches the edge only when you publish it, so a model's mistake
+  can't become an outage.
+
+Your description is untrusted text. It's delimited and labeled as a description
+in the prompt, and the output shape is constrained regardless, so the worst an
+injected instruction achieves is a policy you see in the builder before
+anything is published.
+
+#### Write a description that works
+
+The model is turning prose into comparisons over declared inputs, so a
+description works when it names them:
+
+- **Say what should be refused.** A rule denies. "Only allow senders at our
+  domain" becomes "deny when the sender is not at our domain".
+- **Name the input.** `recipient`, `attachment_count`. A policy can read only
+  the inputs it declares, and a description that names none gives the model
+  nothing to attach a condition to.
+- **Give the comparison and the value.** "More than 10 attachments" is
+  actionable. "Too many attachments" isn't.
+- **One rule per sentence.** Several ideas in one sentence usually produce one
+  rule that means none of them.
+
+A policy that declares inputs but none a condition can read – `LOCAL` only,
+with no detector – is refused before the model is asked, with a message naming
+the fix.
+
+### Take a suggestion
+
+Arcjet proposes policies from what a site's own traffic looks like. Each
+suggestion carries a description you can edit and regenerate from, and a
+ready-made rule set the builder can load. Taking a suggestion skips the label
+question, because a suggestion already knows its label.
+
+Suggestions are derived from input shapes, never values: the names, kinds, and
+exposures your application sends. No model is involved, so the same traffic
+gives the same suggestions. A suggestion can propose a domain rule about
+`recipient` without anyone having read one.
+
+## Test a policy
+
+Store tests with the policy. Each test supplies a sample input document and the
+rule IDs it expects to fire:
+
+```json
+{
+  "name": "external recipient is denied",
+  "inputJson": "{\"values\":{\"recipient\":\"someone@example.com\",\"allowed_recipients\":[\"approved@example.com\"]}}",
+  "expectRuleIds": ["external-recipient"]
+}
+```
+
+Tests are versioned with the policy revision and run at publication, so they're
+a gate rather than documentation. Two habits make them worth having:
+
+- **Assert the near miss, not just the hit.** A test for `dev@mail.example.org`
+  is the one that catches a suffix match creeping in. A test that only checks
+  an obvious external address passes either way.
+- **Assert the allow.** An empty `expectRuleIds` states that an input is
+  permitted. A policy that denies everything passes every deny-only test.
+
+Because `signals` is part of the sample input, you can test detector
+combination logic without a model call. Detector-decided rules can't be
+asserted: a stored input can't stand in for a detector, and the compiler
+filters them out of the comparison.
+
+### Validate and evaluate
+
+Two operations answer different questions, and neither writes anything:
+
+- **Validate** compiles the policy and runs every stored test, reporting one
+  result per test. It reports a policy that can't compile rather than stopping
+  at the first problem, so you see every failure at once, each with its
+  position in your Rego.
+- **Evaluate** compiles a draft and runs one sample input through the official
+  Open Policy Agent evaluator – the same evaluator that checks stored tests at
+  publication, so what you see is what the publish holds the policy to. Only
+  expression rules are exercised: a sample input can't stand in for a detector.
+
+## Publish a policy
+
+Publication runs the policy through several gates before anything reaches the
+edge:
+
+1. Arcjet compiles the submitted document.
+2. It runs every stored test through the official Open Policy Agent evaluator,
+   and refuses while any test fails. A policy that doesn't do what its own
+   tests claim must never reach the edge.
+3. It asks the edge interpreter to evaluate the same compiled artifact and
+   refuses to publish if the two answers differ.
+4. It writes the policy, then mirrors it to the edge and records the
+   acknowledgement.
+
+Each policy is its own record with its own optimistic generation, so saving one
+policy doesn't send or change the others on the site. A failed publication can
+be retried, and the draft is preserved through a conflict.
+
+### A live rule needs a test
+
+A policy with a live expression rule and no stored test can't be published.
+Publication proves the edge interpreter reproduces the answers Open Policy
+Agent gave for the policy's tests, and a policy with no tests gives that gate
+nothing to compare.
+
+A policy whose every rule is in dry run can be saved without tests, because
+nothing it denies is acted on. Detector-backed rules are exempt: a detector
+decides at request time and compiles to no artifact, so a stored test has
+nothing to say about it.
+
+New rules default to dry run, so publishing a draft can't start denying
+production traffic before you've seen it evaluate.
+
+### Revisions and rollback
+
+Every publication creates an immutable revision recording the compiled bundle
+and the compiler and profile versions that produced it. A rollback republishes
+those bytes. A published policy stays active until an ordered replacement or a
+deletion supersedes it, so a policy doesn't expire and a connectivity problem
+doesn't retire it.
+
+Decisions record the artifact digest, the declared inputs, and the detector
+results needed to replay them, and every write records who made it, including
+whether the session was impersonated.
+
+## Generate the SDK call
+
+Every policy page generates the guard call that sends its inputs, in
+JavaScript, Go, and Python, plus an instruction you can hand to a coding agent.
+
+Use it rather than transcribing the contract. A policy does nothing until the
+application sends values under exactly the names it declares, and a mistyped
+name produces a policy that silently never fires. The snippets are generated
+from the policy itself, so they can't drift from it.
+
+## Author from a coding agent
+
+The <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page> exposes the
+same service the Console uses, so an agent and the Console compile and publish
+through one implementation:
+
+| Tool                     | What it does                                              |
+| ------------------------ | ----------------------------------------------------------- |
+| `list-guard-policies`    | Lists the site's policies with their labels and contracts |
+| `get-guard-policy`       | Returns one policy, including every input and its kind and exposure |
+| `validate-guard-policy`  | Compiles a draft and runs its stored tests                |
+| `evaluate-guard-policy`  | Runs one sample input through the official evaluator      |
+| `describe-guard-policy`  | Turns a description into a draft                          |
+| `suggest-guard-policies` | Proposes policies from the site's recorded input shapes   |
+| `put-guard-policy`       | Creates or replaces a policy                              |
+| `delete-guard-policy`    | Deletes a policy                                          |
+| `retry-guard-policy`     | Retries a failed publication                              |
+
+An agent gets the policy's contract from `get-guard-policy` and writes the
+guard call from it. When authoring is rejected, the tool names
+`validate-guard-policy` for the detail rather than relaying the message: a
+compiler diagnostic quotes your own policy source, so it travels in a field
+labeled as untrusted rather than in a tool error the model treats as
+instruction.
+
+## Rules or policies
+
+Arcjet has two remote configuration systems, and the difference is which SDK
+call evaluates them:
+
+|               | Agent guard policies                        | Request remote rules                                     |
+| ------------- | ------------------------------------------- | -------------------------------------------------------- |
+| SDK call      | `guard()`                                   | `protect()`                                              |
+| Scope         | One action label                            | The site and every HTTP request it handles               |
+| Reads         | The actor and explicit typed inputs         | Request metadata and supported request signals           |
+| Configured in | **Policies**                                | <Link.Page href="/remote-rules">Remote rules</Link.Page> |
+
+Both are configured remotely and neither needs a deployment. A remote rule only
+runs where the application already calls `protect()`, so work that never
+arrives over HTTP – a queue job, a workflow step, a tool call – is out of its
+reach entirely. A rate limit written as a policy needs a `guard()` call the
+application doesn't make, and a spend cap written as a filter rule can't see
+the amount.
+
+## Related
+
+- <Link.Page href="/guards/remote-policies">Policy contract</Link.Page> – labels, actors, typed inputs, and detectors
+- <Link.Page href="/guards/rego">Write policies in Rego</Link.Page> – the input document, the profile, and its exclusions
+- <Link.Page href="/guards/policy-examples">Policy examples</Link.Page> – worked policies for common agent actions
+- <Link.Page href="/guards/errors">Policy error codes</Link.Page> – what a rule reports when it can't be evaluated

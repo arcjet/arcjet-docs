@@ -117,6 +117,8 @@ export default guardTool(
 | --- | --- | --- |
 | `action` | All | Guard label and capture name. Use `resource.verb` in the past tense. |
 | `rules` | All | SDK rules, or a function of the tool input or Eve context. Omit to submit none. The Guard call still happens. |
+| `actor` | All | Trusted identity, or a function resolved per call. Take it from authenticated application state, never from a model-produced argument. |
+| `inputs` | All | Named values built with `policyInput.server.*` or `policyInput.local.*`, or a function resolved per call. |
 | `metadata` | `guardTool`, `guardApproval`, `guardInbound` | Nested JSON merged into the decision. |
 | `correlationId` | `guardInbound` | Required. Use a stable conversation ID, not `crypto.randomUUID()`. |
 | `onGuardError` | All | `"deny"` (default) or `"allow"`. |
@@ -324,6 +326,57 @@ import { arcjet } from "../arcjet.js";
 
 export default defineHook(arcjetHooks(arcjet));
 ```
+
+## Send values to a policy
+
+`guardTool` takes `actor` and `inputs`, each as a value or a function
+resolved per call. A resolver receives the parsed tool input, then the agent
+context.
+
+```ts
+const sendEmail = guardTool(arcjet, sendEmailTool, {
+  action: "email.sent",
+  actor: currentUser.id,
+  inputs: ({ recipient, body }) => ({
+    recipient: policyInput.server.string(recipient),
+    allowed_recipients: policyInput.server.stringList(
+      currentUser.allowedRecipients,
+    ),
+    body: policyInput.local.string(body),
+  }),
+});
+```
+
+Build every input explicitly with `policyInput.server.*` or
+`policyInput.local.*`. Plain values are rejected, and the adapter never
+discovers arguments for you.
+
+`guardApproval` takes the same two options. Its resolvers receive Eve's
+approval context.
+
+The policy these calls feed declares `recipient` as a `SERVER` string,
+`allowed_recipients` as a `SERVER` string list, and `body` as a `LOCAL` string,
+then denies a recipient that isn't on the list:
+
+```rego
+package arcjet.guard
+
+import rego.v1
+
+deny contains "external-recipient" if {
+	not input.values.recipient in input.values.allowed_recipients
+}
+```
+
+Map only what a policy needs. Take the actor and any allow list from
+authenticated application state, never from the model's arguments: a policy can
+be conditioned on the actor, so a model that controls it can leave its own
+policy scope.
+
+For the names, kinds, and exposures a policy declares, see
+<Link.Page href="/guards/remote-policies">Policy contract</Link.Page>. For more
+worked policies, see
+<Link.Page href="/guards/policy-examples">Policy examples</Link.Page>.
 
 ## Common patterns
 

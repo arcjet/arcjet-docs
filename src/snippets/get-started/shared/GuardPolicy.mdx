@@ -1,0 +1,21 @@
+import { Link } from "@/components/link";
+
+First, create the policy that decides. In the
+[Arcjet Console](https://console.arcjet.com), go to **Policies**, enter
+`order.looked-up` as the Guard label, and paste this description:
+
+```text
+Deny when order_id is not in the owned_orders list.
+```
+
+Arcjet writes the conditions and opens the draft in the visual builder. It
+declares `order_id` as a `SERVER` string and `owned_orders` as a `SERVER`
+string list. Set the rule live, add a test, and publish.
+
+Every generated rule starts in dry run, so a draft can't begin denying
+production traffic before you have read it. A live rule needs at least one
+stored test before it can be published.
+
+Until you publish, the label matches nothing and every guard call comes back
+`NOT_CONFIGURED`, which allows the action. For the other statuses, see
+<Link.Page href="/guards/reference">Testing and reference</Link.Page>.

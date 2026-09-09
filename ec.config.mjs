@@ -1,6 +1,10 @@
 import { pluginCollapsibleSections } from "@expressive-code/plugin-collapsible-sections";
 import { pluginLineNumbers } from "@expressive-code/plugin-line-numbers";
 import { defineEcConfig } from "astro-expressive-code";
+// Shiki ships no Rego grammar, and Arcjet Guard policy examples are written in
+// Rego. Without this, every ```rego block falls back to plain text and the
+// build logs a warning for each one.
+import regoGrammar from "./src/lib/rego.tmLanguage.json" with { type: "json" };
 
 function lineNumbers() {
   // Only show line numbers on these languages
@@ -40,4 +44,7 @@ export default defineEcConfig({
     lineNumbers(),
     pluginCollapsibleSections(),
   ],
+  shiki: {
+    langs: [regoGrammar],
+  },
 });

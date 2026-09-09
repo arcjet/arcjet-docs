@@ -1,4 +1,4 @@
-import { launchArcjet, localDetectSensitiveInfo } from "@arcjet/guard";
+import { launchArcjet, policyInput } from "@arcjet/guard";
 import { rampart } from "@arcjet/sensitive-info-rampart";
 import { guardTool } from "@arcjet/guard/vercel-eve/v0";
 import { defineTool } from "eve/tools";
@@ -9,22 +9,17 @@ const emailProvider = {
   send: async (_: { to: string; body: string }) => ({ ok: true }),
 };
 
-// Rampart detects bank account and routing numbers on this machine. The
-// rule needs its own reference to it, so share one instance: entity types
-// outside the default set throw unless the rule has a backend.
-const sensitiveInfoBackend = rampart();
-
-// Create one Arcjet client and reuse it across agent runs.
+// Create one Arcjet client and reuse it across agent runs. Rampart
+// evaluates the policy's LOCAL inputs on this machine, so the email body
+// never leaves your application.
 const arcjet = launchArcjet({
   key: process.env.ARCJET_KEY!,
-  sensitiveInfoBackend,
-});
-const detectPii = localDetectSensitiveInfo({
-  deny: ["BANK_ACCOUNT", "ROUTING_NUMBER"],
-  backend: sensitiveInfoBackend,
+  sensitiveInfoBackend: rampart(),
 });
 
 export function emailTools(user: {
+  id: string;
+  allowedRecipients: string[];
   record: {
     name: string;
     bankAccount: string;
@@ -56,7 +51,16 @@ export function emailTools(user: {
     {
       action: "email.sent",
       onDeny: "result",
-      rules: ({ body }) => [detectPii(body)],
+      // Actor and the allow list come from trusted application state.
+      actor: user.id,
+      // Map only the values the remote policy needs.
+      inputs: ({ recipient, body }) => ({
+        recipient: policyInput.server.string(recipient),
+        allowed_recipients: policyInput.server.stringList(
+          user.allowedRecipients,
+        ),
+        body: policyInput.local.string(body),
+      }),
     },
   );
 

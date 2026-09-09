@@ -1,21 +1,10 @@
 import os
 
 from strands import Agent, tool
-from arcjet.guard import DetectPromptInjection, TokenBucket, launch_arcjet
-from arcjet.guard.strands_agents import (
-    guard_hooks,
-    guard_tool,
-    strands_agent_context,
-)
+from arcjet.guard import launch_arcjet, server_input
+from arcjet.guard.strands_agents import guard_hooks, guard_tool
 
 arcjet = launch_arcjet(key=os.environ["ARCJET_KEY"])
-inbound = DetectPromptInjection()
-lookup_limit = TokenBucket(
-    refill_rate=5,
-    interval_seconds=10,
-    max_tokens=10,
-    bucket="lookups",
-)
 
 
 @tool
@@ -24,30 +13,24 @@ def lookup_order(order_id: str) -> dict:
     return {"order_id": order_id, "status": "shipped"}
 
 
-async def run_agent(conversation_id: str, user_text: str):
+def run_agent(user_id: str, owned_orders: list[str], user_text: str):
     guarded_lookup = guard_tool(
         guard=arcjet,
         tool=lookup_order,
+        # The action selects the policy you published.
         action="order.looked-up",
-        rules=lambda arguments: [
-            lookup_limit(key=arguments["order_id"], requested=5)
-        ],
+        # Actor and the order list come from trusted application state.
+        actor=user_id,
+        # Map only the values the policy needs.
+        inputs=lambda arguments: {
+            "order_id": server_input.string(arguments["order_id"]),
+            "owned_orders": server_input.string_list(owned_orders),
+        },
     )
-    app_context = {"session_id": conversation_id}
-    derived = strands_agent_context(app_context)
-
-    decision = await arcjet.guard(
-        label="message.received",
-        rules=[inbound(user_text)],
-        correlation_id=derived.correlation_id,
-    )
-    if decision.conclusion == "DENY" or decision.has_failed_open():
-        raise RuntimeError("Message blocked")
 
     agent = Agent(
         tools=[guarded_lookup],
-        hooks=[
-            guard_hooks(guard=arcjet, session_id=conversation_id)
-        ],
+        # The hooks gate tools this file did not wrap.
+        hooks=[guard_hooks(guard=arcjet, session_id=user_id)],
     )
     return agent(user_text)

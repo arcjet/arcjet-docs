@@ -16,8 +16,8 @@ every tool attempt before the tool can create a side effect.
 
 Use an integration when you want to protect tools without writing decision
 handling around every function. The wrapper preserves the framework's normal
-tool definition and result flow, selects policy with a stable `action`, and maps
-the actor and relevant tool arguments into policy inputs.
+tool definition and result flow, selects a policy with a stable `action`, and
+maps the actor and the tool arguments that policy reads.
 
 Use <Link.Page href="/get-started">`protect()`</Link.Page> on HTTP routes. Use
 the helpers on each framework page for agent tools and other non-HTTP actions.
@@ -66,6 +66,58 @@ with `@arcjet/guard/vercel-ai/v7`,
 `@arcjet/guard/claude-managed-agents/v0`. The wrapper throws or
 misses the real execute path. Don't use an npm CrewAI port with
 `arcjet.guard.crewai`.
+
+## Send an actor and policy inputs
+
+A policy reads the actor and the typed inputs the call carries. Every adapter
+takes `actor` and `inputs`, in both JavaScript and Python, so any adapter can
+satisfy a policy that declares them.
+
+Each takes a value, or a function resolved per call. The arguments a resolver
+receives are that adapter's own call:
+
+| Helper                                     | A resolver receives                             |
+| ------------------------------------------ | ------------------------------------------------- |
+| `guardTool`                                | The parsed tool input, then the agent context   |
+| `guardMiddleware`, `guardHooks`, `guardPlugin`, `guardToolNode` | `{ toolName, input }`, then the framework's context |
+| `guardProcessor` (Mastra)                  | `{ text, messages }`, then the request context  |
+| `guardApproval` (Eve)                      | Eve's approval context                          |
+| `guardEvents` (Claude Managed Agents)      | `{ text, events }`                              |
+| `guard_tool` and the other Python helpers  | The call's arguments                            |
+
+Build every input explicitly with `policyInput.server.*` and
+`policyInput.local.*` in JavaScript, or `server_input.*` and `local_input.*` in
+Python. Plain values are rejected, and no adapter discovers arguments for you:
+
+```ts
+const sendEmail = guardTool(arcjet, sendEmailTool, {
+  action: "email.sent",
+  actor: currentUser.id,
+  inputs: ({ recipient, body }) => ({
+    recipient: policyInput.server.string(recipient),
+    allowed_recipients: policyInput.server.stringList(
+      currentUser.allowedRecipients,
+    ),
+    body: policyInput.local.string(body),
+  }),
+});
+```
+
+Map only what a policy needs. Take the actor and any allow list from
+authenticated application state, never from the model's arguments: a policy can
+be conditioned on the actor, so a model that controls it can leave its own
+policy scope.
+
+A resolver may be async, so you can await a lookup to build an input. A
+resolver that throws is treated as a guard error and follows `onGuardError`.
+
+An adapter calls Guard on every attempt even when you map nothing, so the label
+still selects a policy and SDK rules still evaluate. A call that arrives
+without an input the policy declares reports `AJP1003`, and a live rule that
+depends on it fails closed.
+
+For what a policy declares and how those names have to match, see
+<Link.Page href="/guards/remote-policies">Policy contract</Link.Page>.
 
 ## Vercel AI SDK
 

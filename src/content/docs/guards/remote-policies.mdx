@@ -1,79 +1,69 @@
 ---
-title: "Agent guard remote policies"
-description: "Configure centrally managed policies for agent actions using labels, actors, and typed inputs."
+title: "Policy contract"
+description: "What an Arcjet agent guard policy declares: labels, actors, typed inputs, detectors, and rules."
 ---
 
 import { Aside, Tabs, TabItem } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 
-Agent guard remote policies let authorized site members, including members of
-a security team, change the policy applied to a guarded action without changing
-the tool implementation. Developers own the enforcement point and map
-application values into the policy contract; authorized site members can
-publish the policy selected by its `label`.
+An agent guard policy is the remotely managed half of an enforcement point.
+Developers own the guard call and map trusted application values into it.
+Authorized site members, including a security team, own the policy that decides
+on those values. Neither side needs the other to deploy.
 
-This page covers **Agent guard remote policies** for labeled `guard()` actions
-and tool calls. They are separate from <Link.Page href="/remote-rules">Request Remote rules</Link.Page>, which are site-scoped rules merged
-with SDK request rules for HTTP requests handled by `protect()`.
+This page describes what a policy declares. For the language its conditions are
+written in, see <Link.Page href="/guards/rego">Write policies in Rego</Link.Page>.
+For building, testing, and publishing one, see
+<Link.Page href="/guards/authoring">Author and publish policies</Link.Page>.
 
-Remote policies complement, rather than replace, SDK rules configured in code.
-For the architecture, ownership trade-offs, and vendor examples, read
-[Application-Native vs Remote Security Policies](https://arcjet.com/learn/application-native-vs-remote-security-policies).
+Agent guard policies are separate from
+<Link.Page href="/remote-rules">request remote rules</Link.Page>, which are
+site-scoped rules merged with SDK request rules for HTTP requests handled by
+`protect()`.
 
-## Choose application-native rules, remote policies, or both
+## What a policy declares
 
-An application-native rule is usually code-native: its semantics and change and
-release lifecycle are owned by the application, and it is authored and tested
-with the application. An SDK integration alone does not provide that policy
-model. An SDK can put enforcement inside an application while all policy remains
-configured in a remote control plane. Choose the authoring model based on who
-must change the rule and which lifecycle governs it.
+For each guarded action, security and development teams agree on five things:
 
-|                            | Application-native (code-native) SDK rules            | Agent guard remote policies                                  |
-| -------------------------- | ----------------------------------------------------- | ------------------------------------------------------------ |
-| Primary owner              | Application engineering                               | Authorized site members, often security or platform teams    |
-| Rule authoring             | Application source code                               | Arcjet control plane                                         |
-| Change lifecycle           | Code review, tests, build, and deployment             | Publish without an application deployment                    |
-| Best fit                   | Application-specific logic and engineering invariants | Independent policy changes and rapid response                |
-| Application responsibility | Configure the rule and enforce the decision           | Define the label and typed inputs, then enforce the decision |
-| Can be used together       | Yes; submit SDK rules with the Guard call             | Yes; the matching published policy is evaluated on that call |
-
-Keep stable application invariants in code and put policy that security must
-change independently in the remote control plane. Do not duplicate a rule in
-both places unless one is an intentional defense-in-depth backstop with clear
-precedence and separate tests.
-
-## Policy contract
-
-For each guarded action, security and development teams agree on:
-
-1. A stable `label`, such as `email.sent`.
+1. A stable `label`, such as `email.sent`, that selects the policy.
 2. Whether the policy requires an `actor`.
-3. Named inputs, with a type and `SERVER` or `LOCAL` exposure.
-4. Rules over those values, each in `LIVE` or `DRY_RUN` mode.
+3. Named inputs, each with a type and `SERVER` or `LOCAL` exposure.
+4. Detectors to run, and which input each one reads.
+5. Stable rule identities, each `LIVE` or `DRY_RUN`, decided either by a
+   detector or by the policy's expression.
 
-Every Guard call includes the label so Arcjet can apply the matching published
-policy.
+The application sends values under exactly the names the policy declares. A
+policy does nothing until it does, and a mistyped name produces a policy that
+silently never fires, so generate the guard call from the policy rather than
+transcribing it. For more information, see
+<Link.Page href="/guards/authoring#generate-the-sdk-call">Generate the SDK call</Link.Page>.
 
 ### Label
 
-`label` identifies the action boundary and selects its remote policy. Use a
-hardcoded, past-tense action name such as `email.sent` or `refund.issued`.
-Labels use lowercase letters, digits, dashes, and dots, must start and end with
-a letter or digit, and are limited to 256 bytes.
+`label` identifies the action boundary and selects its policy. Use a hardcoded,
+past-tense action name such as `email.sent` or `refund.issued`. Labels use
+lowercase letters, digits, dashes, and dots, must start and end with a letter
+or digit, and are limited to 256 bytes. One policy owns a label.
+
+Framework wrappers take the same slug as `action`. Direct `guard()` calls take
+it as `label`.
 
 ### Actor
 
-`actor` is an optional opaque string asserted by trusted application code. It
-can represent the authenticated user, service, or tenant responsible for the
-action. The SDK does not derive it from a request or tool arguments and Arcjet
-does not authenticate the value for your application.
+`actor` is an opaque string asserted by trusted application code. It can
+represent the authenticated user, service, or tenant responsible for the
+action.
+
+Derive it from authenticated server-side state, never from a request, a model,
+or a tool argument. The SDK doesn't derive it for you, and Arcjet doesn't
+authenticate the value on your behalf. A policy can require an actor, and a
+call that doesn't carry one then reports `AJP1002`.
 
 ### Typed inputs
 
 Every policy input is named and explicitly constructed. Plain values are
-rejected; the SDK does not inspect the tool schema or automatically discover
-arguments.
+rejected; the SDK doesn't inspect the tool schema or discover arguments for
+you.
 
 | Exposure | Type        | JavaScript / TypeScript                | Python                            | Example value                        |
 | -------- | ----------- | -------------------------------------- | --------------------------------- | ------------------------------------ |
@@ -84,8 +74,8 @@ arguments.
 | `SERVER` | String list | `policyInput.server.stringList(value)` | `server_input.string_list(value)` | `["a@example.com", "b@example.com"]` |
 | `LOCAL`  | String      | `policyInput.local.string(value)`      | `local_input.string(value)`       | `"Email body to inspect"`            |
 
-For example, an email policy can receive a selected recipient, the trusted
-allow list to compare it with, and a message body that stays local:
+An email policy can receive a selected recipient, the trusted allow list to
+compare it with, and a message body that stays local:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -112,146 +102,129 @@ inputs={
 </TabItem>
 </Tabs>
 
+A call is bounded at 64 inputs, 128 KiB per string, and 256 items per list.
+
+Mark an input required when a rule depends on it. An expression over an input
+the application didn't send is undefined, and a rule with an undefined
+statement doesn't fire.
+
 ## Where inputs are evaluated
 
-`SERVER` and `LOCAL` describe where policy evaluates an input and whether its
-raw value is sent to Arcjet.
+`SERVER` and `LOCAL` describe where a policy evaluates an input and whether its
+raw value is sent to Arcjet. The exposure an input needs follows from what
+reads it, so it isn't a preference.
 
 ### SERVER inputs
 
-The typed value is sent to Arcjet for server-side policy evaluation. A call
-containing only server inputs does not need to fetch a local policy projection.
-Use server inputs only for values Arcjet is allowed to receive.
+The typed value is sent to Arcjet for server-side evaluation. The policy
+expression reads server inputs under `input.values`, and server-side detectors
+read them directly. Use a server input only for a value Arcjet is allowed to
+receive.
 
 ### LOCAL inputs
 
-Today, `LOCAL` inputs are used by the sensitive-information rule, which operates
-on a `LOCAL STRING`. Its raw value remains in SDK memory. The SDK evaluates the
-downloaded policy projection locally and sends a domain-separated SHA-256
-digest plus rule attestation. The attestation includes denied entity types and
-offsets, not the matched raw values.
+A `LOCAL` value stays in SDK memory. The SDK evaluates the downloaded policy
+projection locally and sends a domain-separated SHA-256 digest plus a rule
+attestation naming the entity types that matched and where, not the matched
+values. The expression can't read a `LOCAL` value, because Arcjet never
+receives one.
 
 <Aside type="caution">
-  A local-input digest is correlation data, not anonymization. Low-entropy or
-  enumerable values may be guessed and hashed. `LOCAL` limits raw-value
-  transmission; it is not a general privacy guarantee.
+  A local-input digest is correlation data, not anonymization. A low-entropy or
+  enumerable value can be guessed and hashed. `LOCAL` limits raw-value
+  transmission; it isn't a general privacy guarantee.
 </Aside>
 
-## Supported rules
+## Detectors
 
-Agent guard remote policies support the following rules:
+Detectors are native Arcjet operations. A policy can't make a network call or a
+model call; it reads a bounded result Arcjet produced. Declare a detector, give
+it an ID, and name the input it reads:
 
-| Rule                   | Execution | What it evaluates                                                   |
-| ---------------------- | --------- | ------------------------------------------------------------------- |
-| Allowed string values  | Server    | A string against an allow list using exact or email-domain matching |
-| Denied string values   | Server    | A string against a deny list using exact or email-domain matching   |
-| String length          | Server    | Minimum and maximum UTF-8 byte length                               |
-| String-list membership | Server    | Whether one string is a member of a supplied string-list input      |
-| Prompt injection       | Server    | One named server string                                             |
-| Sensitive information  | Local     | One named local string with allowed or denied entity types          |
+| Detector              | Reads             | Runs on    | Options                          |
+| --------------------- | ----------------- | ---------- | -------------------------------- |
+| Prompt injection      | A `SERVER` string | The server | –                                |
+| Sensitive information | A `LOCAL` string  | The SDK    | Allowed or denied entity types   |
 
-Each rule can be `LIVE`, where a denial contributes to the final decision, or
-`DRY_RUN`, where it is evaluated and reported without blocking.
+Prompt injection runs on the server because it needs the raw value. Sensitive
+information runs in the SDK precisely so the raw value never arrives. Declaring
+either against the wrong exposure is a compile error, `AJV2007`.
 
-Generic URL allow/deny rules, command or shell rules, remote custom rules, and
-remote rate limits aren't supported. SDK rules configured in code
-remain available and can be submitted alongside a remote policy.
+An expression reads a detector's result under `input.signals`, keyed by the
+detector ID:
 
-## Policy examples
-
-### Restrict a tool to approved recipients
-
-Configure two `SERVER` inputs – a string named `recipient` and a string list
-named `allowed_recipients` – then add a string-list membership rule requiring the
-recipient to appear in the list.
-
-<Tabs syncKey="language">
-<TabItem label="JavaScript / TypeScript">
-
-{/* prettier-ignore */}
-```ts
-inputs: ({ recipient }) => ({
-  recipient: policyInput.server.string(recipient),
-  allowed_recipients: policyInput.server.stringList(user.allowedRecipients),
-})
-```
-
-</TabItem>
-<TabItem label="Python">
-
-```py
-inputs=lambda arguments, _config: {
-    "recipient": server_input.string(arguments["recipient"]),
-    "allowed_recipients": server_input.string_list(user.allowed_recipients),
+```rego
+deny contains "injection-on-destructive-tool" if {
+	input.signals.prompt_injection.message_check.detected
+	input.values.destructive
 }
 ```
 
-</TabItem>
-</Tabs>
+## Rules
 
-### Block sensitive data before it leaves the tool
+A rule is a stable identity, a mode, and how it's decided.
 
-Configure a `LOCAL` string input named `body`, then add a sensitive information
-rule with the entity types the tool must not send. The policy evaluates the raw
-body locally.
+| Rule kind    | Decided by                       | Use it when                                                    |
+| ------------ | -------------------------------- | -------------------------------------------------------------- |
+| `EXPRESSION` | The policy's Rego                | The condition combines values, or combines a finding with a value |
+| `DETECTOR`   | A declared detector, directly    | The finding is the whole condition                             |
 
-<Tabs syncKey="language">
-<TabItem label="JavaScript / TypeScript">
+A `DETECTOR` rule needs no expression and no stored test. It's also what keeps
+local sensitive-information detection private: the SDK decides, and Arcjet
+never sees the value the detector read.
 
-{/* prettier-ignore */}
-```ts
-inputs: ({ body }) => ({
-  body: policyInput.local.string(body),
-})
-```
+Each rule is in one of two modes:
 
-</TabItem>
-<TabItem label="Python">
+- **`LIVE`.** A denial contributes to the decision and the action is stopped.
+- **`DRY_RUN`.** The rule is evaluated and recorded without blocking.
 
-```py
-inputs=lambda arguments, _config: {
-    "body": local_input.string(arguments["body"]),
-}
-```
+New rules default to dry run, so publishing a draft can't start denying
+production traffic before you've seen it evaluate.
 
-</TabItem>
-</Tabs>
+Where a rule executes follows from its kind and detector rather than being
+chosen. Sensitive information executes in the SDK; everything else executes on
+the server.
 
-### Check the instruction that triggered an action
+Declaring rules rather than inferring them from the expression is what keeps
+mode, the SDK's local projection, and the Console's rule list independent of
+the language. It's also why an expression can only add rule IDs the policy
+declares: the compiler proves that statically, so a typo fails publication
+instead of producing a rule that silently never fires.
 
-Configure a `SERVER` string input named `incoming_message`, then add a prompt
-injection rule over that input. Resolve the message from the application-owned
-agent run rather than from a model-generated tool argument.
+## Choose SDK rules, a policy, or both
 
-<Tabs syncKey="language">
-<TabItem label="JavaScript / TypeScript">
+An SDK rule is code-native: its semantics and its release lifecycle belong to
+the application, and it's authored and tested alongside the application. A
+policy is owned and changed elsewhere. Choose by who has to change the rule and
+which lifecycle governs it.
 
-{/* prettier-ignore */}
-```ts
-inputs: (toolInput) => ({
-  incoming_message: policyInput.server.string(incomingMessage),
-})
-```
+|                            | SDK rules in code                                     | Agent guard policies                                         |
+| -------------------------- | ----------------------------------------------------- | ------------------------------------------------------------ |
+| Primary owner              | Application engineering                               | Authorized site members, often security or platform teams    |
+| Authored in                | Application source code                               | The Arcjet control plane                                     |
+| Change lifecycle           | Code review, tests, build, and deployment             | Publish without an application deployment                    |
+| Best fit                   | Application-specific logic and engineering invariants | Independent policy changes and rapid response                |
+| Application responsibility | Configure the rule and enforce the decision           | Declare the label and typed inputs, then enforce the decision |
+| Used together              | Yes. Submit SDK rules with the guard call             | Yes. The matching published policy is evaluated on that call |
 
-</TabItem>
-<TabItem label="Python">
+Keep stable application invariants in code and put policy that security must
+change independently in the control plane. Don't duplicate a rule in both
+places unless one is an intentional defense-in-depth backstop with clear
+precedence and separate tests.
 
-```py
-inputs=lambda _arguments, _config: {
-    "incoming_message": server_input.string(incoming_message),
-}
-```
+For the architecture and the ownership trade-offs, read
+[Application-Native vs Remote Security Policies](https://arcjet.com/learn/application-native-vs-remote-security-policies).
 
-</TabItem>
-</Tabs>
+## Map inputs in an agent framework
 
-### Combine policies in an agent workflow
+One `email.sent` policy can carry every rule for the action. The integration
+maps the current agent run and the generated tool arguments into the policy
+before the framework executes the tool.
 
-One `email.sent` policy can combine all three of the preceding rules. The
-integration maps the current agent run and generated tool arguments into the
-policy before the framework executes the tool. Framework wrappers such as
-`guardTool` take that slug as `action`. Direct `guard()` calls take it as
-`label`.
+Every adapter takes `actor` and `inputs`, in both JavaScript and Python, each
+as a value or a function resolved per call. For what a resolver receives in
+each adapter, see
+<Link.Page href="/guards/framework-integrations#send-an-actor-and-policy-inputs">Send an actor and policy inputs</Link.Page>.
 
 <Tabs syncKey="language">
 <TabItem label="Vercel AI SDK">
@@ -271,11 +244,13 @@ const sendEmail = guardTool(arcjet, sendEmailTool, {
 });
 
 const tools = { sendEmail };
+const context = createAgentContext({ correlationId: runId });
+
 const result = await generateText({
   model: "openai/gpt-4o-mini",
   prompt: incomingMessage,
   tools,
-  toolsContext: aiToolsContext(createAgentContext(), tools),
+  toolsContext: aiToolsContext(context, tools),
 });
 ```
 
@@ -299,7 +274,7 @@ guarded_send_email = guard_tool(
 )
 
 agent = create_agent(
-    ChatOpenAI(model="gpt-4o-mini"),
+    model="openai:gpt-4o-mini",
     tools=[guarded_send_email],
 )
 result = await agent.ainvoke(
@@ -310,30 +285,49 @@ result = await agent.ainvoke(
 </TabItem>
 </Tabs>
 
-The actor, allowed recipients, and incoming message come from application-owned
-context. Only `recipient` and `body` come from the model's validated tool call.
-If any `LIVE` rule denies, the integration prevents `sendEmailTool` from
-executing.
+The actor, the allowed recipients, and the incoming message come from
+application-owned context. Only `recipient` and `body` come from the model's
+validated tool call. If any live rule denies, the integration prevents the tool
+from executing.
 
-## Remote rules versus policies
+Map only what a policy needs. Every server input you map is a value sent to
+Arcjet and retained as evidence.
 
-Arcjet has two separate remote configuration systems:
+## Policies and remote rules
 
-|               | Agent guard remote policies             | Request Remote rules                                     |
+Arcjet has two remote configuration systems, separated by which SDK call
+evaluates them:
+
+|               | Agent guard policies                    | Request remote rules                                     |
 | ------------- | --------------------------------------- | -------------------------------------------------------- |
 | SDK call      | `guard()`                               | `protect()`                                              |
 | Scope         | One action label                        | A site and its HTTP requests                             |
-| Context       | Trusted actor and explicit typed inputs | Request metadata and supported request signals           |
-| Configuration | Agent guard policy                      | <Link.Page href="/remote-rules">Remote rules</Link.Page> |
+| Reads         | The actor and explicit typed inputs     | Request metadata and supported request signals           |
+| Configured in | **Policies**                            | <Link.Page href="/remote-rules">Remote rules</Link.Page> |
 
-Request Remote rules protect HTTP requests. Agent guard remote policies protect
-tool calls and other actions that use `guard()`.
+Both are configured remotely and neither needs a deployment. A remote rule runs
+only where the application already calls `protect()`, so a queue job, a
+workflow step, or a tool call is out of its reach entirely.
 
 ## Policy updates and availability
 
-When a usable policy is available, temporary connectivity issues do not cause
-the SDK to discard it.
+The SDK fetches a local projection lazily, caches it in memory, never persists
+it, and rechecks every five minutes. When a usable policy is available, a
+temporary connectivity problem doesn't discard it. Arcjet rechecks the
+published policy at the edge every minute, and a published policy stays active
+until an ordered replacement or a deletion supersedes it.
 
-If policy evaluation is incomplete or unavailable, the direct client returns
-an observable failed-open decision. Framework wrappers fail closed by default.
-See <Link.Page href="/guards/reference#availability-and-fail-behavior">Availability and fail behavior</Link.Page>.
+A policy revision mismatch refreshes the local projection, re-evaluates, and
+retries the guard call once.
+
+If policy evaluation is incomplete or unavailable, the direct client returns an
+observable failed-open decision, and framework wrappers fail closed by default.
+For more information, see
+<Link.Page href="/guards/reference#availability-and-fail-behavior">Availability and fail behavior</Link.Page>.
+
+## Related
+
+- <Link.Page href="/guards/rego">Write policies in Rego</Link.Page> – the input document, the profile, and its exclusions
+- <Link.Page href="/guards/policy-examples">Policy examples</Link.Page> – worked policies for common agent actions
+- <Link.Page href="/guards/authoring">Author and publish policies</Link.Page> – the builder, plain English, tests, and publication
+- <Link.Page href="/guards/errors">Policy error codes</Link.Page> – what a rule reports when it can't be evaluated

@@ -8,12 +8,15 @@ next: false
 import { Aside } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 
-[Arcjet](https://arcjet.com) is the runtime security platform that ships with your code. Enforce budgets, stop prompt injection, detect bots, and protect personal information with Arcjet's AI security building blocks.
+[Arcjet](https://arcjet.com) is agent runtime security that ships with your
+code. Put an `ALLOW` or `DENY` decision in front of every agent tool call,
+enforce budgets, stop prompt injection, and protect personal information from
+inside the application.
 
 Arcjet protects two types of entry points:
 
+- **Guards** – tool calls, MCP servers, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` (or `Guard` in Go) to pass inputs directly. See <Link.Page href="/guards">Agent guards</Link.Page>.
 - **Request-based** – HTTP route handlers and API endpoints. Use `protect()` (or `Protect` in Go) with any <Link.Page href="/get-started">supported framework</Link.Page>.
-- **Guards** – tool calls, MCP servers, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` (or `Guard` in Go) to pass inputs directly. See <Link.Page href="/guards">Guards</Link.Page>.
 
 Pick by what's at the protection site:
 
@@ -258,6 +261,34 @@ see
 | Queue worker or background job (Guard) | `tokenBucket` (keyed by user) + `detectPromptInjection` + `localDetectSensitiveInfo` |
 | Claude Managed Agents (Guard)          | `tokenBucket` + `detectPromptInjection` + `localDetectSensitiveInfo` on inbound `user.message` and custom tools |
 
+## Configure an agent guard policy
+
+A guard call carries a `label`, and a policy selected by that label decides the
+action. Policies are managed outside the application, so they change without a
+deployment.
+
+Both transports expose the same policy tools. Over MCP:
+
+1. Call `list-guard-policies` to see the site's policies and their labels.
+2. Call `get-guard-policy` for the policy's contract – its label, and every
+   input with its kind and exposure. Write the `guard()` call from that
+   contract. A policy does nothing until the application sends values under
+   exactly the names it declares, and a mistyped name produces a policy that
+   silently never fires.
+3. To create one, call `describe-guard-policy` with a Guard label and a
+   description of what the action should refuse, then `validate-guard-policy`
+   to compile it and run its stored tests, then `put-guard-policy` to publish.
+
+A policy's conditions are Rego over the declared inputs, and they can read
+Arcjet's own detector findings as facts. A live rule can't publish without at
+least one stored test. For more information, see
+<Link.Page href="/guards/authoring">Author and publish policies</Link.Page>.
+
+Every framework adapter takes `actor` and `inputs`, in both JavaScript and
+Python, each as a value or a function resolved per call. For what a resolver
+receives in each adapter, see
+<Link.Page href="/guards/framework-integrations#send-an-actor-and-policy-inputs">Send an actor and policy inputs</Link.Page>.
+
 ## Verify
 
 After adding protection and starting the app:
@@ -319,6 +350,13 @@ alternative for Claude Code and Cursor users):
   `localDetectSensitiveInfo` on tool _results_ in a guard call so PII in
   tool outputs doesn't leak back into the model context. Add the on-device
   Rampart backend (`backend: rampart()`) to also catch names and addresses.
+- **"Only let this agent email approved recipients"** – declares `recipient`
+  and `allowed_recipients` inputs on an `email.sent` policy and generates the
+  Rego that denies anything else.
+- **"Show me the policy behind this guard label"** – calls `get-guard-policy`
+  and writes the `guard()` call from the contract it returns.
+- **"Test this policy before publishing it"** – calls `validate-guard-policy`
+  to compile the draft and run every stored test.
 - **"Give me a security briefing for my site"** – calls `get-security-briefing`
   to return traffic analysis, threat landscape, anomalies, and recommendations.
 - **"Investigate this suspicious IP address"** – calls `investigate-ip` for geo,
@@ -354,7 +392,13 @@ alternative for Claude Code and Cursor users):
 - <Link.Page href="/llms-full.txt">llms-full.txt</Link.Page> – full machine-readable reference with all framework examples, rule parameters, and decision API
 - <Link.Page href="/remote-rules">Request Remote rules</Link.Page> – manage
   request rules from the Console or MCP server without code changes
-- <Link.Page href="/guards/remote-policies">Agent guard remote policies</Link.Page>
- – manage tool and action policies selected by guard label
+- <Link.Page href="/guards/remote-policies">Policy contract</Link.Page>
+ – labels, actors, typed inputs, detectors, and rules
+- <Link.Page href="/guards/rego">Write policies in Rego</Link.Page> – the input
+  document, the supported language subset, and what it excludes
+- <Link.Page href="/guards/policy-examples">Policy examples</Link.Page> – worked
+  policies for email, refunds, web fetch, databases, files, and budgets
+- <Link.Page href="/observe">Observe agent activity</Link.Page> – ingest agent
+  activity with no code change
 - <Link.Page href="/best-practices">Best practices</Link.Page> – recommended
   patterns and anti-patterns

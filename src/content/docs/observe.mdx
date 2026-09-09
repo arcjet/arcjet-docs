@@ -1,0 +1,243 @@
+---
+title: "Observe agent activity"
+description: "Discover which AI agents run in your organization by sending OpenTelemetry data to Arcjet or connecting the Claude Compliance API."
+---
+
+import { Aside } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+Before you can enforce a policy on an agent action, you need to know which
+agents are running, who runs them, and what they do. Arcjet ingests agent
+activity without a code change, through either of two paths:
+
+- **OpenTelemetry**, where a client you already run exports to Arcjet. Push,
+  low latency, and it carries host metadata and token usage.
+- **The Claude Compliance API**, where you paste one key and Arcjet polls
+  Anthropic for your organization's activity and session transcripts. Pull,
+  zero configuration, and it covers clients you were never configured on.
+
+Both land in the same place and render in the same views. Ingested activity is
+context, not enforcement: it records what an agent did, after the fact. To
+decide whether an action runs, add an enforcement point with
+<Link.Page href="/guards">agent guards</Link.Page>.
+
+<Aside type="caution">
+  Don't run both paths against the same site. Each session is ingested twice,
+  under different identifiers, with no way to correlate the two copies. Pick
+  one per site.
+</Aside>
+
+## Send OpenTelemetry data to Arcjet
+
+Arcjet accepts OpenTelemetry (OTLP) exports over HTTP at
+`https://decide.arcjet.com` and records each record as an Arcjet capture event.
+Point any OTLP exporter at it.
+
+### Export from Claude Code
+
+Set these environment variables to export Claude Code's security and audit
+telemetry:
+
+```sh
+export CLAUDE_CODE_ENABLE_TELEMETRY=1
+export OTEL_LOGS_EXPORTER=otlp
+export OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+export OTEL_EXPORTER_OTLP_ENDPOINT=https://decide.arcjet.com
+export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer ARCJET_KEY"
+export OTEL_LOG_USER_PROMPTS=1
+export OTEL_LOG_TOOL_DETAILS=1
+```
+
+Replace `ARCJET_KEY` with the key for the site the activity belongs to.
+
+`OTEL_LOG_USER_PROMPTS` and `OTEL_LOG_TOOL_DETAILS` enrich the audit trail with
+prompt text and tool arguments. Leave them unset if that content shouldn't
+leave the machine.
+
+### Roll it out across an organization
+
+To enable ingest for everyone rather than relying on each person's shell, ship
+the same configuration through Claude Code
+[managed settings](https://code.claude.com/docs/en/settings):
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
+    "OTEL_LOGS_EXPORTER": "otlp",
+    "OTEL_EXPORTER_OTLP_PROTOCOL": "http/protobuf",
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "https://decide.arcjet.com",
+    "OTEL_EXPORTER_OTLP_HEADERS": "Authorization=Bearer ARCJET_KEY",
+    "OTEL_LOG_USER_PROMPTS": "1",
+    "OTEL_LOG_TOOL_DETAILS": "1"
+  }
+}
+```
+
+Three details decide whether this works:
+
+- Every value is a string, including `"1"`.
+- Put a literal space after `Bearer`. `OTEL_EXPORTER_OTLP_HEADERS` is
+  baggage-encoded, so Claude Code's exporter sends that space as `%20`. Arcjet
+  decodes the header before parsing it, so either a literal space or `%20`
+  works. Don't encode it twice.
+- Point `OTEL_EXPORTER_OTLP_ENDPOINT` at the host with no port. Port 4317 is
+  the gRPC port, which Arcjet doesn't accept. The exporter appends the OTLP
+  HTTP paths itself.
+
+### What Arcjet records
+
+| Signal    | Path          | What happens                                                          |
+| --------- | ------------- | ----------------------------------------------------------------------- |
+| Logs      | `POST /v1/logs`    | The primary signal. Each log record becomes one capture event.     |
+| Traces    | `POST /v1/traces`  | Each span becomes a capture event, best effort.                    |
+| Metrics   | `POST /v1/metrics` | Authenticated and acknowledged, but not recorded.                  |
+
+Arcjet acknowledges metrics rather than rejecting them so that an exporter
+also sending metrics to another backend doesn't error. Aggregate counters
+aren't discrete auditable events, so there's nothing to record.
+
+Both OTLP wire formats work: `http/protobuf` and `http/json`. gRPC on port 4317
+doesn't.
+
+Each record maps onto a capture event:
+
+| OTLP                       | Capture event                                                         |
+| -------------------------- | ----------------------------------------------------------------------- |
+| Event name                 | `action`, verbatim. Claude Code sends names like `claude_code.tool_decision`. |
+| `session.id`               | `correlationId`, which joins the activity in one session.             |
+| Every other attribute      | `metadata`, with types preserved. A duration stays a number and a tool argument object stays an object. |
+| `service.name`             | The sender identity. Claude Code reports `claude-code`.               |
+
+Metadata limits follow OpenTelemetry conventions: 128 keys, 32 KiB per
+serialized value, and a depth of 10. Past the cap, Arcjet keeps the
+security-relevant keys first and records what it dropped on the event, so a
+truncated event is never silently truncated.
+
+Ingest is fire and forget. A `200` means Arcjet received the export, not that
+it's queryable yet.
+
+## Connect the Claude Compliance API
+
+Instead of configuring an exporter on every client, connect one key and Arcjet
+polls Anthropic for your organization's activity and session transcripts.
+
+### Choose a key
+
+Which credential you can create is decided by your Anthropic organization, not
+by preference, and the two differ in what Arcjet can import:
+
+|                  | Compliance Access Key                                | Admin API key                        |
+| ---------------- | ---------------------------------------------------- | ------------------------------------ |
+| Prefix           | `sk-ant-api01-`                                      | `sk-ant-admin01-`                    |
+| Who can create it| A Claude Enterprise primary owner or organization owner | A Claude Console organization admin |
+| Arcjet imports   | Activity and session transcripts                     | Activity only                        |
+
+An Admin API key reaches the activity feed and nothing else, so you get which
+sessions ran, when, and by whom, but no prompts, tool calls, or transcripts.
+Arcjet detects the key type and skips the transcript requests rather than
+spending your organization's shared rate budget on calls that can't succeed.
+
+<Aside type="caution">
+  Enable the Compliance API in Anthropic **before** you create the key. A key
+  created earlier carries no compliance scope, there's no way to add one
+  afterwards, and you have to create a new key. Scopes are immutable after
+  creation.
+</Aside>
+
+Ask for read-only scopes: `read:compliance_activities` and
+`read:compliance_user_data`. A key can also carry
+`delete:compliance_user_data`, which permits hard-deleting chats, files, and
+projects. Arcjet never calls a delete endpoint.
+
+For more information about the two credentials, see Anthropic's
+[Compliance API access](https://platform.claude.com/docs/en/manage-claude/compliance-api-access) documentation.
+
+### Connect the key
+
+1. In the [Arcjet Console](https://console.arcjet.com), open your team, then
+   go to **Settings** > **Integrations** > **Claude Compliance**.
+2. Select which Claude product your organization uses.
+3. Enter the key and select the destination site. A team with one site skips
+   this choice.
+4. Select **Connect**. Arcjet validates the key against Anthropic before
+   storing it, so a key that doesn't work is never stored.
+
+A team admin has to do this, because the credential is a team resource: one
+key, one connection, one destination site. You can change the destination later
+without reconnecting. The connection keeps its position in the feed, so ingest
+continues where it left off, but events already imported stay with the site
+that received them.
+
+The key never comes back from any API, never returns to the browser after you
+submit it, and is never written to Arcjet's databases. Arcjet stores a masked
+form and a salted fingerprint.
+
+### What the Compliance API doesn't cover
+
+Recording isn't retroactive, and Anthropic doesn't backfill, so nothing from
+before you enabled the Compliance API is available. Turning it off later stops
+recording, and that gap can't be recovered.
+
+These are also absent, whichever key you connect:
+
+- Claude Code authenticated with a Console API key, or run through Amazon
+  Bedrock, Google Vertex AI, or Microsoft Foundry.
+- Claude Code on the web.
+- Organizations with HIPAA readiness enabled, and any session under zero data
+  retention.
+- Thinking blocks, images, and other binary content.
+- The system prompt. A marker message stands in for it.
+
+Tool inputs and results are truncated to 10,000 bytes each.
+
+### Diagnose a stalled feed
+
+The integration panel shows the last sync, how far through the feed it has
+read, the last error, and whether the connection is rate limited.
+
+| What you see                      | What it means                                                                     |
+| --------------------------------- | ----------------------------------------------------------------------------------- |
+| Status is `needs_reauth`          | The key was revoked or the connection is gone. Reconnect.                         |
+| Reconnected, still not syncing    | Anthropic rejected the stored key. Only a different key clears this – resubmitting the same one isn't a rotation. |
+| Activity but never any transcripts | The connection uses an Admin API key. Transcripts need a Compliance Access Key.  |
+| Sessions but no transcripts       | Those sessions predate enablement, so their content was never captured.           |
+| Lagging with no errors            | Your organization's shared rate budget is being consumed by your own tooling.     |
+| Nothing at all                    | Confirm the Compliance API was enabled before the period you're looking for.      |
+
+## Read the Agents view
+
+Ingested activity appears in the Console under **Agents** for the site. It
+groups observed agents by sender and asserted principal, lists each agent's
+sessions by correlation ID, and renders a per-session timeline that interleaves
+capture events with the guard and protect decisions Arcjet made.
+
+The view also reports enforcement coverage: which observed actions have an
+Arcjet decision behind them and which don't. Coverage counts only decisions
+Arcjet made. An ingested event is asserted context, so an action that appears
+in the timeline with no decision beside it is an action nothing enforced.
+
+That gap is the point of the view. Use it to find the actions worth guarding,
+then add an enforcement point and a policy for each.
+
+## Data handling
+
+Ingested activity is **untrusted context**. Arcjet records it, correlates it,
+and shows it, but it can never satisfy a protection requirement: a capture
+event is what a client said happened, not something Arcjet adjudicated.
+
+Session transcripts carry raw prompts, source code, and any credential someone
+pasted into a session. Neither Anthropic nor Arcjet masks that content at
+ingest. Prompt and tool-detail capture is opt-in on the OpenTelemetry path,
+through `OTEL_LOG_USER_PROMPTS` and `OTEL_LOG_TOOL_DETAILS`. On the Compliance
+API path it arrives organization-wide with no per-client opt-in, which is worth
+weighing before you connect it.
+
+For what Arcjet retains and for how long, see the
+<Link.Page href="/privacy">privacy documentation</Link.Page>.
+
+## Related
+
+- <Link.Page href="/guards">Agent guards</Link.Page> – enforce a policy before an action runs
+- <Link.Page href="/guards/capture">Capture events</Link.Page> – record an action from your own application code
+- <Link.Page href="/guards/reference">Guard testing and reference</Link.Page> – what a decision reports
