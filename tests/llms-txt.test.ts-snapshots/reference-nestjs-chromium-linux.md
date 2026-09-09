@@ -11,9 +11,9 @@ Installation
 
 In your project root, install the SDK:
 
-*   [npm](#tab-panel-XXX)
-*   [pnpm](#tab-panel-XXX)
-*   [yarn](#tab-panel-XXX)
+*   [npm](#tab-panel-XXX-0)
+*   [pnpm](#tab-panel-XXX-1)
+*   [yarn](#tab-panel-XXX-2)
 
 Terminal window
 
@@ -641,7 +641,7 @@ If there is an error condition when processing the rule, Arcjet returns an `ERRO
 
 If all other rules that were run returned an `ALLOW` result, then the final Arcjet conclusion is `ERROR`.
 
-*   [TS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
 
 ```ts
 import { ARCJET, type ArcjetNest, detectBot } from "@arcjet/nest";
@@ -714,7 +714,7 @@ export class PageController {
 
 The [@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect) package provides utilities for dealing with common errors.
 
-*   [TS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
 
 ```ts
 import { ARCJET, type ArcjetNest, detectBot } from "@arcjet/nest";

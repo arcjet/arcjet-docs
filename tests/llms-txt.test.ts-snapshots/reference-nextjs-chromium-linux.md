@@ -11,9 +11,9 @@ Installation
 
 In your project root, install the SDK:
 
-*   [npm](#tab-panel-XXX)
-*   [pnpm](#tab-panel-XXX)
-*   [yarn](#tab-panel-XXX)
+*   [npm](#tab-panel-XXX-0)
+*   [pnpm](#tab-panel-XXX-1)
+*   [yarn](#tab-panel-XXX-2)
 
 Terminal window
 
@@ -97,8 +97,8 @@ The following fields are optional:
 *   `characteristics` (`string[]`) – A list of [characteristics](/fingerprints#built-in-characteristics) to be used to uniquely identify clients.
 *   `proxies` (`Array<string | ProxyService>`) – A list of one or more trusted proxies. Arcjet excludes these addresses when it determines the client IP address. This is useful if you are behind a load balancer or proxy that sets the client IP address in a header. You can also pass a proxy service such as `cloudflare()` to read the real client IP from a service-specific header. For an example, see [Load balancers and proxies](#load-balancers-and-proxies).
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 ```ts
 import arcjet, { shield } from "@arcjet/next";
@@ -150,8 +150,8 @@ Each rule can be configured in either `LIVE` or `DRY_RUN` mode. When in `DRY_RUN
 
 This lets you run Arcjet in passive or demo mode to test rules before enabling them.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 ```ts
 import arcjet, { fixedWindow } from "@arcjet/next";
@@ -229,8 +229,8 @@ Note
 
 When specifying multiple rules, the order of the rules is ignored. Rule execution ordering is automatically optimized for performance.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 index.ts
 
@@ -300,8 +300,8 @@ npm install pino pino-pretty
 
 Then, create a custom logger that logs to JSON in production and pretty prints in development:
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 /app/api/route/hello.ts
 
@@ -456,10 +456,10 @@ Arcjet provides a single `protect` function that is used to execute your protect
 
 This function returns a `Promise` that resolves to an `ArcjetDecision` object, which provides a high-level conclusion and detailed explanations of the decision made by Arcjet.
 
-*   [TS (App)](#tab-panel-XXX)
-*   [TS (Pages)](#tab-panel-XXX)
-*   [JS (App Router)](#tab-panel-XXX)
-*   [JS (Pages Router)](#tab-panel-XXX)
+*   [TS (App)](#tab-panel-XXX-0)
+*   [TS (Pages)](#tab-panel-XXX-1)
+*   [JS (App Router)](#tab-panel-XXX-2)
+*   [JS (Pages Router)](#tab-panel-XXX-3)
 
 /app/api/route/hello.ts
 
@@ -871,10 +871,10 @@ for (const result of decision.results) {
 
 This example logs the full result as well as each rate limit rule:
 
-*   [TS (App)](#tab-panel-XXX)
-*   [TS (Pages)](#tab-panel-XXX)
-*   [JS (App Router)](#tab-panel-XXX)
-*   [JS (Pages Router)](#tab-panel-XXX)
+*   [TS (App)](#tab-panel-XXX-0)
+*   [TS (Pages)](#tab-panel-XXX-1)
+*   [JS (App Router)](#tab-panel-XXX-2)
+*   [JS (Pages Router)](#tab-panel-XXX-3)
 
 /app/api/route/hello.ts
 
@@ -1240,10 +1240,10 @@ The following are available on all pricing plans:
 
 [Section titled “Example”](#example-1)
 
-*   [TS (App)](#tab-panel-XXX)
-*   [TS (Pages)](#tab-panel-XXX)
-*   [JS (App Router)](#tab-panel-XXX)
-*   [JS (Pages Router)](#tab-panel-XXX)
+*   [TS (App)](#tab-panel-XXX-0)
+*   [TS (Pages)](#tab-panel-XXX-1)
+*   [JS (App Router)](#tab-panel-XXX-2)
+*   [JS (Pages Router)](#tab-panel-XXX-3)
 
 /app/api/route/hello.ts
 
@@ -1419,10 +1419,10 @@ If there is an error condition when processing the rule, Arcjet returns an `ERRO
 
 If all other rules that were run returned an `ALLOW` result, then the final Arcjet conclusion is `ERROR`.
 
-*   [TS (App)](#tab-panel-XXX)
-*   [TS (Pages)](#tab-panel-XXX)
-*   [JS (App Router)](#tab-panel-XXX)
-*   [JS (Pages Router)](#tab-panel-XXX)
+*   [TS (App)](#tab-panel-XXX-0)
+*   [TS (Pages)](#tab-panel-XXX-1)
+*   [JS (App Router)](#tab-panel-XXX-2)
+*   [JS (Pages Router)](#tab-panel-XXX-3)
 
 /app/api/route/hello.ts
 
@@ -1580,10 +1580,10 @@ export default async function handler(req, res) {
 
 The [@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect) package provides utilities for dealing with common errors.
 
-*   [TS (App)](#tab-panel-XXX)
-*   [TS (Pages)](#tab-panel-XXX)
-*   [JS (App Router)](#tab-panel-XXX)
-*   [JS (Pages Router)](#tab-panel-XXX)
+*   [TS (App)](#tab-panel-XXX-0)
+*   [TS (Pages)](#tab-panel-XXX-1)
+*   [JS (App Router)](#tab-panel-XXX-2)
+*   [JS (Pages Router)](#tab-panel-XXX-3)
 
 /app/api/route/hello.ts
 
@@ -1746,10 +1746,10 @@ Ad hoc rules
 
 Sometimes it is useful to add extra protection with a rule based on the logic in your handler; however, you usually want to inherit the rules, cache, and other configuration from our primary SDK. This can be achieved using the `withRule` function which accepts an ad-hoc rule and can be chained to add multiple rules. It returns an augmented client with the specialized `protect` function.
 
-*   [TS (App)](#tab-panel-XXX)
-*   [TS (Pages)](#tab-panel-XXX)
-*   [JS (App Router)](#tab-panel-XXX)
-*   [JS (Pages Router)](#tab-panel-XXX)
+*   [TS (App)](#tab-panel-XXX-0)
+*   [TS (Pages)](#tab-panel-XXX-1)
+*   [JS (App Router)](#tab-panel-XXX-2)
+*   [JS (Pages Router)](#tab-panel-XXX-3)
 
 /app/api/route/hello.ts
 
@@ -1997,8 +1997,8 @@ Client override
 
 You can override the default client. If you don’t specify a client, Arcjet uses a default one. You don’t usually need to provide a client – the Arcjet Next.js SDK handles this for you, including when you use the [Edge Runtime](https://edge-runtime.vercel.app).
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 ```ts
 import arcjet, { createRemoteClient, slidingWindow } from "@arcjet/next";

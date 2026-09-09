@@ -109,8 +109,8 @@ The following fields are required:
 
 *   `key` (`string`) – Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://console.arcjet.com).
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 server/utils/arcjet.ts
 
@@ -167,8 +167,8 @@ Each rule can be configured in either `LIVE` or `DRY_RUN` mode. When in `DRY_RUN
 
 This lets you run Arcjet in passive or demo mode to test rules before enabling them.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 server/utils/arcjet.ts
 
@@ -248,8 +248,8 @@ Note
 
 When specifying multiple rules, the order of the rules is ignored. Rule execution ordering is automatically optimized for performance.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 server/utils/arcjet.ts
 
@@ -325,8 +325,8 @@ Set the `proxies` field to `["203.0.113.100"]` so Arcjet uses `198.51.100.1` as 
 
 You can also specify CIDR ranges to match multiple IP addresses.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 server/utils/arcjet.ts
 
@@ -362,8 +362,8 @@ export const arcjet = arcjetNuxt({
 
 Some providers pass the real client IP in their own header rather than adding themselves to `X-Forwarded-For`. For these you can pass a proxy service in the `proxies` list. The `cloudflare()` helper reads the real client IP from Cloudflare’s `CF-Connecting-IP` header when the request comes from a Cloudflare IP range:
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 server/utils/arcjet.ts
 
@@ -447,8 +447,8 @@ For limits, drop behavior, and language-specific notes, see [Guard metadata](/gu
 
 Arcjet can protect your server routes.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 server/routes/protected.get.ts
 
@@ -490,8 +490,8 @@ export default defineEventHandler(async (event) => {
 
 Arcjet can protect your server API routes.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 server/api/protected.post.ts
 
@@ -533,8 +533,8 @@ export default defineEventHandler(async (event) => {
 
 Arcjet can protect your server middleware.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 server/middleware/protect.ts
 
@@ -633,8 +633,8 @@ for (const result of decision.results) {
 
 This example logs the full result as well as each rate limit rule:
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 server/utils/arcjet.ts
 
@@ -904,8 +904,8 @@ The following are available on all pricing plans:
 
 [Section titled “Example”](#example-1)
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 server/utils/arcjet.ts
 
@@ -1033,8 +1033,8 @@ If there is an error condition when processing the rule, Arcjet returns an `ERRO
 
 If all other rules that were run returned an `ALLOW` result, then the final Arcjet conclusion is `ERROR`.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 server/api/protected.get.ts
 
@@ -1094,8 +1094,8 @@ export default defineEventHandler(async (event) => {
 
 The [@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect) package provides utilities for dealing with common errors.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 server/api/protected.get.ts
 
@@ -1172,8 +1172,8 @@ Ad hoc rules
 
 Sometimes it is useful to add extra protection with a rule based on the logic in your handler; however, you usually want to inherit the rules, cache, and other configuration from our primary SDK. This can be achieved using the `withRule` function which accepts an ad-hoc rule and can be chained to add multiple rules. It returns an augmented client with the specialized `protect` function.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 server/api/protected.get.ts
 
@@ -1277,8 +1277,8 @@ Client override
 
 You can override the default client. If you don’t specify a client, Arcjet uses a default one. You don’t usually need to provide a client – the Arcjet Astro SDK handles this for you.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 server/utils/arcjet.ts
 

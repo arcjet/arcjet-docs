@@ -55,8 +55,8 @@ The following fields are optional:
 *   `characteristics` (`string[]`) – A list of [characteristics](/fingerprints#built-in-characteristics) to be used to uniquely identify clients.
 *   `proxies` (`Array<string | ProxyService>`) – A list of one or more trusted proxies. Arcjet excludes these addresses when it determines the client IP address. This is useful if you are behind a load balancer or proxy that sets the client IP address in a header. You can also pass a proxy service such as `cloudflare()` to read the real client IP from a service-specific header. For an example, see [Load balancers and proxies](#load-balancers-and-proxies).
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 ```ts
 import arcjet, { shield } from "@arcjet/bun";
@@ -155,8 +155,8 @@ Note
 
 When specifying multiple rules, the order of the rules is ignored. Rule execution ordering is automatically optimized for performance.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 index.ts
 
@@ -228,8 +228,8 @@ bun install pino pino-pretty
 
 Then, create a custom logger that logs to JSON in production and pretty prints in development:
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 index.ts
 
@@ -397,8 +397,8 @@ Arcjet provides a single `protect` function that is used to execute your protect
 
 This function returns a `Promise` that resolves to an `ArcjetDecision` object, which provides a high-level conclusion and detailed explanations of the decision made by Arcjet.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 ```ts
 import arcjet, { shield } from "@arcjet/bun";
@@ -642,8 +642,8 @@ for (const result of decision.results) {
 
 This example logs the full result as well as each rate limit rule:
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 ```ts
 import arcjet, { detectBot, fixedWindow } from "@arcjet/bun";
@@ -914,8 +914,8 @@ If there is an error condition when processing the rule, Arcjet returns an `ERRO
 
 If all other rules that were run returned an `ALLOW` result, then the final Arcjet conclusion is `ERROR`.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 ```ts
 import arcjet, { slidingWindow } from "@arcjet/bun";
@@ -995,8 +995,8 @@ export default {
 
 The [@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect) package provides utilities for dealing with common errors.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 ```ts
 import arcjet, { detectBot } from "@arcjet/bun";
@@ -1081,8 +1081,8 @@ Ad hoc rules
 
 Sometimes it is useful to add extra protection with a rule based on the logic in your handler; however, you usually want to inherit the rules, cache, and other configuration from our primary SDK. This can be achieved using the `withRule` function which accepts an ad-hoc rule and can be chained to add multiple rules. It returns an augmented client with the specialized `protect` function.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 ```ts
 import arcjet, { detectBot, shield } from "@arcjet/bun";
@@ -1192,8 +1192,8 @@ Client override
 
 You can override the default client. If you don’t specify a client, Arcjet uses a default one. You don’t usually need to provide a client – the Arcjet SDK handles this for you.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 ```ts
 import arcjet, { slidingWindow, createRemoteClient } from "@arcjet/bun";

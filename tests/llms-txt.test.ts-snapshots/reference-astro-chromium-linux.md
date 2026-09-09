@@ -439,8 +439,8 @@ if (decision.isDenied()) {
 
 Arcjet protects dynamic Astro server endpoints, not static ones ([learn more about this](#static-routes)).
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 src/pages/api.json.ts
 
@@ -503,8 +503,8 @@ Note
 
 Some server Adapters, such as Vercel, only run middleware at build time for [Static routes](#static-routes). Only call `protect` when `context.isPrerendered === false`.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 src/middleware.ts
 
@@ -676,8 +676,8 @@ export default defineConfig({
 });
 ```
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 ```ts
 import aj from "arcjet:client";
@@ -949,8 +949,8 @@ export default defineConfig({
 });
 ```
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 ```ts
 import aj from "arcjet:client";
@@ -1047,8 +1047,8 @@ If there is an error condition when processing the rule, Arcjet returns an `ERRO
 
 If all other rules that were run returned an `ALLOW` result, then the final Arcjet conclusion is `ERROR`.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 ```ts
 import aj from "arcjet:client";
@@ -1123,8 +1123,8 @@ export const GET = async ({ request }) => {
 
 The [@arcjet/inspect](https://www.npmjs.com/@arcjet/inspect) package provides utilities for dealing with common errors.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 ```ts
 import aj from "arcjet:client";
@@ -1214,8 +1214,8 @@ Ad hoc rules
 
 Sometimes it is useful to add extra protection with a rule based on the logic in your handler; however, you usually want to inherit the rules, cache, and other configuration from our primary SDK. This can be achieved using the `withRule` function which accepts an ad-hoc rule and can be chained to add multiple rules. It returns an augmented client with the specialized `protect` function.
 
-*   [TS](#tab-panel-XXX)
-*   [JS](#tab-panel-XXX)
+*   [TS](#tab-panel-XXX-0)
+*   [JS](#tab-panel-XXX-1)
 
 ```ts
 import aj, { detectBot, fixedWindow } from "arcjet:client";
