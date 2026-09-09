@@ -30,13 +30,17 @@ const legacyKey = sdkKey ? legacyKeyFromPathname(Astro.url.pathname) : undefined
 const hasMatchingSlot = legacyKey ? Astro.slots.has(legacyKey) : false;
 
 const frameworkSlots: Partial<Record<FrameworkKey | "default", string>> = {};
-for (const framework of frameworks) {
-  if (Astro.slots.has(framework.key)) {
-    frameworkSlots[framework.key] = await Astro.slots.render(framework.key);
+// Rendering slots consumes Astro's deduplicated hydration scripts. Only render
+// the alternatives for the React fallback; SDK routes render their slot below.
+if (!(sdkKey && hasMatchingSlot)) {
+  for (const framework of frameworks) {
+    if (Astro.slots.has(framework.key)) {
+      frameworkSlots[framework.key] = await Astro.slots.render(framework.key);
+    }
   }
-}
-if (Astro.slots.has("default")) {
-  frameworkSlots.default = await Astro.slots.render("default");
+  if (Astro.slots.has("default")) {
+    frameworkSlots.default = await Astro.slots.render("default");
+  }
 }
 ---
 

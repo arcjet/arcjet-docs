@@ -17,6 +17,26 @@ function selector(page: import("@playwright/test").Page, optionValue: string) {
 }
 
 test.describe("SelectableContent", () => {
+  for (const [path, count, sample] of [
+    ["/sdk/nest/sensitive-info/reference/", 8, "ArcjetModule.forRoot"],
+    ["/sdk/bun/filters/reference/", 1, "aj.handler"],
+  ] as const) {
+    test(`SDK framework slots render nested code examples on ${path}`, async ({
+      page,
+    }) => {
+      await page.goto(path);
+
+      const blocks = page.locator("main .SlotByFramework .SelectableContent");
+      await expect(blocks).toHaveCount(count);
+      for (const block of await blocks.all()) {
+        await expect(block.locator("pre code")).not.toBeEmpty({
+          timeout: 15_000,
+        });
+      }
+      await expect(blocks.first()).toContainText(sample);
+    });
+  }
+
   test("switching the package manager rewrites the command", async ({
     page,
   }) => {
