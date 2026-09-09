@@ -1,5 +1,13 @@
 export const main = [
   {
+    label: "Get started",
+    link: "/get-started",
+  },
+  {
+    label: "Agent get started",
+    link: "/agent-get-started",
+  },
+  {
     label: "Agent guards",
     collapsed: false,
     items: [
@@ -18,6 +26,10 @@ export const main = [
       {
         label: "Capture events",
         link: "/guards/capture",
+      },
+      {
+        label: "Observe agent activity",
+        link: "/observe",
       },
       {
         label: "Testing and reference",
@@ -48,20 +60,6 @@ export const main = [
       {
         label: "Error codes",
         link: "/guards/errors",
-      },
-    ],
-  },
-  {
-    label: "Observe and audit",
-    collapsed: false,
-    items: [
-      {
-        label: "Observe agent activity",
-        link: "/observe",
-      },
-      {
-        label: "Audit and evidence",
-        link: "/audit",
       },
     ],
   },
@@ -127,107 +125,6 @@ export const main = [
         ],
       },
       {
-        label: "Rate limiting",
-        collapsed: true,
-        items: [
-          {
-            attrs: { class: "feature rate-limiting" },
-            label: "Intro",
-            link: "/rate-limiting",
-          },
-          {
-            label: "Quick start",
-            link: "/rate-limiting/quick-start",
-            attrs: { class: "feature rate-limiting" },
-          },
-          {
-            label: "Algorithms",
-            link: "/rate-limiting/algorithms",
-          },
-          {
-            label: "Configuration",
-            link: "/rate-limiting/configuration",
-          },
-          {
-            label: "Reference",
-            link: "/rate-limiting/reference",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    label: "Coding agent tools",
-    collapsed: false,
-    items: [
-      {
-        label: "Agent get started",
-        link: "/agent-get-started",
-      },
-      {
-        label: "Arcjet plugin",
-        link: "/arcjet-plugin",
-      },
-      {
-        label: "Arcjet skills",
-        link: "https://github.com/arcjet/skills",
-        attrs: { target: "_blank", class: "external-link" },
-      },
-      {
-        label: "MCP server",
-        link: "/mcp-server",
-      },
-      {
-        label: "CLI",
-        link: "/cli",
-      },
-      {
-        label: "llms.txt",
-        link: "/llms.txt",
-        attrs: { target: "_blank", class: "external-link" },
-      },
-      {
-        label: "llms-full.txt",
-        link: "/llms-full.txt",
-        attrs: { target: "_blank", class: "external-link" },
-      },
-    ],
-  },
-  {
-    label: "AI runtime protection",
-    collapsed: false,
-    items: [
-      {
-        label: "Overview",
-        link: "/ai-protection",
-      },
-      {
-        label: "Abuse protection",
-        link: "/ai-protection/abuse-protection",
-      },
-      {
-        label: "Budget control",
-        link: "/ai-protection/budget-control",
-      },
-      {
-        label: "Data loss prevention",
-        link: "/ai-protection/data-loss-prevention",
-      },
-      {
-        label: "Prompt injection detection",
-        link: "/ai-protection/prompt-injection",
-      },
-    ],
-  },
-  {
-    label: "Web and API protection",
-    collapsed: false,
-    items: [
-      {
-        label: "Get started",
-        link: "/get-started",
-      },
-      {
         label: "Bot protection",
         collapsed: true,
         items: [
@@ -252,6 +149,34 @@ export const main = [
           {
             label: "Reference",
             link: "/bot-protection/reference",
+          },
+        ],
+      },
+      {
+        label: "Rate limiting",
+        collapsed: true,
+        items: [
+          {
+            attrs: { class: "feature rate-limiting" },
+            label: "Intro",
+            link: "/rate-limiting",
+          },
+          {
+            label: "Quick start",
+            link: "/rate-limiting/quick-start",
+            attrs: { class: "feature rate-limiting" },
+          },
+          {
+            label: "Algorithms",
+            link: "/rate-limiting/algorithms",
+          },
+          {
+            label: "Configuration",
+            link: "/rate-limiting/configuration",
+          },
+          {
+            label: "Reference",
+            link: "/rate-limiting/reference",
           },
         ],
       },
@@ -336,9 +261,64 @@ export const main = [
         ],
         label: "Filters",
       },
+    ],
+  },
+  {
+    label: "Coding agent tools",
+    collapsed: false,
+    items: [
       {
-        label: "Remote rules",
-        link: "/remote-rules",
+        label: "Arcjet plugin",
+        link: "/arcjet-plugin",
+      },
+      {
+        label: "Arcjet skills",
+        link: "https://github.com/arcjet/skills",
+        attrs: { target: "_blank", class: "external-link" },
+      },
+      {
+        label: "MCP server",
+        link: "/mcp-server",
+      },
+      {
+        label: "CLI",
+        link: "/cli",
+      },
+      {
+        label: "llms.txt",
+        link: "/llms.txt",
+        attrs: { target: "_blank", class: "external-link" },
+      },
+      {
+        label: "llms-full.txt",
+        link: "/llms-full.txt",
+        attrs: { target: "_blank", class: "external-link" },
+      },
+    ],
+  },
+  {
+    label: "AI runtime protection",
+    collapsed: false,
+    items: [
+      {
+        label: "Overview",
+        link: "/ai-protection",
+      },
+      {
+        label: "Abuse protection",
+        link: "/ai-protection/abuse-protection",
+      },
+      {
+        label: "Budget control",
+        link: "/ai-protection/budget-control",
+      },
+      {
+        label: "Data loss prevention",
+        link: "/ai-protection/data-loss-prevention",
+      },
+      {
+        label: "Prompt injection detection",
+        link: "/ai-protection/prompt-injection",
       },
     ],
   },
@@ -590,6 +570,10 @@ export const main = [
       {
         label: "Best practices",
         link: "/best-practices",
+      },
+      {
+        label: "Remote rules",
+        link: "/remote-rules",
       },
       {
         label: "Environment variables",

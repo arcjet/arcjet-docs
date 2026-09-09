@@ -140,8 +140,57 @@ This guide shows you how to guard an agent tool in your
 
 ### 1. Configure the policy
 
-In the [Arcjet Console](https://console.arcjet.com), go to **Policies** and
-create a policy with the Guard label `email.sent`. Declare these inputs:
+The policy decides what the guarded tool is allowed to do. Create it once, in
+the [Arcjet Console](https://console.arcjet.com), before you run the example.
+
+You don't have to write the conditions. Describe what the action refuses and
+Arcjet writes them for you. Go to **Policies**, enter `email.sent` as the Guard
+label, and paste this description:
+
+```text
+Deny when recipient is not in the allowed_recipients list.
+Deny when body contains a bank account number or a routing number.
+```
+
+Arcjet returns a draft in the visual builder with three declared inputs, a
+sensitive-information detector over `body`, and two rules. Review it, switch
+both rules from dry run to live, add a test, and publish.
+
+Every generated rule arrives in dry run, so a draft can't start denying
+production traffic before you've read it. A live rule needs at least one stored
+test before it can be published: add one asserting that a recipient on the
+allow list fires no rules, and one asserting that an address outside it is
+denied.
+
+<details>
+<summary>Have your coding agent configure it</summary>
+
+Connect the <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page> and
+give your agent this prompt. It reads and writes the same policies the Console
+does, so nothing about the result differs.
+
+```text
+Create an Arcjet guard policy with the label email.sent.
+
+Declare recipient as a SERVER string, allowed_recipients as a SERVER string
+list, and body as a LOCAL string. Deny when recipient is not a member of
+allowed_recipients. Deny when body contains a BANK_ACCOUNT or ROUTING_NUMBER
+entity.
+
+Add one test for a recipient on the allow list and one for an address outside
+it, then publish. Show me the guard() call that sends these inputs.
+```
+
+Ask it for the guard call as well as the policy. A policy does nothing until
+the application sends values under exactly the names it declares, and a
+mistyped name produces a policy that silently never fires.
+
+</details>
+
+<details>
+<summary>Configure it by hand</summary>
+
+Declare these inputs:
 
 | Input                | Type        | Exposure | Required |
 | -------------------- | ----------- | -------- | -------- |
@@ -154,10 +203,10 @@ denying the `BANK_ACCOUNT` and `ROUTING_NUMBER` entity types.
 
 Then declare two live rules:
 
-| Rule                 | Kind         | Decided by                                   |
-| -------------------- | ------------ | -------------------------------------------- |
-| `external-recipient` | `EXPRESSION` | The policy's Rego                            |
-| `sensitive-body`     | `DETECTOR`   | `body_scan`, directly                        |
+| Rule                 | Kind         | Decided by            |
+| -------------------- | ------------ | --------------------- |
+| `external-recipient` | `EXPRESSION` | The policy's Rego     |
+| `sensitive-body`     | `DETECTOR`   | `body_scan`, directly |
 
 `external-recipient` needs one condition. In the visual builder, add a
 condition requiring `recipient` to be a member of `allowed_recipients`. The
@@ -175,14 +224,14 @@ deny contains "external-recipient" if {
 
 `sensitive-body` needs no expression. A detector rule is decided by its
 detector, which is what keeps the email body private: the SDK runs the
-detection and Arcjet receives the verdict, never the text. The examples
-configure the on-device Rampart backend, which detects these entity types
-locally. The first guarded call loads the Rampart model, so it takes noticeably
-longer than the ones after it.
+detection and Arcjet receives the verdict, never the text.
 
-An expression rule that's live needs at least one stored test before it can be
-published. Add one test asserting that a recipient on the allow list fires no
-rules, and one asserting that an address outside it fires `external-recipient`.
+</details>
+
+The examples configure the on-device Rampart backend, which detects these
+entity types locally, so the `body` never leaves your application. The first
+guarded call loads the Rampart model, so it takes noticeably longer than the
+ones after it.
 
 Publish the policy before you run the example. Until you do, the label matches
 nothing and every guard call comes back `NOT_CONFIGURED`, which falls through

@@ -239,11 +239,13 @@ const sendEmail = guardTool(arcjet, sendEmailTool, {
 });
 
 const tools = { sendEmail };
+const context = createAgentContext({ correlationId: runId });
+
 const result = await generateText({
   model: "openai/gpt-4o-mini",
   prompt: incomingMessage,
   tools,
-  toolsContext: aiToolsContext(createAgentContext(), tools),
+  toolsContext: aiToolsContext(context, tools),
 });
 ```
 
@@ -267,7 +269,7 @@ guarded_send_email = guard_tool(
 )
 
 agent = create_agent(
-    ChatOpenAI(model="gpt-4o-mini"),
+    model="openai:gpt-4o-mini",
     tools=[guarded_send_email],
 )
 result = await agent.ainvoke(

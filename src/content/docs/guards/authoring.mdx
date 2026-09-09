@@ -7,9 +7,9 @@ import { Aside } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 
 A policy changes what a guarded action is allowed to do without changing the
-application. You author it in the Arcjet Console, through the API, or from a
-coding agent over MCP, then publish it. The next guard call carrying that label
-is decided by the new policy.
+application. You author it in the Arcjet Console, or from a coding agent over
+MCP, then publish it. The next guard call carrying that label is decided by the
+new policy.
 
 This page covers authoring, testing, and publication. For the contract a policy
 declares, see <Link.Page href="/guards/remote-policies">Policy contract</Link.Page>.
@@ -210,8 +210,8 @@ deletion supersedes it, so a policy doesn't expire and a connectivity problem
 doesn't retire it.
 
 Decisions record the artifact digest, the declared inputs, and the detector
-results needed to replay them, and every write records who made it. For more
-information, see <Link.Page href="/audit">Audit and evidence</Link.Page>.
+results needed to replay them, and every write records who made it, including
+whether the session was impersonated.
 
 ## Generate the SDK call
 
@@ -248,27 +248,6 @@ compiler diagnostic quotes your own policy source, so it travels in a field
 labeled as untrusted rather than in a tool error the model treats as
 instruction.
 
-## Author over the API
-
-The same operations are available on the site-scoped REST API:
-
-| Method   | Path                                                     |
-| -------- | -------------------------------------------------------- |
-| `GET`    | `/v1/sites/{siteId}/guard-policies`                      |
-| `GET`    | `/v1/sites/{siteId}/guard-policies/{policyId}`           |
-| `PUT`    | `/v1/sites/{siteId}/guard-policies/{policyId}`           |
-| `DELETE` | `/v1/sites/{siteId}/guard-policies/{policyId}`           |
-| `POST`   | `/v1/sites/{siteId}/guard-policies/validate`             |
-| `POST`   | `/v1/sites/{siteId}/guard-policies/evaluate`             |
-| `POST`   | `/v1/sites/{siteId}/guard-policies/{policyId}/retry`     |
-| `POST`   | `/v1/sites/{siteId}/guard-policies/describe`             |
-| `GET`    | `/v1/sites/{siteId}/guard-policies/suggestions`          |
-
-The authoring document crosses the API as canonical protobuf JSON. Decoding is
-strict in both directions: an unknown field is rejected so a typo can't
-silently drop a condition, and a duplicate JSON key is rejected so two readers
-can't disagree about which value applies.
-
 ## Rules or policies
 
 Arcjet has two remote configuration systems, and the difference is which SDK
@@ -294,4 +273,3 @@ the amount.
 - <Link.Page href="/guards/rego">Write policies in Rego</Link.Page> – the input document, the profile, and its exclusions
 - <Link.Page href="/guards/policy-examples">Policy examples</Link.Page> – worked policies for common agent actions
 - <Link.Page href="/guards/errors">Policy error codes</Link.Page> – what a rule reports when it can't be evaluated
-- <Link.Page href="/audit">Audit and evidence</Link.Page> – what Arcjet records about each decision

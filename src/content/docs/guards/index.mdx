@@ -39,11 +39,15 @@ reliably infer.
 
 Securing an agent at runtime is three problems, and Arcjet covers each one:
 
-| Question                          | What to use                                                                     |
-| --------------------------------- | --------------------------------------------------------------------------------- |
-| Which agents are running?         | <Link.Page href="/observe">Observe agent activity</Link.Page>, with no code change |
-| Should this action be allowed?    | Agent guards, at the action boundary                                            |
-| What happened, and why?           | <Link.Page href="/audit">Audit and evidence</Link.Page>, recorded per decision   |
+| Question                       | What to use                                                                        |
+| ------------------------------ | ------------------------------------------------------------------------------------ |
+| Which agents are running?      | <Link.Page href="/observe">Observe agent activity</Link.Page>, with no code change |
+| Should this action be allowed? | Agent guards, at the action boundary                                               |
+| What happened, and why?        | Decisions and <Link.Page href="/guards/capture">capture events</Link.Page>, recorded per action |
+
+Every decision records the policy revision, the compiled program's digest, and
+the values the policy read, so an answer can be reconstructed rather than
+retold.
 
 ## Where enforcement runs
 

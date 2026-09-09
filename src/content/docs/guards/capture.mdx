@@ -118,7 +118,8 @@ belonging to that flush are dropped (`AJ3003`) and the client stays usable.
 
 There is no `close()` on the JavaScript or Python clients. Flushing is the
 only shutdown step that changes what gets delivered. The Go client also
-exposes `Close`, which flushes first and then releases local wasm.
+exposes `Close`, which flushes and then releases the locally compiled
+WebAssembly, so at shutdown you call `Close` rather than both.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -145,7 +146,9 @@ arcjet_sync_guard.flush()
 ```go
 ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 defer cancel()
-guard.Flush(ctx) // one-second deadline if ctx has none
+guard.Flush(ctx) // one-second deadline if ctx carries none
+
+// At shutdown. Close flushes first, so it replaces the Flush above.
 _ = guard.Close(ctx)
 ```
 
@@ -213,7 +216,6 @@ startup and import the free `capture()` function. See <Link.Page href="/testing#
 
 - <Link.Page href="/guards">Agent guards</Link.Page>
 - <Link.Page href="/observe">Observe agent activity</Link.Page>
-- <Link.Page href="/audit">Audit and evidence</Link.Page>
 - <Link.Page href="/guards/reference">Guard testing and reference</Link.Page>
 - <Link.Page href="/testing">Testing Arcjet</Link.Page>
 - <Link.Page href="/reference/python#record-what-happened-with-capture">Python SDK capture</Link.Page>

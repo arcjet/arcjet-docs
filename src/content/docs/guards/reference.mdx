@@ -209,8 +209,8 @@ The type of a policy rule result follows the kind of the rule that produced it:
 `POLICY_EXPRESSION` is the type most rules produce, and it carries the
 conclusion and nothing more. Which conditions fired is a property of the
 compiled program named by the policy revision and artifact digest, not
-something the result restates. To reconstruct it, see
-<Link.Page href="/audit#prove-which-policy-ran">Prove which policy ran</Link.Page>.
+something the result restates. Record the artifact digest alongside the
+decision ID when you need to reconstruct an answer later.
 
 An SDK released before this result type reads it as an unset variant. It
 enforces the decision correctly, because enforcement follows the decision's
@@ -411,7 +411,6 @@ For the HTTP Newman examples and a fuller walkthrough of the test client, see
 - <Link.Page href="/guards/remote-policies">Policy contract</Link.Page>
 - <Link.Page href="/guards/rego">Write policies in Rego</Link.Page>
 - <Link.Page href="/guards/errors">Policy error codes</Link.Page>
-- <Link.Page href="/audit">Audit and evidence</Link.Page>
 - <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
 - <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>
 - <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>

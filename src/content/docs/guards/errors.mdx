@@ -93,7 +93,7 @@ deny contains "extrenal-recipient" if {
 }
 
 # Computes an ID instead of writing a literal.
-deny contains sprintf("rule-%v", [input.values.kind]) if {
+deny contains concat("-", ["rule", input.values.kind]) if {
 	input.values.external
 }
 ```
