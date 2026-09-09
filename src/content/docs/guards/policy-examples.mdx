@@ -1,0 +1,449 @@
+---
+title: "Policy examples"
+description: "Worked Arcjet agent guard policies for common agent actions: email, refunds, web fetch, database queries, file access, and budgets."
+---
+
+import { Aside } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+Each example on this page is a complete policy expression, with the inputs and
+detectors it expects. Declare those on the policy, paste the Rego, then adapt
+the names to your own action.
+
+For the language itself, see
+<Link.Page href="/guards/rego">Write policies in Rego</Link.Page>. For the
+declaration these expressions sit inside, see
+<Link.Page href="/guards/remote-policies">Policy contract</Link.Page>.
+
+Every example assumes the standard preamble:
+
+```rego
+package arcjet.guard
+
+import rego.v1
+```
+
+## Restrict an email tool to approved domains
+
+The most common agent guard policy. An agent can draft and send mail, and the
+policy decides who it can reach.
+
+**Label:** `email.sent`
+
+| Input          | Kind        | Exposure | Required |
+| -------------- | ----------- | -------- | -------- |
+| `recipient`    | String      | `SERVER` | Yes      |
+| `team_domains` | String list | `SERVER` | Yes      |
+
+**Declared rules:** `malformed-recipient`, `external-recipient`
+
+```rego
+parts := split(input.values.recipient, "@")
+
+deny contains "malformed-recipient" if {
+	count(parts) != 2
+}
+
+deny contains "external-recipient" if {
+	count(parts) == 2
+	not lower(parts[1]) in input.values.team_domains
+}
+```
+
+The domain comparison is exact, so a policy that allows `example.org` denies
+`dev@mail.example.org`. That's deliberate: a suffix match lets a lookalike
+subdomain through. Counting the segments first closes the second trap, an
+address like `attacker@evil.example@example.org` whose second segment isn't
+the domain at all.
+
+`team_domains` comes from the application, not from the model. Mapping the
+allow list as an input rather than hardcoding it in the policy lets the same
+policy serve every tenant.
+
+Store tests that assert the near miss and the allow, not just the obvious
+denial:
+
+| Test                            | `recipient`                     | Expected rules        |
+| ------------------------------- | ------------------------------- | --------------------- |
+| Internal recipient is allowed   | `dev@example.org`               | none                  |
+| External recipient is denied    | `someone@example.com`           | `external-recipient`  |
+| A subdomain is not the domain   | `dev@mail.example.org`          | `external-recipient`  |
+| A second at-sign is rejected    | `a@evil.example@example.org`    | `malformed-recipient` |
+
+## Block attachments on an external send
+
+An agent can send mail outside the team, but not with a file attached.
+
+| Input          | Kind        | Exposure |
+| -------------- | ----------- | -------- |
+| `recipient`    | String      | `SERVER` |
+| `team_domains` | String list | `SERVER` |
+| `attachments`  | Integer     | `SERVER` |
+
+```rego
+deny contains "external-attachment" if {
+	parts := split(input.values.recipient, "@")
+	count(parts) == 2
+	not lower(parts[1]) in input.values.team_domains
+	input.values.attachments > 0
+}
+```
+
+A rule body is a conjunction, so this fires only when both conditions hold.
+Internal sends with attachments and external sends without them both pass.
+
+## Keep a refund inside an approval limit
+
+| Input            | Kind    | Exposure |
+| ---------------- | ------- | -------- |
+| `amount_cents`   | Integer | `SERVER` |
+| `approval_limit` | Integer | `SERVER` |
+| `currency`       | String  | `SERVER` |
+
+```rego
+deny contains "over-approval-limit" if {
+	input.values.amount_cents > input.values.approval_limit
+}
+
+deny contains "unsupported-currency" if {
+	not input.values.currency in ["USD", "EUR", "GBP"]
+}
+```
+
+Comparing two inputs is the reason to reach for Rego rather than the builder,
+which compares an input to a fixed value. Resolve `approval_limit` from the
+authenticated user's own entitlements on the server, so the limit travels with
+the call and the policy stays one rule for every role.
+
+Work in minor units. Arcjet reproduces Open Policy Agent's arithmetic exactly,
+so decimals compare correctly, but integers avoid the question.
+
+## Restrict a web fetch tool to trusted hosts
+
+| Input           | Kind        | Exposure |
+| --------------- | ----------- | -------- |
+| `url`           | String      | `SERVER` |
+| `allowed_hosts` | String list | `SERVER` |
+
+```rego
+authority := split(trim_prefix(lower(input.values.url), "https://"), "/")[0]
+
+deny contains "insecure-scheme" if {
+	not startswith(lower(input.values.url), "https://")
+}
+
+deny contains "untrusted-host" if {
+	not authority in input.values.allowed_hosts
+}
+```
+
+The authority is everything between the scheme and the first `/`, so it
+includes any port and any user information. That's what defeats
+`https://api.example.com@evil.example/data`, where the host is
+`evil.example` and a naive prefix check would pass it. List each entry in
+`allowed_hosts` exactly as it appears in the URL, including a non-default
+port.
+
+<Aside type="caution">
+  A fetch tool that follows redirects can leave the allow list after the policy
+  has allowed the call. Disable redirects in the tool, or guard each hop.
+</Aside>
+
+## Require a role before a privileged action
+
+| Input            | Kind        | Exposure |
+| ---------------- | ----------- | -------- |
+| `required_roles` | String list | `SERVER` |
+| `actor_roles`    | String list | `SERVER` |
+
+```rego
+deny contains "missing-role" if {
+	some required in input.values.required_roles
+	not required in input.values.actor_roles
+}
+```
+
+This reads as "the actor must hold every required role". `some` searches for a
+counterexample, and the rule fires if one exists.
+
+Resolve `actor_roles` from authenticated server-side state. A role list the
+model can influence is not an authorization check.
+
+## Deny a destructive database statement
+
+| Input             | Kind        | Exposure |
+| ----------------- | ----------- | -------- |
+| `statement`       | String      | `SERVER` |
+| `table`           | String      | `SERVER` |
+| `readable_tables` | String list | `SERVER` |
+
+```rego
+statement := upper(trim_space(input.values.statement))
+
+deny contains "destructive-statement" if {
+	some verb in ["DELETE", "DROP", "TRUNCATE", "ALTER", "UPDATE", "GRANT"]
+	startswith(statement, verb)
+}
+
+deny contains "unapproved-table" if {
+	not lower(input.values.table) in input.values.readable_tables
+}
+```
+
+<Aside type="caution">
+  A prefix check over statement text is a guardrail, not a parser. It doesn't
+  see a destructive statement inside a common table expression or after a
+  comment. Where the stakes justify it, give the tool a narrow interface –
+  a table name and a filter – rather than free-text SQL, and let the policy
+  decide on those values.
+</Aside>
+
+## Cap a bulk operation
+
+| Input        | Kind        | Exposure |
+| ------------ | ----------- | -------- |
+| `recipients` | String list | `SERVER` |
+
+```rego
+deny contains "bulk-send" if {
+	count(input.values.recipients) > 25
+}
+```
+
+Put a new threshold rule in `DRY_RUN` first. It's evaluated and recorded
+without blocking, so you can read the decisions it would have denied before
+you make it live.
+
+## Deny when most recipients are external
+
+| Input          | Kind        | Exposure |
+| -------------- | ----------- | -------- |
+| `recipients`   | String list | `SERVER` |
+| `team_domains` | String list | `SERVER` |
+
+```rego
+internal_recipients := [r |
+	some r in input.values.recipients
+	parts := split(r, "@")
+	count(parts) == 2
+	lower(parts[1]) in input.values.team_domains
+]
+
+deny contains "mostly-external" if {
+	count(input.values.recipients) > count(internal_recipients) * 2
+}
+```
+
+The profile excludes division, so express a proportion by multiplying. "More
+than half are external" is the same statement as "the total is more than twice
+the internal count".
+
+Building the internal list rather than the external one also fails closed: an
+address the comprehension can't parse isn't internal, so it counts toward the
+threshold.
+
+## Act on a prompt injection finding in context
+
+| Input              | Kind    | Exposure |
+| ------------------ | ------- | -------- |
+| `incoming_message` | String  | `SERVER` |
+| `destructive`      | Boolean | `SERVER` |
+
+**Detector:** `message_check`, prompt injection over `incoming_message`
+
+```rego
+deny contains "injection-on-destructive-tool" if {
+	input.signals.prompt_injection.message_check.detected
+	input.values.destructive
+}
+```
+
+A detector result is a fact to combine, not a verdict on its own. A flagged
+message reaching a read-only tool doesn't block; the same message reaching a
+tool that writes to production does.
+
+Resolve `incoming_message` from the application-owned agent run, not from a
+model-generated tool argument. A model that rewrites the message on its way
+into the tool call would otherwise decide what the detector sees.
+
+To deny on any injection regardless of context, declare a `DETECTOR` rule
+instead. It needs no expression and no stored test.
+
+## Keep sensitive data from leaving on an external send
+
+| Input          | Kind        | Exposure |
+| -------------- | ----------- | -------- |
+| `recipient`    | String      | `SERVER` |
+| `team_domains` | String list | `SERVER` |
+| `body`         | String      | `LOCAL`  |
+
+**Detector:** `body_scan`, local sensitive information over `body`
+
+```rego
+deny contains "sensitive-data-to-external" if {
+	input.signals.sensitive_info.body_scan.detected
+	parts := split(input.values.recipient, "@")
+	count(parts) == 2
+	not lower(parts[1]) in input.values.team_domains
+}
+```
+
+`body` is a `LOCAL` input, so its raw value never leaves your process. The SDK
+runs the detector, and Arcjet receives a digest and the verified result. The
+expression reads the result, never the text.
+
+To match on a specific entity type, read the `entities` list:
+
+```rego
+deny contains "card-number-emailed" if {
+	"CREDIT_CARD_NUMBER" in input.signals.sensitive_info.body_scan.entities
+}
+```
+
+## Confine a file tool to the workspace
+
+| Input            | Kind   | Exposure |
+| ---------------- | ------ | -------- |
+| `path`           | String | `SERVER` |
+| `workspace_root` | String | `SERVER` |
+
+```rego
+deny contains "path-traversal" if {
+	contains(input.values.path, "..")
+}
+
+deny contains "path-outside-workspace" if {
+	not startswith(input.values.path, input.values.workspace_root)
+}
+```
+
+Resolve the path to an absolute, normalized form in the application before you
+map it. A policy compares the string it's given; it can't resolve a symbolic
+link.
+
+## Restrict which MCP servers a tool can reach
+
+| Input               | Kind        | Exposure |
+| ------------------- | ----------- | -------- |
+| `mcp_server`        | String      | `SERVER` |
+| `approved_servers`  | String list | `SERVER` |
+| `tool_name`         | String      | `SERVER` |
+
+```rego
+deny contains "unapproved-server" if {
+	not input.values.mcp_server in input.values.approved_servers
+}
+
+deny contains "unapproved-tool" if {
+	input.values.mcp_server == "internal-ops"
+	not startswith(input.values.tool_name, "read_")
+}
+```
+
+The second rule shows a condition that applies to one server only. Writing it
+as two statements in one body is clearer than two policies.
+
+## Enforce a spend budget
+
+| Input           | Kind    | Exposure |
+| --------------- | ------- | -------- |
+| `spent_cents`   | Integer | `SERVER` |
+| `request_cents` | Integer | `SERVER` |
+| `budget_cents`  | Integer | `SERVER` |
+
+```rego
+deny contains "over-budget" if {
+	input.values.spent_cents + input.values.request_cents > input.values.budget_cents
+}
+```
+
+The application owns the running total and sends it with the call, so the
+policy stays a comparison. For a limit Arcjet tracks for you, use a token
+bucket SDK rule on the same guard call instead. Both are evaluated, and either
+can deny.
+
+## Require review before a production change
+
+| Input          | Kind   | Exposure |
+| -------------- | ------ | -------- |
+| `environment`  | String | `SERVER` |
+| `reviewed_by`  | String | `SERVER` |
+
+```rego
+deny contains "unreviewed-production-change" if {
+	input.values.environment == "production"
+	not input.values.reviewed_by
+}
+```
+
+`not input.values.reviewed_by` is true when the application didn't send the
+input at all. Use this shape for a value whose absence is itself the failure.
+
+Mark an input required whenever a rule depends on it. An expression over an
+absent optional input is undefined, and a rule with an undefined statement
+doesn't fire.
+
+## Check every item in a list
+
+To deny when any element breaks a rule, find the counterexample with `some`:
+
+```rego
+deny contains "unapproved-attachment-type" if {
+	some name in input.values.attachment_names
+	not endswith(lower(name), ".pdf")
+}
+```
+
+`every` states the positive invariant, which reads better when you also want
+to use the result elsewhere:
+
+```rego
+all_pdf if {
+	every name in input.values.attachment_names {
+		endswith(lower(name), ".pdf")
+	}
+}
+
+deny contains "unapproved-attachment-type" if {
+	not all_pdf
+}
+```
+
+`not every` isn't valid Rego, so reach for the `some` form when you only need
+the denial.
+
+## Combine several conditions
+
+One policy can carry every rule for an action. This `email.sent` policy uses
+both detector kinds and both rule modes:
+
+| Rule                    | Kind         | Mode      | What it does                                       |
+| ----------------------- | ------------ | --------- | -------------------------------------------------- |
+| `no-card-numbers`       | `DETECTOR`   | `LIVE`    | Denies any card number in the body, in the SDK     |
+| `injected-subject`      | `DETECTOR`   | `LIVE`    | Denies a subject line that looks like an injection |
+| `external-recipient`    | `EXPRESSION` | `LIVE`    | Denies a recipient outside the team's domains      |
+| `bulk-attachments`      | `EXPRESSION` | `DRY_RUN` | Records sends with more than 10 attachments        |
+
+```rego
+deny contains "external-recipient" if {
+	parts := split(input.values.recipient, "@")
+	count(parts) == 2
+	not lower(parts[1]) in input.values.team_domains
+}
+
+deny contains "bulk-attachments" if {
+	input.values.attachments > 10
+}
+```
+
+The two detector rules need no expression. Rego never sees the email body:
+the raw value stays in SDK memory, and only the verified result crosses to
+Arcjet. `bulk-attachments` is in dry run, which is the safe way to introduce a
+rule to production traffic.
+
+## Related
+
+- <Link.Page href="/guards/rego">Write policies in Rego</Link.Page> – the input document, the profile, and its exclusions
+- <Link.Page href="/guards/remote-policies">Policy contract</Link.Page> – labels, actors, typed inputs, and detectors
+- <Link.Page href="/guards/authoring">Author and publish policies</Link.Page> – the builder, plain English, tests, and publication
+- <Link.Page href="/guards/quick-start">Agent guards quick start</Link.Page> – guard a tool end to end

@@ -398,6 +398,57 @@ await runner.runAsync({
 - Don't import `@arcjet/guard/google-adk`. The path is
   `@arcjet/guard/google-adk/v2`.
 
+## Send values to a policy
+
+This adapter selects a policy with `action` and submits the SDK rules you
+configure. It doesn't map an actor or typed policy inputs, so a policy for this
+label can't declare inputs. A call that arrives without a declared input
+reports `AJP1003`, and a live rule that depends on it fails closed.
+
+Where an action needs a policy that reads values, call `guard()` directly in
+the handler rather than relying on the wrapper alone:
+
+```ts
+const decision = await arcjet.guard({
+  label: "email.sent",
+  actor: currentUser.id,
+  inputs: {
+    recipient: policyInput.server.string(recipient),
+    team_domains: policyInput.server.stringList(currentUser.teamDomains),
+  },
+  rules: [],
+});
+
+if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+  throw new Error("Blocked by policy");
+}
+```
+
+The policy behind that call declares `recipient` as a `SERVER` string and
+`team_domains` as a `SERVER` string list, and denies a recipient outside the
+team:
+
+```rego
+package arcjet.guard
+
+import rego.v1
+
+deny contains "external-recipient" if {
+	parts := split(input.values.recipient, "@")
+	count(parts) == 2
+	not lower(parts[1]) in input.values.team_domains
+}
+```
+
+Use the wrapper for actions that don't need policy inputs, and a direct
+`guard()` call for the ones that do. For the full API, see
+<Link.Page href="/guards/reference#direct-guard-api">Direct Guard API</Link.Page>.
+
+For the names, kinds, and exposures a policy declares, see
+<Link.Page href="/guards/remote-policies">Policy contract</Link.Page>. For more
+worked policies, see
+<Link.Page href="/guards/policy-examples">Policy examples</Link.Page>.
+
 ## Common patterns
 
 ### Rate limit a tool by a trusted ID

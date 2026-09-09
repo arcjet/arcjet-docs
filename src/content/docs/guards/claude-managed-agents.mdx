@@ -631,6 +631,89 @@ Replace the following:
 - Don't import `@arcjet/guard/claude-managed-agents`. The path is
   `@arcjet/guard/claude-managed-agents/v0`.
 
+## Send values to a policy
+
+A policy reads the actor and the typed inputs the call carries, and the two
+adapters differ in whether they can map them.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+`guardCustomTool` selects a policy with `action` and submits the SDK rules you
+configure. It doesn't map an actor or typed policy inputs, so a policy for this
+label can't declare inputs. A call that arrives without a declared input
+reports `AJP1003`, and a live rule that depends on it fails closed.
+
+Where an action needs a policy that reads values, call `guard()` directly in
+the handler instead:
+
+```ts
+const decision = await arcjet.guard({
+  label: "email.sent",
+  actor: currentUser.id,
+  inputs: {
+    recipient: policyInput.server.string(recipient),
+    team_domains: policyInput.server.stringList(currentUser.teamDomains),
+  },
+  rules: [],
+});
+
+if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+  throw new Error("Blocked by policy");
+}
+```
+
+For the full API, see
+<Link.Page href="/guards/reference#direct-guard-api">Direct Guard API</Link.Page>.
+
+</TabItem>
+<TabItem label="Python">
+
+`guard_custom_tool` takes `actor` and `inputs`, each as a value or a callable of the
+call's arguments. Build every input explicitly with `server_input.*` or
+`local_input.*`; plain values are rejected, and the adapter never discovers
+arguments for you.
+
+```py
+guarded_send_email = guard_custom_tool(
+    guard=arcjet,
+    tool=send_email_tool,
+    action="email.sent",
+    actor=current_user.id,
+    inputs=lambda arguments: {
+        "recipient": server_input.string(arguments["recipient"]),
+        "team_domains": server_input.string_list(current_user.team_domains),
+    },
+)
+```
+
+</TabItem>
+</Tabs>
+
+The policy behind these calls declares `recipient` as a `SERVER` string and
+`team_domains` as a `SERVER` string list, and denies a recipient outside the
+team:
+
+```rego
+package arcjet.guard
+
+import rego.v1
+
+deny contains "external-recipient" if {
+	parts := split(input.values.recipient, "@")
+	count(parts) == 2
+	not lower(parts[1]) in input.values.team_domains
+}
+```
+
+Map only what a policy needs. Take the actor and any allow list from
+authenticated application state, not from the model's arguments.
+
+For the names, kinds, and exposures a policy declares, see
+<Link.Page href="/guards/remote-policies">Policy contract</Link.Page>. For more
+worked policies, see
+<Link.Page href="/guards/policy-examples">Policy examples</Link.Page>.
+
 ## Common patterns
 
 - **Prompt injection before the model sees the prompt:** `guardEvents`

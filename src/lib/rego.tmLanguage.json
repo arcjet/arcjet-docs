@@ -1,0 +1,71 @@
+{
+  "name": "rego",
+  "scopeName": "source.rego",
+  "patterns": [
+    {
+      "include": "#comment"
+    },
+    {
+      "include": "#string"
+    },
+    {
+      "include": "#keyword"
+    },
+    {
+      "include": "#constant"
+    },
+    {
+      "include": "#builtin"
+    },
+    {
+      "include": "#number"
+    },
+    {
+      "include": "#operator"
+    },
+    {
+      "include": "#function-call"
+    }
+  ],
+  "repository": {
+    "comment": {
+      "name": "comment.line.number-sign.rego",
+      "match": "#.*$"
+    },
+    "string": {
+      "name": "string.quoted.double.rego",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.rego",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "keyword": {
+      "name": "keyword.control.rego",
+      "match": "\\b(package|import|default|not|with|as|some|every|in|if|contains|else)\\b"
+    },
+    "constant": {
+      "name": "constant.language.rego",
+      "match": "\\b(true|false|null|input|data)\\b"
+    },
+    "builtin": {
+      "name": "support.function.rego",
+      "match": "\\b(abs|all|any|array\\.concat|array\\.reverse|array\\.slice|ceil|concat|contains|count|endswith|floor|format_int|indexof|intersection|is_array|is_boolean|is_null|is_number|is_object|is_set|is_string|lower|max|min|object\\.filter|object\\.get|object\\.keys|object\\.remove|object\\.subset|object\\.union|product|replace|round|sort|split|startswith|strings\\.reverse|substring|sum|to_number|trim|trim_left|trim_prefix|trim_right|trim_space|trim_suffix|type_name|union|upper)\\b(?=\\s*\\()"
+    },
+    "number": {
+      "name": "constant.numeric.rego",
+      "match": "\\b-?\\d+(\\.\\d+)?([eE][-+]?\\d+)?\\b"
+    },
+    "operator": {
+      "name": "keyword.operator.rego",
+      "match": ":=|==|!=|<=|>=|<|>|=|\\+|-|\\*|\\||&"
+    },
+    "function-call": {
+      "name": "entity.name.function.rego",
+      "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*(?=\\s*\\()"
+    }
+  }
+}

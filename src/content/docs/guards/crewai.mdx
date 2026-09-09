@@ -113,6 +113,8 @@ an npm CrewAI port with these helpers.
 | --- | --- | --- |
 | `guard` | No | Blocking client. Optional if you called `register_arcjet()`. The hook path needs `launch_arcjet_sync`. |
 | `action` | No | Guard label and capture name. Use `resource.verb` in the past tense, such as `email.sent`. A string, or a function of the hook context. Defaults to `{sanitized_tool_name}.invoked`. |
+| `actor` | No | Who is acting, or a function of `(arguments, ctx)`. |
+| `inputs` | No | Typed policy inputs, or a function of `(arguments, ctx)`. |
 | `rules` | No | Bound SDK rule inputs, or a function of `(arguments, ctx)`. `arguments` is the tool's own mapping from `ctx.tool_input`, unfiltered. Omit to submit none. |
 | `policies` | No | Per-tool `ToolPolicy` overrides, keyed by tool name. Keys are sanitized. |
 | `tools` | No | Tool names to gate. Names are sanitized. Omit to gate every tool. |
@@ -127,8 +129,10 @@ needs a blocking client. Direct `guard_sync()` takes `label` (not
 `ToolPolicy.rules` is a bound sequence, not a function. Match it with
 `sanitize_tool_name` the same way CrewAI matches `tools=`.
 
-`guard_tool` takes `action` (required), `rules`, and `on_guard_error`.
-Use it only for a standalone `BaseTool` you invoke yourself.
+`guard_tool` takes `action` (required), `actor`, `inputs`, `rules`, and
+`on_guard_error`. Its `actor` and `inputs` callables receive the call's
+arguments alone, not `(arguments, ctx)`. Use it only for a standalone
+`BaseTool` you invoke yourself.
 
 `unregister_arcjet_hooks(handle)` removes the hook. Call it in tests,
 or call `handle.unregister()`. Registration is once per process.
@@ -317,6 +321,51 @@ For more information about fail-open versus fail-closed behavior, see
 - Don't also wrap these tools with `@arcjet/guard/vercel-ai/v7`.
 - Don't import `arcjet.guard.crewai` unless you installed official
   CrewAI yourself.
+
+## Send values to a policy
+
+Both surfaces take `actor` and `inputs`, each as a value or a callable. On
+`guard_tool` the callable receives the call's arguments; on
+`register_arcjet_hooks` it receives `(arguments, ctx)`. Build every input
+explicitly with `server_input.*` or `local_input.*`; plain values are rejected,
+and the adapter never discovers arguments for you.
+
+```py
+guarded_send_email = guard_tool(
+    guard=arcjet,
+    tool=send_email_tool,
+    action="email.sent",
+    actor=current_user.id,
+    inputs=lambda arguments: {
+        "recipient": server_input.string(arguments["recipient"]),
+        "team_domains": server_input.string_list(current_user.team_domains),
+    },
+)
+```
+
+The policy behind that call declares `recipient` as a `SERVER` string and
+`team_domains` as a `SERVER` string list, and denies a recipient outside the
+team:
+
+```rego
+package arcjet.guard
+
+import rego.v1
+
+deny contains "external-recipient" if {
+	parts := split(input.values.recipient, "@")
+	count(parts) == 2
+	not lower(parts[1]) in input.values.team_domains
+}
+```
+
+Map only what a policy needs. Take the actor and any allow list from
+authenticated application state, not from the model's arguments.
+
+For the names, kinds, and exposures a policy declares, see
+<Link.Page href="/guards/remote-policies">Policy contract</Link.Page>. For more
+worked policies, see
+<Link.Page href="/guards/policy-examples">Policy examples</Link.Page>.
 
 ## Common patterns
 

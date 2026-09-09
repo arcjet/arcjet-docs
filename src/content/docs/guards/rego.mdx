@@ -1,0 +1,334 @@
+---
+title: "Write policies in Rego"
+description: "Write Arcjet agent guard policy conditions in Rego over declared inputs and Arcjet detector results."
+---
+
+import { Aside } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+An agent guard policy expresses its conditions in
+[Rego](https://www.openpolicyagent.org/docs/policy-language), the Open Policy
+Agent language. Arcjet compiles the policy to an Open Policy Agent
+intermediate representation when you publish it, then interprets that compiled
+plan at the edge on every guard call. Nothing compiles Rego at request time,
+and the interpreter never sees your source.
+
+You don't have to write Rego. The visual builder generates it for you, and so
+does a description written in plain English. For more information about those
+paths, see <Link.Page href="/guards/authoring">Author and publish policies</Link.Page>.
+Write Rego directly when you need boolean grouping, comparisons between two
+inputs, derived values, or logic over a collection.
+
+This page covers the shape of a policy expression. For the surrounding
+contract – labels, actors, typed inputs, and detectors – see
+<Link.Page href="/guards/remote-policies">Policy contract</Link.Page>. For
+worked policies you can adapt, see
+<Link.Page href="/guards/policy-examples">Policy examples</Link.Page>.
+
+## The input document
+
+Arcjet assembles one document after it validates the guard call, and your
+policy reads that document as `input`:
+
+```json
+{
+  "label": "email.sent",
+  "actor": "user_123",
+  "values": {
+    "recipient": "someone@example.com",
+    "team_domains": ["example.org"],
+    "attachments": 11
+  },
+  "signals": {
+    "prompt_injection": { "subject_check": { "detected": false } },
+    "sensitive_info": {
+      "body_scan": { "detected": true, "entities": ["CREDIT_CARD_NUMBER"] }
+    }
+  }
+}
+```
+
+| Field     | What it holds                                                                                |
+| --------- | -------------------------------------------------------------------------------------------- |
+| `label`   | The guard label that selected the policy. Available for tests and diagnostics.               |
+| `actor`   | The opaque principal the application asserted, when the policy requires one.                 |
+| `values`  | Declared, validated `SERVER` inputs, keyed by input name.                                    |
+| `signals` | Results Arcjet produced or verified, keyed by **detector ID**, not by the name of the input. |
+
+Four things are deliberately absent, and each absence is load-bearing:
+
+- **`LOCAL` input values.** A `LOCAL` value stays in SDK memory. Arcjet
+  receives a digest and a verified detector result, so there is nothing for an
+  expression to read.
+- **Guard metadata.** Metadata is untrusted correlation data. A policy that
+  read it would be deciding on values nobody declared.
+- **Raw request data.** A guard call has no HTTP request. Everything a policy
+  reads is a value the application chose to map.
+- **Anything outside the call.** There is no clock, no random source, no
+  network, and no environment. The same document produces the same decision
+  every time.
+
+Arcjet selects the policy by label before it evaluates anything, so a policy
+can't name a different label to select another one.
+
+## The shape of a rule
+
+A policy declares its rule IDs. The expression adds the ID of each rule that
+denies to a set called `deny`:
+
+```rego
+package arcjet.guard
+
+import rego.v1
+
+deny contains "external-recipient" if {
+	parts := split(input.values.recipient, "@")
+	count(parts) == 2
+	not lower(parts[1]) in input.values.team_domains
+}
+
+deny contains "bulk-attachments" if {
+	input.values.attachments > 10
+}
+```
+
+Three requirements hold for every policy:
+
+- The package is `arcjet.guard`. Another package name is rejected with
+  `AJR1003`.
+- `deny` is a partial set rule, written `deny contains "<rule-id>" if { … }`.
+  Writing it as a complete rule (`deny := …`) is rejected with `AJR1010`.
+- Every string added to `deny` is a literal drawn from the rule IDs the policy
+  declares. The compiler proves this statically, so an undeclared or computed
+  ID fails publication with `AJR1011` rather than failing closed later at
+  request time.
+
+`import rego.v1` appears in every Arcjet example. Under Rego v1 the `if`,
+`contains`, and `in` keywords are available without it, so the import is a
+convention rather than a requirement, and the compiler accepts a policy either
+way.
+
+A rule body is implicitly a conjunction: every statement in it must hold for
+the rule to fire. To express **or**, write the same rule ID twice:
+
+```rego
+deny contains "untrusted-url" if {
+	not startswith(input.values.url, "https://")
+}
+
+deny contains "untrusted-url" if {
+	contains(input.values.url, "..")
+}
+```
+
+A rule that doesn't appear in `deny` allowed the action. Whether a denial
+blocks the call depends on the rule's mode: a `LIVE` rule contributes to the
+decision, and a `DRY_RUN` rule is evaluated and recorded without blocking.
+
+## Read a detector result
+
+Detectors are native Arcjet operations. A policy can't call a model or make a
+network request; it reads a bounded result Arcjet already produced, under
+`input.signals`, keyed by the detector ID you declared:
+
+```rego
+deny contains "injection-on-destructive-tool" if {
+	input.signals.prompt_injection.incoming_message.detected
+	input.values.destructive
+}
+```
+
+Reading a detector result as a fact rather than a verdict is the point. A
+flagged prompt on a read-only tool doesn't have to block; the same finding on
+a tool that writes to production can. A sensitive-information result also
+carries the entity types that matched:
+
+```rego
+deny contains "card-number-to-external" if {
+	"CREDIT_CARD_NUMBER" in input.signals.sensitive_info.body_scan.entities
+	not lower(split(input.values.recipient, "@")[1]) in input.values.team_domains
+}
+```
+
+<Aside type="note">
+  A detector can also decide a rule on its own, without the expression. That's
+  a `DETECTOR` rule, and it's what keeps local sensitive-information detection
+  private: Arcjet never sees the value the detector read. Declare an
+  `EXPRESSION` rule only when the finding has to be combined with something
+  else. For more information, see <Link.Page href="/guards/remote-policies#rules">Rules</Link.Page>.
+</Aside>
+
+When a detector produces no verdict, every rule that depends on it reports
+`AJP1004` and is not evaluated. An absent signal would read as "not detected",
+which would make a rule written to deny on detection allow instead.
+
+## What the profile allows
+
+Arcjet compiles Rego under a versioned profile that's an allowlist, enforced
+through Open Policy Agent's own capabilities, so a built-in outside it fails
+when you validate the policy rather than in a scan that could drift. The
+profile version is recorded in every compiled artifact, and the edge refuses an
+artifact whose profile it doesn't implement.
+
+These families are available:
+
+| Family      | Built-ins                                                                          |
+| ----------- | ---------------------------------------------------------------------------------- |
+| Comparison  | `==`, `!=`, `<`, `<=`, `>`, `>=`                                                   |
+| Membership  | `in`, `some`, `every`                                                              |
+| Numbers     | `+`, `-`, `*`, `abs`, `round`, `ceil`, `floor`, `min`, `max`, `sum`, `product`     |
+| Strings     | `concat`, `contains`, `startswith`, `endswith`, `indexof`, `substring`, `lower`, `upper`, `trim`, `trim_left`, `trim_right`, `trim_prefix`, `trim_suffix`, `trim_space`, `split`, `replace`, `strings.reverse` |
+| Collections | `count`, `sort`, `all`, `any`, `array.concat`, `array.slice`, `array.reverse`, `intersection`, `union`, `set_diff`, and comprehensions |
+| Objects     | `object.get`, `object.keys`, `object.remove`, `object.union`, `object.filter`, `object.subset` |
+| Types       | `is_number`, `is_string`, `is_boolean`, `is_array`, `is_set`, `is_object`, `is_null`, `type_name` |
+| Conversion  | `to_number`, `format_int`                                                          |
+
+Anything not in that table is rejected. That includes `sprintf`, the `json`
+family, `crypto` and `io.jwt`, `print` and `trace`, and the `with` keyword,
+which rebinds `input` for a nested block. Arcjet builds the input document
+itself, so there is nothing for `with` to usefully replace.
+
+Three exclusions shape how you write conditions, so they're worth knowing in
+detail.
+
+### No network, clock, or randomness
+
+`http.send`, the `time` built-ins, `rand`, environment access, and host
+mutation are all rejected. A policy that could reach outside the request would
+be non-deterministic, unauditable, and on the latency path. Everything a policy
+decides on is a value the application sent or a result Arcjet produced.
+
+### No regular expressions
+
+`regex.match` and the rest of the `regex` family are rejected. Go's RE2 engine
+and JavaScript's backtracking engine agree on neither syntax nor complexity,
+and running a backtracking engine over author-supplied patterns is a
+denial-of-service risk. Use `startswith`, `endswith`, `contains`, `indexof`,
+and `split` instead. Most patterns a policy needs are prefix, suffix, or
+membership checks.
+
+### No division or remainder
+
+`div` and `rem` are rejected. Arcjet reproduces Open Policy Agent's arithmetic
+exactly, which is exact over integers and a 64-bit binary float otherwise, so
+`0.3 - 0.1` is `0.20000000000000000002` on both sides. `1/3` has no finite
+form, and reproducing its rounding is a cost that comparing counts, lengths,
+and budgets doesn't justify.
+
+Express a proportion by multiplying instead of dividing. To deny when more than
+half the recipients are external:
+
+```rego
+deny contains "mostly-external" if {
+	count(externals) * 2 > count(input.values.recipients)
+}
+```
+
+## Handle values that might be absent
+
+An expression over an input the application didn't send is undefined, and a
+rule with an undefined statement in its body doesn't fire. That is ordinary
+Rego control flow, not an error, and it means an optional input can silently
+skip a condition.
+
+Mark an input as required when a rule depends on it. Where an input is
+genuinely optional, test for it:
+
+```rego
+deny contains "unreviewed-change" if {
+	not input.values.reviewed_by
+}
+```
+
+## Avoid the email address trap
+
+`split(address, "@")[1]` is the second segment of the address, which is the
+domain only when the address contains exactly one `@`. For
+`attacker@evil.example@example.org` it returns `evil.example`, and a
+membership check against your own domains passes. Count the segments first:
+
+```rego
+parts := split(input.values.recipient, "@")
+
+deny contains "malformed-recipient" if {
+	count(parts) != 2
+}
+
+deny contains "external-recipient" if {
+	count(parts) == 2
+	not lower(parts[1]) in input.values.team_domains
+}
+```
+
+Compare the domain exactly, and lowercase both sides. An exact comparison
+denies `dev@mail.example.org` for a policy that allows `example.org`, which is
+what you want: a suffix match lets a lookalike subdomain through. The visual
+builder's email-domain comparisons apply both of these rules for you.
+
+## Errors fail closed
+
+Rego has three outcomes for an expression, not two: a value, **undefined**
+(the rule doesn't fire), and a **built-in error**, where a function receives
+arguments it refuses to operate on. An empty search string in `indexof`, a
+negative offset in `substring`, and an operand of the wrong type all produce
+one.
+
+Arcjet aborts evaluation on a built-in error and reports `AJP1007` on the rule.
+A live rule that could not be evaluated fails closed. Returning undefined
+instead would let the rule quietly not fire: `indexof(body, needle) == 0` is a
+"starts with" check that would be true for an empty needle, firing a rule that
+was never evaluated.
+
+For the full list of codes a rule can carry, see
+<Link.Page href="/guards/errors">Policy error codes</Link.Page>.
+
+## Limits
+
+Arcjet bounds a policy at compile time and at evaluation time. The compile-time
+bounds apply when you validate or publish:
+
+| Limit                     | Value   |
+| ------------------------- | ------- |
+| Rego source               | 128 KiB |
+| Compiled plan             | 512 KiB |
+| Compiled statements       | 20,000  |
+| Nesting depth             | 16      |
+| Rego rule definitions     | 256     |
+| Declared rules per policy | 50      |
+| Inputs per policy         | 64      |
+| Detectors per policy      | 16      |
+| Stored tests              | 100     |
+
+A declared rule can have several Rego definitions, which is how you express
+**or**, so the two rule limits count different things.
+
+Evaluation is metered per guard call, not per worker, so one policy can't
+consume another tenant's budget. Each evaluation is bounded to 100,000
+interpreter steps, 100,000 collection elements, and a block depth of 64.
+Exceeding a limit is incomplete evaluation, and a live rule fails closed.
+
+## Test before you publish
+
+Store tests with the policy. Each one supplies a sample input document and the
+rule IDs it expects to fire. Arcjet runs them through the official Open Policy
+Agent evaluator when you validate, and again at publication, where it also
+checks that the edge interpreter reproduces the same answers.
+
+A policy with a live expression rule and no tests can't be published
+(`AJV2015`). A policy whose every rule is in dry run can be saved without
+tests, because nothing it denies is acted on.
+
+Because `signals` is part of the sample input, you can test detector
+combination logic without a model call. Detector-decided rules can't be
+asserted in a test: a stored input can't stand in for a detector, and the
+compiler filters them out of the comparison.
+
+For how to write and run tests, see
+<Link.Page href="/guards/authoring#test-a-policy">Author and publish policies</Link.Page>.
+
+## Related
+
+- <Link.Page href="/guards/policy-examples">Policy examples</Link.Page> – worked policies for common agent actions
+- <Link.Page href="/guards/remote-policies">Policy contract</Link.Page> – labels, actors, typed inputs, and detectors
+- <Link.Page href="/guards/authoring">Author and publish policies</Link.Page> – the builder, plain English, tests, and publication
+- <Link.Page href="/guards/errors">Policy error codes</Link.Page> – what a rule reports when it can't be evaluated

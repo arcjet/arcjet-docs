@@ -73,6 +73,33 @@ event is sent with source `"sdk"`.
 
 Do not put secrets or PII in `metadata`. It is stored as untrusted data.
 
+## Automatic captures from a framework wrapper
+
+A framework integration captures an event for you around every guarded call, so
+the record covers the action whatever happened to it. Each one carries an
+`outcome` in its metadata:
+
+| `outcome`     | What happened                                                                    |
+| ------------- | ---------------------------------------------------------------------------------- |
+| `success`     | Policy judged the action and allowed it, and the action ran.                     |
+| `denied`      | Policy denied the action, and the wrapped tool didn't run.                       |
+| `unavailable` | The check couldn't be completed, and the fail-closed default stopped the action. |
+| `degraded`    | The check couldn't be completed, and `onGuardError: "allow"` let the action run. |
+| `error`       | The action ran and then threw. This takes precedence over the other outcomes.    |
+
+`success` is reserved for an action policy judged in full, which is what makes
+`degraded` worth reading. Without it, an action that ran during an outage
+because you configured the wrapper to fail open would be indistinguishable from
+one Arcjet approved – and those are the calls a post-incident review most needs
+to find.
+
+A `degraded` event carries no decision ID, because there's no decision to point
+at: either the guard call threw, or the decision it returned failed open and
+judged nothing.
+
+Filter on `outcome` to answer two questions an audit asks: which actions ran
+without a decision behind them, and which denials the agent hit.
+
 ## Delivery
 
 Capture is best-effort and never blocks or throws into application code:
@@ -185,6 +212,8 @@ startup and import the free `capture()` function. See <Link.Page href="/testing#
 ## Related
 
 - <Link.Page href="/guards">Agent guards</Link.Page>
+- <Link.Page href="/observe">Observe agent activity</Link.Page>
+- <Link.Page href="/audit">Audit and evidence</Link.Page>
 - <Link.Page href="/guards/reference">Guard testing and reference</Link.Page>
 - <Link.Page href="/testing">Testing Arcjet</Link.Page>
 - <Link.Page href="/reference/python#record-what-happened-with-capture">Python SDK capture</Link.Page>

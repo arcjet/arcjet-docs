@@ -195,6 +195,32 @@ Remote policy data is separate from SDK-submitted rule results:
   execution, and the typed result.
 - `results` remains the positional list for rules submitted by the SDK call.
 
+### Policy rule result types
+
+The type of a policy rule result follows the kind of the rule that produced it:
+
+| Result type         | Produced by                                                            |
+| ------------------- | ------------------------------------------------------------------------ |
+| `POLICY_EXPRESSION` | A rule decided by the policy's Rego. Carries the rule's conclusion.    |
+| `PROMPT_INJECTION`  | A rule decided directly by a prompt injection detector.                |
+| `SENSITIVE_INFO`    | A rule decided directly by a sensitive information detector.           |
+| `ERROR`             | A rule that couldn't be evaluated. Carries a stable code and message.  |
+
+`POLICY_EXPRESSION` is the type most rules produce, and it carries the
+conclusion and nothing more. Which conditions fired is a property of the
+compiled program named by the policy revision and artifact digest, not
+something the result restates. To reconstruct it, see
+<Link.Page href="/audit#prove-which-policy-ran">Prove which policy ran</Link.Page>.
+
+An SDK released before this result type reads it as an unset variant. It
+enforces the decision correctly, because enforcement follows the decision's
+conclusion rather than per-rule detail, but it reports no detail for that rule
+until you upgrade.
+
+An `ERROR` result carries an `AJP` code naming why the rule couldn't be
+evaluated. For the codes and how to handle each one, see
+<Link.Page href="/guards/errors">Policy error codes</Link.Page>.
+
 The Arcjet server combines enforced SDK and remote rules into the final
 `ALLOW` or `DENY`; the SDK does not recompute that aggregate conclusion.
 
@@ -222,6 +248,12 @@ evaluated and its status:
 The field may be absent when the server does not return remote-policy status.
 If your application expects a policy, inspect the decision's error results and
 verify the SDK and policy configuration.
+
+`policyEvaluation` / `policy_evaluation` also carries `artifactSha256` /
+`artifact_sha256`, a digest of the compiled program that evaluated. It's empty
+when no expression rule ran, which is the case for a policy decided entirely by
+detectors. Record it alongside the decision ID when you need to prove later
+which program produced an answer.
 
 ## Availability and fail behavior
 
@@ -376,7 +408,10 @@ For the HTTP Newman examples and a fuller walkthrough of the test client, see
 
 - <Link.Page href="/guards/capture">Capture events</Link.Page>
 - <Link.Page href="/content-moderation">Content moderation</Link.Page>
-- <Link.Page href="/guards/remote-policies">Remote policy inputs and supported rules</Link.Page>
+- <Link.Page href="/guards/remote-policies">Policy contract</Link.Page>
+- <Link.Page href="/guards/rego">Write policies in Rego</Link.Page>
+- <Link.Page href="/guards/errors">Policy error codes</Link.Page>
+- <Link.Page href="/audit">Audit and evidence</Link.Page>
 - <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
 - <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>
 - <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>

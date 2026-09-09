@@ -16,8 +16,9 @@ every tool attempt before the tool can create a side effect.
 
 Use an integration when you want to protect tools without writing decision
 handling around every function. The wrapper preserves the framework's normal
-tool definition and result flow, selects policy with a stable `action`, and maps
-the actor and relevant tool arguments into policy inputs.
+tool definition and result flow and selects a policy with a stable `action`.
+Some adapters also map the actor and the tool arguments a policy reads. For
+which ones, see [Which adapters send policy inputs](#which-adapters-send-policy-inputs).
 
 Use <Link.Page href="/get-started">`protect()`</Link.Page> on HTTP routes. Use
 the helpers on each framework page for agent tools and other non-HTTP actions.
@@ -66,6 +67,55 @@ with `@arcjet/guard/vercel-ai/v7`,
 `@arcjet/guard/claude-managed-agents/v0`. The wrapper throws or
 misses the real execute path. Don't use an npm CrewAI port with
 `arcjet.guard.crewai`.
+
+## Which adapters send policy inputs
+
+A policy reads the actor and the typed inputs the call carries. Adapters differ
+in whether they can map them, which decides what kind of policy each one can
+enforce:
+
+| Adapter                    | Language   | Maps `actor` | Maps `inputs` |
+| -------------------------- | ---------- | ------------ | ------------- |
+| Vercel AI SDK v7           | JavaScript | Yes          | Yes           |
+| LangChain                  | Python     | Yes          | Yes           |
+| CrewAI                     | Python     | Yes          | Yes           |
+| OpenAI Agents              | Python     | Yes          | Yes           |
+| Strands Agents             | Python     | Yes          | Yes           |
+| Claude Agent SDK           | Python     | Yes          | Yes           |
+| Claude Managed Agents      | Python     | Yes          | Yes           |
+| Every other JavaScript adapter | JavaScript | No       | No            |
+
+An adapter that maps neither still calls Guard on every tool attempt, so the
+label still selects a policy and SDK rules still evaluate. What it can't do is
+satisfy a policy that declares inputs: the call arrives without them, the policy
+reports `AJP1003`, and a live rule fails closed.
+
+Where the adapter can't map inputs, call `guard()` directly inside the tool
+body. It takes `label`, `actor`, and `inputs`, and returns the decision for you
+to act on:
+
+```ts
+const decision = await arcjet.guard({
+  label: "email.sent",
+  actor: currentUser.id,
+  inputs: {
+    recipient: policyInput.server.string(recipient),
+    team_domains: policyInput.server.stringList(currentUser.teamDomains),
+  },
+  rules: [],
+});
+
+if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+  throw new Error("Blocked by policy");
+}
+```
+
+Use the adapter for the tools that don't need policy inputs and a direct
+`guard()` call for the ones that do. For the full API, see
+<Link.Page href="/guards/reference#direct-guard-api">Direct Guard API</Link.Page>.
+
+For what a policy declares and how those names have to match, see
+<Link.Page href="/guards/remote-policies">Policy contract</Link.Page>.
 
 ## Vercel AI SDK
 

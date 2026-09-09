@@ -140,35 +140,57 @@ This guide shows you how to guard an agent tool in your
 
 ### 1. Configure the policy
 
-In the [Arcjet Console](https://console.arcjet.com), create an Agent Guard
-policy with the label `email.sent`. Add these inputs:
+In the [Arcjet Console](https://console.arcjet.com), go to **Policies** and
+create a policy with the Guard label `email.sent`. Declare these inputs:
 
-| Input                | Exposure | Type        |
-| -------------------- | -------- | ----------- |
-| `recipient`          | `SERVER` | String      |
-| `allowed_recipients` | `SERVER` | String list |
-| `body`               | `LOCAL`  | String      |
+| Input                | Type        | Exposure | Required |
+| -------------------- | ----------- | -------- | -------- |
+| `recipient`          | String      | `SERVER` | Yes      |
+| `allowed_recipients` | String list | `SERVER` | Yes      |
+| `body`               | String      | `LOCAL`  | Yes      |
 
-Then add:
+Declare one detector, `body_scan`, for sensitive information over `body`,
+denying the `BANK_ACCOUNT` and `ROUTING_NUMBER` entity types.
 
-1. A **string-list membership** rule requiring `recipient` to be a member of
-   `allowed_recipients`.
-2. A **sensitive information** rule on `body` that denies
-   `BANK_ACCOUNT` and `ROUTING_NUMBER`.
+Then declare two live rules:
 
-The examples configure the on-device Rampart backend, which detects these
-entity types locally, so the `body` never leaves your application. The first
-guarded call loads the Rampart model, so it takes noticeably longer than the
-ones after it.
+| Rule                 | Kind         | Decided by                                   |
+| -------------------- | ------------ | -------------------------------------------- |
+| `external-recipient` | `EXPRESSION` | The policy's Rego                            |
+| `sensitive-body`     | `DETECTOR`   | `body_scan`, directly                        |
 
-Publish the policy before running the example. Until you do, the label
-matches nothing and every guard call comes back `NOT_CONFIGURED`, which
-falls through to the SDK rule decision rather than denying. See
-<Link.Page href="/guards/reference">Testing and reference</Link.Page> for
-the other policy statuses.
+`external-recipient` needs one condition. In the visual builder, add a
+condition requiring `recipient` to be a member of `allowed_recipients`. The
+builder generates this Rego:
 
-Framework wrappers take `action` for the same slug you configured as the
-policy label. Direct `guard()` calls still use the field name `label`.
+```rego
+package arcjet.guard
+
+import rego.v1
+
+deny contains "external-recipient" if {
+	not input.values.recipient in input.values.allowed_recipients
+}
+```
+
+`sensitive-body` needs no expression. A detector rule is decided by its
+detector, which is what keeps the email body private: the SDK runs the
+detection and Arcjet receives the verdict, never the text. The examples
+configure the on-device Rampart backend, which detects these entity types
+locally. The first guarded call loads the Rampart model, so it takes noticeably
+longer than the ones after it.
+
+An expression rule that's live needs at least one stored test before it can be
+published. Add one test asserting that a recipient on the allow list fires no
+rules, and one asserting that an address outside it fires `external-recipient`.
+
+Publish the policy before you run the example. Until you do, the label matches
+nothing and every guard call comes back `NOT_CONFIGURED`, which falls through
+to the SDK rule decision rather than denying. For the other statuses, see
+<Link.Page href="/guards/reference">Testing and reference</Link.Page>.
+
+Framework wrappers take `action` for the same slug you configured as the policy
+label. Direct `guard()` calls use the field name `label`.
 
 ### 2. Install Arcjet
 
@@ -321,9 +343,19 @@ model.
     description="Helpers, denial envelopes, and fail-closed defaults for every adapter."
   />
   <Link.Card
-    title="Remote policies"
+    title="Policy contract"
     href="/guards/remote-policies"
-    description="Labels, actors, typed inputs, and supported policy rules."
+    description="Labels, actors, typed inputs, detectors, and rules."
+  />
+  <Link.Card
+    title="Write policies in Rego"
+    href="/guards/rego"
+    description="The input document, the supported language subset, and what it excludes."
+  />
+  <Link.Card
+    title="Policy examples"
+    href="/guards/policy-examples"
+    description="Worked policies for email, refunds, web fetch, databases, files, and budgets."
   />
   <Link.Card
     title="Capture events"

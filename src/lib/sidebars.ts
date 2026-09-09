@@ -1,15 +1,350 @@
 export const main = [
   {
-    label: "Get started",
-    link: "/get-started",
+    label: "Agent guards",
+    collapsed: false,
+    items: [
+      {
+        label: "Overview",
+        link: "/guards",
+      },
+      {
+        label: "Quick start",
+        link: "/guards/quick-start",
+      },
+      {
+        label: "Framework integrations",
+        link: "/guards/framework-integrations",
+      },
+      {
+        label: "Capture events",
+        link: "/guards/capture",
+      },
+      {
+        label: "Testing and reference",
+        link: "/guards/reference",
+      },
+    ],
   },
   {
-    label: "Agent get started",
-    link: "/agent-get-started",
+    label: "Policies",
+    collapsed: false,
+    items: [
+      {
+        label: "Policy contract",
+        link: "/guards/remote-policies",
+      },
+      {
+        label: "Write policies in Rego",
+        link: "/guards/rego",
+      },
+      {
+        label: "Policy examples",
+        link: "/guards/policy-examples",
+      },
+      {
+        label: "Author and publish",
+        link: "/guards/authoring",
+      },
+      {
+        label: "Error codes",
+        link: "/guards/errors",
+      },
+    ],
+  },
+  {
+    label: "Observe and audit",
+    collapsed: false,
+    items: [
+      {
+        label: "Observe agent activity",
+        link: "/observe",
+      },
+      {
+        label: "Audit and evidence",
+        link: "/audit",
+      },
+    ],
+  },
+  {
+    label: "Building blocks",
+    collapsed: false,
+    items: [
+      {
+        label: "Prompt injection",
+        collapsed: true,
+        items: [
+          {
+            attrs: { class: "feature prompt-injection-detection" },
+            label: "Intro",
+            link: "/prompt-injection",
+          },
+          {
+            attrs: { class: "feature prompt-injection-detection" },
+            label: "Quick start",
+            link: "/prompt-injection/quick-start",
+          },
+        ],
+      },
+      {
+        label: "Content moderation",
+        collapsed: true,
+        items: [
+          {
+            attrs: { class: "feature content-moderation" },
+            label: "Intro",
+            link: "/content-moderation",
+          },
+          {
+            attrs: { class: "feature content-moderation" },
+            label: "Quick start",
+            link: "/content-moderation/quick-start",
+          },
+          {
+            attrs: { class: "feature content-moderation" },
+            label: "Policy",
+            link: "/content-moderation/policy",
+          },
+        ],
+      },
+      {
+        label: "Sensitive information",
+        collapsed: true,
+        items: [
+          {
+            attrs: { class: "feature sensitive-information" },
+            label: "Intro",
+            link: "/sensitive-info",
+          },
+          {
+            label: "Quick start",
+            link: "/sensitive-info/quick-start",
+            attrs: { class: "feature sensitive-information" },
+          },
+          {
+            label: "Reference",
+            link: "/sensitive-info/reference",
+          },
+        ],
+      },
+      {
+        label: "Rate limiting",
+        collapsed: true,
+        items: [
+          {
+            attrs: { class: "feature rate-limiting" },
+            label: "Intro",
+            link: "/rate-limiting",
+          },
+          {
+            label: "Quick start",
+            link: "/rate-limiting/quick-start",
+            attrs: { class: "feature rate-limiting" },
+          },
+          {
+            label: "Algorithms",
+            link: "/rate-limiting/algorithms",
+          },
+          {
+            label: "Configuration",
+            link: "/rate-limiting/configuration",
+          },
+          {
+            label: "Reference",
+            link: "/rate-limiting/reference",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    label: "Coding agent tools",
+    collapsed: false,
+    items: [
+      {
+        label: "Agent get started",
+        link: "/agent-get-started",
+      },
+      {
+        label: "Arcjet plugin",
+        link: "/arcjet-plugin",
+      },
+      {
+        label: "Arcjet skills",
+        link: "https://github.com/arcjet/skills",
+        attrs: { target: "_blank", class: "external-link" },
+      },
+      {
+        label: "MCP server",
+        link: "/mcp-server",
+      },
+      {
+        label: "CLI",
+        link: "/cli",
+      },
+      {
+        label: "llms.txt",
+        link: "/llms.txt",
+        attrs: { target: "_blank", class: "external-link" },
+      },
+      {
+        label: "llms-full.txt",
+        link: "/llms-full.txt",
+        attrs: { target: "_blank", class: "external-link" },
+      },
+    ],
+  },
+  {
+    label: "AI runtime protection",
+    collapsed: false,
+    items: [
+      {
+        label: "Overview",
+        link: "/ai-protection",
+      },
+      {
+        label: "Abuse protection",
+        link: "/ai-protection/abuse-protection",
+      },
+      {
+        label: "Budget control",
+        link: "/ai-protection/budget-control",
+      },
+      {
+        label: "Data loss prevention",
+        link: "/ai-protection/data-loss-prevention",
+      },
+      {
+        label: "Prompt injection detection",
+        link: "/ai-protection/prompt-injection",
+      },
+    ],
+  },
+  {
+    label: "Web and API protection",
+    collapsed: false,
+    items: [
+      {
+        label: "Get started",
+        link: "/get-started",
+      },
+      {
+        label: "Bot protection",
+        collapsed: true,
+        items: [
+          {
+            attrs: { class: "feature bot-protection" },
+            label: "Intro",
+            link: "/bot-protection",
+          },
+          {
+            label: "Quick start",
+            link: "/bot-protection/quick-start",
+            attrs: { class: "feature bot-protection" },
+          },
+          {
+            label: "Identifying bots",
+            link: "/bot-protection/identifying-bots",
+          },
+          {
+            label: "Advanced signals",
+            link: "/bot-protection/advanced-signals",
+          },
+          {
+            label: "Reference",
+            link: "/bot-protection/reference",
+          },
+        ],
+      },
+      {
+        label: "Shield WAF",
+        collapsed: true,
+        items: [
+          {
+            attrs: { class: "feature shield-waf" },
+            label: "Intro",
+            link: "/shield",
+          },
+          {
+            label: "Quick start",
+            link: "/shield/quick-start",
+            attrs: { class: "feature shield-waf" },
+          },
+          {
+            label: "Reference",
+            link: "/shield/reference",
+          },
+        ],
+      },
+      {
+        label: "Email validation",
+        collapsed: true,
+        items: [
+          {
+            attrs: { class: "feature email-validation" },
+            label: "Intro",
+            link: "/email-validation",
+          },
+          {
+            label: "Quick start",
+            link: "/email-validation/quick-start",
+            attrs: { class: "feature email-validation" },
+          },
+          {
+            label: "Reference",
+            link: "/email-validation/reference",
+          },
+        ],
+      },
+      {
+        label: "Signup form protection",
+        collapsed: true,
+        items: [
+          {
+            attrs: { class: "feature signup-form-protection" },
+            label: "Intro",
+            link: "/signup-protection",
+          },
+          {
+            label: "Quick start",
+            link: "/signup-protection/quick-start",
+            attrs: { class: "feature signup-form-protection" },
+          },
+          {
+            label: "Reference",
+            link: "/signup-protection/reference",
+          },
+        ],
+      },
+      {
+        collapsed: true,
+        items: [
+          {
+            attrs: { class: "feature filters" },
+            label: "Intro",
+            link: "/filters",
+          },
+          {
+            attrs: { class: "feature filters" },
+            label: "Quick start",
+            link: "/filters/quick-start",
+          },
+          {
+            attrs: { class: "feature filters" },
+            label: "Reference",
+            link: "/filters/reference",
+          },
+        ],
+        label: "Filters",
+      },
+      {
+        label: "Remote rules",
+        link: "/remote-rules",
+      },
+    ],
   },
   {
     label: "Examples",
-    collapsed: false,
+    collapsed: true,
     items: [
       {
         label: "Apps",
@@ -168,295 +503,6 @@ export const main = [
     ],
   },
   {
-    label: "Agent guards",
-    collapsed: false,
-    items: [
-      {
-        label: "Overview",
-        link: "/guards",
-      },
-      {
-        label: "Quick start",
-        link: "/guards/quick-start",
-      },
-      {
-        label: "Framework integrations",
-        link: "/guards/framework-integrations",
-      },
-      {
-        label: "Remote policies",
-        link: "/guards/remote-policies",
-      },
-      {
-        label: "Capture",
-        link: "/guards/capture",
-      },
-      {
-        label: "Testing and reference",
-        link: "/guards/reference",
-      },
-    ],
-  },
-  {
-    label: "Building blocks",
-    collapsed: false,
-    items: [
-      {
-        label: "Prompt injection",
-        collapsed: true,
-        items: [
-          {
-            attrs: { class: "feature prompt-injection-detection" },
-            label: "Intro",
-            link: "/prompt-injection",
-          },
-          {
-            attrs: { class: "feature prompt-injection-detection" },
-            label: "Quick start",
-            link: "/prompt-injection/quick-start",
-          },
-        ],
-      },
-      {
-        label: "Content moderation",
-        collapsed: true,
-        items: [
-          {
-            attrs: { class: "feature content-moderation" },
-            label: "Intro",
-            link: "/content-moderation",
-          },
-          {
-            attrs: { class: "feature content-moderation" },
-            label: "Quick start",
-            link: "/content-moderation/quick-start",
-          },
-          {
-            attrs: { class: "feature content-moderation" },
-            label: "Policy",
-            link: "/content-moderation/policy",
-          },
-        ],
-      },
-      {
-        label: "Sensitive information",
-        collapsed: true,
-        items: [
-          {
-            attrs: { class: "feature sensitive-information" },
-            label: "Intro",
-            link: "/sensitive-info",
-          },
-          {
-            label: "Quick start",
-            link: "/sensitive-info/quick-start",
-            attrs: { class: "feature sensitive-information" },
-          },
-          {
-            label: "Reference",
-            link: "/sensitive-info/reference",
-          },
-        ],
-      },
-      {
-        label: "Bot protection",
-        collapsed: true,
-        items: [
-          {
-            attrs: { class: "feature bot-protection" },
-            label: "Intro",
-            link: "/bot-protection",
-          },
-          {
-            label: "Quick start",
-            link: "/bot-protection/quick-start",
-            attrs: { class: "feature bot-protection" },
-          },
-          {
-            label: "Identifying bots",
-            link: "/bot-protection/identifying-bots",
-          },
-          {
-            label: "Advanced signals",
-            link: "/bot-protection/advanced-signals",
-          },
-          {
-            label: "Reference",
-            link: "/bot-protection/reference",
-          },
-        ],
-      },
-      {
-        label: "Rate limiting",
-        collapsed: true,
-        items: [
-          {
-            attrs: { class: "feature rate-limiting" },
-            label: "Intro",
-            link: "/rate-limiting",
-          },
-          {
-            label: "Quick start",
-            link: "/rate-limiting/quick-start",
-            attrs: { class: "feature rate-limiting" },
-          },
-          {
-            label: "Algorithms",
-            link: "/rate-limiting/algorithms",
-          },
-          {
-            label: "Configuration",
-            link: "/rate-limiting/configuration",
-          },
-          {
-            label: "Reference",
-            link: "/rate-limiting/reference",
-          },
-        ],
-      },
-      {
-        label: "Shield WAF",
-        collapsed: true,
-        items: [
-          {
-            attrs: { class: "feature shield-waf" },
-            label: "Intro",
-            link: "/shield",
-          },
-          {
-            label: "Quick start",
-            link: "/shield/quick-start",
-            attrs: { class: "feature shield-waf" },
-          },
-          {
-            label: "Reference",
-            link: "/shield/reference",
-          },
-        ],
-      },
-      {
-        label: "Email validation",
-        collapsed: true,
-        items: [
-          {
-            attrs: { class: "feature email-validation" },
-            label: "Intro",
-            link: "/email-validation",
-          },
-          {
-            label: "Quick start",
-            link: "/email-validation/quick-start",
-            attrs: { class: "feature email-validation" },
-          },
-          {
-            label: "Reference",
-            link: "/email-validation/reference",
-          },
-        ],
-      },
-      {
-        label: "Signup form protection",
-        collapsed: true,
-        items: [
-          {
-            attrs: { class: "feature signup-form-protection" },
-            label: "Intro",
-            link: "/signup-protection",
-          },
-          {
-            label: "Quick start",
-            link: "/signup-protection/quick-start",
-            attrs: { class: "feature signup-form-protection" },
-          },
-          {
-            label: "Reference",
-            link: "/signup-protection/reference",
-          },
-        ],
-      },
-      {
-        collapsed: true,
-        items: [
-          {
-            attrs: { class: "feature filters" },
-            label: "Intro",
-            link: "/filters",
-          },
-          {
-            attrs: { class: "feature filters" },
-            label: "Quick start",
-            link: "/filters/quick-start",
-          },
-          {
-            attrs: { class: "feature filters" },
-            label: "Reference",
-            link: "/filters/reference",
-          },
-        ],
-        label: "Filters",
-      },
-    ],
-  },
-  {
-    label: "Coding agent tools",
-    collapsed: false,
-    items: [
-      {
-        label: "Arcjet plugin",
-        link: "/arcjet-plugin",
-      },
-      {
-        label: "Arcjet skills",
-        link: "https://github.com/arcjet/skills",
-        attrs: { target: "_blank", class: "external-link" },
-      },
-      {
-        label: "MCP server",
-        link: "/mcp-server",
-      },
-      {
-        label: "CLI",
-        link: "/cli",
-      },
-      {
-        label: "llms.txt",
-        link: "/llms.txt",
-        attrs: { target: "_blank", class: "external-link" },
-      },
-      {
-        label: "llms-full.txt",
-        link: "/llms-full.txt",
-        attrs: { target: "_blank", class: "external-link" },
-      },
-    ],
-  },
-  {
-    label: "AI runtime protection",
-    collapsed: false,
-    items: [
-      {
-        label: "Overview",
-        link: "/ai-protection",
-      },
-      {
-        label: "Abuse protection",
-        link: "/ai-protection/abuse-protection",
-      },
-      {
-        label: "Budget control",
-        link: "/ai-protection/budget-control",
-      },
-      {
-        label: "Data loss prevention",
-        link: "/ai-protection/data-loss-prevention",
-      },
-      {
-        label: "Prompt injection detection",
-        link: "/ai-protection/prompt-injection",
-      },
-    ],
-  },
-  {
     label: "Advanced",
     collapsed: false,
     items: [
@@ -544,10 +590,6 @@ export const main = [
       {
         label: "Best practices",
         link: "/best-practices",
-      },
-      {
-        label: "Remote rules",
-        link: "/remote-rules",
       },
       {
         label: "Environment variables",

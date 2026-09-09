@@ -1,26 +1,27 @@
 ---
 title: "Agent guards"
-description: "Protect AI agent tool calls and other non-HTTP actions with policy enforcement at the action boundary."
+description: "Enforce security policy on AI agent tool calls and other non-HTTP actions, before the side effect runs."
 ---
 
 import { CardGrid } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 
 AI agents turn model output into real actions: sending email, changing records,
-accessing sensitive data, and calling third-party services. Agent guards give
-security teams central control over those actions with remote policies that can
-change as risks and requirements evolve, without changing the agent's code.
+reading sensitive data, and calling third-party services. Those actions are
+triggered by a chat form, an inbox, a webhook, or a schedule, and they run
+across long workflows nobody watches.
 
-Developers add one enforcement point immediately before a tool or action and
-map trusted application context into it. Security teams define the policy for
-that action in Arcjet using its stable `label`. Every attempted action receives
-an `ALLOW` or `DENY` decision before the side effect runs, making enforcement
+Agent guards put a deterministic check immediately before each of those
+actions. Developers add one enforcement point and map trusted application
+context into it. Security teams define the policy for that action in Arcjet,
+selected by its stable `label`. Every attempted action receives an `ALLOW` or
+`DENY` decision before the side effect runs, which makes enforcement
 deterministic even when model behavior is not.
 
-Agent guards work inside tool handlers and other action boundaries without an
-HTTP `Request`. This is where Arcjet can use the actor, action inputs, and
-application context that model gateways and network controls cannot reliably
-infer.
+Agent guards work inside tool handlers, queue consumers, and workflow steps,
+with no HTTP request. That's where Arcjet can use the actor, the action inputs,
+and the application context that model gateways and network controls can't
+reliably infer.
 
 ```text
 ┌──────────┐  proposed call  ┌─────────────┐  ALLOW  ┌─────────────┐
@@ -34,21 +35,31 @@ infer.
                              └──────────────┘
 ```
 
+## Observe, enforce, audit
+
+Securing an agent at runtime is three problems, and Arcjet covers each one:
+
+| Question                          | What to use                                                                     |
+| --------------------------------- | --------------------------------------------------------------------------------- |
+| Which agents are running?         | <Link.Page href="/observe">Observe agent activity</Link.Page>, with no code change |
+| Should this action be allowed?    | Agent guards, at the action boundary                                            |
+| What happened, and why?           | <Link.Page href="/audit">Audit and evidence</Link.Page>, recorded per decision   |
+
 ## Where enforcement runs
 
 The enforcement point runs in your application, immediately before the side
-effect. The final decision can combine any of the following:
+effect. The decision can combine any of the following:
 
+- **A remote policy**, selected by the guard `label` and configured centrally.
+  Its conditions are written in Rego over the inputs you map, and can read
+  Arcjet's own detector findings as facts.
 - **SDK rules in code**, such as rate limiting or prompt injection detection.
-- **Agent guard remote policies**, selected by the guard `label` and configured
-  centrally by a security team.
-- **Local evaluation**, which covers sensitive information detection over an
-  explicitly marked local string.
-- **Server evaluation** over the `actor` and explicitly marked server inputs.
+- **Local evaluation**, which covers sensitive-information detection over a
+  string that never leaves your process.
 
-The application owns the final enforcement point. Direct `guard()` calls return
-a decision, while framework integrations place the same check around a tool
-automatically.
+The application owns the final enforcement point. A direct `guard()` call
+returns a decision for you to act on, and a framework integration places the
+same check around a tool automatically.
 
 ## Agent guards and request protection
 
@@ -59,7 +70,10 @@ Use the API that matches the enforcement boundary:
 | Entry point          | `guard()`; `capture()` records what happened afterward    | `protect()`                                                                        |
 | Protects             | Tool calls, agent actions, queue jobs, workflow steps     | HTTP routes and API requests                                                       |
 | Input                | `label`, optional `actor`, typed policy inputs, SDK rules | Request and request-specific rule inputs                                           |
-| Remote configuration | <Link.Page href="/guards/remote-policies">Agent guard remote policies</Link.Page>, selected by `label` | <Link.Page href="/remote-rules">Remote rules</Link.Page>, scoped to a site |
+| Remote configuration | <Link.Page href="/guards/remote-policies">Agent guard policies</Link.Page>, selected by `label` | <Link.Page href="/remote-rules">Remote rules</Link.Page>, scoped to a site |
+
+A single application can use both: request protection on its API routes, and
+agent guards inside its tool handlers, queue workers, and MCP tools.
 
 ## Next steps
 
@@ -67,7 +81,7 @@ Use the API that matches the enforcement boundary:
   <Link.Card
     title="Guard one tool call"
     href="/guards/quick-start"
-    description="Add an explicit enforcement point before one action."
+    description="Add an enforcement point before one action, end to end."
   />
   <Link.Card
     title="Framework integrations"
@@ -75,9 +89,24 @@ Use the API that matches the enforcement boundary:
     description="Wrap Vercel AI SDK, LangChain, CrewAI, LangGraph, Genkit, Google ADK, OpenAI Agents, Strands Agents, TanStack AI, Vercel Eve, Mastra, Claude Agent SDK, and Claude Managed Agents agents, in JavaScript and Python."
   />
   <Link.Card
-    title="Remote policies"
+    title="Policy contract"
     href="/guards/remote-policies"
-    description="Configure labels, actors, typed inputs, and supported policy rules."
+    description="Labels, actors, typed inputs, detectors, and rules."
+  />
+  <Link.Card
+    title="Write policies in Rego"
+    href="/guards/rego"
+    description="The input document, the supported language subset, and what it excludes."
+  />
+  <Link.Card
+    title="Policy examples"
+    href="/guards/policy-examples"
+    description="Worked policies for email, refunds, web fetch, databases, files, and budgets."
+  />
+  <Link.Card
+    title="Author and publish policies"
+    href="/guards/authoring"
+    description="Build visually, describe in English, test, and publish."
   />
   <Link.Card
     title="Capture events"
