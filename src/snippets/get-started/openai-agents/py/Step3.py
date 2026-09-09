@@ -1,17 +1,10 @@
 import os
 
 from agents import Agent, Runner, function_tool
-from arcjet.guard import DetectPromptInjection, TokenBucket, launch_arcjet
-from arcjet.guard.openai_agents import guard_tool, openai_agents_context
+from arcjet.guard import launch_arcjet, server_input
+from arcjet.guard.openai_agents import guard_tool
 
 arcjet = launch_arcjet(key=os.environ["ARCJET_KEY"])
-inbound = DetectPromptInjection()
-lookup_limit = TokenBucket(
-    refill_rate=5,
-    interval_seconds=10,
-    max_tokens=10,
-    bucket="lookups",
-)
 
 
 @function_tool
@@ -20,32 +13,29 @@ def lookup_order(order_id: str) -> dict:
     return {"order_id": order_id, "status": "shipped"}
 
 
-guarded_lookup = guard_tool(
-    guard=arcjet,
-    tool=lookup_order,
-    action="order.looked-up",
-    rules=lambda arguments: [
-        lookup_limit(key=arguments["order_id"], requested=5)
-    ],
-)
-
-agent = Agent(
-    name="support-agent",
-    instructions="Help the user look up orders.",
-    tools=[guarded_lookup],
-)
-
-
-async def run_agent(conversation_id: str, user_text: str):
-    app_context = {"session_id": conversation_id}
-    derived = openai_agents_context(app_context)
-
-    decision = await arcjet.guard(
-        label="message.received",
-        rules=[inbound(user_text)],
-        correlation_id=derived.correlation_id,
+def build_agent(user_id: str, owned_orders: list[str]) -> Agent:
+    guarded_lookup = guard_tool(
+        guard=arcjet,
+        tool=lookup_order,
+        # The action selects the policy you published.
+        action="order.looked-up",
+        # Actor and the order list come from trusted application state.
+        actor=user_id,
+        # Map only the values the policy needs.
+        inputs=lambda arguments: {
+            "order_id": server_input.string(arguments["order_id"]),
+            "owned_orders": server_input.string_list(owned_orders),
+        },
     )
-    if decision.conclusion == "DENY" or decision.has_failed_open():
-        raise RuntimeError("Message blocked")
+    return Agent(
+        name="support-agent",
+        instructions="Help the user look up orders.",
+        tools=[guarded_lookup],
+    )
 
-    return await Runner.run(agent, user_text, context=app_context)
+
+async def run_agent(user_id: str, owned_orders: list[str], user_text: str):
+    agent = build_agent(user_id, owned_orders)
+    return await Runner.run(
+        agent, user_text, context={"session_id": user_id}
+    )
