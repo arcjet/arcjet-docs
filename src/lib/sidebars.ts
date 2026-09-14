@@ -184,6 +184,64 @@ export const main = [
         link: "/guards/framework-integrations",
       },
       {
+        label: "Frameworks",
+        collapsed: true,
+        items: [
+          {
+            label: "Claude Agent SDK",
+            link: "/guards/claude-agent-sdk",
+          },
+          {
+            label: "Claude Managed Agents",
+            link: "/guards/claude-managed-agents",
+          },
+          {
+            label: "CrewAI",
+            link: "/guards/crewai",
+          },
+          {
+            label: "Genkit",
+            link: "/guards/genkit",
+          },
+          {
+            label: "Google ADK",
+            link: "/guards/google-adk",
+          },
+          {
+            label: "LangChain",
+            link: "/guards/langchain",
+          },
+          {
+            label: "LangGraph",
+            link: "/guards/langgraph",
+          },
+          {
+            label: "Mastra",
+            link: "/guards/mastra",
+          },
+          {
+            label: "OpenAI Agents",
+            link: "/guards/openai-agents",
+          },
+          {
+            label: "Strands Agents",
+            link: "/guards/strands-agents",
+          },
+          {
+            label: "TanStack AI",
+            link: "/guards/tanstack-ai",
+          },
+          {
+            label: "Vercel AI SDK",
+            link: "/guards/vercel-ai",
+          },
+          {
+            label: "Vercel Eve",
+            link: "/guards/vercel-eve",
+          },
+        ],
+      },
+      {
         label: "Remote policies",
         link: "/guards/remote-policies",
       },
@@ -628,45 +686,13 @@ export const main = [
         link: "/integrations/better-auth",
       },
       {
-        label: "Claude Agent SDK",
-        link: "/guards/claude-agent-sdk",
-      },
-      {
-        label: "Claude Managed Agents",
-        link: "/guards/claude-managed-agents",
-      },
-      {
         label: "Clerk",
         link: "/integrations/clerk",
-      },
-      {
-        label: "CrewAI",
-        link: "/guards/crewai",
       },
       {
         label: "Fly.io",
         link: "https://fly.io/docs/reference/arcjet/",
         attrs: { target: "_blank", class: "external-link" },
-      },
-      {
-        label: "Genkit",
-        link: "/guards/genkit",
-      },
-      {
-        label: "Google ADK",
-        link: "/guards/google-adk",
-      },
-      {
-        label: "LangChain",
-        link: "/guards/langchain",
-      },
-      {
-        label: "LangGraph",
-        link: "/guards/langgraph",
-      },
-      {
-        label: "Mastra",
-        link: "/guards/mastra",
       },
       {
         label: "Netlify",
@@ -678,29 +704,9 @@ export const main = [
         link: "/sdk/next/ai-protection/abuse-protection/",
       },
       {
-        label: "OpenAI Agents",
-        link: "/guards/openai-agents",
-      },
-      {
-        label: "Strands Agents",
-        link: "/guards/strands-agents",
-      },
-      {
-        label: "TanStack AI",
-        link: "/guards/tanstack-ai",
-      },
-      {
         label: "Vercel",
         link: "https://vercel.com/integrations/arcjet",
         attrs: { target: "_blank", class: "external-link" },
-      },
-      {
-        label: "Vercel AI SDK",
-        link: "/guards/vercel-ai",
-      },
-      {
-        label: "Vercel Eve",
-        link: "/guards/vercel-eve",
       },
     ],
   },
