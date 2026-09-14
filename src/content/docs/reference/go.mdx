@@ -11,8 +11,7 @@ The Arcjet Go SDK protects `net/http` handlers and non-HTTP operations such as
 AI tool calls, MCP handlers, queue workers, and background jobs. It works with
 the standard library and routers that expose `*http.Request`.
 
-> **Caution:** The Go SDK is pre-release and its API may change. The current
-> pre-release is `v1.0.0-rc.2`, which requires Go 1.25 or later.
+The Go SDK requires Go 1.25 or later.
 
 ## Client IP address detection
 
@@ -40,12 +39,10 @@ provenance without protecting the request.
 
 ## Install
 
-Use Go tooling so the project records a compatible version in `go.mod`. Name the
-pre-release explicitly, because `@latest` selects the newest stable tag and this
-API is not in one yet:
+Use Go tooling so the project records a compatible version in `go.mod`:
 
 ```bash
-go get github.com/arcjet/arcjet-go@v1.0.0-rc.2
+go get github.com/arcjet/arcjet-go@latest
 ```
 
 Set `ARCJET_KEY` in the environment. Retrieve it from the
@@ -168,7 +165,7 @@ Pass dynamic inputs with the following `Protect` options:
 - `WithRequested(...)` for the number of tokens a token bucket consumes.
 - `WithDetectPromptInjectionMessage(...)` for untrusted text.
 - `WithSensitiveInfoValue(...)` for text to scan for sensitive information.
-- `WithCorrelationId(...)` to correlate a request decision with related work.
+- `WithCorrelationID(...)` to correlate a request decision with related work.
 - `WithMetadata(...)` for nested JSON attached to the decision. See
   [Metadata](#metadata).
 - `WithIPSrc(...)` to override the automatically detected client IP address.
@@ -337,7 +334,7 @@ var promptScan = must(arcjet.GuardPromptInjection(
 func getWeather(ctx context.Context, userID, prompt string) error {
 	decision, err := guard.Guard(ctx, arcjet.GuardRequest{
 		Label:         "tools.get-weather",
-		CorrelationId: "trace_123",
+		CorrelationID: "trace_123",
 		Metadata: arcjet.Metadata{
 			"user": map[string]any{"id": userID},
 		},
@@ -430,8 +427,8 @@ affect `Guard` or `Protect` conclusions and never set `HasFailedOpen()`.
 ```go
 guard.Capture(arcjet.CaptureEvent{
 	Action:        "refund.issued",
-	CorrelationId: runID,
-	DecisionId:    decision.ID,
+	CorrelationID: runID,
+	DecisionID:    decision.ID,
 	Metadata: arcjet.Metadata{
 		"invoice":  map[string]any{"id": "inv_123", "amount": 4200},
 		"refunded": true,
@@ -440,7 +437,7 @@ guard.Capture(arcjet.CaptureEvent{
 ```
 
 `Action` is required. An empty action drops the event. Optional fields:
-`CorrelationId`, `DecisionId`, `Metadata`, and `OccurredAt` (zero means now).
+`CorrelationID`, `DecisionID`, `Metadata`, and `OccurredAt` (zero means now).
 Delivery is best-effort: a bounded queue, batched sends, no retries. Call
 `Flush` (or `Close`) on shutdown so the last batch is sent.
 
