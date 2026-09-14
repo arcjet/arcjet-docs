@@ -53,7 +53,7 @@ resolve. The version segment is LangChain's major. `langchain`
 LangChain 1.2.34, which is why `langchain` has the higher floor.
 `@langchain/core` keeps the `>=1 <2` range `langgraph/v1` already
 shipped. This adapter does not require `@langchain/langgraph`. The
-integration requires Node.js 22 or later.
+integration requires Node.js `>=22.21.0 <23 || >=24.5.0`.
 
 `createAgent` resolves a model string such as `"openai:gpt-4o"` through
 the matching provider package, so install the one your model needs. The
@@ -608,9 +608,9 @@ await agent.ainvoke(
 ## Human approval is not a policy gate
 
 Human-in-the-loop (HITL) confirmation pauses a run so a person can approve it.
-It is not a policy gate. That is the same trap as Mastra `requireApproval`,
-Claude permission callbacks, LangGraph `interrupt()`, Genkit `toolApproval`,
-and OpenAI `needsApproval`.
+It asks a person rather than evaluating a policy, so it is not a Guard
+enforcement point. For more information, see
+<Link.Page href="/guards/framework-integrations#human-approval-is-not-a-policy-gate">Human approval is not a policy gate</Link.Page>.
 
 There is no approval helper in either adapter. Don't wrap HITL as Guard, and
 don't turn a denial into an approval pause. Gate authored tools with the
@@ -742,7 +742,6 @@ with arcjet_sequence(correlation_id=session_id):
 - Don't use either adapter with the LangGraph Graph API. For more information
   about that adapter, see
   <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>.
-- Don't mix the JavaScript and Python adapters on the same tool.
 - Don't mint a new correlation ID per turn.
 
 <Tabs syncKey="language">

@@ -117,6 +117,34 @@ tool with another framework's adapter either throws or misses the path the
 framework runs, which leaves the tool unguarded. The Python CrewAI helpers
 work with official CrewAI rather than an npm port of it.
 
+## Human approval is not a policy gate
+
+Most agent frameworks offer a way to pause a run so that a person can approve a
+tool call:
+
+| Framework | Approval control |
+| --- | --- |
+| Claude Agent SDK | A permission callback |
+| Claude Managed Agents | `always_ask` with `user.tool_confirmation` |
+| CrewAI | `human_input` |
+| Genkit | `toolApproval` |
+| LangChain, LangGraph | An interrupt |
+| Mastra | `requireApproval` |
+| OpenAI Agents | An approval flag |
+| Strands Agents | An interrupt |
+| TanStack AI | `needsApproval` |
+| Vercel Eve | A connection's `approval` field |
+
+None of these is a Guard enforcement point. Each one asks a person instead of
+evaluating a policy, and a run that nobody is watching stalls. Arcjet does not
+wrap any of them as a gate, and no adapter has a `guardApproval` helper except
+Vercel Eve, where the `approval` field is the only place the framework lets you
+intercept an OpenAPI or MCP connection.
+
+Use a framework's approval control when a person must decide, and a Guard
+helper when a policy must decide. The two compose, so an approval pause can sit
+in front of a guarded tool.
+
 ## Denial responses
 
 Every JavaScript adapter uses one payload, `ArcjetDenialResult`. The fields,

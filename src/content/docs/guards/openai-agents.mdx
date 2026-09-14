@@ -40,11 +40,10 @@ Install the Guard SDK and the OpenAI Agents SDK:
 npm install @arcjet/guard @openai/agents
 ```
 
-Import helpers from the versioned path `@arcjet/guard/openai-agents/v0`.
-There is no unversioned alias. `@arcjet/guard/openai-agents` does not
-resolve. The SDK is pre-1.0, so the segment is `v0`. `@openai/agents`
-(`>=0.17.0 <1`) is an optional peer. The integration requires Node.js 22
-or later.
+Import helpers from the versioned path `@arcjet/guard/openai-agents/v0`. There
+is no unversioned alias. `@arcjet/guard/openai-agents` does not resolve. The
+SDK is pre-1.0, so the segment is `v0`. `@openai/agents` (`>=0.17.0 <1`) is an
+optional peer. The integration requires Node.js `>=22.21.0 <23 || >=24.5.0`.
 
 Launch one client at module scope:
 
@@ -433,11 +432,10 @@ guarded_lookup = guard_tool(
 ## Human approval is not a policy gate
 
 An approval flag on a function tool or an agent used as a tool pauses the run
-for human-in-the-loop (HITL) confirmation. Hosted MCP approval is the same
-class of control. Neither is a policy gate. That is the same trap as CrewAI
-`human_input`, LangChain `humanInTheLoopMiddleware`, Mastra `requireApproval`,
-Claude permission callbacks, LangGraph `interrupt()`, and Genkit
-`toolApproval`.
+for human-in-the-loop (HITL) confirmation, and hosted MCP approval is the same
+class of control. Neither evaluates a policy, so neither is a Guard
+enforcement point. For more information, see
+<Link.Page href="/guards/framework-integrations#human-approval-is-not-a-policy-gate">Human approval is not a policy gate</Link.Page>.
 
 There is no approval helper in either adapter. Don't wrap an approval pause as
 Guard, and gate authored handlers you own with the authored-tool gate instead.
@@ -531,7 +529,6 @@ await Runner.run(agent, user_text, context=app_context)
   computer and shell tools. Those paths have no authored gate.
 - Don't read the SDK trace ID for correlation. The SDK mints one when omitted.
 - Don't mint a session or conversation ID.
-- Don't mix the JavaScript and Python adapters on the same tool.
 - Don't use either adapter with Realtime or Sandbox.
 
 <Tabs syncKey="language">

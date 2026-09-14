@@ -25,7 +25,7 @@ npm install @arcjet/guard @mastra/core
 
 Import helpers from the versioned path `@arcjet/guard/mastra/v1`. There is no
 unversioned alias. `@arcjet/guard/mastra` does not resolve. The Mastra
-integration requires `@mastra/core` 1.x and Node.js 22 or later.
+integration requires `@mastra/core` 1.x and Node.js `>=22.21.0 <23 || >=24.5.0`.
 
 Launch one client at module scope:
 
@@ -123,8 +123,12 @@ export const agent = new Agent({
 
 ## Human approval is not a policy gate
 
-Mastra `requireApproval` pauses for a human. It is not a remote policy. Use
-`guardTool` for authored tools or `guardHooks` for unwrapped tools.
+Mastra `requireApproval` pauses for a human. It asks a person rather than
+evaluating a policy, so it is not a Guard enforcement point. For more
+information, see
+<Link.Page href="/guards/framework-integrations#human-approval-is-not-a-policy-gate">Human approval is not a policy gate</Link.Page>.
+
+Use `guardTool` for authored tools, or `guardHooks` for unwrapped tools.
 
 On `DENY` the tool's `execute` never runs. The model receives
 `{ arcjetDenied: true, reason, message, retryable, retryAfterSeconds? }`.

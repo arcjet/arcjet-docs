@@ -32,7 +32,7 @@ Import helpers from the versioned path `@arcjet/guard/langgraph/v1`. There is
 no unversioned alias. `@arcjet/guard/langgraph` does not resolve. The version
 segment is LangGraph's major. `@langchain/langgraph` (`>=1 <2`) and
 `@langchain/core` (`>=1 <2`) are optional type-only peers. The integration
-requires Node.js 22 or later.
+requires Node.js `>=22.21.0 <23 || >=24.5.0`.
 
 Launch one client at module scope:
 
@@ -137,10 +137,11 @@ await graph.invoke({ messages: [{ role: "user", content: userText }] }, config);
 
 ## Human approval is not a policy gate
 
-`interrupt()` / `interrupt_before=["tools"]` is human-in-the-loop (HITL)
-confirmation. It is not a remote policy. Same trap as Mastra `requireApproval`
-and Claude `canUseTool`. There is no `guardInterrupt` and no `guardApproval`.
-Don't wrap them as Guard.
+`interrupt()` and `interrupt_before=["tools"]` are human-in-the-loop (HITL)
+confirmation. They ask a person rather than evaluating a policy, so they are
+not a Guard enforcement point, and this adapter has no `guardInterrupt` and no
+`guardApproval`. For more information, see
+<Link.Page href="/guards/framework-integrations#human-approval-is-not-a-policy-gate">Human approval is not a policy gate</Link.Page>.
 
 Use `guardTool` for authored tools you invoke yourself.
 

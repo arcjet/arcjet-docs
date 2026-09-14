@@ -41,12 +41,11 @@ npm install @arcjet/guard @strands-agents/sdk
 dependency of it. If your project already has it in the range that
 follows, install `@arcjet/guard` on its own so your pins don't move.
 
-Import helpers from the versioned path
-`@arcjet/guard/strands-agents/v1`. There is no unversioned alias.
-`@arcjet/guard/strands-agents` does not resolve. The version
-segment is the Strands Agents SDK major. `@strands-agents/sdk`
-(`>=1.1.0 <2`) is an optional peer. The integration requires
-Node.js 22 or later.
+Import helpers from the versioned path `@arcjet/guard/strands-agents/v1`.
+There is no unversioned alias. `@arcjet/guard/strands-agents` does not
+resolve. The version segment is the Strands Agents SDK major.
+`@strands-agents/sdk` (`>=1.1.0 <2`) is an optional peer. The integration
+requires Node.js `>=22.21.0 <23 || >=24.5.0`.
 
 Launch one client at module scope:
 
@@ -184,7 +183,7 @@ Don't also wrap these tools with
 
 | Option | Helpers | Description |
 | --- | --- | --- |
-| `action` | `guardTool`, `guardHooks` | Guard label and capture name. Use `resource.verb` in the past tense. A string, or a function of the parsed tool input (or `{ toolName, input }` on the hooks). Required on `guardTool`. Hooks default to `tool.invoked`. |
+| `action` | `guardTool`, `guardHooks` | Guard label and capture name. Use `resource.verb` in the past tense. Required on `guardTool`, where it takes a string. On the hooks it is optional, takes a string or a function of `{ toolName, input }`, and defaults to `tool.invoked`. |
 | `rules` | `guardTool`, `guardHooks` | SDK rules, or a function of the parsed tool input (or `{ toolName, input }` on the hooks). Omit to submit none. The guard call still happens. |
 | `metadata` | `guardTool`, `guardHooks` | Nested JSON, or a function of the same input as `rules`. |
 | `sessionId` | `guardTool`, `guardHooks` | Caller-owned fallback when `invocationState` has no `correlationId`, `sessionId`, or `requestId`. A string, or a function of the same input as `rules`. Prefer putting the ID on `agent.invoke(prompt, { invocationState })`. |
@@ -584,11 +583,10 @@ agent = Agent(
 
 ## Human approval is not a policy gate
 
-An interrupt pauses the run for human-in-the-loop (HITL) confirmation. It is
-not a policy gate. That is the same trap as CrewAI `human_input`, LangChain
-`humanInTheLoopMiddleware`, Mastra `requireApproval`, Claude permission
-callbacks, LangGraph `interrupt()`, Genkit `toolApproval`, and OpenAI approval
-flags.
+An interrupt pauses the run for human-in-the-loop (HITL) confirmation. It asks
+a person rather than evaluating a policy, so it is not a Guard enforcement
+point. For more information, see
+<Link.Page href="/guards/framework-integrations#human-approval-is-not-a-policy-gate">Human approval is not a policy gate</Link.Page>.
 
 There is no approval helper in either adapter. Don't wrap an interrupt as
 Guard, and don't turn a denial into an approval pause. Gate authored tools with
@@ -689,7 +687,6 @@ agent(user_text)
   the hooks, or the denial payload from the authored-tool wrapper.
 - Don't set `BeforeToolsEvent.cancel`. That skips per-tool hooks.
 - Don't mint a correlation ID, read a trace ID, or read the agent ID.
-- Don't mix the JavaScript and Python adapters on the same tool.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
