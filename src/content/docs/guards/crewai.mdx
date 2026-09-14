@@ -92,9 +92,10 @@ hook path raises `HookAborted` so the abort reaches the crew.
 errors, because `BaseTool.run` never dispatches `PRE_TOOL_CALL`.
 
 There is no `guard_crew`. There is no inbound helper. Screen user text
-with a direct `guard_sync()` call before `crew.kickoff()`. There is no
-approval helper. `human_input` and `request_human_input()` are
-human-in-the-loop (HITL) confirmation, not policy.
+with a direct `guard()` call on the blocking client before
+`crew.kickoff()`. There is no approval helper. `human_input` and
+`request_human_input()` are human-in-the-loop (HITL) confirmation, not
+policy.
 
 `sanitize_tool_name` matches CrewAI's `tools=` filter:
 `Send Email` and `send_email` name the same tool. `free_text_arguments`
@@ -120,7 +121,7 @@ an npm CrewAI port with these helpers.
 | `correlation_id` | No | Caller-owned Sequence id. Falls back to `arcjet_sequence`. Never minted from crew, task, or agent ids. |
 
 `guard` is optional if you called `register_arcjet()`. The hook path
-needs a blocking client. Direct `guard_sync()` takes `label` (not
+needs a blocking client. A direct `guard()` call takes `label` (not
 `action`) and fails open.
 
 `ToolPolicy` takes `action` (required) and `rules` (optional).
@@ -140,7 +141,7 @@ There is no inbound hook, so there is no inbound helper. Put
 prompt-injection and other inbound rules in the application before
 `crew.kickoff()`.
 
-Direct `guard_sync()` fails open, so an `ALLOW` is not proof the rules
+A direct `guard()` call fails open, so an `ALLOW` is not proof the rules
 ran. Gate inbound on `decision.has_failed_open()` if this call site must
 fail closed. `register_arcjet_hooks` already defaults to that on
 `PRE_TOOL_CALL`.
@@ -153,7 +154,7 @@ from arcjet.guard import DetectPromptInjection, launch_arcjet_sync
 arcjet = launch_arcjet_sync(key=ARCJET_KEY)
 inbound = DetectPromptInjection()
 
-decision = arcjet.guard_sync(
+decision = arcjet.guard(
     label="message.received",
     rules=[inbound(user_text)],
 )
@@ -290,7 +291,7 @@ stops the call. CrewAI swallows any other exception (fail-open), so a
 raw `ArcjetDeniedError` or `ArcjetUnavailableError` does not abort the
 tool.
 
-The core `guard_sync()` call still fails open. It returns `ALLOW`, and
+The core `guard()` call still fails open. It returns `ALLOW`, and
 `has_failed_open()` returns `True`. The wrappers that sit around an
 effect fail closed.
 
