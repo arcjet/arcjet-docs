@@ -38,7 +38,7 @@ Import helpers from the versioned path `@arcjet/guard/claude-agent-sdk/v0`.
 There is no unversioned alias. `@arcjet/guard/claude-agent-sdk` does not
 resolve. The Claude Agent SDK is pre-1.0, so the segment is `v0`.
 `@anthropic-ai/claude-agent-sdk` is an optional peer (`>=0.1.0 <1`). The
-integration requires Node.js 22 or later.
+integration requires Node.js 22.21 or later, excluding Node.js 23.
 
 Launch one client at module scope:
 
@@ -522,8 +522,10 @@ not pass through `guard_tool`.
 ## Tool permission callbacks are not a policy gate
 
 `allowedTools`, allow rules, and `bypassPermissions` / `acceptEdits` skip the
-Claude permission callback. That is the same trap as Eve approval and Mastra
-`requireApproval`: the callback looks like a gate, but the runtime can skip it.
+Claude permission callback, so the callback looks like a gate that the runtime
+can step around. It also asks a person rather than evaluating a policy. For
+more information, see
+<Link.Page href="/guards/framework-integrations#human-approval-is-not-a-policy-gate">Human approval is not a policy gate</Link.Page>.
 
 There is no Arcjet wrapper for the permission callback, and there is no approval
 helper. Don't put Arcjet policy on a permission callback. Gate authored tools
@@ -680,7 +682,6 @@ ID that you already search for.
 - Don't signal a denial by throwing or raising. Return the tool result with the
   error flag set.
 - Don't apply the authored-tool wrapper and `PreToolUse` to the same tool.
-- Don't mix the JavaScript and Python adapters on the same tool.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">

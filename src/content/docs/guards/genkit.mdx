@@ -34,8 +34,8 @@ Import helpers from the versioned path `@arcjet/guard/genkit/v1`. There is
 no unversioned alias. `@arcjet/guard/genkit` does not resolve. The version
 segment is Genkit's major. `genkit` (`>=1.0.0 <2`) is an optional peer.
 `guardMiddleware` needs the `generateMiddleware` `tool` hook (Genkit >=
-1.33). Verified against Genkit 1.41.0. The integration requires Node.js 22
-or later and `@arcjet/guard` 1.11.0 or later.
+1.33). Verified against Genkit 1.41.0. The integration requires Node.js 22.21
+or later, excluding Node.js 23, and `@arcjet/guard` 1.11.0 or later.
 
 Launch one client at module scope:
 
@@ -242,11 +242,11 @@ if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
 
 ## Human approval is not a policy gate
 
-`interrupt()` / `defineInterrupt` / `@genkit-ai/middleware` `toolApproval` /
-`restartTool` are human-in-the-loop (HITL) confirmation. They are not a
-policy gate. Same trap as Mastra `requireApproval`, Claude `canUseTool`,
-LangGraph `interrupt()`, and OpenAI `needsApproval`. There is no
-`guardApproval`. Don't wrap them as Guard.
+`interrupt()`, `defineInterrupt`, `@genkit-ai/middleware` `toolApproval`, and
+`restartTool` are human-in-the-loop (HITL) confirmation. They ask a person
+rather than evaluating a policy, so they are not a Guard enforcement point,
+and this adapter has no `guardApproval`. For more information, see
+<Link.Page href="/guards/framework-integrations#human-approval-is-not-a-policy-gate">Human approval is not a policy gate</Link.Page>.
 
 Use `guardTool` for authored `ai.defineTool` actions you own.
 
