@@ -732,6 +732,16 @@ rule once, then bind input and call `guard()` per invocation. The client
 request timeout defaults to 2000 ms (`timeout_ms` on `launch_arcjet` /
 `launch_arcjet_sync`), matching the JavaScript Guard default.
 
+Both take the same parameters:
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `key` | `str` | Your site key (required). An empty key raises `ArcjetMisconfiguration`. Unlike the Go SDK, the Python client never reads `ARCJET_KEY` for you |
+| `timeout_ms` | `int` | Request timeout. Defaults to 2000 |
+| `base_url` | `str \| None` | Override the Arcjet endpoint |
+| `logger` | `Logger \| None` | Receives `AJxxxx` diagnostics. Without one, local failures are coalesced |
+| `sensitive_info_backend` | `Backend \| None` | On-device backend for sensitive information detection – see [Sensitive information backends](#sensitive-information-backends) |
+
 <Code code={Guard} title="main.py" lang="py" />
 
 ### Checkpoint helpers
@@ -746,8 +756,48 @@ the Claude Managed Agents helper, which does not send
 `user.message` and returns `user.custom_tool_result`, and
 the Strands Agents Python helper, which returns a plain
 `ArcjetDenialResult` dict.
-Unavailability raises `ArcjetUnavailableError` or
-`ArcjetToolUnavailableError` on the LangChain and CrewAI surfaces.
+Unavailability raises `ArcjetUnavailableError`, except on the LangChain
+`guard_tool` surface, which raises `ArcjetToolUnavailableError`. That class and
+`ArcjetToolDeniedError` subclass LangChain's `ToolException`, so a wrapped
+tool's `handle_tool_error` handles them when you configure one.
+
+#### `guard_action()`
+
+`guard_action` wraps any coroutine function, and `guard_action_sync` wraps any
+blocking callable. Both take the callable first, then keyword arguments:
+
+```py
+from arcjet.guard import guard_action
+
+refund = await guard_action(
+    lambda: issue_refund(invoice_id),
+    action="refund.issued",
+    actor=user.id,
+    correlation_id=run_id,
+)
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `fn` | `Callable` | The action to guard, taking no arguments (required, positional) |
+| `action` | `str` | Checkpoint label, which also selects the remote policy (required) |
+| `guard` | `ArcjetGuard \| None` | The client. Defaults to the registered one. With nothing registered the call fails open into an error decision, and `on_guard_error` governs from there |
+| `actor` | `str \| None` | Who is performing the action |
+| `inputs` | `PolicyInputMap \| None` | Values offered for remote policy evaluation |
+| `rules` | `Sequence[RuleWithInput]` | Local guard rules. Defaults to none, which still contacts the server |
+| `metadata` | `Metadata \| None` | Application context |
+| `correlation_id` | `str \| None` | Identifier linking this event to a Sequence |
+| `on_guard_error` | `"deny" \| "allow"` | What to do when policy could not be evaluated. Defaults to `"deny"` |
+
+The return value is whatever `fn` returns. A `DENY` raises `ArcjetDeniedError`
+and always blocks, whatever `on_guard_error` says, because that option governs
+only an unevaluated policy.
+
+To record that an allowed action happened without gating it, use
+`capture_action`, which takes `action`, `metadata`, `correlation_id`, and
+`decision_id`.
+
+#### Where each helper goes
 
 - **Any Python callable** – `guard_action` / `guard_action_sync` in
   `arcjet.guard`. No extra.
@@ -867,8 +917,8 @@ decision = await aj.guard(
 #### Sensitive information detection
 
 Runs locally in WebAssembly – the raw text never leaves the SDK; only a SHA-256
-hash is sent alongside the local result. Valid entity types: `"EMAIL"`,
-`"PHONE_NUMBER"`, `"IP_ADDRESS"`, `"CREDIT_CARD_NUMBER"`.
+hash is sent alongside the local result. The built-in entity types are
+`"EMAIL"`, `"PHONE_NUMBER"`, `"IP_ADDRESS"`, and `"CREDIT_CARD_NUMBER"`.
 
 ```py
 from arcjet.guard import LocalDetectSensitiveInfo
@@ -879,6 +929,32 @@ sensitive = LocalDetectSensitiveInfo(
 ```
 
 `allow` and `deny` are mutually exclusive.
+
+##### Sensitive information backends
+
+An on-device backend adds entity types that pattern matching alone doesn't
+reach, such as `"BANK_ACCOUNT"`, `"ROUTING_NUMBER"`, names, and addresses.
+Install the extra, then pass the backend when you create the client:
+
+```bash
+pip install "arcjet[sensitive-info-rampart]"
+```
+
+```py
+from arcjet_sensitive_info_rampart import rampart
+from arcjet.guard import launch_arcjet
+
+arcjet = launch_arcjet(
+    key=os.environ["ARCJET_KEY"],
+    sensitive_info_backend=rampart(),
+)
+```
+
+Every `LocalDetectSensitiveInfo` rule on that client uses the backend, and so
+does the sensitive information rule in an
+<Link.Page href="/guards/remote-policies">agent guard remote policy</Link.Page>.
+The first guarded call loads the model, so it takes noticeably longer than the
+ones after it.
 
 #### Content moderation
 
@@ -921,7 +997,9 @@ bound rule inputs, and optional metadata:
 | Parameter   | Type                      | Description |
 | ----------- | ------------------------- | ----------- |
 | `label`     | `str`                     | Label identifying this guard call (required). Validated server-side as a slug – lowercase letters, digits, dash (`-`), and dot (`.`) only |
-| `rules`     | `Sequence[RuleWithInput]` | Bound rule inputs (required) |
+| `rules`     | `Sequence[RuleWithInput]` | Bound rule inputs. Defaults to empty, which still contacts Guard so a remote policy selected by `label` can apply |
+| `actor`     | `str \| None`             | Trusted, application-asserted identity. The SDK never derives it from a request or from tool arguments |
+| `inputs`    | `PolicyInputMap \| None`  | Named values built with `server_input.*` or `local_input.*` – see <Link.Page href="/guards/remote-policies">Agent guard remote policies</Link.Page> |
 | `metadata`  | `Metadata \| None`        | Nested JSON for correlation and analytics – see [Metadata](#metadata) |
 | `correlation_id` | `str \| None`        | Optional ID correlating this decision with a request, workflow run, or agent trace. A dedicated field, not metadata; does not affect the decision (`arcjet` >= 0.9.0) |
 

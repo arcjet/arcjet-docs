@@ -114,7 +114,10 @@ an npm CrewAI port with these helpers.
 | --- | --- | --- |
 | `guard` | No | Blocking client. Optional if you called `register_arcjet()`. The hook path needs `launch_arcjet_sync`. |
 | `action` | No | Guard label and capture name. Use `resource.verb` in the past tense, such as `email.sent`. A string, or a function of the hook context. Defaults to `{sanitized_tool_name}.invoked`. |
+| `actor` | No | Who is acting, or a function of `(arguments, ctx)`. Take it from authenticated application state, never from a model-produced argument. |
+| `inputs` | No | Typed remote-policy inputs, or a function of `(arguments, ctx)`. |
 | `rules` | No | Bound SDK rule inputs, or a function of `(arguments, ctx)`. `arguments` is the tool's own mapping from `ctx.tool_input`, unfiltered. Omit to submit none. |
+| `metadata` | No | Capture metadata, or a function of `(arguments, ctx)`. Crew, task, and agent names are added as metadata on your behalf. |
 | `policies` | No | Per-tool `ToolPolicy` overrides, keyed by tool name. Keys are sanitized. |
 | `tools` | No | Tool names to gate. Names are sanitized. Omit to gate every tool. |
 | `on_guard_error` | No | `"deny"` (default) or `"allow"`. A real `DENY` always blocks. |
@@ -124,12 +127,13 @@ an npm CrewAI port with these helpers.
 needs a blocking client. A direct `guard()` call takes `label` (not
 `action`) and fails open.
 
-`ToolPolicy` takes `action` (required) and `rules` (optional).
-`ToolPolicy.rules` is a bound sequence, not a function. Match it with
-`sanitize_tool_name` the same way CrewAI matches `tools=`.
+`ToolPolicy` takes `action` (required), then `rules`, `actor`, `inputs`, and
+`metadata`. `ToolPolicy.rules` is a bound sequence, not a function. Match it
+with `sanitize_tool_name` the same way CrewAI matches `tools=`.
 
-`guard_tool` takes `action` (required), `rules`, and `on_guard_error`.
-Use it only for a standalone `BaseTool` you invoke yourself.
+`guard_tool` takes `guard`, `tool`, and `action` (all required), then `actor`,
+`inputs`, `rules`, `metadata`, `correlation_id`, and `on_guard_error`. Use it
+only for a standalone `BaseTool` you invoke yourself.
 
 `unregister_arcjet_hooks(handle)` removes the hook. Call it in tests,
 or call `handle.unregister()`. Registration is once per process.

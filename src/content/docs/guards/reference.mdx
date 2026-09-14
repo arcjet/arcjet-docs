@@ -170,8 +170,10 @@ What the SDK cannot encode differs by language:
 | Python     | `datetime`, sets, `NaN`, circular references          | Integers are sent verbatim, including values past 2^53. Convert datetimes explicitly (`datetime.isoformat()`).                                                   |
 | Go         | channels, funcs, cycles, `NaN`, invalid UTF-8 strings | Exact `int64` values survive. Keys are processed in sorted order because Go maps have no insertion order.                                                        |
 
-Rule-level metadata is merged with `guard()`-level metadata shallowly: a
-duplicate key's whole value is replaced, never deep-merged.
+A rule carries its own metadata, and the metadata you configure on the rule
+merges shallowly with the metadata you bind at call time: a duplicate key's
+whole value is replaced, never deep-merged. Metadata you pass to `guard()`
+travels on the request instead, and is never merged into a rule's.
 
 Metadata is untrusted and is not redacted – do not put secrets or PII in it.
 
@@ -349,6 +351,11 @@ come in pairs:
 
 Calling the wrong pair fail-opens and reports `AJ3007` on the registered
 client's logger.
+
+The `_sync` suffix belongs to the free functions, not to the client. A client
+you hold has the same method names in both flavors, so a blocking client
+evaluates a policy with `arcjet.guard(...)` and flushes with
+`arcjet.flush()`. There is no `arcjet.guard_sync(...)` method.
 
 ```py
 from arcjet.guard.testing import register_test_client

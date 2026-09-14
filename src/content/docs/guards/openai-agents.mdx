@@ -207,8 +207,13 @@ and fails open.
 | Option | Required | Description |
 | --- | --- | --- |
 | `guard` | Yes | Client from `launch_arcjet` or `launch_arcjet_sync`. |
+| `tool` | Yes | The `FunctionTool` to gate. |
 | `action` | Yes | Guard label and capture name. Use `resource.verb` in the past tense, such as `email.sent`. |
+| `actor` | No | Who is acting, or a function of the parsed tool arguments. Take it from authenticated application state, never from a model-produced argument. |
+| `inputs` | No | Typed remote-policy inputs, or a function of the parsed tool arguments. |
 | `rules` | No | Bound SDK rule inputs, or a function of the parsed tool arguments. Omit to submit none. |
+| `metadata` | No | Capture metadata, or a function of the parsed tool arguments. |
+| `correlation_id` | No | Caller-owned correlation ID. Falls back to the enclosing `arcjet_sequence`. |
 | `on_guard_error` | No | `"deny"` (default) or `"allow"`. A real `DENY` always blocks. |
 
 Inbound screening uses direct `guard()`, which takes `label` (not

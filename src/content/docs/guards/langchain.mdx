@@ -196,7 +196,7 @@ Inbound screening uses direct `guard()`, which takes `label` (not
 </TabItem>
 <TabItem label="Python">
 
-`guard_tool`, `guard_action`, and `ToolPolicy` share this contract:
+`guard_tool`, `guard_action`, and `ToolPolicy` share most of one contract:
 
 | Option | Required | Description |
 | --- | --- | --- |
@@ -204,8 +204,14 @@ Inbound screening uses direct `guard()`, which takes `label` (not
 | `rules` | No | Bound SDK rule inputs. Empty is normal and still contacts Guard so a remote policy can apply. |
 | `actor` | No | Trusted identity. On `guard_tool`, a callable receives `RunnableConfig`. On `ToolPolicy`, a callable receives parsed arguments. |
 | `inputs` | No | Named values built with `server_input.*` or `local_input.*`. On `guard_tool`, a callable receives `(arguments, config)`. On `ToolPolicy`, a callable receives parsed arguments. |
-| `on_guard_error` | No | `"deny"` (default) or `"allow"`. A real `DENY` always blocks. |
-| `metadata` | No | Nested JSON on `ToolPolicy`. |
+| `metadata` | No | Capture metadata. |
+
+Where they differ:
+
+- `guard_tool` also requires `guard` and `tool`, and accepts `on_guard_error`.
+- `guard_action` also accepts `guard`, `correlation_id`, and `on_guard_error`.
+- `ToolPolicy` carries policy only. Its fail-closed behavior comes from the
+  `on_guard_error` you pass to `ArcjetMiddleware`.
 
 `ArcjetMiddleware` also accepts `guard` (optional if you called
 `register_arcjet()`), `policies` (tool name to `ToolPolicy`), and `tools` (the
