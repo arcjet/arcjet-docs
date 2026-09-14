@@ -34,7 +34,7 @@ arcjet.capture({
 ```py
 # workflow_id comes from the surrounding workflow or agent run, like `runId` above.
 workflow_id = run_id
-aj.capture(
+arcjet.capture(
     action="refund.issued",
     correlation_id=workflow_id,
     decision_id=decision.id,
@@ -105,11 +105,12 @@ await arcjet.flush(250); // custom deadline in milliseconds
 <TabItem label="Python">
 
 ```py
-# Async (FastAPI lifespan, or any async teardown)
-await aj.flush()
+# `arcjet` from launch_arcjet, in a FastAPI lifespan or any async teardown.
+await arcjet.flush()
 
-# Sync (Flask teardown, atexit, or the end of a script)
-arcjet_sync_guard.flush()
+# `arcjet_sync` from launch_arcjet_sync, in a Flask teardown, atexit, or at
+# the end of a script. The method is `flush`, not `flush_sync`.
+arcjet_sync.flush()
 ```
 
 </TabItem>

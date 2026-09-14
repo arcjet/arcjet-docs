@@ -55,6 +55,7 @@ export const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 pip install "arcjet[claude-agent-sdk]"
 ```
 
+The Python adapter requires `arcjet` 1.1.0 or later.
 `arcjet[claude-agent-sdk]` depends on `claude-agent-sdk>=0.2.127,<1`.
 CPython 3.10 or later.
 
@@ -178,25 +179,40 @@ Don't also wrap these tools with `@arcjet/guard/claude-agent-sdk/v0`.
 | Option | Required | Description |
 | --- | --- | --- |
 | `guard` | Yes | Client from `launch_arcjet` or `launch_arcjet_sync`. |
+| `tool` | Yes | The authored `@tool` handler to gate. |
 | `action` | Yes | Guard label and capture name. Use `resource.verb` in the past tense, such as `email.sent`. |
+| `actor` | No | Who is acting, or a function of the parsed tool arguments. Take it from authenticated application state, never from a model-produced argument. |
+| `inputs` | No | Typed remote-policy inputs, or a function of the parsed tool arguments. |
 | `rules` | No | Bound SDK rule inputs, or a function of the parsed tool arguments. Omit to submit none. |
+| `metadata` | No | Capture metadata, or a function of the parsed tool arguments. |
 | `session_id` | No | Caller-owned UUID. An authored handler has no `extra.session_id`, so pass the same id you give `ClaudeAgentOptions`. Never minted. |
+| `correlation_id` | No | Caller-owned UUID. Falls back to the enclosing `arcjet_sequence`. |
 | `on_guard_error` | No | `"deny"` (default) or `"allow"`. A real `DENY` always blocks. |
 
 `guard_hooks` accepts this contract:
 
 | Option | Required | Description |
 | --- | --- | --- |
-| `guard` | Yes | Client from `launch_arcjet` or `launch_arcjet_sync`. |
+| `guard` | No | Client from `launch_arcjet` or `launch_arcjet_sync`. Omit to use the client you registered with `register_arcjet`. |
 | `action` | No | Guard label and capture name. A string, or a function of the hook input. Defaults to `{tool_name}.invoked` when a tool hook is registered. |
+| `actor` | No | Who is acting, or a function of the hook input. Take it from authenticated application state, never from a model-produced argument. |
+| `inputs` | No | Typed remote-policy inputs, or a function of the hook input. |
 | `rules` | No | Bound SDK rule inputs, or a function of the tool arguments. Omit to submit none. |
+| `metadata` | No | Capture metadata, or a function of the hook input. |
 | `inbound` | No | Policy for `UserPromptSubmit`. Requires `action`. `rules` receives `{"prompt": ...}`. |
+| `tools` | No | Pass `True` to register the tool hooks without giving them a policy of their own. |
 | `exclude` | No | Tools already wrapped with `guard_tool`. Pass `{"server": ..., "name": ...}` to match `mcp__{server}__{name}`, or a bare string for a built-in such as `"Bash"`. |
 | `session_id` | No | Caller-owned UUID fallback. Hook `session_id` is preferred. Never minted. |
+| `correlation_id` | No | Caller-owned UUID. Falls back to the enclosing `arcjet_sequence`. |
 | `on_guard_error` | No | `"deny"` (default) or `"allow"`. A real `DENY` always blocks. |
 
-`guard_hooks` needs a tool policy (`action` or `rules`), an
-`inbound` policy, or both. There is no `guard_inbound`.
+`guard_hooks` needs a tool policy (`action`, `rules`, `exclude`, or
+`tools=True`), an `inbound` policy, or both. There is no `guard_inbound`.
+
+The Python helper registers only what you ask for. Giving it `inbound` alone
+registers `UserPromptSubmit` and leaves tool calls ungated. The JavaScript
+`guardHooks` always registers `PreToolUse`, `UserPromptSubmit`, and
+`PostToolUse`, so the same-looking call gates every tool as well.
 
 </TabItem>
 </Tabs>

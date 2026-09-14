@@ -63,6 +63,7 @@ export const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 pip install "arcjet[strands-agents]"
 ```
 
+The Python adapter requires `arcjet` 1.1.0 or later.
 `arcjet[strands-agents]` depends on `strands-agents>=1.11.0,<2`.
 CPython 3.10 or later.
 
@@ -201,8 +202,12 @@ Inbound screening uses direct `guard()`, which takes `label` (not
 | Option | Required | Description |
 | --- | --- | --- |
 | `guard` | Yes | Client from `launch_arcjet` or `launch_arcjet_sync`. |
+| `tool` | Yes | The authored `@tool` handler to gate. |
 | `action` | Yes | Guard label and capture name. Use `resource.verb` in the past tense, such as `email.sent`. |
+| `actor` | No | Who is acting, or a function of the parsed tool arguments. Take it from authenticated application state, never from a model-produced argument. |
+| `inputs` | No | Typed remote-policy inputs, or a function of the parsed tool arguments. |
 | `rules` | No | Bound SDK rule inputs, or a function of the parsed tool arguments. Omit to submit none. |
+| `metadata` | No | Capture metadata, or a function of the parsed tool arguments. |
 | `correlation_id` | No | Caller-owned fallback when the object you pass to `strands_agent_context` has no ID. Never minted. |
 | `session_id` | No | Same, when the application calls the ID a session. Ignored when `correlation_id` is set. |
 | `request_id` | No | Same, when the application calls the ID a request. Ignored when `correlation_id` or `session_id` is set. |
@@ -212,9 +217,12 @@ Inbound screening uses direct `guard()`, which takes `label` (not
 
 | Option | Required | Description |
 | --- | --- | --- |
-| `guard` | Yes | Client from `launch_arcjet` or `launch_arcjet_sync`. |
+| `guard` | No | Client from `launch_arcjet` or `launch_arcjet_sync`. Omit to use the client you registered with `register_arcjet`. |
 | `action` | No | Guard label and capture name. A string, or a function of the tool-call envelope. Defaults to `{tool_name}.invoked`. |
+| `actor` | No | Who is acting, or a function of the tool-call envelope. Take it from authenticated application state, never from a model-produced argument. |
+| `inputs` | No | Typed remote-policy inputs, or a function of the tool-call envelope. |
 | `rules` | No | Bound SDK rule inputs, or a function of `tool_use.input` plus `tool_name`. Omit to submit none. |
+| `metadata` | No | Capture metadata, or a function of the tool-call envelope. |
 | `correlation_id` | No | Caller-owned fallback when `invocation_state` has no ID. Never minted. |
 | `session_id` | No | Same, when the application calls the ID a session. Ignored when `correlation_id` is set. |
 | `request_id` | No | Same, when the application calls the ID a request. Ignored when `correlation_id` or `session_id` is set. |
