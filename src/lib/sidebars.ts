@@ -90,8 +90,8 @@ export const main = [
                 attrs: { target: "_blank", class: "external-link" },
               },
               {
-                label: "JS SDK examples",
-                link: "https://github.com/arcjet/arcjet-js/tree/main/examples",
+                label: "All examples",
+                link: "https://github.com/arcjet/examples",
                 attrs: { target: "_blank", class: "external-link" },
               },
             ],

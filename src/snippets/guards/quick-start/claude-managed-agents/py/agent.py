@@ -116,7 +116,7 @@ async def run_email_agent(user, session_id: str, prompt: str):
                 result = await send_email(
                     event,
                     send=client.beta.sessions.events.send,
-                    session_id=session_id,
+                    anthropic_session_id=session_id,
                 )
                 if result is not None:
                     await send_tool_result(event.id, result)

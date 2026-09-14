@@ -11,8 +11,8 @@ The Arcjet Go SDK protects `net/http` handlers and non-HTTP operations such as
 AI tool calls, MCP handlers, queue workers, and background jobs. It works with
 the standard library and routers that expose `*http.Request`.
 
-> **Caution:** The Go SDK is pre-release and its API may change. Version 0.1.0
-> requires Go 1.25 or later.
+> **Caution:** The Go SDK is pre-release and its API may change. The current
+> pre-release is `v1.0.0-rc.2`, which requires Go 1.25 or later.
 
 ## Client IP address detection
 
@@ -40,10 +40,12 @@ provenance without protecting the request.
 
 ## Install
 
-Use Go tooling so the project records a compatible version in `go.mod`:
+Use Go tooling so the project records a compatible version in `go.mod`. Name the
+pre-release explicitly, because `@latest` selects the newest stable tag and this
+API is not in one yet:
 
 ```bash
-go get github.com/arcjet/arcjet-go@latest
+go get github.com/arcjet/arcjet-go@v1.0.0-rc.2
 ```
 
 Set `ARCJET_KEY` in the environment. Retrieve it from the
