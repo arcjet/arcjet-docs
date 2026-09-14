@@ -104,7 +104,7 @@ decision, err := guard.Guard(ctx, arcjet.GuardRequest{
 		"workflow": "support",
 		"invoice":  map[string]any{"id": "inv_123", "amount": 4200},
 	},
-	CorrelationId: runID,
+	CorrelationID: runID,
 })
 ```
 
@@ -115,7 +115,7 @@ decision, err := guard.Guard(ctx, arcjet.GuardRequest{
 | `Inputs`        | Named values created with `GuardPolicyServer*` or `GuardPolicyLocal*` |
 | `Rules`         | Optional SDK rule submissions; an empty list still calls Guard        |
 | `Metadata`      | Nested JSON for analytics and debugging. See [Metadata](#metadata).   |
-| `CorrelationId` | Identifier shared across related calls                                |
+| `CorrelationID` | Identifier shared across related calls                                |
 
 </TabItem>
 </Tabs>
