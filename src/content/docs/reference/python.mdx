@@ -999,7 +999,7 @@ bound rule inputs, and optional metadata:
 | `label`     | `str`                     | Label identifying this guard call (required). Validated server-side as a slug – lowercase letters, digits, dash (`-`), and dot (`.`) only |
 | `rules`     | `Sequence[RuleWithInput]` | Bound rule inputs. Defaults to empty, which still contacts Guard so a remote policy selected by `label` can apply |
 | `actor`     | `str \| None`             | Trusted, application-asserted identity. The SDK never derives it from a request or from tool arguments |
-| `inputs`    | `PolicyInputMap \| None`  | Named values built with `server_input.*` or `local_input.*` – see <Link.Page href="/guards/remote-policies">Agent guard remote policies</Link.Page> |
+| `inputs`    | `PolicyInputMap \| None`  | Named values built with `server_input.*` or `local_input.*` – see <Link.Page href="/guards/remote-policies">Policy contract</Link.Page> |
 | `metadata`  | `Metadata \| None`        | Nested JSON for correlation and analytics – see [Metadata](#metadata) |
 | `correlation_id` | `str \| None`        | Optional ID correlating this decision with a request, workflow run, or agent trace. A dedicated field, not metadata; does not affect the decision (`arcjet` >= 0.9.0) |
 

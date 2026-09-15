@@ -1,21 +1,9 @@
-import {
-  launchArcjet,
-  detectPromptInjection,
-  tokenBucket,
-} from "@arcjet/guard";
-import { guardPlugin, googleAdkContext } from "@arcjet/guard/google-adk/v2";
+import { launchArcjet, policyInput } from "@arcjet/guard";
+import { guardPlugin } from "@arcjet/guard/google-adk/v2";
 import { FunctionTool, InMemoryRunner, LlmAgent } from "@google/adk";
 import { z } from "zod";
 
 const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
-
-const lookupLimit = tokenBucket({
-  bucket: "lookups",
-  refillRate: 5,
-  intervalSeconds: 10,
-  maxTokens: 10,
-});
-const inbound = detectPromptInjection();
 
 const lookupOrderInput = z.object({ orderId: z.string() });
 
@@ -33,38 +21,41 @@ const agent = new LlmAgent({
   tools: [lookupOrder],
 });
 
-export async function runAgent(conversationId: string, userText: string) {
-  const appContext = { sessionId: conversationId };
-  const decision = await arcjet.guard({
-    label: "message.received",
-    rules: [inbound(userText)],
-    ...googleAdkContext(appContext),
-  });
-
-  if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
-    throw new Error("Message blocked");
-  }
-
+export async function runAgent(
+  user: { id: string; orderIds: string[] },
+  userText: string,
+) {
+  // guardPlugin gates every tool call. There is no guardTool for ADK.
   const runner = new InMemoryRunner({
     agent,
     appName: "orders",
     plugins: [
       guardPlugin(arcjet, {
-        sessionId: conversationId,
-        rules: ({ toolName, input }) => {
+        sessionId: user.id,
+        // The action selects the policy you published.
+        action: ({ toolName }) =>
+          toolName === "lookup_order" ? "order.looked-up" : "tool.invoked",
+        // Actor and the order list come from trusted application state.
+        actor: user.id,
+        // The plugin gates every tool, so map inputs only for the one the
+        // policy covers.
+        inputs: ({ toolName, input }) => {
           if (toolName !== "lookup_order") {
-            return [];
+            return {};
           }
           const { orderId } = lookupOrderInput.parse(input);
-          return [lookupLimit({ key: orderId, requested: 1 })];
+          return {
+            order_id: policyInput.server.string(orderId),
+            owned_orders: policyInput.server.stringList(user.orderIds),
+          };
         },
       }),
     ],
   });
 
   return runner.runAsync({
-    userId: conversationId,
-    sessionId: conversationId,
+    userId: user.id,
+    sessionId: user.id,
     newMessage: { parts: [{ text: userText }] },
   });
 }

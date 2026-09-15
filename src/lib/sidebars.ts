@@ -8,167 +8,39 @@ export const main = [
     link: "/agent-get-started",
   },
   {
-    label: "Examples",
+    label: "Arcjet skills",
+    link: "https://github.com/arcjet/skills",
+    attrs: { target: "_blank", class: "external-link" },
+  },
+  {
+    label: "llms.txt",
+    link: "/llms.txt",
+    attrs: { target: "_blank", class: "external-link" },
+  },
+  {
+    label: "Coding agents",
     collapsed: false,
     items: [
       {
-        label: "Apps",
-        collapsed: true,
-        items: [
-          {
-            label: "Astro",
-            link: "https://github.com/arcjet/example-astro",
-            attrs: { target: "_blank", class: "external-link" },
-          },
-          {
-            label: "Deno",
-            link: "https://github.com/arcjet/example-deno",
-            attrs: { target: "_blank", class: "external-link" },
-          },
-          {
-            label: "Express.js",
-            link: "https://github.com/arcjet/example-expressjs",
-            attrs: { target: "_blank", class: "external-link" },
-          },
-          {
-            label: "Fastify",
-            link: "https://github.com/arcjet/example-fastify",
-            attrs: { target: "_blank", class: "external-link" },
-          },
-          {
-            label: "Firebase",
-            link: "https://github.com/arcjet/example-firebase-functions",
-            attrs: { target: "_blank", class: "external-link" },
-          },
-          {
-            label: "NestJS",
-            link: "https://github.com/arcjet/example-nestjs",
-            attrs: { target: "_blank", class: "external-link" },
-          },
-          {
-            label: "Next.js",
-            link: "https://github.com/arcjet/example-nextjs",
-            attrs: { target: "_blank", class: "external-link" },
-          },
-          {
-            label: "React Router",
-            link: "https://github.com/arcjet/example-react-router",
-            attrs: { target: "_blank", class: "external-link" },
-          },
-          {
-            label: "Remix",
-            link: "https://github.com/arcjet/example-remix",
-            attrs: { target: "_blank", class: "external-link" },
-          },
-          {
-            label: "SvelteKit",
-            link: "https://github.com/arcjet/example-sveltekit",
-            attrs: { target: "_blank", class: "external-link" },
-          },
-          {
-            label: "TanStack Start",
-            link: "https://github.com/arcjet/example-tanstack-start",
-            attrs: { target: "_blank", class: "external-link" },
-          },
-          {
-            label: "Use cases",
-            collapsed: true,
-            items: [
-              {
-                label: "Next.js form protection",
-                link: "https://github.com/arcjet/example-nextjs-form",
-                attrs: { target: "_blank", class: "external-link" },
-              },
-              {
-                label: "Next.js Server Actions",
-                link: "https://github.com/arcjet/example-nextjs-server-action",
-                attrs: { target: "_blank", class: "external-link" },
-              },
-              {
-                label: "Next.js + Fly.io",
-                link: "https://github.com/arcjet/example-nextjs-fly",
-                attrs: { target: "_blank", class: "external-link" },
-              },
-              {
-                label: "All examples",
-                link: "https://github.com/arcjet/examples",
-                attrs: { target: "_blank", class: "external-link" },
-              },
-            ],
-          },
-          {
-            label: "Community starters",
-            collapsed: true,
-            items: [
-              {
-                label: "Next.js Starter (@ixartz)",
-                link: "https://github.com/ixartz/Next-js-Boilerplate",
-                attrs: { target: "_blank", class: "external-link" },
-              },
-              {
-                label: "next-forge (Vercel)",
-                link: "https://www.next-forge.com/",
-                attrs: { target: "_blank", class: "external-link" },
-              },
-              {
-                label: "Remix SaaS (@dev-xo)",
-                link: "https://github.com/dev-xo/remix-saas",
-                attrs: { target: "_blank", class: "external-link" },
-              },
-            ],
-          },
-        ],
+        label: "Overview",
+        link: "/coding-agents",
       },
       {
-        label: "Blueprints",
-        collapsed: true,
-        items: [
-          {
-            label: "AI quota control",
-            link: "/blueprints/ai-quota-control",
-          },
-          {
-            label: "Cookie banner",
-            link: "/blueprints/cookie-banner",
-          },
-          {
-            label: "Custom rule",
-            link: "/blueprints/defining-custom-rules",
-          },
-          {
-            label: "IP geolocation",
-            link: "/blueprints/ip-geolocation",
-          },
-          {
-            label: "Feedback form",
-            link: "/blueprints/feedback-form",
-          },
-          {
-            label: "Malicious traffic",
-            link: "/blueprints/malicious-traffic",
-          },
-          {
-            label: "Per user quotas and limits",
-            link: "/blueprints/per-user-quotas",
-          },
-          {
-            label: "Payment form",
-            link: "/blueprints/payment-form",
-          },
-          {
-            label: "Sampling traffic",
-            link: "/blueprints/sampling",
-          },
-          {
-            label: "VPN and proxy",
-            link: "/blueprints/vpn-proxy-detection",
-          },
-        ],
+        label: "Claude Code",
+        link: "/coding-agents/claude-code",
+      },
+      {
+        label: "GitHub Copilot",
+        link: "/coding-agents/copilot",
+      },
+      {
+        label: "Coding agent policies",
+        link: "/coding-agents/policies",
       },
     ],
   },
   {
-    label: "Agent guards",
+    label: "Custom agents",
     collapsed: false,
     items: [
       {
@@ -242,16 +114,42 @@ export const main = [
         ],
       },
       {
-        label: "Remote policies",
-        link: "/guards/remote-policies",
+        label: "Capture events",
+        link: "/guards/capture",
       },
       {
-        label: "Capture",
-        link: "/guards/capture",
+        label: "Observe agent activity",
+        link: "/observe",
       },
       {
         label: "Testing and reference",
         link: "/guards/reference",
+      },
+    ],
+  },
+  {
+    label: "Policies",
+    collapsed: false,
+    items: [
+      {
+        label: "Policy contract",
+        link: "/guards/remote-policies",
+      },
+      {
+        label: "Write policies in Rego",
+        link: "/guards/rego",
+      },
+      {
+        label: "Policy examples",
+        link: "/guards/policy-examples",
+      },
+      {
+        label: "Author and publish",
+        link: "/guards/authoring",
+      },
+      {
+        label: "Error codes",
+        link: "/guards/errors",
       },
     ],
   },
@@ -456,7 +354,7 @@ export const main = [
     ],
   },
   {
-    label: "Coding agent tools",
+    label: "Tools for AI",
     collapsed: false,
     items: [
       {
@@ -674,39 +572,6 @@ export const main = [
             link: "/redact/reference",
           },
         ],
-      },
-    ],
-  },
-  {
-    label: "Integrations",
-    collapsed: false,
-    items: [
-      {
-        label: "Better Auth",
-        link: "/integrations/better-auth",
-      },
-      {
-        label: "Clerk",
-        link: "/integrations/clerk",
-      },
-      {
-        label: "Fly.io",
-        link: "https://fly.io/docs/reference/arcjet/",
-        attrs: { target: "_blank", class: "external-link" },
-      },
-      {
-        label: "Netlify",
-        link: "https://www.netlify.com/integrations/arcjet/",
-        attrs: { target: "_blank", class: "external-link" },
-      },
-      {
-        label: "OpenAI",
-        link: "/sdk/next/ai-protection/abuse-protection/",
-      },
-      {
-        label: "Vercel",
-        link: "https://vercel.com/integrations/arcjet",
-        attrs: { target: "_blank", class: "external-link" },
       },
     ],
   },

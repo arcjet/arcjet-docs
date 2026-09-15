@@ -1,18 +1,11 @@
 import os
 
-from arcjet.guard import DetectPromptInjection, TokenBucket, launch_arcjet_sync
+from arcjet.guard import launch_arcjet_sync, server_input
 from arcjet.guard.crewai import register_arcjet_hooks
 from crewai import Agent, Crew, Task
 from crewai.tools import tool
 
 arcjet = launch_arcjet_sync(key=os.environ["ARCJET_KEY"])
-inbound = DetectPromptInjection()
-lookup_limit = TokenBucket(
-    refill_rate=5,
-    interval_seconds=10,
-    max_tokens=10,
-    bucket="lookups",
-)
 
 
 @tool("lookup_order")
@@ -20,13 +13,6 @@ def lookup_order(order_id: str) -> dict:
     """Look up an order by ID."""
     return {"order_id": order_id, "status": "shipped"}
 
-
-register_arcjet_hooks(
-    guard=arcjet,
-    tools=["lookup_order"],
-    action="order.looked-up",
-    rules=[lookup_limit(key="orders", requested=1)],
-)
 
 agent = Agent(
     role="Order clerk",
@@ -42,12 +28,19 @@ task = Task(
 crew = Crew(agents=[agent], tasks=[task])
 
 
-def run_crew(user_text: str, order_id: str) -> str:
-    decision = arcjet.guard_sync(
-        label="message.received",
-        rules=[inbound(user_text)],
+def run_crew(user_id: str, owned_orders: list[str], order_id: str) -> str:
+    register_arcjet_hooks(
+        guard=arcjet,
+        tools=["lookup_order"],
+        # The action selects the policy you published.
+        action="order.looked-up",
+        # Actor and the order list come from trusted application state.
+        actor=user_id,
+        # Map only the values the policy needs.
+        inputs=lambda arguments, _ctx: {
+            "order_id": server_input.string(arguments["order_id"]),
+            "owned_orders": server_input.string_list(owned_orders),
+        },
     )
-    if decision.conclusion == "DENY" or decision.has_failed_open():
-        raise RuntimeError("Message blocked")
     result = crew.kickoff(inputs={"order_id": order_id})
     return str(result)

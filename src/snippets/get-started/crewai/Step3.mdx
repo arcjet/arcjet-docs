@@ -1,7 +1,10 @@
 import Step from "./Step3.py?raw";
 import { Code } from "@astrojs/starlight/components";
+import GuardPolicy from "../shared/GuardPolicy.mdx";
 
-Create a client, screen inbound text, and register `PRE_TOOL_CALL` with
-`register_arcjet_hooks`:
+<GuardPolicy />
+
+Then create a client and register the hook so Arcjet evaluates the policy
+before the tool runs:
 
 <Code code={Step} lang="py" title="agent.py" />

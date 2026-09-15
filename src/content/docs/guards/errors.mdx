@@ -1,0 +1,180 @@
+---
+title: "Policy error codes"
+description: "Reference for Arcjet agent guard policy diagnostics: compile-time AJR codes, validation AJV codes, and runtime AJP codes."
+---
+
+import { Aside } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+Agent guard policies report three families of stable codes. The family tells
+you where the problem is.
+
+| Family | Where it happens                     | What it stops                             |
+| ------ | ------------------------------------ | ----------------------------------------- |
+| `AJR`  | Compiling the Rego                   | Validation and publication                |
+| `AJV`  | Validating the policy document       | Publication                               |
+| `AJP`  | Evaluating a rule on a guard call    | That rule, and a live rule fails closed   |
+
+A code's meaning doesn't change once it's released, so you can match on a code
+programmatically. Match on the code, not the message, which is prose.
+
+## Runtime codes
+
+A rule that couldn't be evaluated carries an `AJP` code and a message on its
+result in the decision and in the Console.
+
+| Code      | The rule couldn't be evaluated because                     | What to do                                                                                      |
+| --------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| `AJP1001` | The SDK lacks the capability the policy needs                | Upgrade the SDK. A policy declaring a detector the SDK can't run needs a version that can.       |
+| `AJP1002` | The actor is missing or invalid                              | The policy requires an actor. Assert one from authenticated server-side state on the guard call. |
+| `AJP1003` | The request's inputs don't fit the declared contract         | A required input is missing, or a declared input has the wrong kind, exposure, or size, or the call carries more than 64 inputs. The message names the input. Compare the call with the policy's generated snippet. |
+| `AJP1004` | A model-backed detector was unavailable                      | Transient. Every rule that reads the detector reports it, not only the rule that names it.       |
+| `AJP1005` | A local result was incompatible or absent                    | The SDK's local evaluation didn't reach Arcjet, or it was stale against the current revision.    |
+| `AJP1006` | The policy expression couldn't be evaluated                  | The interpreter ran and failed. The message carries the fault and what to do about it. See [Read an expression failure](#read-an-expression-failure). |
+| `AJP1007` | The expression called a built-in with arguments it refuses   | A built-in error. The message names the built-in and the operand position. Test for the value's type before using it. |
+| `AJP1008` | The remote policy for this label couldn't be read            | Arcjet couldn't read the stored policy. Retry.                                                    |
+
+A live rule carrying any of these fails closed for a caller that enforces. A
+dry-run rule reports the code without affecting the decision.
+
+`AJP1001` is defined but never emitted: a caller without the policy capability
+gets no rule results at all, because there's nothing it could act on.
+
+### An undeclared input is a warning
+
+An input the policy doesn't declare isn't an error. It reaches no rule, so
+Arcjet drops it, evaluates the policy, and adds a non-fatal warning to the
+decision:
+
+| Code     | Meaning                                                                 |
+| -------- | ----------------------------------------------------------------------- |
+| `AJ1060` | The call carried an input the policy doesn't declare. The warning names it. |
+| `AJ1061` | The call carried an input whose name is outside the input-name grammar. Counted, never repeated back. |
+
+A typo in an optional input therefore doesn't fail the call closed, but the
+rule that reads the intended name sees nothing. When a rule you expect to fire
+never does, read the warnings on the decision.
+
+### Read an expression failure
+
+An `AJP1006` or `AJP1007` message carries three things: the code an SDK
+matches on, the interpreter fault that caused it, and what to do about it:
+
+```text
+Remote policy expression evaluation failed. AJR3020: policy evaluation exceeded
+its step budget. Simplify the rule. A comprehension or helper rule over a large
+input list is the usual cause.
+```
+
+The fault falls into one of five classes. Four are yours to fix, and the fifth
+is Arcjet's:
+
+| Class                    | What it means                                                                                  |
+| ------------------------ | ---------------------------------------------------------------------------------------------- |
+| Untyped input            | A value was not the type or range the expression assumed. `input` is untyped, so the compiler can't catch this. Test for the type before using the value. |
+| Evaluation bounds        | The policy is too expensive or too deeply nested for the request path. Simplify the rule.      |
+| What the policy produced | A `deny` rule produced something other than IDs of rules this policy declares.                 |
+| Conflicts                | Two rule bodies disagreed about one variable, or a comprehension about one object key.         |
+| Malformed artifact       | The stored artifact doesn't match what was published. Republish. If it recurs, contact support. |
+
+A remedy names the class of fix, not the line to change, because the runtime
+doesn't have the policy source. To find the line, add the failing input as a
+stored test in the Console and validate. The test runner uses the official
+Open Policy Agent evaluator and reports its message, which quotes the offending
+value because a test input is one you wrote.
+
+### Why an absent detector fails every dependent rule
+
+Every rule that depends on the detector reports `AJP1004`, not only the rules
+that name it. An expression reading
+`input.signals.prompt_injection.message_check.detected` isn't evaluated when
+that detector produced no verdict, because an absent signal would read as "not
+detected" and a live rule written to deny on detection would allow instead.
+
+### Why a built-in error is not an allow
+
+An expression can produce a value, be undefined, or hand a built-in arguments
+it refuses, such as an empty search string or a negative offset. Open Policy
+Agent aborts evaluation for the third, so the policy didn't decide and a live
+rule fails closed. Returning undefined instead would let
+`indexof(body, needle) == 0`, a "starts with" check, fire for an empty needle
+on a rule that was never evaluated.
+
+## Compile codes
+
+An `AJR` code comes from compiling the Rego, and appears when you validate or
+publish. Each one carries the position in your source.
+
+| Code      | Meaning                                                        |
+| --------- | ---------------------------------------------------------------- |
+| `AJR1001` | The Rego source is larger than 128 KiB                         |
+| `AJR1002` | The source doesn't parse                                       |
+| `AJR1003` | The policy doesn't declare `package arcjet.guard`               |
+| `AJR1005` | The source parses but doesn't compile                          |
+| `AJR1006` | The compiled plan uses a construct the runtime doesn't implement |
+| `AJR1007` | The compiled plan is larger than 512 KiB                       |
+| `AJR1008` | The policy compiles to more than 20,000 statements             |
+| `AJR1009` | The policy has more than 256 Rego rule definitions             |
+| `AJR1010` | The policy doesn't define `deny` as a partial set rule          |
+| `AJR1011` | `deny` can add a rule ID the policy doesn't declare             |
+| `AJR1012` | The policy nests deeper than 16 levels                         |
+| `AJR1013` | A declaration in the policy document is invalid                |
+
+Two of these come up far more than the rest.
+
+### AJR1011: an undeclared or computed rule ID
+
+The compiler proves statically that `deny` only adds literal strings drawn
+from the rule IDs the policy declares. The two ways to trip it:
+
+```rego
+# Denies with an ID the policy never declared.
+deny contains "extrenal-recipient" if {
+	input.values.external
+}
+
+# Computes an ID instead of writing a literal.
+deny contains concat("-", ["rule", input.values.kind]) if {
+	input.values.external
+}
+```
+
+Catching a typo at publication is better than a rule that silently never
+fires.
+
+### AJR1002 or AJR1005 on a built-in outside the profile
+
+Open Policy Agent itself rejects `regex.match`, `http.send`, the `time`
+family, `sprintf`, and everything else outside the profile's allowlist, so they
+arrive as a parse or compile error carrying its own message rather than a code
+of their own. For the allowlist, see
+<Link.Page href="/guards/rego#what-the-profile-allows">What the profile allows</Link.Page>.
+
+## Validation codes
+
+An `AJV` code comes from validating the policy document rather than the Rego.
+These are the ones you're most likely to see:
+
+| Code      | Meaning                                                   | What to do                                                                        |
+| --------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `AJV2007` | A detector requires a `SERVER` or `LOCAL` input           | Prompt injection needs a `SERVER` string; sensitive information needs a `LOCAL` one |
+| `AJV2008` | A rule's execution doesn't match its detector             | Execution is derived. Let the Console or the compiler set it                       |
+| `AJV2012` | The policy doesn't satisfy its stored tests               | Validate to list every failing test at once                                        |
+| `AJV2015` | A live rule needs at least one stored test                | Add a test, or leave every rule in dry run until you have one                      |
+| `AJV2016` | A coding agent policy executes on something other than Tool call or Prompt | Pick one of the two. Omit the setting for an application policy         |
+| `AJV2017` | The policy declares a detector kind that isn't available   | Choose a detector the site can run                                                 |
+
+`AJV2007` isn't a preference you can override. Prompt injection runs on the
+server and needs the raw value, SDK-local sensitive information runs in the SDK
+so the raw value never arrives, and the server-side kind reads a `SERVER`
+value.
+
+A compiler diagnostic quotes your own policy source, so Arcjet treats it as
+untrusted text. It's shown to you in the Console and travels to an MCP client
+in a field labeled as untrusted, but never reaches logs, metrics, or traces.
+
+## Related
+
+- <Link.Page href="/guards/rego">Write policies in Rego</Link.Page> – the profile and its exclusions
+- <Link.Page href="/guards/authoring">Author and publish policies</Link.Page> – validate, evaluate, and the publication gates
+- <Link.Page href="/guards/reference#policy-evaluation-status">Policy evaluation status</Link.Page> – the status Arcjet reports for the policy as a whole

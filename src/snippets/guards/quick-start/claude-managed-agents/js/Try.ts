@@ -2,6 +2,8 @@ import { runEmailAgent } from "./agent.js";
 
 // Keep identity and sensitive records on the server.
 const user = {
+  id: "customer-123",
+  allowedRecipients: ["approved@example.com"],
   // Your own conversation id. Arcjet correlates on this, not on the
   // Anthropic session id.
   conversationId: "conversation-123",

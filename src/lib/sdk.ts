@@ -672,14 +672,14 @@ export function variantOnlySdkAstroRedirects(): Record<string, string> {
     const prefix = `/sdk/${sdkConfig.key}`;
     const targetPrefix = `${prefix}/plus/${defaultVariant.key}`;
 
+    // `trailingSlash` is `ignore`, so one key per route covers both `/x` and
+    // `/x/`. Emitting both forms makes Astro report a route collision.
     redirects[prefix] = targetPrefix;
-    redirects[`${prefix}/`] = `${targetPrefix}/`;
 
     for (const hubPath of LEGACY_FRAMEWORK_HUB_PATHS) {
       const withSlash = normalizeDocHref(hubPath);
       const withoutSlash = withSlash.replace(/\/$/, "") || withSlash;
-      redirects[`${prefix}${withoutSlash}`] = `${targetPrefix}${withoutSlash}`;
-      redirects[`${prefix}${withSlash}`] = `${targetPrefix}${withSlash}`;
+      redirects[`${prefix}${withoutSlash}`] = `${targetPrefix}${withSlash}`;
     }
   }
 

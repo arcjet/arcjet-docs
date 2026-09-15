@@ -34,6 +34,17 @@
     // `genkit` pulls in `@genkit-ai/firebase`, and with it `firebase-admin`
     // and `@google-cloud/storage`. That tree carries around 60 transitive
     // advisories for one adapter's coverage, so it is not a dependency.
-    "src/snippets/**/genkit/**/*.ts"
+    "src/snippets/**/genkit/**/*.ts",
+    // Every JavaScript adapter policy takes `actor` and `inputs` as of
+    // arcjet/arcjet-js#6277, and these samples teach that contract. The
+    // installed `@arcjet/guard` 1.12.0 predates it, so its policy types
+    // reject the two options. Lift these once this repo moves to the release
+    // that ships them.
+    "src/snippets/**/claude-agent-sdk/js/*.ts",
+    "src/snippets/**/langchain/js/*.ts",
+    "src/snippets/**/langgraph/*.ts",
+    "src/snippets/**/mastra/*.ts",
+    "src/snippets/**/openai-agents/js/*.ts",
+    "src/snippets/**/vercel-eve/*.ts"
   ]
 }
