@@ -140,10 +140,14 @@ Remote rules are managed via the MCP server or Console – no code changes or re
 ### Guards (tool calls, agentic pipelines, queues)
 - Securing MCP server tool handlers? → guard() with rate limiting + prompt injection detection
 - Rate limiting per-user tool calls? → guard() with tokenBucket
-- Scanning tool inputs/outputs for PII? → guard() with sensitiveInfo
+- Scanning tool inputs/outputs for PII? → guard() with `localDetectSensitiveInfo()`
+  (JS) or `LocalDetectSensitiveInfo()` (Python). The HTTP `sensitiveInfo` /
+  `detect_sensitive_info` rule is not exported by the Guard SDK. Pass `allow`
+  or `deny`, and a `backend` for any entity type beyond the default four.
 - Detecting prompt injection in agent tool results? → guard() with detectPromptInjection
 - Recording that an allowed action happened? → capture() / Capture (batched, best-effort)
 - Moderating untrusted text at a tool boundary? → moderateContent() (JS), ModerateContent() (Python), or GuardModerateContent (Go).
+- Using an agent framework that owns the tool loop? → the framework adapter, not a raw guard() call. See "Agent framework adapters".
 
 Add guard protection with the skill:
 ```bash
@@ -156,24 +160,25 @@ Go SDK: https://github.com/arcjet/arcjet-go
 
 ## Quick start – choose your framework
 
-Each link below directs to the quick start guide with a framework-specific view:
+Each link below directs to the SDK-scoped quick start guide for that framework:
 
-- [Astro quick start](https://docs.arcjet.com/get-started?f=astro)
-- [Bun quick start](https://docs.arcjet.com/get-started?f=bun)
-- [Deno quick start](https://docs.arcjet.com/get-started?f=deno)
-- [Fastify quick start](https://docs.arcjet.com/get-started?f=fastify)
+- [Astro quick start](https://docs.arcjet.com/sdk/astro/get-started/)
+- [Bun quick start](https://docs.arcjet.com/sdk/bun/get-started/)
+- [Deno quick start](https://docs.arcjet.com/sdk/deno/get-started/)
+- [Fastify quick start](https://docs.arcjet.com/sdk/fastify/get-started/)
 - [Go SDK reference](https://docs.arcjet.com/reference/go)
-- [NestJS quick start](https://docs.arcjet.com/get-started?f=nest-js)
-- [Next.js quick start](https://docs.arcjet.com/get-started?f=next-js)
-- [Node.js quick start](https://docs.arcjet.com/get-started?f=node-js)
-- [Node.js + Express quick start](https://docs.arcjet.com/get-started?f=node-js-express)
-- [Node.js + Hono quick start](https://docs.arcjet.com/get-started?f=node-js-hono)
-- [Nuxt quick start](https://docs.arcjet.com/get-started?f=nuxt)
-- [Python FastAPI quick start](https://docs.arcjet.com/get-started?f=python-fastapi)
-- [Python Flask quick start](https://docs.arcjet.com/get-started?f=python-flask)
-- [React Router quick start](https://docs.arcjet.com/get-started?f=react-router)
-- [Remix quick start](https://docs.arcjet.com/get-started?f=remix)
-- [SvelteKit quick start](https://docs.arcjet.com/get-started?f=sveltekit)
+- [NestJS quick start](https://docs.arcjet.com/sdk/nest/get-started/)
+- [Next.js quick start](https://docs.arcjet.com/sdk/next/get-started/)
+- [Node.js quick start](https://docs.arcjet.com/sdk/node/get-started/)
+- [Node.js + Express quick start](https://docs.arcjet.com/sdk/node/plus/express/get-started/)
+- [Node.js + Hono quick start](https://docs.arcjet.com/sdk/node/plus/hono/get-started/)
+- [Nuxt quick start](https://docs.arcjet.com/sdk/nuxt/get-started/)
+- [Python + FastAPI quick start](https://docs.arcjet.com/sdk/python/plus/fastapi/get-started/)
+- [Python + Flask quick start](https://docs.arcjet.com/sdk/python/plus/flask/get-started/)
+- [React Router quick start](https://docs.arcjet.com/sdk/react-router/get-started/)
+- [Remix quick start](https://docs.arcjet.com/sdk/remix/get-started/)
+- [SvelteKit quick start](https://docs.arcjet.com/sdk/sveltekit/get-started/)
+- [Bun + Hono quick start](https://docs.arcjet.com/sdk/bun/plus/hono/get-started/)
 
 Full docs: https://docs.arcjet.com
 
@@ -197,11 +202,12 @@ Full docs: https://docs.arcjet.com
 | Astro          | `@arcjet/astro`        | `npx astro add @arcjet/astro`          |
 | Python FastAPI | `arcjet`               | `pip install arcjet`                   |
 | Python Flask   | `arcjet`               | `pip install arcjet flask`             |
-| Go             | `github.com/arcjet/arcjet-go` | `go get github.com/arcjet/arcjet-go@latest` |
+| Go             | `github.com/arcjet/arcjet-go` | `go get github.com/arcjet/arcjet-go@v1.0.0-rc.2` |
 
 ## Go SDK
 
-The Go SDK is pre-release. Version 0.1.0 requires Go 1.25 or later and supports
+The Go SDK is pre-release. The current pre-release is v1.0.0-rc.2, which
+requires Go 1.25 or later and supports
 `net/http` request protection plus Guard protection for non-HTTP operations.
 Create clients once at package scope and reuse them.
 
@@ -236,7 +242,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
         arcjet.WithRequested(1),
     )
     if err != nil {
-        // Arcjet fails open. Log the error and apply your fallback policy.
+        // Fail-open: ERROR decision plus err. Log it and continue.
         log.Printf("arcjet: %v", err)
     } else if decision.IsDenied() {
         status := http.StatusForbidden
@@ -260,6 +266,12 @@ Call `Protect(r.Context(), r, ...)` once inside each handler. Use
 `WithCharacteristics`, `WithRequested`, `WithDetectPromptInjectionMessage`,
 `WithSensitiveInfoValue`, and `WithCorrelationId` for dynamic inputs.
 
+On a transport failure, `Protect` returns an `ERROR` conclusion `Decision`
+together with `err`. `IsAllowed()` and `IsErrored()` are both true;
+`IsDenied()` is false. If the client or request is nil, `Protect` returns the
+zero `Decision`. Log `err` and deny only when `IsDenied()` is true. Use
+`IsErrored()` to distinguish a real allow from a fail-open error.
+
 ### Go Guard protection
 
 ```go
@@ -268,7 +280,7 @@ var guard = must(arcjet.NewGuardClient(arcjet.GuardConfig{
 }))
 
 var promptScan = must(arcjet.GuardPromptInjection(
-    arcjet.GuardPromptInjectionOptions{Mode: arcjet.ModeLive},
+    arcjet.GuardPromptInjectionOptions{Mode: arcjet.ModeLive}, // required
 ))
 
 decision, err := guard.Guard(ctx, arcjet.GuardRequest{
@@ -297,6 +309,11 @@ local rules, and content moderation (`GuardModerateContent`). Use `Capture`
 to record what happened after a Guard call. Labels and buckets must be
 lowercase slugs containing letters, digits, dashes, or dots. Standard
 `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` variables configure outbound calls.
+
+Every Guard rule constructor requires `Mode` (`ModeLive` or `ModeDryRun`). An
+empty `Mode` returns `ErrInvalidMode`. HTTP `Protect` rules default an empty
+`Mode` to `ModeDryRun`. JavaScript and Python Guard rules default to `LIVE`;
+Go returns a constructor error instead of defaulting to `LIVE`.
 
 ## Common setup for all frameworks
 
@@ -344,12 +361,12 @@ import { convertToModelMessages, isTextUIPart, streamText } from "ai";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
-  // Track budgets per user — replace "userId" with any stable identifier
+  // Track budgets per user – replace "userId" with any stable identifier
   characteristics: ["userId"],
   rules: [
-    // Shield protects against common web attacks e.g. SQL injection
+    // Shield protects against common web attacks such as SQL injection
     shield({ mode: "LIVE" }),
-    // Block all automated clients — bots inflate AI costs
+    // Block all automated clients – bots inflate AI costs
     detectBot({
       mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
       allow: [], // Block all bots. See https://arcjet.com/bot-list
@@ -365,7 +382,7 @@ const aj = arcjet({
     sensitiveInfo({
       mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
       // Block PII types that should never appear in AI prompts.
-      // Remove types your app legitimately handles (e.g. EMAIL for a support bot).
+      // Remove types your app legitimately handles (for example, EMAIL for a support bot).
       deny: ["CREDIT_CARD_NUMBER", "EMAIL"],
     }),
     // Detect prompt injection attacks before they reach your AI model
@@ -416,7 +433,7 @@ export async function POST(req: Request) {
       return new Response("Sensitive information detected", { status: 400 });
     } else if (decision.reason.isPromptInjection()) {
       return new Response(
-        "Prompt injection detected — please rephrase your message",
+        "Prompt injection detected – rephrase your message",
         { status: 400 },
       );
     } else {
@@ -443,7 +460,7 @@ tokenizer like `tiktoken` for accurate counts.
 ### Install
 
 ```shell
-npm i @arcjet/node @arcjet/inspect
+npm i @arcjet/node @arcjet/inspect express
 ```
 
 ### Configure
@@ -1238,9 +1255,9 @@ wrap the fetch handler with `aj.handler()`.
 ### Install
 
 ```shell
-pip install arcjet
+pip install arcjet fastapi uvicorn
 # or with uv:
-uv add arcjet fastapi uvicorn langchain langchain-openai
+uv add arcjet fastapi uvicorn
 ```
 
 ### Configure
@@ -1335,7 +1352,7 @@ uvicorn main:app --reload
 ```shell
 pip install arcjet flask
 # or with uv:
-uv add arcjet flask langchain langchain-openai
+uv add arcjet flask
 ```
 
 ### Configure
@@ -1431,6 +1448,10 @@ flask run
 Every rule accepts `mode: "LIVE" | "DRY_RUN"`. In `DRY_RUN` mode the rule
 evaluates and returns a decision but never blocks. Use `DRY_RUN` for testing.
 
+In Python, HTTP rule factories require `mode`. Omitting it raises
+`TypeError`. Guard constructors default to `Mode.LIVE`. JavaScript HTTP
+rules default to `"DRY_RUN"`.
+
 ### shield(options)
 
 Protects against common web attacks, including SQL injection and XSS.
@@ -1475,7 +1496,9 @@ Bot categories use the `CATEGORY:` prefix. Full list: https://arcjet.com/bot-lis
 
 Python: `detect_bot(mode=Mode.LIVE, allow=[BotCategory.SEARCH_ENGINE])` or
 `detect_bot(mode=Mode.LIVE, allow=["CURL"])`. Use `BotCategory.<NAME>` for
-categories or pass specific bot name strings directly.
+categories or pass specific bot name strings directly. Pass exactly one of
+`allow` or `deny`. `allow=[]` blocks every detected bot. Passing neither list
+or both lists raises `ValueError`.
 
 ### tokenBucket(options)
 
@@ -1629,8 +1652,19 @@ const decision = await aj.protect(req, {
 Parameters:
 - `mode` (optional): `"LIVE"` or `"DRY_RUN"`
 
+JavaScript accepts only `mode`. `threshold` and `score` are removed on JS SDK
+`main` – drop them on upgrade. The core SDK ignores leftover `threshold`.
+`@arcjet/astro` Zod `.strict()` throws at startup if `threshold` is still in
+the integration config.
+
+The verdict is binary: `decision.reason.isPromptInjection()` or
+`decision.reason.injectionDetected`.
+
 Python: `detect_prompt_injection(mode=Mode.LIVE)` with
-`detect_prompt_injection_message=message` at protect() time.
+`detect_prompt_injection_message=message` at protect() time. `mode` is
+required: omitting it or passing `threshold=` raises `TypeError`. Drop
+`threshold`. `PromptInjectionReason.score` remains deprecated. Guard
+`DetectPromptInjection` defaults to `LIVE`.
 
 ### validateEmail(options)
 
@@ -1660,7 +1694,9 @@ Parameters:
 Valid email types: `DISPOSABLE`, `FREE`, `NO_MX_RECORDS`, `NO_GRAVATAR`, `INVALID`
 
 Python: `validate_email(mode=Mode.LIVE, deny=[EmailType.DISPOSABLE, EmailType.INVALID, EmailType.NO_MX_RECORDS])`
-At protect() time: `email="user@example.com"`
+At protect() time: `email="user@example.com"`. Pass exactly one of `allow` or
+`deny`. `allow=[]` allows no email types. Passing neither list or both lists
+raises `ValueError`.
 
 ### protectSignup(options)
 
@@ -1723,8 +1759,7 @@ aj = arcjet(
 )
 ```
 
-At protect() time: `email="user@example.com"`. The helper is on the Python SDK
-`main` branch. It is not in published `arcjet` 0.9.0 or `0.10.0b1`.
+At protect() time: `email="user@example.com"`.
 
 ### filter(options)
 
@@ -1778,6 +1813,7 @@ if (decision.isDenied()) {
   decision.reason.isSensitiveInfo()  // PII detected
   decision.reason.isEmail()          // Email validation failed
   decision.reason.isPromptInjection() // Prompt injection detected
+  decision.reason.injectionDetected  // Binary prompt-injection verdict
   decision.reason.isFilterRule()     // Filter rule matched
 }
 ```
@@ -1786,7 +1822,7 @@ if (decision.isDenied()) {
 
 ```ts
 if (decision.isErrored()) {
-  // Arcjet fails open — log the error and allow the request
+  // Arcjet fails open – log the error and allow the request
   console.error("Arcjet error", decision.reason.message);
 }
 ```
@@ -1879,10 +1915,10 @@ Create one Arcjet instance and add route-specific rules with `withRule()`
 (JS) or `with_rule()` (Python). The Python clone shares `DecisionCache`,
 key, characteristics, and transport. The original client is unchanged.
 `with_rule()` accepts a single rule or a sequence of rules. HTTP Python
-rule factories require `mode`. This method is on Python SDK `main`.
+rule factories require `mode`.
 
 ```ts
-// lib/arcjet.ts — create and export a base instance
+// lib/arcjet.ts – create and export a base instance
 import arcjet, {
   detectBot,
   fixedWindow,
@@ -1901,7 +1937,7 @@ export default arcjet({
 ```
 
 ```ts
-// app/api/chat/route.ts — add route-specific rules
+// app/api/chat/route.ts – add route-specific rules
 import arcjet, { detectBot, fixedWindow } from "@/lib/arcjet";
 
 const aj = arcjet
@@ -2011,7 +2047,7 @@ Guards apply Arcjet security rules inside AI agent tool calls, MCP tool
 handlers, queue workers, and anywhere else you process untrusted input without an
 HTTP request. Pass inputs directly, get a decision back.
 
-Supported languages: **JavaScript / TypeScript** (`@arcjet/guard` >= 1.4.0), **Python** (`arcjet` >= 0.7.0), and **Go** (`arcjet-go` >= 0.1.0, pre-release).
+Supported languages: **JavaScript / TypeScript** (`@arcjet/guard`), **Python** (the `arcjet` package), and **Go** (`arcjet-go`, pre-release).
 
 ### JavaScript / TypeScript example
 
@@ -2104,6 +2140,143 @@ For the full API reference, read the installed library source:
 - JS/TS: `node_modules/@arcjet/guard`
 - Python: `arcjet.guard` module
 
+### Agent framework adapters
+
+The examples above call `guard()` directly. When the agent framework owns the
+tool loop, use its adapter instead: the wrapper sits between the model's
+generated arguments and the tool's own handler, so a denial stops the side
+effect and returns an envelope the model can read. Framework wrappers take
+`action`; direct `guard()` calls take `label` for the same slug.
+
+Every adapter page below documents one integration and selects the language
+with a tab where both a JavaScript and a Python adapter exist.
+
+| Framework | JavaScript import | Python import | Deny point |
+| --- | --- | --- | --- |
+| Vercel AI SDK | `@arcjet/guard/vercel-ai/v7` | – | `guardTool`, `guardAction` |
+| LangChain | `@arcjet/guard/langchain/v1` | `arcjet.guard.langchain` | `guardTool` / `guard_tool`, `guardMiddleware` / `ArcjetMiddleware` |
+| LangGraph | `@arcjet/guard/langgraph/v1` | – | `guardTool`, `guardToolNode` |
+| CrewAI | – | `arcjet.guard.crewai` | `register_arcjet_hooks` on `PRE_TOOL_CALL`, `guard_tool` |
+| Genkit | `@arcjet/guard/genkit/v1` | – | `guardTool`, `guardMiddleware` |
+| Google ADK | `@arcjet/guard/google-adk/v2` | – | `guardPlugin` (`beforeToolCallback`). No `guardTool` |
+| OpenAI Agents | `@arcjet/guard/openai-agents/v0` | `arcjet.guard.openai_agents` | `guardTool` on `invoke` / `guard_tool` on `tool_input_guardrails` |
+| Strands Agents | `@arcjet/guard/strands-agents/v1` | `arcjet.guard.strands_agents` | `guardTool` / `guard_tool`, `guardHooks` / `guard_hooks` |
+| TanStack AI | `@arcjet/guard/tanstack-ai/v0` | – | `guardMiddleware` (`onBeforeToolCall`). No `guardTool` |
+| Mastra | `@arcjet/guard/mastra/v1` | – | `guardProcessor`, `guardTool`, `guardHooks` |
+| Vercel Eve | `@arcjet/guard/vercel-eve/v0` | – | `guardInbound`, `guardTool`, `guardApproval` (connections) |
+| Claude Agent SDK | `@arcjet/guard/claude-agent-sdk/v0` | `arcjet.guard.claude_agent_sdk` | `guardTool` / `guard_tool`, `guardHooks` / `guard_hooks` (`UserPromptSubmit`, `PreToolUse`) |
+| Claude Managed Agents | `@arcjet/guard/claude-managed-agents/v0` | `arcjet.guard.claude_managed_agents` | `guardEvents` / `guard_events`, `guardCustomTool` / `guard_custom_tool` |
+
+Every JavaScript path is versioned. Unversioned aliases such as
+`@arcjet/guard/vercel-ai` do not resolve. Don't wrap the same tool with two
+adapters, and don't mix the JavaScript and Python adapter for one framework.
+
+A framework's human-in-the-loop confirmation is not a policy gate.
+`needsApproval`, `humanInTheLoopMiddleware`, `interrupt()`, `requireApproval`,
+`human_input`, `can_use_tool`, and `always_ask` all pause a run for a person.
+The runtime can skip some of them, and none of them evaluates a policy. Don't
+put Arcjet policy on any of them.
+
+The one exception is `guardApproval` on `@arcjet/guard/vercel-eve/v0`, which
+evaluates a policy on an Eve connection's `approval` field. A connection's
+tools have no local handler to wrap, so this is the only enforcement point
+that reaches them. `onAllow: "user-approval"` still requires a person after
+the policy passes. No other adapter has an approval helper.
+
+The wrappers fail closed: if Guard cannot be evaluated the tool does not run.
+Direct `guard()` fails open and reports `hasFailedOpen()` /
+`has_failed_open()`, so an `ALLOW` from a direct call is not proof the rules
+ran.
+
+### Common mistakes when writing Guard code
+
+These are the traps that produce code which looks correct, runs without an
+error, and enforces nothing.
+
+**Configure the local sensitive-information rule.** In Python,
+`LocalDetectSensitiveInfo()` with neither `allow` nor `deny` fails during
+local evaluation. The rule result is
+`RuleResultError(conclusion='ALLOW', reason='ERROR', code='AJ1203')` and the
+decision conclusion is `ALLOW`, so the check looks configured and blocks
+nothing. Only `has_failed_open()` reveals it. JavaScript
+`localDetectSensitiveInfo()` does work with no arguments. Always pass an
+explicit list in both languages.
+
+**The rule needs its own `backend`.** The default WASM backend detects
+`EMAIL`, `PHONE_NUMBER`, `IP_ADDRESS`, and `CREDIT_CARD_NUMBER`. Every other
+entity type needs a backend that supports it, such as Rampart. The rule does
+not inherit the client's `sensitiveInfoBackend` / `sensitive_info_backend`,
+so listing `BANK_ACCOUNT` or `ROUTING_NUMBER` without passing `backend` to
+the rule itself throws at construction. Share one instance:
+
+```ts
+const sensitiveInfoBackend = rampart();
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY!, sensitiveInfoBackend });
+const detectPii = localDetectSensitiveInfo({
+  deny: ["BANK_ACCOUNT", "ROUTING_NUMBER"],
+  backend: sensitiveInfoBackend,
+});
+```
+
+**Only some adapters map typed `inputs`.** A remote policy evaluates the
+typed inputs a guard call submits. In JavaScript only
+`@arcjet/guard/vercel-ai/v7` accepts `inputs` and `actor`; every other
+JavaScript adapter takes `action` and SDK `rules` only, so a remote policy
+has nothing to evaluate and none of its rules fire. Every Python adapter
+accepts `inputs`. Use SDK `rules` where `inputs` is unavailable, and don't
+assume a published policy is enforcing.
+
+The builders differ by language. JavaScript uses one `policyInput` namespace
+(`policyInput.server.string`, `policyInput.server.stringList`,
+`policyInput.local.string`). Python uses two module-level objects,
+`server_input` and `local_input` (`server_input.string`,
+`server_input.string_list`, `local_input.string`). `SERVER` inputs go to
+Arcjet; `LOCAL` inputs are evaluated on your machine, so the value never
+leaves your application.
+
+**The `inputs` and `actor` resolver arity varies by surface.** Python
+`guard_tool` calls the resolver with the arguments mapping alone. CrewAI's
+`register_arcjet_hooks` calls it with `(arguments, ctx)`, and LangChain's
+`guard_tool` with `(arguments, config)`.
+
+**Annotate the `rules` callback where `TInput` defaults to `unknown`.** On
+the Genkit, OpenAI Agents, and Strands Agents JavaScript adapters,
+`guardTool` cannot infer the tool input, so destructuring it is a type error.
+Write `rules: (input: { body: string }) => [detectPii(input.body)]`.
+
+**A missing decision is not a denial.** If the model asks a clarifying
+question instead of calling the guarded tool, nothing is sent, no guard call
+happens, and no decision is returned. That looks identical to a working
+guard. When verifying an integration, read the decision in the Console or
+your logs rather than concluding from the absence of a side effect. Give a
+test agent a system prompt that tells it to complete the request without
+follow-up questions, and to quote retrieved values verbatim: a model that
+masks sensitive values itself leaves the rule nothing to detect, and the
+guard then correctly allows.
+
+**Guarding one tool only helps if it is the only path.** If the same session
+also exposes an unguarded route to the capability, the model can take it. On
+the Claude Agent SDK, `settingSources: []` / `setting_sources=[]` drops
+CLAUDE.md and filesystem settings, and `strictMcpConfig: true` /
+`strict_mcp_config=True` drops inherited MCP servers. Both are needed.
+
+**Claude Agent SDK uses two distinct ids.** `ClaudeAgentOptions.sessionId` /
+`session_id` names a new SDK session and must be unique per run; reusing one
+fails with `Session ID ... is already in use`. The guard `sessionId` /
+`session_id` identifies the actor and can be long-lived. An authored
+`tool()` handler carries no session id of its own, so pass one to
+`guardTool`.
+
+**Claude Managed Agents correlates on your own id.**
+`claudeManagedAgentsContext` / `claude_managed_agents_context` drops
+Anthropic session and event ids (`sesn_…`, `sevt_…`), because they are not
+ids you created. Pass a conversation id your application owns. Anthropic's
+session id still addresses the session you send events to. In Python,
+`guard_events` has no `inbound` option: `action` and `rules` sit at the top
+level, it takes `send=`, and the callable it returns replaces `send` and
+raises `ArcjetDeniedError` on a denial. Pass an async client, because a
+blocking one makes the wrapper synchronous.
+
 ## Reference guides
 
 ### Features
@@ -2117,10 +2290,28 @@ For the full API reference, read the installed library source:
 - [Content moderation](https://docs.arcjet.com/content-moderation)
 - [Signup form protection](https://docs.arcjet.com/signup-protection)
 - [Filters](https://docs.arcjet.com/filters)
+- [AI protection](https://docs.arcjet.com/ai-protection)
 - [Guards](https://docs.arcjet.com/guards)
+- [Agent guard quick start](https://docs.arcjet.com/guards/quick-start)
+- [Agent guard integrations](https://docs.arcjet.com/guards/framework-integrations)
+- [Agent guard remote policies](https://docs.arcjet.com/guards/remote-policies)
+- [Agent guard testing and reference](https://docs.arcjet.com/guards/reference)
+- [Capture events](https://docs.arcjet.com/guards/capture)
+- [Vercel AI SDK agent guard](https://docs.arcjet.com/guards/vercel-ai)
 - [LangChain agent guard](https://docs.arcjet.com/guards/langchain)
 - [CrewAI agent guard](https://docs.arcjet.com/guards/crewai)
-- [Capture events](https://docs.arcjet.com/guards/capture)
+- [LangGraph agent guard](https://docs.arcjet.com/guards/langgraph)
+- [Genkit agent guard](https://docs.arcjet.com/guards/genkit)
+- [Google ADK agent guard](https://docs.arcjet.com/guards/google-adk)
+- [OpenAI Agents agent guard](https://docs.arcjet.com/guards/openai-agents)
+- [Strands Agents agent guard](https://docs.arcjet.com/guards/strands-agents)
+- [TanStack AI agent guard](https://docs.arcjet.com/guards/tanstack-ai)
+- [Vercel Eve agent guard](https://docs.arcjet.com/guards/vercel-eve)
+- [Mastra agent guard](https://docs.arcjet.com/guards/mastra)
+- [Claude Agent SDK agent guard](https://docs.arcjet.com/guards/claude-agent-sdk)
+- [Claude Managed Agents agent guard](https://docs.arcjet.com/guards/claude-managed-agents)
+- [Nosecone security headers](https://docs.arcjet.com/nosecone/quick-start)
+- [`@arcjet/redact`](https://docs.arcjet.com/redact/quick-start)
 
 ### SDKs
 

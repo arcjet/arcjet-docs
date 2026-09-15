@@ -4,8 +4,8 @@ Arcjet filters let you define custom security and traffic rules inside your appl
 
 You write expressions in a [domain-specific language](/filters/reference#expression-language) (DSL) that match against request fields. Filters can use:
 
-*   **Literal fields** - values directly from the request, such as the `user-agent` header or client IP address.
-*   **Reflected fields** - derived values based on Arcjet analysis, such as the client’s country or whether the IP belongs to a known VPN, proxy, or relay service.
+*   **Literal fields** – values directly from the request, such as the `user-agent` header or client IP address.
+*   **Reflected fields** – derived values based on Arcjet analysis, such as the client’s country or whether the IP belongs to a known VPN, proxy, or relay service.
 
 Other platforms provide similar rule engines at the CDN or network layer. Arcjet filters are different because you configure and run them inside your application code. This gives you full, dynamic control over what to allow or block, where, and when.
 
@@ -24,16 +24,16 @@ Use filters when you want to block or shape traffic in your application based on
 *   Apply different rules for high-risk IP ranges or ASNs.
 *   Combine multiple signals (for example, country + VPN + user agent) into a single rule.
 
-You can also access the `ip` field on an Arcjet decision and handle requests manually in your application code. The key difference is:
+You can also access the `ip` field on an Arcjet decision and handle requests manually in your application code. The two approaches differ as follows:
 
 *   **Filters** integrate blocking with other Arcjet rules.
 *   **`decision.ip` fields** are better for customizing the response, such as showing a specific message or challenge.
 
-See the [VPN & proxy detection blueprint](/blueprints/vpn-proxy-detection) for a concrete example.
+For a concrete example, see the [VPN and proxy detection blueprint](/blueprints/vpn-proxy-detection).
 
 Using the MCP server
 
-Filters can also be managed as [remote rules](/remote-rules) from the Arcjet dashboard or via the [Arcjet MCP server](/mcp-server) — no code changes or redeployment needed. Use `investigate-ip` to look up geo, ASN, and threat intelligence for a suspicious IP, then create a filter rule to block it immediately.
+Filters can also be managed as [remote rules](/remote-rules) from the Arcjet dashboard or through the [Arcjet MCP server](/mcp-server) – no code changes or redeployment needed. Use `investigate-ip` to look up geo, ASN, and threat intelligence for a suspicious IP, then create a filter rule to block it immediately.
 
 How Arcjet filters work
 -----------------------
@@ -70,7 +70,7 @@ Other, non-IP fields are analyzed locally by the SDK and do not require a networ
 
 Arcjet makes at most one call to the Cloud API per request, regardless of how many rules or filters you configure. The Cloud API is designed for high performance and low latency, and is deployed to multiple regions worldwide. The SDK automatically uses the closest region, so the total overhead is typically no more than 20-30 ms, often significantly less.
 
-See the [architecture reference](/architecture#arcjet-cloud-api) for more details.
+For more details, see the [architecture reference](/architecture#arcjet-cloud-api).
 
 ### Fingerprints and your concept of “user”
 
@@ -78,14 +78,14 @@ See the [architecture reference](/architecture#arcjet-cloud-api) for more detail
 
 Clients are tracked by configurable [fingerprints](/fingerprints) that include IP addresses by default. This means clients sharing the same IP address can be blocked or limited as a group.
 
-To ensure rules are applied correctly, choose fingerprint characteristics that align with the fields used in your filters and match your concept of a “user” (for example, IP only vs IP + user ID vs IP + session).
+So that Arcjet applies rules correctly, choose fingerprint characteristics that align with the fields used in your filters and match your concept of a “user”. For example, IP only, IP plus user ID, or IP plus session.
 
 Pricing
 -------
 
 [Section titled “Pricing”](#pricing)
 
-See the [pricing page](https://arcjet.com/pricing) for details.
+For details, see the [pricing page](https://arcjet.com/pricing).
 
 Discussion
 ----------
