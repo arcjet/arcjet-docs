@@ -111,7 +111,16 @@ merged page, which selects the language with a tab.
 - [Mastra agent guard](https://docs.arcjet.com/guards/mastra): JavaScript. `guardProcessor`, `guardTool`, and `guardHooks`.
 - [Claude Agent SDK agent guard](https://docs.arcjet.com/guards/claude-agent-sdk): JavaScript `guardTool` (MCP `CallToolResult` with `isError: true` plus `structuredContent`); Python `guard_tool` (JSON in content plus `is_error: True`, no `structuredContent`). Inbound `UserPromptSubmit` and `PreToolUse` through the hooks helper in both. A tool permission callback is not a policy gate.
 - [Claude Managed Agents agent guard](https://docs.arcjet.com/guards/claude-managed-agents): hosted harness, JavaScript and Python. Inbound `user.message` via `guardEvents` / `guard_events` before send, and custom tools via `guardCustomTool` / `guard_custom_tool` on `agent.custom_tool_use`. Default `always_allow` means no customer pre-exec for built-in bash or files. `always_ask` is opt-in HITL, not policy. Not the Claude Agent SDK.
-- [Agent guard remote policies](https://docs.arcjet.com/guards/remote-policies): centrally managed action policies using labels, actors, and typed inputs.
+- [Policy contract](https://docs.arcjet.com/guards/remote-policies): what an agent guard policy declares. Labels, actors, typed `SERVER` and `LOCAL` inputs, detectors, and `LIVE` or `DRY_RUN` rules.
+- [Write policies in Rego](https://docs.arcjet.com/guards/rego): the input document (`input.values`, `input.signals`), the `deny contains "<rule-id>" if { … }` shape, the built-in allowlist, and its exclusions (no regex, no division, no network or clock).
+- [Policy examples](https://docs.arcjet.com/guards/policy-examples): worked policies for email recipients, refunds, web fetch hosts, roles, database statements, bulk sends, file paths, MCP servers, and budgets.
+- [Author and publish policies](https://docs.arcjet.com/guards/authoring): the visual builder, plain English generation, stored tests, validate versus evaluate, publication gates, and the MCP tools.
+- [Policy error codes](https://docs.arcjet.com/guards/errors): `AJR` compile codes, `AJV` validation codes, `AJP` runtime codes, and the `AJ1060` undeclared-input warning.
+- [Secure coding agents](https://docs.arcjet.com/coding-agents): enforce policy on Claude Code and GitHub Copilot tool calls from the hooks they already fire. No SDK.
+- [Secure Claude Code](https://docs.arcjet.com/coding-agents/claude-code): managed settings, MDM, server-managed settings for cloud sessions, and repository pilots.
+- [Secure GitHub Copilot](https://docs.arcjet.com/coding-agents/copilot): the CLI, VS Code agent mode, and the cloud coding agent.
+- [Coding agent policies](https://docs.arcjet.com/coding-agents/policies): the fixed `coding-agent/v1` input contract, `tool_kind` normalization, and nine starter policies.
+- [Observe agent activity](https://docs.arcjet.com/observe): OpenTelemetry ingest at `https://decide.arcjet.com` and the Claude Compliance API. Records, never enforces.
 - [Capture events](https://docs.arcjet.com/guards/capture): record that an allowed action happened; batched, best-effort, never a security decision.
 - [Agent guard testing and reference](https://docs.arcjet.com/guards/reference): decisions, availability, fail behavior, nested JSON metadata, `registerArcjet` / `register_arcjet`, and the test client. Free `guard()` fail-opens if no client is registered.
 
@@ -123,7 +132,8 @@ traps that produce code which runs without error and enforces nothing:
 
 - Python `LocalDetectSensitiveInfo()` with neither `allow` nor `deny` fails local evaluation and the decision still concludes `ALLOW`. Always pass a list.
 - The sensitive-information rule does not inherit the client's backend. Entity types beyond `EMAIL`, `PHONE_NUMBER`, `IP_ADDRESS`, and `CREDIT_CARD_NUMBER` need `backend` on the rule too; share one Rampart instance with the client.
-- Typed `inputs` reach a remote policy from every Python adapter, but in JavaScript only from `@arcjet/guard/vercel-ai/v7`. Elsewhere use SDK `rules`; a published policy will not fire.
+- Every adapter takes `actor` and `inputs`, in JavaScript and Python. A policy does nothing until the call sends values under exactly the names it declares, so generate the call from the policy's contract (`get-guard-policy` over MCP, or the Console snippet) rather than transcribing it.
+- A remote rule attaches to `protect()` and reads the HTTP request. A policy attaches to `guard()` and reads typed inputs. A rate limit written as a policy needs a `guard()` call the application doesn't make, and a spend cap written as a filter rule can't see the amount.
 - No decision is not a denial. A model that declines to call the tool, or masks the values itself, leaves the guard nothing to evaluate and looks exactly like enforcement. Verify by reading the decision.
 - Guarding one tool only helps if it is the only path to the capability. On the Claude Agent SDK that needs `settingSources: []` and `strictMcpConfig: true` together.
 

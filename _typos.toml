@@ -5,3 +5,8 @@ extend-exclude = [
     "/tests/screenshot.test.ts-snapshots/screenshot-ai-protection-budget-contro-dark-chromium-darwin.png",
     "/tests/screenshot.test.ts-snapshots/screenshot-ai-protection-budget-contro-light-chromium-darwin.png"
 ]
+
+[default]
+# The AJR1011 example on /guards/errors misspells a rule ID on purpose, to show
+# what the compiler refuses. Ignore that one token rather than the word itself.
+extend-ignore-re = ["extrenal-recipient"]

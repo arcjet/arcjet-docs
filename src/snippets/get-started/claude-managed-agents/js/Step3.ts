@@ -1,30 +1,19 @@
 import Anthropic from "@anthropic-ai/sdk";
-import {
-  launchArcjet,
-  detectPromptInjection,
-  tokenBucket,
-} from "@arcjet/guard";
+import { launchArcjet, policyInput } from "@arcjet/guard";
 import {
   claudeManagedAgentsContext,
   guardCustomTool,
-  guardEvents,
 } from "@arcjet/guard/claude-managed-agents/v0";
 
 const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 const client = new Anthropic();
-
-const lookupLimit = tokenBucket({
-  bucket: "lookups",
-  refillRate: 5,
-  intervalSeconds: 10,
-  maxTokens: 10,
-});
 
 async function lookupOrder(input: { [key: string]: unknown }) {
   return { orderId: String(input.orderId), status: "shipped" };
 }
 
 export async function runAgent(
+  user: { id: string; orderIds: string[] },
   conversationId: string,
   sessionId: string,
   userText: string,
@@ -36,25 +25,11 @@ export async function runAgent(
 
   const stream = await client.beta.sessions.events.stream(sessionId);
 
-  // Anthropic runs the tool loop, so there is no PreToolUse hook. This
-  // screens the prompt and sends it only if the guard allows.
-  const inbound = await guardEvents(
-    arcjet,
-    {
-      events: [
-        { type: "user.message", content: [{ type: "text", text: userText }] },
-      ],
-      inbound: {
-        action: "message.received",
-        rules: ({ text }) => [detectPromptInjection()(text)],
-      },
-      context,
-    },
-    (body) => client.beta.sessions.events.send(sessionId, body),
-  );
-  if (!inbound.allowed) {
-    throw new Error(inbound.message);
-  }
+  await client.beta.sessions.events.send(sessionId, {
+    events: [
+      { type: "user.message", content: [{ type: "text", text: userText }] },
+    ],
+  });
 
   for await (const event of stream) {
     // This agent has one tool. Once you add a second, dispatch on
@@ -72,10 +47,15 @@ export async function runAgent(
             client.beta.sessions.events.send(sessionId, { events: [result] }),
         },
         {
+          // The action selects the policy you published.
           action: "order.looked-up",
-          rules: (input) => [
-            lookupLimit({ key: String(input.orderId), requested: 1 }),
-          ],
+          // Actor and the order list come from trusted application state.
+          actor: user.id,
+          // Map only the values the policy needs.
+          inputs: (input) => ({
+            order_id: policyInput.server.string(String(input.orderId)),
+            owned_orders: policyInput.server.stringList(user.orderIds),
+          }),
           context,
         },
       );

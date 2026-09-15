@@ -1,0 +1,173 @@
+---
+title: "Secure GitHub Copilot"
+description: "Install Arcjet hooks for GitHub Copilot in the CLI, VS Code agent mode, and the cloud coding agent, lock them for an organization, and verify."
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+
+Arcjet integrates into GitHub Copilot sessions through hooks that fire
+for different actions like prompts and tool calls. This allows Arcjet to
+observe activity, enforce policy, and record actions taken by developers
+without requiring any changes to the developer's workflow.
+
+<WhatIsArcjet />
+
+## Before you start
+
+[Create a free Arcjet account](https://console.arcjet.com) then use the key to
+authenticate the Arcjet hooks. It is semi-secret, but can be distributed
+to multiple devices and team members through environment variables or
+configuration management.
+
+## Install the hooks
+
+Put this file in the repository as `.github/hooks/arcjet.json`:
+
+```json title=".github/hooks/arcjet.json"
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "type": "http",
+        "url": "https://decide.arcjet.com/v1/agent-hooks/copilot?event=pre-tool-use&surface=cli",
+        "headers": {
+          "Authorization": "Bearer $ARCJET_KEY",
+          "X-Arcjet-Principal": "$USER"
+        },
+        "allowedEnvVars": ["ARCJET_KEY", "USER"],
+        "timeoutSec": 5
+      }
+    ],
+    "permissionRequest": [
+      {
+        "type": "http",
+        "url": "https://decide.arcjet.com/v1/agent-hooks/copilot?event=permission-request&surface=cli",
+        "headers": {
+          "Authorization": "Bearer $ARCJET_KEY",
+          "X-Arcjet-Principal": "$USER"
+        },
+        "allowedEnvVars": ["ARCJET_KEY", "USER"],
+        "timeoutSec": 5
+      }
+    ],
+    "userPromptSubmitted": [
+      {
+        "type": "http",
+        "url": "https://decide.arcjet.com/v1/agent-hooks/copilot?event=user-prompt-submit&surface=cli",
+        "headers": {
+          "Authorization": "Bearer $ARCJET_KEY",
+          "X-Arcjet-Principal": "$USER"
+        },
+        "allowedEnvVars": ["ARCJET_KEY", "USER"],
+        "timeoutSec": 5
+      }
+    ],
+    "userPromptTransformed": [
+      {
+        "type": "http",
+        "url": "https://decide.arcjet.com/v1/agent-hooks/copilot?event=user-prompt-transformed&surface=cli",
+        "headers": {
+          "Authorization": "Bearer $ARCJET_KEY",
+          "X-Arcjet-Principal": "$USER"
+        },
+        "allowedEnvVars": ["ARCJET_KEY", "USER"],
+        "timeoutSec": 5
+      }
+    ],
+    "postToolUse": [
+      {
+        "type": "http",
+        "url": "https://decide.arcjet.com/v1/agent-hooks/copilot?event=post-tool-use&surface=cli",
+        "headers": {
+          "Authorization": "Bearer $ARCJET_KEY",
+          "X-Arcjet-Principal": "$USER"
+        },
+        "allowedEnvVars": ["ARCJET_KEY", "USER"],
+        "timeoutSec": 5
+      }
+    ],
+    "agentStop": [
+      {
+        "type": "http",
+        "url": "https://decide.arcjet.com/v1/agent-hooks/copilot?event=stop&surface=cli",
+        "headers": {
+          "Authorization": "Bearer $ARCJET_KEY",
+          "X-Arcjet-Principal": "$USER"
+        },
+        "allowedEnvVars": ["ARCJET_KEY", "USER"],
+        "timeoutSec": 5
+      }
+    ],
+    "sessionStart": [
+      {
+        "type": "http",
+        "url": "https://decide.arcjet.com/v1/agent-hooks/copilot?event=session-start&surface=cli",
+        "headers": {
+          "Authorization": "Bearer $ARCJET_KEY",
+          "X-Arcjet-Principal": "$USER"
+        },
+        "allowedEnvVars": ["ARCJET_KEY", "USER"],
+        "timeoutSec": 5
+      }
+    ],
+    "sessionEnd": [
+      {
+        "type": "http",
+        "url": "https://decide.arcjet.com/v1/agent-hooks/copilot?event=session-end&surface=cli",
+        "headers": {
+          "Authorization": "Bearer $ARCJET_KEY",
+          "X-Arcjet-Principal": "$USER"
+        },
+        "allowedEnvVars": ["ARCJET_KEY", "USER"],
+        "timeoutSec": 5
+      }
+    ]
+  }
+}
+```
+
+`allowedEnvVars` allows `$ARCJET_KEY` and `$USER` to be used in the hook headers. Export `ARCJET_KEY` where the agent runs, or replace the header with a literal
+value in a file only an administrator can edit. Never commit a literal key.
+
+`X-Arcjet-Principal` attributes a session to a developer. It's untrusted, but useful extra metadata. `$USER` is unset on
+Windows, so use `$USERNAME` there and add it to both `allowedEnvVars` lists.
+
+## Per surface
+
+### VS Code
+
+[Agent hooks in VS Code are in preview](https://code.visualstudio.com/docs/agent-customization/hooks) and do not support HTTP hook types, so cannot be used with Arcjet.
+
+### Copilot CLI
+
+The CLI reads `.github/hooks/*.json` from the repository and honors HTTP
+entries as written. For an administrator lock, put the same JSON in
+`/etc/github-copilot/policy.d/arcjet.json`, root-owned and not group- or
+world-writable. Users can't disable a policy hook.
+
+### Cloud coding agent
+
+The cloud agent runs `.github/hooks/*.json` from the repository's default
+branch, so the hooks apply once the file is merged. Add a firewall allow
+rule for `decide.arcjet.com` under the repository or organization's internet access settings.
+
+## Verify the install
+
+<Steps>
+
+1. Start a Copilot session in a repository that carries the hook file and ask
+   it to run a harmless command, such as listing a directory.
+
+2. Open the site's **Activity** in the [Arcjet Console](https://console.arcjet.com)
+   and confirm the session and the tool call appear.
+
+</Steps>
+
+## Related
+
+- <Link.Page href="/coding-agents">Secure coding agents</Link.Page> – the endpoint, the events, and where enforcement stops
+- <Link.Page href="/coding-agents/policies">Coding agent policies</Link.Page> – the input contract and the starter policies
+- <Link.Page href="/coding-agents/claude-code">Secure Claude Code</Link.Page>

@@ -8,6 +8,7 @@ import { FastApi as IconFastApi } from "@/components/icons/tech/FastApi";
 import { Fastify as IconFastify } from "@/components/icons/tech/Fastify";
 import { Flask as IconFlask } from "@/components/icons/tech/Flask";
 import { Genkit as IconGenkit } from "@/components/icons/tech/Genkit";
+import { GitHub as IconGitHub } from "@/components/icons/tech/GitHub";
 import { GoogleAdk as IconGoogleAdk } from "@/components/icons/tech/GoogleAdk";
 import { LangChain as IconLangChain } from "@/components/icons/tech/LangChain";
 import { LangGraph as IconLangGraph } from "@/components/icons/tech/LangGraph";
@@ -25,7 +26,7 @@ import { TanStackAi as IconTanStackAi } from "@/components/icons/tech/TanStackAi
 import { VercelAi as IconVercelAi } from "@/components/icons/tech/VercelAi";
 import { VercelEve as IconVercelEve } from "@/components/icons/tech/VercelEve";
 import { frameworks, getStoredFramework, type FrameworkKey } from "@/lib/prefs";
-import { hrefForLegacyFrameworkKey } from "@/lib/sdk";
+import { GUARD_SDK_KEYS, hrefForLegacyFrameworkKey } from "@/lib/sdk";
 import { queryParamFramework } from "@/store";
 import { useStore } from "@nanostores/react";
 import type { ForwardedRef, PropsWithChildren, ReactNode } from "react";
@@ -38,6 +39,90 @@ interface FrameworkLinksProps extends PropsWithChildren {
   exclude?: FrameworkKey[];
   path?: string;
   alwaysShow?: boolean;
+  grouped?: boolean;
+}
+
+/**
+ * Coding agents Arcjet onboards through the hooks they already fire. They
+ * are not frameworks in `prefs`: nothing on these pages switches by them, so
+ * each is a plain link to its own guide.
+ */
+const codingAgents = [
+  {
+    key: "claude-code",
+    label: "Claude Code",
+    href: "/coding-agents/claude-code",
+    icon: <IconClaudeAgentSdk />,
+  },
+  {
+    key: "github-copilot",
+    label: "GitHub Copilot",
+    href: "/coding-agents/copilot",
+    icon: <IconGitHub />,
+  },
+] as const;
+
+const guardSdkKeys: ReadonlySet<string> = new Set(GUARD_SDK_KEYS);
+
+function iconFor(key: FrameworkKey): ReactNode {
+  switch (key) {
+    case "astro":
+      return <IconAstro />;
+    case "bun":
+    case "bun-hono":
+      return <IconBun />;
+    case "deno":
+      return <IconDeno />;
+    case "fastify":
+      return <IconFastify />;
+    case "genkit":
+      return <IconGenkit />;
+    case "nest-js":
+      return <IconNestJs />;
+    case "next-js":
+      return <IconNextJs />;
+    case "node-js":
+    case "node-js-express":
+    case "node-js-hono":
+      return <IconNodeJs />;
+    case "nuxt":
+      return <IconNuxt />;
+    case "python-fastapi":
+      return <IconFastApi />;
+    case "python-flask":
+      return <IconFlask />;
+    case "react-router":
+      return <IconReactRouter />;
+    case "remix":
+      return <IconRemix />;
+    case "strands-agents":
+      return <IconStrandsAgents />;
+    case "google-adk":
+      return <IconGoogleAdk />;
+    case "sveltekit":
+      return <IconSvelteKit />;
+    case "tanstack-ai":
+      return <IconTanStackAi />;
+    case "claude-agent-sdk":
+    case "claude-managed-agents":
+      return <IconClaudeAgentSdk />;
+    case "crewai":
+      return <IconCrewAi />;
+    case "langchain":
+      return <IconLangChain />;
+    case "langgraph":
+      return <IconLangGraph />;
+    case "mastra":
+      return <IconMastra />;
+    case "openai-agents":
+      return <IconOpenAiAgents />;
+    case "vercel-ai":
+      return <IconVercelAi />;
+    case "vercel-eve":
+      return <IconVercelEve />;
+    default:
+      return "";
+  }
 }
 
 /**
@@ -49,6 +134,7 @@ interface FrameworkLinksProps extends PropsWithChildren {
  * @param exclude - A list of framework to exclude from display.
  * @param path - An optional path to link to, defaults to the same page.
  * @param alwaysShow - Show the links even if a framework is selected or stored, defaults to false.
+ * @param grouped - Split the links into coding agents, AI agent frameworks, and native SDKs, defaults to false.
  */
 const FrameworkLinks = forwardRef(
   (
@@ -57,6 +143,7 @@ const FrameworkLinks = forwardRef(
       exclude,
       path = "",
       alwaysShow,
+      grouped,
       ...props
     }: FrameworkLinksProps,
     ref: ForwardedRef<HTMLDivElement>,
@@ -91,125 +178,79 @@ const FrameworkLinks = forwardRef(
 
     let cls = "FrameworkLinks " + styles.FrameworkLinks;
 
+    const visible = frameworks.filter((f) => !exclude?.includes(f.key));
+
+    const renderFrameworks = (list: typeof visible) =>
+      list.map((f, idx) => (
+        <Button
+          key={f.key + idx}
+          as="link"
+          size="lg"
+          href={hrefForLegacyFrameworkKey(f.key, basePath || path || "/")}
+          decoratorLeft={iconFor(f.key)}
+        >
+          {f.label}
+        </Button>
+      ));
+
+    if (grouped) {
+      const agentFrameworks = visible.filter((f) => guardSdkKeys.has(f.key));
+      const nativeSdks = visible.filter((f) => !guardSdkKeys.has(f.key));
+
+      return (
+        !hide && (
+          <div ref={ref} className={cls} {...props}>
+            <h2 id="choose-a-framework">{title}</h2>
+            <div className={styles.Group}>
+              <h3 id="coding-agents">Coding agents</h3>
+              <p>Enforce security policies on developer coding agents.</p>
+              <div className={styles.Links}>
+                {codingAgents.map((agent) => (
+                  <Button
+                    key={agent.key}
+                    as="link"
+                    size="lg"
+                    href={agent.href}
+                    decoratorLeft={agent.icon}
+                  >
+                    {agent.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            {agentFrameworks.length > 0 && (
+              <div className={styles.Group}>
+                <h3 id="ai-agent-frameworks">AI agent frameworks</h3>
+                <p>
+                  Protect custom-built agents with direct framework
+                  integrations.
+                </p>
+                <div className={styles.Links}>
+                  {renderFrameworks(agentFrameworks)}
+                </div>
+              </div>
+            )}
+            {nativeSdks.length > 0 && (
+              <div className={styles.Group}>
+                <h3 id="native-sdks">Native SDKs</h3>
+                <p>
+                  Create custom integrations and protect your application code.
+                </p>
+                <div className={styles.Links}>
+                  {renderFrameworks(nativeSdks)}
+                </div>
+              </div>
+            )}
+          </div>
+        )
+      );
+    }
+
     return (
       !hide && (
         <div ref={ref} className={cls} {...props}>
           <h2 id="choose-a-framework">{title}</h2>
-          <div className={styles.Links}>
-            {frameworks.map((f, idx) => {
-              let icon: ReactNode;
-
-              switch (f.key) {
-                case "astro":
-                  icon = <IconAstro />;
-                  break;
-                case "bun":
-                  icon = <IconBun />;
-                  break;
-                case "bun-hono":
-                  icon = <IconBun />;
-                  break;
-                case "deno":
-                  icon = <IconDeno />;
-                  break;
-                case "fastify":
-                  icon = <IconFastify />;
-                  break;
-                case "genkit":
-                  icon = <IconGenkit />;
-                  break;
-                case "nest-js":
-                  icon = <IconNestJs />;
-                  break;
-                case "next-js":
-                  icon = <IconNextJs />;
-                  break;
-                case "node-js":
-                  icon = <IconNodeJs />;
-                  break;
-                case "node-js-express":
-                  icon = <IconNodeJs />;
-                  break;
-                case "node-js-hono":
-                  icon = <IconNodeJs />;
-                  break;
-                case "nuxt":
-                  icon = <IconNuxt />;
-                  break;
-                case "python-fastapi":
-                  icon = <IconFastApi />;
-                  break;
-                case "python-flask":
-                  icon = <IconFlask />;
-                  break;
-                case "react-router":
-                  icon = <IconReactRouter />;
-                  break;
-                case "remix":
-                  icon = <IconRemix />;
-                  break;
-                case "strands-agents":
-                  icon = <IconStrandsAgents />;
-                  break;
-                case "google-adk":
-                  icon = <IconGoogleAdk />;
-                  break;
-                case "sveltekit":
-                  icon = <IconSvelteKit />;
-                  break;
-                case "tanstack-ai":
-                  icon = <IconTanStackAi />;
-                  break;
-                case "claude-agent-sdk":
-                  icon = <IconClaudeAgentSdk />;
-                  break;
-                case "claude-managed-agents":
-                  icon = <IconClaudeAgentSdk />;
-                  break;
-                case "crewai":
-                  icon = <IconCrewAi />;
-                  break;
-                case "langchain":
-                  icon = <IconLangChain />;
-                  break;
-                case "langgraph":
-                  icon = <IconLangGraph />;
-                  break;
-                case "mastra":
-                  icon = <IconMastra />;
-                  break;
-                case "openai-agents":
-                  icon = <IconOpenAiAgents />;
-                  break;
-                case "vercel-ai":
-                  icon = <IconVercelAi />;
-                  break;
-                case "vercel-eve":
-                  icon = <IconVercelEve />;
-                  break;
-                default:
-                  icon = "";
-                  break;
-              }
-
-              if (exclude?.includes(f.key)) return null;
-
-              return (
-                <Button
-                  key={f.key + idx}
-                  as="link"
-                  size="lg"
-                  href={hrefForLegacyFrameworkKey(
-                    f.key,
-                    basePath || path || "/",
-                  )}
-                  decoratorLeft={icon}
-                >
-                  {f.label}
-                </Button>
-              );
-            })}
-          </div>
+          <div className={styles.Links}>{renderFrameworks(visible)}</div>
         </div>
       )
     );

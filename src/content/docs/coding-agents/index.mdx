@@ -1,0 +1,124 @@
+---
+title: "Secure coding agents"
+description: "Enforce Arcjet policy on Claude Code and GitHub Copilot tool calls from the hooks they already fire, with no SDK and no code change."
+---
+
+import { Aside, CardGrid } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+A coding agent runs shell commands, edits files, fetches URLs, and calls MCP
+servers with the developer's credentials. Arcjet checks each of those tool
+calls against your policies before the agent makes it, from a hook the agent
+already fires, and records every other lifecycle event so you can see what the
+agent did.
+
+Arcjet also screens what the developer typed for prompt injection and sensitive
+information, and records the whole session as activity in the Console.
+
+There is no SDK to install and no code to change. Publishing a policy from
+Arcjet's Console.
+
+```text
+┌─────────────┐      hook      ┌───────────────┐    allow    ┌───────────────┐
+│ Coding agent│───────────────▶│ Arcjet policy │────────────▶│ Tool runs     │
+└─────────────┘                └───────┬───────┘             └───────────────┘
+                                       │
+                                       │ deny
+                                       ▼
+                               ┌───────────────┐
+                               │ Agent stops   │
+                               └───────────────┘
+```
+
+## How it works
+
+Coding agent events are tracked using HTTP hooks that report events to Arcjet.
+Policies execute whenever an event is reported, determining whether the agent
+is allowed to proceed based on the applicable policy. Policies can be enforced
+or configured to log only, with changes updating in real time. Execution
+happens at the edge in over 300 data center locations, minimizing latency and
+ensuring rapid policy enforcement.
+
+Policies work across all supported coding agents, so you don't need to write
+separate policies for each agent.
+
+If a policy denies an action, the agent is told the rule ID and the reason e.g
+
+```text
+Blocked by Arcjet policy: destructive-command.
+```
+
+### Policy enforcement
+
+Policies are configured on one or more execution points where the inputs can be
+evaluated and allowed or denied.
+
+| Execute on    | Events                                        | Inputs the policy can read                                                                          |
+| ------------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| **Tool call** | `pre-tool-use`, `permission-request`          | `tool_name`, `tool_kind`, `command`, `command_tokens`, `paths`, `domains`, `mcp_server`, `mcp_tool` |
+| **Prompt**    | `user-prompt-submit`, `user-prompt-expansion` | `prompt`                                                                                            |
+
+### Recorded events
+
+Arcjet tracks all these events, but can only enforce policy on the above enforceable events.
+
+| `event`                   | Claude Code          | Copilot                 | What it carries                            |
+| ------------------------- | -------------------- | ----------------------- | ------------------------------------------ |
+| `post-tool-use`           | `PostToolUse`        | `postToolUse`           | What the tool returned                     |
+| `post-tool-use-failure`   | `PostToolUseFailure` | `postToolUseFailure`    | Why it did not                             |
+| `user-prompt-transformed` | –                    | `userPromptTransformed` | The model-facing prompt after a rewrite    |
+| `stop`                    | `Stop`               | `agentStop`             | The agent's final message                  |
+| `subagent-start`          | `SubagentStart`      | `subagentStart`         | Work delegated to another agent            |
+| `subagent-stop`           | `SubagentStop`       | `subagentStop`          | A subagent's final message and its name    |
+| `session-start`           | `SessionStart`       | `sessionStart`          | When an agent started, and from what       |
+| `session-end`             | `SessionEnd`         | `sessionEnd`            | When it stopped, and why                   |
+| `notification`            | `Notification`       | `notification`          | Permission prompts and elicitations        |
+| `permission-denied`       | `PermissionDenied`   | –                       | What the agent's own controls stopped      |
+| `pre-compact`             | `PreCompact`         | `preCompact`            | Context discarded mid-session              |
+| `error`                   | `StopFailure`        | `errorOccurred`         | Why a turn failed                          |
+| `config-change`           | `ConfigChange`       | –                       | Settings changed, which is a tamper signal |
+| `instructions-loaded`     | `InstructionsLoaded` | –                       | A `CLAUDE.md` entering context             |
+
+## Enforcement limitations
+
+- **Claude Code and Copilot fail open on a slow or failing hook, by their own design.** A
+timeout, a network error, a non-2xx response, or a malformed body is a
+non-blocking error, and the tool call continues through the agent's normal
+permission flow.
+- **Copilot can't honor a prompt denial.** It drops hook output on
+`userPromptSubmitted`. Arcjet records the decision and marks it as not
+enforced.
+- **A recorded event can never block.** Neither agent offers a point where Arcjet
+could withhold a tool result. A poisoned web page or MCP response is the most
+common route for an injection into a coding agent, and the hook can't catch
+it, because the tool has already run.
+- **A hook binds one client, not one person.** A repository-level hook can be
+deleted, a third-party model provider skips the server-managed settings fetch,
+and a developer calling the API from another tool is outside all of it.
+Reconcile against <Link.Page href="/observe">OpenTelemetry or Compliance API ingest</Link.Page>
+to find sessions with no hook decisions.
+
+## Get started
+
+<CardGrid>
+  <Link.Card
+    title="Claude Code"
+    href="/coding-agents/claude-code"
+    description="Install the hooks through managed settings, MDM, server-managed settings, or a repository, and reach cloud sessions."
+  />
+  <Link.Card
+    title="GitHub Copilot"
+    href="/coding-agents/copilot"
+    description="Install the hooks for the CLI, VS Code agent mode, and the cloud agent, and lock them for an organization."
+  />
+  <Link.Card
+    title="Coding agent policies"
+    href="/coding-agents/policies"
+    description="The fixed input contract, the starter policies, and how to write your own."
+  />
+  <Link.Card
+    title="Observe agent activity"
+    href="/observe"
+    description="The OpenTelemetry and Compliance API paths that record without enforcing."
+  />
+</CardGrid>

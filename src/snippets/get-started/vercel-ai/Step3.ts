@@ -1,4 +1,4 @@
-import { launchArcjet, detectPromptInjection, tokenBucket } from "@arcjet/guard";
+import { launchArcjet, policyInput } from "@arcjet/guard";
 import {
   aiToolsContext,
   createAgentContext,
@@ -9,25 +9,10 @@ import { z } from "zod";
 
 const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 
-const lookupLimit = tokenBucket({
-  bucket: "lookups",
-  refillRate: 5,
-  intervalSeconds: 10,
-  maxTokens: 10,
-});
-const inbound = detectPromptInjection();
-
-export async function runAgent(userId: string, prompt: string) {
-  const decision = await arcjet.guard({
-    label: "message.received",
-    actor: userId,
-    rules: [inbound(prompt)],
-  });
-
-  if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
-    throw new Error("Message blocked");
-  }
-
+export async function runAgent(
+  user: { id: string; orderIds: string[] },
+  prompt: string,
+) {
   const lookupOrder = guardTool(
     arcjet,
     tool({
@@ -36,14 +21,20 @@ export async function runAgent(userId: string, prompt: string) {
       execute: async ({ orderId }) => ({ orderId, status: "shipped" }),
     }),
     {
+      // The action selects the policy you published.
       action: "order.looked-up",
-      actor: userId,
-      rules: () => [lookupLimit({ key: userId, requested: 5 })],
+      // Actor and the order list come from trusted application state.
+      actor: user.id,
+      // Map only the values the policy needs.
+      inputs: ({ orderId }) => ({
+        order_id: policyInput.server.string(orderId),
+        owned_orders: policyInput.server.stringList(user.orderIds),
+      }),
     },
   );
 
   const tools = { lookupOrder };
-  const context = createAgentContext({ correlationId: userId });
+  const context = createAgentContext({ correlationId: user.id });
 
   return generateText({
     model: "openai/gpt-4o-mini",

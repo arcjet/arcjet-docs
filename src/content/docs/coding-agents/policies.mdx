@@ -1,0 +1,274 @@
+---
+title: "Coding agent policies"
+description: "The fixed input contract a coding agent policy reads, the starter policies for Claude Code and GitHub Copilot, and how to write and roll out your own."
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+Arcjet enforces coding agent policies by observing the actions and prompts of coding agents through hooks.
+Internally they're built on top of <Link.Page href="/guards/remote-policies">remote agent guard policies</Link.Page>, which means you can use Arcjet's built-in detectors like prompt injection detection and sensitive data protection.
+
+Policies are written in Rego, the policy language used by Arcjet's guard system. See <Link.Page href="/guards/rego">the Rego documentation</Link.Page> for more details.
+
+## Create policies in the Console
+
+In the [Arcjet Console](https://console.arcjet.com), go to **Policies**. The
+create page asks whether the policy guards a coding agent or an action in your
+own application.
+
+Choose when the policy should execute: on a **Tool call** or on a **Prompt**.
+
+| Execute on    | Runs                                                                                            | Rules read                                                                                          |
+| ------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| **Tool call** | Before the agent runs a command, reads or writes a file, calls an MCP server, or fetches a URL  | `tool_name`, `tool_kind`, `command`, `command_tokens`, `paths`, `domains`, `mcp_server`, `mcp_tool` |
+| **Prompt**    | Before text reaches the model: what the developer typed, and what a slash command expanded into | `prompt`                                                                                            |
+
+## The input contract
+
+Arcjet builds every input from the hook payload. Read a value in Rego as
+`input.values.<name>`.
+
+| Input             | Kind        | What it holds                                                              |
+| ----------------- | ----------- | -------------------------------------------------------------------------- |
+| `contract`        | String      | The contract version, always `coding-agent/v1`                             |
+| `agent_vendor`    | String      | `anthropic` or `github`                                                    |
+| `agent_product`   | String      | `claude-code` or `copilot`                                                 |
+| `agent_surface`   | String      | The `surface` the hook entry declared: `cli`, `ide`, `cloud`, or `unknown` |
+| `event`           | String      | The lifecycle event, such as `pre-tool-use`                                |
+| `session`         | String      | The agent's session ID, which also correlates the recorded activity        |
+| `principal`       | String      | The asserted developer identity from `X-Arcjet-Principal`. Untrusted       |
+| `cwd`             | String      | The agent's working directory                                              |
+| `permission_mode` | String      | The agent's own permission mode, when it reports one                       |
+| `tool_name`       | String      | The tool about to be called, verbatim                                      |
+| `tool_kind`       | String      | `shell`, `file_read`, `file_write`, `web`, `mcp`, `agent`, or `other`      |
+| `command`         | String      | The shell command text, for a shell call                                   |
+| `command_tokens`  | String list | The command split on whitespace and the shell's chaining operators         |
+| `paths`           | String list | File paths from the call's structured arguments                            |
+| `domains`         | String list | Hosts of the call's URL arguments                                          |
+| `mcp_server`      | String      | The MCP server name, for an MCP call                                       |
+| `mcp_tool`        | String      | The MCP tool name, for an MCP call                                         |
+| `prompt`          | String      | The prompt text this event carries                                         |
+
+### Compare `tool_kind`, not `tool_name`
+
+The agents spell their tools differently so Arcjet normalizes them to a consistent `tool_kind`. Matching is case-insensitive.
+
+| `tool_kind`  | Claude Code and Copilot                                    | Copilot CLI                                   |
+| ------------ | ---------------------------------------------------------- | --------------------------------------------- |
+| `shell`      | `Bash`, `BashOutput`, `KillShell`                          | `powershell`                                  |
+| `file_read`  | `Read`, `Glob`, `Grep`, `NotebookRead`                     | `view`, `rg`                                  |
+| `file_write` | `Edit`, `Write`, `MultiEdit`, `NotebookEdit`               | `create`, `str_replace_editor`, `apply_patch` |
+| `web`        | `WebFetch`, `WebSearch`                                    | `web_fetch`, `web_search`                     |
+| `mcp`        | Any `mcp__<server>__<tool>` name                           | Any MCP tool                                  |
+| `agent`      | `Agent`, `Task`                                            |                                               |
+| `other`      | Everything else, such as `AskUserQuestion` and `TodoWrite` | `ask_user`, `update_todo`                     |
+
+## Starter policies
+
+Arcjet will run every policy attached to the specific event in one round trip so you can define multiple policies for the same event. The most restrictive decision will be applied.
+
+Every example assumes the standard preamble:
+
+```rego
+package arcjet.guard
+
+import rego.v1
+```
+
+### Destructive shell command
+
+A deny over the words in a command. `command_tokens` is what lets a rule match
+a word without a regular expression.
+
+```rego
+destructive := {"rm", "rmdir", "shred", "dd", "mkfs", "sudo", "doas", "trash"}
+
+deny contains "destructive-command" if {
+	input.values.tool_kind == "shell"
+	some token in input.values.command_tokens
+	lower(token) in destructive
+}
+```
+
+### Credential access
+
+Two rules over one marker list: one for the files a tool call names, one for
+the text of a shell command. They're different inputs because a shell command
+is opaque text, so a rule that only read `paths` would miss `cat ~/.ssh/id_rsa`.
+
+```rego
+markers := {".ssh/", "id_rsa", "id_ed25519", ".aws/credentials", "/etc/shadow", ".netrc", ".npmrc", ".env"}
+
+deny contains "credential-path" if {
+	some path in input.values.paths
+	some marker in markers
+	contains(path, marker)
+}
+
+deny contains "credential-command" if {
+	input.values.tool_kind == "shell"
+	some marker in markers
+	contains(input.values.command, marker)
+}
+```
+
+Both rules can fire on one call, such as `cp .npmrc /tmp` with `.npmrc` also
+in `paths`.
+
+### A download piped into a shell
+
+A plain download and a pipe into `jq` both pass.
+
+```rego
+deny contains "piped-installer" if {
+	input.values.tool_kind == "shell"
+	contains(input.values.command, "|")
+	some fetcher in input.values.command_tokens
+	lower(fetcher) in {"curl", "wget"}
+	some shell in input.values.command_tokens
+	lower(shell) in {"sh", "bash", "zsh", "dash"}
+}
+```
+
+### A rewrite of shared history
+
+A verb plus a flag.
+
+```rego
+deny contains "force-push" if {
+	input.values.tool_kind == "shell"
+	contains(input.values.command, "git push")
+	some flag in input.values.command_tokens
+	flag in {"--force", "-f"}
+}
+
+deny contains "hard-reset" if {
+	input.values.tool_kind == "shell"
+	contains(input.values.command, "git reset")
+	"--hard" in input.values.command_tokens
+}
+```
+
+### An MCP server allowlist
+
+The allowlist is written into the policy.
+
+```rego
+deny contains "unlisted-mcp-server" if {
+	input.values.tool_kind == "mcp"
+	not input.values.mcp_server in {"arcjet", "github", "sentry"}
+}
+```
+
+A built-in tool isn't an MCP call, so `mcp_server` is empty and the rule
+doesn't fire.
+
+### Writes to protected paths
+
+A deny scoped to writes.
+
+```rego
+protected := {".github/workflows/", ".git/", "/etc/", "node_modules/"}
+
+deny contains "protected-path-write" if {
+	input.values.tool_kind == "file_write"
+	some path in input.values.paths
+	some marker in protected
+	contains(path, marker)
+}
+```
+
+### An outbound domain allowlist
+
+```rego
+deny contains "unlisted-domain" if {
+	input.values.tool_kind == "web"
+	some host in input.values.domains
+	not host in {"docs.arcjet.com", "github.com", "raw.githubusercontent.com"}
+}
+```
+
+### Prompt injection in a developer's prompt
+
+Arcjet runs prompt injection detection over the `prompt` input, so a hook can
+refuse a turn whose instructions came from somewhere other than the developer:
+a README, an issue comment, or a web page the agent pasted in.
+
+Declare a **server-side** prompt injection detector with the ID `injection` over `prompt`.
+
+```rego
+prompt_events := {"user-prompt-submit", "user-prompt-expansion", "user-prompt-transformed"}
+
+deny contains "injected-prompt" if {
+	input.values.event in prompt_events
+	input.signals.prompt_injection.injection.detected
+}
+```
+
+### Sensitive information in a developer's prompt
+
+Arcjet runs server-side sensitive information detection over the `prompt`
+input, so a hook can refuse a turn that pastes a card number or Social
+Security number into the prompt.
+
+Declare a **server-side** sensitive information detector with the ID `pii`
+over `prompt`, denying the `CREDIT_CARD_NUMBER` and `SSN` entity types.
+
+```rego
+prompt_events := {"user-prompt-submit", "user-prompt-expansion", "user-prompt-transformed"}
+
+deny contains "prompt-has-sensitive-info" if {
+	input.values.event in prompt_events
+	input.signals.sensitive_info.pii.detected
+}
+```
+
+## Write your own
+
+<Steps>
+
+1. In the Console, go to **Policies**, choose the coding agent kind, and give
+   the policy a label such as `coding-agent.no-npm-publish`.
+2. Set what it executes on: **Tool call** for anything about a command, a
+   file, a URL, or an MCP server, and **Prompt** for anything about what the
+   developer typed.
+3. Add rules in the visual builder, or start from the closest starter policy
+   and edit its Rego.
+4. Add stored tests. A test input is the contract's `values`, so a test for
+   the force-push rule looks like this:
+
+   ```json
+   {
+     "values": {
+       "tool_kind": "shell",
+       "command": "git push --force origin main",
+       "command_tokens": ["git", "push", "--force", "origin", "main"]
+     }
+   }
+   ```
+
+   Assert the allow as well as the denial.
+
+5. Publish. Every new rule starts in dry run, so publishing can't start
+   denying tool calls before you've seen it evaluate.
+
+</Steps>
+
+## Roll out safely
+
+1. Publish the policy with every rule in dry run.
+2. Let developers work, then open the site's **Activity** in the Console and
+   read the tool calls each dry-run rule would have denied.
+3. Set the rule live in a second edit.
+4. Watch the denial reasons developers see. A denial names the rule ID, so a
+   rule ID a developer can understand is one they can work around properly.
+
+## Related
+
+- <Link.Page href="/coding-agents">Secure coding agents</Link.Page> – the endpoint, the events, and where enforcement stops
+- <Link.Page href="/coding-agents/claude-code">Secure Claude Code</Link.Page>
+- <Link.Page href="/coding-agents/copilot">Secure GitHub Copilot</Link.Page>
+- <Link.Page href="/guards/rego">Write policies in Rego</Link.Page> – the language, the profile, and its exclusions
+- <Link.Page href="/guards/authoring">Author and publish policies</Link.Page> – the builder, plain English, tests, and publication
+- <Link.Page href="/guards/errors">Policy error codes</Link.Page>

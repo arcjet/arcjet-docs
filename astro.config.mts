@@ -104,8 +104,8 @@ export default defineConfig({
   prefetch: true,
   markdown: {
     // Keep the existing Markdown/MDX pipeline for code examples and .md routes.
-    processor: unified(),
-    gfm: true,
+    // `gfm` belongs on the processor; the top-level `markdown.gfm` is deprecated.
+    processor: unified({ gfm: true }),
   },
   // This is a fix for https://github.com/withastro/astro/issues/8297
   vite: {

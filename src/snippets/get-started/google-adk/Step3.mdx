@@ -1,7 +1,10 @@
 import Step from "./Step3.ts?raw";
 import { Code } from "@astrojs/starlight/components";
+import GuardPolicy from "../shared/GuardPolicy.mdx";
 
-Create a client, screen inbound text, and pass `guardPlugin`
-first on the Runner `plugins` list:
+<GuardPolicy />
+
+Then create a client and pass `guardPlugin` first on the Runner `plugins`
+list, so Arcjet evaluates the policy before a tool runs:
 
 <Code code={Step} lang="ts" title="agent.ts" />

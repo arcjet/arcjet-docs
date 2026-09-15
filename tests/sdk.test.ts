@@ -328,11 +328,16 @@ test.describe("variantOnlySdkAstroRedirects", () => {
   test("redirects bare Python SDK paths to FastAPI", () => {
     const redirects = variantOnlySdkAstroRedirects();
     expect(redirects["/sdk/python/get-started"]).toBe(
-      "/sdk/python/plus/fastapi/get-started",
-    );
-    expect(redirects["/sdk/python/get-started/"]).toBe(
       "/sdk/python/plus/fastapi/get-started/",
     );
+  });
+
+  // `trailingSlash` is `ignore`, so the key above answers `/x` and `/x/`
+  // alike. Emitting both forms makes Astro report a route collision.
+  test("emits one key per route", () => {
+    const redirects = variantOnlySdkAstroRedirects();
+    expect(redirects["/sdk/python/get-started/"]).toBeUndefined();
+    expect(redirects["/sdk/python/"]).toBeUndefined();
   });
 });
 

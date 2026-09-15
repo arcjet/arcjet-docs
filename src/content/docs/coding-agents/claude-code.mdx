@@ -1,0 +1,349 @@
+---
+title: "Secure Claude Code"
+description: "Install Arcjet hooks for Claude Code through managed settings, MDM, server-managed settings, or a repository, supply the site key, lock it down, and verify."
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+
+Arcjet integrates into Claude Coding agent sessions through hooks that fire
+for different actions like prompts and tool calls. This allows Arcjet to
+observe activity, enforce policy, and record actions taken by developers
+without requiring any changes to the developer's workflow.
+
+<WhatIsArcjet />
+
+## Before you start
+
+[Create a free Arcjet account](https://console.arcjet.com) then use the key to
+authenticate the Arcjet hooks. It is semi-secret, but can be distributed
+to multiple devices and team members through environment variables or
+configuration management.
+
+## Choose where to deploy
+
+Claude Code has two channels for organization policy.
+[Endpoint-managed settings](https://code.claude.com/docs/en/managed-settings)
+are deployed to a device by IT.
+[Server-managed settings](https://code.claude.com/docs/en/server-managed-settings)
+are fetched from the claude.ai console. Both sit in the same top precedence
+tier, above every setting a developer can write.
+
+| Mechanism                                  | Where the JSON goes                                                                                                                                                                           | Reaches                                                                          | Removable by a developer    |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | --------------------------- |
+| Managed settings file (endpoint-managed)   | `/etc/claude-code/managed-settings.json` (Linux, WSL), `/Library/Application Support/ClaudeCode/managed-settings.json` (macOS), `C:\Program Files\ClaudeCode\managed-settings.json` (Windows) | That device only: terminal, IDE extensions, the desktop Code tab, Agent SDK sessions | Local administrator only    |
+| MDM or OS policy (endpoint-managed)        | macOS `com.anthropic.claudecode` managed preferences; Windows `HKLM\SOFTWARE\Policies\ClaudeCode`, value `Settings`                                                                           | The same surfaces, redeployable on a schedule                                     | Local administrator only    |
+| Server-managed settings                    | claude.ai console, **Admin settings** > **Claude Code** > **Managed settings**                                                                                                                | Every session that authenticates with an eligible credential. | Only by switching provider  |
+| Repository settings                        | `.claude/settings.json`, committed                                                                                                                                                            | Sessions in that repository.                            | Yes. |
+
+If your
+developers use [Claude Code on the web](https://code.claude.com/docs/en/claude-code-on-the-web),
+read [Cloud sessions](#cloud-sessions).
+
+## Install the hooks
+
+This template installs every enforcement point plus the recorded events worth
+keeping. Replace `ajkey_REPLACE_ME` with your Arcjet key and put the file at the
+managed settings path for the operating system.
+
+```json title="managed-settings.json"
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=pre-tool-use&surface=cli",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=permission-request&surface=cli",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=user-prompt-submit&surface=cli",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptExpansion": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=user-prompt-expansion&surface=cli",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=post-tool-use&surface=cli",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=stop&surface=cli",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=session-start&surface=cli",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=session-end&surface=cli",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PermissionDenied": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=permission-denied&surface=cli",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "ConfigChange": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=config-change&surface=cli",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "InstructionsLoaded": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=instructions-loaded&surface=cli",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "env": { "ARCJET_KEY": "ajkey_REPLACE_ME" },
+  "allowedHttpHookUrls": ["https://decide.arcjet.com/*"],
+  "httpHookAllowedEnvVars": ["ARCJET_KEY", "USER"],
+  "permissions": { "disableBypassPermissionsMode": "disable" }
+}
+```
+
+
+### What the hooks do
+
+Claude Code runs every matching hook for an event in parallel, so these entries
+add one request of latency (typically a few tens of milliseconds).
+
+- `PreToolUse` and `PermissionRequest` are the
+tool-call moment; `UserPromptSubmit` and `UserPromptExpansion` are the prompt
+moment.
+- `timeout` on every entry. Claude Code's default for an HTTP hook is 600
+seconds, but 5 seconds is a sensible ceiling for a policy decision.
+- `X-Arcjet-Principal` attributes a session to a developer. It's untrusted, but useful extra metadata. `$USER` is unset on
+Windows, so use `$USERNAME` there and add it to both `allowedEnvVars` lists.
+
+## Supply the Arcjet key
+
+`allowedEnvVars` allows `$ARCJET_KEY` to resolve. Define it in one of the following ways:
+
+- **An `env` block in the same settings file**, as in the template. Claude
+  Code applies `env` to every subprocess it starts, so any command the agent
+  runs can read the key.
+- **A literal header value**, `"Authorization": "Bearer ajkey_…"`. It never
+enters the agent's environment. Prefer this in a root-owned managed settings file.
+
+## Lock it down
+
+The last four keys in the template are the lockdown:
+
+```json
+{
+  "allowManagedHooksOnly": true,
+  "permissions": { "disableBypassPermissionsMode": "disable" },
+  "allowedHttpHookUrls": ["https://decide.arcjet.com/*"]
+}
+```
+
+Hook entries merge across settings levels, so without `allowManagedHooksOnly`
+a developer's own hooks run alongside yours.
+
+`disableBypassPermissionsMode` keeps the agent's own permission flow in place.
+
+## Cloud sessions
+
+A cloud session, on [Claude Code on the web](https://code.claude.com/docs/en/claude-code-on-the-web)
+or from `claude --cloud`, runs in a
+[cloud environment](https://code.claude.com/docs/en/cloud-environments) on a
+fresh clone of the repository rather than on the developer's machine.
+
+### Deliver the hooks
+
+A cloud session reads any committed `.claude/settings.json` and your
+organization's server-managed settings.
+
+### Allow the endpoint
+
+Every cloud environment sets a
+[network access level](https://code.claude.com/docs/en/cloud-environments#access-levels), but Arcjet is blocked by default.
+Give the environment **Custom** network access and add `decide.arcjet.com` to
+**Allowed domains**, keeping the default list if your sessions install
+packages.
+
+<Aside type="caution" title="An allowlist is per environment">
+  Server-managed settings apply inside a cloud session, but none of them adds a
+  domain to an environment's network allowlist, and there is no
+  organization-wide allowlist to push. An Owner can create a
+  [shared environment](https://code.claude.com/docs/en/cloud-environments#shared-environments)
+  with the right access level and make it the organization's default, but a
+  developer who runs a session in an environment of their own still has to
+  allow the domain there.
+</Aside>
+
+### Third-party model providers
+
+Exporting a `CLAUDE_CODE_USE_*` provider variable, such as
+`CLAUDE_CODE_USE_BEDROCK`, `CLAUDE_CODE_USE_VERTEX`, or
+`CLAUDE_CODE_USE_FOUNDRY`, or pointing `ANTHROPIC_BASE_URL` somewhere other
+than the Anthropic API, makes Claude Code skip the server-managed settings
+fetch for that session.
+
+Use endpoint-managed settings for configuration that must always be applied,
+regardless of any `CLAUDE_CODE_USE_*` environment variables.
+
+## Verify the install
+
+<Steps>
+
+1. Run `/status` in Claude Code. **Setting sources** names the selected managed
+   source and **Skipped sources** what it skipped. A missing line means no
+   source delivered a policy key, and a different source than you expected is
+   the first-wins trap.
+
+2. Run `/hooks` to list every configured hook with its source and URL.
+
+3. Run `claude doctor` for the server-managed fetch outcome and any dropped
+   entry, or `claude --debug-file <path>` to record each hook firing and its
+   result.
+
+4. Open the site's **Activity** in the [Arcjet Console](https://console.arcjet.com)
+   and confirm the session appears.
+
+</Steps>
+
+## Record telemetry instead
+
+If you can't deploy hooks, Arcjet can connect to the Claude Compliance API to pull activity directly. Alternatively, Claude Code can export its own OpenTelemetry
+telemetry to Arcjet through managed settings. See <Link.Page href="/observe#send-opentelemetry-data-to-arcjet">Observe Agent Activity</Link.Page> for more details, but note that hooks are the only way to enforce policies.
+
+## Related
+
+- <Link.Page href="/coding-agents">Secure coding agents</Link.Page> – the endpoint, the events, and where enforcement stops
+- <Link.Page href="/coding-agents/policies">Coding agent policies</Link.Page> – the input contract and the starter policies
+- <Link.Page href="/coding-agents/copilot">Secure GitHub Copilot</Link.Page>
+- <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page> – for agents you build with the SDK rather than the Claude Code product

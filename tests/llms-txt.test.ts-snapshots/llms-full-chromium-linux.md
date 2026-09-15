@@ -2218,13 +2218,33 @@ const detectPii = localDetectSensitiveInfo({
 });
 ```
 
-**Only some adapters map typed `inputs`.** A remote policy evaluates the
-typed inputs a guard call submits. In JavaScript only
-`@arcjet/guard/vercel-ai/v7` accepts `inputs` and `actor`; every other
-JavaScript adapter takes `action` and SDK `rules` only, so a remote policy
-has nothing to evaluate and none of its rules fire. Every Python adapter
-accepts `inputs`. Use SDK `rules` where `inputs` is unavailable, and don't
-assume a published policy is enforcing.
+**Map the inputs the policy declares.** A remote policy evaluates the typed
+inputs a guard call submits. Every adapter accepts `inputs` and `actor`, in
+JavaScript and Python, each as a value or a function resolved per call. A
+policy does nothing until the call sends values under exactly the names it
+declares: a missing required input reports `AJP1003` and a live rule fails
+closed, and an input the policy doesn't declare is dropped with an `AJ1060`
+warning. Generate the call from the policy's contract rather than
+transcribing it.
+
+**A policy's conditions are Rego.** The policy reads `input.values.<name>`
+for declared `SERVER` inputs and `input.signals.<kind>.<detectorId>` for
+detector results, and adds declared rule IDs to `deny`:
+
+```rego
+package arcjet.guard
+
+import rego.v1
+
+deny contains "external-recipient" if {
+	not input.values.recipient in input.values.allowed_recipients
+}
+```
+
+The profile has no regular expressions and no division. A live expression
+rule can't publish without a stored test. See
+https://docs.arcjet.com/guards/rego and
+https://docs.arcjet.com/guards/policy-examples.
 
 The builders differ by language. JavaScript uses one `policyInput` namespace
 (`policyInput.server.string`, `policyInput.server.stringList`,
@@ -2294,7 +2314,14 @@ blocking one makes the wrapper synchronous.
 - [Guards](https://docs.arcjet.com/guards)
 - [Agent guard quick start](https://docs.arcjet.com/guards/quick-start)
 - [Agent guard integrations](https://docs.arcjet.com/guards/framework-integrations)
-- [Agent guard remote policies](https://docs.arcjet.com/guards/remote-policies)
+- [Policy contract](https://docs.arcjet.com/guards/remote-policies)
+- [Write policies in Rego](https://docs.arcjet.com/guards/rego)
+- [Policy examples](https://docs.arcjet.com/guards/policy-examples)
+- [Author and publish policies](https://docs.arcjet.com/guards/authoring)
+- [Policy error codes](https://docs.arcjet.com/guards/errors)
+- [Secure coding agents](https://docs.arcjet.com/coding-agents)
+- [Coding agent policies](https://docs.arcjet.com/coding-agents/policies)
+- [Observe agent activity](https://docs.arcjet.com/observe)
 - [Agent guard testing and reference](https://docs.arcjet.com/guards/reference)
 - [Capture events](https://docs.arcjet.com/guards/capture)
 - [Vercel AI SDK agent guard](https://docs.arcjet.com/guards/vercel-ai)

@@ -132,8 +132,10 @@ needs a blocking client. A direct `guard()` call takes `label` (not
 with `sanitize_tool_name` the same way CrewAI matches `tools=`.
 
 `guard_tool` takes `guard`, `tool`, and `action` (all required), then `actor`,
-`inputs`, `rules`, `metadata`, `correlation_id`, and `on_guard_error`. Use it
-only for a standalone `BaseTool` you invoke yourself.
+`inputs`, `rules`, `metadata`, `correlation_id`, and `on_guard_error`. Its
+`actor` and `inputs` callables receive the call's arguments alone, not
+`(arguments, ctx)`. Use it only for a standalone `BaseTool` you invoke
+yourself.
 
 `unregister_arcjet_hooks(handle)` removes the hook. Call it in tests,
 or call `handle.unregister()`. Registration is once per process.
@@ -322,6 +324,53 @@ For more information about fail-open versus fail-closed behavior, see
 - Don't also wrap these tools with `@arcjet/guard/vercel-ai/v7`.
 - Don't import `arcjet.guard.crewai` unless you installed official
   CrewAI yourself.
+
+## Send values to a policy
+
+`guard_tool` takes `actor` and `inputs`, each as a value or a callable of
+the call's arguments.
+
+```py
+guarded_send_email = guard_tool(
+    guard=arcjet,
+    tool=send_email_tool,
+    action="email.sent",
+    actor=current_user.id,
+    inputs=lambda arguments: {
+        "recipient": server_input.string(arguments["recipient"]),
+        "allowed_recipients": server_input.string_list(
+            current_user.allowed_recipients
+        ),
+        "body": local_input.string(arguments["body"]),
+    },
+)
+```
+
+`register_arcjet_hooks` takes them too, with callables of `(arguments, ctx)`.
+
+The policy these calls feed declares `recipient` as a `SERVER` string,
+`allowed_recipients` as a `SERVER` string list, and `body` as a `LOCAL` string,
+then denies a recipient that isn't on the list:
+
+```rego
+package arcjet.guard
+
+import rego.v1
+
+deny contains "external-recipient" if {
+	not input.values.recipient in input.values.allowed_recipients
+}
+```
+
+Map only what a policy needs. Take the actor and any allow list from
+authenticated application state, never from the model's arguments: a policy can
+be conditioned on the actor, so a model that controls it can leave its own
+policy scope.
+
+For the names, kinds, and exposures a policy declares, see
+<Link.Page href="/guards/remote-policies">Policy contract</Link.Page>. For more
+worked policies, see
+<Link.Page href="/guards/policy-examples">Policy examples</Link.Page>.
 
 ## Common patterns
 
