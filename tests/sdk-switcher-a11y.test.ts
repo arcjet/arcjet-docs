@@ -36,7 +36,9 @@ test.describe("SDK switcher accessibility", () => {
     const current = menu.locator("[aria-current='page']");
     await expect(current).toHaveAttribute("aria-selected", "true");
     await expect(current).toContainText("Astro");
-    await expect(menu.locator("svg[aria-hidden='true']").first()).toBeAttached();
+    await expect(
+      menu.locator("svg[aria-hidden='true']").first(),
+    ).toBeAttached();
   });
 
   test("ArrowDown opens the menu and Enter chooses the highlighted option", async ({
@@ -109,6 +111,35 @@ test.describe("SDK switcher accessibility", () => {
     await expect(activeOption(page)).toContainText("Astro");
     await page.keyboard.press("End");
     await expect(activeOption(page)).toContainText("Vercel Eve");
+  });
+
+  test("typeahead survives a keypress dispatched before the menu opens", async ({
+    page,
+  }) => {
+    await page.goto("/sdk/astro/get-started/");
+    const toggle = visibleSdkToggle(page);
+    await expect(toggle).toBeVisible({ timeout: 15_000 });
+    await toggle.focus();
+
+    // `showPopover()` makes the menu visible synchronously and queues its
+    // `toggle` event, so a fast typist's letter can land before the handler
+    // runs. Dispatching both keys in one task forces that ordering.
+    await page.evaluate(() => {
+      const element = document.activeElement;
+      if (!(element instanceof HTMLElement)) throw new Error("nothing focused");
+      for (const key of ["ArrowDown", "n"]) {
+        element.dispatchEvent(
+          new KeyboardEvent("keydown", {
+            key,
+            bubbles: true,
+            cancelable: true,
+          }),
+        );
+      }
+    });
+
+    await expect(visibleSdkMenu(page)).toBeVisible();
+    await expect(activeOption(page)).toContainText("NestJS");
   });
 
   test("Space chooses the highlighted option", async ({ page }) => {

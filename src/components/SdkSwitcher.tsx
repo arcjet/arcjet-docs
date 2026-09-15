@@ -103,9 +103,7 @@ export function SdkSwitcher({
         ? (queryFramework as FrameworkKey)
         : (getStoredFramework() ?? defaultSelectedFramework);
 
-    displayedFramework.set(
-      getClosestFrameworkMatch(framework, pageFrameworks),
-    );
+    displayedFramework.set(getClosestFrameworkMatch(framework, pageFrameworks));
   }, [pageFrameworks, pathname]);
 
   const options = useMemo(
@@ -116,8 +114,7 @@ export function SdkSwitcher({
   const buttonLabel =
     current?.label ?? sdkDisplayLabelFromPathname(pathname) ?? "SDK";
   const popoverId = variant === "mobile" ? "mtoc-sdk" : "toc-sdk";
-  const toggleClass =
-    variant === "mobile" ? "mtoc-sdk-toggle" : "toc-toggle";
+  const toggleClass = variant === "mobile" ? "mtoc-sdk-toggle" : "toc-toggle";
   const reactId = useId();
   const labelId = `sdk-switcher-label-${reactId}`;
   const buttonId = `sdk-switcher-button-${reactId}`;
@@ -126,7 +123,11 @@ export function SdkSwitcher({
   const menuRef = useRef<HTMLDivElement>(null);
   const typeaheadQuery = useRef("");
   const typeaheadTimer = useRef<number>(0);
-  const pendingActiveIndex = useRef<number | null>(null);
+  // `showPopover()` flips the menu visible synchronously but queues the
+  // `toggle` event, so a keypress can land before the handler runs. This
+  // records that the keyboard path already chose an index, so the handler
+  // leaves it alone rather than overwriting a typeahead result.
+  const indexSetOnOpen = useRef(false);
 
   const currentIndex = Math.max(
     0,
@@ -176,18 +177,22 @@ export function SdkSwitcher({
       openRef.current = isOpen;
       setOpen(isOpen);
       if (isOpen) {
-        const pending = pendingActiveIndex.current;
-        pendingActiveIndex.current = null;
-        const nextIndex =
-          pending ??
-          Math.max(
+        // A pointer click opens the popover through `popovertarget`, so this
+        // is the only chance to highlight the current SDK. The keyboard path
+        // has already set an index, and may have moved it since.
+        if (indexSetOnOpen.current) {
+          indexSetOnOpen.current = false;
+        } else {
+          const nextIndex = Math.max(
             0,
             options.findIndex((option) => option.id === current?.id),
           );
-        activeIndexRef.current = nextIndex;
-        setActiveIndex(nextIndex);
+          activeIndexRef.current = nextIndex;
+          setActiveIndex(nextIndex);
+        }
         requestAnimationFrame(() => buttonRef.current?.focus());
       } else {
+        indexSetOnOpen.current = false;
         clearTypeahead();
       }
     };
@@ -208,8 +213,12 @@ export function SdkSwitcher({
     return () => window.clearTimeout(typeaheadTimer.current);
   }, []);
 
-  const openMenu = useCallback(() => {
+  /** Opens the menu with `index` highlighted, set before the popover opens. */
+  const openMenu = useCallback((index: number) => {
     openRef.current = true;
+    activeIndexRef.current = index;
+    setActiveIndex(index);
+    indexSetOnOpen.current = true;
     menuRef.current?.showPopover();
   }, []);
 
@@ -246,30 +255,24 @@ export function SdkSwitcher({
           (event.altKey && event.key === "ArrowDown")
         ) {
           event.preventDefault();
-          if (event.key === "ArrowUp" || event.key === "End") {
-            pendingActiveIndex.current = options.length - 1;
-          } else if (event.key === "Home") {
-            pendingActiveIndex.current = 0;
-          } else {
-            pendingActiveIndex.current = currentIndex;
-          }
           event.stopPropagation();
-          openMenu();
+          if (event.key === "ArrowUp" || event.key === "End") {
+            openMenu(options.length - 1);
+          } else if (event.key === "Home") {
+            openMenu(0);
+          } else {
+            openMenu(currentIndex);
+          }
         } else if (printable) {
           event.preventDefault();
           event.stopPropagation();
           typeaheadQuery.current = event.key;
-          pendingActiveIndex.current = typeaheadIndex(
-            labels,
-            currentIndex,
-            event.key,
-          );
           window.clearTimeout(typeaheadTimer.current);
           typeaheadTimer.current = window.setTimeout(
             clearTypeahead,
             TYPEAHEAD_RESET_MS,
           );
-          openMenu();
+          openMenu(typeaheadIndex(labels, currentIndex, event.key));
         }
         return;
       }
@@ -388,9 +391,7 @@ export function SdkSwitcher({
         aria-labelledby={
           variant === "desktop" ? `${labelId} ${buttonId}` : undefined
         }
-        aria-label={
-          variant === "mobile" ? `SDK, ${buttonLabel}` : undefined
-        }
+        aria-label={variant === "mobile" ? `SDK, ${buttonLabel}` : undefined}
         onKeyDown={onButtonKeyDown}
       >
         {current ? (
