@@ -1,6 +1,6 @@
 Terminal window
 
-```
+```sh
 ignore-me
 ```
 
@@ -15,7 +15,7 @@ Quick start
 
 [Section titled “Quick start”](#quick-start)
 
-See the [Fastify quick start](/get-started?f=fastify).
+See the [Fastify quick start](/sdk/fastify/get-started/).
 
 Requirements
 ------------
@@ -48,19 +48,19 @@ Build Arcjet clients as few times as possible. That means _outside_ request hand
 
 [Section titled “Options”](#options)
 
-The main way to configure Arcjet is to pass options to the `arcjet` function. The fields are:
+The main way to configure Arcjet is to pass options to the `arcjet` function. It accepts the following fields:
 
-*   `characteristics` (`Array<string>`, default: `["src.ip"]`) — characteristics to track a user by; can also be passed to rules
-*   `client` (`Client`, optional) — client used to make requests to the Cloud API
-*   `key` (`string`, **required**) — API key to identify the site in Arcjet (typically through `process.env.ARCJET_KEY`)
-*   `log` (`ArcjetLogger`, optional) — log interface to emit useful info
-*   `rules` (`Array<ArcjetRule>`, **required**) — rules to use (order insensitive)
+*   `characteristics` (`Array<string>`, default: `["src.ip"]`) – characteristics to track a user by; can also be passed to rules
+*   `client` (`Client`, optional) – client used to make requests to the Cloud API
+*   `key` (`string`, **required**) – API key to identify the site in Arcjet (typically through `process.env.ARCJET_KEY`)
+*   `log` (`ArcjetLogger`, optional) – log interface to emit useful info
+*   `rules` (`Array<ArcjetRule>`, **required**) – rules to use (order insensitive)
 
 Get the Arcjet key for your site from the [Arcjet dashboard](https://console.arcjet.com). Set it as an environment variable called `ARCJET_KEY` in your `.env` file:
 
 Terminal window
 
-```
+```sh
 ARCJET_KEY=your_site_key_here
 ```
 
@@ -68,7 +68,7 @@ ARCJET_KEY=your_site_key_here
 
 [Section titled “Environment variables”](#environment-variables)
 
-The Arcjet Fastify SDK uses several environment variables to configure its behavior. See [Concepts: Environment variables](/environment) for more info. The `ARCJET_KEY` environment variable is not read automatically and must be passed explicitly.
+The Arcjet Fastify SDK uses several environment variables to configure its behavior. For more information, see [Concepts: Environment variables](/environment). The `ARCJET_KEY` environment variable is not read automatically and must be passed explicitly.
 
 ### Protect
 
@@ -76,17 +76,85 @@ The Arcjet Fastify SDK uses several environment variables to configure its behav
 
 Use the `protect` function to protect a request from Fastify. Some rules, such as `validateEmail`, may need extra properties. The protect function returns a promise that resolves to a decision.
 
+```js
+import arcjetFastify, { tokenBucket } from "@arcjet/fastify";
+import Fastify from "fastify";
+
+const arcjetKey = process.env.ARCJET_KEY;
+
+if (!arcjetKey) {
+  throw new Error("Cannot find `ARCJET_KEY` environment variable");
+}
+
+const arcjet = arcjetFastify({
+  key: arcjetKey,
+  rules: [
+    tokenBucket({
+      capacity: 10,
+      characteristics: ["userId"],
+      interval: 10,
+      mode: "LIVE",
+      refillRate: 5,
+    }),
+  ],
+});
+
+const fastify = Fastify({ logger: true });
+
+fastify.get("/", async function (request, reply) {
+  // Replace `userId` with your authenticated user ID.
+  const userId = "user123";
+  const decision = await arcjet.protect(request, {
+    requested: 5,
+    userId,
+  });
+
+  if (decision.isDenied()) {
+    return reply.status(403).send("Forbidden");
+  }
+
+  return reply.status(200).send("Hello world");
+});
+
+await fastify.listen({ port: 3000 });
 ```
-1import arcjetFastify, { tokenBucket } from "@arcjet/fastify";2import Fastify from "fastify";3
-4const arcjetKey = process.env.ARCJET_KEY;5
-6if (!arcjetKey) {7  throw new Error("Cannot find `ARCJET_KEY` environment variable");8}9
-10const arcjet = arcjetFastify({11  key: arcjetKey,12  rules: [13    tokenBucket({14      capacity: 10,15      characteristics: ["userId"],16      interval: 10,17      mode: "LIVE",18      refillRate: 5,19    }),20  ],21});22
-23const fastify = Fastify({ logger: true });24
-25fastify.get("/", async function (request, reply) {26  // Replace `userId` with your authenticated user ID.27  const userId = "user123";28  const decision = await arcjet.protect(request, {29    requested: 5,30    userId,31  });32
-33  if (decision.isDenied()) {34    return reply.status(403).send("Forbidden");35  }36
-37  return reply.status(200).send("Hello world");38});39
-40await fastify.listen({ port: 3000 });
+
+#### Override the client IP
+
+[Section titled “Override the client IP”](#override-the-client-ip)
+
+Arcjet normally detects the client IP address from the request. If your application has already determined the client IP from a trusted source, pass it as `ipSrc` in the second argument to `protect()`. In this example, `requestInput` represents the request or framework context normally passed to `protect()`:
+
+```ts
+const ipSrc = getClientIpFromTrustedSource(requestInput);
+const decision = await aj.protect(requestInput, { ipSrc });
 ```
+
+A non-empty `ipSrc` takes precedence over automatic detection, including the development-only `x-arcjet-ip` header. If `ipSrc` is an empty string, Arcjet uses automatic detection instead.
+
+> **Caution:** The SDK trusts `ipSrc` without validating it. Validate the value and ensure it comes from a trusted source. Do not pass a client-controlled header directly; doing so could allow clients to choose the IP address used for fingerprinting, rate limiting, and other security checks.
+
+#### Metadata
+
+[Section titled “Metadata”](#metadata)
+
+`protect()` accepts `metadata`: an object of string keys mapped to **any JSON-serializable value**, including nested objects, arrays, numbers, booleans, and `null`. It is attached to the decision for correlation and analytics and does not affect the decision or its cache key.
+
+```ts
+const decision = await aj.protect(requestInput, {
+  metadata: {
+    requestId,
+    user: { id: userId, plan: "pro" },
+    flags: { beta: true },
+  },
+});
+```
+
+Each top-level value is JSON-encoded by the SDK. Keys the SDK cannot encode (`undefined`, a function, a `BigInt`, a circular reference) are dropped with a single `AJ1017` warning naming them. A `metadata` that is not a plain object is ignored entirely. Prefer `metadata` over `extra`, which stays a flat string map.
+
+Metadata is untrusted and is not redacted – do not put secrets or PII in it. JavaScript numbers are IEEE-754 doubles, so pass an integer above `Number.MAX_SAFE_INTEGER` as a string.
+
+For limits, drop behavior, and language-specific notes, see [Guard metadata](/guards/reference#metadata).
 
 ### Decision
 
@@ -94,39 +162,63 @@ Use the `protect` function to protect a request from Fastify. Some rules, such a
 
 The `ArcjetDecision` that `protect` resolves to has the following fields:
 
-*   `conclusion` (`"ALLOW"`, `"DENY"`, or `"ERROR"`) — what to do with the request
-*   `id` (`string`) — ID for the request; local decisions start with `lreq_` and remote ones with `req_`
-*   `ip` (`ArcjetIpDetails`) — analysis of the client IP address
-*   `reason` (`ArcjetReason`) — more info about the conclusion
-*   `results` (`Array<ArcjetRuleResult>`) — results of each rule
-*   `ttl` (`number`) — time-to-live for the decision in seconds; `"DENY"` decisions are cached by `@arcjet/fastify` for this duration
+*   `conclusion` (`"ALLOW"`, `"DENY"`, or `"ERROR"`) – what to do with the request
+*   `id` (`string`) – ID for the request; local decisions start with `lreq_` and remote ones with `req_`
+*   `ip` (`ArcjetIpDetails`) – analysis of the client IP address
+*   `reason` (`ArcjetReason`) – more info about the conclusion
+*   `results` (`Array<ArcjetRuleResult>`) – results of each rule
+*   `ttl` (`number`) – time-to-live for the decision in seconds; `"DENY"` decisions are cached by `@arcjet/fastify` for this duration
 
-This top-level decision takes the results from each `"LIVE"` rule into account. If one of them is `"DENY"` then the overall conclusion will be `"DENY"`. Otherwise, if one of them is `"ERROR"`, then `"ERROR"`. Otherwise, it will be `"ALLOW"`. The `reason` and `ttl` fields reflect this conclusion.
+This top-level decision takes the results from each `"LIVE"` rule into account. If one of them is `"DENY"`, then the overall conclusion is `"DENY"`. Otherwise, if one of them is `"ERROR"`, then `"ERROR"`. Otherwise, it is `"ALLOW"`. The `reason` and `ttl` fields reflect this conclusion.
 
 To illustrate, when a bot rule returns an error and a validate email rule returns a deny, the overall conclusion is `"DENY"`, while the `"ERROR"` is available in the results.
 
 The results of `"DRY_RUN"` rules do not affect this overall decision, but are included in `results`.
 
-The `ip` field is available when the Cloud API was called and contains IP geolocation and reputation info. You can use this field to customize responses or you can use [Arcjet Filters](/filters) to make decisions based on it. See the [IP geolocation](/blueprints/ip-geolocation) and [IP reputation](/blueprints/vpn-proxy-detection) blueprints for more info.
+The `ip` field is available when the Cloud API was called and contains IP geolocation and reputation info. You can use this field to customize responses or you can use [Arcjet Filters](/filters) to make decisions based on it. For more information, see the [IP geolocation](/blueprints/ip-geolocation) and [IP reputation](/blueprints/vpn-proxy-detection) blueprints.
 
 Errors
 ------
 
 [Section titled “Errors”](#errors)
 
-Arcjet fails open so that a service issue, misconfiguration, or [network timeout](/architecture#timeout) does not block requests. Such errors should in many cases be logged but otherwise treated as `"ALLOW"` decisions. The `reason.message` field has more info on what occurred.
+Arcjet fails open so that a service issue, misconfiguration, or [network timeout](/architecture#timeout) does not block requests. In many cases, log such errors but otherwise treat them as `"ALLOW"` decisions. The `reason.message` field describes what occurred.
 
-```
-1import arcjetFastify, { filter } from "@arcjet/fastify";2import Fastify from "fastify";3
-4const arcjetKey = process.env.ARCJET_KEY;5
-6if (!arcjetKey) {7  throw new Error("Cannot find `ARCJET_KEY` environment variable");8}9
-10const arcjet = arcjetFastify({11  key: arcjetKey,12  rules: [13    // This broken expression will result in an error decision:14    filter({ deny: ['ip.src.country is "'] }),15  ],16});17
-18const fastify = Fastify({ logger: true });19
-20fastify.get("/", async function (request, reply) {21  const decision = await arcjet.protect(request);22
-23  if (decision.isErrored()) {24    console.warn("Arcjet error", decision.reason.message);25  }26
-27  if (decision.isDenied()) {28    return reply.status(403).send("Forbidden");29  }30
-31  return reply.status(200).send("Hello world");32});33
-34await fastify.listen({ port: 3000 });
+```js
+import arcjetFastify, { filter } from "@arcjet/fastify";
+import Fastify from "fastify";
+
+const arcjetKey = process.env.ARCJET_KEY;
+
+if (!arcjetKey) {
+  throw new Error("Cannot find `ARCJET_KEY` environment variable");
+}
+
+const arcjet = arcjetFastify({
+  key: arcjetKey,
+  rules: [
+    // This broken expression will result in an error decision:
+    filter({ deny: ['ip.src.country is "'] }),
+  ],
+});
+
+const fastify = Fastify({ logger: true });
+
+fastify.get("/", async function (request, reply) {
+  const decision = await arcjet.protect(request);
+
+  if (decision.isErrored()) {
+    console.warn("Arcjet error", decision.reason.message);
+  }
+
+  if (decision.isDenied()) {
+    return reply.status(403).send("Forbidden");
+  }
+
+  return reply.status(200).send("Hello world");
+});
+
+await fastify.listen({ port: 3000 });
 ```
 
 Custom logs
@@ -136,13 +228,35 @@ Custom logs
 
 You can use a custom log interface matching [`pino`](https://github.com/pinojs/pino) to change the default behavior. Using `pino-pretty` as an example:
 
-Then, create a custom logger that will log to JSON in production and pretty print in development:
+Then, create a custom logger that logs to JSON in production and pretty prints in development:
 
-```
-1import arcjetFastify from "@arcjet/fastify";2import pino from "pino";3
-4const arcjetKey = process.env.ARCJET_KEY;5
-6if (!arcjetKey) {7  throw new Error("Cannot find `ARCJET_KEY` environment variable");8}9
-10const arcjet = arcjetFastify({11  key: arcjetKey,12  log: pino({13    // Warn in development, debug otherwise.14    level:15      process.env.ARCJET_LOG_LEVEL ||16      (process.env.ARCJET_ENV === "development" ? "debug" : "warn"),17    // Pretty print in development, JSON otherwise.18    transport:19      process.env.ARCJET_ENV === "development"20        ? { options: { colorize: true }, target: "pino-pretty" }21        : undefined,22  }),23  rules: [24    // …25  ],26});
+```js
+import arcjetFastify from "@arcjet/fastify";
+import pino from "pino";
+
+const arcjetKey = process.env.ARCJET_KEY;
+
+if (!arcjetKey) {
+  throw new Error("Cannot find `ARCJET_KEY` environment variable");
+}
+
+const arcjet = arcjetFastify({
+  key: arcjetKey,
+  log: pino({
+    // Warn in development, debug otherwise.
+    level:
+      process.env.ARCJET_LOG_LEVEL ||
+      (process.env.ARCJET_ENV === "development" ? "debug" : "warn"),
+    // Pretty print in development, JSON otherwise.
+    transport:
+      process.env.ARCJET_ENV === "development"
+        ? { options: { colorize: true }, target: "pino-pretty" }
+        : undefined,
+  }),
+  rules: [
+    // …
+  ],
+});
 ```
 
 Custom client
@@ -152,11 +266,22 @@ Custom client
 
 You can pass a client to change the behavior when connecting to the Cloud API. Use `createRemoteClient` to create a client.
 
-```
-1import arcjetFastify, { createRemoteClient } from "@arcjet/fastify";2
-3const arcjetKey = process.env.ARCJET_KEY;4
-5if (!arcjetKey) {6  throw new Error("Cannot find `ARCJET_KEY` environment variable");7}8
-9const arcjet = arcjetFastify({10  key: arcjetKey,11  client: createRemoteClient({ timeout: 3000 }),12  rules: [13    // …14  ],15});
+```js
+import arcjetFastify, { createRemoteClient } from "@arcjet/fastify";
+
+const arcjetKey = process.env.ARCJET_KEY;
+
+if (!arcjetKey) {
+  throw new Error("Cannot find `ARCJET_KEY` environment variable");
+}
+
+const arcjet = arcjetFastify({
+  key: arcjetKey,
+  client: createRemoteClient({ timeout: 3000 }),
+  rules: [
+    // …
+  ],
+});
 ```
 
 * * *

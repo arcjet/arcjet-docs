@@ -9,7 +9,7 @@ Quick start
 
 [Section titled “Quick start”](#quick-start)
 
-See the [Deno quick start](/get-started?f=deno).
+See the [Deno quick start](/sdk/deno/get-started/).
 
 Requirements
 ------------
@@ -26,7 +26,7 @@ Install
 
 Terminal window
 
-```
+```sh
 deno add npm:@arcjet/deno
 ```
 
@@ -45,19 +45,19 @@ Build Arcjet clients as few times as possible. That means _outside_ request hand
 
 [Section titled “Options”](#options)
 
-The main way to configure Arcjet is to pass options to the `arcjet` function. The fields are:
+The main way to configure Arcjet is to pass options to the `arcjet` function. It accepts the following fields:
 
-*   `characteristics` (`Array<string>`, default: `["src.ip"]`) — characteristics to track a user by; can also be passed to rules
-*   `client` (`Client`, optional) — client used to make requests to the Cloud API
-*   `key` (`string`, **required**) — API key to identify the site in Arcjet (typically through `process.env.ARCJET_KEY`)
-*   `log` (`ArcjetLogger`, optional) — log interface to emit useful info
-*   `rules` (`Array<ArcjetRule>`, **required**) — rules to use (order insensitive)
+*   `characteristics` (`Array<string>`, default: `["src.ip"]`) – characteristics to track a user by; can also be passed to rules
+*   `client` (`Client`, optional) – client used to make requests to the Cloud API
+*   `key` (`string`, **required**) – API key to identify the site in Arcjet (typically through `process.env.ARCJET_KEY`)
+*   `log` (`ArcjetLogger`, optional) – log interface to emit useful info
+*   `rules` (`Array<ArcjetRule>`, **required**) – rules to use (order insensitive)
 
 Get the Arcjet key for your site from the [Arcjet dashboard](https://console.arcjet.com). Set it as an environment variable called `ARCJET_KEY` in your `.env` file:
 
 Terminal window
 
-```
+```sh
 ARCJET_KEY=your_site_key_here
 ```
 
@@ -65,7 +65,7 @@ ARCJET_KEY=your_site_key_here
 
 [Section titled “Environment variables”](#environment-variables)
 
-The Arcjet Deno SDK uses several environment variables to configure its behavior. See [Concepts: Environment variables](/environment) for more info. The `ARCJET_KEY` environment variable is not read automatically and must be passed explicitly.
+The Arcjet Deno SDK uses several environment variables to configure its behavior. For more information, see [Concepts: Environment variables](/environment). The `ARCJET_KEY` environment variable is not read automatically and must be passed explicitly.
 
 ### Protect
 
@@ -73,15 +73,84 @@ The Arcjet Deno SDK uses several environment variables to configure its behavior
 
 Use the `protect` function to protect a request from Deno. Some rules, such as `validateEmail`, may need extra properties. The protect function returns a promise that resolves to a decision.
 
+```ts
+import "jsr:@std/dotenv/load";
+import arcjetDeno, { tokenBucket } from "npm:@arcjet/deno";
+
+const arcjetKey = Deno.env.get("ARCJET_KEY");
+
+if (!arcjetKey) {
+  throw new Error("Cannot find `ARCJET_KEY` environment variable");
+}
+
+const arcjet = arcjetDeno({
+  key: arcjetKey,
+  rules: [
+    tokenBucket({
+      capacity: 10,
+      characteristics: ["userId"],
+      interval: 10,
+      mode: "LIVE",
+      refillRate: 5,
+    }),
+  ],
+});
+
+Deno.serve(
+  { port: 3000 },
+  arcjet.handler(async function (request) {
+    // Replace `userId` with your authenticated user ID.
+    const userId = "user123";
+    const decision = await arcjet.protect(request, {
+      requested: 5,
+      userId,
+    });
+
+    if (decision.isDenied()) {
+      return new Response("Forbidden", { status: 403 });
+    }
+
+    return new Response("Hello world");
+  }),
+);
 ```
-1import "jsr:@std/dotenv/load";2import arcjetDeno, { tokenBucket } from "npm:@arcjet/deno";3
-4const arcjetKey = Deno.env.get("ARCJET_KEY");5
-6if (!arcjetKey) {7  throw new Error("Cannot find `ARCJET_KEY` environment variable");8}9
-10const arcjet = arcjetDeno({11  key: arcjetKey,12  rules: [13    tokenBucket({14      capacity: 10,15      characteristics: ["userId"],16      interval: 10,17      mode: "LIVE",18      refillRate: 5,19    }),20  ],21});22
-23Deno.serve(24  { port: 3000 },25  arcjet.handler(async function (request) {26    // Replace `userId` with your authenticated user ID.27    const userId = "user123";28    const decision = await arcjet.protect(request, {29      requested: 5,30      userId,31    });32
-33    if (decision.isDenied()) {34      return new Response("Forbidden", { status: 403 });35    }36
-37    return new Response("Hello world");38  }),39);
+
+#### Override the client IP
+
+[Section titled “Override the client IP”](#override-the-client-ip)
+
+Arcjet normally detects the client IP address from the request. If your application has already determined the client IP from a trusted source, pass it as `ipSrc` in the second argument to `protect()`. In this example, `requestInput` represents the request or framework context normally passed to `protect()`:
+
+```ts
+const ipSrc = getClientIpFromTrustedSource(requestInput);
+const decision = await aj.protect(requestInput, { ipSrc });
 ```
+
+A non-empty `ipSrc` takes precedence over automatic detection, including the development-only `x-arcjet-ip` header. If `ipSrc` is an empty string, Arcjet uses automatic detection instead.
+
+> **Caution:** The SDK trusts `ipSrc` without validating it. Validate the value and ensure it comes from a trusted source. Do not pass a client-controlled header directly; doing so could allow clients to choose the IP address used for fingerprinting, rate limiting, and other security checks.
+
+#### Metadata
+
+[Section titled “Metadata”](#metadata)
+
+`protect()` accepts `metadata`: an object of string keys mapped to **any JSON-serializable value**, including nested objects, arrays, numbers, booleans, and `null`. It is attached to the decision for correlation and analytics and does not affect the decision or its cache key.
+
+```ts
+const decision = await aj.protect(requestInput, {
+  metadata: {
+    requestId,
+    user: { id: userId, plan: "pro" },
+    flags: { beta: true },
+  },
+});
+```
+
+Each top-level value is JSON-encoded by the SDK. Keys the SDK cannot encode (`undefined`, a function, a `BigInt`, a circular reference) are dropped with a single `AJ1017` warning naming them. A `metadata` that is not a plain object is ignored entirely. Prefer `metadata` over `extra`, which stays a flat string map.
+
+Metadata is untrusted and is not redacted – do not put secrets or PII in it. JavaScript numbers are IEEE-754 doubles, so pass an integer above `Number.MAX_SAFE_INTEGER` as a string.
+
+For limits, drop behavior, and language-specific notes, see [Guard metadata](/guards/reference#metadata).
 
 ### Decision
 
@@ -89,37 +158,62 @@ Use the `protect` function to protect a request from Deno. Some rules, such as `
 
 The `ArcjetDecision` that `protect` resolves to has the following fields:
 
-*   `conclusion` (`"ALLOW"`, `"DENY"`, or `"ERROR"`) — what to do with the request
-*   `id` (`string`) — ID for the request; local decisions start with `lreq_` and remote ones with `req_`
-*   `ip` (`ArcjetIpDetails`) — analysis of the client IP address
-*   `reason` (`ArcjetReason`) — more info about the conclusion
-*   `results` (`Array<ArcjetRuleResult>`) — results of each rule
-*   `ttl` (`number`) — time-to-live for the decision in seconds; `"DENY"` decisions are cached by `@arcjet/deno` for this duration
+*   `conclusion` (`"ALLOW"`, `"DENY"`, or `"ERROR"`) – what to do with the request
+*   `id` (`string`) – ID for the request; local decisions start with `lreq_` and remote ones with `req_`
+*   `ip` (`ArcjetIpDetails`) – analysis of the client IP address
+*   `reason` (`ArcjetReason`) – more info about the conclusion
+*   `results` (`Array<ArcjetRuleResult>`) – results of each rule
+*   `ttl` (`number`) – time-to-live for the decision in seconds; `"DENY"` decisions are cached by `@arcjet/deno` for this duration
 
-This top-level decision takes the results from each `"LIVE"` rule into account. If one of them is `"DENY"` then the overall conclusion will be `"DENY"`. Otherwise, if one of them is `"ERROR"`, then `"ERROR"`. Otherwise, it will be `"ALLOW"`. The `reason` and `ttl` fields reflect this conclusion.
+This top-level decision takes the results from each `"LIVE"` rule into account. If one of them is `"DENY"`, then the overall conclusion is `"DENY"`. Otherwise, if one of them is `"ERROR"`, then `"ERROR"`. Otherwise, it is `"ALLOW"`. The `reason` and `ttl` fields reflect this conclusion.
 
 To illustrate, when a bot rule returns an error and a validate email rule returns a deny, the overall conclusion is `"DENY"`, while the `"ERROR"` is available in the results.
 
 The results of `"DRY_RUN"` rules do not affect this overall decision, but are included in `results`.
 
-The `ip` field is available when the Cloud API was called and contains IP geolocation and reputation info. You can use this field to customize responses or you can use [Arcjet Filters](/filters) to make decisions based on it. See the [IP geolocation](/blueprints/ip-geolocation) and [IP reputation](/blueprints/vpn-proxy-detection) blueprints for more info.
+The `ip` field is available when the Cloud API was called and contains IP geolocation and reputation info. You can use this field to customize responses or you can use [Arcjet Filters](/filters) to make decisions based on it. For more information, see the [IP geolocation](/blueprints/ip-geolocation) and [IP reputation](/blueprints/vpn-proxy-detection) blueprints.
 
 Errors
 ------
 
 [Section titled “Errors”](#errors)
 
-Arcjet fails open so that a service issue, misconfiguration, or [network timeout](/architecture#timeout) does not block requests. Such errors should in many cases be logged but otherwise treated as `"ALLOW"` decisions. The `reason.message` field has more info on what occurred.
+Arcjet fails open so that a service issue, misconfiguration, or [network timeout](/architecture#timeout) does not block requests. In many cases, log such errors but otherwise treat them as `"ALLOW"` decisions. The `reason.message` field describes what occurred.
 
-```
-1import "jsr:@std/dotenv/load";2import arcjetDeno, { filter } from "npm:@arcjet/deno";3
-4const arcjetKey = Deno.env.get("ARCJET_KEY");5
-6if (!arcjetKey) {7  throw new Error("Cannot find `ARCJET_KEY` environment variable");8}9
-10const arcjet = arcjetDeno({11  key: arcjetKey,12  rules: [13    // This broken expression will result in an error decision:14    filter({ deny: ['ip.src.country is "'] }),15  ],16});17
-18Deno.serve(19  { port: 3000 },20  arcjet.handler(async function (request) {21    const decision = await arcjet.protect(request);22
-23    if (decision.isErrored()) {24      console.warn("Arcjet error", decision.reason.message);25    }26
-27    if (decision.isDenied()) {28      return new Response("Forbidden", { status: 403 });29    }30
-31    return new Response("Hello world");32  }),33);
+```ts
+import "jsr:@std/dotenv/load";
+import arcjetDeno, { filter } from "npm:@arcjet/deno";
+
+const arcjetKey = Deno.env.get("ARCJET_KEY");
+
+if (!arcjetKey) {
+  throw new Error("Cannot find `ARCJET_KEY` environment variable");
+}
+
+const arcjet = arcjetDeno({
+  key: arcjetKey,
+  rules: [
+    // This broken expression will result in an error decision:
+    filter({ deny: ['ip.src.country is "'] }),
+  ],
+});
+
+Deno.serve(
+  { port: 3000 },
+  arcjet.handler(async function (request) {
+    const decision = await arcjet.protect(request);
+
+    if (decision.isErrored()) {
+      console.warn("Arcjet error", decision.reason.message);
+    }
+
+    if (decision.isDenied()) {
+      return new Response("Forbidden", { status: 403 });
+    }
+
+    return new Response("Hello world");
+  }),
+);
 ```
 
 Custom logs
@@ -131,17 +225,42 @@ You can use a custom log interface matching [`pino`](https://github.com/pinojs/p
 
 Terminal window
 
-```
+```sh
 deno add npm:pino npm:pino-pretty
 ```
 
-Then, create a custom logger that will log to JSON in production and pretty print in development:
+Then, create a custom logger that logs to JSON in production and pretty prints in development:
 
-```
-1import "jsr:@std/dotenv/load";2import arcjetDeno from "npm:@arcjet/deno";3import pinoPretty from "npm:pino-pretty";4import pino from "npm:pino";5
-6const arcjetKey = Deno.env.get("ARCJET_KEY");7
-8if (!arcjetKey) {9  throw new Error("Cannot find `ARCJET_KEY` environment variable");10}11
-12const arcjet = arcjetDeno({13  key: arcjetKey,14  log: pino(15    {16      // Warn in development, debug otherwise.17      level:18        Deno.env.get("ARCJET_LOG_LEVEL") ||19        (Deno.env.get("ARCJET_ENV") === "development" ? "debug" : "warn"),20    },21    // Pretty print in development, JSON otherwise.22    Deno.env.get("ARCJET_ENV") === "development"23      ? pinoPretty({ colorize: true })24      : undefined,25  ),26  rules: [27    // …28  ],29});
+```ts
+import "jsr:@std/dotenv/load";
+import arcjetDeno from "npm:@arcjet/deno";
+import pinoPretty from "npm:pino-pretty";
+import pino from "npm:pino";
+
+const arcjetKey = Deno.env.get("ARCJET_KEY");
+
+if (!arcjetKey) {
+  throw new Error("Cannot find `ARCJET_KEY` environment variable");
+}
+
+const arcjet = arcjetDeno({
+  key: arcjetKey,
+  log: pino(
+    {
+      // Warn in development, debug otherwise.
+      level:
+        Deno.env.get("ARCJET_LOG_LEVEL") ||
+        (Deno.env.get("ARCJET_ENV") === "development" ? "debug" : "warn"),
+    },
+    // Pretty print in development, JSON otherwise.
+    Deno.env.get("ARCJET_ENV") === "development"
+      ? pinoPretty({ colorize: true })
+      : undefined,
+  ),
+  rules: [
+    // …
+  ],
+});
 ```
 
 Custom client
@@ -151,11 +270,23 @@ Custom client
 
 You can pass a client to change the behavior when connecting to the Cloud API. Use `createRemoteClient` to create a client.
 
-```
-1import "jsr:@std/dotenv/load";2import arcjetDeno, { createRemoteClient } from "npm:@arcjet/deno";3
-4const arcjetKey = Deno.env.get("ARCJET_KEY");5
-6if (!arcjetKey) {7  throw new Error("Cannot find `ARCJET_KEY` environment variable");8}9
-10const arcjet = arcjetDeno({11  key: arcjetKey,12  client: createRemoteClient({ timeout: 3000 }),13  rules: [14    // …15  ],16});
+```ts
+import "jsr:@std/dotenv/load";
+import arcjetDeno, { createRemoteClient } from "npm:@arcjet/deno";
+
+const arcjetKey = Deno.env.get("ARCJET_KEY");
+
+if (!arcjetKey) {
+  throw new Error("Cannot find `ARCJET_KEY` environment variable");
+}
+
+const arcjet = arcjetDeno({
+  key: arcjetKey,
+  client: createRemoteClient({ timeout: 3000 }),
+  rules: [
+    // …
+  ],
+});
 ```
 
 * * *

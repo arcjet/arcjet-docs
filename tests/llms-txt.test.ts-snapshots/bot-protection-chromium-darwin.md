@@ -44,14 +44,17 @@ Using the MCP server
 
 Use the [Arcjet MCP server](/mcp-server) to monitor bot traffic in real time. Call `analyze-traffic` to see top IPs and denial rates, `get-anomalies` to detect sudden changes in bot patterns, or `get-security-briefing` for a comprehensive overview including threat landscape and recommendations.
 
-Configure without code changes
+Configure bot rules without code changes
+----------------------------------------
 
-Bot rules can also be configured as [remote rules](/remote-rules) from the Arcjet dashboard or via the [MCP server](/mcp-server), applied site-wide with no code changes or redeployment. This is useful for blocking a newly-spotted bot category during an incident. Developers can keep route-specific bot policy in code, while SecOps can use remote bot rules for incident response and site-wide allow or deny changes.
+[Section titled “Configure bot rules without code changes”](#configure-bot-rules-without-code-changes)
 
-In-app bot detection vs network/CDN bot protection
---------------------------------------------------
+You can also configure bot rules as [remote rules](/remote-rules) from the Arcjet dashboard or through the [MCP server](/mcp-server), applied site-wide with no code changes or redeployment. This is useful for blocking a bot category you have just spotted during an incident. Developers can keep route-specific bot policy in code, while SecOps can use remote bot rules for incident response and site-wide allow or deny changes.
 
-[Section titled “In-app bot detection vs network/CDN bot protection”](#in-app-bot-detection-vs-networkcdn-bot-protection)
+In-app bot detection versus network/CDN bot protection
+------------------------------------------------------
+
+[Section titled “In-app bot detection versus network/CDN bot protection”](#in-app-bot-detection-versus-networkcdn-bot-protection)
 
 Traditional bot protection runs at the network or CDN layer and often provides a fixed set of rules. Arcjet bot protection runs inside your application, where you have access to rich context such as user identity, subscription level, and business logic. This lets you build more accurate, application-aware bot rules and avoid blocking legitimate users.
 
@@ -68,14 +71,14 @@ For basic bot detection, regular expressions are applied to the `user-agent` hea
 
 Advanced bot detection adds IP reputation, [verification](/bot-protection/reference#bot-verification), machine learning, and [advanced signals](/bot-protection/advanced-signals) to identify bots more accurately and distinguish real users from automated traffic.
 
-Clients are tracked using configurable [fingerprints](/fingerprints) (IP address by default) to identify unique clients. Fingerprints let you track anonymous users and attach rules and detections to known users via session tokens or other identifiers.
+Clients are tracked using configurable [fingerprints](/fingerprints) (IP address by default) to identify unique clients. Fingerprints let you track anonymous users and attach rules and detections to known users through session tokens or other identifiers.
 
 Pricing
 -------
 
 [Section titled “Pricing”](#pricing)
 
-See the [pricing page](https://arcjet.com/pricing) for details.
+For details, see the [pricing page](https://arcjet.com/pricing).
 
 Discussion
 ----------
