@@ -202,11 +202,12 @@ Full docs: https://docs.arcjet.com
 | Astro          | `@arcjet/astro`        | `npx astro add @arcjet/astro`          |
 | Python FastAPI | `arcjet`               | `pip install arcjet`                   |
 | Python Flask   | `arcjet`               | `pip install arcjet flask`             |
-| Go             | `github.com/arcjet/arcjet-go` | `go get github.com/arcjet/arcjet-go@latest` |
+| Go             | `github.com/arcjet/arcjet-go` | `go get github.com/arcjet/arcjet-go@v1.0.0-rc.2` |
 
 ## Go SDK
 
-The Go SDK is pre-release. Version 0.1.0 requires Go 1.25 or later and supports
+The Go SDK is pre-release. The current pre-release is v1.0.0-rc.2, which
+requires Go 1.25 or later and supports
 `net/http` request protection plus Guard protection for non-HTTP operations.
 Create clients once at package scope and reuse them.
 
