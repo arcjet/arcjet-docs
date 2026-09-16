@@ -6,19 +6,51 @@ next: false
 ---
 
 import { Aside } from "@astrojs/starlight/components";
-import { Link } from "@/components/link";
 
-[Arcjet](https://arcjet.com) is agent runtime security that ships with your
-code. Put an `ALLOW` or `DENY` decision in front of every agent tool call,
-enforce budgets, stop prompt injection, and protect personal information from
-inside the application.
+[Arcjet](https://arcjet.com) is the AI agent runtime security platform.
+Discover the agents running in your organization, enforce policy across every action,
+prompt, and tool call, and keep the evidence to prove what happened. Detect prompt
+injection, authorize agent tool calls, redact PII, and block bots and abuse.
 
-Arcjet protects two types of entry points:
+Agents can register on behalf of the user using [agent registration](https://arcjet.com/auth.md).
 
-- **Guards** – tool calls, MCP servers, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` (or `Guard` in Go) to pass inputs directly. See <Link.Page href="/guards">Agent guards</Link.Page>.
-- **Request-based** – HTTP route handlers and API endpoints. Use `protect()` (or `Protect` in Go) with any <Link.Page href="/get-started">supported framework</Link.Page>.
+<Aside type="tip">
+  This guide is designed for AI coding agents. If you are a developer, see the
+  [quick start guide](/get-started).
+</Aside>
 
-Pick by what's at the protection site:
+## Choose an integration path
+
+Read this section first and skip to the path that matches the project. Most
+projects need one.
+
+| What you're protecting                                      | Path                                                                        |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------- |
+| A developer's coding agent (Claude Code, GitHub Copilot)    | [Secure the coding agent](#secure-the-coding-agent). No package to install. |
+| An agent you built (tool calls, MCP servers, queue workers) | [Guard](#add-protection) with `@arcjet/guard` or `arcjet.guard`.            |
+| HTTP routes and API endpoints                               | [Protect](#add-protection) with a request SDK.                              |
+
+Detect which one applies by reading the project manifest:
+
+- **`package.json`** with `next`, `express`, `fastify`, `@nestjs/core`,
+  `@sveltejs/kit`, `hono`, `@remix-run/node`, `react-router`, `astro`, or
+  `nuxt`, or a Bun or Deno runtime, means a web application.
+- **`pyproject.toml` or `requirements.txt`** with `fastapi` or `flask` means a
+  web application.
+- **`go.mod`** means the Go SDK with `net/http` or any router that exposes
+  `*http.Request`.
+- **An agent framework in either manifest** (`ai`, `eve`, `genkit`,
+  `langchain`, `@langchain/langgraph`, `@mastra/core`, `@openai/agents`,
+  `@google/adk`, `@strands-agents/sdk`, `@tanstack/ai`, or `crewai`) means the
+  project builds its own agent. Use the guard adapter for that framework,
+  instead of or alongside a request SDK.
+
+Two package names look alike and are different products. `@anthropic-ai/sdk` or
+`anthropic` calling hosted `sessions` and `events.send` is Claude Managed
+Agents. `@anthropic-ai/claude-agent-sdk` or `claude-agent-sdk` with a local
+`query()` loop is the [Claude Agent SDK](/guards/claude-agent-sdk).
+
+### Protect compared with Guard
 
 |                                                                    |       Protect (request SDKs)       | Guard (`@arcjet/guard`, `arcjet.guard`, `NewGuardClient`)  |
 | ------------------------------------------------------------------ | :--------------------------------: | :--------------------------------------------------------: |
@@ -27,60 +59,52 @@ Pick by what's at the protection site:
 | Rate limit key                                                     |      IP or `characteristics`       |             Explicit `key` string at call time             |
 | Rate limiting / prompt injection / sensitive info                  |                 ✅                 |                             ✅                             |
 | Bot protection / Shield / email validation / filters / IP analysis |                 ✅                 |                             –                              |
+| Content moderation                                                 |                 –                  |                             ✅                             |
 | Custom rules                                                       |                 –                  |                             ✅                             |
 
-A single application can use both – request-based protection on API routes
-and guards inside tool handlers, queue workers, and MCP tools.
+A single application can use both: request-based protection on API routes, and
+guards inside tool handlers, queue workers, and MCP tools.
 
-The recommended path for an agentic workflow is to install a skill that gives
-your agent the documentation to integrate the Arcjet SDK, then connect to the
-Arcjet API with the <Link.Page href="/cli">CLI</Link.Page> or
-
-<Link.Page href="/mcp-server">MCP server</Link.Page> to create sites, retrieve
-credentials, and verify decisions.
-
-<Aside type="tip">
-  This guide is designed for AI coding agents. If you are a developer, see the
-  <Link.Page href="/get-started">quick start guide</Link.Page>.
-</Aside>
-
-## Skills
+## Install a skill
 
 Skills are the primary entry point for setting up Arcjet in an agentic
-workflow. They give your agent the documentation to detect your framework,
+workflow. They give your agent the documentation to detect the framework,
 install the SDK, and wire up protection rules.
-
-Install the Arcjet skill:
 
 ```bash
 npx skills add arcjet/skills
 ```
 
-Then describe what you want to protect. The skill handles the rest.
-
-Source: [github.com/arcjet/skills](https://github.com/arcjet/skills)
+Then describe what you want to protect. The skill handles the rest. For the
+source, see [github.com/arcjet/skills](https://github.com/arcjet/skills).
 
 ## Connect to the Arcjet API
 
 Skills handle the SDK and rule integration in your code. To create sites,
-retrieve `ARCJET_KEY`, inspect requests, and manage remote rules, the agent
-needs to talk to the Arcjet API. There are two parallel support transports –
-pick whichever fits your working style:
+retrieve `ARCJET_KEY`, inspect requests, and manage remote configuration, the
+agent needs to talk to the Arcjet API. There are two transports:
 
-- **<Link.Page href="/cli">Arcjet CLI</Link.Page>** – for agents and humans
-  working in a terminal (Claude Code, Codex, plugin tasks, CI). No editor or
-  MCP setup required.
-- **<Link.Page href="/mcp-server">MCP server</Link.Page>** – for online clients
-  without shell access (ChatGPT, Claude Desktop) and editors with built-in MCP
-  support (VS Code Copilot, Windsurf, Cursor).
+- **[Arcjet CLI](/cli)** for agents and humans working in a terminal (Claude
+  Code, Codex, plugin tasks, CI). No editor or MCP setup required.
+- **[MCP server](/mcp-server)** for online clients without shell access
+  (ChatGPT, Claude Desktop) and clients with built-in MCP support (Claude Code,
+  Codex CLI, Cursor, VS Code with Copilot, Windsurf).
 
-Both transports expose the same management-plane surface. The following sections
-describe each path end to end.
+The two transports overlap but aren't identical. Both cover teams, sites,
+remote rules, traffic analysis, and request inspection. **Agent guard policies
+are MCP-only**, so an agent that has to author or publish a policy needs the
+MCP server. For the full surface, see the
+[CLI command reference](/cli#command-reference) and the
+[MCP tool list](/mcp-server#available-tools).
+
+If the user doesn't have an Arcjet account, direct them to
+[console.arcjet.com](https://console.arcjet.com) to create one or register on
+their behalf using [agent registration](https://arcjet.com/auth.md). Both transports
+authenticate as that user, so don't prompt them for a token or an API key.
 
 ### Path A: Connect with the CLI
 
-The <Link.Page href="/cli">Arcjet CLI</Link.Page> lets you manage sites, keys,
-and rules from your terminal:
+The [Arcjet CLI](/cli) manages sites, keys, and rules from the terminal:
 
 ```bash
 npx -y @arcjet/cli@latest auth login
@@ -89,39 +113,30 @@ npx -y @arcjet/cli@latest sites list --team-id team_01abc123
 npx -y @arcjet/cli@latest sites get-key --site-id site_01abc123
 ```
 
-For frequent use, install the binary so you can run `arcjet <command>`
-directly. See <Link.Page href="/cli#install">CLI install paths</Link.Page>.
-
-Set the key in the project environment:
-
-```ini
-# .env.local (Next.js, Astro) or .env (other frameworks)
-ARCJET_KEY=ajkey_yourkey
-```
-
-Then continue with [Install the SDK](#install-the-sdk) and
-[Add protection](#add-protection).
+`auth login` uses a browser-based device flow. For frequent use, install the
+binary so you can run `arcjet <command>` directly. See
+[CLI install paths](/cli#install).
 
 ### Path B: Connect with the MCP server
 
-Use this path if you are using a tool with built-in MCP support (VS Code
-Copilot, Windsurf, ChatGPT, Claude Code, Claude Desktop, Cursor).
+The Arcjet MCP server manages your account from an AI coding tool. For the
+per-client configuration steps, see [MCP server setup](/mcp-server#setup).
 
-The Arcjet MCP server lets you manage your account directly from your AI coding
-tool. For the per-client configuration steps, see <Link.Page
-href="/mcp-server#setup">MCP server setup</Link.Page>.
+Authentication uses OAuth on first connection. Claude Code and ChatGPT open a
+browser automatically. Cursor, Codex CLI, and VS Code prompt you to
+authenticate first, so the user may have to click through before any tool call
+succeeds.
 
-OAuth authentication happens automatically on first connection – a browser
-window opens for the user to sign in.
-
-Once connected, retrieve your site key with the MCP tools:
+Once connected, retrieve the site key:
 
 1. Call `list-teams` to get available teams.
-2. Call `list-sites` with the team ID to find the site (or call `create-site`
-   to create a new one).
+2. Call `list-sites` with the team ID to find the site, or call `create-site`
+   to create one.
 3. Call `get-site-key` with the site ID to retrieve the `ARCJET_KEY`.
 
-Set the key in the project environment:
+### Set the environment
+
+Whichever transport you used, set the key in the project environment:
 
 ```ini
 # .env.local (Next.js, Astro) or .env (other frameworks)
@@ -129,62 +144,91 @@ ARCJET_KEY=ajkey_yourkey
 ARCJET_ENV=development
 ```
 
-`ARCJET_ENV` is read by the Arcjet SDK in your local app to switch into
-development mode. It is not used by the MCP connection itself.
+`ARCJET_ENV=development` switches the SDK in the local app into development
+mode, which allows the private and loopback IP addresses that are normal on a
+developer machine. It's read by the JavaScript and Python SDKs and ignored by
+the Go SDK, which has no development mode. It has nothing to do with the CLI or
+the MCP connection. For more information, see
+[Environment variables](/environment#arcjet-env).
 
-If the user doesn't have an Arcjet account yet, direct them to
-[console.arcjet.com](https://console.arcjet.com) to create one (free trial).
+## Install Arcjet
 
-## Install the SDK
+Install the package for the framework you detected. Coding agents need no
+package at all.
 
-Detect the framework by checking the project files:
+### Coding agents
 
-- **`package.json`** – look for `next`, `express`, `fastify`, `@nestjs/core`,
-  `@sveltejs/kit`, `hono`, `@remix-run/node`, `react-router`, `astro`, `nuxt`,
-  or check whether the runtime is Bun or Deno. If you see `@anthropic-ai/sdk`
-  and the app calls hosted Managed Agents `sessions` / `events.send`, use
-  Claude Managed Agents. If you see `@anthropic-ai/claude-agent-sdk` and a
-  local `query()` loop, that is a different product – see
-  <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>.
-- **`pyproject.toml` / `requirements.txt`** – look for `fastapi` or `flask`.
-  If you see `anthropic` and hosted Managed Agents sessions, use Claude
-  Managed Agents. If you see `claude-agent-sdk`, that is a different product
-  – see
-  <Link.Page href="/guards/claude-agent-sdk">Claude Agent SDK agent guard</Link.Page>.
-- **`go.mod`** – use the Go SDK with `net/http` or any router that exposes
-  `*http.Request`.
+Enforce security policies on developer coding agents. There is no package to
+install, and no code changes. An administrator configures the hooks the agent
+already fires. See [Claude Code](/coding-agents/claude-code) and
+[GitHub Copilot](/coding-agents/copilot).
 
-Then install the correct package:
+### AI agent frameworks
 
-| Framework      | Install command                                 |
-| -------------- | ----------------------------------------------- |
-| Next.js        | `npm i @arcjet/next`                            |
-| Express        | `npm i @arcjet/node @arcjet/inspect`            |
-| Node.js        | `npm i @arcjet/node @arcjet/inspect`            |
-| Node.js + Hono | `npm i @arcjet/node @arcjet/inspect`            |
-| Fastify        | `npm i @arcjet/fastify`                         |
-| NestJS         | `npm i @arcjet/nest`                            |
-| SvelteKit      | `npm i @arcjet/sveltekit @arcjet/inspect`       |
-| Remix          | `npm i @arcjet/remix @arcjet/inspect`           |
-| React Router   | `npm i @arcjet/react-router @arcjet/inspect`    |
-| Bun            | `bun add @arcjet/bun @arcjet/inspect`           |
-| Bun + Hono     | `bun add @arcjet/bun @arcjet/inspect`           |
-| Deno           | `deno add npm:@arcjet/deno npm:@arcjet/inspect` |
-| Nuxt           | `npx nuxt module add @arcjet/nuxt`              |
-| Astro          | `npx astro add @arcjet/astro`                   |
-| Python FastAPI | `pip install arcjet` or `uv add arcjet`         |
-| Python Flask   | `pip install arcjet` or `uv add arcjet`         |
-| Go             | `go get github.com/arcjet/arcjet-go@v1.0.0-rc.2` |
-| Claude Managed Agents | See [Claude Managed Agents](#claude-managed-agents). |
+Protect custom-built agents with direct framework integrations. Each one uses
+the guard SDK (`@arcjet/guard` or `arcjet.guard`) with the framework package as
+a peer.
+
+| Framework             | Install command                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------ |
+| Claude Agent SDK      | `npm i @arcjet/guard @anthropic-ai/claude-agent-sdk` or `pip install "arcjet[claude-agent-sdk]"` |
+| Claude Managed Agents | `npm i @arcjet/guard @anthropic-ai/sdk` or `pip install "arcjet[claude-managed-agents]"`         |
+| CrewAI                | `pip install "arcjet>=1.0.0" "crewai>=1.15.3,<2"`                                                |
+| Genkit                | `npm i @arcjet/guard genkit`                                                                     |
+| Google ADK            | `npm i @arcjet/guard @google/adk`                                                                |
+| LangChain             | `npm i @arcjet/guard langchain @langchain/core` or `pip install "arcjet[langchain]"`             |
+| LangGraph             | `npm i @arcjet/guard @langchain/langgraph @langchain/core`                                       |
+| Mastra                | `npm i @arcjet/guard @mastra/core`                                                               |
+| OpenAI Agents         | `npm i @arcjet/guard @openai/agents` or `pip install "arcjet[openai-agents]"`                    |
+| Strands Agents        | `npm i @arcjet/guard @strands-agents/sdk` or `pip install "arcjet[strands-agents]"`              |
+| TanStack AI           | `npm i @arcjet/guard @tanstack/ai`                                                               |
+| Vercel AI SDK         | `npm i @arcjet/guard ai @ai-sdk/provider-utils`                                                  |
+| Vercel Eve            | `npm i @arcjet/guard eve`                                                                        |
+
+Where a row lists only an `npm` command, that adapter is JavaScript-only.
+CrewAI is Python-only, and has no `arcjet[crewai]` extra, so install CrewAI
+yourself. LangChain splits its extras: `arcjet[langchain]` covers `guard_tool`
+and the capture handlers, and `arcjet[langchain-agents]` covers
+`ArcjetMiddleware` and `ToolPolicy`. Claude Managed Agents needs the extra
+steps in [Claude Managed Agents](#claude-managed-agents). For every adapter,
+see [Guards](/guards).
+
+Import paths are versioned. `@arcjet/guard/vercel-ai/v7` resolves and
+`@arcjet/guard/vercel-ai` does not, which is deliberate: an unversioned import
+throws `ERR_PACKAGE_PATH_NOT_EXPORTED` rather than silently changing behavior
+across a major version.
+
+### Native SDKs
+
+Create custom integrations and protect your application code.
+
+| Framework         | Install command                                  |
+| ----------------- | ------------------------------------------------ |
+| Astro             | `npx astro add @arcjet/astro`                    |
+| Bun               | `bun add @arcjet/bun @arcjet/inspect`            |
+| Bun + Hono        | `bun add @arcjet/bun @arcjet/inspect`            |
+| Deno              | `deno add npm:@arcjet/deno npm:@arcjet/inspect`  |
+| Fastify           | `npm i @arcjet/fastify`                          |
+| Go                | `go get github.com/arcjet/arcjet-go@v1.0.0-rc.2` |
+| NestJS            | `npm i @arcjet/nest`                             |
+| Next.js           | `npm i @arcjet/next`                             |
+| Node.js           | `npm i @arcjet/node @arcjet/inspect`             |
+| Node.js + Express | `npm i @arcjet/node @arcjet/inspect`             |
+| Node.js + Hono    | `npm i @arcjet/node @arcjet/inspect`             |
+| Nuxt              | `npx nuxt module add @arcjet/nuxt`               |
+| Python + FastAPI  | `pip install arcjet` or `uv add arcjet`          |
+| Python + Flask    | `pip install arcjet` or `uv add arcjet`          |
+| React Router      | `npm i @arcjet/react-router @arcjet/inspect`     |
+| Remix             | `npm i @arcjet/remix @arcjet/inspect`            |
+| SvelteKit         | `npm i @arcjet/sveltekit @arcjet/inspect`        |
 
 ### Claude Managed Agents
 
-Claude Managed Agents is Anthropic's hosted harness. It is not the Claude
-Agent SDK. Don't install `claude-agent-sdk` or
-`@anthropic-ai/claude-agent-sdk` for this adapter.
+Claude Managed Agents is Anthropic's hosted harness. It is not the Claude Agent
+SDK, so don't install `claude-agent-sdk` or `@anthropic-ai/claude-agent-sdk`
+for this adapter.
 
-For JavaScript, install the guard SDK with `@anthropic-ai/sdk`
-(`>=0.86.0 <1`):
+For JavaScript, install the guard SDK with `@anthropic-ai/sdk` (`>=0.86.0 <1`):
 
 ```bash
 npm i @arcjet/guard @anthropic-ai/sdk
@@ -197,221 +241,298 @@ pip install "arcjet[claude-managed-agents]"
 ```
 
 Or `uv add` the same spec. One adapter, both languages. Import
-`@arcjet/guard/claude-managed-agents/v0`
-(`guardEvents`, `guardCustomTool`, `claudeManagedAgentsContext`) or
-`arcjet.guard.claude_managed_agents` (`guard_events`,
-`guard_custom_tool`, `claude_managed_agents_context`). On custom-tool
-`DENY`, return `user.custom_tool_result` with `is_error` set. For more
-information about install, helpers, and denial handling, see
-<Link.Page href="/guards/claude-managed-agents">Claude Managed Agents agent guard</Link.Page>.
+`@arcjet/guard/claude-managed-agents/v0` (`guardEvents`, `guardCustomTool`,
+`claudeManagedAgentsContext`) or `arcjet.guard.claude_managed_agents`
+(`guard_events`, `guard_custom_tool`, `claude_managed_agents_context`).
+
+This adapter has no `protect()` call. Screen inbound `user.message` with
+`guardEvents` or `guard_events` before `events.send`, and wrap custom tools
+with `guardCustomTool` or `guard_custom_tool` before your app executes them. On
+a custom-tool `DENY`, return `user.custom_tool_result` with `is_error` set.
+
+Anthropic runs built-in tools and the default is `always_allow`, so there's no
+pre-execution hook for bash or file tools. `always_ask` with
+`user.tool_confirmation` is opt-in human confirmation, not policy. For MCP, put
+Guard on servers you host. For more information, see
+[Claude Managed Agents agent guard](/guards/claude-managed-agents).
 
 ## Add protection
 
-Add Arcjet rules to protect the application. See the
-<Link.Page href="/llms-full.txt">llms-full.txt</Link.Page> file for complete,
-copy-paste code examples for every framework, including the rule parameter
-reference and decision API. <Link.Page href="/llms.txt">llms.txt</Link.Page> is
-a shorter index for AI agents that links out to the full reference.
+A typical setup has three steps:
 
-A typical setup has the following steps:
+1. Create an Arcjet client **once**, outside request handlers.
+2. Configure rules.
+3. Call `protect()` or `guard()` at the protection site, then act on the
+   decision.
 
-1. Create an Arcjet client instance **once**, outside request handlers.
-2. Configure rules: `shield` (WAF), `detectBot`, rate limiting
-   (`tokenBucket`, `fixedWindow`, or `slidingWindow`), and optionally
-   `sensitiveInfo` or `detectPromptInjection` for AI apps.
-3. Call `protect()` (or `Protect`) inside each route handler and check whether
-   the decision was denied.
+### Protect an HTTP route
+
+Configure `shield` (WAF), `detectBot`, rate limiting (`tokenBucket`,
+`fixedWindow`, or `slidingWindow`), and optionally `sensitiveInfo` or
+`detectPromptInjection` for AI apps. Call `protect()` inside each route handler
+and check whether the decision was denied.
+
+<Aside type="caution">
+  **Do not** create a new Arcjet instance per request, which defeats caching,
+  and **do not** call `protect()` more than once for the same request. Prefer a
+  route handler over middleware, because the handler has the full request
+  context. For more information, see [Best practices](/best-practices).
+</Aside>
 
 In Go, log the `err` from `Protect` and deny only when `IsDenied()` is true. A
 transport failure returns an `ERROR` decision that `IsAllowed()` treats as
-allowed; use `IsErrored()` to distinguish it from a real allow. If the client
-or request is nil, `Protect` returns the zero `Decision`.
+allowed, so use `IsErrored()` to distinguish it from a real allow. If the
+client or request is nil, `Protect` returns the zero `Decision`.
 
-Go Guard rule constructors require `Mode` (`ModeLive` or `ModeDryRun`). An
-empty `Mode` returns `ErrInvalidMode`. HTTP `Protect` rules default an empty
-`Mode` to `ModeDryRun`.
+### Guard an agent action
 
-For Claude Managed Agents, don't call `protect()`. Screen inbound
-`user.message` with `guardEvents` / `guard_events` before `events.send`.
-Wrap custom tools with `guardCustomTool` / `guard_custom_tool` before
-your app executes them. Anthropic runs built-in tools; the default is
-`always_allow`, so you don't get a pre-exec hook for bash or files.
-`always_ask` plus `user.tool_confirmation` is opt-in HITL confirmation,
-not policy. For MCP, put Guard on servers you host. For more information,
-see
-<Link.Page href="/guards/claude-managed-agents">Claude Managed Agents agent guard</Link.Page>.
+A guard call needs no request object. Create the client once, configure rules,
+then evaluate them at the action boundary:
 
-<Aside type="caution">
-  **Do not** create a new Arcjet instance per request – this defeats caching.
-  **Do not** call `protect()` multiple times for the same request. **Do not**
-  place Arcjet in middleware – call it in route handlers for full context.
-</Aside>
+```ts
+import {
+  launchArcjet,
+  detectPromptInjection,
+  tokenBucket,
+} from "@arcjet/guard";
+
+// Create the client once, at module scope.
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+
+const promptScan = detectPromptInjection();
+const lookupLimit = tokenBucket({
+  refillRate: 10,
+  intervalSeconds: 60,
+  maxTokens: 10,
+});
+
+export async function lookupOrder(userId: string, orderNumber: string) {
+  const decision = await arcjet.guard({
+    label: "order.looked-up",
+    rules: [
+      promptScan(orderNumber),
+      lookupLimit({ key: userId, requested: 1 }),
+    ],
+  });
+
+  if (decision.conclusion === "DENY") {
+    throw new Error(`Denied: ${decision.reason}`);
+  }
+
+  return await db.orders.find(orderNumber);
+}
+```
+
+The same call in Python, where `guard()` has a `guard_sync()` pair:
+
+```py
+import os
+
+from arcjet.guard import launch_arcjet, DetectPromptInjection
+
+aj = launch_arcjet(key=os.environ["ARCJET_KEY"])
+prompt_scan = DetectPromptInjection()
+
+decision = await aj.guard(
+    label="order.looked-up",
+    rules=[prompt_scan(order_number)],
+)
+
+if decision.conclusion == "DENY":
+    raise RuntimeError(f"Denied: {decision.reason}")
+```
+
+Labels are validated as slugs: lowercase letters, digits, dash, and dot only.
+Hardcode them rather than building them from user input, so they stay greppable
+and the Console can group by them.
+
+The JavaScript guard client is async and has no blocking variant. Python has a
+`_sync` pair for every entry point (`launch_arcjet_sync()`, `guard_sync()`),
+which is what a queue worker or other synchronous job needs. Go guard rule
+constructors require `Mode` (`ModeLive` or `ModeDryRun`), and an empty `Mode`
+returns `ErrInvalidMode`. HTTP `Protect` rules default an empty `Mode` to
+`ModeDryRun`.
+
+For complete, copy-paste examples for every framework, including the rule
+parameter reference and decision API, see [llms-full.txt](/llms-full.txt).
+[llms.txt](/llms.txt) is a shorter index that links out to the full reference.
 
 ### Recommended rules by app type
 
-| App type                               | Rules                                                                                |
-| -------------------------------------- | ------------------------------------------------------------------------------------ |
-| AI or LLM chat                         | `shield` + `detectBot` + `tokenBucket` + `sensitiveInfo` + `detectPromptInjection`   |
-| Public API                             | `shield` + `detectBot` + `fixedWindow` or `tokenBucket`                              |
-| Signup or login form                   | `shield` + `detectBot` + `validateEmail` + `slidingWindow`                           |
-| Internal or admin route                | `shield` + `filter` (country/VPN blocking)                                           |
-| Any web app                            | `shield` + `detectBot` (good baseline)                                               |
-| AI agent tool call (Guard)             | `tokenBucket` + `detectPromptInjection` + `localDetectSensitiveInfo`                 |
-| MCP tool handler (Guard)               | `tokenBucket` (keyed by session) + `detectPromptInjection`                           |
-| Queue worker or background job (Guard) | `tokenBucket` (keyed by user) + `detectPromptInjection` + `localDetectSensitiveInfo` |
+| App type                               | Rules                                                                                                           |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| AI or LLM chat                         | `shield` + `detectBot` + `tokenBucket` + `sensitiveInfo` + `detectPromptInjection`                              |
+| Public API                             | `shield` + `detectBot` + `fixedWindow` or `tokenBucket`                                                         |
+| Signup or login form                   | `shield` + `detectBot` + `validateEmail` + `slidingWindow`                                                      |
+| Internal or admin route                | `shield` + `filter` (country/VPN blocking)                                                                      |
+| Any web app                            | `shield` + `detectBot` (good baseline)                                                                          |
+| AI agent tool call (Guard)             | `tokenBucket` + `detectPromptInjection` + `localDetectSensitiveInfo`                                            |
+| MCP tool handler (Guard)               | `tokenBucket` (keyed by session) + `detectPromptInjection`                                                      |
+| Queue worker or background job (Guard) | `tokenBucket` (keyed by user) + `detectPromptInjection` + `localDetectSensitiveInfo`                            |
 | Claude Managed Agents (Guard)          | `tokenBucket` + `detectPromptInjection` + `localDetectSensitiveInfo` on inbound `user.message` and custom tools |
 
-## Secure the coding agent itself
+`localDetectSensitiveInfo` detects `EMAIL`, `PHONE_NUMBER`, `IP_ADDRESS`, and
+`CREDIT_CARD_NUMBER` with the bundled detector, entirely on-device. Names,
+addresses, and government or financial identifiers need the Rampart backend.
+Pass `backend: rampart()` on the rule, or `sensitiveInfoBackend: rampart()` on
+the client to cover the sensitive information rule in a remote policy too.
+
+## Secure the coding agent
 
 The hooks Claude Code and GitHub Copilot already fire can call Arcjet before
-every tool call, with no SDK. An administrator installs one hook entry per
-event and publishes the policies to enforce. For the hook configuration and
-the starter policies, see
-<Link.Page href="/coding-agents">Secure coding agents</Link.Page>.
+every tool call, with no SDK and no code change. An administrator installs one
+hook entry per event and publishes the policies to enforce. For the hook
+configuration and the starter policies, see
+[Secure coding agents](/coding-agents).
 
 ## Configure an agent guard policy
 
-A guard call carries a `label`, and a policy selected by that label decides the
-action. Policies are managed outside the application, so they change without a
-deployment.
+A policy decides the action for a guard call, and it's managed outside the
+application, so it changes without a deployment. Policies are MCP-only: the CLI
+has no policy commands.
 
-Both transports expose the same policy tools. Over MCP:
+A direct `guard()` call selects a policy with `label`. **A framework adapter
+takes `action` instead**, for the same slug. Passing `label` to `guardTool()`
+doesn't compile.
 
 1. Call `list-guard-policies` to see the site's policies and their labels.
-2. Call `get-guard-policy` for the policy's contract – its label, and every
+2. Call `get-guard-policy` for the policy's contract: its label, and every
    input with its kind and exposure. Write the `guard()` call from that
    contract. A policy does nothing until the application sends values under
    exactly the names it declares, and a mistyped name produces a policy that
    silently never fires.
 3. To create one, call `describe-guard-policy` with a Guard label and a
-   description of what the action must refuse, then `validate-guard-policy`
-   to compile it and run its stored tests, then `put-guard-policy` to publish.
+   description of what the action must refuse, then `validate-guard-policy` to
+   compile it and run its stored tests, then `put-guard-policy` to publish.
 
 A coding agent policy is selected by what it executes on rather than by a
 label, and its inputs are fixed. Pass `describe-guard-policy` a draft that
 already carries the contract and the execute-on setting, or copy a starter
-policy from <Link.Page href="/coding-agents/policies">Coding agent policies</Link.Page>.
+policy from [Coding agent policies](/coding-agents/policies).
 
 A policy's conditions are Rego over the declared inputs, and they can read
-Arcjet's own detector findings as facts. A live rule can't publish without at
-least one stored test. For more information, see
-<Link.Page href="/guards/authoring">Author and publish policies</Link.Page>.
+Arcjet's own detector findings as facts. A policy with a live expression rule
+needs at least one stored test before it can publish. A policy whose rules are
+all dry run can be saved without tests, and detector-backed rules are exempt.
+For more information, see
+[Author and publish policies](/guards/authoring).
 
 Every framework adapter takes `actor` and `inputs`, in both JavaScript and
-Python, each as a value or a function resolved per call. For what a resolver
-receives in each adapter, see
-<Link.Page href="/guards/framework-integrations#send-an-actor-and-policy-inputs">Send an actor and policy inputs</Link.Page>.
+Python, each as a value or a function resolved per call. Build each input with
+`policyInput`, which makes the wire type and the exposure explicit:
+
+```ts
+inputs: {
+  recipient: policyInput.server.string(recipient),
+  allowed_recipients: policyInput.server.stringList(allowlist),
+  body: policyInput.local.string(body),
+}
+```
+
+`server` values are transmitted to Arcjet. `local` values stay in SDK memory
+and only a SHA-256 digest is sent. Derive `actor` from an authenticated
+server-side identity and never from user-controlled input, because a policy can
+be conditioned on it. For what a resolver receives in each adapter, see
+[Send an actor and policy inputs](/guards/framework-integrations#send-an-actor-and-policy-inputs).
 
 ## Verify
 
 After adding protection and starting the app:
 
-1. Send a test request to a protected route – or for guards, invoke the
-   protected tool or task. A small script that imports the function and calls it
-   twice (once to allow, once to exceed a limit) is enough. For MCP servers,
-   send a tool call with the MCP client or inspector.
-2. List recent decisions with the CLI (`arcjet requests list --site-id <id>` for
-   request-based protection or `arcjet guards list --site-id <id>` for guards)
-   or the MCP tools (`list-requests`, `list-guards`).
-3. Inspect individual decisions with the CLI (`arcjet requests details`, `arcjet
-   requests explain`, `arcjet guards details`, `arcjet guards explain`) or the
-   MCP tools (`get-request-details`, `explain-decision`, `get-guard-details`).
-4. Use `arcjet analyze traffic --site-id <id>` (CLI) or `analyze-traffic` (MCP)
-   for a Console-level overview of request patterns.
-5. Check the [Arcjet Console](https://console.arcjet.com) for real-time
-   monitoring.
+1. Exercise the protection site. Send a test request to a protected route, or
+   for guards, invoke the protected tool or task. A small script that calls the
+   function twice, once to allow and once to exceed a limit, is enough. For MCP
+   servers, send a tool call with the MCP client or inspector.
+2. Read the decision your code received. Every guard decision has an `id`
+   (prefix `gdec_`), a `conclusion`, and per-rule `results`. Log it.
+3. For request-based protection, list and inspect decisions from the terminal:
 
-If decisions are not appearing, verify that `ARCJET_KEY` and `ARCJET_ENV` are
-set correctly and that `protect()` / `guard()` (or `Protect` / `Guard`) is
-being called. For Claude Managed Agents, confirm `guardEvents` /
-`guard_events` ran before `events.send` and `guardCustomTool` /
+   ```bash
+   arcjet requests list --site-id site_01abc123
+   arcjet requests details --site-id site_01abc123 --request-id <request-id>
+   arcjet requests explain --site-id site_01abc123 --request-id <request-id>
+   arcjet analyze traffic --site-id site_01abc123
+   ```
+
+   The equivalent MCP tools are `list-requests`, `get-request-details`,
+   `explain-decision`, and `analyze-traffic`.
+
+4. For guard decisions, check the [Arcjet Console](https://console.arcjet.com).
+   The CLI and MCP request commands cover request-based protection only, so
+   there is no terminal equivalent for guards.
+
+<Aside type="caution">
+  No decision at all is not the same as a denial. If a model declined to call
+  the tool, nothing was guarded and nothing was recorded, which looks identical
+  to a working guard from the outside. Always confirm against the decision, not
+  against the absence of an effect.
+</Aside>
+
+If decisions aren't appearing, verify that `ARCJET_KEY` is set and that
+`protect()` or `guard()` is actually being called. On JavaScript and Python,
+check `ARCJET_ENV` too. For Claude Managed Agents, confirm `guardEvents` or
+`guard_events` ran before `events.send`, and that `guardCustomTool` or
 `guard_custom_tool` ran before each custom tool.
 
 ## Common agent prompts
 
 These prompts work well when given to an AI coding agent with skills installed
-and either the CLI or MCP server connected (the
+and either the CLI or the MCP server connected:
 
-<Link.Page href="/arcjet-plugin">Arcjet plugin</Link.Page> is a bundled
-alternative for Claude Code and Cursor users):
-
-- **"Protect my API routes with Arcjet"** – adds shield, bot detection, and
-  rate limiting to all API routes.
-- **"Add rate limiting to my app"** – adds a token bucket or fixed window rate
-  limit.
-- **"Set up bot protection"** – blocks automated clients while allowing search
-  engines.
-- **"Add prompt injection detection to my AI chat endpoint"** – adds
+- **"Set up Arcjet security for my app"** adds shield, bot detection, and rate
+  limiting end to end.
+- **"Protect my API routes with Arcjet"** adds shield, bot detection, and rate
+  limiting to all API routes.
+- **"Add prompt injection detection to my AI chat endpoint"** adds
   `detectPromptInjection` with message scanning.
-- **"Block sensitive data from reaching my LLM"** – adds `sensitiveInfo` (JS)
-  or `detect_sensitive_info` (Python) to scan for PII.
-- **"Set up Arcjet security for my app"** – full end-to-end setup with shield,
-  bot detection, and rate limiting.
-- **"Rate limit my AI agent tool calls per user"** – installs the guard skill
-  and wires up `tokenBucket` keyed by user inside each tool handler.
-- **"Secure my MCP server"** – installs the guard skill, adds per-tool
-  `guard()` calls with hardcoded labels and session-scoped rate limits.
-- **"Protect my queue worker from prompt injection"** – uses the sync guard
-  client (`launchArcjet` / `launch_arcjet_sync`) with prompt injection
+- **"Block sensitive data from reaching my LLM"** adds `sensitiveInfo` in
+  JavaScript, or `detect_sensitive_info` in Python, to scan for personal
+  information.
+- **"Rate limit my AI agent tool calls per user"** wires up `tokenBucket` keyed
+  by user inside each tool handler.
+- **"Secure my MCP server"** adds per-tool `guard()` calls with hardcoded
+  labels and session-scoped rate limits.
+- **"Protect my queue worker from prompt injection"** uses the Python
+  synchronous guard client (`launch_arcjet_sync`) with prompt injection
   detection on job payloads.
-- **"Protect my Claude Managed Agents session"** – screens inbound
-  `user.message` before `events.send` and gates custom tools on
-  `agent.custom_tool_use`. Uses the Claude Managed Agents adapter, not the
-  Claude Agent SDK. For more information, see
-  <Link.Page href="/guards/claude-managed-agents">Claude Managed Agents agent guard</Link.Page>.
-- **"Block PII in agent tool outputs before they reach the model"** – uses
-  `localDetectSensitiveInfo` on tool _results_ in a guard call so PII in
-  tool outputs doesn't leak back into the model context. Add the on-device
-  Rampart backend (`backend: rampart()`) to also catch names and addresses.
-- **"Only let this agent email approved recipients"** – declares `recipient`
-  and `allowed_recipients` inputs on an `email.sent` policy and generates the
-  Rego that denies anything else.
-- **"Show me the policy behind this guard label"** – calls `get-guard-policy`
-  and writes the `guard()` call from the contract it returns.
-- **"Test this policy before publishing it"** – calls `validate-guard-policy`
-  to compile the draft and run every stored test.
-- **"Give me a security briefing for my site"** – calls `get-security-briefing`
-  to return traffic analysis, threat landscape, anomalies, and recommendations.
-- **"Investigate this suspicious IP address"** – calls `investigate-ip` for geo,
-  threat intelligence, and request activity.
-- **"What would happen if I promote my dry-run rules to live?"** – calls
+- **"Block personal information in agent tool outputs"** uses
+  `localDetectSensitiveInfo` on tool _results_, so data in tool outputs doesn't
+  leak back into the model context.
+- **"Only let this agent email approved recipients"** declares `recipient` and
+  `allowed_recipients` inputs on an `email.sent` policy and generates the Rego
+  that denies anything else.
+- **"Show me the policy behind this guard label"** calls `get-guard-policy` and
+  writes the `guard()` call from the contract it returns.
+- **"Give me a security briefing for my site"** calls `get-security-briefing`
+  over MCP, or `arcjet briefing --site-id <id>` from the CLI.
+- **"What would happen if I promote my dry-run rules to live?"** calls
   `get-dry-run-impact` to show blocked requests, affected IPs, and
   false-positive risk.
 
-## See also
-
-- <Link.Page href="/arcjet-plugin">Arcjet Plugin</Link.Page> – bundled
-  experience for Claude Code and Cursor users who prefer a single-command
-  install that wires up MCP, skills, and coding rules together. Not the
-  recommended first step for general agentic workflows, but a convenient
-  alternative if you are already in one of those editors.
-
 ## Reference
 
-- <Link.Page href="/get-started">Quick start guide</Link.Page> –
-  framework-specific setup with full code examples
-- <Link.Page href="/guards">Guards</Link.Page> – protect tool calls, queues, and
-  agentic pipelines without an HTTP request
-- <Link.Page href="/guards/claude-managed-agents">Claude Managed Agents agent guard</Link.Page>
-  – inbound `user.message` and custom tools for Anthropic's hosted harness
-  (JavaScript and Python)
-- <Link.Page href="/cli">Arcjet CLI</Link.Page> – manage sites, keys, and rules
-  from the terminal
-- <Link.Page href="/mcp-server">MCP server</Link.Page> – full MCP tool reference
-  and client setup
-- <Link.Page href="/arcjet-plugin">Arcjet Plugin</Link.Page> – bundled
-  experience for Claude Code and Cursor
-- <Link.Page href="/llms.txt">llms.txt</Link.Page> – short machine-readable index for AI agents
-- <Link.Page href="/llms-full.txt">llms-full.txt</Link.Page> – full machine-readable reference with all framework examples, rule parameters, and decision API
-- <Link.Page href="/remote-rules">Request Remote rules</Link.Page> – manage
-  request rules from the Console or MCP server without code changes
-- <Link.Page href="/guards/remote-policies">Policy contract</Link.Page>
- – labels, actors, typed inputs, detectors, and rules
-- <Link.Page href="/guards/rego">Write policies in Rego</Link.Page> – the input
-  document, the supported language subset, and what it excludes
-- <Link.Page href="/guards/policy-examples">Policy examples</Link.Page> – worked
-  policies for email, refunds, web fetch, databases, files, and budgets
-- <Link.Page href="/observe">Observe agent activity</Link.Page> – ingest agent
-  activity with no code change
-- <Link.Page href="/best-practices">Best practices</Link.Page> – recommended
-  patterns and anti-patterns
+- [Quick start guide](/get-started) for framework-specific setup with full code
+  examples
+- [Guards](/guards) to protect tool calls, queues, and agentic pipelines
+  without an HTTP request
+- [Claude Managed Agents agent guard](/guards/claude-managed-agents) for
+  inbound `user.message` and custom tools in Anthropic's hosted harness
+- [Arcjet CLI](/cli) to manage sites, keys, and rules from the terminal
+- [MCP server](/mcp-server) for the full MCP tool reference and client setup
+- [Arcjet plugin](/arcjet-plugin), a bundled install that wires up MCP, skills,
+  and coding rules together for Claude Code and Cursor users. It's an
+  alternative to the steps in this guide, not an additional step.
+- [llms.txt](/llms.txt), a short machine-readable index for AI agents
+- [llms-full.txt](/llms-full.txt), the full machine-readable reference with all
+  framework examples, rule parameters, and the decision API
+- [Request remote rules](/remote-rules) to manage request rules from the
+  Console or the MCP server without code changes
+- [Policy contract](/guards/remote-policies) for labels, actors, typed inputs,
+  detectors, and rules
+- [Write policies in Rego](/guards/rego) for the input document, the supported
+  language subset, and what it excludes
+- [Policy examples](/guards/policy-examples) for worked policies covering
+  email, refunds, web fetch, databases, files, and budgets
+- [Observe agent activity](/observe) to ingest agent activity with no code
+  change
+- [Best practices](/best-practices) for recommended patterns and anti-patterns
