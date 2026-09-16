@@ -20,15 +20,16 @@ const SITE_URL = "https://docs.arcjet.com";
 
 /**
  * The canonical Arcjet description. Used wherever the graph describes Arcjet
- * itself, and matches the blockquote in `public/llms.txt`, the graph on
- * arcjet.com, and the marketing copy. Keep all of those in sync.
+ * itself, and matches the opening paragraph of `public/llms.txt`,
+ * `src/components/WhatIsArcjet.astro`, the graph on arcjet.com, and the
+ * marketing copy. Keep all of those in sync.
  */
 const ARCJET_DESCRIPTION =
-  "Arcjet is the runtime security platform that ships in your AI code. Detect prompt injection, authorize agent tool calls, redact sensitive data, and block bots and abuse. Real-time security building blocks you call inside your app, before an action happens.";
+  "Arcjet is the AI agent runtime security platform. Discover the agents running in your organization, enforce policy across every action, prompt, and tool call, and keep the evidence to prove what happened. Detect prompt injection, authorize agent tool calls, redact PII, and block bots and abuse.";
 
 /** Describes the documentation site rather than Arcjet, so it stands apart. */
 const SITE_DESCRIPTION =
-  "Arcjet documentation for runtime policy enforcement in applications and AI agents. Enforce budgets, bot protection, prompt-injection checks, sensitive-data controls, and action-level guardrails with real application context.";
+  "Arcjet documentation for the AI agent runtime security platform. Discover the agents running in your organization, enforce policy across every action, prompt, and tool call, and keep the evidence to prove what happened.";
 
 export type BreadcrumbItem = {
   name: string;

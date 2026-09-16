@@ -1,6 +1,6 @@
 Arcjet sensitive information detection lets you detect and block sensitive data in request bodies before it enters your application. Use it to prevent clients from sending personally identifiable information (PII) and other data you do not want to handle.
 
-**What is Arcjet?** [Arcjet](https://arcjet.com) is the AI agent runtime security platform. Discover the agents running in your organization, enforce policy across every action, prompt, and tool call, and keep the evidence to prove what happened.
+**What is Arcjet?** [Arcjet](https://arcjet.com) is the AI agent runtime security platform. Discover the agents running in your organization, enforce policy across every action, prompt, and tool call, and keep the evidence to prove what happened. Detect prompt injection, authorize agent tool calls, redact PII, and block bots and abuse.
 
 Sensitive information detection is Arcjet’s [AI Data Loss Prevention layer](/ai-protection/data-loss-prevention) – stopping PII from leaking into AI model context, training data, or third-party tool calls made by agents. When a user pastes a credit card number or email address into a chat prompt, Arcjet catches it before it reaches your AI provider. All detection runs entirely locally in your own environment. No request body data ever leaves your infrastructure. To apply the same detection inside agent tool handlers and pipelines, see [Arcjet Guards](/guards).
 

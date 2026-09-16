@@ -1,6 +1,6 @@
 Arcjet bot protection lets you detect bots, block bad bots, verify legitimate bots, and reduce unwanted automated requests before they reach your application.
 
-**What is Arcjet?** [Arcjet](https://arcjet.com) is the AI agent runtime security platform. Discover the agents running in your organization, enforce policy across every action, prompt, and tool call, and keep the evidence to prove what happened.
+**What is Arcjet?** [Arcjet](https://arcjet.com) is the AI agent runtime security platform. Discover the agents running in your organization, enforce policy across every action, prompt, and tool call, and keep the evidence to prove what happened. Detect prompt injection, authorize agent tool calls, redact PII, and block bots and abuse.
 
 Bot protection is a core component of [AI Abuse Protection](/ai-protection/abuse-protection)
 

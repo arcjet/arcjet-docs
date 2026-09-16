@@ -9,10 +9,10 @@
 
 [View the docs](docs).
 
-[Arcjet][arcjet] provides runtime policy enforcement for applications and AI
-agents. It ships with your code so teams can enforce budgets, bot protection,
-prompt-injection checks, sensitive-data controls, and action-level guardrails
-with real application context.
+[Arcjet][arcjet] is the AI agent runtime security platform. Discover the agents
+running in your organization, enforce policy across every action, prompt, and
+tool call, and keep the evidence to prove what happened. Detect prompt
+injection, authorize agent tool calls, redact PII, and block bots and abuse.
 
 Try an Arcjet protected app live at [https://example.arcjet.com][example-url].
 
