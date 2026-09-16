@@ -10,7 +10,7 @@ export async function runAgent(prompt: string) {
     rules: [moderate(prompt)],
   });
 
-  if (decision.conclusion === "DENY" && decision.reason === "MODERATE_CONTENT") {
+  if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
     throw new Error("Harmful content detected – rephrase your message");
   }
 

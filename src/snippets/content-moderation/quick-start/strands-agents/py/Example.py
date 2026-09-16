@@ -18,7 +18,7 @@ async def screen_prompt(conversation_id: str, user_text: str) -> None:
     )
     if (
         decision.conclusion == "DENY"
-        and decision.reason == "MODERATE_CONTENT"
+        or decision.has_failed_open()
     ):
         raise RuntimeError(
             "Harmful content detected – rephrase your message"

@@ -20,7 +20,7 @@ async def create_message(body: MessageRequest):
         label="message.received",
         rules=[moderate(body.message)],
     )
-    if decision.conclusion == "DENY" and decision.reason == "MODERATE_CONTENT":
+    if decision.conclusion == "DENY" or decision.has_failed_open():
         raise HTTPException(
             status_code=400,
             detail="Harmful content detected – rephrase your message",

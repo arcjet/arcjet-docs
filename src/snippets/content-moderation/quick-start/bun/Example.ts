@@ -14,8 +14,8 @@ export default {
     });
 
     if (
-      decision.conclusion === "DENY" &&
-      decision.reason === "MODERATE_CONTENT"
+      decision.conclusion === "DENY" ||
+      decision.hasFailedOpen()
     ) {
       return Response.json(
         { error: "Harmful content detected – rephrase your message" },

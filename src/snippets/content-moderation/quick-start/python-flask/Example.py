@@ -16,7 +16,7 @@ def create_message():
         label="message.received",
         rules=[moderate(text)],
     )
-    if decision.conclusion == "DENY" and decision.reason == "MODERATE_CONTENT":
+    if decision.conclusion == "DENY" or decision.has_failed_open():
         return jsonify(
             error="Harmful content detected – rephrase your message"
         ), 400

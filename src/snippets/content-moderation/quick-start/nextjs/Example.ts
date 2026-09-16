@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     rules: [moderate(message)],
   });
 
-  if (decision.conclusion === "DENY" && decision.reason === "MODERATE_CONTENT") {
+  if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
     return NextResponse.json(
       { error: "Harmful content detected – rephrase your message" },
       { status: 400 },

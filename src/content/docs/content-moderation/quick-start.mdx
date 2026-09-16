@@ -144,7 +144,7 @@ const decision = await arcjet.guard({
   rules: [moderate(userMessage)],
 });
 
-if (decision.conclusion === "DENY" && decision.reason === "MODERATE_CONTENT") {
+if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
   throw new Error("Harmful content detected – rephrase your message");
 }
 
@@ -174,7 +174,7 @@ decision = await arcjet.guard(
     rules=[moderate(text)],
 )
 
-if decision.conclusion == "DENY" and decision.reason == "MODERATE_CONTENT":
+if decision.conclusion == "DENY" or decision.has_failed_open():
     raise RuntimeError("Harmful content detected – rephrase your message")
 
 result = moderate.result(decision)
@@ -207,7 +207,7 @@ decision, err := guard.Guard(ctx, arcjet.GuardRequest{
 if err != nil {
 	return err
 }
-if decision.IsDenied() && decision.Reason == arcjet.ReasonModerateContent {
+if decision.IsDenied() || decision.HasFailedOpen() {
 	return errors.New("content flagged by moderation")
 }
 

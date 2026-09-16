@@ -13,8 +13,8 @@ export async function screenPrompt(conversationId: string, userText: string) {
   });
 
   if (
-    decision.conclusion === "DENY" &&
-    decision.reason === "MODERATE_CONTENT"
+    decision.conclusion === "DENY" ||
+    decision.hasFailedOpen()
   ) {
     throw new Error("Harmful content detected – rephrase your message");
   }

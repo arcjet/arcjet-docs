@@ -15,7 +15,7 @@ export async function screenPrompt(
     ...openaiAgentsContext({ context: appContext, conversationId }),
   });
 
-  if (decision.conclusion === "DENY" && decision.reason === "MODERATE_CONTENT") {
+  if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
     throw new Error("Harmful content detected – rephrase your message");
   }
 }

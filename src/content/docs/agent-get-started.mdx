@@ -315,8 +315,8 @@ export async function lookupOrder(userId: string, orderNumber: string) {
     ],
   });
 
-  if (decision.conclusion === "DENY") {
-    throw new Error(`Denied: ${decision.reason}`);
+  if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+    throw new Error("Denied");
   }
 
   return await db.orders.find(orderNumber);
@@ -338,8 +338,8 @@ decision = await aj.guard(
     rules=[prompt_scan(order_number)],
 )
 
-if decision.conclusion == "DENY":
-    raise RuntimeError(f"Denied: {decision.reason}")
+if decision.conclusion == "DENY" or decision.has_failed_open():
+    raise RuntimeError("Denied")
 ```
 
 Labels are validated as slugs: lowercase letters, digits, dash, and dot only.

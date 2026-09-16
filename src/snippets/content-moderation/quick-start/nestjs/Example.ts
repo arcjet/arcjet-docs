@@ -14,8 +14,8 @@ export class MessagesController {
     });
 
     if (
-      decision.conclusion === "DENY" &&
-      decision.reason === "MODERATE_CONTENT"
+      decision.conclusion === "DENY" ||
+      decision.hasFailedOpen()
     ) {
       throw new BadRequestException(
         "Harmful content detected – rephrase your message",

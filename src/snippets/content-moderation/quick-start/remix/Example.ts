@@ -13,7 +13,7 @@ export async function action({ request }: ActionFunctionArgs) {
     rules: [moderate(message)],
   });
 
-  if (decision.conclusion === "DENY" && decision.reason === "MODERATE_CONTENT") {
+  if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
     return json(
       { error: "Harmful content detected – rephrase your message" },
       { status: 400 },

@@ -410,7 +410,7 @@ decision, err := guard.Guard(ctx, arcjet.GuardRequest{
 	Rules: []arcjet.GuardRuleInput{moderation.Text(userMessage)},
 })
 
-if decision.IsDenied() && decision.Reason == arcjet.ReasonModerateContent {
+if decision.IsDenied() || decision.HasFailedOpen() {
 	return errors.New("content flagged by moderation")
 }
 

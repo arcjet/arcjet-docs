@@ -16,7 +16,8 @@ export default async function handler(
   res: NextApiResponse,
 ) {
   const decision = await aj.protect(req, {
-    sensitiveInfoValue: req.body,
+    sensitiveInfoValue:
+      typeof req.body === "string" ? req.body : JSON.stringify(req.body ?? ""),
   });
   console.log("Decision", decision);
 

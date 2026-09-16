@@ -12,7 +12,8 @@ const aj = arcjet({
 
 export default async function handler(req, res) {
   const decision = await aj.protect(req, {
-    sensitiveInfoValue: req.body,
+    sensitiveInfoValue:
+      typeof req.body === "string" ? req.body : JSON.stringify(req.body ?? ""),
   });
 
   for (const { reason } of decision.results) {

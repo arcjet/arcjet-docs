@@ -28,7 +28,7 @@ async def handle_tool_call(user_id: str, message: str) -> str:
         metadata={"user_id": user_id},
     )
 
-    if decision.conclusion == "DENY":
+    if decision.conclusion == "DENY" or decision.has_failed_open():
         # Branch on which rule denied to give the caller something actionable
         rate_limited = user_limit.denied_result(decision)
         if rate_limited:

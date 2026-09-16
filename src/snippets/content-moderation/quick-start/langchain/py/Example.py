@@ -11,5 +11,5 @@ async def screen_message(text: str) -> None:
         label="message.received",
         rules=[moderate(text)],
     )
-    if decision.conclusion == "DENY" and decision.reason == "MODERATE_CONTENT":
+    if decision.conclusion == "DENY" or decision.has_failed_open():
         raise RuntimeError("Harmful content detected – rephrase your message")
