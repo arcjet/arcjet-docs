@@ -55,7 +55,7 @@ managed settings path for the operating system.
         "hooks": [
           {
             "type": "http",
-            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=pre-tool-use&surface=cli",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=pre-tool-use",
             "headers": {
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
@@ -71,7 +71,7 @@ managed settings path for the operating system.
         "hooks": [
           {
             "type": "http",
-            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=permission-request&surface=cli",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=permission-request",
             "headers": {
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
@@ -87,7 +87,7 @@ managed settings path for the operating system.
         "hooks": [
           {
             "type": "http",
-            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=user-prompt-submit&surface=cli",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=user-prompt-submit",
             "headers": {
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
@@ -103,7 +103,7 @@ managed settings path for the operating system.
         "hooks": [
           {
             "type": "http",
-            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=user-prompt-expansion&surface=cli",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=user-prompt-expansion",
             "headers": {
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
@@ -119,7 +119,7 @@ managed settings path for the operating system.
         "hooks": [
           {
             "type": "http",
-            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=post-tool-use&surface=cli",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=post-tool-use",
             "headers": {
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
@@ -135,7 +135,7 @@ managed settings path for the operating system.
         "hooks": [
           {
             "type": "http",
-            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=stop&surface=cli",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=stop",
             "headers": {
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
@@ -151,7 +151,7 @@ managed settings path for the operating system.
         "hooks": [
           {
             "type": "http",
-            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=session-start&surface=cli",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=session-start",
             "headers": {
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
@@ -167,7 +167,7 @@ managed settings path for the operating system.
         "hooks": [
           {
             "type": "http",
-            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=session-end&surface=cli",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=session-end",
             "headers": {
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
@@ -183,7 +183,7 @@ managed settings path for the operating system.
         "hooks": [
           {
             "type": "http",
-            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=permission-denied&surface=cli",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=permission-denied",
             "headers": {
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
@@ -199,7 +199,7 @@ managed settings path for the operating system.
         "hooks": [
           {
             "type": "http",
-            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=config-change&surface=cli",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=config-change",
             "headers": {
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
@@ -215,7 +215,7 @@ managed settings path for the operating system.
         "hooks": [
           {
             "type": "http",
-            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=instructions-loaded&surface=cli",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=instructions-loaded",
             "headers": {
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
@@ -247,6 +247,10 @@ moment.
 seconds, but 5 seconds is a sensible ceiling for a policy decision.
 - `X-Arcjet-Principal` attributes a session to a developer. It's untrusted, but useful extra metadata. `$USER` is unset on
 Windows, so use `$USERNAME` there and add it to both `allowedEnvVars` lists.
+- The hook URLs omit `surface`. Managed settings reach the terminal, IDE
+extensions, Desktop, and cloud from one file, so a hard-coded `cli` mislabels
+most of that traffic. Arcjet records `unknown` when you omit the parameter. Set
+it only when the hook file is specific to one surface.
 
 ## Supply the Arcjet key
 

@@ -34,7 +34,7 @@ Arcjet builds every input from the hook payload. Read a value in Rego as
 | `contract`        | String      | The contract version, always `coding-agent/v1`                             |
 | `agent_vendor`    | String      | `anthropic` or `github`                                                    |
 | `agent_product`   | String      | `claude-code` or `copilot`                                                 |
-| `agent_surface`   | String      | The `surface` the hook entry declared: `cli`, `ide`, `cloud`, or `unknown` |
+| `agent_surface`   | String      | The optional `surface` query parameter, or `unknown` when omitted          |
 | `event`           | String      | The lifecycle event, such as `pre-tool-use`                                |
 | `session`         | String      | The agent's session ID, which also correlates the recorded activity        |
 | `principal`       | String      | The asserted developer identity from `X-Arcjet-Principal`. Untrusted       |
