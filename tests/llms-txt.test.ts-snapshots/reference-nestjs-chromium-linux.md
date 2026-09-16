@@ -2,7 +2,7 @@
 
 This is the reference guide for the Arcjet NestJS SDK, [available on GitHub](https://github.com/arcjet/arcjet-js) and licensed under the Apache 2.0 license.
 
-**What is Arcjet?** [Arcjet](https://arcjet.com) is the AI agent runtime security platform. Discover the agents running in your organization, enforce policy across every action, prompt, and tool call, and keep the evidence to prove what happened.
+**What is Arcjet?** [Arcjet](https://arcjet.com) is the AI agent runtime security platform. Discover the agents running in your organization, enforce policy across every action, prompt, and tool call, and keep the evidence to prove what happened. Detect prompt injection, authorize agent tool calls, redact PII, and block bots and abuse.
 
 Installation
 ------------

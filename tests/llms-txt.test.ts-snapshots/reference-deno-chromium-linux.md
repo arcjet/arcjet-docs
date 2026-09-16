@@ -2,7 +2,7 @@
 
 This guide shows how to use the package [`@arcjet/deno`](https://www.npmjs.com/package/@arcjet/deno). Its source code is [on GitHub](https://github.com/arcjet/arcjet-js/tree/main/arcjet-deno). The code is open source and licensed under Apache 2.0.
 
-**What is Arcjet?** [Arcjet](https://arcjet.com) is the AI agent runtime security platform. Discover the agents running in your organization, enforce policy across every action, prompt, and tool call, and keep the evidence to prove what happened.
+**What is Arcjet?** [Arcjet](https://arcjet.com) is the AI agent runtime security platform. Discover the agents running in your organization, enforce policy across every action, prompt, and tool call, and keep the evidence to prove what happened. Detect prompt injection, authorize agent tool calls, redact PII, and block bots and abuse.
 
 Quick start
 -----------

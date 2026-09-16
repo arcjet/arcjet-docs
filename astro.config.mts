@@ -136,7 +136,7 @@ export default defineConfig({
     starlight({
       title: "Arcjet Docs",
       description:
-        "Arcjet documentation for runtime policy enforcement in applications and AI agents. Enforce budgets, bot protection, prompt-injection checks, sensitive-data controls, and action-level guardrails with real application context.",
+        "Arcjet documentation for the AI agent runtime security platform. Discover the agents running in your organization, enforce policy across every action, prompt, and tool call, and keep the evidence to prove what happened.",
       logo: {
         light: "./src/assets/logo-lockup-mark-light.svg",
         dark: "./src/assets/logo-lockup-mark-dark.svg",

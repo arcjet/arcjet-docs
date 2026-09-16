@@ -71,12 +71,24 @@ const NOINDEX_PLUS_GET_STARTED_URLS = sdks().flatMap((entry) =>
   ),
 );
 
-const LLMS_TXT_SDK_URLS = [
-  "https://docs.arcjet.com/sdk/next/get-started/",
-  "https://docs.arcjet.com/sdk/astro/get-started/",
-  "https://docs.arcjet.com/sdk/bun/plus/hono/get-started/",
-  "https://docs.arcjet.com/sdk/node/plus/express/get-started/",
-  "https://docs.arcjet.com/sdk/python/plus/fastapi/get-started/",
+/**
+ * The canonical Arcjet description. Keep in sync with `public/llms.txt`,
+ * `public/llms-full.txt`, `src/components/WhatIsArcjet.astro`, and
+ * `ARCJET_DESCRIPTION` in `src/lib/structured-data.ts`.
+ */
+const ARCJET_DESCRIPTION =
+  "Arcjet is the AI agent runtime security platform. Discover the agents running in your organization, enforce policy across every action, prompt, and tool call, and keep the evidence to prove what happened. Detect prompt injection, authorize agent tool calls, redact PII, and block bots and abuse.";
+
+/**
+ * The entry points an agent reads `llms.txt` to find. The SDK-scoped quick
+ * start URLs live in `llms-full.txt` rather than here.
+ */
+const LLMS_TXT_ENTRY_POINTS = [
+  "https://docs.arcjet.com/llms-full.txt",
+  "https://docs.arcjet.com/agent-get-started",
+  "https://docs.arcjet.com/cli",
+  "https://docs.arcjet.com/mcp-server",
+  "https://docs.arcjet.com/arcjet-plugin",
 ] as const;
 
 const LEGACY_HUB_SAMPLES = [
@@ -246,12 +258,21 @@ test.describe("SDK routes in sitemap", () => {
 });
 
 test.describe("llms.txt agent discovery", () => {
-  test("lists SDK-scoped get-started URLs", async ({ request }) => {
+  test("opens with the canonical Arcjet description", async ({ request }) => {
+    const response = await request.get("/llms.txt");
+    expect(response.status()).toBe(200);
+
+    expect(await response.text()).toContain(ARCJET_DESCRIPTION);
+  });
+
+  test("lists the entry points without legacy ?f= links", async ({
+    request,
+  }) => {
     const response = await request.get("/llms.txt");
     expect(response.status()).toBe(200);
 
     const body = await response.text();
-    for (const url of LLMS_TXT_SDK_URLS) {
+    for (const url of LLMS_TXT_ENTRY_POINTS) {
       expect(body).toContain(url);
     }
     expect(body).not.toMatch(/https:\/\/docs\.arcjet\.com\/[^\s)]*\?f=/);
@@ -259,6 +280,13 @@ test.describe("llms.txt agent discovery", () => {
 });
 
 test.describe("llms-full.txt agent discovery", () => {
+  test("opens with the canonical Arcjet description", async ({ request }) => {
+    const response = await request.get("/llms-full.txt");
+    expect(response.status()).toBe(200);
+
+    expect(await response.text()).toContain(ARCJET_DESCRIPTION);
+  });
+
   test("lists SDK-scoped get-started URLs without legacy ?f= links", async ({
     request,
   }) => {

@@ -1,6 +1,6 @@
 Arcjet email validation lets you validate and verify email addresses in your application to reduce spam and fraudulent signups.
 
-**What is Arcjet?** [Arcjet](https://arcjet.com) is the AI agent runtime security platform. Discover the agents running in your organization, enforce policy across every action, prompt, and tool call, and keep the evidence to prove what happened.
+**What is Arcjet?** [Arcjet](https://arcjet.com) is the AI agent runtime security platform. Discover the agents running in your organization, enforce policy across every action, prompt, and tool call, and keep the evidence to prove what happened. Detect prompt injection, authorize agent tool calls, redact PII, and block bots and abuse.
 
 Email validation is useful anywhere users enter an email address, such as signup, login, password reset, and contact forms. It helps you catch invalid, disposable, and undeliverable addresses before they become accounts in your system.
 
