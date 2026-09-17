@@ -272,7 +272,16 @@ Two helpers report unavailability differently from the preceding table:
 - CrewAI `register_arcjet_hooks` raises
   `HookAborted(reason=..., source="arcjet")` from `PRE_TOOL_CALL` for both a
   denial and unavailability, so the agent sees
-  `Tool execution blocked by hook. Tool: {name}` in each case.
+  `Tool execution blocked by hook. Tool: {name}` in each case. That hook
+  records `metadata.outcome` as `success` when the action proceeds. It
+  doesn't record `degraded`. CrewAI `guard_tool` records the five wrapper
+  outcomes.
+
+Most other wrappers that sit around an effect record
+`metadata.outcome` as `degraded` when the action ran only because
+`onGuardError` / `on_guard_error` is `"allow"`. For more information
+about the five values, see
+<Link.Page href="/guards/capture#automatic-captures-from-a-framework-wrapper">Automatic captures from a framework wrapper</Link.Page>.
 
 For the direct client and wrapper differences, see
 <Link.Page href="/guards/reference#availability-and-fail-behavior">Availability and fail behavior</Link.Page>.

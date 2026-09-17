@@ -301,6 +301,13 @@ The core `guard()` call still fails open. It returns `ALLOW`, and
 `has_failed_open()` returns `True`. The wrappers that sit around an
 effect fail closed.
 
+`register_arcjet_hooks` records `metadata.outcome` as `success` when the
+action proceeds, including when `on_guard_error="allow"` and policy did
+not judge the action fully. It doesn't record `degraded`. The
+`PRE_TOOL_CALL` hook cannot observe the tool body. `guard_tool` records
+the five wrapper outcomes. For more information, see
+<Link.Page href="/guards/capture#automatic-captures-from-a-framework-wrapper">Automatic captures from a framework wrapper</Link.Page>.
+
 For more information about fail-open versus fail-closed behavior, see
 <Link.Page href="/guards/reference#availability-and-fail-behavior">Availability and fail behavior</Link.Page>.
 
@@ -446,6 +453,7 @@ register_arcjet_hooks(
 ## Related
 
 - <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
+- <Link.Page href="/guards/capture">Capture events</Link.Page>
 - <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
 - <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>
 - <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>

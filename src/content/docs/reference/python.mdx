@@ -849,7 +849,9 @@ Checkpoint helpers that wrap an effect also record `metadata.outcome` on
 the capture event. The value is capture and Sequence metadata. It
 doesn't change `conclusion`, which remains `ALLOW` or `DENY`. For the
 five values and the `degraded` discriminator, see
-<Link.Page href="/guards/capture#capture-outcomes">Capture outcomes</Link.Page>.
+<Link.Page href="/guards/capture#automatic-captures-from-a-framework-wrapper">Automatic captures from a framework wrapper</Link.Page>.
+`register_arcjet_hooks` records `success` when the action proceeds. It
+doesn't record `degraded`.
 
 For install, examples, correlation, and the configure-before-wrap rule,
 see the <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>.
@@ -1117,7 +1119,7 @@ href="/guards/reference#metadata">Guard metadata</Link.Page>.
 happened. It never affects a decision, never raises, and is not awaited even
 on the async client. Checkpoint helpers set `metadata.outcome` on the
 events they emit. A direct `capture()` call doesn't. See
-<Link.Page href="/guards/capture#capture-outcomes">Capture outcomes</Link.Page>.
+<Link.Page href="/guards/capture#automatic-captures-from-a-framework-wrapper">Automatic captures from a framework wrapper</Link.Page>.
 
 ```py
 aj.capture(

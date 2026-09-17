@@ -672,13 +672,13 @@ The core `guard()` call still fails open. It returns `ALLOW`, and
 </TabItem>
 </Tabs>
 
-Checkpoint surfaces go through the checkpoint engine, so the capture
-event they emit includes `metadata.outcome`. If the action ran only
-because `on_guard_error="allow"` and policy did not judge it fully, the
-event records `degraded`. The default records `unavailable` and blocks.
-For more information about the five values and how `decision_id`
-distinguishes a partial judgment, see
-<Link.Page href="/guards/capture#capture-outcomes">Capture outcomes</Link.Page>.
+Wrappers that sit around an effect record `metadata.outcome` on the
+capture event. If the action ran only because `onGuardError` /
+`on_guard_error` is `"allow"` and policy did not judge it fully, the
+event records `degraded`. The default records `unavailable` and
+blocks. For more information about the five values and how a decision
+ID distinguishes a partial judgment, see
+<Link.Page href="/guards/capture#automatic-captures-from-a-framework-wrapper">Automatic captures from a framework wrapper</Link.Page>.
 
 ## Correlation
 
@@ -884,6 +884,7 @@ no LangChain extra.
 ## Related
 
 - <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
+- <Link.Page href="/guards/capture">Capture events</Link.Page>
 - <Link.Page href="/guards/langgraph">LangGraph agent guard</Link.Page>
 - <Link.Page href="/guards/crewai">CrewAI agent guard</Link.Page>
 - <Link.Page href="/guards/tanstack-ai">TanStack AI agent guard</Link.Page>
