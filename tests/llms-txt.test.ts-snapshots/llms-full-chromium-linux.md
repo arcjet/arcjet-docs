@@ -203,12 +203,11 @@ Full docs: https://docs.arcjet.com
 | Astro          | `@arcjet/astro`        | `npx astro add @arcjet/astro`          |
 | Python FastAPI | `arcjet`               | `pip install arcjet`                   |
 | Python Flask   | `arcjet`               | `pip install arcjet flask`             |
-| Go             | `github.com/arcjet/arcjet-go` | `go get github.com/arcjet/arcjet-go@v1.0.0-rc.2` |
+| Go             | `github.com/arcjet/arcjet-go` | `go get github.com/arcjet/arcjet-go@latest` |
 
 ## Go SDK
 
-The Go SDK is pre-release. The current pre-release is v1.0.0-rc.2, which
-requires Go 1.25 or later and supports
+The Go SDK requires Go 1.25 or later and supports
 `net/http` request protection plus Guard protection for non-HTTP operations.
 Create clients once at package scope and reuse them.
 
@@ -265,7 +264,7 @@ func must[T any](value T, err error) T {
 
 Call `Protect(r.Context(), r, ...)` once inside each handler. Use
 `WithCharacteristics`, `WithRequested`, `WithDetectPromptInjectionMessage`,
-`WithSensitiveInfoValue`, and `WithCorrelationId` for dynamic inputs.
+`WithSensitiveInfoValue`, and `WithCorrelationID` for dynamic inputs.
 
 On a transport failure, `Protect` returns an `ERROR` conclusion `Decision`
 together with `err`. `IsAllowed()` and `IsErrored()` are both true;
@@ -286,7 +285,7 @@ var promptScan = must(arcjet.GuardPromptInjection(
 
 decision, err := guard.Guard(ctx, arcjet.GuardRequest{
     Label:         "tools.summarize",
-    CorrelationId: "trace_123",
+    CorrelationID: "trace_123",
     Metadata: arcjet.Metadata{
         "user": map[string]any{"id": userID},
     },
@@ -2048,7 +2047,7 @@ Guards apply Arcjet security rules inside AI agent tool calls, MCP tool
 handlers, queue workers, and anywhere else you process untrusted input without an
 HTTP request. Pass inputs directly, get a decision back.
 
-Supported languages: **JavaScript / TypeScript** (`@arcjet/guard`), **Python** (the `arcjet` package), and **Go** (`arcjet-go`, pre-release).
+Supported languages: **JavaScript / TypeScript** (`@arcjet/guard`), **Python** (the `arcjet` package), and **Go** (`arcjet-go`).
 
 ### JavaScript / TypeScript example
 
