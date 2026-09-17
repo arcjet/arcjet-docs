@@ -42,10 +42,11 @@ with a lowercase letter or digit, and are limited to 256 bytes. One policy owns
 a label.
 
 A label the service will not match reads as `ALLOW` with `hasFailedOpen()` /
-`has_failed_open()` false, so the guard does not run. Adapter factories throw
-or raise `ArcjetInvalidLabelError` (`@arcjet/guard` >= 1.13.0, `arcjet` >=
-1.2.0). `capture()` warns `AJ1023` and still sends. Check a label you build
-yourself with `validateGuardLabel` / `validate_guard_label`.
+`has_failed_open()` / `HasFailedOpen()` false, so the guard does not run.
+Adapter factories throw or raise `ArcjetInvalidLabelError`
+(`@arcjet/guard` >= 1.13.0, `arcjet` >= 1.2.0), or return `ErrInvalidLabel`.
+`capture()` warns `AJ1023` and still sends. Check a label you build yourself
+with `validateGuardLabel` / `validate_guard_label` / `ValidateGuardLabel`.
 
 The Python adapters derive a default action from a snake_case tool name, so
 `send_email.invoked` is a label you can publish a policy for.

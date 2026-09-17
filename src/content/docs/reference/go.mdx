@@ -366,6 +366,10 @@ rejected, so use `tools.get-weather` or `tools.get_weather`, not
 `tools.getWeather`. Use a stable, hardcoded label for each operation and an
 explicit rate-limit key such as a user ID, session ID, or API key.
 
+`Bucket` on a rate-limit rule is a separate identifier from the Guard label.
+It groups counters. For more information about rate limiting, see
+<Link.Page href="/rate-limiting">Rate limiting</Link.Page>.
+
 A label the service will not match reads as `ALLOW` with `HasFailedOpen()`
 false, so the guard does not run. Check a label you build yourself with
 `ValidateGuardLabel`. `Capture` warns `AJ1023` and still sends.
