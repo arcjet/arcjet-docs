@@ -188,7 +188,7 @@ The same `tools` and `toolsContext` pattern works with `streamText` and
 
 | Option | Required | Description |
 | --- | --- | --- |
-| `action` | Yes | Guard label and capture name. Use `resource.verb` in the past tense, such as `email.sent`. Slug: lowercase letters, digits, dash, and dot. |
+| `action` | Yes | Guard label and capture name. Use `resource.verb` in the past tense, such as `email.sent`. Slug: lowercase letters, digits, dash, underscore, and dot. Must start and end with a lowercase letter or digit. |
 | `rules` | No | SDK rules, or a function of the parsed tool input. Omit or return `[]` to submit none. The Guard call still happens so a remote policy can apply. |
 | `actor` | No | Trusted identity, or a function of `(input, context)`. Take it from authenticated application state, never from a model-produced argument. |
 | `inputs` | No | Named values built with `policyInput.server.*` or `policyInput.local.*`, or a function of `(input, context)`. |
