@@ -342,9 +342,11 @@ if decision.conclusion == "DENY":
     raise RuntimeError(f"Denied: {decision.reason}")
 ```
 
-Labels are validated as slugs: lowercase letters, digits, dash, and dot only.
-Hardcode them rather than building them from user input, so they stay greppable
-and the Console can group by them.
+Labels are slugs: lowercase letters, digits, dash, underscore, and dot. They
+must start and end with a lowercase letter or digit. Uppercase is rejected, so
+use `tools.get-weather` or `tools.get_weather`, not `tools.getWeather`.
+Hardcode them rather than building them from user input, so they stay
+greppable and the Console can group by them.
 
 The JavaScript guard client is async and has no blocking variant. Python has a
 `_sync` pair for every entry point (`launch_arcjet_sync()`, `guard_sync()`),
