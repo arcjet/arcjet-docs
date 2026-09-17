@@ -81,9 +81,10 @@ try {
     "Content-Type" = "application/json"
     "X-Arcjet-Principal" = "$principal"
   }
-  Invoke-RestMethod -Method Post -TimeoutSec 5 `
+  $response = Invoke-WebRequest -Method Post -TimeoutSec 5 `
     -Uri "https://decide.arcjet.com/v1/agent-hooks/$Vendor`?event=$Event" `
-    -Headers $headers -Body $body | ConvertTo-Json -Compress
+    -Headers $headers -Body $body
+  Write-Output $response.Content
 } catch {
   Write-Output '{}'
 }
@@ -194,7 +195,9 @@ request of latency (typically a few tens of milliseconds).
   alias onto `post-tool-use`. Don't install those either.
 - Cursor reports `Shell`, `Read`, `Write`, `Grep`, `Delete`, and `Task`.
   Arcjet maps those to `shell`, `file_read`, `file_write`, and `agent`.
-  A specialized before-hook that omits `tool_name` is inferred as
+  That list is the tools Cursor reports today. A name that isn't in it
+  is `tool_kind: other`, so a rule over the kind never matches it. A
+  specialized before-hook that omits `tool_name` is inferred as
   `Shell`, `Read`, or `Write`.
 - Omit `matcher`. A matcher that lists only `Shell` or `Write` leaves
   reads, MCP tools, and Task calls outside the policy.

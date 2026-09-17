@@ -81,9 +81,10 @@ try {
     "Content-Type" = "application/json"
     "X-Arcjet-Principal" = "$principal"
   }
-  Invoke-RestMethod -Method Post -TimeoutSec 5 `
+  $response = Invoke-WebRequest -Method Post -TimeoutSec 5 `
     -Uri "https://decide.arcjet.com/v1/agent-hooks/$Vendor`?event=$Event" `
-    -Headers $headers -Body $body | ConvertTo-Json -Compress
+    -Headers $headers -Body $body
+  Write-Output $response.Content
 } catch {
   Write-Output '{}'
 }
@@ -107,7 +108,7 @@ install the files somewhere else.
         "hooks": [
           {
             "type": "command",
-            "command": "/usr/bin/env sh \"$(git rev-parse --show-toplevel)/.codex/hooks/arcjet-hook.sh\" codex pre-tool-use",
+            "command": "sh .codex/hooks/arcjet-hook.sh codex pre-tool-use",
             "commandWindows": "powershell -NoProfile -File .codex/hooks/arcjet-hook.ps1 -Vendor codex -Event pre-tool-use",
             "timeout": 5
           }
@@ -119,7 +120,7 @@ install the files somewhere else.
         "hooks": [
           {
             "type": "command",
-            "command": "/usr/bin/env sh \"$(git rev-parse --show-toplevel)/.codex/hooks/arcjet-hook.sh\" codex permission-request",
+            "command": "sh .codex/hooks/arcjet-hook.sh codex permission-request",
             "commandWindows": "powershell -NoProfile -File .codex/hooks/arcjet-hook.ps1 -Vendor codex -Event permission-request",
             "timeout": 5
           }
@@ -131,7 +132,7 @@ install the files somewhere else.
         "hooks": [
           {
             "type": "command",
-            "command": "/usr/bin/env sh \"$(git rev-parse --show-toplevel)/.codex/hooks/arcjet-hook.sh\" codex user-prompt-submit",
+            "command": "sh .codex/hooks/arcjet-hook.sh codex user-prompt-submit",
             "commandWindows": "powershell -NoProfile -File .codex/hooks/arcjet-hook.ps1 -Vendor codex -Event user-prompt-submit",
             "timeout": 5
           }
@@ -143,7 +144,7 @@ install the files somewhere else.
         "hooks": [
           {
             "type": "command",
-            "command": "/usr/bin/env sh \"$(git rev-parse --show-toplevel)/.codex/hooks/arcjet-hook.sh\" codex post-tool-use",
+            "command": "sh .codex/hooks/arcjet-hook.sh codex post-tool-use",
             "commandWindows": "powershell -NoProfile -File .codex/hooks/arcjet-hook.ps1 -Vendor codex -Event post-tool-use",
             "timeout": 5
           }
@@ -155,7 +156,7 @@ install the files somewhere else.
         "hooks": [
           {
             "type": "command",
-            "command": "/usr/bin/env sh \"$(git rev-parse --show-toplevel)/.codex/hooks/arcjet-hook.sh\" codex stop",
+            "command": "sh .codex/hooks/arcjet-hook.sh codex stop",
             "commandWindows": "powershell -NoProfile -File .codex/hooks/arcjet-hook.ps1 -Vendor codex -Event stop",
             "timeout": 5
           }
@@ -167,7 +168,7 @@ install the files somewhere else.
         "hooks": [
           {
             "type": "command",
-            "command": "/usr/bin/env sh \"$(git rev-parse --show-toplevel)/.codex/hooks/arcjet-hook.sh\" codex session-start",
+            "command": "sh .codex/hooks/arcjet-hook.sh codex session-start",
             "commandWindows": "powershell -NoProfile -File .codex/hooks/arcjet-hook.ps1 -Vendor codex -Event session-start",
             "timeout": 5
           }
@@ -179,7 +180,7 @@ install the files somewhere else.
         "hooks": [
           {
             "type": "command",
-            "command": "/usr/bin/env sh \"$(git rev-parse --show-toplevel)/.codex/hooks/arcjet-hook.sh\" codex session-end",
+            "command": "sh .codex/hooks/arcjet-hook.sh codex session-end",
             "commandWindows": "powershell -NoProfile -File .codex/hooks/arcjet-hook.ps1 -Vendor codex -Event session-end",
             "timeout": 3
           }
@@ -191,7 +192,7 @@ install the files somewhere else.
         "hooks": [
           {
             "type": "command",
-            "command": "/usr/bin/env sh \"$(git rev-parse --show-toplevel)/.codex/hooks/arcjet-hook.sh\" codex subagent-start",
+            "command": "sh .codex/hooks/arcjet-hook.sh codex subagent-start",
             "commandWindows": "powershell -NoProfile -File .codex/hooks/arcjet-hook.ps1 -Vendor codex -Event subagent-start",
             "timeout": 5
           }
@@ -203,7 +204,7 @@ install the files somewhere else.
         "hooks": [
           {
             "type": "command",
-            "command": "/usr/bin/env sh \"$(git rev-parse --show-toplevel)/.codex/hooks/arcjet-hook.sh\" codex subagent-stop",
+            "command": "sh .codex/hooks/arcjet-hook.sh codex subagent-stop",
             "commandWindows": "powershell -NoProfile -File .codex/hooks/arcjet-hook.ps1 -Vendor codex -Event subagent-stop",
             "timeout": 5
           }
@@ -215,7 +216,7 @@ install the files somewhere else.
         "hooks": [
           {
             "type": "command",
-            "command": "/usr/bin/env sh \"$(git rev-parse --show-toplevel)/.codex/hooks/arcjet-hook.sh\" codex pre-compact",
+            "command": "sh .codex/hooks/arcjet-hook.sh codex pre-compact",
             "commandWindows": "powershell -NoProfile -File .codex/hooks/arcjet-hook.ps1 -Vendor codex -Event pre-compact",
             "timeout": 5
           }
@@ -226,9 +227,12 @@ install the files somewhere else.
 }
 ```
 
+The repository template uses a path relative to the project directory
+Codex is running in. Don't wrap it in `git rev-parse --show-toplevel`:
+outside a git working tree that resolves to `/` and the hook never runs.
+
 For a user-level file at `~/.codex/hooks.json`, change each command to
-`sh ~/.codex/hooks/arcjet-hook.sh codex EVENT` so it doesn't depend on a
-git root.
+`sh ~/.codex/hooks/arcjet-hook.sh codex EVENT`.
 
 For a managed install, put the same events in `requirements.toml` with
 absolute script paths. Codex doesn't distribute the scripts; your MDM or

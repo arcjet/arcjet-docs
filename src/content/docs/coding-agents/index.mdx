@@ -63,7 +63,7 @@ The hook URL names the vendor. Use `POST /v1/agent-hooks/claude-code`, `/copilot
 | `event`                 | Claude Code           | Copilot               | Codex               | Cursor                                                                 | Denial honoured            |
 | ----------------------- | --------------------- | --------------------- | ------------------- | ---------------------------------------------------------------------- | -------------------------- |
 | `pre-tool-use`          | `PreToolUse`          | `preToolUse`          | `PreToolUse`        | `preToolUse` (aliases: `beforeShellExecution`, `beforeMCPExecution`, `beforeReadFile`) | All                        |
-| `permission-request`    | `PermissionRequest`   | `permissionRequest`   | `PermissionRequest` | –                                                                      | Claude Code, Copilot, Codex |
+| `permission-request`    | `PermissionRequest`   | `permissionRequest`   | `PermissionRequest` | No such hook                                                           | Claude Code, Copilot, Codex |
 | `user-prompt-submit`    | `UserPromptSubmit`    | `userPromptSubmitted` | `UserPromptSubmit`  | `beforeSubmitPrompt`                                                   | Claude Code, Codex, Cursor |
 | `user-prompt-expansion` | `UserPromptExpansion` | –                     | –                   | –                                                                      | Claude Code only           |
 
@@ -113,6 +113,8 @@ Policy inputs identify the agent as `agent_vendor` / `agent_product`:
 timeout, a network error, a non-2xx response, or a malformed body is a
 non-blocking error, and the tool call continues through the agent's normal
 permission flow. Cursor is the same unless the hook sets `failClosed: true`.
+- **Cursor has no `permission-request` hook.** A tool-call policy still
+runs on `preToolUse`.
 - **Copilot can't honor a prompt denial.** It drops hook output on
 `userPromptSubmitted`. Arcjet records the decision and marks it as not
 enforced. Claude Code, Codex, and Cursor honor a prompt denial.
