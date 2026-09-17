@@ -1,0 +1,483 @@
+---
+title: "Microsoft Agent Framework agent guard"
+description: "Screen user text before the provider runs, wrap function tools so a denial reaches the model as a result rather than an error, and gate the tools a model picks, in Go."
+---
+
+import { Aside } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+
+<WhatIsArcjet />
+
+[Microsoft Agent Framework for Go](https://github.com/microsoft/agent-framework-go)
+runs a tool loop that calls the function tools an agent carries. Arcjet Guard
+sits between the call the model chose and the function that would run it, so a
+policy decides before a side effect happens.
+
+Use <Link.Page href="/get-started">`protect()`</Link.Page> on HTTP routes. Use
+the helpers on this page for agent tools and other actions that have no HTTP
+request.
+
+You need an [Arcjet account](https://console.arcjet.com) and an `ARCJET_KEY`.
+Create one `*arcjet.GuardClient` and reuse it. It owns the capture queue that
+`Flush` and `Close` drain, so a client per call loses the events it queued.
+
+Every policy takes an `Action` string such as `refund.issued`. That slug selects
+the matching <Link.Page href="/guards/remote-policies">remote policy</Link.Page>
+and names the event in the Arcjet Console. A direct `Guard` call uses the field
+name `Label` for the same slug.
+
+<Aside type="caution">
+  `ToolPolicy.Action` and `InboundPolicy.Action` are validated when you build
+  the helper, not on the first call. A slug Guard would reject returns an error
+  from `GuardTool`, `GuardTools` or `GuardMiddleware`, so a typo fails at
+  startup rather than disabling the guard for the life of the process.
+</Aside>
+
+## Install
+
+```bash
+go get github.com/arcjet/arcjet-go/agentframework@latest
+```
+
+The helpers are a nested module. Import both it and the root SDK:
+
+```go
+import (
+	"github.com/arcjet/arcjet-go"
+	"github.com/arcjet/arcjet-go/agentframework"
+)
+```
+
+The module requires Go 1.26, which is the framework's own floor. The root
+`github.com/arcjet/arcjet-go` module requires Go 1.25.
+
+Microsoft Agent Framework for Go is a public preview. This module tracks it and
+may change with it, so its own version stays at `v0.x` until the framework's API
+settles. There is no version segment in the import path, unlike the JavaScript
+adapters. The module's `go.mod` names the framework version it is built and
+tested against, and Go treats that requirement as a lower bound, so a build
+that already selects a newer framework compiles against that one.
+
+Create the client once, and close it on shutdown so the last batch of capture
+events is sent:
+
+```go
+guard, err := arcjet.NewGuardClient(arcjet.GuardConfig{})
+if err != nil {
+	return fmt.Errorf("arcjet guard client: %w", err)
+}
+defer func() { _ = guard.Close(context.Background()) }()
+```
+
+An empty `Key` reads `ARCJET_KEY` from the environment.
+
+## Which helper
+
+| You have | Use | What a denial does |
+| --- | --- | --- |
+| A `tool.FuncTool` you built with `functool.New` | `GuardTool` | The model gets a denial result instead of the tool's output |
+| Tools from `mcptool.ListTools`, or any tool list | `GuardTools` | The same, for each tool the policy selects |
+| An agent whose tools the model picks, or user text to screen | `GuardMiddleware` | The same for tools; a screened turn ends with one assistant message |
+| An agent-as-tool from `agenttool.New` | `GuardTool`, because it is a function tool | The model gets a denial result |
+| Any other Go function | `arcjet.GuardAction` in the root module | The call returns a `*arcjet.GuardDeniedError` |
+
+Hosted tools such as `hostedtool.WebSearch` and `hostedtool.MCPServer` execute
+at the provider. No Go code runs them, so they cannot be guarded, and both
+`GuardTools` and `GuardMiddleware` pass them through unchanged.
+
+## Wrap one tool
+
+`GuardTool` returns a `tool.FuncTool` that keeps the wrapped tool's name,
+description, schemas, and approval-required status, so it goes wherever the
+original went:
+
+```go
+issueRefund := functool.MustNew(
+	functool.Config{Name: "issue_refund", Description: "Refund an order in full"},
+	func(_ context.Context, in orderArgs) (string, error) {
+		return fmt.Sprintf("Refund issued for order %s", in.OrderNumber), nil
+	},
+)
+
+guarded, err := agentframework.GuardTool(guard, issueRefund, agentframework.ToolPolicy{
+	Action: "refund.issued",
+	Actor: func(context.Context, json.RawMessage) (string, error) {
+		return userID, nil
+	},
+	Rules: func(context.Context, json.RawMessage) ([]arcjet.GuardRuleInput, error) {
+		return []arcjet.GuardRuleInput{refundLimit.Key(userID, 1)}, nil
+	},
+	Metadata: arcjet.SecurityMetadata{
+		User:          userID,
+		Reversibility: "irreversible",
+	}.Metadata(),
+})
+if err != nil {
+	return fmt.Errorf("guarding issue_refund: %w", err)
+}
+```
+
+`MustGuardTool` is the same helper and panics on a configuration error, which
+suits a package-level variable where there is no error to return.
+
+Arcjet is called on every attempt, including when `Rules` is nil, because the
+server selects a remote policy by the action slug.
+
+## Tool policy options
+
+`ToolPolicy` is a struct, so an omitted field is its zero value. `Action` is the
+only required one.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `Action` | `string` | Required. A hardcoded slug such as `order.looked-up` |
+| `Actor` | `func(context.Context, json.RawMessage) (string, error)` | The actor identity a policy can read |
+| `Inputs` | `func(context.Context, json.RawMessage) (map[string]arcjet.GuardPolicyInput, error)` | Typed values a remote policy declares |
+| `Rules` | `func(context.Context, json.RawMessage) ([]arcjet.GuardRuleInput, error)` | SDK rules bound to this call |
+| `CorrelationID` | `string` | Wins over the ID on the context and the one on the session |
+| `Metadata` | `arcjet.Metadata` | Attached to the Guard call and to the capture event |
+| `OnGuardError` | `arcjet.OnGuardError` | The zero value denies. See [Fail-closed default](#fail-closed-default) |
+| `OnDeny` | `func(arcjet.GuardDecision) any` | Replaces the result a `DENY` returns to the model |
+
+The three resolvers receive the tool call's raw JSON arguments, so one policy
+shape works for every tool. A resolver that returns an error counts as policy
+that was not evaluated and follows `OnGuardError`.
+
+## What the model sees on a denial
+
+A guarded tool returns `arcjet.GuardDenialResult` as its result. Its JSON field
+names match the JavaScript and Python SDKs, so a model meets one shape across
+every Arcjet integration:
+
+```json
+{
+  "arcjetDenied": true,
+  "reason": "RATE_LIMIT",
+  "message": "Arcjet denied this call (RATE_LIMIT). It may be retried after 30 seconds.",
+  "retryable": true,
+  "retryAfterSeconds": 30
+}
+```
+
+`retryAfterSeconds` is derived from the denying rule's reset time, so it is
+present for a rate limit and absent for a reason that carries no hint.
+
+A denial is a result rather than a Go error because of what the framework does
+with an error. It replaces the tool's error text with the fixed string
+`Error: Function failed.` unless `toolautocall.Config.IncludeDetailedErrors` is
+set, and it allows three consecutive rounds of failing tool calls before the
+fourth returns the aggregated errors to the caller and ends the run. Three is
+`MaximumConsecutiveErrorsPerRequest`'s default. A model told only that a
+function failed cannot explain the denial to the user or choose a different
+approach.
+
+The wrapped tool's own errors pass through unchanged. Only this wrapper's
+decision becomes a result.
+
+Set `OnDeny` to return something else, such as a value shaped to a tool's own
+output schema:
+
+```go
+OnDeny: func(d arcjet.GuardDecision) any {
+	return refundResult{Status: "refused", Reason: string(d.Reason)}
+},
+```
+
+## Screen user text before the provider runs
+
+`GuardMiddleware` with an `InboundPolicy` evaluates the run's user text before
+the provider is called, which is where prompt injection detection belongs:
+
+```go
+screen, err := agentframework.GuardMiddleware(guard, agentframework.MiddlewareConfig{
+	Inbound: &agentframework.InboundPolicy{
+		Action: "message.received",
+		Rules: func(_ context.Context, text string) ([]arcjet.GuardRuleInput, error) {
+			return []arcjet.GuardRuleInput{promptScan.Text(text)}, nil
+		},
+	},
+})
+if err != nil {
+	return fmt.Errorf("guard middleware: %w", err)
+}
+
+a := anthropicprovider.NewAgent(anthropic.NewClient(), anthropicprovider.AgentConfig{
+	Model: model,
+	Config: agent.Config{
+		Tools:       tools,
+		Middlewares: []agent.Middleware{screen},
+	},
+})
+```
+
+`InboundPolicy.Rules` receives the concatenated text of the run's user-role
+messages. `Actor` receives the messages themselves, and `Inputs` receives the
+same text as `Rules`. The other fields match `ToolPolicy`, except `OnDeny`,
+which builds an `*agent.ResponseUpdate` rather than a tool result.
+
+A denied turn returns one assistant message carrying the denial text and never
+calls the provider. Because agent-level middleware wraps the agent's own invoke,
+the run's history and context providers do not see that turn or the refusal:
+they run beneath the middleware. Screening cannot both stop the provider being
+called and still run the work that happens underneath it.
+
+## Gate the tools a model picks
+
+Wrapping each tool by hand guards the tools you remembered. Set
+`MiddlewareConfig.Tools` as well, and every tool the run carries is guarded,
+including one added later:
+
+```go
+gate, err := agentframework.GuardMiddleware(guard, agentframework.MiddlewareConfig{
+	Tools: func(t tool.Tool) (agentframework.ToolPolicy, bool) {
+		switch t.Name() {
+		case "issue_refund":
+			return agentframework.ToolPolicy{Action: "refund.issued", Actor: actor}, true
+		case "lookup_order":
+			return agentframework.ToolPolicy{Action: "order.looked-up", Actor: actor}, true
+		}
+		return agentframework.ToolPolicy{}, false
+	},
+	Inbound: &agentframework.InboundPolicy{ /* as above */ },
+})
+```
+
+`Tools` is where you switch on `t.Name()` to pick a hardcoded action per tool.
+Returning `false` leaves that tool alone.
+
+`GuardTools` applies the same selector to a list you already hold, which is what
+you want for tools that arrive at runtime:
+
+```go
+discovered, err := mcptool.ListTools(ctx, session)
+if err != nil {
+	return err
+}
+guarded, err := agentframework.GuardTools(guard, discovered, policyFor)
+```
+
+Tools that are not function tools, tools the selector declines, and tools
+already wrapped by `GuardTool` pass through unchanged, so the result can be
+handed to the agent or to `mcptool.AddTool` in place of the input.
+
+<Aside type="caution">
+  A guarded tool keeps the wrapped tool's `ReturnSchema`. Re-exporting one
+  through `mcptool.AddTool` publishes that schema as the MCP output schema while
+  a denial returns `arcjet.GuardDenialResult` instead, and an MCP client that
+  validates structured output rejects such a denial. Give that tool an `OnDeny`
+  that shapes the denial to the tool's own schema, or leave its output schema
+  unset.
+</Aside>
+
+## Which tools the middleware reaches
+
+Tools from `agent.Config.Tools` and from a per-run `agent.WithTool` both arrive
+as run options, so `MiddlewareConfig.Tools` reaches all of them. A tool that
+`GuardTool` already wrapped carries a marker and is not wrapped twice.
+
+That marker is an interface method, and Go promotes only the methods of an
+embedded field's own interface type. A wrapper that embeds `tool.FuncTool`
+therefore hides it. `tool.ApprovalRequiredFunc` is one such wrapper, so
+`tool.ApprovalRequiredFunc(guarded)` reads as unguarded and is guarded a second
+time: one model call then spends two Guard evaluations and two rate-limit
+tokens. Apply `GuardTool` outermost, which also keeps the human gate, because
+`GuardTool` forwards the approval requirement:
+
+```go
+guarded := agentframework.MustGuardTool(guard, tool.ApprovalRequiredFunc(t), policy)
+```
+
+Two sources of tools are out of the middleware's reach, because both add tools
+after the agent middleware chain has run:
+
+| Source | Why the middleware cannot see it |
+| --- | --- |
+| A `ContextProvider` appending `agent.WithTool` from its `Invoking` hook | The context providers run inside the agent's own invoke, after the middleware |
+| `toolautocall.Config.AdditionalTools` | Merged straight into the callable set, so it never becomes a run option |
+
+Wrap tools from either source with `GuardTool` where you create them. A tool
+wrapped there is guarded wherever it is later contributed from, and `GuardTools`
+and `GuardMiddleware` will not wrap it a second time.
+
+## Correlation
+
+A correlation ID groups every decision from one conversation into a single
+Sequence in the Arcjet Console. Put an ID the application already has on the
+context before the run:
+
+```go
+ctx = arcjet.ContextWithCorrelationID(ctx, conversationID)
+resp, err := a.RunText(ctx, prompt).Collect()
+```
+
+For work that outlives one call, store it on the session instead.
+`GuardMiddleware` reads it whenever the context carries none:
+
+```go
+session.Set(agentframework.CorrelationIDStateKey, conversationID)
+```
+
+Session state is serialized with the session, so the ID survives a session that
+is persisted and restored. A `ToolPolicy` or `InboundPolicy` may also set
+`CorrelationID` directly, which wins over both.
+
+Nothing generates an ID. A run with none produces decisions that join no
+Sequence.
+
+`agent.Session.ServiceID` is deliberately not used as a source. It belongs to
+the provider, and the OpenAI Responses, AG-UI, A2A and Copilot providers all
+rewrite it during a run, so a conversation keyed on it would scatter across many
+IDs.
+
+## Send values to a policy
+
+A policy reads the actor and the typed inputs a call carries. Both are resolved
+per call from the tool's raw arguments, so a policy can be written once and
+evaluated against whatever the model proposed.
+
+Take the actor and any allow list from authenticated application state, never
+from the model's arguments. A policy can be conditioned on the actor, so a model
+that controls the actor can leave its own policy scope. The same holds for a
+rate-limit key:
+
+```go
+Rules: func(context.Context, json.RawMessage) ([]arcjet.GuardRuleInput, error) {
+	return []arcjet.GuardRuleInput{refundLimit.Key(userID, 1)}, nil
+},
+```
+
+When a policy does need the model's arguments, `Args` adapts a typed resolver to
+the raw-JSON form `Rules` takes. `Actor` and `Inputs` receive the same raw
+arguments and decode them themselves:
+
+```go
+agentframework.ToolPolicy{
+	Action: "order.looked-up",
+	Actor:  actor,
+	Inputs: func(_ context.Context, raw json.RawMessage) (map[string]arcjet.GuardPolicyInput, error) {
+		var in orderArgs
+		if err := json.Unmarshal(raw, &in); err != nil {
+			return nil, err
+		}
+		return map[string]arcjet.GuardPolicyInput{
+			"order_number": arcjet.GuardPolicyServerString(in.OrderNumber),
+		}, nil
+	},
+	Rules: agentframework.Args(func(_ context.Context, in orderArgs) ([]arcjet.GuardRuleInput, error) {
+		return []arcjet.GuardRuleInput{lookupLimit.Key(userID, 1)}, nil
+	}),
+}
+```
+
+`Args` decodes `In` the way `functool` decodes it. A struct input is the
+arguments object itself; any other input type arrives wrapped in a
+single-property object, and a wrapped form carrying zero properties or more than
+one fails the call closed.
+
+Decoding uses `encoding/json` rather than the framework's own decoder, which is
+unexported, so schema defaults are not applied: a field the tool's schema
+defaults arrives here as its zero value while the tool's handler sees the
+default. Key a policy on a value the caller supplies rather than one the schema
+fills in.
+
+For what a policy declares and how the names have to match, see
+<Link.Page href="/guards/remote-policies">Policy contract</Link.Page>.
+
+## Fail-closed default
+
+The zero value of `OnGuardError` is deny, so a policy literal that omits the
+field fails closed. When policy cannot be evaluated, because Arcjet could not be
+reached, a deadline passed, or a rule or resolver returned an error, the tool
+does not run and the model receives `arcjet.NewGuardUnavailableResult()`:
+
+```json
+{
+  "arcjetDenied": true,
+  "reason": "ERROR",
+  "message": "Arcjet security check could not be completed; please retry later.",
+  "retryable": true,
+  "retryAfterSeconds": 5
+}
+```
+
+`GuardMiddleware` ends the run with that message as assistant text.
+
+Set `OnGuardError: arcjet.OnGuardErrorAllow` where running without a complete
+security decision is acceptable, such as a read-only lookup. The call then runs
+and its capture event records `outcome` as `degraded`, so the gap is visible
+afterwards rather than silent:
+
+```go
+agentframework.ToolPolicy{
+	Action:       "order.looked-up",
+	Actor:        actor,
+	OnGuardError: arcjet.OnGuardErrorAllow,
+}
+```
+
+That setting covers availability only. A request Arcjet could not use at all,
+such as an invalid `Action` or a rule whose key is empty, is denied whatever
+`OnGuardError` is set to, because the alternative is running the tool under a
+policy that never ran. Those errors wrap `arcjet.ErrGuardMisconfigured`. A
+`DENY` decision always blocks.
+
+For more information about fail-open versus fail-closed behavior, see
+<Link.Page href="/guards/reference#availability-and-fail-behavior">Availability and fail behavior</Link.Page>.
+
+## Guard any Go function
+
+Code that is not a framework tool uses `arcjet.GuardAction` from the root
+module. It runs the function only if policy allows it, and reports a denial to
+the caller as an error rather than to a model as a result:
+
+```go
+receipt, err := arcjet.GuardAction(ctx, guard, arcjet.GuardActionPolicy{
+	Action: "refund.issued",
+	Actor:  userID,
+	Rules:  []arcjet.GuardRuleInput{refundLimit.Key(userID, 1)},
+}, func(ctx context.Context) (Receipt, error) {
+	return issueRefund(ctx, orderNumber)
+})
+
+var denied *arcjet.GuardDeniedError
+var unavailable *arcjet.GuardUnavailableError
+switch {
+case errors.As(err, &denied):
+	return fmt.Errorf("refund refused: %s", denied.Decision.Reason)
+case errors.As(err, &unavailable):
+	return fmt.Errorf("refund not attempted: %w", unavailable)
+case err != nil:
+	return err
+}
+```
+
+That is the same division the framework helpers make. A helper that answers a
+model returns a value it can read; a helper that answers your application
+signals an error. See
+<Link.Page href="/reference/go#guard-non-http-operations">Guard non-HTTP operations</Link.Page>
+in the Go SDK reference.
+
+## Human approval isn't a policy gate
+
+The framework's `toolapproval` middleware and `tool.ApprovalRequiredFunc` pause
+a run so a person can approve a tool call. Each asks a person rather than
+evaluating a policy, and a run nobody is watching stalls, so neither is a Guard
+enforcement point and an Arcjet decision never stands in for a person's answer.
+
+The two compose. `GuardTool` forwards a tool's approval requirement, so a
+guarded tool keeps its approval pause, and wrapping in that order also keeps the
+guard from running twice. Use the framework's approval control when a person
+must decide, and a Guard helper when a policy must decide.
+
+## Related
+
+- <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>
+- <Link.Page href="/reference/go">Go SDK reference</Link.Page>
+- <Link.Page href="/guards/remote-policies">Policy contract</Link.Page>
+- <Link.Page href="/guards/capture">Capture events</Link.Page>
+- <Link.Page href="/guards">Agent guards</Link.Page>
+- Example:
+  [examples/agentframework](https://github.com/arcjet/arcjet-go/tree/main/examples/agentframework)
+- Module:
+  [`agentframework/v0.1.0`](https://github.com/arcjet/arcjet-go/tree/agentframework/v0.1.0/agentframework)
