@@ -30,8 +30,16 @@ export const main = [
         link: "/coding-agents/claude-code",
       },
       {
+        label: "Cursor",
+        link: "/coding-agents/cursor",
+      },
+      {
         label: "GitHub Copilot",
         link: "/coding-agents/copilot",
+      },
+      {
+        label: "OpenAI Codex",
+        link: "/coding-agents/codex",
       },
       {
         label: "Coding agent policies",

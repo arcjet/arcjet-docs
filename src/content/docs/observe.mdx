@@ -10,7 +10,7 @@ Before you can enforce a policy on an agent action, you need to know which
 agents are running, who runs them, and what they do. Arcjet ingests agent
 activity without a code change, through three paths:
 
-- **Coding agent hooks**, where Claude Code or GitHub Copilot calls Arcjet at
+- **Coding agent hooks**, where Claude Code, GitHub Copilot, OpenAI Codex, or Cursor calls Arcjet at
   each lifecycle event. This is the only path that can also refuse a tool
   call. For more information, see <Link.Page href="/coding-agents">Secure coding agents</Link.Page>.
 - **OpenTelemetry**, where a client you already run exports to Arcjet. It
@@ -226,7 +226,7 @@ activity with no decision beside it is an action nothing enforced. That gap is
 the point of the view. Use it to find the actions worth guarding, then add an
 enforcement point and a policy for each, or install the
 <Link.Page href="/coding-agents">coding agent hooks</Link.Page> where the
-sessions are Claude Code or Copilot.
+sessions are Claude Code, Copilot, Codex, or Cursor.
 
 ## Data handling
 
@@ -247,7 +247,7 @@ For what Arcjet retains and for how long, see the
 ## Related
 
 - <Link.Page href="/coding-agents">Secure coding agents</Link.Page> – enforce
-  policy on Claude Code and Copilot tool calls
+  policy on Claude Code, Copilot, Codex, and Cursor tool calls
 - <Link.Page href="/guards">Agent guards</Link.Page> – enforce a policy before
   an action runs
 - <Link.Page href="/guards/capture">Capture events</Link.Page> – record an
