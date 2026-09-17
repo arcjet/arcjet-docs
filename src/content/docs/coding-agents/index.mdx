@@ -58,13 +58,22 @@ evaluated and allowed or denied.
 | **Tool call** | `pre-tool-use`, `permission-request`          | `tool_name`, `tool_kind`, `command`, `command_tokens`, `paths`, `domains`, `mcp_server`, `mcp_tool` |
 | **Prompt**    | `user-prompt-submit`, `user-prompt-expansion` | `prompt`                                                                                            |
 
+The hook URL names the vendor. Use `POST /v1/agent-hooks/claude-code`, `/copilot`, `/codex`, or `/cursor`, with `event` as a query parameter.
+
+| `event`                 | Claude Code           | Copilot               | Codex               | Cursor                                                                 | Denial honoured            |
+| ----------------------- | --------------------- | --------------------- | ------------------- | ---------------------------------------------------------------------- | -------------------------- |
+| `pre-tool-use`          | `PreToolUse`          | `preToolUse`          | `PreToolUse`        | `preToolUse` (aliases: `beforeShellExecution`, `beforeMCPExecution`, `beforeReadFile`) | All                        |
+| `permission-request`    | `PermissionRequest`   | `permissionRequest`   | `PermissionRequest` | –                                                                      | Claude Code, Copilot, Codex |
+| `user-prompt-submit`    | `UserPromptSubmit`    | `userPromptSubmitted` | `UserPromptSubmit`  | `beforeSubmitPrompt`                                                   | Claude Code, Codex, Cursor |
+| `user-prompt-expansion` | `UserPromptExpansion` | –                     | –                   | –                                                                      | Claude Code only           |
+
 ### Recorded events
 
 Arcjet tracks all these events, but can only enforce policy on the above enforceable events.
 
-| `event`                   | Claude Code          | Copilot                 | Codex            | Cursor                 | What it carries                            |
-| ------------------------- | -------------------- | ----------------------- | ---------------- | ---------------------- | ------------------------------------------ |
-| `post-tool-use`           | `PostToolUse`        | `postToolUse`           | `PostToolUse`    | `postToolUse`          | What the tool returned                     |
+| `event`                   | Claude Code          | Copilot                 | Codex            | Cursor                                                              | What it carries                            |
+| ------------------------- | -------------------- | ----------------------- | ---------------- | ------------------------------------------------------------------- | ------------------------------------------ |
+| `post-tool-use`           | `PostToolUse`        | `postToolUse`           | `PostToolUse`    | `postToolUse` (aliases: `afterShellExecution`, `afterMCPExecution`, `afterFileEdit`) | What the tool returned                     |
 | `post-tool-use-failure`   | `PostToolUseFailure` | `postToolUseFailure`    | –                | `postToolUseFailure`   | Why it did not                             |
 | `user-prompt-transformed` | –                    | `userPromptTransformed` | –                | –                      | The model-facing prompt after a rewrite    |
 | `stop`                    | `Stop`               | `agentStop`             | `Stop`           | `stop`                 | The agent's final message                  |
@@ -78,6 +87,25 @@ Arcjet tracks all these events, but can only enforce policy on the above enforce
 | `error`                   | `StopFailure`        | `errorOccurred`         | –                | –                      | Why a turn failed                          |
 | `config-change`           | `ConfigChange`       | –                       | –                | –                      | Settings changed, which is a tamper signal |
 | `instructions-loaded`     | `InstructionsLoaded` | –                       | –                | –                      | A `CLAUDE.md` entering context             |
+
+### What Arcjet answers
+
+A denial uses the vendor's own hook-output shape. An allow is always `{}`.
+Arcjet never answers `permissionDecision: "allow"` or Cursor's
+`permission: "allow"`: those are grants that skip the agent's own
+permission flow. Codex can also rewrite the call when an allow carries
+`updatedInput`.
+
+| Event                   | Claude Code / Codex                                    | Copilot                                         | Cursor                                              |
+| ----------------------- | ------------------------------------------------------ | ----------------------------------------------- | --------------------------------------------------- |
+| `pre-tool-use`          | `hookSpecificOutput.permissionDecision: "deny"`        | Flat `permissionDecision` and the nested object | `{ permission: "deny", user_message, agent_message }` |
+| `permission-request`    | `hookSpecificOutput.decision: {behavior, message}`     | Flat `behavior` / `message`                     | No such hook                                        |
+| `user-prompt-submit`    | Top-level `{ decision: "block", reason }`              | Output dropped. Can't enforce                   | `{ continue: false, user_message }`                 |
+| `user-prompt-expansion` | Top-level `{ decision: "block", reason }` (Claude Code) | No such hook                                    | No such hook                                        |
+
+Policy inputs identify the agent as `agent_vendor` / `agent_product`:
+`anthropic` / `claude-code`, `github` / `copilot`, `openai` / `codex`, or
+`anysphere` / `cursor`.
 
 ## Enforcement limitations
 

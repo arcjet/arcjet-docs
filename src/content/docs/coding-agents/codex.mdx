@@ -320,10 +320,18 @@ timeout = 5
 Codex launches matching command hooks for an event concurrently, so these
 entries add one request of latency (typically a few tens of milliseconds).
 
+- The wrapper posts to `https://decide.arcjet.com/v1/agent-hooks/codex`
+  with `event` as a query parameter. Policy inputs identify Codex as
+  `agent_vendor: openai` and `agent_product: codex`.
 - `PreToolUse` and `PermissionRequest` are the tool-call moment.
   `UserPromptSubmit` is the prompt moment. Codex honors a prompt denial.
+  Codex doesn't fire prompt expansion.
 - Omit `matcher`. A matcher that lists only `Bash` or `apply_patch` leaves
   MCP tools and other local function tools outside the policy.
+- Codex reports `apply_patch`, `exec_command`, `spawn_agent`, and
+  `update_plan`. Arcjet maps those to `file_write`, `shell`, `agent`, and
+  `other`. It also matches the shared PascalCase names such as `Bash`,
+  `Read`, and `Write`.
 - `timeout` on every entry. Codex's default for most hooks is 600 seconds.
   `SessionEnd` supports at most 3 seconds.
 - `X-Arcjet-Principal` attributes a session to a developer. It's untrusted,
@@ -341,6 +349,22 @@ Codex skips a non-managed command hook until someone reviews and trusts
 the exact definition in `/hooks`. Managed hooks from
 `requirements.toml`, MDM, or cloud requirements are trusted by policy and
 can't be disabled from the user hook browser.
+
+### What Arcjet answers
+
+The wrapper prints Arcjet's JSON to standard output. Codex reads that as
+the hook result. Echo the body as-is.
+
+| Event                | Denial body | Honored |
+| -------------------- | ----------- | ------- |
+| `pre-tool-use`       | `{ "hookSpecificOutput": { "hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "RULE_ID" } }` | Yes |
+| `permission-request` | `{ "hookSpecificOutput": { "hookEventName": "PermissionRequest", "decision": { "behavior": "deny", "message": "RULE_ID" } } }` | Yes |
+| `user-prompt-submit` | `{ "decision": "block", "reason": "RULE_ID" }` | Yes |
+
+An allow is `{}`. Codex treats `permissionDecision: "allow"` as a grant
+that skips its own permission flow, and can rewrite the call when that
+grant carries `updatedInput`. The denial reason names the rule IDs that
+fired and nothing else.
 
 ## Supply the Arcjet key
 

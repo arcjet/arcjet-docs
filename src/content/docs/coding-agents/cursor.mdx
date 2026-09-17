@@ -178,13 +178,24 @@ directory.
 Cursor runs every matching hook for an event, so these entries add one
 request of latency (typically a few tens of milliseconds).
 
-- `preToolUse` is the tool-call moment. Cursor fires it for Shell, Read,
-  Write, MCP, Task, and the other agent tools. `beforeSubmitPrompt` is
-  the prompt moment. Cursor honors a prompt denial (`continue: false`).
+- The wrapper posts to `https://decide.arcjet.com/v1/agent-hooks/cursor`
+  with `event` as a query parameter. Policy inputs identify Cursor as
+  `agent_vendor: anysphere` and `agent_product: cursor`.
+- `preToolUse` is the tool-call moment. The wrapper sends
+  `event=pre-tool-use`. Cursor fires it for `Shell`, `Read`, `Write`,
+  MCP, `Task`, and the other agent tools. `beforeSubmitPrompt` is the
+  prompt moment (`event=user-prompt-submit`). Cursor honors a prompt
+  denial. Cursor has no permission-request or prompt-expansion hook.
 - Cursor also has `beforeShellExecution`, `beforeMCPExecution`, and
-  `beforeReadFile`. They carry a richer payload for that one action, and
-  they fire in addition to `preToolUse`. This template uses `preToolUse`
-  so one entry covers every tool without posting the same call twice.
+  `beforeReadFile`. They alias onto `pre-tool-use` and fire in addition
+  to `preToolUse`. This template uses `preToolUse` so one entry covers
+  every tool without posting the same call twice. The matching after
+  hooks (`afterShellExecution`, `afterMCPExecution`, `afterFileEdit`)
+  alias onto `post-tool-use`. Don't install those either.
+- Cursor reports `Shell`, `Read`, `Write`, `Grep`, `Delete`, and `Task`.
+  Arcjet maps those to `shell`, `file_read`, `file_write`, and `agent`.
+  A specialized before-hook that omits `tool_name` is inferred as
+  `Shell`, `Read`, or `Write`.
 - Omit `matcher`. A matcher that lists only `Shell` or `Write` leaves
   reads, MCP tools, and Task calls outside the policy.
 - `failClosed: true` on the two enforcement entries. Cursor's default is
@@ -198,6 +209,20 @@ request of latency (typically a few tens of milliseconds).
   cloud, so a hard-coded `ide` mislabels cloud sessions. Arcjet records
   `unknown` when you omit the parameter. Set it only when the hook file
   is specific to one surface.
+
+### What Arcjet answers
+
+The wrapper prints Arcjet's JSON to standard output. Cursor reads that as
+the hook result. Echo the body as-is.
+
+| Event                | Denial body | Honored |
+| -------------------- | ----------- | ------- |
+| `pre-tool-use`       | `{ "permission": "deny", "user_message": "RULE_ID", "agent_message": "RULE_ID" }` | Yes |
+| `user-prompt-submit` | `{ "continue": false, "user_message": "RULE_ID" }` | Yes |
+
+An allow is `{}`. Cursor treats `permission: "allow"` as a grant that
+skips its own permission flow. The denial reason names the rule IDs that
+fired and nothing else.
 
 ## Supply the Arcjet key
 

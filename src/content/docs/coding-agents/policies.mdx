@@ -32,8 +32,8 @@ Arcjet builds every input from the hook payload. Read a value in Rego as
 | Input             | Kind        | What it holds                                                              |
 | ----------------- | ----------- | -------------------------------------------------------------------------- |
 | `contract`        | String      | The contract version, always `coding-agent/v1`                             |
-| `agent_vendor`    | String      | `anthropic` or `github`                                                    |
-| `agent_product`   | String      | `claude-code` or `copilot`                                                 |
+| `agent_vendor`    | String      | `anthropic`, `github`, `openai`, or `anysphere`                            |
+| `agent_product`   | String      | `claude-code`, `copilot`, `codex`, or `cursor`                             |
 | `agent_surface`   | String      | The optional `surface` query parameter (`cli`, `ide`, `cloud`), or `unknown` when omitted |
 | `event`           | String      | The lifecycle event, such as `pre-tool-use`                                |
 | `session`         | String      | The agent's session ID, which also correlates the recorded activity        |
@@ -52,17 +52,17 @@ Arcjet builds every input from the hook payload. Read a value in Rego as
 
 ### Compare `tool_kind`, not `tool_name`
 
-The agents spell their tools differently so Arcjet normalizes them to a consistent `tool_kind`. Matching is case-insensitive.
+The agents spell their tools differently so Arcjet normalizes them to a consistent `tool_kind`. Matching is case-insensitive. A name that isn't in this table is `tool_kind: other`, so a rule over the kind never matches it.
 
-| `tool_kind`  | Claude Code and Copilot                                    | Copilot CLI                                   | Codex                                      | Cursor                          |
-| ------------ | ---------------------------------------------------------- | --------------------------------------------- | ------------------------------------------ | ------------------------------- |
-| `shell`      | `Bash`, `BashOutput`, `KillShell`                          | `powershell`                                  | `Bash`                                     | `Shell`                         |
-| `file_read`  | `Read`, `Glob`, `Grep`, `NotebookRead`                     | `view`, `rg`                                  | Local function tools that read files       | `Read`, `Grep`                  |
-| `file_write` | `Edit`, `Write`, `MultiEdit`, `NotebookEdit`               | `create`, `str_replace_editor`, `apply_patch` | `apply_patch` (also matches `Edit`, `Write`) | `Write`, `Delete`             |
-| `web`        | `WebFetch`, `WebSearch`                                    | `web_fetch`, `web_search`                     | Hosted `WebSearch` skips `PreToolUse`      |                                 |
-| `mcp`        | Any `mcp__<server>__<tool>` name                           | Any MCP tool                                  | Any `mcp__<server>__<tool>` name           | `MCP:<tool_name>`               |
-| `agent`      | `Agent`, `Task`                                            |                                               | `Agent`, `spawn_agent`                     | `Task`                          |
-| `other`      | Everything else, such as `AskUserQuestion` and `TodoWrite` | `ask_user`, `update_todo`                     | `update_plan`                              |                                 |
+| `tool_kind`  | Claude Code and Copilot                                    | Copilot CLI                                   | Codex                                                          | Cursor                          |
+| ------------ | ---------------------------------------------------------- | --------------------------------------------- | -------------------------------------------------------------- | ------------------------------- |
+| `shell`      | `Bash`, `BashOutput`, `KillShell`                          | `powershell`                                  | `Bash`, `exec_command`                                         | `Shell`                         |
+| `file_read`  | `Read`, `Glob`, `Grep`, `NotebookRead`                     | `view`, `rg`                                  | `Read`, `Glob`, `Grep`, `NotebookRead`                         | `Read`, `Grep`                  |
+| `file_write` | `Edit`, `Write`, `MultiEdit`, `NotebookEdit`               | `create`, `str_replace_editor`, `apply_patch` | `apply_patch`, `Edit`, `Write`, `MultiEdit`, `NotebookEdit`    | `Write`, `Delete`               |
+| `web`        | `WebFetch`, `WebSearch`                                    | `web_fetch`, `web_search`                     | `WebFetch` (hosted `WebSearch` skips `PreToolUse`)             | `WebFetch`, `WebSearch`         |
+| `mcp`        | Any `mcp__<server>__<tool>` name                           | Any MCP tool                                  | Any `mcp__<server>__<tool>` or `@<server>/<tool>` name         | Any namespaced MCP name         |
+| `agent`      | `Agent`, `Task`                                            |                                               | `Agent`, `Task`, `spawn_agent`                                 | `Task`                          |
+| `other`      | Everything else, such as `AskUserQuestion` and `TodoWrite` | `ask_user`, `update_todo`                     | `update_plan`                                                  |                                 |
 
 ## Starter policies
 
