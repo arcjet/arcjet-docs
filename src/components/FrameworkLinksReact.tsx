@@ -3,6 +3,7 @@ import { Astro as IconAstro } from "@/components/icons/tech/Astro";
 import { Bun as IconBun } from "@/components/icons/tech/Bun";
 import { ClaudeAgentSdk as IconClaudeAgentSdk } from "@/components/icons/tech/ClaudeAgentSdk";
 import { CrewAi as IconCrewAi } from "@/components/icons/tech/CrewAi";
+import { Cursor as IconCursor } from "@/components/icons/tech/Cursor";
 import { Deno as IconDeno } from "@/components/icons/tech/Deno";
 import { FastApi as IconFastApi } from "@/components/icons/tech/FastApi";
 import { Fastify as IconFastify } from "@/components/icons/tech/Fastify";
@@ -56,10 +57,22 @@ const codingAgents = [
     icon: <IconClaudeAgentSdk />,
   },
   {
+    key: "cursor",
+    label: "Cursor",
+    href: "/coding-agents/cursor",
+    icon: <IconCursor />,
+  },
+  {
     key: "github-copilot",
     label: "GitHub Copilot",
     href: "/coding-agents/copilot",
     icon: <IconGitHub />,
+  },
+  {
+    key: "openai-codex",
+    label: "OpenAI Codex",
+    href: "/coding-agents/codex",
+    icon: <IconOpenAiAgents />,
   },
 ] as const;
 

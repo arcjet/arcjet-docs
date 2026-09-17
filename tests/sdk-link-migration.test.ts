@@ -79,6 +79,27 @@ test.describe("SDK link migration", () => {
     expect(hrefs.some((href) => href?.startsWith("/guards/"))).toBe(false);
   });
 
+  test("get-started coding agents picker lists agents alphabetically", async ({
+    page,
+  }) => {
+    await page.goto("/get-started/");
+    await page.waitForSelector("#coding-agents", { timeout: 15_000 });
+
+    const group = page.locator(".FrameworkLinks").locator("div").filter({
+      has: page.locator("#coding-agents"),
+    });
+    const labels = (await group.locator("a").allTextContents()).map((label) =>
+      label.trim(),
+    );
+
+    expect(labels).toEqual([
+      "Claude Code",
+      "Cursor",
+      "GitHub Copilot",
+      "OpenAI Codex",
+    ]);
+  });
+
   test("SDK and hub pages share a custom switcher with alphabetical options", async ({
     page,
   }) => {
