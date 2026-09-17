@@ -1,19 +1,20 @@
 # Arcjet
 
-> Arcjet is the runtime security platform that ships in your AI code. Detect prompt injection, authorize agent tool calls, redact sensitive data, and block bots and abuse. Real-time security building blocks you call inside your app, before an action happens.
+Arcjet is the AI agent runtime security platform. Discover the agents running in your organization, enforce policy across every action, prompt, and tool call, and keep the evidence to prove what happened. Detect prompt injection, authorize agent tool calls, redact PII, and block bots and abuse.
 
-Arcjet is a lightweight SDK that enforces controls inline, with real identity and session context – configured by your agent with the CLI or MCP server.
+Full documentation content: https://docs.arcjet.com/llms-full.txt
 
-Arcjet's primary use case is securing the actions AI agents take in production. Agents have gone from answering questions to moving money, changing records, and shipping code, and the security or engineering leader now owns that risk. Identity and RBAC authenticate the agent but don't govern the action it's about to take, and network proxies can't see inside the workflow. Arcjet gives security and engineering teams visibility into what each agent is doing, real-time enforcement before a consequential action (prompt injection, PII, tool authorization), and an audit trail.
+Agent registration: https://arcjet.com/auth.md
 
-Because it runs inside the same application code, Arcjet protects traditional entry points the same way – enforce budgets, detect bots, validate email, rate limit, and block common attacks across HTTP routes and APIs.
+Arcjet's primary use case is securing the actions AI agents take, when coding on developer laptops or taking actions in production. Agents have gone from answering questions to moving money, changing records, and shipping code, and the security or engineering leader now owns that risk. Identity and RBAC authenticate the agent but don't govern the action it's about to take, and network proxies can't see inside the workflow. Arcjet gives security and engineering teams visibility into what each agent is doing, real-time enforcement before a consequential action (prompt injection, PII, tool authorization), and an audit trail.
 
-Arcjet protects two types of entry points:
-- **Request-based** – HTTP route handlers, API endpoints, middleware. Use `protect()` with any supported framework.
-- **Guards** – tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input without an HTTP request. Use `guard()` to pass inputs directly and get a decision back. Use `capture()` to record that an allowed action happened (visibility only; never changes a decision).
+How Arcjet compares to other AI agent security approaches: [AI agent security platforms](https://arcjet.com/compare/ai-agent-security-platforms), [Rein vs Arcjet](https://arcjet.com/compare/rein-vs-arcjet), [Datadog AI Guard vs Arcjet](https://arcjet.com/compare/datadog-ai-guard-vs-arcjet).
 
-Arcjet runs server-side. Bot protection advanced client signals are an optional
-extra layer of defense. Pricing is based on usage, see https://arcjet.com/pricing
+Arcjet protects several entry points:
+
+- **Coding agents** - apply policies and enforce security controls directly within the development environment. Protect prompts from injection, redact sensitive data, and ensure that agent actions comply with organizational policies. Supported coding agents include: Claude Code and GitHub Copilot.
+- **Custom agents** - tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input in custom agents you've built and deployed yourself. Protect HTTP requests from bots and abuse, and enforce security policies consistently across all agent interactions. Supported AI agent frameworks include: Claude Agent SDK, Claude Managed Agents, CrewAI, Genkit, Google ADK, LangChain, LangGraph, Mastra, Microsoft Agent Framework for Go, OpenAI Agents, Strands Agents, TanStack AI, Vercel AI SDK, Vercel Eve.
+- **Web applications** - protect HTTP routes, API endpoints, and middleware within web applications. Bot protection, email validation, WAF, and other security building blocks applied directly in-code. Supported languages and frameworks include: Astro, Bun, Deno, Fastify, NestJS, Next.js, Node.js, Express, Hono, Nuxt, Python, FastAPI, Flask, React Router, Remix, SvelteKit, Go.
 
 ## Get started
 
@@ -202,14 +203,15 @@ Full docs: https://docs.arcjet.com
 | Astro          | `@arcjet/astro`        | `npx astro add @arcjet/astro`          |
 | Python FastAPI | `arcjet`               | `pip install arcjet`                   |
 | Python Flask   | `arcjet`               | `pip install arcjet flask`             |
-| Go             | `github.com/arcjet/arcjet-go` | `go get github.com/arcjet/arcjet-go@v1.0.0-rc.2` |
+| Go             | `github.com/arcjet/arcjet-go` | `go get github.com/arcjet/arcjet-go@latest` |
 
 ## Go SDK
 
-The Go SDK is pre-release. The current pre-release is v1.0.0-rc.2, which
-requires Go 1.25 or later and supports
+The Go SDK is v1.0.0 and requires Go 1.25 or later. It supports
 `net/http` request protection plus Guard protection for non-HTTP operations.
-Create clients once at package scope and reuse them.
+Create clients once at package scope and reuse them. The Microsoft Agent
+Framework helpers are `github.com/arcjet/arcjet-go/agentframework` and
+require Go 1.26 or later.
 
 Full reference: https://docs.arcjet.com/reference/go
 
@@ -264,7 +266,7 @@ func must[T any](value T, err error) T {
 
 Call `Protect(r.Context(), r, ...)` once inside each handler. Use
 `WithCharacteristics`, `WithRequested`, `WithDetectPromptInjectionMessage`,
-`WithSensitiveInfoValue`, and `WithCorrelationId` for dynamic inputs.
+`WithSensitiveInfoValue`, and `WithCorrelationID` for dynamic inputs.
 
 On a transport failure, `Protect` returns an `ERROR` conclusion `Decision`
 together with `err`. `IsAllowed()` and `IsErrored()` are both true;
@@ -285,7 +287,7 @@ var promptScan = must(arcjet.GuardPromptInjection(
 
 decision, err := guard.Guard(ctx, arcjet.GuardRequest{
     Label:         "tools.summarize",
-    CorrelationId: "trace_123",
+    CorrelationID: "trace_123",
     Metadata: arcjet.Metadata{
         "user": map[string]any{"id": userID},
     },
@@ -2163,6 +2165,7 @@ with a tab where both a JavaScript and a Python adapter exist.
 | Strands Agents | `@arcjet/guard/strands-agents/v1` | `arcjet.guard.strands_agents` | `guardTool` / `guard_tool`, `guardHooks` / `guard_hooks` |
 | TanStack AI | `@arcjet/guard/tanstack-ai/v0` | – | `guardMiddleware` (`onBeforeToolCall`). No `guardTool` |
 | Mastra | `@arcjet/guard/mastra/v1` | – | `guardProcessor`, `guardTool`, `guardHooks` |
+| Microsoft Agent Framework for Go | Go: `github.com/arcjet/arcjet-go/agentframework` | – | `GuardTool`, `GuardTools`, `GuardMiddleware`. `arcjet.GuardAction` for any other Go function |
 | Vercel Eve | `@arcjet/guard/vercel-eve/v0` | – | `guardInbound`, `guardTool`, `guardApproval` (connections) |
 | Claude Agent SDK | `@arcjet/guard/claude-agent-sdk/v0` | `arcjet.guard.claude_agent_sdk` | `guardTool` / `guard_tool`, `guardHooks` / `guard_hooks` (`UserPromptSubmit`, `PreToolUse`) |
 | Claude Managed Agents | `@arcjet/guard/claude-managed-agents/v0` | `arcjet.guard.claude_managed_agents` | `guardEvents` / `guard_events`, `guardCustomTool` / `guard_custom_tool` |
@@ -2335,6 +2338,7 @@ blocking one makes the wrapper synchronous.
 - [TanStack AI agent guard](https://docs.arcjet.com/guards/tanstack-ai)
 - [Vercel Eve agent guard](https://docs.arcjet.com/guards/vercel-eve)
 - [Mastra agent guard](https://docs.arcjet.com/guards/mastra)
+- [Microsoft Agent Framework for Go agent guard](https://docs.arcjet.com/guards/agent-framework-go)
 - [Claude Agent SDK agent guard](https://docs.arcjet.com/guards/claude-agent-sdk)
 - [Claude Managed Agents agent guard](https://docs.arcjet.com/guards/claude-managed-agents)
 - [Nosecone security headers](https://docs.arcjet.com/nosecone/quick-start)
