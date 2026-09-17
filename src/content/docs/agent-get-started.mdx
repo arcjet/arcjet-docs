@@ -41,7 +41,8 @@ Detect which one applies by reading the project manifest:
   `*http.Request`.
 - **An agent framework in either manifest** (`ai`, `eve`, `genkit`,
   `langchain`, `@langchain/langgraph`, `@mastra/core`, `@openai/agents`,
-  `@google/adk`, `@strands-agents/sdk`, `@tanstack/ai`, or `crewai`) means the
+  `@google/adk`, `@strands-agents/sdk`, `@tanstack/ai`, `crewai`, or
+  `github.com/microsoft/agent-framework-go`) means the
   project builds its own agent. Use the guard adapter for that framework,
   instead of or alongside a request SDK.
 
@@ -179,6 +180,7 @@ a peer.
 | LangChain             | `npm i @arcjet/guard langchain @langchain/core` or `pip install "arcjet[langchain]"`             |
 | LangGraph             | `npm i @arcjet/guard @langchain/langgraph @langchain/core`                                       |
 | Mastra                | `npm i @arcjet/guard @mastra/core`                                                               |
+| Microsoft Agent Framework for Go | `go get github.com/arcjet/arcjet-go@latest` and `go get github.com/arcjet/arcjet-go/agentframework@latest` |
 | OpenAI Agents         | `npm i @arcjet/guard @openai/agents` or `pip install "arcjet[openai-agents]"`                    |
 | Strands Agents        | `npm i @arcjet/guard @strands-agents/sdk` or `pip install "arcjet[strands-agents]"`              |
 | TanStack AI           | `npm i @arcjet/guard @tanstack/ai`                                                               |
@@ -187,7 +189,8 @@ a peer.
 
 Where a row lists only an `npm` command, that adapter is JavaScript-only.
 CrewAI is Python-only, and has no `arcjet[crewai]` extra, so install CrewAI
-yourself. LangChain splits its extras: `arcjet[langchain]` covers `guard_tool`
+yourself. Microsoft Agent Framework for Go is Go-only, requires Go 1.26, and
+has no JavaScript or Python adapter. LangChain splits its extras: `arcjet[langchain]` covers `guard_tool`
 and the capture handlers, and `arcjet[langchain-agents]` covers
 `ArcjetMiddleware` and `ToolPolicy`. Claude Managed Agents needs the extra
 steps in [Claude Managed Agents](#claude-managed-agents). For every adapter,
@@ -209,7 +212,7 @@ Create custom integrations and protect your application code.
 | Bun + Hono        | `bun add @arcjet/bun @arcjet/inspect`            |
 | Deno              | `deno add npm:@arcjet/deno npm:@arcjet/inspect`  |
 | Fastify           | `npm i @arcjet/fastify`                          |
-| Go                | `go get github.com/arcjet/arcjet-go@v1.0.0-rc.2` |
+| Go                | `go get github.com/arcjet/arcjet-go@latest` |
 | NestJS            | `npm i @arcjet/nest`                             |
 | Next.js           | `npm i @arcjet/next`                             |
 | Node.js           | `npm i @arcjet/node @arcjet/inspect`             |

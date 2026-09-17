@@ -13,7 +13,7 @@ How Arcjet compares to other AI agent security approaches: [AI agent security pl
 Arcjet protects several entry points:
 
 - **Coding agents** - apply policies and enforce security controls directly within the development environment. Protect prompts from injection, redact sensitive data, and ensure that agent actions comply with organizational policies. Supported coding agents include: Claude Code and GitHub Copilot.
-- **Custom agents** - tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input in custom agents you've built and deployed yourself. Protect HTTP requests from bots and abuse, and enforce security policies consistently across all agent interactions. Supported AI agent frameworks include: Claude Agent SDK, Claude Managed Agents, CrewAI, Genkit, Google ADK, LangChain, LangGraph, Mastra, OpenAI Agents, Strands Agents, TanStack AI, Vercel AI SDK, Vercel Eve.
+- **Custom agents** - tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input in custom agents you've built and deployed yourself. Protect HTTP requests from bots and abuse, and enforce security policies consistently across all agent interactions. Supported AI agent frameworks include: Claude Agent SDK, Claude Managed Agents, CrewAI, Genkit, Google ADK, LangChain, LangGraph, Mastra, Microsoft Agent Framework for Go, OpenAI Agents, Strands Agents, TanStack AI, Vercel AI SDK, Vercel Eve.
 - **Web applications** - protect HTTP routes, API endpoints, and middleware within web applications. Bot protection, email validation, WAF, and other security building blocks applied directly in-code. Supported languages and frameworks include: Astro, Bun, Deno, Fastify, NestJS, Next.js, Node.js, Express, Hono, Nuxt, Python, FastAPI, Flask, React Router, Remix, SvelteKit, Go.
 
 ## Get started
@@ -203,14 +203,15 @@ Full docs: https://docs.arcjet.com
 | Astro          | `@arcjet/astro`        | `npx astro add @arcjet/astro`          |
 | Python FastAPI | `arcjet`               | `pip install arcjet`                   |
 | Python Flask   | `arcjet`               | `pip install arcjet flask`             |
-| Go             | `github.com/arcjet/arcjet-go` | `go get github.com/arcjet/arcjet-go@v1.0.0-rc.2` |
+| Go             | `github.com/arcjet/arcjet-go` | `go get github.com/arcjet/arcjet-go@latest` |
 
 ## Go SDK
 
-The Go SDK is pre-release. The current pre-release is v1.0.0-rc.2, which
-requires Go 1.25 or later and supports
+The Go SDK is v1.0.0 and requires Go 1.25 or later. It supports
 `net/http` request protection plus Guard protection for non-HTTP operations.
-Create clients once at package scope and reuse them.
+Create clients once at package scope and reuse them. The Microsoft Agent
+Framework helpers are `github.com/arcjet/arcjet-go/agentframework` and
+require Go 1.26 or later.
 
 Full reference: https://docs.arcjet.com/reference/go
 
@@ -265,7 +266,7 @@ func must[T any](value T, err error) T {
 
 Call `Protect(r.Context(), r, ...)` once inside each handler. Use
 `WithCharacteristics`, `WithRequested`, `WithDetectPromptInjectionMessage`,
-`WithSensitiveInfoValue`, and `WithCorrelationId` for dynamic inputs.
+`WithSensitiveInfoValue`, and `WithCorrelationID` for dynamic inputs.
 
 On a transport failure, `Protect` returns an `ERROR` conclusion `Decision`
 together with `err`. `IsAllowed()` and `IsErrored()` are both true;
@@ -286,7 +287,7 @@ var promptScan = must(arcjet.GuardPromptInjection(
 
 decision, err := guard.Guard(ctx, arcjet.GuardRequest{
     Label:         "tools.summarize",
-    CorrelationId: "trace_123",
+    CorrelationID: "trace_123",
     Metadata: arcjet.Metadata{
         "user": map[string]any{"id": userID},
     },
@@ -2164,6 +2165,7 @@ with a tab where both a JavaScript and a Python adapter exist.
 | Strands Agents | `@arcjet/guard/strands-agents/v1` | `arcjet.guard.strands_agents` | `guardTool` / `guard_tool`, `guardHooks` / `guard_hooks` |
 | TanStack AI | `@arcjet/guard/tanstack-ai/v0` | – | `guardMiddleware` (`onBeforeToolCall`). No `guardTool` |
 | Mastra | `@arcjet/guard/mastra/v1` | – | `guardProcessor`, `guardTool`, `guardHooks` |
+| Microsoft Agent Framework for Go | Go: `github.com/arcjet/arcjet-go/agentframework` | – | `GuardTool`, `GuardTools`, `GuardMiddleware`. `arcjet.GuardAction` for any other Go function |
 | Vercel Eve | `@arcjet/guard/vercel-eve/v0` | – | `guardInbound`, `guardTool`, `guardApproval` (connections) |
 | Claude Agent SDK | `@arcjet/guard/claude-agent-sdk/v0` | `arcjet.guard.claude_agent_sdk` | `guardTool` / `guard_tool`, `guardHooks` / `guard_hooks` (`UserPromptSubmit`, `PreToolUse`) |
 | Claude Managed Agents | `@arcjet/guard/claude-managed-agents/v0` | `arcjet.guard.claude_managed_agents` | `guardEvents` / `guard_events`, `guardCustomTool` / `guard_custom_tool` |
@@ -2336,6 +2338,7 @@ blocking one makes the wrapper synchronous.
 - [TanStack AI agent guard](https://docs.arcjet.com/guards/tanstack-ai)
 - [Vercel Eve agent guard](https://docs.arcjet.com/guards/vercel-eve)
 - [Mastra agent guard](https://docs.arcjet.com/guards/mastra)
+- [Microsoft Agent Framework for Go agent guard](https://docs.arcjet.com/guards/agent-framework-go)
 - [Claude Agent SDK agent guard](https://docs.arcjet.com/guards/claude-agent-sdk)
 - [Claude Managed Agents agent guard](https://docs.arcjet.com/guards/claude-managed-agents)
 - [Nosecone security headers](https://docs.arcjet.com/nosecone/quick-start)

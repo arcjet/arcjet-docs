@@ -2,6 +2,7 @@
 title: "Get started with Arcjet"
 titleByFramework:
   default: "Get started with Arcjet"
+  agent-framework-go: "Get started with Microsoft Agent Framework (Go)"
   astro: "Get started with Astro"
   bun: "Get started with Bun"
   bun-hono: "Get started with Bun + Hono"
@@ -35,6 +36,7 @@ description: "Getting started with Arcjet. Quick start guide to protect your AI 
 prev: false
 next: false
 frameworks:
+  - agent-framework-go
   - astro
   - bun
   - bun-hono
@@ -89,6 +91,12 @@ import { Aside, LinkButton, CardGrid } from "@astrojs/starlight/components";
 import FAQs from "/src/components/FAQs.astro";
 import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 import SdkHydration from "@/components/SdkHydration.astro";
+
+import AgentFrameworkGoStep1 from "@/snippets/get-started/agent-framework-go/Step1.mdx";
+import AgentFrameworkGoRequirements from "@/snippets/get-started/agent-framework-go/Requirements.mdx";
+import AgentFrameworkGoStep2 from "@/snippets/get-started/agent-framework-go/Step2.mdx";
+import AgentFrameworkGoStep3 from "@/snippets/get-started/agent-framework-go/Step3.mdx";
+import AgentFrameworkGoStep4 from "@/snippets/get-started/agent-framework-go/Step4.mdx";
 
 import AstroStep1 from "@/snippets/shared/astro/Install.mdx";
 import AstroRequirements from "@/snippets/get-started/astro/Requirements.mdx";
@@ -293,6 +301,7 @@ SDK, see <Link.Page href="/coding-agents">Secure coding agents</Link.Page>.
 In your project root, run the following:
 
 <SlotByFramework>
+  <AgentFrameworkGoStep1 slot="agent-framework-go" />
   <AstroStep1 slot="astro" />
   <BunStep1 slot="bun" />
   <BunHonoStep1 slot="bun-hono" />
@@ -327,6 +336,7 @@ In your project root, run the following:
 ### Requirements
 
 <SlotByFramework>
+  <AgentFrameworkGoRequirements slot="agent-framework-go" />
   <AstroRequirements slot="astro" />
   <BunRequirements slot="bun" />
   <BunHonoRequirements slot="bun-hono" />
@@ -364,6 +374,7 @@ In your project root, run the following:
 instructions to add a site and get a key.
 
 <SlotByFramework>
+  <AgentFrameworkGoStep2 slot="agent-framework-go" />
   <AstroStep2 slot="astro" />
   <BunStep2 slot="bun" />
   <BunHonoStep2 slot="bun-hono" />
@@ -401,6 +412,7 @@ This adds Arcjet to your application code, where it can see who is acting and
 what they are asking for.
 
 <SlotByFramework>
+  <AgentFrameworkGoStep3 slot="agent-framework-go" />
   <AstroStep3 slot="astro" />
   <BunStep3 slot="bun" />
   <BunHonoStep3 slot="bun-hono" />
@@ -433,6 +445,7 @@ what they are asking for.
 </SlotByFramework>
 
 <SlotByFramework>
+  <AgentFrameworkGoStep4 slot="agent-framework-go" />
   <AstroStep4 slot="astro" />
   <BunStep4 slot="bun" />
   <BunHonoStep4 slot="bun-hono" />
@@ -481,7 +494,7 @@ The requests also appear in the [Arcjet dashboard](https://console.arcjet.com).
   <Link.Card
     title="Agent guard integrations"
     href="/guards/framework-integrations"
-    description="Wrap tools in Vercel AI SDK, LangChain, CrewAI, LangGraph, Genkit, Google ADK, OpenAI Agents, Strands Agents, TanStack AI, Eve, Mastra, Claude Agent SDK, and Claude Managed Agents."
+    description="Wrap tools in Vercel AI SDK, LangChain, CrewAI, LangGraph, Genkit, Google ADK, OpenAI Agents, Strands Agents, TanStack AI, Eve, Mastra, Claude Agent SDK, Claude Managed Agents, and Microsoft Agent Framework for Go."
   />
   <Link.Card
     title="Customize allowed bots"

@@ -92,6 +92,10 @@ export const main = [
             link: "/guards/mastra",
           },
           {
+            label: "Microsoft Agent Framework (Go)",
+            link: "/guards/agent-framework-go",
+          },
+          {
             label: "OpenAI Agents",
             link: "/guards/openai-agents",
           },

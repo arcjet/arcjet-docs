@@ -1,3 +1,4 @@
+import { AgentFrameworkGo } from "@/components/icons/tech/AgentFrameworkGo";
 import { Astro as AstroIcon } from "@/components/icons/tech/Astro";
 import { Bun } from "@/components/icons/tech/Bun";
 import { ClaudeAgentSdk } from "@/components/icons/tech/ClaudeAgentSdk";
@@ -32,6 +33,7 @@ import type { ComponentType, HTMLProps } from "react";
 type IconComponent = ComponentType<HTMLProps<SVGSVGElement>>;
 
 const sdkIcons: Record<ArcjetRouteSdkKey, IconComponent> = {
+  "agent-framework-go": AgentFrameworkGo,
   astro: AstroIcon,
   bun: Bun,
   "claude-agent-sdk": ClaudeAgentSdk,

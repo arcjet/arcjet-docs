@@ -104,7 +104,7 @@ decision, err := guard.Guard(ctx, arcjet.GuardRequest{
 		"workflow": "support",
 		"invoice":  map[string]any{"id": "inv_123", "amount": 4200},
 	},
-	CorrelationId: runID,
+	CorrelationID: runID,
 })
 ```
 
@@ -115,7 +115,7 @@ decision, err := guard.Guard(ctx, arcjet.GuardRequest{
 | `Inputs`        | Named values created with `GuardPolicyServer*` or `GuardPolicyLocal*` |
 | `Rules`         | Optional SDK rule submissions; an empty list still calls Guard        |
 | `Metadata`      | Nested JSON for analytics and debugging. See [Metadata](#metadata).   |
-| `CorrelationId` | Identifier shared across related calls                                |
+| `CorrelationID` | Identifier shared across related calls                                |
 
 </TabItem>
 </Tabs>
@@ -422,6 +422,7 @@ For the HTTP Newman examples and a fuller walkthrough of the test client, see
 - <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>
 - <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
 - <Link.Page href="/guards/crewai">CrewAI agent guard</Link.Page>
+- <Link.Page href="/guards/agent-framework-go">Microsoft Agent Framework for Go agent guard</Link.Page>
 - <Link.Page href="/reference/python#guard">Python Guard SDK reference</Link.Page>
 - <Link.Page href="/reference/go#guard-non-http-operations">Go Guard SDK reference</Link.Page>
 - <Link.Page href="/testing">Testing request protection</Link.Page>

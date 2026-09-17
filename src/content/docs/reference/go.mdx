@@ -11,8 +11,9 @@ The Arcjet Go SDK protects `net/http` handlers and non-HTTP operations such as
 AI tool calls, MCP handlers, queue workers, and background jobs. It works with
 the standard library and routers that expose `*http.Request`.
 
-> **Caution:** The Go SDK is pre-release and its API may change. The current
-> pre-release is `v1.0.0-rc.2`, which requires Go 1.25 or later.
+The Go SDK is `v1.0.0` and requires Go 1.25 or later. The Microsoft Agent
+Framework helpers live in `github.com/arcjet/arcjet-go/agentframework` and
+require Go 1.26 or later.
 
 ## Client IP address detection
 
@@ -40,12 +41,16 @@ provenance without protecting the request.
 
 ## Install
 
-Use Go tooling so the project records a compatible version in `go.mod`. Name the
-pre-release explicitly, because `@latest` selects the newest stable tag and this
-API is not in one yet:
+Use Go tooling so the project records a compatible version in `go.mod`:
 
 ```bash
-go get github.com/arcjet/arcjet-go@v1.0.0-rc.2
+go get github.com/arcjet/arcjet-go@latest
+```
+
+For Microsoft Agent Framework for Go, also install the adapter module:
+
+```bash
+go get github.com/arcjet/arcjet-go/agentframework@latest
 ```
 
 Set `ARCJET_KEY` in the environment. Retrieve it from the
@@ -168,7 +173,7 @@ Pass dynamic inputs with the following `Protect` options:
 - `WithRequested(...)` for the number of tokens a token bucket consumes.
 - `WithDetectPromptInjectionMessage(...)` for untrusted text.
 - `WithSensitiveInfoValue(...)` for text to scan for sensitive information.
-- `WithCorrelationId(...)` to correlate a request decision with related work.
+- `WithCorrelationID(...)` to correlate a request decision with related work.
 - `WithMetadata(...)` for nested JSON attached to the decision. See
   [Metadata](#metadata).
 - `WithIPSrc(...)` to override the automatically detected client IP address.
@@ -337,7 +342,7 @@ var promptScan = must(arcjet.GuardPromptInjection(
 func getWeather(ctx context.Context, userID, prompt string) error {
 	decision, err := guard.Guard(ctx, arcjet.GuardRequest{
 		Label:         "tools.get-weather",
-		CorrelationId: "trace_123",
+		CorrelationID: "trace_123",
 		Metadata: arcjet.Metadata{
 			"user": map[string]any{"id": userID},
 		},
@@ -398,6 +403,36 @@ Guard separates enforcement decisions from processing problems:
 Choose an explicit fallback policy for sensitive operations. Arcjet fails open
 by default so a service issue does not block all work.
 
+### Guard a function with `GuardAction`
+
+For a sensitive tool call or other Go function, wrap it in
+`arcjet.GuardAction` instead of hand-writing the `HasFailedOpen()` gate. It
+calls Guard even when you submit no rules, denies with
+`*arcjet.GuardDeniedError`, fails closed with
+`*arcjet.GuardUnavailableError` when policy cannot be evaluated, runs the
+function otherwise, and records one capture event whose metadata `outcome`
+is `success`, `degraded`, `denied`, `error`, or `unavailable`.
+
+```go
+out, err := arcjet.GuardAction(ctx, guard, arcjet.GuardActionPolicy{
+	Action: "refund.issued",
+	Actor:  userID,
+	Rules:  []arcjet.GuardRuleInput{refundLimit.Key(userID, 1)},
+}, func(ctx context.Context) (Receipt, error) {
+	return refundPayment(ctx, id)
+})
+```
+
+Distinguish the two errors with `errors.As`.
+`OnGuardError: arcjet.OnGuardErrorAllow` opts a call site back into
+fail-open; a `DENY` still blocks. Use `arcjet.NewGuardDenialResult(decision)`
+and `arcjet.NewGuardUnavailableResult()` when the caller is a model and
+needs a JSON result rather than a Go error.
+
+For Microsoft Agent Framework for Go tools, use
+<Link.Page href="/guards/agent-framework-go">`GuardTool`</Link.Page>
+instead of wrapping each handler by hand.
+
 ### Content moderation
 
 ```go
@@ -430,8 +465,8 @@ affect `Guard` or `Protect` conclusions and never set `HasFailedOpen()`.
 ```go
 guard.Capture(arcjet.CaptureEvent{
 	Action:        "refund.issued",
-	CorrelationId: runID,
-	DecisionId:    decision.ID,
+	CorrelationID: runID,
+	DecisionID:    decision.ID,
 	Metadata: arcjet.Metadata{
 		"invoice":  map[string]any{"id": "inv_123", "amount": 4200},
 		"refunded": true,
@@ -440,7 +475,7 @@ guard.Capture(arcjet.CaptureEvent{
 ```
 
 `Action` is required. An empty action drops the event. Optional fields:
-`CorrelationId`, `DecisionId`, `Metadata`, and `OccurredAt` (zero means now).
+`CorrelationID`, `DecisionID`, `Metadata`, and `OccurredAt` (zero means now).
 Delivery is best-effort: a bounded queue, batched sends, no retries. Call
 `Flush` (or `Close`) on shutdown so the last batch is sent.
 
@@ -496,6 +531,7 @@ so do not log them.
 ## More resources
 
 - <Link.Page href="/guards">Arcjet Guards</Link.Page>
+- <Link.Page href="/guards/agent-framework-go">Microsoft Agent Framework for Go agent guard</Link.Page>
 - <Link.Page href="/guards/capture">Capture events</Link.Page>
 - <Link.Page href="/content-moderation">Content moderation</Link.Page>
 - <Link.Page href="/rate-limiting">Rate limiting</Link.Page>

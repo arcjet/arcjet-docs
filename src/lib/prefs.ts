@@ -47,6 +47,7 @@ export type Prefs = {
  * The user selectable framework options.
  */
 export const frameworks = [
+  { key: "agent-framework-go", label: "Microsoft Agent Framework (Go)" },
   { key: "astro", label: "Astro" },
   { key: "bun", label: "Bun" },
   { key: "bun-hono", label: "Bun + Hono" },

@@ -377,6 +377,9 @@ test.describe("pathnameForLegacyFrameworkKey", () => {
     expect(pathnameForLegacyFrameworkKey("tanstack-ai", "/get-started")).toBe(
       "/sdk/tanstack-ai/get-started/",
     );
+    expect(
+      pathnameForLegacyFrameworkKey("agent-framework-go", "/get-started"),
+    ).toBe("/sdk/agent-framework-go/get-started/");
     expect(pathnameForLegacyFrameworkKey("google-adk", "/get-started")).toBe(
       "/sdk/google-adk/get-started/",
     );

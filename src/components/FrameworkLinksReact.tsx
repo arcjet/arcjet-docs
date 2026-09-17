@@ -1,4 +1,5 @@
 import Button from "@/components/Button";
+import { AgentFrameworkGo as IconAgentFrameworkGo } from "@/components/icons/tech/AgentFrameworkGo";
 import { Astro as IconAstro } from "@/components/icons/tech/Astro";
 import { Bun as IconBun } from "@/components/icons/tech/Bun";
 import { ClaudeAgentSdk as IconClaudeAgentSdk } from "@/components/icons/tech/ClaudeAgentSdk";
@@ -66,6 +67,8 @@ const guardSdkKeys: ReadonlySet<string> = new Set(GUARD_SDK_KEYS);
 
 function iconFor(key: FrameworkKey): ReactNode {
   switch (key) {
+    case "agent-framework-go":
+      return <IconAgentFrameworkGo />;
     case "astro":
       return <IconAstro />;
     case "bun":

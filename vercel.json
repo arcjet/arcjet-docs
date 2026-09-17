@@ -124,21 +124,6 @@
       "permanent": true
     },
     {
-      "source": "/ai-guardrails",
-      "destination": "/guards",
-      "permanent": true
-    },
-    {
-      "source": "/ai-guardrails/:path*",
-      "destination": "/guards",
-      "permanent": true
-    },
-    {
-      "source": "/guard/concepts",
-      "destination": "/guards",
-      "permanent": true
-    },
-    {
       "source": "/get-started",
       "has": [
         {
@@ -328,6 +313,18 @@
         }
       ],
       "destination": "/sdk/sveltekit/get-started/",
+      "permanent": true
+    },
+    {
+      "source": "/get-started",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "agent-framework-go"
+        }
+      ],
+      "destination": "/sdk/agent-framework-go/get-started/",
       "permanent": true
     },
     {
@@ -3564,6 +3561,18 @@
         {
           "type": "query",
           "key": "f",
+          "value": "agent-framework-go"
+        }
+      ],
+      "destination": "/sdk/agent-framework-go/guards/quick-start/",
+      "permanent": true
+    },
+    {
+      "source": "/guards/quick-start",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
           "value": "claude-agent-sdk"
         }
       ],
@@ -3939,6 +3948,21 @@
         }
       ],
       "destination": "/sdk/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/ai-guardrails",
+      "destination": "/guards",
+      "permanent": true
+    },
+    {
+      "source": "/ai-guardrails/:path*",
+      "destination": "/guards",
+      "permanent": true
+    },
+    {
+      "source": "/guard/concepts",
+      "destination": "/guards",
       "permanent": true
     },
     {

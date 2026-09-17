@@ -27,6 +27,7 @@ export type ArcjetSdkKey =
  * path-based switcher can select a guard the same way it selects Next.js.
  */
 export type ArcjetGuardSdkKey =
+  | "agent-framework-go"
   | "claude-agent-sdk"
   | "claude-managed-agents"
   | "crewai"
@@ -45,6 +46,7 @@ export type ArcjetGuardSdkKey =
 export type ArcjetRouteSdkKey = ArcjetSdkKey | ArcjetGuardSdkKey;
 
 export const GUARD_SDK_KEYS = [
+  "agent-framework-go",
   "claude-agent-sdk",
   "claude-managed-agents",
   "crewai",
@@ -61,6 +63,7 @@ export const GUARD_SDK_KEYS = [
 ] as const satisfies readonly ArcjetGuardSdkKey[];
 
 const GUARD_SDK_LABELS = {
+  "agent-framework-go": "Microsoft Agent Framework (Go)",
   "claude-agent-sdk": "Claude Agent SDK",
   "claude-managed-agents": "Claude Managed Agents",
   crewai: "CrewAI",
