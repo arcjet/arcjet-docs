@@ -1,0 +1,405 @@
+---
+title: "Block personal coding agent accounts"
+description: "Keep personal Claude Code, Codex, Copilot, and Cursor accounts off managed networks so only the approved tenant reaches Arcjet hooks and Compliance."
+---
+
+import { Aside, Steps, Tabs, TabItem } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+Arcjet hooks and Claude Compliance see sessions that authenticate to your
+approved tenant. They don't see a personal Claude, ChatGPT, Copilot, or Cursor
+account on the same laptop. Those products share domains with the enterprise
+tier, so a hostname allowlist doesn't separate them.
+
+Each vendor offers an account or network restriction that refuses the personal
+path. Your secure web gateway (SWG) or MDM injects that control. Arcjet does
+not inject the headers, does not deploy the MDM policy, and does not receive
+personal sessions.
+
+Use this layer with
+<Link.Page href="/coding-agents">coding agent hooks</Link.Page>
+and
+<Link.Page href="/observe">Compliance or OpenTelemetry ingest</Link.Page>
+so the approved path is visible and governed.
+
+## Why personal accounts are invisible
+
+A developer can open the same app with a personal login on a corporate
+laptop. That traffic looks like any other request to the vendor. Your
+organization's Compliance feed and Arcjet hooks never see it.
+
+Hooks and Compliance then govern only the approved tenant, while personal
+use on the same network leaves no transcript and no decision.
+
+## What to restrict
+
+Pick the control that matches the agent. Overwrite a header when the vendor
+uses one. Don't append a second copy.
+
+| Agent | Control | Match | Identifier |
+| ----- | ------- | ----- | ---------- |
+| Claude Code | Header overwrite | claude.ai, api.anthropic.com, claude.com, anthropic.com | `anthropic-allowed-org-ids` |
+| Codex | Header overwrite, plus local Codex requirements | chatgpt.com | `ChatGPT-Allowed-Workspace-Id` |
+| Copilot | Plan-based DNS allow and block | `*.business.githubcopilot.com`, `*.enterprise.githubcopilot.com`, `*.individual.githubcopilot.com` | Copilot plan endpoints |
+| Copilot (EMU) | Header overwrite | github.com, api.github.com, `*.githubcopilot.com` | `sec-GitHub-allowed-enterprise` |
+| Cursor | MDM policy on the device | Cursor editor | `AllowedTeamId` |
+
+<Tabs>
+<TabItem label="Claude Code">
+
+Anthropic Tenant Restrictions refuse any organization that isn't on your
+allowlist, including personal accounts. The restriction covers web sessions,
+the desktop app, API keys, and OAuth tokens.
+
+A TLS-inspecting proxy overwrites this header:
+
+```http
+anthropic-allowed-org-ids: ORG_UUID
+```
+
+Replace `ORG_UUID` with your Claude organization UUID. For more than one
+organization, join UUIDs with commas and no spaces.
+
+You need a Claude Enterprise plan or a Claude Console organization, TLS
+decryption on for those domains, and traffic going through the SWG.
+
+Find the UUID in Claude Enterprise under **Settings** > **Account**
+(**Organization ID**), or in the Claude Console under **Settings** >
+**Organization**.
+
+If the proxy appends a second `anthropic-allowed-org-ids` value, Anthropic
+returns `400`. For the `;n=K` continuation format, see Anthropic's
+[Tenant Restrictions](https://support.claude.com/en/articles/13198485-enforce-network-level-access-control-with-tenant-restrictions).
+
+### Inject the header
+
+<Tabs>
+<TabItem label="Cloudflare Gateway">
+
+Cloudflare documents a Claude example in
+[Modify HTTP request headers in Gateway](https://developers.cloudflare.com/cloudflare-one/traffic-policies/http-policies/tenant-control/).
+
+<Steps>
+
+1. In [Cloudflare One](https://one.dash.cloudflare.com), go to **Traffic
+   policies** > **Firewall policies** > **HTTP**.
+
+2. Select **Add a policy**.
+
+3. Match **Application** **Claude**, or the domains claude.ai,
+   api.anthropic.com, claude.com, and anthropic.com.
+
+4. In **Action**, select **Allow**.
+
+5. Under **Modify request headers**, select **Overwrite**. Don't use **Add**.
+
+6. Set `anthropic-allowed-org-ids` to your organization UUID and save.
+   TLS decryption must be on.
+
+</Steps>
+
+</TabItem>
+<TabItem label="Zscaler ZIA">
+
+Use an HTTP header insertion profile on an **Allow** URL Filtering rule for
+a custom URL category. Zscaler's built-in tenant profiles don't include
+Claude. HTTP Header Control may need Zscaler Support to enable it. See
+[Adding an HTTP Header Insertion Profile](https://help.zscaler.com/zia/adding-http-header-insertion-profile).
+
+<Steps>
+
+1. Create a custom URL category for claude.ai, api.anthropic.com, claude.com,
+   and anthropic.com.
+
+2. Go to **Policies** > **Access Control** > **Internet & SaaS** >
+   **HTTP Header Control** > **HTTP Header Insertion Profile**.
+
+3. Add a profile with `anthropic-allowed-org-ids` set to your organization
+   UUID.
+
+4. Attach that profile to a URL Filtering rule that **Allow**s the category.
+
+5. Confirm SSL inspection isn't bypassed, then activate the change.
+
+</Steps>
+
+</TabItem>
+<TabItem label="Netskope">
+
+Netskope inserts the header. Anthropic refuses the personal account. See
+[Anthropic Claude header insertion](https://community.netskope.com/generative-ai-anthropic-claude-176/anthropic-claude-access-to-corporate-instance-only-via-header-insertion-8757).
+
+<Steps>
+
+1. Confirm you have a Next-Gen SWG license.
+
+2. Go to **Settings** > **Manage** > **Header Insertion**.
+
+3. Insert `anthropic-allowed-org-ids` with your organization UUID on Claude
+   traffic.
+
+4. Keep SSL decryption on.
+
+</Steps>
+
+Netskope doesn't apply a block action. Skope IT may show no block event.
+The refusal is Anthropic's `403`.
+
+</TabItem>
+<TabItem label="Prisma Access">
+
+See Palo Alto Networks
+[Create Custom HTTP Header Insertion Entries](https://docs.paloaltonetworks.com/ngfw/administration/app-id/http-header-insertion/http-header-insertion-create-custom).
+
+<Steps>
+
+1. Create a custom URL category for the four Claude domains.
+
+2. Decrypt that category with SSL Forward Proxy.
+
+3. In a URL Filtering profile, add a **Custom** HTTP Header Insertion entry
+   for those domains.
+
+4. Set `anthropic-allowed-org-ids` to your organization UUID.
+
+5. Attach the profile to an allow security policy and commit.
+
+</Steps>
+
+</TabItem>
+</Tabs>
+
+Cato uses a Tenant Restriction policy. FortiGate and FortiSASE use a web
+proxy profile on a proxy-mode policy with deep inspection. Any HTTPS proxy
+that can overwrite headers works. For vendor steps, see
+[Cato](https://support.catonetworks.com/hc/en-us/articles/24373653275165-Managing-Tenant-Restrictions-for-SaaS-Apps-Tenant-Restrictions-Policy)
+and
+[Fortinet](https://community.fortinet.com/fortigate-3/technical-tip-restrict-claude-ai-access-to-organization-accounts-using-a-web-proxy-profile-229086).
+
+### Verify
+
+From a device on the restricted network, send Anthropic's Messages API test
+with an organization API key, then with a personal key:
+
+```sh
+curl https://api.anthropic.com/v1/messages \
+  -H "x-api-key: $API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -H "content-type: application/json" \
+  -d '{
+    "model": "claude-sonnet-4-6",
+    "max_tokens": 1024,
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
+```
+
+Replace `API_KEY` first with an allowlisted organization key (the request
+succeeds), then with a personal key. Expect `403` and
+`tenant_restriction_violation`. A personal sign-in to claude.ai is
+refused the same way.
+
+Then install
+<Link.Page href="/coding-agents/claude-code">Claude Code hooks</Link.Page>
+on the approved client.
+
+</TabItem>
+<TabItem label="Codex">
+
+Codex signs in with a ChatGPT workspace or an API key. Personal ChatGPT
+and an unmanaged API organization both bypass your approved workspace.
+
+You need ChatGPT Enterprise or ChatGPT Team for a workspace UUID. Find it
+in ChatGPT under your profile > **Workspace settings** > **General**, or at
+[chatgpt.com/admin](https://chatgpt.com/admin).
+
+### Restrict ChatGPT on the network
+
+Overwrite this header on `https://chatgpt.com/*`:
+
+```http
+ChatGPT-Allowed-Workspace-Id: WORKSPACE_UUID
+```
+
+Replace `WORKSPACE_UUID` with your workspace UUID. For more than one
+workspace, join UUIDs with commas and no spaces. ChatGPT filters any
+workspace that isn't listed, including personal workspaces. A user with no
+remaining workspace receives `403`.
+
+Use the same overwrite pattern as Claude: Cloudflare Gateway **Overwrite**,
+or your SWG's header-insertion rule. Cloudflare documents the ChatGPT
+header in
+[Modify HTTP request headers in Gateway](https://developers.cloudflare.com/cloudflare-one/traffic-policies/http-policies/tenant-control/).
+OpenAI's network control is in
+[Corporate Network Controls in ChatGPT Enterprise](https://help.openai.com/en/articles/20001323-corporate-network-controls-in-chatgpt-enterprise).
+
+TLS decryption must be on for chatgpt.com. The header doesn't apply to
+`api.openai.com`, so an API key still reaches the Platform API.
+
+### Pin Codex on the device
+
+Local Codex requirements apply before credentials load. Cloud-managed
+requirements ignore these keys, so put them in
+`/etc/codex/requirements.toml` (Windows:
+`%ProgramData%\OpenAI\Codex\requirements.toml`) or macOS MDM
+`com.openai.codex:requirements_toml_base64`:
+
+```toml
+allowed_login_methods = ["chatgpt"]
+allowed_chatgpt_workspaces = ["WORKSPACE_UUID"]
+```
+
+Replace `WORKSPACE_UUID` with the same workspace UUID. Codex then refuses
+ChatGPT login outside that workspace. If you also permit `api` in
+`allowed_login_methods`, an API key remains a way around the workspace
+pin. Leave `api` out unless a CI host needs it.
+
+For more information, see OpenAI
+[Managed configuration](https://developers.openai.com/codex/enterprise/managed-configuration)
+and
+[Authentication](https://developers.openai.com/codex/auth).
+
+### Verify
+
+On the restricted network, sign in to chatgpt.com with the approved
+workspace, then with a personal account. The personal workspace is hidden
+or returns `403`.
+
+On a managed device, run `codex login` with a personal ChatGPT account.
+Codex refuses to start, or logs the user out. Repeat with the approved
+workspace; login succeeds.
+
+</TabItem>
+<TabItem label="Copilot">
+
+GitHub routes Copilot traffic to a hostname that matches the user's plan.
+A firewall can allow the Business or Enterprise hostname and block the
+individual one. That stops Copilot Pro, Pro+, Max, and Free on the managed
+network.
+
+Allow one or both of the following, and keep the rest of GitHub's Copilot
+allowlist open:
+
+- Copilot Business: `*.business.githubcopilot.com`
+- Copilot Enterprise: `*.enterprise.githubcopilot.com`
+
+Block `*.individual.githubcopilot.com`.
+
+Clients need a recent Copilot build (VS Code Copilot Chat 0.17 or later,
+JetBrains 1.5.6.5692 or later, Visual Studio 2022 17.11 or later). This
+routing covers inline suggestions, Copilot Chat, GitHub Mobile, and Copilot
+CLI.
+
+For more information, see
+[Managing GitHub Copilot access to your enterprise's network](https://docs.github.com/en/copilot/how-tos/administer-copilot/manage-for-enterprise/manage-access/manage-network-access).
+
+### Optional: block personal GitHub.com accounts
+
+If you use Enterprise Managed Users on GitHub.com, enable **Enterprise
+access restrictions** and overwrite this header on github.com,
+api.github.com, and `*.githubcopilot.com`:
+
+```http
+sec-GitHub-allowed-enterprise: ENTERPRISE_ID
+```
+
+Replace `ENTERPRISE_ID` with the ID shown under enterprise **Settings** >
+**Authentication security**. Overwrite a single header. A duplicate name or
+an unknown ID returns `400`. A personal account or token receives `403`.
+
+This header needs an EMU enterprise. It doesn't replace plan-based Copilot
+routing. SSH, Codespaces (`github.dev`), and GitHub Pages aren't covered.
+
+For more information, see
+[Restricting access to GitHub.com using a corporate proxy](https://docs.github.com/enterprise-cloud@latest/admin/configuring-settings/hardening-security-for-your-enterprise/restricting-access-to-githubcom-using-a-corporate-proxy).
+
+### Verify
+
+From the restricted network, sign in with a Copilot Business or Enterprise
+seat and confirm Chat or CLI still works. Sign in with Copilot Free or Pro
+and confirm the individual hostname is blocked.
+
+Then install
+<Link.Page href="/coding-agents/copilot">Copilot hooks</Link.Page>
+on the approved client.
+
+</TabItem>
+<TabItem label="Cursor">
+
+Cursor has no tenant-restriction HTTP header. Personal accounts are
+refused on the device: MDM sets `AllowedTeamId`, and Cursor logs out any
+other team ID. Cursor also asks you to exclude its domains from SSL
+inspection, so don't invent a header on that traffic.
+
+You need a Cursor Enterprise team and an MDM channel (Jamf, Intune, Group
+Policy, or Linux policy JSON). Find the team ID by opening
+[cursor.com/dashboard](https://cursor.com/dashboard) and selecting the team
+name.
+
+Set `AllowedTeamId` to that ID. For more than one team, join IDs with
+commas and no spaces, such as `1,3,7`. The MDM policy overrides
+`cursorAuth.allowedTeamId` on the device.
+
+Example macOS policy key (production bundle ID
+`com.todesktop.230313mzl4w4u92`):
+
+```xml
+<key>AllowedTeamId</key>
+<string>TEAM_ID</string>
+```
+
+Linux policy file `~/.cursor/policy.json`:
+
+```json
+{
+  "AllowedTeamId": "TEAM_ID"
+}
+```
+
+Replace `TEAM_ID` with your team ID. A personal login is logged out and
+can't retry until an allowed team is used.
+
+For platform files and the full profile, see Cursor
+[Identity and access management](https://cursor.com/docs/enterprise/identity-and-access-management)
+and
+[Deployment patterns](https://cursor.com/docs/enterprise/deployment-patterns).
+
+`AllowedTeamId` governs editor sign-in. A Cursor CLI session that uses
+`CURSOR_API_KEY` is a separate credential path.
+
+### Verify
+
+On a managed device, sign in with the approved team. Then sign in with a
+personal Cursor account and confirm Cursor logs the session out.
+
+</TabItem>
+</Tabs>
+
+## Limits
+
+- These controls apply on the managed network, endpoint agent, or MDM
+  enrollment. A personal device that leaves that path (BYOD off-network) is
+  out of scope.
+- A refused personal session is not a transcript. The vendor stops the
+  request. Nothing is sent to Arcjet.
+- Netskope may show no block event for Claude. It inserts a header;
+  Anthropic returns the `403`.
+- Codex API keys and Cursor CLI API keys can bypass a ChatGPT workspace
+  header or Cursor team login. Pin login methods on the device, or treat
+  those keys as a separate allowlist.
+- This complements
+  <Link.Page href="/coding-agents">Arcjet coding agent hooks</Link.Page>
+  and
+  <Link.Page href="/observe">activity ingest</Link.Page>.
+  Hooks and Compliance govern the approved tenant. These restrictions keep
+  personal accounts off the managed path.
+
+## Related
+
+- <Link.Page href="/coding-agents">Secure coding agents</Link.Page> – the
+  hook endpoint, the events, and where enforcement stops
+- <Link.Page href="/coding-agents/claude-code">Secure Claude Code</Link.Page> –
+  managed settings and MDM hooks for the approved Claude client
+- <Link.Page href="/coding-agents/copilot">Secure GitHub Copilot</Link.Page> –
+  hooks for the approved Copilot client
+- <Link.Page href="/observe">Observe agent activity</Link.Page> – OpenTelemetry
+  and the Claude Compliance API

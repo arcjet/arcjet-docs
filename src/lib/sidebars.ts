@@ -45,6 +45,10 @@ export const main = [
         label: "Coding agent policies",
         link: "/coding-agents/policies",
       },
+      {
+        label: "Block personal accounts",
+        link: "/coding-agents/block-personal-accounts",
+      },
     ],
   },
   {

@@ -2398,6 +2398,7 @@ blocking one makes the wrapper synchronous.
 - [Secure OpenAI Codex](https://docs.arcjet.com/coding-agents/codex)
 - [Secure Cursor](https://docs.arcjet.com/coding-agents/cursor)
 - [Coding agent policies](https://docs.arcjet.com/coding-agents/policies)
+- [Block personal coding agent accounts](https://docs.arcjet.com/coding-agents/block-personal-accounts)
 - [Observe agent activity](https://docs.arcjet.com/observe)
 - [Agent guard testing and reference](https://docs.arcjet.com/guards/reference)
 - [Capture events](https://docs.arcjet.com/guards/capture)
