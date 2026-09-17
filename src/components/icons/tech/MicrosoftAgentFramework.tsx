@@ -1,13 +1,22 @@
 import type { ForwardedRef, HTMLProps } from "react";
 import { forwardRef } from "react";
 
-/**
- * Official Microsoft Agent Framework fill mark.
- * Path data from microsoft/agent-framework
- * `docs/assets/SVG/Microsoft Foundry Agent Framework - Fill (Black).svg`.
- */
 export interface Props extends HTMLProps<SVGSVGElement> {}
 
+/**
+ * Official Microsoft Agent Framework fill mark — the interlocking two-shape
+ * logo, not the four-square Microsoft, Azure, or .NET marks.
+ *
+ * The two path `d` values are a byte-for-byte copy of
+ * `docs/assets/SVG/Microsoft Foundry Agent Framework - Fill (Black).svg`
+ * in `microsoft/agent-framework`, matching
+ * `design-system/react/icon/tech/MicrosoftAgentFramework.tsx` on
+ * `david/cursor/microsoft-agent-framework-home-a434`. The official file's
+ * white background `<rect>` is omitted so `currentColor` works like the
+ * other tech icons.
+ *
+ * @see {@link https://github.com/microsoft/agent-framework/blob/main/docs/assets/SVG/Microsoft%20Foundry%20Agent%20Framework%20-%20Fill%20(Black).svg | Official mark}
+ */
 export const MicrosoftAgentFramework = forwardRef(
   ({ className, ...props }: Props, ref: ForwardedRef<SVGSVGElement>) => {
     let cls = "aj-Icon aj-Icon-microsoft-agent-framework";
