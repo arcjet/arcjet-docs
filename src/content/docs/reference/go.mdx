@@ -75,6 +75,8 @@ For more information, see
 | --- | --- |
 | `arcjet.NewClient` and `Protect` | HTTP handlers with a `*http.Request` |
 | `arcjet.NewGuardClient` and `Guard` | Tool calls, MCP handlers, queues, background jobs, and other operations without an HTTP request |
+| `arcjet.GuardAction` | The same operations, when you want the helper to run the function only if policy allows it |
+| `github.com/arcjet/arcjet-go/agentframework` | Microsoft Agent Framework tools and agent runs |
 
 Create either client once at package scope and reuse it. Do not create a new
 client for every request or operation.
@@ -382,6 +384,75 @@ and custom local rules.
 Use `Capture` to record what the application did after a Guard call –
 visibility data, never a security decision. See [Capture](#capture).
 
+### Guard an action
+
+`Guard` returns a decision for you to act on. `GuardAction` runs a function only
+if the policy allows it, so the decision and the effect cannot drift apart. It
+is the fail-closed helper for consequential effects: tool calls, jobs, and
+workers.
+
+```go
+receipt, err := arcjet.GuardAction(ctx, guard, arcjet.GuardActionPolicy{
+	Action: "refund.issued",
+	Actor:  userID,
+	Rules:  []arcjet.GuardRuleInput{refundLimit.Key(userID, 1)},
+	Metadata: arcjet.SecurityMetadata{
+		User:          userID,
+		Reversibility: "irreversible",
+	}.Metadata(),
+}, func(ctx context.Context) (Receipt, error) {
+	return issueRefund(ctx, orderNumber)
+})
+
+var denied *arcjet.GuardDeniedError
+var unavailable *arcjet.GuardUnavailableError
+switch {
+case errors.As(err, &denied):
+	return fmt.Errorf("refund refused: %s", denied.Decision.Reason)
+case errors.As(err, &unavailable):
+	return fmt.Errorf("refund not attempted: %w", unavailable)
+case err != nil:
+	return err
+}
+```
+
+`Action` is required and is sent as the Guard label. Every call reaches Guard,
+including one with no rules, because the server selects a remote policy by that
+label. Set `Resolve` to compute `Actor`, `Inputs`, and `Rules` at call time; it
+replaces the static fields.
+
+A `DENY` decision returns `*GuardDeniedError` and does not run the function,
+whatever `OnGuardError` is set to. Policy that could not be evaluated, because
+Guard returned an error, the decision failed open, or `Resolve` failed, returns
+`*GuardUnavailableError` under the default `OnGuardErrorDeny`, and runs the
+function under `OnGuardErrorAllow`.
+
+Each call records one capture event named by `Action` whose metadata `outcome`
+is `success`, `degraded`, `denied`, `error`, or `unavailable`. `GuardAction`
+bounds its own Guard call at two seconds when the caller's context carries no
+deadline.
+
+For Microsoft Agent Framework tools, the
+<Link.Page href="/guards/microsoft-agent-framework">agent framework helpers</Link.Page>
+place the same check around a tool and hand the model a denial it can read
+instead of returning an error.
+
+### Correlate decisions
+
+A correlation ID groups the decisions of one run into a single Sequence in the
+Arcjet Console. `GuardAction` and the agent framework helpers read it from the
+context:
+
+```go
+ctx = arcjet.ContextWithCorrelationID(ctx, conversationID)
+id, ok := arcjet.CorrelationIDFromContext(ctx)
+```
+
+`Guard` and `Capture` never read the context; pass them `CorrelationID`
+explicitly. An empty ID is ignored rather than stored, so a call that passes
+through a missing value does not shadow an ID an outer layer already set.
+Nothing here generates an ID.
+
 ### Errors and warnings
 
 Guard separates enforcement decisions from processing problems:
@@ -493,6 +564,7 @@ so do not log them.
 ## More resources
 
 - <Link.Page href="/guards">Arcjet Guards</Link.Page>
+- <Link.Page href="/guards/microsoft-agent-framework">Microsoft Agent Framework agent guard</Link.Page>
 - <Link.Page href="/guards/capture">Capture events</Link.Page>
 - <Link.Page href="/content-moderation">Content moderation</Link.Page>
 - <Link.Page href="/rate-limiting">Rate limiting</Link.Page>

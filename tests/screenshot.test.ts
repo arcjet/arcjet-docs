@@ -53,6 +53,7 @@ const PATHS_FROM_SITEMAP = [
   "/guards/langchain/",
   "/guards/langgraph/",
   "/guards/mastra/",
+  "/guards/microsoft-agent-framework/",
   "/guards/openai-agents/",
   "/guards/quick-start/",
   "/guards/strands-agents/",

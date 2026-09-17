@@ -204,6 +204,7 @@ Full docs: https://docs.arcjet.com
 | Python FastAPI | `arcjet`               | `pip install arcjet`                   |
 | Python Flask   | `arcjet`               | `pip install arcjet flask`             |
 | Go             | `github.com/arcjet/arcjet-go` | `go get github.com/arcjet/arcjet-go@latest` |
+| Go agent framework | `github.com/arcjet/arcjet-go/agentframework` | `go get github.com/arcjet/arcjet-go/agentframework@latest` |
 
 ## Go SDK
 
@@ -314,6 +315,75 @@ Every Guard rule constructor requires `Mode` (`ModeLive` or `ModeDryRun`). An
 empty `Mode` returns `ErrInvalidMode`. HTTP `Protect` rules default an empty
 `Mode` to `ModeDryRun`. JavaScript and Python Guard rules default to `LIVE`;
 Go returns a constructor error instead of defaulting to `LIVE`.
+
+### Go guarded actions
+
+`Guard` returns a decision to act on. `GuardAction` runs a function only if
+the policy allows it, and reports the outcome to the caller as an error:
+
+```go
+receipt, err := arcjet.GuardAction(ctx, guard, arcjet.GuardActionPolicy{
+    Action: "refund.issued",
+    Actor:  userID,
+    Rules:  []arcjet.GuardRuleInput{refundLimit.Key(userID, 1)},
+}, func(ctx context.Context) (Receipt, error) {
+    return issueRefund(ctx, orderNumber)
+})
+
+var denied *arcjet.GuardDeniedError
+var unavailable *arcjet.GuardUnavailableError
+if errors.As(err, &denied) {
+    return fmt.Errorf("refund refused: %s", denied.Decision.Reason)
+}
+if errors.As(err, &unavailable) {
+    return fmt.Errorf("refund not attempted: %w", unavailable)
+}
+```
+
+A `DENY` returns `*GuardDeniedError` and does not run the function, whatever
+`OnGuardError` is set to. Policy that could not be evaluated returns
+`*GuardUnavailableError` under the default `OnGuardErrorDeny`, and runs the
+function under `OnGuardErrorAllow`. Each call records one capture event whose
+metadata `outcome` is `success`, `degraded`, `denied`, `error`, or
+`unavailable`. `arcjet.ContextWithCorrelationID(ctx, id)` puts a correlation
+ID on the context, which `GuardAction` reads; `Guard` and `Capture` take
+`CorrelationID` explicitly.
+
+### Go agent framework helpers
+
+`github.com/arcjet/arcjet-go/agentframework` guards Microsoft Agent Framework
+for Go. It is a nested module requiring Go 1.26, and stays at `v0.x` while
+the framework is a public preview.
+
+```go
+guarded, err := agentframework.GuardTool(guard, issueRefund, agentframework.ToolPolicy{
+    Action: "refund.issued",
+    Actor: func(context.Context, json.RawMessage) (string, error) {
+        return userID, nil
+    },
+    Rules: agentframework.Args(func(_ context.Context, in refundArgs) ([]arcjet.GuardRuleInput, error) {
+        return []arcjet.GuardRuleInput{refundLimit.Key(userID, 1)}, nil
+    }),
+})
+
+middleware, err := agentframework.GuardMiddleware(guard, agentframework.MiddlewareConfig{
+    Tools: policyFor, // func(tool.Tool) (agentframework.ToolPolicy, bool)
+    Inbound: &agentframework.InboundPolicy{
+        Action: "message.received",
+        Rules: func(_ context.Context, text string) ([]arcjet.GuardRuleInput, error) {
+            return []arcjet.GuardRuleInput{promptScan.Text(text)}, nil
+        },
+    },
+})
+```
+
+`GuardTool` wraps one `tool.FuncTool`, `MustGuardTool` panics instead of
+returning an error, and `GuardTools` applies a selector to a list such as the
+one `mcptool.ListTools` returns. A denial is returned as a successful tool
+result carrying `arcjet.GuardDenialResult`, not as a Go error, because the
+framework replaces tool error text with `Error: Function failed.`. Apply
+`GuardTool` outermost when a tool also uses `tool.ApprovalRequiredFunc`, which
+hides the marker that stops a tool being guarded twice.
 
 ## Common setup for all frameworks
 
@@ -2149,27 +2219,29 @@ effect and returns an envelope the model can read. Framework wrappers take
 `action`; direct `guard()` calls take `label` for the same slug.
 
 Every adapter page below documents one integration and selects the language
-with a tab where both a JavaScript and a Python adapter exist.
+with a tab where more than one language has an adapter for it.
 
-| Framework | JavaScript import | Python import | Deny point |
-| --- | --- | --- | --- |
-| Vercel AI SDK | `@arcjet/guard/vercel-ai/v7` | – | `guardTool`, `guardAction` |
-| LangChain | `@arcjet/guard/langchain/v1` | `arcjet.guard.langchain` | `guardTool` / `guard_tool`, `guardMiddleware` / `ArcjetMiddleware` |
-| LangGraph | `@arcjet/guard/langgraph/v1` | – | `guardTool`, `guardToolNode` |
-| CrewAI | – | `arcjet.guard.crewai` | `register_arcjet_hooks` on `PRE_TOOL_CALL`, `guard_tool` |
-| Genkit | `@arcjet/guard/genkit/v1` | – | `guardTool`, `guardMiddleware` |
-| Google ADK | `@arcjet/guard/google-adk/v2` | – | `guardPlugin` (`beforeToolCallback`). No `guardTool` |
-| OpenAI Agents | `@arcjet/guard/openai-agents/v0` | `arcjet.guard.openai_agents` | `guardTool` on `invoke` / `guard_tool` on `tool_input_guardrails` |
-| Strands Agents | `@arcjet/guard/strands-agents/v1` | `arcjet.guard.strands_agents` | `guardTool` / `guard_tool`, `guardHooks` / `guard_hooks` |
-| TanStack AI | `@arcjet/guard/tanstack-ai/v0` | – | `guardMiddleware` (`onBeforeToolCall`). No `guardTool` |
-| Mastra | `@arcjet/guard/mastra/v1` | – | `guardProcessor`, `guardTool`, `guardHooks` |
-| Vercel Eve | `@arcjet/guard/vercel-eve/v0` | – | `guardInbound`, `guardTool`, `guardApproval` (connections) |
-| Claude Agent SDK | `@arcjet/guard/claude-agent-sdk/v0` | `arcjet.guard.claude_agent_sdk` | `guardTool` / `guard_tool`, `guardHooks` / `guard_hooks` (`UserPromptSubmit`, `PreToolUse`) |
-| Claude Managed Agents | `@arcjet/guard/claude-managed-agents/v0` | `arcjet.guard.claude_managed_agents` | `guardEvents` / `guard_events`, `guardCustomTool` / `guard_custom_tool` |
+| Framework | JavaScript import | Python import | Go import | Deny point |
+| --- | --- | --- | --- | --- |
+| Vercel AI SDK | `@arcjet/guard/vercel-ai/v7` | – | – | `guardTool`, `guardAction` |
+| LangChain | `@arcjet/guard/langchain/v1` | `arcjet.guard.langchain` | – | `guardTool` / `guard_tool`, `guardMiddleware` / `ArcjetMiddleware` |
+| LangGraph | `@arcjet/guard/langgraph/v1` | – | – | `guardTool`, `guardToolNode` |
+| CrewAI | – | `arcjet.guard.crewai` | – | `register_arcjet_hooks` on `PRE_TOOL_CALL`, `guard_tool` |
+| Genkit | `@arcjet/guard/genkit/v1` | – | – | `guardTool`, `guardMiddleware` |
+| Google ADK | `@arcjet/guard/google-adk/v2` | – | – | `guardPlugin` (`beforeToolCallback`). No `guardTool` |
+| OpenAI Agents | `@arcjet/guard/openai-agents/v0` | `arcjet.guard.openai_agents` | – | `guardTool` on `invoke` / `guard_tool` on `tool_input_guardrails` |
+| Strands Agents | `@arcjet/guard/strands-agents/v1` | `arcjet.guard.strands_agents` | – | `guardTool` / `guard_tool`, `guardHooks` / `guard_hooks` |
+| TanStack AI | `@arcjet/guard/tanstack-ai/v0` | – | – | `guardMiddleware` (`onBeforeToolCall`). No `guardTool` |
+| Mastra | `@arcjet/guard/mastra/v1` | – | – | `guardProcessor`, `guardTool`, `guardHooks` |
+| Microsoft Agent Framework | – | – | `github.com/arcjet/arcjet-go/agentframework` | `GuardTool`, `GuardTools`, `GuardMiddleware` (tools and inbound text) |
+| Vercel Eve | `@arcjet/guard/vercel-eve/v0` | – | – | `guardInbound`, `guardTool`, `guardApproval` (connections) |
+| Claude Agent SDK | `@arcjet/guard/claude-agent-sdk/v0` | `arcjet.guard.claude_agent_sdk` | – | `guardTool` / `guard_tool`, `guardHooks` / `guard_hooks` (`UserPromptSubmit`, `PreToolUse`) |
+| Claude Managed Agents | `@arcjet/guard/claude-managed-agents/v0` | `arcjet.guard.claude_managed_agents` | – | `guardEvents` / `guard_events`, `guardCustomTool` / `guard_custom_tool` |
 
 Every JavaScript path is versioned. Unversioned aliases such as
-`@arcjet/guard/vercel-ai` do not resolve. Don't wrap the same tool with two
-adapters, and don't mix the JavaScript and Python adapter for one framework.
+`@arcjet/guard/vercel-ai` do not resolve. The Go module carries no version
+segment; its `go.mod` names the framework version it is built against. Don't
+wrap the same tool with two adapters.
 
 A framework's human-in-the-loop confirmation is not a policy gate.
 `needsApproval`, `humanInTheLoopMiddleware`, `interrupt()`, `requireApproval`,
@@ -2219,8 +2291,9 @@ const detectPii = localDetectSensitiveInfo({
 ```
 
 **Map the inputs the policy declares.** A remote policy evaluates the typed
-inputs a guard call submits. Every adapter accepts `inputs` and `actor`, in
-JavaScript and Python, each as a value or a function resolved per call. A
+inputs a guard call submits. Every adapter accepts `inputs` and `actor` in
+JavaScript and Python, and `Inputs` and `Actor` in Go, each as a value or a
+function resolved per call. A
 policy does nothing until the call sends values under exactly the names it
 declares: a missing required input reports `AJP1003` and a live rule fails
 closed, and an input the policy doesn't declare is dropped with an `AJ1060`
