@@ -93,9 +93,43 @@ because you configured the wrapper to fail open would be indistinguishable from
 one Arcjet approved – and those are the calls a post-incident review most needs
 to find.
 
-A `degraded` event carries no decision ID, because there's no decision to point
-at: either the guard call threw, or the decision it returned failed open and
-judged nothing.
+The value is capture and Sequence metadata. It never changes the decision.
+`conclusion` remains `ALLOW` or `DENY`. The decision has no outcome field. You
+don't set `outcome`. The helper writes it after your metadata so a caller key
+can't overwrite what the helper recorded.
+
+A `degraded` event uses `decisionId` / `decision_id` to tell the two incomplete
+judgments apart:
+
+- Present: policy judged the action in part. Guard returned a decision with an
+  ID, but an input the decision needed could not be resolved.
+- Absent: policy judged none of it. The helper had no decision, a failed-open
+  decision with an empty ID, or an answer it could not read.
+
+An unreadable decision isn't passed into capture. The event emits without a
+decision ID.
+
+`onGuardError` / `on_guard_error` is `"allow"` or `"deny"`. The default is
+`"deny"`: an incomplete check blocks the action and records `unavailable`. If
+the action runs and then throws, the event records `error`, even when the
+judgment was incomplete.
+
+A direct `capture()` / `Capture` call doesn't set `outcome`.
+
+Most wrappers that sit around an effect record these five values. These
+surfaces record `success` when the action proceeds, including when
+`on_guard_error="allow"` and policy did not judge the action fully. They don't
+record `degraded`:
+
+- CrewAI `register_arcjet_hooks`. The `PRE_TOOL_CALL` hook cannot observe the
+  tool body, so it records the decision to proceed, not the tool's result.
+  CrewAI `guard_tool` records the five values.
+- Claude Agent SDK `PostToolUse`. That hook is observe-only after the tool
+  ran, and it cannot distinguish a tool error from a result the model is meant
+  to read.
+
+Observe-only LangChain `ArcjetCaptureHandler` and `ArcjetAsyncCaptureHandler`
+don't go through the checkpoint engine.
 
 Filter on `outcome` to answer two questions an audit asks: which actions ran
 without a decision behind them, and which denials the agent hit.
@@ -218,6 +252,8 @@ startup and import the free `capture()` function. See <Link.Page href="/testing#
 - <Link.Page href="/guards">Agent guards</Link.Page>
 - <Link.Page href="/observe">Observe agent activity</Link.Page>
 - <Link.Page href="/guards/reference">Guard testing and reference</Link.Page>
+- <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
+- <Link.Page href="/guards/crewai">CrewAI agent guard</Link.Page>
 - <Link.Page href="/testing">Testing Arcjet</Link.Page>
 - <Link.Page href="/reference/python#record-what-happened-with-capture">Python SDK capture</Link.Page>
 - <Link.Page href="/reference/go#capture">Go SDK capture</Link.Page>
