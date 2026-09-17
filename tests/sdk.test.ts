@@ -35,6 +35,7 @@ test.describe("isRouteSdkKey", () => {
   test("accepts HTTP SDK keys and guard adapters", () => {
     expect(isRouteSdkKey("next")).toBe(true);
     expect(isRouteSdkKey("langchain")).toBe(true);
+    expect(isRouteSdkKey("microsoft-agent-framework")).toBe(true);
     expect(isRouteSdkKey("go")).toBe(false);
   });
 });
@@ -380,6 +381,12 @@ test.describe("pathnameForLegacyFrameworkKey", () => {
     expect(pathnameForLegacyFrameworkKey("google-adk", "/get-started")).toBe(
       "/sdk/google-adk/get-started/",
     );
+    expect(
+      pathnameForLegacyFrameworkKey(
+        "microsoft-agent-framework",
+        "/get-started",
+      ),
+    ).toBe("/sdk/microsoft-agent-framework/get-started/");
     expect(
       pathnameForLegacyFrameworkKey("strands-agents", "/get-started"),
     ).toBe("/sdk/strands-agents/get-started/");

@@ -13,6 +13,7 @@ import { GoogleAdk as IconGoogleAdk } from "@/components/icons/tech/GoogleAdk";
 import { LangChain as IconLangChain } from "@/components/icons/tech/LangChain";
 import { LangGraph as IconLangGraph } from "@/components/icons/tech/LangGraph";
 import { Mastra as IconMastra } from "@/components/icons/tech/Mastra";
+import { MicrosoftAgentFramework as IconMicrosoftAgentFramework } from "@/components/icons/tech/MicrosoftAgentFramework";
 import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
 import { NextJs as IconNextJs } from "@/components/icons/tech/NextJs";
 import { NodeJs as IconNodeJs } from "@/components/icons/tech/NodeJs";
@@ -114,6 +115,8 @@ function iconFor(key: FrameworkKey): ReactNode {
       return <IconLangGraph />;
     case "mastra":
       return <IconMastra />;
+    case "microsoft-agent-framework":
+      return <IconMicrosoftAgentFramework />;
     case "openai-agents":
       return <IconOpenAiAgents />;
     case "vercel-ai":

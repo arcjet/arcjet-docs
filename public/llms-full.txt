@@ -13,7 +13,7 @@ How Arcjet compares to other AI agent security approaches: [AI agent security pl
 Arcjet protects several entry points:
 
 - **Coding agents** - apply policies and enforce security controls directly within the development environment. Protect prompts from injection, redact sensitive data, and ensure that agent actions comply with organizational policies. Supported coding agents include: Claude Code and GitHub Copilot.
-- **Custom agents** - tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input in custom agents you've built and deployed yourself. Protect HTTP requests from bots and abuse, and enforce security policies consistently across all agent interactions. Supported AI agent frameworks include: Claude Agent SDK, Claude Managed Agents, CrewAI, Genkit, Google ADK, LangChain, LangGraph, Mastra, OpenAI Agents, Strands Agents, TanStack AI, Vercel AI SDK, Vercel Eve.
+- **Custom agents** - tool calls, queue consumers, agentic pipelines, and anywhere else you process untrusted input in custom agents you've built and deployed yourself. Protect HTTP requests from bots and abuse, and enforce security policies consistently across all agent interactions. Supported AI agent frameworks include: Claude Agent SDK, Claude Managed Agents, CrewAI, Genkit, Google ADK, LangChain, LangGraph, Mastra, Microsoft Agent Framework, OpenAI Agents, Strands Agents, TanStack AI, Vercel AI SDK, Vercel Eve.
 - **Web applications** - protect HTTP routes, API endpoints, and middleware within web applications. Bot protection, email validation, WAF, and other security building blocks applied directly in-code. Supported languages and frameworks include: Astro, Bun, Deno, Fastify, NestJS, Next.js, Node.js, Express, Hono, Nuxt, Python, FastAPI, Flask, React Router, Remix, SvelteKit, Go.
 
 ## Get started
@@ -2408,6 +2408,7 @@ blocking one makes the wrapper synchronous.
 - [TanStack AI agent guard](https://docs.arcjet.com/guards/tanstack-ai)
 - [Vercel Eve agent guard](https://docs.arcjet.com/guards/vercel-eve)
 - [Mastra agent guard](https://docs.arcjet.com/guards/mastra)
+- [Microsoft Agent Framework agent guard](https://docs.arcjet.com/guards/microsoft-agent-framework)
 - [Claude Agent SDK agent guard](https://docs.arcjet.com/guards/claude-agent-sdk)
 - [Claude Managed Agents agent guard](https://docs.arcjet.com/guards/claude-managed-agents)
 - [Nosecone security headers](https://docs.arcjet.com/nosecone/quick-start)
