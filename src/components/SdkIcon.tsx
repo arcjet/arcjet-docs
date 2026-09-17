@@ -13,6 +13,7 @@ import { Hono } from "@/components/icons/tech/Hono";
 import { LangChain } from "@/components/icons/tech/LangChain";
 import { LangGraph } from "@/components/icons/tech/LangGraph";
 import { Mastra } from "@/components/icons/tech/Mastra";
+import { MicrosoftAgentFramework } from "@/components/icons/tech/MicrosoftAgentFramework";
 import { NestJs } from "@/components/icons/tech/NestJs";
 import { NextJs } from "@/components/icons/tech/NextJs";
 import { NodeJs } from "@/components/icons/tech/NodeJs";
@@ -44,6 +45,7 @@ const sdkIcons: Record<ArcjetRouteSdkKey, IconComponent> = {
   langchain: LangChain,
   langgraph: LangGraph,
   mastra: Mastra,
+  "microsoft-agent-framework": MicrosoftAgentFramework,
   nest: NestJs,
   next: NextJs,
   node: NodeJs,

@@ -13,6 +13,7 @@ import { Hono as IconHono } from "@/components/icons/tech/Hono";
 import { LangChain as IconLangChain } from "@/components/icons/tech/LangChain";
 import { LangGraph as IconLangGraph } from "@/components/icons/tech/LangGraph";
 import { Mastra as IconMastra } from "@/components/icons/tech/Mastra";
+import { MicrosoftAgentFramework as IconMicrosoftAgentFramework } from "@/components/icons/tech/MicrosoftAgentFramework";
 import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
 import { NextJs as IconNextJs } from "@/components/icons/tech/NextJs";
 import { NodeJs as IconNodeJs } from "@/components/icons/tech/NodeJs";
@@ -65,6 +66,7 @@ const frameworkIcon = {
   langchain: <IconLangChain />,
   langgraph: <IconLangGraph />,
   mastra: <IconMastra />,
+  "microsoft-agent-framework": <IconMicrosoftAgentFramework />,
   "nest-js": <IconNestJs />,
   "next-js": <IconNextJs />,
   "node-js-express": <IconNodeJs />,

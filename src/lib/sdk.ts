@@ -35,6 +35,7 @@ export type ArcjetGuardSdkKey =
   | "langchain"
   | "langgraph"
   | "mastra"
+  | "microsoft-agent-framework"
   | "openai-agents"
   | "strands-agents"
   | "tanstack-ai"
@@ -53,6 +54,7 @@ export const GUARD_SDK_KEYS = [
   "langchain",
   "langgraph",
   "mastra",
+  "microsoft-agent-framework",
   "openai-agents",
   "strands-agents",
   "tanstack-ai",
@@ -69,6 +71,7 @@ const GUARD_SDK_LABELS = {
   langchain: "LangChain",
   langgraph: "LangGraph",
   mastra: "Mastra",
+  "microsoft-agent-framework": "Microsoft Agent Framework",
   "openai-agents": "OpenAI Agents",
   "strands-agents": "Strands Agents",
   "tanstack-ai": "TanStack AI",

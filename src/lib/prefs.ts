@@ -60,6 +60,7 @@ export const frameworks = [
   { key: "langchain", label: "LangChain" },
   { key: "langgraph", label: "LangGraph" },
   { key: "mastra", label: "Mastra" },
+  { key: "microsoft-agent-framework", label: "Microsoft Agent Framework" },
   { key: "nest-js", label: "NestJS" },
   { key: "next-js", label: "Next.js" },
   { key: "node-js", label: "Node.js" },
