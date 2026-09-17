@@ -2394,6 +2394,7 @@ blocking one makes the wrapper synchronous.
 - [Policy error codes](https://docs.arcjet.com/guards/errors)
 - [Secure coding agents](https://docs.arcjet.com/coding-agents)
 - [Coding agent policies](https://docs.arcjet.com/coding-agents/policies)
+- [Block personal coding agent accounts](https://docs.arcjet.com/coding-agents/block-personal-accounts)
 - [Observe agent activity](https://docs.arcjet.com/observe)
 - [Agent guard testing and reference](https://docs.arcjet.com/guards/reference)
 - [Capture events](https://docs.arcjet.com/guards/capture)
