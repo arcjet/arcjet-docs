@@ -1,6 +1,6 @@
 ---
 title: "Coding agent policies"
-description: "The fixed input contract a coding agent policy reads, the starter policies for Claude Code and GitHub Copilot, and how to write and roll out your own."
+description: "The fixed input contract a coding agent policy reads, the starter policies for Claude Code, GitHub Copilot, OpenAI Codex, and Cursor, and how to write and roll out your own."
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
@@ -54,15 +54,15 @@ Arcjet builds every input from the hook payload. Read a value in Rego as
 
 The agents spell their tools differently so Arcjet normalizes them to a consistent `tool_kind`. Matching is case-insensitive.
 
-| `tool_kind`  | Claude Code and Copilot                                    | Copilot CLI                                   |
-| ------------ | ---------------------------------------------------------- | --------------------------------------------- |
-| `shell`      | `Bash`, `BashOutput`, `KillShell`                          | `powershell`                                  |
-| `file_read`  | `Read`, `Glob`, `Grep`, `NotebookRead`                     | `view`, `rg`                                  |
-| `file_write` | `Edit`, `Write`, `MultiEdit`, `NotebookEdit`               | `create`, `str_replace_editor`, `apply_patch` |
-| `web`        | `WebFetch`, `WebSearch`                                    | `web_fetch`, `web_search`                     |
-| `mcp`        | Any `mcp__<server>__<tool>` name                           | Any MCP tool                                  |
-| `agent`      | `Agent`, `Task`                                            |                                               |
-| `other`      | Everything else, such as `AskUserQuestion` and `TodoWrite` | `ask_user`, `update_todo`                     |
+| `tool_kind`  | Claude Code and Copilot                                    | Copilot CLI                                   | Codex                                      | Cursor                          |
+| ------------ | ---------------------------------------------------------- | --------------------------------------------- | ------------------------------------------ | ------------------------------- |
+| `shell`      | `Bash`, `BashOutput`, `KillShell`                          | `powershell`                                  | `Bash`                                     | `Shell`                         |
+| `file_read`  | `Read`, `Glob`, `Grep`, `NotebookRead`                     | `view`, `rg`                                  | Local function tools that read files       | `Read`, `Grep`                  |
+| `file_write` | `Edit`, `Write`, `MultiEdit`, `NotebookEdit`               | `create`, `str_replace_editor`, `apply_patch` | `apply_patch` (also matches `Edit`, `Write`) | `Write`, `Delete`             |
+| `web`        | `WebFetch`, `WebSearch`                                    | `web_fetch`, `web_search`                     | Hosted `WebSearch` skips `PreToolUse`      |                                 |
+| `mcp`        | Any `mcp__<server>__<tool>` name                           | Any MCP tool                                  | Any `mcp__<server>__<tool>` name           | `MCP:<tool_name>`               |
+| `agent`      | `Agent`, `Task`                                            |                                               | `Agent`, `spawn_agent`                     | `Task`                          |
+| `other`      | Everything else, such as `AskUserQuestion` and `TodoWrite` | `ask_user`, `update_todo`                     | `update_plan`                              |                                 |
 
 ## Starter policies
 
@@ -269,6 +269,8 @@ deny contains "prompt-has-sensitive-info" if {
 - <Link.Page href="/coding-agents">Secure coding agents</Link.Page> – the endpoint, the events, and where enforcement stops
 - <Link.Page href="/coding-agents/claude-code">Secure Claude Code</Link.Page>
 - <Link.Page href="/coding-agents/copilot">Secure GitHub Copilot</Link.Page>
+- <Link.Page href="/coding-agents/codex">Secure OpenAI Codex</Link.Page>
+- <Link.Page href="/coding-agents/cursor">Secure Cursor</Link.Page>
 - <Link.Page href="/guards/rego">Write policies in Rego</Link.Page> – the language, the profile, and its exclusions
 - <Link.Page href="/guards/authoring">Author and publish policies</Link.Page> – the builder, plain English, tests, and publication
 - <Link.Page href="/guards/errors">Policy error codes</Link.Page>

@@ -26,7 +26,7 @@ projects need one.
 
 | What you're protecting                                      | Path                                                                        |
 | ----------------------------------------------------------- | --------------------------------------------------------------------------- |
-| A developer's coding agent (Claude Code, GitHub Copilot)    | [Secure the coding agent](#secure-the-coding-agent). No package to install. |
+| A developer's coding agent (Claude Code, GitHub Copilot, OpenAI Codex, Cursor) | [Secure the coding agent](#secure-the-coding-agent). No package to install. |
 | An agent you built (tool calls, MCP servers, queue workers) | [Guard](#add-protection) with `@arcjet/guard` or `arcjet.guard`.            |
 | HTTP routes and API endpoints                               | [Protect](#add-protection) with a request SDK.                              |
 
@@ -160,8 +160,10 @@ package at all.
 
 Enforce security policies on developer coding agents. There is no package to
 install, and no code changes. An administrator configures the hooks the agent
-already fires. See [Claude Code](/coding-agents/claude-code) and
-[GitHub Copilot](/coding-agents/copilot).
+already fires. See [Claude Code](/coding-agents/claude-code),
+[GitHub Copilot](/coding-agents/copilot),
+[OpenAI Codex](/coding-agents/codex), and
+[Cursor](/coding-agents/cursor).
 
 ### AI agent frameworks
 
@@ -381,7 +383,7 @@ the client to cover the sensitive information rule in a remote policy too.
 
 ## Secure the coding agent
 
-The hooks Claude Code and GitHub Copilot already fire can call Arcjet before
+The hooks Claude Code, GitHub Copilot, OpenAI Codex, and Cursor already fire can call Arcjet before
 every tool call, with no SDK and no code change. An administrator installs one
 hook entry per event and publishes the policies to enforce. For the hook
 configuration and the starter policies, see

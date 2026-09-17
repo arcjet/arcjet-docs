@@ -1,6 +1,6 @@
 ---
 title: "Secure coding agents"
-description: "Enforce Arcjet policy on Claude Code and GitHub Copilot tool calls from the hooks they already fire, with no SDK and no code change."
+description: "Enforce Arcjet policy on Claude Code, GitHub Copilot, OpenAI Codex, and Cursor tool calls from the hooks they already fire, with no SDK and no code change."
 ---
 
 import { Aside, CardGrid } from "@astrojs/starlight/components";
@@ -62,33 +62,36 @@ evaluated and allowed or denied.
 
 Arcjet tracks all these events, but can only enforce policy on the above enforceable events.
 
-| `event`                   | Claude Code          | Copilot                 | What it carries                            |
-| ------------------------- | -------------------- | ----------------------- | ------------------------------------------ |
-| `post-tool-use`           | `PostToolUse`        | `postToolUse`           | What the tool returned                     |
-| `post-tool-use-failure`   | `PostToolUseFailure` | `postToolUseFailure`    | Why it did not                             |
-| `user-prompt-transformed` | –                    | `userPromptTransformed` | The model-facing prompt after a rewrite    |
-| `stop`                    | `Stop`               | `agentStop`             | The agent's final message                  |
-| `subagent-start`          | `SubagentStart`      | `subagentStart`         | Work delegated to another agent            |
-| `subagent-stop`           | `SubagentStop`       | `subagentStop`          | A subagent's final message and its name    |
-| `session-start`           | `SessionStart`       | `sessionStart`          | When an agent started, and from what       |
-| `session-end`             | `SessionEnd`         | `sessionEnd`            | When it stopped, and why                   |
-| `notification`            | `Notification`       | `notification`          | Permission prompts and elicitations        |
-| `permission-denied`       | `PermissionDenied`   | –                       | What the agent's own controls stopped      |
-| `pre-compact`             | `PreCompact`         | `preCompact`            | Context discarded mid-session              |
-| `error`                   | `StopFailure`        | `errorOccurred`         | Why a turn failed                          |
-| `config-change`           | `ConfigChange`       | –                       | Settings changed, which is a tamper signal |
-| `instructions-loaded`     | `InstructionsLoaded` | –                       | A `CLAUDE.md` entering context             |
+| `event`                   | Claude Code          | Copilot                 | Codex            | Cursor                 | What it carries                            |
+| ------------------------- | -------------------- | ----------------------- | ---------------- | ---------------------- | ------------------------------------------ |
+| `post-tool-use`           | `PostToolUse`        | `postToolUse`           | `PostToolUse`    | `postToolUse`          | What the tool returned                     |
+| `post-tool-use-failure`   | `PostToolUseFailure` | `postToolUseFailure`    | –                | `postToolUseFailure`   | Why it did not                             |
+| `user-prompt-transformed` | –                    | `userPromptTransformed` | –                | –                      | The model-facing prompt after a rewrite    |
+| `stop`                    | `Stop`               | `agentStop`             | `Stop`           | `stop`                 | The agent's final message                  |
+| `subagent-start`          | `SubagentStart`      | `subagentStart`         | `SubagentStart`  | `subagentStart`        | Work delegated to another agent            |
+| `subagent-stop`           | `SubagentStop`       | `subagentStop`          | `SubagentStop`   | `subagentStop`         | A subagent's final message and its name    |
+| `session-start`           | `SessionStart`       | `sessionStart`          | `SessionStart`   | `sessionStart`         | When an agent started, and from what       |
+| `session-end`             | `SessionEnd`         | `sessionEnd`            | `SessionEnd`     | `sessionEnd`           | When it stopped, and why                   |
+| `notification`            | `Notification`       | `notification`          | –                | –                      | Permission prompts and elicitations        |
+| `permission-denied`       | `PermissionDenied`   | –                       | –                | –                      | What the agent's own controls stopped      |
+| `pre-compact`             | `PreCompact`         | `preCompact`            | `PreCompact`     | `preCompact`           | Context discarded mid-session              |
+| `error`                   | `StopFailure`        | `errorOccurred`         | –                | –                      | Why a turn failed                          |
+| `config-change`           | `ConfigChange`       | –                       | –                | –                      | Settings changed, which is a tamper signal |
+| `instructions-loaded`     | `InstructionsLoaded` | –                       | –                | –                      | A `CLAUDE.md` entering context             |
 
 ## Enforcement limitations
 
-- **Claude Code and Copilot fail open on a slow or failing hook, by their own design.** A
+- **Claude Code, Copilot, and Codex fail open on a slow or failing hook, by their own design.** A
 timeout, a network error, a non-2xx response, or a malformed body is a
 non-blocking error, and the tool call continues through the agent's normal
-permission flow.
+permission flow. Cursor is the same unless the hook sets `failClosed: true`.
 - **Copilot can't honor a prompt denial.** It drops hook output on
 `userPromptSubmitted`. Arcjet records the decision and marks it as not
-enforced.
-- **A recorded event can never block.** Neither agent offers a point where Arcjet
+enforced. Claude Code, Codex, and Cursor honor a prompt denial.
+- **Codex hosted tools skip `PreToolUse`.** `WebSearch` and other hosted tools
+don't use Codex's local function-tool hook path, so a tool-call policy never
+sees them.
+- **A recorded event can never block.** No supported agent offers a point where Arcjet
 could withhold a tool result. A poisoned web page or MCP response is the most
 common route for an injection into a coding agent, and the hook can't catch
 it, because the tool has already run.
@@ -110,6 +113,16 @@ to find sessions with no hook decisions.
     title="GitHub Copilot"
     href="/coding-agents/copilot"
     description="Install the hooks for the CLI, VS Code agent mode, and the cloud agent, and lock them for an organization."
+  />
+  <Link.Card
+    title="OpenAI Codex"
+    href="/coding-agents/codex"
+    description="Install the command wrapper through managed requirements, MDM, cloud-managed requirements, or a repository."
+  />
+  <Link.Card
+    title="Cursor"
+    href="/coding-agents/cursor"
+    description="Install the command wrapper for the IDE, CLI, and cloud agents, and lock it for a team or enterprise."
   />
   <Link.Card
     title="Coding agent policies"

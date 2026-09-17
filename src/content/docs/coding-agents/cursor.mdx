@@ -1,0 +1,272 @@
+---
+title: "Secure Cursor"
+description: "Install Arcjet hooks for Cursor in the IDE, CLI, and cloud agents, lock them for a team or enterprise, and verify."
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+
+Arcjet integrates into Cursor sessions through hooks that fire
+for different actions like prompts and tool calls. This allows Arcjet to
+observe activity, enforce policy, and record actions taken by developers
+without requiring any changes to the developer's workflow.
+
+<WhatIsArcjet />
+
+## Before you start
+
+[Create a free Arcjet account](https://console.arcjet.com) then use the key to
+authenticate the Arcjet hooks. It is semi-secret, but can be distributed
+to multiple devices and team members through environment variables or
+configuration management.
+
+Cursor runs hooks as commands, not as native HTTP handlers. The install is a
+small script that reads the hook payload from standard input, posts it to
+Arcjet, and writes Arcjet's response to standard output. The machine that
+runs Cursor needs `curl`.
+
+## Choose where to deploy
+
+Cursor loads hooks from several sources. When responses conflict,
+[higher-priority sources win](https://cursor.com/docs/hooks): Enterprise,
+then Team, then Project, then User.
+
+| Mechanism | Where the files go | Reaches | Removable by a developer |
+| --------- | ------------------ | ------- | ------------------------ |
+| Enterprise (MDM) | `/Library/Application Support/Cursor/hooks.json` (macOS), `/etc/cursor/hooks.json` (Linux, WSL), `C:\ProgramData\Cursor\hooks.json` (Windows), plus scripts beside that file | That device: Agent Chat, Cmd+K, and the CLI | Local administrator only |
+| Team hooks | Cursor dashboard, Enterprise plan | Members of the team, including [cloud agents](#cloud-agents) | Only from the dashboard |
+| Project hooks | `.cursor/hooks.json`, committed | Sessions in that repository, including cloud agents | Yes |
+| User hooks | `~/.cursor/hooks.json` | That developer's local IDE and CLI | Yes |
+
+User hooks don't reach cloud agents. Cloud agent VMs have no access to a
+developer's home directory.
+
+## Install the hook script
+
+Save this script next to the hook configuration. In a repository, put it at
+`.cursor/hooks/arcjet-hook.sh`. For an enterprise install, put it in the
+same directory as the managed `hooks.json`.
+
+```sh title="arcjet-hook.sh"
+#!/bin/sh
+# Usage: arcjet-hook.sh VENDOR EVENT
+# Reads one hook payload from stdin and posts it to Arcjet.
+
+vendor=$1
+event=$2
+principal=${USER:-${USERNAME:-}}
+
+curl -sS --max-time 5 -X POST \
+  "https://decide.arcjet.com/v1/agent-hooks/${vendor}?event=${event}" \
+  -H "Authorization: Bearer ${ARCJET_KEY}" \
+  -H "Content-Type: application/json" \
+  -H "X-Arcjet-Principal: ${principal}" \
+  --data-binary @- || printf '%s\n' '{}'
+```
+
+Make the script executable. Project hooks run from the project root, so the
+command path is `.cursor/hooks/arcjet-hook.sh`. User hooks run from
+`~/.cursor/`, so use `./hooks/arcjet-hook.sh` there.
+
+On Windows, save a sibling `arcjet-hook.ps1`:
+
+```powershell title="arcjet-hook.ps1"
+param([string]$Vendor, [string]$Event)
+$principal = if ($env:USERNAME) { $env:USERNAME } else { $env:USER }
+try {
+  $body = [Console]::In.ReadToEnd()
+  $headers = @{
+    Authorization = "Bearer $env:ARCJET_KEY"
+    "Content-Type" = "application/json"
+    "X-Arcjet-Principal" = "$principal"
+  }
+  Invoke-RestMethod -Method Post -TimeoutSec 5 `
+    -Uri "https://decide.arcjet.com/v1/agent-hooks/$Vendor`?event=$Event" `
+    -Headers $headers -Body $body | ConvertTo-Json -Compress
+} catch {
+  Write-Output '{}'
+}
+```
+
+A failed or timed-out `curl` prints `{}`. Cursor treats invalid JSON as a
+hook failure and, by default, lets the action through.
+
+## Install the hooks
+
+Put this file in the repository as `.cursor/hooks.json`. The template
+installs the tool-call and prompt moments plus the recorded events worth
+keeping. It omits `matcher`, so Arcjet sees every tool Cursor reports on
+`preToolUse`.
+
+```json title=".cursor/hooks.json"
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "command": "sh .cursor/hooks/arcjet-hook.sh cursor pre-tool-use",
+        "timeout": 5,
+        "failClosed": true
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "sh .cursor/hooks/arcjet-hook.sh cursor user-prompt-submit",
+        "timeout": 5,
+        "failClosed": true
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": "sh .cursor/hooks/arcjet-hook.sh cursor post-tool-use",
+        "timeout": 5
+      }
+    ],
+    "postToolUseFailure": [
+      {
+        "command": "sh .cursor/hooks/arcjet-hook.sh cursor post-tool-use-failure",
+        "timeout": 5
+      }
+    ],
+    "sessionStart": [
+      {
+        "command": "sh .cursor/hooks/arcjet-hook.sh cursor session-start",
+        "timeout": 5
+      }
+    ],
+    "sessionEnd": [
+      {
+        "command": "sh .cursor/hooks/arcjet-hook.sh cursor session-end",
+        "timeout": 5
+      }
+    ],
+    "subagentStart": [
+      {
+        "command": "sh .cursor/hooks/arcjet-hook.sh cursor subagent-start",
+        "timeout": 5
+      }
+    ],
+    "subagentStop": [
+      {
+        "command": "sh .cursor/hooks/arcjet-hook.sh cursor subagent-stop",
+        "timeout": 5
+      }
+    ],
+    "stop": [
+      {
+        "command": "sh .cursor/hooks/arcjet-hook.sh cursor stop",
+        "timeout": 5
+      }
+    ],
+    "preCompact": [
+      {
+        "command": "sh .cursor/hooks/arcjet-hook.sh cursor pre-compact",
+        "timeout": 5
+      }
+    ]
+  }
+}
+```
+
+For an enterprise or user install, change the command to an absolute path
+or to `./hooks/arcjet-hook.sh` so it resolves from that source's working
+directory.
+
+### What the hooks do
+
+Cursor runs every matching hook for an event, so these entries add one
+request of latency (typically a few tens of milliseconds).
+
+- `preToolUse` is the tool-call moment. Cursor fires it for Shell, Read,
+  Write, MCP, Task, and the other agent tools. `beforeSubmitPrompt` is
+  the prompt moment. Cursor honors a prompt denial (`continue: false`).
+- Cursor also has `beforeShellExecution`, `beforeMCPExecution`, and
+  `beforeReadFile`. They carry a richer payload for that one action, and
+  they fire in addition to `preToolUse`. This template uses `preToolUse`
+  so one entry covers every tool without posting the same call twice.
+- Omit `matcher`. A matcher that lists only `Shell` or `Write` leaves
+  reads, MCP tools, and Task calls outside the policy.
+- `failClosed: true` on the two enforcement entries. Cursor's default is
+  fail-open: a crash, a timeout, or invalid JSON lets the action through.
+- `timeout` on every entry. Five seconds is a sensible ceiling for a
+  policy decision.
+- `X-Arcjet-Principal` attributes a session to a developer. It's
+  untrusted, but useful extra metadata. `$USER` is unset on Windows, so
+  the script falls back to `$USERNAME`.
+- The hook URLs omit `surface`. The same file reaches the IDE, CLI, and
+  cloud, so a hard-coded `ide` mislabels cloud sessions. Arcjet records
+  `unknown` when you omit the parameter. Set it only when the hook file
+  is specific to one surface.
+
+## Supply the Arcjet key
+
+The script reads `ARCJET_KEY` from the environment. Export it where Cursor
+runs, or inject it through your configuration-management tooling. Never
+commit a literal key.
+
+`X-Arcjet-Principal` uses `$USER` or `$USERNAME`. Cursor also sends
+`user_email` on the hook payload when the developer is signed in. Arcjet
+reads the asserted principal from the header, not from that field.
+
+## Lock it down
+
+Enterprise MDM and Team dashboard hooks outrank a developer's project or
+user file. Distribute the script with the `hooks.json` so the command
+path exists on every machine.
+
+Project hooks run only in a trusted workspace. A developer who rejects
+workspace trust skips the repository file.
+
+## Cloud agents
+
+A [cloud agent](https://cursor.com/docs/cloud-agent) runs command hooks
+from the repository. Commit `.cursor/hooks.json` and
+`.cursor/hooks/arcjet-hook.sh` so the cloud VM can execute them.
+
+On Enterprise plans, cloud agents also run Team hooks and
+enterprise-managed hooks from the dashboard.
+
+Cloud agents sometimes start in a read-only environment for early
+exploratory turns. Hooks don't run during those turns. They start once
+the agent has a writable environment.
+
+The following hooks don't run in cloud agents: `sessionStart`,
+`sessionEnd`, `beforeMCPExecution`, and `afterMCPExecution`. Tab hooks
+and `workspaceOpen` are IDE-only. The template still installs
+`sessionStart` and `sessionEnd` for local sessions.
+
+Cloud agents have internet access by default. If you restrict
+[network egress](https://cursor.com/docs/cloud-agent/security-network),
+add `decide.arcjet.com` to the allowlist for **Default + allowlist** or
+**Allowlist only**. The hook is an HTTP `POST` of the vendor payload.
+
+<Aside type="caution" title="An allowlist is per user, team, and environment">
+  Team admins can set a default network access mode, and a saved
+  environment can inherit that policy or define its own. A developer who
+  runs a cloud agent under a stricter environment still has to allow the
+  domain there.
+</Aside>
+
+## Verify the install
+
+<Steps>
+
+1. Open **View** > **Output** and select the **Hooks** channel, or open
+   **Customize** > **Hooks**, and confirm the Arcjet commands loaded.
+
+2. Start an agent session in a repository that carries the hook file and
+   ask it to run a harmless command, such as listing a directory.
+
+3. Open the site's **Activity** in the [Arcjet Console](https://console.arcjet.com)
+   and confirm the session and the tool call appear.
+
+</Steps>
+
+## Related
+
+- <Link.Page href="/coding-agents">Secure coding agents</Link.Page> – the endpoint, the events, and where enforcement stops
+- <Link.Page href="/coding-agents/policies">Coding agent policies</Link.Page> – the input contract and the starter policies
+- <Link.Page href="/coding-agents/claude-code">Secure Claude Code</Link.Page>
+- <Link.Page href="/coding-agents/copilot">Secure GitHub Copilot</Link.Page>
+- <Link.Page href="/coding-agents/codex">Secure OpenAI Codex</Link.Page>

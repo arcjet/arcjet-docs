@@ -1,0 +1,422 @@
+---
+title: "Secure OpenAI Codex"
+description: "Install Arcjet hooks for OpenAI Codex through a command wrapper, managed requirements, MDM, or a repository, supply the site key, lock it down, and verify."
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+
+Arcjet integrates into OpenAI Codex sessions through hooks that fire
+for different actions like prompts and tool calls. This allows Arcjet to
+observe activity, enforce policy, and record actions taken by developers
+without requiring any changes to the developer's workflow.
+
+<WhatIsArcjet />
+
+## Before you start
+
+[Create a free Arcjet account](https://console.arcjet.com) then use the key to
+authenticate the Arcjet hooks. It is semi-secret, but can be distributed
+to multiple devices and team members through environment variables or
+configuration management.
+
+Codex runs hooks as commands, not as native HTTP handlers. The install is a
+small script that reads the hook payload from standard input, posts it to
+Arcjet, and writes Arcjet's response to standard output. The machine that
+runs Codex needs `curl`.
+
+## Choose where to deploy
+
+Codex has two channels for organization policy.
+[Managed requirements](https://developers.openai.com/codex/enterprise/managed-configuration)
+are admin-enforced and users can't override them.
+[Hooks](https://developers.openai.com/codex/hooks) also load from user,
+project, and plugin files. Managed hooks sit above every hook a developer
+can write.
+
+| Mechanism | Where the files go | Reaches | Removable by a developer |
+| --------- | ------------------ | ------- | ------------------------ |
+| System `requirements.toml` | `/etc/codex/requirements.toml` (Linux, macOS) or `%ProgramData%\OpenAI\Codex\requirements.toml` (Windows), plus scripts under `managed_dir` | That device: CLI, app, and IDE extension | Local administrator only |
+| MDM managed preferences | macOS `com.openai.codex` `requirements_toml_base64` | The same surfaces, redeployable on a schedule | Local administrator only |
+| Cloud-managed requirements | ChatGPT Business or Enterprise managed-config page | Every session that signs in with an eligible ChatGPT credential | Only by switching provider |
+| Repository settings | `.codex/hooks.json` or `.codex/config.toml`, committed | Sessions in that repository, after the project `.codex/` layer is trusted | Yes |
+
+If your developers use [Codex on the web](https://developers.openai.com/codex/cloud),
+read [Cloud sessions](#cloud-sessions).
+
+## Install the hook script
+
+Save this script next to the hook configuration. In a repository, put it at
+`.codex/hooks/arcjet-hook.sh`. For a managed install, put it at the absolute
+path you set as `managed_dir`.
+
+```sh title="arcjet-hook.sh"
+#!/bin/sh
+# Usage: arcjet-hook.sh VENDOR EVENT
+# Reads one hook payload from stdin and posts it to Arcjet.
+
+vendor=$1
+event=$2
+principal=${USER:-${USERNAME:-}}
+
+curl -sS --max-time 5 -X POST \
+  "https://decide.arcjet.com/v1/agent-hooks/${vendor}?event=${event}" \
+  -H "Authorization: Bearer ${ARCJET_KEY}" \
+  -H "Content-Type: application/json" \
+  -H "X-Arcjet-Principal: ${principal}" \
+  --data-binary @- || printf '%s\n' '{}'
+```
+
+Make the script executable. On Windows, save a sibling `arcjet-hook.ps1` and
+point `command_windows` at it:
+
+```powershell title="arcjet-hook.ps1"
+param([string]$Vendor, [string]$Event)
+$principal = if ($env:USERNAME) { $env:USERNAME } else { $env:USER }
+try {
+  $body = [Console]::In.ReadToEnd()
+  $headers = @{
+    Authorization = "Bearer $env:ARCJET_KEY"
+    "Content-Type" = "application/json"
+    "X-Arcjet-Principal" = "$principal"
+  }
+  Invoke-RestMethod -Method Post -TimeoutSec 5 `
+    -Uri "https://decide.arcjet.com/v1/agent-hooks/$Vendor`?event=$Event" `
+    -Headers $headers -Body $body | ConvertTo-Json -Compress
+} catch {
+  Write-Output '{}'
+}
+```
+
+A failed or timed-out `curl` prints `{}`. Codex treats empty hook output as
+success and continues, which matches Codex's own fail-open behavior.
+
+## Install the hooks
+
+This template installs every enforcement point plus the recorded events
+worth keeping. It omits `matcher`, so Arcjet sees every tool Codex reports
+on `PreToolUse` and `PermissionRequest`. Replace the script path if you
+install the files somewhere else.
+
+```json title=".codex/hooks.json"
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env sh \"$(git rev-parse --show-toplevel)/.codex/hooks/arcjet-hook.sh\" codex pre-tool-use",
+            "commandWindows": "powershell -NoProfile -File .codex/hooks/arcjet-hook.ps1 -Vendor codex -Event pre-tool-use",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env sh \"$(git rev-parse --show-toplevel)/.codex/hooks/arcjet-hook.sh\" codex permission-request",
+            "commandWindows": "powershell -NoProfile -File .codex/hooks/arcjet-hook.ps1 -Vendor codex -Event permission-request",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env sh \"$(git rev-parse --show-toplevel)/.codex/hooks/arcjet-hook.sh\" codex user-prompt-submit",
+            "commandWindows": "powershell -NoProfile -File .codex/hooks/arcjet-hook.ps1 -Vendor codex -Event user-prompt-submit",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env sh \"$(git rev-parse --show-toplevel)/.codex/hooks/arcjet-hook.sh\" codex post-tool-use",
+            "commandWindows": "powershell -NoProfile -File .codex/hooks/arcjet-hook.ps1 -Vendor codex -Event post-tool-use",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env sh \"$(git rev-parse --show-toplevel)/.codex/hooks/arcjet-hook.sh\" codex stop",
+            "commandWindows": "powershell -NoProfile -File .codex/hooks/arcjet-hook.ps1 -Vendor codex -Event stop",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env sh \"$(git rev-parse --show-toplevel)/.codex/hooks/arcjet-hook.sh\" codex session-start",
+            "commandWindows": "powershell -NoProfile -File .codex/hooks/arcjet-hook.ps1 -Vendor codex -Event session-start",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env sh \"$(git rev-parse --show-toplevel)/.codex/hooks/arcjet-hook.sh\" codex session-end",
+            "commandWindows": "powershell -NoProfile -File .codex/hooks/arcjet-hook.ps1 -Vendor codex -Event session-end",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env sh \"$(git rev-parse --show-toplevel)/.codex/hooks/arcjet-hook.sh\" codex subagent-start",
+            "commandWindows": "powershell -NoProfile -File .codex/hooks/arcjet-hook.ps1 -Vendor codex -Event subagent-start",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env sh \"$(git rev-parse --show-toplevel)/.codex/hooks/arcjet-hook.sh\" codex subagent-stop",
+            "commandWindows": "powershell -NoProfile -File .codex/hooks/arcjet-hook.ps1 -Vendor codex -Event subagent-stop",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env sh \"$(git rev-parse --show-toplevel)/.codex/hooks/arcjet-hook.sh\" codex pre-compact",
+            "commandWindows": "powershell -NoProfile -File .codex/hooks/arcjet-hook.ps1 -Vendor codex -Event pre-compact",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+For a user-level file at `~/.codex/hooks.json`, change each command to
+`sh ~/.codex/hooks/arcjet-hook.sh codex EVENT` so it doesn't depend on a
+git root.
+
+For a managed install, put the same events in `requirements.toml` with
+absolute script paths. Codex doesn't distribute the scripts; your MDM or
+device-management tooling must install them under `managed_dir`.
+
+```toml title="requirements.toml"
+allow_managed_hooks_only = true
+
+[features]
+hooks = true
+
+[hooks]
+managed_dir = "/etc/codex/hooks"
+windows_managed_dir = 'C:\ProgramData\OpenAI\Codex\hooks'
+
+[[hooks.PreToolUse]]
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "sh /etc/codex/hooks/arcjet-hook.sh codex pre-tool-use"
+command_windows = 'powershell -NoProfile -File C:\ProgramData\OpenAI\Codex\hooks\arcjet-hook.ps1 -Vendor codex -Event pre-tool-use'
+timeout = 5
+
+[[hooks.PermissionRequest]]
+[[hooks.PermissionRequest.hooks]]
+type = "command"
+command = "sh /etc/codex/hooks/arcjet-hook.sh codex permission-request"
+command_windows = 'powershell -NoProfile -File C:\ProgramData\OpenAI\Codex\hooks\arcjet-hook.ps1 -Vendor codex -Event permission-request'
+timeout = 5
+
+[[hooks.UserPromptSubmit]]
+[[hooks.UserPromptSubmit.hooks]]
+type = "command"
+command = "sh /etc/codex/hooks/arcjet-hook.sh codex user-prompt-submit"
+command_windows = 'powershell -NoProfile -File C:\ProgramData\OpenAI\Codex\hooks\arcjet-hook.ps1 -Vendor codex -Event user-prompt-submit'
+timeout = 5
+
+[[hooks.PostToolUse]]
+[[hooks.PostToolUse.hooks]]
+type = "command"
+command = "sh /etc/codex/hooks/arcjet-hook.sh codex post-tool-use"
+command_windows = 'powershell -NoProfile -File C:\ProgramData\OpenAI\Codex\hooks\arcjet-hook.ps1 -Vendor codex -Event post-tool-use'
+timeout = 5
+
+[[hooks.Stop]]
+[[hooks.Stop.hooks]]
+type = "command"
+command = "sh /etc/codex/hooks/arcjet-hook.sh codex stop"
+command_windows = 'powershell -NoProfile -File C:\ProgramData\OpenAI\Codex\hooks\arcjet-hook.ps1 -Vendor codex -Event stop'
+timeout = 5
+
+[[hooks.SessionStart]]
+[[hooks.SessionStart.hooks]]
+type = "command"
+command = "sh /etc/codex/hooks/arcjet-hook.sh codex session-start"
+command_windows = 'powershell -NoProfile -File C:\ProgramData\OpenAI\Codex\hooks\arcjet-hook.ps1 -Vendor codex -Event session-start'
+timeout = 5
+
+[[hooks.SessionEnd]]
+[[hooks.SessionEnd.hooks]]
+type = "command"
+command = "sh /etc/codex/hooks/arcjet-hook.sh codex session-end"
+command_windows = 'powershell -NoProfile -File C:\ProgramData\OpenAI\Codex\hooks\arcjet-hook.ps1 -Vendor codex -Event session-end'
+timeout = 3
+
+[[hooks.SubagentStart]]
+[[hooks.SubagentStart.hooks]]
+type = "command"
+command = "sh /etc/codex/hooks/arcjet-hook.sh codex subagent-start"
+command_windows = 'powershell -NoProfile -File C:\ProgramData\OpenAI\Codex\hooks\arcjet-hook.ps1 -Vendor codex -Event subagent-start'
+timeout = 5
+
+[[hooks.SubagentStop]]
+[[hooks.SubagentStop.hooks]]
+type = "command"
+command = "sh /etc/codex/hooks/arcjet-hook.sh codex subagent-stop"
+command_windows = 'powershell -NoProfile -File C:\ProgramData\OpenAI\Codex\hooks\arcjet-hook.ps1 -Vendor codex -Event subagent-stop'
+timeout = 5
+
+[[hooks.PreCompact]]
+[[hooks.PreCompact.hooks]]
+type = "command"
+command = "sh /etc/codex/hooks/arcjet-hook.sh codex pre-compact"
+command_windows = 'powershell -NoProfile -File C:\ProgramData\OpenAI\Codex\hooks\arcjet-hook.ps1 -Vendor codex -Event pre-compact'
+timeout = 5
+```
+
+### What the hooks do
+
+Codex launches matching command hooks for an event concurrently, so these
+entries add one request of latency (typically a few tens of milliseconds).
+
+- `PreToolUse` and `PermissionRequest` are the tool-call moment.
+  `UserPromptSubmit` is the prompt moment. Codex honors a prompt denial.
+- Omit `matcher`. A matcher that lists only `Bash` or `apply_patch` leaves
+  MCP tools and other local function tools outside the policy.
+- `timeout` on every entry. Codex's default for most hooks is 600 seconds.
+  `SessionEnd` supports at most 3 seconds.
+- `X-Arcjet-Principal` attributes a session to a developer. It's untrusted,
+  but useful extra metadata. `$USER` is unset on Windows, so the script
+  falls back to `$USERNAME`.
+- The hook URLs omit `surface`. The same files reach the CLI, app, IDE
+  extension, and cloud, so a hard-coded `cli` mislabels most of that
+  traffic. Arcjet records `unknown` when you omit the parameter. Set it
+  only when the hook file is specific to one surface.
+- Hosted tools such as `WebSearch` don't use Codex's local function-tool
+  hook path, so `PreToolUse` never sees them.
+
+Project-local hooks load only when the project `.codex/` layer is trusted.
+Codex skips a non-managed command hook until someone reviews and trusts
+the exact definition in `/hooks`. Managed hooks from
+`requirements.toml`, MDM, or cloud requirements are trusted by policy and
+can't be disabled from the user hook browser.
+
+## Supply the Arcjet key
+
+The script reads `ARCJET_KEY` from the environment. Export it where Codex
+runs, or inject it through your configuration-management tooling. Never
+commit a literal key.
+
+`X-Arcjet-Principal` uses `$USER` or `$USERNAME`. You don't need to list
+those names in a Codex allowlist; Codex command hooks inherit the process
+environment.
+
+## Lock it down
+
+The last keys in the managed template are the lockdown:
+
+```toml
+allow_managed_hooks_only = true
+
+[features]
+hooks = true
+```
+
+`allow_managed_hooks_only` is valid only in `requirements.toml`. Putting
+it in `config.toml` doesn't enable managed-hooks-only mode.
+
+Without `allow_managed_hooks_only`, a developer's own hooks run alongside
+yours. Pin `[features].hooks = true` so a local `hooks = false` can't turn
+the managed entries off.
+
+## Cloud sessions
+
+A cloud session on [Codex on the web](https://developers.openai.com/codex/cloud)
+runs in an environment on a clone of the repository rather than on the
+developer's machine.
+
+### Deliver the hooks
+
+A cloud session reads a committed `.codex/hooks.json` after the project
+layer is trusted, and your organization's cloud-managed requirements.
+
+### Allow the endpoint
+
+Codex environments block agent internet access by default. Turn agent
+internet access **On**, add `decide.arcjet.com` to the domain allowlist,
+and allow `POST`. A methods allowlist that keeps only `GET`, `HEAD`, and
+`OPTIONS` blocks the hook.
+
+<Aside type="caution" title="An allowlist is per environment">
+  Cloud-managed requirements apply inside a cloud session, but they don't
+  add a domain to an environment's network allowlist. A developer who
+  runs a session in an environment of their own still has to allow the
+  domain there.
+</Aside>
+
+If you pin sandboxed networking with
+`experimental_network.managed_allowed_domains_only`, add
+`decide.arcjet.com` to `experimental_network.allowed_domains` as well.
+
+## Verify the install
+
+<Steps>
+
+1. Run `/hooks` in Codex. Confirm the Arcjet entries appear, and trust
+   them if Codex marked a non-managed definition for review.
+
+2. Ask Codex to run a harmless command, such as listing a directory.
+
+3. Open the site's **Activity** in the [Arcjet Console](https://console.arcjet.com)
+   and confirm the session and the tool call appear.
+
+</Steps>
+
+## Related
+
+- <Link.Page href="/coding-agents">Secure coding agents</Link.Page> – the endpoint, the events, and where enforcement stops
+- <Link.Page href="/coding-agents/policies">Coding agent policies</Link.Page> – the input contract and the starter policies
+- <Link.Page href="/coding-agents/claude-code">Secure Claude Code</Link.Page>
+- <Link.Page href="/coding-agents/copilot">Secure GitHub Copilot</Link.Page>
+- <Link.Page href="/coding-agents/cursor">Secure Cursor</Link.Page>
