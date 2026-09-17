@@ -60,7 +60,9 @@ func main() {
 		panic(err)
 	}
 
-	// Hand `lookup` to the agent as a tool. A denial reaches the model as
+	// This file compiles, but running it does not invoke an agent or write
+	// a dashboard event. Hand `lookup` to your agent as a tool and invoke
+	// that agent from your own setup. A denial reaches the model as
 	// arcjet.GuardDenialResult rather than a Go error.
 	_ = lookup
 }
