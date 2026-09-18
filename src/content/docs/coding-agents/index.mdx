@@ -130,6 +130,11 @@ deleted, a third-party model provider skips the server-managed settings fetch,
 and a developer calling the API from another tool is outside all of it.
 Reconcile against <Link.Page href="/observe">OpenTelemetry or Compliance API ingest</Link.Page>
 to find sessions with no hook decisions.
+- **Personal accounts don't reach Arcjet.** A personal Claude, ChatGPT,
+Copilot, or Cursor login on a corporate laptop uses the same product
+domains as the enterprise tier. Hooks and Compliance don't see that
+session. Refuse it at the network or device with
+<Link.Page href="/coding-agents/block-personal-accounts">account restrictions</Link.Page>.
 
 ## Get started
 
@@ -163,5 +168,10 @@ to find sessions with no hook decisions.
     title="Observe agent activity"
     href="/observe"
     description="The OpenTelemetry and Compliance API paths that record without enforcing."
+  />
+  <Link.Card
+    title="Block personal accounts"
+    href="/coding-agents/block-personal-accounts"
+    description="Keep personal Claude Code, Codex, Copilot, and Cursor accounts off managed networks."
   />
 </CardGrid>
