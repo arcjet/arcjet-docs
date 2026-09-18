@@ -18,7 +18,9 @@ create page asks whether the policy guards a coding agent or an action in your
 own application.
 
 Choose when the policy should execute: on a **Tool call**, on a **Prompt**, or
-on a **Model switch**.
+on a **Model switch**. A model list is a normal Rego policy with those
+Execute on options, not a separate org-wide setting. The hook file does not
+name it.
 
 | Execute on       | Runs                                                                                            | Rules read                                                                                          |
 | ---------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
@@ -114,7 +116,7 @@ Arcjet will run every policy attached to the specific event in one round trip so
 | `coding-agent.egress-allowlist` | Fetches to hosts outside a list written into the policy |
 | `coding-agent.prompt-injection` | Instructions the injection detector flags in a prompt |
 | `coding-agent.sensitive-info` | Card numbers and Social Security numbers in a prompt |
-| `coding-agent.model-allowlist` | A model switch, prompt, or tool call whose model is outside the list in the policy. Claude Code denies the switch only; Codex and Cursor deny the prompt and the tool call; Copilot is not covered. |
+| `coding-agent.model-allowlist` | A model switch, prompt, or tool call whose model is outside the list the author wrote in Rego. Claude Code denies the switch only; Codex and Cursor deny the prompt and the tool call; Copilot is not covered. |
 
 See <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>
 for the coverage table.
@@ -277,19 +279,25 @@ deny contains "prompt-has-sensitive-info" if {
 
 ### Allowed models
 
+A normal Rego Guard policy. Write the list of model ids in Rego and choose
+when it runs: **Tool call**, **Prompt**, and **Model switch**. The hook file
+does not name the policy.
+
 A model switch, prompt, or tool call whose model is outside the list in the
 policy. Claude Code denies the switch only; Codex and Cursor deny the prompt
 and the tool call; Copilot is not covered.
 
-`codingAgentMoments` is `["model-switch", "tool-call", "prompt"]`. All three
-are required. A policy that reads `model` and is attached only to Tool call
-refuses Codex and Cursor tools and never sees a Claude Code switch.
+Selecting all three Execute on options is how you get that coverage. A
+policy that reads `model` and is attached only to Tool call refuses Codex
+and Cursor tools and never sees a Claude Code switch. Clearing Model switch
+leaves Claude Code unenforced. Clearing Tool call and Prompt leaves Codex
+and Cursor unenforced.
 
-The set in the starter is a placeholder. The three ids are one per vendor we
-enforce, so an author can see that the list is not Claude-only. Replace it
-before the rule goes live. `auto` is not in the list, so a Cursor session on
-Auto is denied. An author who intends to allow Auto adds `auto` to the list.
-That is a deliberate edit, not a default.
+The set in the example is a placeholder. The three ids are one per vendor
+we enforce, so an author can see that the list is not Claude-only. Replace
+it with the ids you allow before the rule goes live. `auto` is not in the
+list, so a Cursor session on Auto is denied unless the author listed
+`auto`. That is a deliberate edit, not a default.
 
 ```rego
 deny contains "disallowed-model" if {
@@ -317,8 +325,9 @@ for the coverage table and the already-selected-model gap on Claude Code.
    the policy a label such as `coding-agent.no-npm-publish`.
 2. Set what it executes on: **Tool call** for anything about a command, a
    file, a URL, or an MCP server, **Prompt** for anything about what the
-   developer typed, and **Model switch** for a Claude Code model change. A
-   model allowlist needs all three.
+   developer typed, and **Model switch** for a Claude Code model change.
+   Write the allowed model ids in Rego. The hook file does not name the
+   policy. Choose the boxes that match when you want the rule to run.
 3. Add rules in the visual builder, or start from the closest starter policy
    and edit its Rego.
 4. Add stored tests. A test input is the contract's `values`, so a test for

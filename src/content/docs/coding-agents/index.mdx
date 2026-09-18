@@ -167,11 +167,12 @@ session. Refuse it at the network or device with
 
 ## Allowed models
 
-One coding-agent policy, `coding-agent.model-allowlist`, holds the list of
-model ids an organisation allows. Publishing it is what turns it on. The hook
-file does not name the policy.
+Allowed models is a normal Rego Guard policy. Write the list of model ids in
+Rego and choose when it runs: **Tool call**, **Prompt**, and **Model switch**.
+The hook file does not name the policy.
 
-The policy does two different things, depending on which agent fired the hook:
+A rule over `model` does two different things, depending on which agent fired
+the hook and which Execute on options you selected:
 
 - On Claude Code it refuses the switch onto a model that is not in the list.
 - On Codex and Cursor it refuses the prompt and the tool call while a model
@@ -208,9 +209,8 @@ before the VM existed. Enterprise team hooks reach cloud agents. User-level
 allowlist unless the author listed that exact token. On Cursor they are real
 selector states. On Claude Code and Copilot the field is absent, which is a
 different case: an optional input that is absent does not make the binding
-incomplete. A Cursor session on Auto is denied by the starter. An author who
-intends to allow Auto adds `auto` to the list. That is a deliberate edit, not
-a default.
+incomplete. A Cursor session on Auto is denied unless the author listed
+`auto`. That is a deliberate edit, not a default.
 
 List canonical model ids. Matching is exact, after lowercasing. Not a prefix
 and not `contains`. `contains "fable"` misses `claude-fable-5` and hits any
@@ -232,8 +232,8 @@ starter on
 | `tool-call` | absent | `model` on `PreToolUse` and `PermissionRequest` | `model_id`, else `model`, on `preToolUse` | absent |
 
 Absent means the translator does not set the input. It does not set it to
-`""`. On Cursor a blank result is the token `unknown`. `unknown` is not in
-the starter list.
+`""`. On Cursor a blank result is the token `unknown`. `unknown` is not a
+member of any allowlist unless the author listed that exact token.
 
 ## Get started
 
