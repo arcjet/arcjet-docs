@@ -205,25 +205,6 @@ managed settings path for the operating system.
         ]
       }
     ],
-    "PostToolBatch": [
-      {
-        "hooks": [
-          {
-            "type": "http",
-            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=post-tool-batch",
-            "headers": {
-              "Authorization": "Bearer $ARCJET_KEY",
-              "X-Arcjet-Principal": "$USER"
-            },
-            "allowedEnvVars": [
-              "ARCJET_KEY",
-              "USER"
-            ],
-            "timeout": 5
-          }
-        ]
-      }
-    ],
     "Notification": [
       {
         "hooks": [
@@ -452,6 +433,25 @@ managed settings path for the operating system.
         ]
       }
     ],
+    "FileChanged": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=file-changed",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "PreCompact": [
       {
         "hooks": [
@@ -620,21 +620,24 @@ An allow is always `{}`. The hook file does not name a policy.
   that case. For more information about writing the list, see
   <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>.
 - The other entries record the session. They cover permissions
-  (`PermissionDenied`), tool results (`PostToolUse`, `PostToolUseFailure`,
-  `PostToolBatch`), notifications, subagents (`SubagentStart`,
-  `SubagentStop`), tasks (`TaskCreated`, `TaskCompleted`), turns (`Stop`,
-  `StopFailure`), agent teams (`TeammateIdle`), instructions
-  (`InstructionsLoaded`), configuration (`ConfigChange`), the working
-  directory (`CwdChanged`, `DirectoryAdded`), compaction (`PreCompact`,
-  `PostCompact`), model changes after they apply (`PostModelSwitch`), MCP
-  elicitations (`Elicitation`, `ElicitationResult`), and the session
-  (`SessionStart`, `SessionEnd`).
-- The template omits `MessageDisplay`, `FileChanged`, `WorktreeCreate`,
-  `WorktreeRemove`, and `Setup`. `MessageDisplay` runs on every streamed
-  batch of assistant text. `FileChanged` only watches files a `matcher`
-  names, and this template has no `matcher`. `WorktreeCreate` and
-  `WorktreeRemove` replace Claude Code's default git worktree behavior.
-  `Setup` runs for `--init` and `--maintenance`, not a developer session.
+  (`PermissionDenied`), tool results (`PostToolUse`, `PostToolUseFailure`),
+  notifications, subagents (`SubagentStart`, `SubagentStop`), tasks
+  (`TaskCreated`, `TaskCompleted`), turns (`Stop`, `StopFailure`), agent
+  teams (`TeammateIdle`), instructions (`InstructionsLoaded`),
+  configuration (`ConfigChange`), the working directory (`CwdChanged`,
+  `DirectoryAdded`), watched files (`FileChanged`), compaction
+  (`PreCompact`, `PostCompact`), model changes after they apply
+  (`PostModelSwitch`), MCP elicitations (`Elicitation`,
+  `ElicitationResult`), and the session (`SessionStart`, `SessionEnd`).
+  `FileChanged` has no `matcher`, so it records a change only if
+  something else seeded the watch list.
+- The template omits `MessageDisplay`, `PostToolBatch`, `Setup`,
+  `WorktreeCreate`, and `WorktreeRemove`. `MessageDisplay` runs on every
+  streamed batch of assistant text. `PostToolBatch` repeats what
+  `PostToolUse` already records. `Setup` runs for `--init` and
+  `--maintenance`, and Claude Code runs command hooks there, not HTTP.
+  `WorktreeCreate` and `WorktreeRemove` replace Claude Code's default git
+  worktree behavior.
 - `timeout` on every entry. Claude Code's default for an HTTP hook is 600
   seconds, but 5 seconds is a sensible ceiling for a policy decision. The
   `PreModelSwitch` entry sets `timeout: 30`. A slow response can block a
