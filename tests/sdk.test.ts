@@ -382,6 +382,12 @@ test.describe("pathnameForLegacyFrameworkKey", () => {
       "/sdk/google-adk/get-started/",
     );
     expect(
+      pathnameForLegacyFrameworkKey("google-adk-py", "/get-started"),
+    ).toBe("/sdk/google-adk-py/get-started/");
+    expect(
+      pathnameForLegacyFrameworkKey("cloudflare-think", "/get-started"),
+    ).toBe("/sdk/cloudflare-think/get-started/");
+    expect(
       pathnameForLegacyFrameworkKey(
         "microsoft-agent-framework",
         "/get-started",
@@ -499,6 +505,22 @@ test.describe("legacyFrameworkVercelRedirects", () => {
       redirects.find(
         (r) =>
           r.source === "/get-started" &&
+          r.has[0]?.value === "google-adk-py" &&
+          r.destination === "/sdk/google-adk-py/get-started/",
+      ),
+    ).toBeDefined();
+    expect(
+      redirects.find(
+        (r) =>
+          r.source === "/get-started" &&
+          r.has[0]?.value === "cloudflare-think" &&
+          r.destination === "/sdk/cloudflare-think/get-started/",
+      ),
+    ).toBeDefined();
+    expect(
+      redirects.find(
+        (r) =>
+          r.source === "/get-started" &&
           r.has[0]?.value === "strands-agents-py" &&
           r.destination === "/sdk/strands-agents/get-started/",
       ),
@@ -578,6 +600,22 @@ test.describe("legacyFrameworkVercelRedirects", () => {
           r.source === "/guards/quick-start" &&
           r.has[0]?.value === "google-adk" &&
           r.destination === "/sdk/google-adk/guards/quick-start/",
+      ),
+    ).toBeDefined();
+    expect(
+      redirects.find(
+        (r) =>
+          r.source === "/guards/quick-start" &&
+          r.has[0]?.value === "google-adk-py" &&
+          r.destination === "/sdk/google-adk-py/guards/quick-start/",
+      ),
+    ).toBeDefined();
+    expect(
+      redirects.find(
+        (r) =>
+          r.source === "/guards/quick-start" &&
+          r.has[0]?.value === "cloudflare-think" &&
+          r.destination === "/sdk/cloudflare-think/guards/quick-start/",
       ),
     ).toBeDefined();
     expect(

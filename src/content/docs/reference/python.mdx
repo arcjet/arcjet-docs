@@ -844,6 +844,14 @@ To record that an allowed action happened without gating it, use
   or a string). Don't set `BeforeToolsEvent.cancel`. There is no
   inbound helper. `event.interrupt()` is HITL, not policy. This
   is not `@arcjet/guard/strands-agents/v1`.
+- **Google ADK Python `LlmAgent`** – `guard_tool` plus
+  `guard_plugin` (`arcjet[google-adk]`,
+  `arcjet.guard.google_adk`, `google-adk>=2.0.0,<3`).
+  `LlmAgent.before_tool_callback` and Runner
+  `before_tool_callback` return a skip dict with `arcjetDenied`.
+  `None` executes. Never return `{}`. There is no inbound
+  helper. `require_confirmation` is HITL, not policy. This is
+  not `@arcjet/guard/google-adk/v2`.
 
 Checkpoint helpers that wrap an effect also record `metadata.outcome` on
 the capture event. The value is capture and Sequence metadata. It
@@ -865,6 +873,8 @@ For Claude Managed Agents, see the
 <Link.Page href="/guards/claude-managed-agents">Claude Managed Agents agent guard</Link.Page>.
 For Strands Agents Python, see the
 <Link.Page href="/guards/strands-agents">Strands Agents agent guard</Link.Page>.
+For Google ADK Python, see the
+<Link.Page href="/guards/google-adk-py">Google ADK Python agent guard</Link.Page>.
 
 ### Rules
 
