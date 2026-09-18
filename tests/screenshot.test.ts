@@ -111,7 +111,34 @@ const PATHS_FROM_SITEMAP = [
 // overly excessive sizes.
 const SCREENSHOT_MAX_HEIGHT_PX = 5000;
 
+// Comments, embeds, and analytics keep connections open, so `networkidle`
+// never arrives and the 30s test timeout fails. These are the same widgets
+// the test already strips from the DOM after load.
+const SCREENSHOT_BLOCKED_HOSTS = new Set([
+  "giscus.app",
+  "giscus.github.com",
+  "www.youtube.com",
+  "youtube.com",
+  "www.youtube-nocookie.com",
+  "i.ytimg.com",
+  "js.hs-scripts.com",
+  "js.hs-analytics.net",
+  "js.hscollectedforms.net",
+  "js.hs-banner.com",
+  "js.hubspot.com",
+  "js.hsadspixel.net",
+  "static.reo.dev",
+  "api.reo.dev",
+]);
+
 test.describe("Screenshots", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.route(
+      (url) => SCREENSHOT_BLOCKED_HOSTS.has(url.hostname),
+      (route) => route.abort(),
+    );
+  });
+
   for (const path of PATHS_FROM_SITEMAP) {
     for (const colorScheme of ["light", "dark"] as const) {
       const name =
