@@ -7,10 +7,9 @@ import { Aside, Steps } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 
-Arcjet integrates into Cursor sessions through hooks that fire
-for different actions like prompts and tool calls. This allows Arcjet to
-observe activity, enforce policy, and record actions taken by developers
-without requiring any changes to the developer's workflow.
+Cursor already fires hooks for prompts and tool calls. Arcjet uses those
+hooks to enforce your policies and record the session. You don't change
+how developers work.
 
 <WhatIsArcjet />
 
@@ -52,28 +51,63 @@ same directory as the managed `hooks.json`.
 #!/bin/sh
 # Usage: arcjet-hook.sh VENDOR EVENT
 # Reads one hook payload from stdin and posts it to Arcjet.
+# On success: print the body and exit 0.
+# On any transport failure, non-2xx, or non-JSON 2xx: print the
+# vendor denial shape and exit 2.
 
 vendor=$1
 event=$2
 principal=${USER:-${USERNAME:-}}
 
-curl -sS --max-time 5 -X POST \
+deny() {
+  case "${vendor}:${event}" in
+    cursor:pre-tool-use)
+      printf '%s\n' '{"permission":"deny","user_message":"arcjet-hook","agent_message":"arcjet-hook"}' ;;
+    cursor:user-prompt-submit)
+      printf '%s\n' '{"continue":false,"user_message":"arcjet-hook"}' ;;
+    *)
+      printf '%s\n' '{}' ;;
+  esac
+  exit 2
+}
+
+tmp=$(mktemp) || deny
+trap 'rm -f "$tmp"' EXIT
+code=$(curl -sS --max-time 5 -o "$tmp" -w '%{http_code}' -X POST \
   "https://decide.arcjet.com/v1/agent-hooks/${vendor}?event=${event}" \
   -H "Authorization: Bearer ${ARCJET_KEY}" \
   -H "Content-Type: application/json" \
   -H "X-Arcjet-Principal: ${principal}" \
-  --data-binary @- || printf '%s\n' '{}'
+  --data-binary @-) || deny
+case "$code" in
+  2??) ;;
+  *) deny ;;
+esac
+head=$(dd if="$tmp" bs=1 count=1 2>/dev/null) || deny
+case "$head" in
+  \{|\[) ;;
+  *) deny ;;
+esac
+cat "$tmp"
+exit 0
 ```
 
 Make the script executable. Project hooks run from the project root, so the
-command path is `.cursor/hooks/arcjet-hook.sh`. User hooks run from
-`~/.cursor/`, so use `./hooks/arcjet-hook.sh` there.
+command path is `.cursor/hooks/arcjet-hook.sh`.
 
 On Windows, save a sibling `arcjet-hook.ps1`:
 
 ```powershell title="arcjet-hook.ps1"
 param([string]$Vendor, [string]$Event)
 $principal = if ($env:USERNAME) { $env:USERNAME } else { $env:USER }
+function Deny {
+  switch ("$Vendor`:$Event") {
+    "cursor:pre-tool-use" { Write-Output '{"permission":"deny","user_message":"arcjet-hook","agent_message":"arcjet-hook"}' }
+    "cursor:user-prompt-submit" { Write-Output '{"continue":false,"user_message":"arcjet-hook"}' }
+    default { Write-Output '{}' }
+  }
+  exit 2
+}
 try {
   $body = [Console]::In.ReadToEnd()
   $headers = @{
@@ -84,21 +118,43 @@ try {
   $response = Invoke-WebRequest -Method Post -TimeoutSec 5 `
     -Uri "https://decide.arcjet.com/v1/agent-hooks/$Vendor`?event=$Event" `
     -Headers $headers -Body $body
-  Write-Output $response.Content
+  if ($response.StatusCode -lt 200 -or $response.StatusCode -ge 300) { Deny }
+  $content = $response.Content
+  if ($content -notmatch '^\s*[\{\[]') { Deny }
+  Write-Output $content
 } catch {
-  Write-Output '{}'
+  Deny
 }
 ```
 
-A failed or timed-out `curl` prints `{}`. Cursor treats invalid JSON as a
-hook failure and, by default, lets the action through.
+`arcjet-hook` reads stdin, POSTs it to
+`https://decide.arcjet.com/v1/agent-hooks/<vendor>?event=<event>` with
+`Authorization: Bearer $ARCJET_KEY`, prints the body, and exits 0. On
+failure it prints the denial shape for that vendor and event and exits 2.
+Cursor is configured with `failClosed: true`, so a crash, timeout, or
+invalid JSON denies as well. A wrong key denies every Cursor prompt and
+tool call. The script does not log the body.
 
 ## Install the hooks
 
-Put this file in the repository as `.cursor/hooks.json`. The template
-installs the tool-call and prompt moments plus the recorded events worth
-keeping. It omits `matcher`, so Arcjet sees every tool Cursor reports on
-`preToolUse`.
+This template is a complete setup. Put this file in the repository as
+`.cursor/hooks.json`. It installs every enforcement point plus the recorded
+events worth keeping. It omits `matcher`, so Arcjet sees every tool Cursor
+reports on `preToolUse`.
+
+IDE sessions run both `preToolUse` and `beforeSubmitPrompt`. Cloud agents
+run `preToolUse` only. Tool calls are refused; the prompt itself is not,
+because it was submitted before the VM existed. Enterprise team hooks
+reach cloud agents. User-level `~/.cursor/hooks.json` does not. A
+repository file on the default branch is what cloud agents load.
+
+Cursor has no model-switch hook. A model-list policy refuses the prompt
+and the tool call while a model that isn't in the list is selected. For
+more information about writing the list, see
+<Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>.
+
+<details>
+<summary>Show .cursor/hooks.json</summary>
 
 ```json title=".cursor/hooks.json"
 {
@@ -170,6 +226,8 @@ keeping. It omits `matcher`, so Arcjet sees every tool Cursor reports on
 }
 ```
 
+</details>
+
 For an enterprise or user install, change the command to an absolute path
 or to `./hooks/arcjet-hook.sh` so it resolves from that source's working
 directory.
@@ -181,11 +239,11 @@ request of latency (typically a few tens of milliseconds).
 
 - The wrapper posts to `https://decide.arcjet.com/v1/agent-hooks/cursor`
   with `event` as a query parameter. Policy inputs identify Cursor as
-  `agent_vendor: anysphere` and `agent_product: cursor`.
-- `preToolUse` is the tool-call moment. The wrapper sends
+  `agent_vendor: cursor` and `agent_product: cursor`.
+- `preToolUse` runs on **Tool call**. The wrapper sends
   `event=pre-tool-use`. Cursor fires it for `Shell`, `Read`, `Write`,
-  MCP, `Task`, and the other agent tools. `beforeSubmitPrompt` is the
-  prompt moment (`event=user-prompt-submit`). Cursor honors a prompt
+  MCP, `Task`, and the other agent tools. `beforeSubmitPrompt` runs on
+  **Prompt** (`event=user-prompt-submit`). Cursor honors a prompt
   denial. Cursor has no permission-request or prompt-expansion hook.
 - Cursor also has `beforeShellExecution`, `beforeMCPExecution`, and
   `beforeReadFile`. They alias onto `pre-tool-use` and fire in addition

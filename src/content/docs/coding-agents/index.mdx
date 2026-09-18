@@ -15,8 +15,8 @@ agent did.
 Arcjet also screens what the developer typed for prompt injection and sensitive
 information, and records the whole session as activity in the Console.
 
-There is no SDK to install and no code to change. Publishing a policy from
-Arcjet's Console.
+There is no SDK to install and no code to change. Publish a policy from
+the Arcjet Console.
 
 ```text
 ┌─────────────┐      hook      ┌───────────────┐    allow    ┌───────────────┐
@@ -32,17 +32,18 @@ Arcjet's Console.
 
 ## How it works
 
-Coding agent events are tracked using HTTP hooks that report events to Arcjet.
-Policies execute whenever an event is reported, determining whether the agent
-is allowed to proceed based on the applicable policy. Policies can be enforced
-or configured to log only, with changes updating in real time. Execution
-happens at the edge in over 300 data center locations, minimizing latency and
-ensuring rapid policy enforcement.
+Coding agent events are tracked using HTTP hooks that report events to
+Arcjet. When a hook fires, Arcjet runs the policies attached to that
+event and decides whether the agent can proceed. You can enforce a
+policy or log only, and a change takes effect in real time. Evaluation
+runs at the edge in over 300 data centers, so the extra latency stays
+small.
 
-Policies work across all supported coding agents, so you don't need to write
-separate policies for each agent.
+Policies work across every supported coding agent, so you don't write a
+separate policy for each one.
 
-If a policy denies an action, the agent is told the rule ID and the reason e.g
+If a policy denies an action, the agent is told the rule ID, for
+example:
 
 ```text
 Blocked by Arcjet policy: destructive-command.
@@ -50,13 +51,19 @@ Blocked by Arcjet policy: destructive-command.
 
 ### Policy enforcement
 
-Policies are configured on one or more execution points where the inputs can be
-evaluated and allowed or denied.
+Choose one or more **Execute on** options. There are three: **Tool
+call**, **Prompt**, and **Model switch**. Events that share an Execute
+on option share inputs. `model` is filled only on the vendors in
+[Where `model` is filled](#where-model-is-filled).
 
-| Execute on    | Events                                        | Inputs the policy can read                                                                          |
-| ------------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **Tool call** | `pre-tool-use`, `permission-request`          | `tool_name`, `tool_kind`, `command`, `command_tokens`, `paths`, `domains`, `mcp_server`, `mcp_tool` |
-| **Prompt**    | `user-prompt-submit`, `user-prompt-expansion` | `prompt`                                                                                            |
+| Execute on       | Events                                                      | Inputs the policy can read                                                                          |
+| ---------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| **Tool call**    | `pre-tool-use`, `permission-request`                        | `tool_name`, `tool_kind`, `command`, `command_tokens`, `paths`, `domains`, `mcp_server`, `mcp_tool`, `model` |
+| **Prompt**       | `user-prompt-submit`, `user-prompt-expansion`               | `prompt`, `model`                                                                                   |
+| **Model switch** | `pre-model-switch` enforces. `post-model-switch` is recorded and never adjudicated. | `model`                                                                          |
+
+A `model` rule on Tool call or Prompt does nothing for Claude Code or Copilot,
+and that is intended. It is not an INCOMPLETE policy.
 
 The hook URL names the vendor. Use `POST /v1/agent-hooks/claude-code`, `/copilot`, `/codex`, or `/cursor`, with `event` as a query parameter.
 
@@ -66,13 +73,16 @@ The hook URL names the vendor. Use `POST /v1/agent-hooks/claude-code`, `/copilot
 | `permission-request`    | `PermissionRequest`   | `permissionRequest`   | `PermissionRequest` | No such hook                                                           | Claude Code, Copilot, Codex |
 | `user-prompt-submit`    | `UserPromptSubmit`    | `userPromptSubmitted` | `UserPromptSubmit`  | `beforeSubmitPrompt`                                                   | Claude Code, Codex, Cursor |
 | `user-prompt-expansion` | `UserPromptExpansion` | –                     | –                   | –                                                                      | Claude Code only           |
+| `pre-model-switch`      | `PreModelSwitch`      | –                     | –                   | –                                                                      | Claude Code only           |
 
 ### Recorded events
 
-Arcjet tracks all these events, but can only enforce policy on the above enforceable events.
+Arcjet tracks all these events, but can only enforce policy on the
+enforceable events in the preceding table.
 
 | `event`                   | Claude Code          | Copilot                 | Codex            | Cursor                                                              | What it carries                            |
 | ------------------------- | -------------------- | ----------------------- | ---------------- | ------------------------------------------------------------------- | ------------------------------------------ |
+| `post-model-switch`       | `PostModelSwitch`    | –                       | –                | –                      | The model the session is now using         |
 | `post-tool-use`           | `PostToolUse`        | `postToolUse`           | `PostToolUse`    | `postToolUse` (aliases: `afterShellExecution`, `afterMCPExecution`, `afterFileEdit`) | What the tool returned                     |
 | `post-tool-use-failure`   | `PostToolUseFailure` | `postToolUseFailure`    | –                | `postToolUseFailure`   | Why it did not                             |
 | `user-prompt-transformed` | –                    | `userPromptTransformed` | –                | –                      | The model-facing prompt after a rewrite    |
@@ -102,17 +112,38 @@ permission flow. Codex can also rewrite the call when an allow carries
 | `permission-request`    | `hookSpecificOutput.decision: {behavior, message}`     | Flat `behavior` / `message`                     | No such hook                                        |
 | `user-prompt-submit`    | Top-level `{ decision: "block", reason }`              | Output dropped. Can't enforce                   | `{ continue: false, user_message }`                 |
 | `user-prompt-expansion` | Top-level `{ decision: "block", reason }` (Claude Code) | No such hook                                    | No such hook                                        |
+| `pre-model-switch`      | `hookSpecificOutput.permissionDecision: "deny"` (Claude Code). Codex and Cursor do not fire this. | – | – |
+
+| Event                   | Vendor      | Denial |
+| ----------------------- | ----------- | ------ |
+| `pre-model-switch`      | Claude Code | `hookSpecificOutput.hookEventName` is `PreModelSwitch`, `permissionDecision` is `deny`, `permissionDecisionReason` is the rule id. Exit 0 with that JSON. |
+| `pre-tool-use`          | Codex       | `hookSpecificOutput.hookEventName` is `PreToolUse`, `permissionDecision` is `deny`, `permissionDecisionReason` is the rule id. The legacy `{decision: "block", reason}` shape is also accepted by Codex; send the `permissionDecision` shape only. |
+| `permission-request`    | Codex       | `hookSpecificOutput.decision.behavior` is `deny`, `message` is the rule id. |
+| `user-prompt-submit`    | Codex       | Top-level `{decision: "block", reason}`. `reason` is the rule id. |
+| `pre-tool-use`          | Cursor      | `{permission: "deny", user_message, agent_message}`. Both messages are the rule id. `ask` is not sent: Cursor accepts it on this event and does not enforce it. |
+| `user-prompt-submit`    | Cursor      | `{continue: false, user_message}`. `user_message` is the rule id. This is `beforeSubmitPrompt`. |
 
 Policy inputs identify the agent as `agent_vendor` / `agent_product`:
 `anthropic` / `claude-code`, `github` / `copilot`, `openai` / `codex`, or
-`anysphere` / `cursor`.
+`cursor` / `cursor`.
 
 ## Enforcement limitations
 
-- **Claude Code, Copilot, and Codex fail open on a slow or failing hook, by their own design.** A
-timeout, a network error, a non-2xx response, or a malformed body is a
-non-blocking error, and the tool call continues through the agent's normal
-permission flow. Cursor is the same unless the hook sets `failClosed: true`.
+- **Claude Code and Copilot HTTP hooks fail open** on timeout, network error,
+and non-2xx, except `PreModelSwitch`: a timeout there blocks the switch, and
+the default timeout is 30 seconds. The install sets `timeout: 30` on that
+entry. A slow response can block a legitimate switch. A 401 does not block
+`PreToolUse`, but a `PreModelSwitch` timeout does block the switch. Keep
+those fail-open facts for every Claude Code and Copilot hook other than
+`PreModelSwitch`.
+- **Codex and Cursor are not fail-open HTTP.** Neither has an HTTP hook type.
+The wrapper is the fail-closed boundary: it POSTs the raw stdin to the
+vendor's URL and prints the response body; on any transport failure, non-2xx,
+or non-JSON 2xx, it writes the vendor's denial shape to stdout and exits 2.
+Exit 2 is what Codex treats as a deny on `PreToolUse` and `UserPromptSubmit`.
+Cursor is configured with `failClosed: true`, so a crash, timeout, or invalid
+JSON denies as well. A wrong key denies every Codex and Cursor prompt and
+tool call.
 - **Cursor has no `permission-request` hook.** A tool-call policy still
 runs on `preToolUse`.
 - **Copilot can't honor a prompt denial.** It drops hook output on
@@ -135,6 +166,76 @@ Copilot, or Cursor login on a corporate laptop uses the same product
 domains as the enterprise tier. Hooks and Compliance don't see that
 session. Refuse it at the network or device with
 <Link.Page href="/coding-agents/block-personal-accounts">account restrictions</Link.Page>.
+
+## Allowed models
+
+Allowed models is a normal Rego Guard policy. Write the list of model ids in
+Rego and choose when it runs: **Tool call**, **Prompt**, and **Model switch**.
+The hook file does not name the policy.
+
+A rule over `model` does two different things, depending on which agent fired
+the hook and which Execute on options you selected:
+
+- On Claude Code it refuses the switch onto a model that is not in the list.
+- On Codex and Cursor it refuses the prompt and the tool call while a model
+that is not in the list is selected.
+
+It does not do the second thing on Claude Code, and it does not do either on
+Copilot. Claude Code denies the switch only; Codex and Cursor deny the prompt
+and the tool call; Copilot is not covered.
+
+| Agent | Blocks the switch | Blocks the next prompt | Blocks tool calls | How the hook is installed |
+| --- | --- | --- | --- | --- |
+| Claude Code | Yes. `PreModelSwitch`. | No. Those payloads have no model. | No. Same reason. | HTTP entry, same as the other Claude hooks. |
+| Codex | No. There is no switch hook. | Yes. `UserPromptSubmit` carries `model` and honours `decision: "block"`. | Yes. `PreToolUse` and `PermissionRequest` carry `model` and honour a deny. | Command wrapper. Codex has command and MCP-tool hooks, not HTTP. |
+| Cursor | No. There is no switch hook. | Yes, in the IDE. `beforeSubmitPrompt` carries `model` / `model_id` and honours `continue: false`. | Yes. `preToolUse` carries the same fields and honours `permission: "deny"`. | Command wrapper. Cursor hooks are command-only. |
+| Copilot | No. | No. | No. | Not this policy. Copilot hook payloads have no model field. |
+
+A session that opened on a disallowed model and never switches is stopped on
+Codex and Cursor (the next prompt and every tool call) and is not stopped on
+Claude Code. Claude Code still needs the vendor's own org default or
+banned-model setting for that case.
+
+Cloud agents:
+
+- Claude Code cloud sessions run the same managed HTTP hooks, so the switch
+block applies there.
+- Codex managed hooks from `requirements.toml`, MDM, or cloud config are
+trusted and cannot be disabled. The wrapper applies wherever those hooks run.
+- Cursor cloud agents run `preToolUse` and do not run `beforeSubmitPrompt`.
+Tool calls are refused; the prompt itself is not, because it was submitted
+before the VM existed. Enterprise team hooks reach cloud agents. User-level
+`~/.cursor/hooks.json` does not.
+
+`auto`, `default`, `inherit`, and a blank model are not members of any
+allowlist unless you listed that exact token. On Cursor they are real
+selector states. On Claude Code and Copilot the field is absent, which is
+a different case: an optional input that is absent does not make the
+binding incomplete. A Cursor session on Auto is denied unless you listed
+`auto`. That is a deliberate edit, not a default.
+
+List canonical model ids. Matching is exact, after lowercasing. Not a prefix
+and not `contains`. `contains "fable"` misses `claude-fable-5` and hits any
+id that happens to include those letters.
+
+See the install sections on
+<Link.Page href="/coding-agents/claude-code">Secure Claude Code</Link.Page>,
+<Link.Page href="/coding-agents/codex">Secure OpenAI Codex</Link.Page>, and
+<Link.Page href="/coding-agents/cursor">Secure Cursor</Link.Page>, and the
+starter on
+<Link.Page href="/coding-agents/policies#allowed-models">Coding agent policies</Link.Page>.
+
+### Where `model` is filled
+
+| Execute on | Claude Code | Codex | Cursor | Copilot |
+| --- | --- | --- | --- | --- |
+| **Model switch** | `to_model` | event does not fire | event does not fire | event does not fire |
+| **Prompt** | absent | `model` on `UserPromptSubmit` | `model_id`, else `model`, on `beforeSubmitPrompt` | absent |
+| **Tool call** | absent | `model` on `PreToolUse` and `PermissionRequest` | `model_id`, else `model`, on `preToolUse` | absent |
+
+Absent means the translator does not set the input. It does not set it to
+`""`. On Cursor a blank result is the token `unknown`. `unknown` is not a
+member of any allowlist unless you listed that exact token.
 
 ## Get started
 

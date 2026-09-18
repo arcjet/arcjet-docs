@@ -7,10 +7,9 @@ import { Aside, Steps } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 
-Arcjet integrates into GitHub Copilot sessions through hooks that fire
-for different actions like prompts and tool calls. This allows Arcjet to
-observe activity, enforce policy, and record actions taken by developers
-without requiring any changes to the developer's workflow.
+GitHub Copilot already fires hooks for prompts and tool calls. Arcjet uses
+those hooks to enforce your policies and record the session. You don't
+change how developers work.
 
 <WhatIsArcjet />
 
@@ -23,7 +22,11 @@ configuration management.
 
 ## Install the hooks
 
-Put this file in the repository as `.github/hooks/arcjet.json`:
+This template is a complete setup. Put this file in the repository as
+`.github/hooks/arcjet.json`.
+
+<details>
+<summary>Show .github/hooks/arcjet.json</summary>
 
 ```json title=".github/hooks/arcjet.json"
 {
@@ -129,16 +132,26 @@ Put this file in the repository as `.github/hooks/arcjet.json`:
 }
 ```
 
-`allowedEnvVars` allows `$ARCJET_KEY` and `$USER` to be used in the hook headers. Export `ARCJET_KEY` where the agent runs, or replace the header with a literal
-value in a file only an administrator can edit. Never commit a literal key.
+</details>
 
-`X-Arcjet-Principal` attributes a session to a developer. It's untrusted, but useful extra metadata. `$USER` is unset on
-Windows, so use `$USERNAME` there and add it to both `allowedEnvVars` lists.
+`allowedEnvVars` allows `$ARCJET_KEY` and `$USER` to be used in the hook
+headers. Export `ARCJET_KEY` where the agent runs, or replace the header
+with a literal value in a file only an administrator can edit. Never
+commit a literal key.
+
+`X-Arcjet-Principal` attributes a session to a developer. It's untrusted,
+but useful extra metadata. `$USER` is unset on Windows, so use `$USERNAME`
+there and add it to both `allowedEnvVars` lists.
 
 The hook URLs omit `surface`. The same file reaches the CLI and the cloud
-coding agent, so a hard-coded `cli` mislabels cloud sessions. Arcjet records
-`unknown` when you omit the parameter. Set it only when the hook file is
-specific to one surface.
+coding agent, so a hard-coded `cli` mislabels cloud sessions. Arcjet
+records `unknown` when you omit the parameter. Set it only when the hook
+file is specific to one surface.
+
+Copilot hook payloads have no model field. A model-list policy doesn't
+run, and a Tool call entry doesn't approximate it. For more information
+about model lists, see
+<Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>.
 
 ## Per surface
 

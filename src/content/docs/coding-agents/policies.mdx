@@ -17,12 +17,21 @@ In the [Arcjet Console](https://console.arcjet.com), go to **Policies**. The
 create page asks whether the policy guards a coding agent or an action in your
 own application.
 
-Choose when the policy should execute: on a **Tool call** or on a **Prompt**.
+Choose when the policy runs: on a **Tool call**, on a **Prompt**, or on
+a **Model switch**. A model list is a normal Rego policy with those
+Execute on options, not a separate org-wide setting. The hook file does
+not name it.
 
-| Execute on    | Runs                                                                                            | Rules read                                                                                          |
-| ------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **Tool call** | Before the agent runs a command, reads or writes a file, calls an MCP server, or fetches a URL  | `tool_name`, `tool_kind`, `command`, `command_tokens`, `paths`, `domains`, `mcp_server`, `mcp_tool` |
-| **Prompt**    | Before text reaches the model: what the developer typed, and what a slash command expanded into | `prompt`                                                                                            |
+| Execute on       | Runs                                                                                            | Rules read                                                                                          |
+| ---------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| **Tool call**    | Before the agent runs a command, reads or writes a file, calls an MCP server, or fetches a URL  | `tool_name`, `tool_kind`, `command`, `command_tokens`, `paths`, `domains`, `mcp_server`, `mcp_tool`, `model` |
+| **Prompt**       | Before text reaches the model: what the developer typed, and what a slash command expanded into | `prompt`, `model`                                                                                   |
+| **Model switch** | Before Claude Code changes which model the session is using. A denial keeps the current model. Codex and Cursor do not fire this. | `model`                                                                         |
+
+Events that share an Execute on option share inputs. `model` is filled
+only on the vendors in [Where `model` is filled](#where-model-is-filled).
+A `model` rule on Tool call or Prompt does nothing for Claude Code or
+Copilot, and that is intended. It is not an INCOMPLETE policy.
 
 ## The input contract
 
@@ -32,7 +41,7 @@ Arcjet builds every input from the hook payload. Read a value in Rego as
 | Input             | Kind        | What it holds                                                              |
 | ----------------- | ----------- | -------------------------------------------------------------------------- |
 | `contract`        | String      | The contract version, always `coding-agent/v1`                             |
-| `agent_vendor`    | String      | `anthropic`, `github`, `openai`, or `anysphere`                            |
+| `agent_vendor`    | String      | `anthropic`, `github`, `openai`, or `cursor`                               |
 | `agent_product`   | String      | `claude-code`, `copilot`, `codex`, or `cursor`                             |
 | `agent_surface`   | String      | The optional `surface` query parameter (`cli`, `ide`, `cloud`), or `unknown` when omitted |
 | `event`           | String      | The lifecycle event, such as `pre-tool-use`                                |
@@ -49,6 +58,34 @@ Arcjet builds every input from the hook payload. Read a value in Rego as
 | `mcp_server`      | String      | The MCP server name, for an MCP call                                       |
 | `mcp_tool`        | String      | The MCP tool name, for an MCP call                                         |
 | `prompt`          | String      | The prompt text this event carries                                         |
+| `model`           | String      | The canonical id being switched to, or the id selected for the prompt or tool call. Exact match, after lowercasing. Not a prefix and not `contains`. Required on `pre-model-switch` only. |
+
+`from_model`, switch source, effort, and thinking level are metadata only.
+They are not inputs.
+
+### Where `model` is filled
+
+| Execute on | Claude Code | Codex | Cursor | Copilot |
+| --- | --- | --- | --- | --- |
+| **Model switch** | `to_model` | event does not fire | event does not fire | event does not fire |
+| **Prompt** | absent | `model` on `UserPromptSubmit` | `model_id`, else `model`, on `beforeSubmitPrompt` | absent |
+| **Tool call** | absent | `model` on `PreToolUse` and `PermissionRequest` | `model_id`, else `model`, on `preToolUse` | absent |
+
+Absent means the translator does not set the input. It does not set it to
+`""`. An optional input that is absent does not make the binding incomplete.
+A required input that is absent does. That is why `model` is required only on
+`pre-model-switch`, where Claude Code always sends `to_model`. Declaring it
+required on Tool call or Prompt would deny every Claude Code and Copilot
+call.
+
+On Cursor, `model_id` if it is a non-blank string, otherwise `model`,
+lowercased. The tokens `auto`, `default`, and `inherit` are kept as those
+tokens. A blank result is the token `unknown`. On Codex, missing or blank is
+treated as absent, not as `unknown`. On Claude Code and Copilot prompt and
+tool events, the field is absent.
+
+`contains` is not used. `contains "fable"` misses `claude-fable-5` and hits
+any id that happens to include those letters.
 
 ### Compare `tool_kind`, not `tool_name`
 
@@ -67,6 +104,22 @@ The agents spell their tools differently so Arcjet normalizes them to a consiste
 ## Starter policies
 
 Arcjet will run every policy attached to the specific event in one round trip so you can define multiple policies for the same event. The most restrictive decision will be applied.
+
+| Label | What it denies |
+| --- | --- |
+| `coding-agent.destructive-command` | `rm`, `dd`, `mkfs`, `sudo` and friends in a shell call |
+| `coding-agent.credential-access` | Tool calls and commands naming credential files |
+| `coding-agent.piped-installer` | A download piped into a shell |
+| `coding-agent.rewrite-history` | `git push --force` and `git reset --hard` |
+| `coding-agent.mcp-allowlist` | MCP servers outside a list written into the policy |
+| `coding-agent.protected-paths` | Writes to CI configuration and version-control internals |
+| `coding-agent.egress-allowlist` | Fetches to hosts outside a list written into the policy |
+| `coding-agent.prompt-injection` | Instructions the injection detector flags in a prompt |
+| `coding-agent.sensitive-info` | Card numbers and Social Security numbers in a prompt |
+| `coding-agent.model-allowlist` | A model switch, prompt, or tool call whose model is outside the list the author wrote in Rego. Claude Code denies the switch only; Codex and Cursor deny the prompt and the tool call; Copilot is not covered. |
+
+See <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>
+for the coverage table.
 
 Every example assumes the standard preamble:
 
@@ -224,6 +277,46 @@ deny contains "prompt-has-sensitive-info" if {
 }
 ```
 
+### Allowed models
+
+A normal Rego Guard policy. Write the list of model ids in Rego and choose
+when it runs: **Tool call**, **Prompt**, and **Model switch**. The hook file
+does not name the policy.
+
+A model switch, prompt, or tool call whose model is outside the list in the
+policy. Claude Code denies the switch only; Codex and Cursor deny the prompt
+and the tool call; Copilot is not covered.
+
+Selecting all three Execute on options is how you get that coverage. A
+policy that reads `model` and is attached only to Tool call refuses Codex
+and Cursor tools and never sees a Claude Code switch. Clearing Model switch
+leaves Claude Code unenforced. Clearing Tool call and Prompt leaves Codex
+and Cursor unenforced.
+
+The set in the example is a placeholder. The three ids are one per vendor
+we enforce, so you can see that the list is not Claude-only. Replace it
+with the ids you allow before the rule goes live. `auto` is not in the
+list, so a Cursor session on Auto is denied unless you listed `auto`.
+That is a deliberate edit, not a default.
+
+```rego
+deny contains "disallowed-model" if {
+  input.values.model
+  not input.values.model in {"claude-sonnet-4-6", "claude-opus-4-6", "gpt-5.4"}
+}
+```
+
+`input.values.model` is false when the input is absent or `""`, so Claude
+Code and Copilot prompt and tool events do not match. Claude Code
+`pre-model-switch` always has the input, so an id outside the list matches.
+Codex and Cursor match whenever the translated id is outside the list.
+
+The denial reason sent to the agent is the rule id `disallowed-model` and
+nothing else.
+
+See <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>
+for the coverage table and the already-selected-model gap on Claude Code.
+
 ## Write your own
 
 <Steps>
@@ -231,8 +324,10 @@ deny contains "prompt-has-sensitive-info" if {
 1. In the Console, go to **Policies**, choose the coding agent kind, and give
    the policy a label such as `coding-agent.no-npm-publish`.
 2. Set what it executes on: **Tool call** for anything about a command, a
-   file, a URL, or an MCP server, and **Prompt** for anything about what the
-   developer typed.
+   file, a URL, or an MCP server, **Prompt** for anything about what the
+   developer typed, and **Model switch** for a Claude Code model change.
+   Write the allowed model ids in Rego. The hook file does not name the
+   policy. Choose the boxes that match when you want the rule to run.
 3. Add rules in the visual builder, or start from the closest starter policy
    and edit its Rego.
 4. Add stored tests. A test input is the contract's `values`, so a test for
