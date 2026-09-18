@@ -7,10 +7,9 @@ import { Aside, Steps } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 
-Arcjet integrates into Cursor sessions through hooks that fire
-for different actions like prompts and tool calls. This allows Arcjet to
-observe activity, enforce policy, and record actions taken by developers
-without requiring any changes to the developer's workflow.
+Cursor already fires hooks for prompts and tool calls. Arcjet uses those
+hooks to enforce your policies and record the session. You don't change
+how developers work.
 
 <WhatIsArcjet />
 
@@ -133,51 +132,29 @@ try {
 `Authorization: Bearer $ARCJET_KEY`, prints the body, and exits 0. On
 failure it prints the denial shape for that vendor and event and exits 2.
 Cursor is configured with `failClosed: true`, so a crash, timeout, or
-invalid JSON denies as well. A wrong key denies every Codex and Cursor
-prompt and tool call. The script does not log the body. User-level hooks
-are not the documented install.
+invalid JSON denies as well. A wrong key denies every Cursor prompt and
+tool call. The script does not log the body.
 
 ## Install the hooks
 
-### Allowed models
+This template is a complete setup. Put this file in the repository as
+`.cursor/hooks.json`. It installs every enforcement point plus the recorded
+events worth keeping. It omits `matcher`, so Arcjet sees every tool Cursor
+reports on `preToolUse`.
 
-Project or enterprise-managed `.cursor/hooks.json`. `failClosed: true` on
-both. No matcher. IDE sessions get both. Cloud agents get `preToolUse` only.
-Tool calls are refused; the prompt itself is not, because it was submitted
-before the VM existed. Cursor enterprise cloud distribution is the managed
-path. A repo file on the default branch is what cloud agents load.
-User-level hooks are not the documented install.
+IDE sessions run both `preToolUse` and `beforeSubmitPrompt`. Cloud agents
+run `preToolUse` only. Tool calls are refused; the prompt itself is not,
+because it was submitted before the VM existed. Enterprise team hooks
+reach cloud agents. User-level `~/.cursor/hooks.json` does not. A
+repository file on the default branch is what cloud agents load.
 
-```json
-{
-  "version": 1,
-  "hooks": {
-    "preToolUse": [
-      {
-        "command": "/usr/local/bin/arcjet-hook cursor pre-tool-use",
-        "failClosed": true,
-        "timeout": 5
-      }
-    ],
-    "beforeSubmitPrompt": [
-      {
-        "command": "/usr/local/bin/arcjet-hook cursor user-prompt-submit",
-        "failClosed": true,
-        "timeout": 5
-      }
-    ]
-  }
-}
-```
-
-Claude Code denies the switch only; Codex and Cursor deny the prompt and
-the tool call; Copilot is not covered. See
+Cursor has no model-switch hook. A model-list policy refuses the prompt
+and the tool call while a model that isn't in the list is selected. For
+more information about writing the list, see
 <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>.
 
-Put this file in the repository as `.cursor/hooks.json`. The template
-installs the tool-call and prompt moments plus the recorded events worth
-keeping. It omits `matcher`, so Arcjet sees every tool Cursor reports on
-`preToolUse`.
+<details>
+<summary>Show .cursor/hooks.json</summary>
 
 ```json title=".cursor/hooks.json"
 {
@@ -249,6 +226,8 @@ keeping. It omits `matcher`, so Arcjet sees every tool Cursor reports on
 }
 ```
 
+</details>
+
 For an enterprise or user install, change the command to an absolute path
 or to `./hooks/arcjet-hook.sh` so it resolves from that source's working
 directory.
@@ -261,10 +240,10 @@ request of latency (typically a few tens of milliseconds).
 - The wrapper posts to `https://decide.arcjet.com/v1/agent-hooks/cursor`
   with `event` as a query parameter. Policy inputs identify Cursor as
   `agent_vendor: cursor` and `agent_product: cursor`.
-- `preToolUse` is the tool-call moment. The wrapper sends
+- `preToolUse` runs on **Tool call**. The wrapper sends
   `event=pre-tool-use`. Cursor fires it for `Shell`, `Read`, `Write`,
-  MCP, `Task`, and the other agent tools. `beforeSubmitPrompt` is the
-  prompt moment (`event=user-prompt-submit`). Cursor honors a prompt
+  MCP, `Task`, and the other agent tools. `beforeSubmitPrompt` runs on
+  **Prompt** (`event=user-prompt-submit`). Cursor honors a prompt
   denial. Cursor has no permission-request or prompt-expansion hook.
 - Cursor also has `beforeShellExecution`, `beforeMCPExecution`, and
   `beforeReadFile`. They alias onto `pre-tool-use` and fire in addition

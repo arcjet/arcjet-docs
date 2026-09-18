@@ -17,10 +17,10 @@ In the [Arcjet Console](https://console.arcjet.com), go to **Policies**. The
 create page asks whether the policy guards a coding agent or an action in your
 own application.
 
-Choose when the policy should execute: on a **Tool call**, on a **Prompt**, or
-on a **Model switch**. A model list is a normal Rego policy with those
-Execute on options, not a separate org-wide setting. The hook file does not
-name it.
+Choose when the policy runs: on a **Tool call**, on a **Prompt**, or on
+a **Model switch**. A model list is a normal Rego policy with those
+Execute on options, not a separate org-wide setting. The hook file does
+not name it.
 
 | Execute on       | Runs                                                                                            | Rules read                                                                                          |
 | ---------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
@@ -28,10 +28,10 @@ name it.
 | **Prompt**       | Before text reaches the model: what the developer typed, and what a slash command expanded into | `prompt`, `model`                                                                                   |
 | **Model switch** | Before Claude Code changes which model the session is using. A denial keeps the current model. Codex and Cursor do not fire this. | `model`                                                                         |
 
-Events inside a moment still share inputs. `model` is filled only on the
-vendors in [Where `model` is filled](#where-model-is-filled). A `model` rule
-on Tool call or Prompt does nothing for Claude Code or Copilot, and that is
-intended. It is not an INCOMPLETE policy.
+Events that share an Execute on option share inputs. `model` is filled
+only on the vendors in [Where `model` is filled](#where-model-is-filled).
+A `model` rule on Tool call or Prompt does nothing for Claude Code or
+Copilot, and that is intended. It is not an INCOMPLETE policy.
 
 ## The input contract
 
@@ -65,11 +65,11 @@ They are not inputs.
 
 ### Where `model` is filled
 
-| Moment | Claude Code | Codex | Cursor | Copilot |
+| Execute on | Claude Code | Codex | Cursor | Copilot |
 | --- | --- | --- | --- | --- |
-| `model-switch` | `to_model` | event does not fire | event does not fire | event does not fire |
-| `prompt` | absent | `model` on `UserPromptSubmit` | `model_id`, else `model`, on `beforeSubmitPrompt` | absent |
-| `tool-call` | absent | `model` on `PreToolUse` and `PermissionRequest` | `model_id`, else `model`, on `preToolUse` | absent |
+| **Model switch** | `to_model` | event does not fire | event does not fire | event does not fire |
+| **Prompt** | absent | `model` on `UserPromptSubmit` | `model_id`, else `model`, on `beforeSubmitPrompt` | absent |
+| **Tool call** | absent | `model` on `PreToolUse` and `PermissionRequest` | `model_id`, else `model`, on `preToolUse` | absent |
 
 Absent means the translator does not set the input. It does not set it to
 `""`. An optional input that is absent does not make the binding incomplete.
@@ -294,10 +294,10 @@ leaves Claude Code unenforced. Clearing Tool call and Prompt leaves Codex
 and Cursor unenforced.
 
 The set in the example is a placeholder. The three ids are one per vendor
-we enforce, so an author can see that the list is not Claude-only. Replace
-it with the ids you allow before the rule goes live. `auto` is not in the
-list, so a Cursor session on Auto is denied unless the author listed
-`auto`. That is a deliberate edit, not a default.
+we enforce, so you can see that the list is not Claude-only. Replace it
+with the ids you allow before the rule goes live. `auto` is not in the
+list, so a Cursor session on Auto is denied unless you listed `auto`.
+That is a deliberate edit, not a default.
 
 ```rego
 deny contains "disallowed-model" if {

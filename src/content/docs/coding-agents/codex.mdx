@@ -7,10 +7,9 @@ import { Aside, Steps } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 
-Arcjet integrates into OpenAI Codex sessions through hooks that fire
-for different actions like prompts and tool calls. This allows Arcjet to
-observe activity, enforce policy, and record actions taken by developers
-without requiring any changes to the developer's workflow.
+OpenAI Codex already fires hooks for prompts and tool calls. Arcjet uses
+those hooks to enforce your policies and record the session. You don't
+change how developers work.
 
 <WhatIsArcjet />
 
@@ -71,10 +70,6 @@ deny() {
       printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PermissionRequest","decision":{"behavior":"deny","message":"arcjet-hook"}}}' ;;
     codex:user-prompt-submit)
       printf '%s\n' '{"decision":"block","reason":"arcjet-hook"}' ;;
-    cursor:pre-tool-use)
-      printf '%s\n' '{"permission":"deny","user_message":"arcjet-hook","agent_message":"arcjet-hook"}' ;;
-    cursor:user-prompt-submit)
-      printf '%s\n' '{"continue":false,"user_message":"arcjet-hook"}' ;;
     *)
       printf '%s\n' '{}' ;;
   esac
@@ -113,8 +108,6 @@ function Deny {
     "codex:pre-tool-use" { Write-Output '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"arcjet-hook"}}' }
     "codex:permission-request" { Write-Output '{"hookSpecificOutput":{"hookEventName":"PermissionRequest","decision":{"behavior":"deny","message":"arcjet-hook"}}}' }
     "codex:user-prompt-submit" { Write-Output '{"decision":"block","reason":"arcjet-hook"}' }
-    "cursor:pre-tool-use" { Write-Output '{"permission":"deny","user_message":"arcjet-hook","agent_message":"arcjet-hook"}' }
-    "cursor:user-prompt-submit" { Write-Output '{"continue":false,"user_message":"arcjet-hook"}' }
     default { Write-Output '{}' }
   }
   exit 2
@@ -143,69 +136,27 @@ try {
 `Authorization: Bearer $ARCJET_KEY`, prints the body, and exits 0. On
 failure it prints the denial shape for that vendor and event and exits 2.
 Exit 2 is what Codex treats as a deny on `PreToolUse` and
-`UserPromptSubmit`. A wrong key denies every Codex and Cursor prompt and
-tool call. The script does not log the body.
+`UserPromptSubmit`. A wrong key denies every Codex prompt and tool call.
+The script does not log the body.
 
 ## Install the hooks
 
-### Allowed models
+This template is a complete setup. It installs every enforcement point
+plus the recorded events worth keeping. It omits `matcher`, so Arcjet sees
+every tool Codex reports on `PreToolUse` and `PermissionRequest`. Replace
+the script path if you install the files somewhere else.
 
-Command entries in the managed layer (`requirements.toml` or the MDM
-equivalent), not in a user `hooks.json`. No matcher, so every tool and
-every prompt is covered. `PermissionRequest` is included because it is the
-other `tool-call` event; it does not fire for calls that never ask for
-approval, so it is not the control to rely on. `PreToolUse` is.
+`PermissionRequest` is the other **Tool call** event. It doesn't fire for
+calls that never ask for approval, so it isn't the control to rely on.
+`PreToolUse` is.
 
-The command is one wrapper, invoked with the event name:
-
-```json
-"PreToolUse": [
-  {
-    "hooks": [
-      {
-        "type": "command",
-        "command": "/usr/local/bin/arcjet-hook codex pre-tool-use",
-        "timeout": 5
-      }
-    ]
-  }
-],
-"PermissionRequest": [
-  {
-    "hooks": [
-      {
-        "type": "command",
-        "command": "/usr/local/bin/arcjet-hook codex permission-request",
-        "timeout": 5
-      }
-    ]
-  }
-],
-"UserPromptSubmit": [
-  {
-    "hooks": [
-      {
-        "type": "command",
-        "command": "/usr/local/bin/arcjet-hook codex user-prompt-submit",
-        "timeout": 5
-      }
-    ]
-  }
-]
-```
-
-Managed hooks are trusted by policy and cannot be disabled from `/hooks`.
-Project hooks are not the install we document: they require trust review
-and can be skipped.
-
-Claude Code denies the switch only; Codex and Cursor deny the prompt and
-the tool call; Copilot is not covered. See
+Codex has no model-switch hook. A model-list policy refuses the prompt
+and the tool call while a model that isn't in the list is selected. For
+more information about writing the list, see
 <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>.
 
-This template installs every enforcement point plus the recorded events
-worth keeping. It omits `matcher`, so Arcjet sees every tool Codex reports
-on `PreToolUse` and `PermissionRequest`. Replace the script path if you
-install the files somewhere else.
+<details>
+<summary>Show .codex/hooks.json</summary>
 
 ```json title=".codex/hooks.json"
 {
@@ -334,6 +285,8 @@ install the files somewhere else.
 }
 ```
 
+</details>
+
 The repository template uses a path relative to the project directory
 Codex is running in. Don't wrap it in `git rev-parse --show-toplevel`:
 outside a git working tree that resolves to `/` and the hook never runs.
@@ -343,7 +296,11 @@ For a user-level file at `~/.codex/hooks.json`, change each command to
 
 For a managed install, put the same events in `requirements.toml` with
 absolute script paths. Codex doesn't distribute the scripts; your MDM or
-device-management tooling must install them under `managed_dir`.
+device-management tooling must install them under `managed_dir`. Managed
+hooks are trusted by policy and can't be disabled from `/hooks`.
+
+<details>
+<summary>Show requirements.toml</summary>
 
 ```toml title="requirements.toml"
 allow_managed_hooks_only = true
@@ -426,6 +383,8 @@ command_windows = 'powershell -NoProfile -File C:\ProgramData\OpenAI\Codex\hooks
 timeout = 5
 ```
 
+</details>
+
 ### What the hooks do
 
 Codex launches matching command hooks for an event concurrently, so these
@@ -434,8 +393,8 @@ entries add one request of latency (typically a few tens of milliseconds).
 - The wrapper posts to `https://decide.arcjet.com/v1/agent-hooks/codex`
   with `event` as a query parameter. Policy inputs identify Codex as
   `agent_vendor: openai` and `agent_product: codex`.
-- `PreToolUse` and `PermissionRequest` are the tool-call moment.
-  `UserPromptSubmit` is the prompt moment. Codex honors a prompt denial.
+- `PreToolUse` and `PermissionRequest` run on **Tool call**.
+  `UserPromptSubmit` runs on **Prompt**. Codex honors a prompt denial.
   Codex doesn't fire prompt expansion.
 - Omit `matcher`. A matcher that lists only `Bash` or `apply_patch` leaves
   MCP tools and other local function tools outside the policy.

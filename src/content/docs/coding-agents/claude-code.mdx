@@ -7,10 +7,9 @@ import { Aside, Steps } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 
-Arcjet integrates into Claude Coding agent sessions through hooks that fire
-for different actions like prompts and tool calls. This allows Arcjet to
-observe activity, enforce policy, and record actions taken by developers
-without requiring any changes to the developer's workflow.
+Claude Code already fires hooks for prompts, tool calls, and model switches.
+Arcjet uses those hooks to enforce your policies and record the session. You
+don't change how developers work.
 
 <WhatIsArcjet />
 
@@ -43,9 +42,12 @@ read [Cloud sessions](#cloud-sessions).
 
 ## Install the hooks
 
-This template installs every enforcement point plus the recorded events worth
-keeping. Replace `ajkey_REPLACE_ME` with your Arcjet key and put the file at the
-managed settings path for the operating system.
+This template is a complete setup. It installs every enforcement point plus
+the recorded events worth keeping. Replace `ajkey_REPLACE_ME` with your Arcjet
+key and put the file at the managed settings path for the operating system.
+
+<details>
+<summary>Show managed-settings.json</summary>
 
 ```json title="managed-settings.json"
 {
@@ -266,69 +268,39 @@ managed settings path for the operating system.
 }
 ```
 
-
-### Allowed models
-
-Add two entries to the existing managed settings. Leave the current entries
-in place. No `matcher`. No `label`. No `surface`. Claude Code denies the
-switch only; Codex and Cursor deny the prompt and the tool call; Copilot is
-not covered.
-
-```json
-"PreModelSwitch": [
-  {
-    "type": "http",
-    "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=pre-model-switch",
-    "headers": {
-      "Authorization": "Bearer $ARCJET_KEY",
-      "X-Arcjet-Principal": "$USER"
-    },
-    "timeout": 30
-  }
-],
-"PostModelSwitch": [
-  {
-    "type": "http",
-    "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=post-model-switch",
-    "headers": {
-      "Authorization": "Bearer $ARCJET_KEY",
-      "X-Arcjet-Principal": "$USER"
-    },
-    "timeout": 5
-  }
-]
-```
-
-`PostModelSwitch` is observation. It has no denial shape. A non-2xx there is
-a missed capture row, not a blocked switch. The `PreModelSwitch` entry sets
-`timeout: 30`. A slow response can block a legitimate switch. A 401 does not
-block `PreToolUse`, but a `PreModelSwitch` timeout does block the switch.
-
-See <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>.
+</details>
 
 ### What the hooks do
 
-Claude Code runs every matching hook for an event in parallel, so these entries
-add one request of latency (typically a few tens of milliseconds).
+Claude Code runs every matching hook for an event in parallel, so these
+entries add one request of latency (typically a few tens of milliseconds).
 
-- `PreToolUse` and `PermissionRequest` are the
-tool-call moment; `UserPromptSubmit` and `UserPromptExpansion` are the prompt
-moment; `PreModelSwitch` is the model-switch moment. Claude Code denies the
-switch only; Codex and Cursor deny the prompt and the tool call; Copilot is
-not covered. See <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>.
+- `PreToolUse` and `PermissionRequest` run on **Tool call**.
+  `UserPromptSubmit` and `UserPromptExpansion` run on **Prompt**.
+  `PreModelSwitch` runs on **Model switch**. A denial of the switch keeps
+  the current model. Claude Code doesn't send a model on prompt or tool
+  events, so a model-list policy doesn't refuse those. A session that
+  opened on a model that isn't in the list and never switches isn't
+  stopped. Use Claude Code's own org default or banned-model setting for
+  that case. For more information about writing the list, see
+  <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>.
 - `timeout` on every entry. Claude Code's default for an HTTP hook is 600
-seconds, but 5 seconds is a sensible ceiling for a policy decision. The
-`PreModelSwitch` entry sets `timeout: 30`. A slow response can block a
-legitimate switch. `PostModelSwitch` is observation. It has no denial shape.
-A non-2xx there is a missed capture row, not a blocked switch.
-- No `matcher`. No `label`. No `surface`. A matcher on a model id would hide
-every other switch or tool call from the policy.
-- `X-Arcjet-Principal` attributes a session to a developer. It's untrusted, but useful extra metadata. `$USER` is unset on
-Windows, so use `$USERNAME` there and add it to both `allowedEnvVars` lists.
+  seconds, but 5 seconds is a sensible ceiling for a policy decision. The
+  `PreModelSwitch` entry sets `timeout: 30`. A slow response can block a
+  legitimate switch. `PostModelSwitch` is observation. It has no denial
+  shape. A non-2xx there is a missed capture row, not a blocked switch. A
+  401 doesn't block `PreToolUse`, but a `PreModelSwitch` timeout does
+  block the switch.
+- No `matcher`. No `label`. No `surface`. A matcher on a model id would
+  hide every other switch or tool call from the policy.
+- `X-Arcjet-Principal` attributes a session to a developer. It's
+  untrusted, but useful extra metadata. `$USER` is unset on Windows, so
+  use `$USERNAME` there and add it to both `allowedEnvVars` lists.
 - The hook URLs omit `surface`. Managed settings reach the terminal, IDE
-extensions, Desktop, and cloud from one file, so a hard-coded `cli` mislabels
-most of that traffic. Arcjet records `unknown` when you omit the parameter. Set
-it only when the hook file is specific to one surface.
+  extensions, Desktop, and cloud from one file, so a hard-coded `cli`
+  mislabels most of that traffic. Arcjet records `unknown` when you omit
+  the parameter. Set it only when the hook file is specific to one
+  surface.
 
 ## Supply the Arcjet key
 
@@ -420,8 +392,11 @@ regardless of any `CLAUDE_CODE_USE_*` environment variables.
 
 ## Record telemetry instead
 
-If you can't deploy hooks, Arcjet can connect to the Claude Compliance API to pull activity directly. Alternatively, Claude Code can export its own OpenTelemetry
-telemetry to Arcjet through managed settings. See <Link.Page href="/observe#send-opentelemetry-data-to-arcjet">Observe Agent Activity</Link.Page> for more details, but note that hooks are the only way to enforce policies.
+If you can't deploy hooks, Arcjet can connect to the Claude Compliance API
+to pull activity directly. Alternatively, Claude Code can export its own
+OpenTelemetry telemetry to Arcjet through managed settings. See
+<Link.Page href="/observe#send-opentelemetry-data-to-arcjet">Observe Agent Activity</Link.Page>
+for more details. Hooks are the only way to enforce policies.
 
 ## Related
 

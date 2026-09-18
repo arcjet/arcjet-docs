@@ -15,8 +15,8 @@ agent did.
 Arcjet also screens what the developer typed for prompt injection and sensitive
 information, and records the whole session as activity in the Console.
 
-There is no SDK to install and no code to change. Publishing a policy from
-Arcjet's Console.
+There is no SDK to install and no code to change. Publish a policy from
+the Arcjet Console.
 
 ```text
 ┌─────────────┐      hook      ┌───────────────┐    allow    ┌───────────────┐
@@ -32,17 +32,18 @@ Arcjet's Console.
 
 ## How it works
 
-Coding agent events are tracked using HTTP hooks that report events to Arcjet.
-Policies execute whenever an event is reported, determining whether the agent
-is allowed to proceed based on the applicable policy. Policies can be enforced
-or configured to log only, with changes updating in real time. Execution
-happens at the edge in over 300 data center locations, minimizing latency and
-ensuring rapid policy enforcement.
+Coding agent events are tracked using HTTP hooks that report events to
+Arcjet. When a hook fires, Arcjet runs the policies attached to that
+event and decides whether the agent can proceed. You can enforce a
+policy or log only, and a change takes effect in real time. Evaluation
+runs at the edge in over 300 data centers, so the extra latency stays
+small.
 
-Policies work across all supported coding agents, so you don't need to write
-separate policies for each agent.
+Policies work across every supported coding agent, so you don't write a
+separate policy for each one.
 
-If a policy denies an action, the agent is told the rule ID and the reason e.g
+If a policy denies an action, the agent is told the rule ID, for
+example:
 
 ```text
 Blocked by Arcjet policy: destructive-command.
@@ -50,9 +51,9 @@ Blocked by Arcjet policy: destructive-command.
 
 ### Policy enforcement
 
-Policies are configured on one or more execution points where the inputs can be
-evaluated and allowed or denied. There are three moments. Events inside a
-moment share inputs. `model` is filled only on the vendors in
+Choose one or more **Execute on** options. There are three: **Tool
+call**, **Prompt**, and **Model switch**. Events that share an Execute
+on option share inputs. `model` is filled only on the vendors in
 [Where `model` is filled](#where-model-is-filled).
 
 | Execute on       | Events                                                      | Inputs the policy can read                                                                          |
@@ -76,7 +77,8 @@ The hook URL names the vendor. Use `POST /v1/agent-hooks/claude-code`, `/copilot
 
 ### Recorded events
 
-Arcjet tracks all these events, but can only enforce policy on the above enforceable events.
+Arcjet tracks all these events, but can only enforce policy on the
+enforceable events in the preceding table.
 
 | `event`                   | Claude Code          | Copilot                 | Codex            | Cursor                                                              | What it carries                            |
 | ------------------------- | -------------------- | ----------------------- | ---------------- | ------------------------------------------------------------------- | ------------------------------------------ |
@@ -206,10 +208,10 @@ before the VM existed. Enterprise team hooks reach cloud agents. User-level
 `~/.cursor/hooks.json` does not.
 
 `auto`, `default`, `inherit`, and a blank model are not members of any
-allowlist unless the author listed that exact token. On Cursor they are real
-selector states. On Claude Code and Copilot the field is absent, which is a
-different case: an optional input that is absent does not make the binding
-incomplete. A Cursor session on Auto is denied unless the author listed
+allowlist unless you listed that exact token. On Cursor they are real
+selector states. On Claude Code and Copilot the field is absent, which is
+a different case: an optional input that is absent does not make the
+binding incomplete. A Cursor session on Auto is denied unless you listed
 `auto`. That is a deliberate edit, not a default.
 
 List canonical model ids. Matching is exact, after lowercasing. Not a prefix
@@ -225,15 +227,15 @@ starter on
 
 ### Where `model` is filled
 
-| Moment | Claude Code | Codex | Cursor | Copilot |
+| Execute on | Claude Code | Codex | Cursor | Copilot |
 | --- | --- | --- | --- | --- |
-| `model-switch` | `to_model` | event does not fire | event does not fire | event does not fire |
-| `prompt` | absent | `model` on `UserPromptSubmit` | `model_id`, else `model`, on `beforeSubmitPrompt` | absent |
-| `tool-call` | absent | `model` on `PreToolUse` and `PermissionRequest` | `model_id`, else `model`, on `preToolUse` | absent |
+| **Model switch** | `to_model` | event does not fire | event does not fire | event does not fire |
+| **Prompt** | absent | `model` on `UserPromptSubmit` | `model_id`, else `model`, on `beforeSubmitPrompt` | absent |
+| **Tool call** | absent | `model` on `PreToolUse` and `PermissionRequest` | `model_id`, else `model`, on `preToolUse` | absent |
 
 Absent means the translator does not set the input. It does not set it to
 `""`. On Cursor a blank result is the token `unknown`. `unknown` is not a
-member of any allowlist unless the author listed that exact token.
+member of any allowlist unless you listed that exact token.
 
 ## Get started
 
