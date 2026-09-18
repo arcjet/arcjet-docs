@@ -629,8 +629,11 @@ An allow is always `{}`. The hook file does not name a policy.
   (`PreCompact`, `PostCompact`), model changes after they apply
   (`PostModelSwitch`), MCP elicitations (`Elicitation`,
   `ElicitationResult`), and the session (`SessionStart`, `SessionEnd`).
-  `FileChanged` has no `matcher`, so it records a change only if
-  something else seeded the watch list.
+  `StopFailure` posts as `event=error`, the name Arcjet already records
+  for a failed turn. Claude Code only watches files that a `matcher` or a
+  `watchPaths` response named. This template has no `matcher`, so
+  `FileChanged` records a change only if another hook seeded the watch
+  list.
 - The template omits `MessageDisplay`, `PostToolBatch`, `Setup`,
   `WorktreeCreate`, and `WorktreeRemove`. `MessageDisplay` runs on every
   streamed batch of assistant text. `PostToolBatch` repeats what
