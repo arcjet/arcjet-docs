@@ -55,17 +55,51 @@ path you set as `managed_dir`.
 #!/bin/sh
 # Usage: arcjet-hook.sh VENDOR EVENT
 # Reads one hook payload from stdin and posts it to Arcjet.
+# On success: print the body and exit 0.
+# On any transport failure, non-2xx, or non-JSON 2xx: print the
+# vendor denial shape and exit 2.
 
 vendor=$1
 event=$2
 principal=${USER:-${USERNAME:-}}
 
-curl -sS --max-time 5 -X POST \
+deny() {
+  case "${vendor}:${event}" in
+    codex:pre-tool-use)
+      printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"arcjet-hook"}}' ;;
+    codex:permission-request)
+      printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PermissionRequest","decision":{"behavior":"deny","message":"arcjet-hook"}}}' ;;
+    codex:user-prompt-submit)
+      printf '%s\n' '{"decision":"block","reason":"arcjet-hook"}' ;;
+    cursor:pre-tool-use)
+      printf '%s\n' '{"permission":"deny","user_message":"arcjet-hook","agent_message":"arcjet-hook"}' ;;
+    cursor:user-prompt-submit)
+      printf '%s\n' '{"continue":false,"user_message":"arcjet-hook"}' ;;
+    *)
+      printf '%s\n' '{}' ;;
+  esac
+  exit 2
+}
+
+tmp=$(mktemp) || deny
+trap 'rm -f "$tmp"' EXIT
+code=$(curl -sS --max-time 5 -o "$tmp" -w '%{http_code}' -X POST \
   "https://decide.arcjet.com/v1/agent-hooks/${vendor}?event=${event}" \
   -H "Authorization: Bearer ${ARCJET_KEY}" \
   -H "Content-Type: application/json" \
   -H "X-Arcjet-Principal: ${principal}" \
-  --data-binary @- || printf '%s\n' '{}'
+  --data-binary @-) || deny
+case "$code" in
+  2??) ;;
+  *) deny ;;
+esac
+head=$(dd if="$tmp" bs=1 count=1 2>/dev/null) || deny
+case "$head" in
+  \{|\[) ;;
+  *) deny ;;
+esac
+cat "$tmp"
+exit 0
 ```
 
 Make the script executable. On Windows, save a sibling `arcjet-hook.ps1` and
@@ -74,6 +108,17 @@ point `command_windows` at it:
 ```powershell title="arcjet-hook.ps1"
 param([string]$Vendor, [string]$Event)
 $principal = if ($env:USERNAME) { $env:USERNAME } else { $env:USER }
+function Deny {
+  switch ("$Vendor`:$Event") {
+    "codex:pre-tool-use" { Write-Output '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"arcjet-hook"}}' }
+    "codex:permission-request" { Write-Output '{"hookSpecificOutput":{"hookEventName":"PermissionRequest","decision":{"behavior":"deny","message":"arcjet-hook"}}}' }
+    "codex:user-prompt-submit" { Write-Output '{"decision":"block","reason":"arcjet-hook"}' }
+    "cursor:pre-tool-use" { Write-Output '{"permission":"deny","user_message":"arcjet-hook","agent_message":"arcjet-hook"}' }
+    "cursor:user-prompt-submit" { Write-Output '{"continue":false,"user_message":"arcjet-hook"}' }
+    default { Write-Output '{}' }
+  }
+  exit 2
+}
 try {
   $body = [Console]::In.ReadToEnd()
   $headers = @{
@@ -84,16 +129,78 @@ try {
   $response = Invoke-WebRequest -Method Post -TimeoutSec 5 `
     -Uri "https://decide.arcjet.com/v1/agent-hooks/$Vendor`?event=$Event" `
     -Headers $headers -Body $body
-  Write-Output $response.Content
+  if ($response.StatusCode -lt 200 -or $response.StatusCode -ge 300) { Deny }
+  $content = $response.Content
+  if ($content -notmatch '^\s*[\{\[]') { Deny }
+  Write-Output $content
 } catch {
-  Write-Output '{}'
+  Deny
 }
 ```
 
-A failed or timed-out `curl` prints `{}`. Codex treats empty hook output as
-success and continues, which matches Codex's own fail-open behavior.
+`arcjet-hook` reads stdin, POSTs it to
+`https://decide.arcjet.com/v1/agent-hooks/<vendor>?event=<event>` with
+`Authorization: Bearer $ARCJET_KEY`, prints the body, and exits 0. On
+failure it prints the denial shape for that vendor and event and exits 2.
+Exit 2 is what Codex treats as a deny on `PreToolUse` and
+`UserPromptSubmit`. A wrong key denies every Codex and Cursor prompt and
+tool call. The script does not log the body.
 
 ## Install the hooks
+
+### Allowed models
+
+Command entries in the managed layer (`requirements.toml` or the MDM
+equivalent), not in a user `hooks.json`. No matcher, so every tool and
+every prompt is covered. `PermissionRequest` is included because it is the
+other `tool-call` event; it does not fire for calls that never ask for
+approval, so it is not the control to rely on. `PreToolUse` is.
+
+The command is one wrapper, invoked with the event name:
+
+```json
+"PreToolUse": [
+  {
+    "hooks": [
+      {
+        "type": "command",
+        "command": "/usr/local/bin/arcjet-hook codex pre-tool-use",
+        "timeout": 5
+      }
+    ]
+  }
+],
+"PermissionRequest": [
+  {
+    "hooks": [
+      {
+        "type": "command",
+        "command": "/usr/local/bin/arcjet-hook codex permission-request",
+        "timeout": 5
+      }
+    ]
+  }
+],
+"UserPromptSubmit": [
+  {
+    "hooks": [
+      {
+        "type": "command",
+        "command": "/usr/local/bin/arcjet-hook codex user-prompt-submit",
+        "timeout": 5
+      }
+    ]
+  }
+]
+```
+
+Managed hooks are trusted by policy and cannot be disabled from `/hooks`.
+Project hooks are not the install we document: they require trust review
+and can be skipped.
+
+Claude Code denies the switch only; Codex and Cursor deny the prompt and
+the tool call; Copilot is not covered. See
+<Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>.
 
 This template installs every enforcement point plus the recorded events
 worth keeping. It omits `matcher`, so Arcjet sees every tool Codex reports

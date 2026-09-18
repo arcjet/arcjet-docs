@@ -225,6 +225,38 @@ managed settings path for the operating system.
           }
         ]
       }
+    ],
+    "PreModelSwitch": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=pre-model-switch",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostModelSwitch": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=post-model-switch",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "timeout": 5
+          }
+        ]
+      }
     ]
   },
   "env": { "ARCJET_KEY": "ajkey_REPLACE_ME" },
@@ -235,6 +267,45 @@ managed settings path for the operating system.
 ```
 
 
+### Allowed models
+
+Add two entries to the existing managed settings. Leave the current entries
+in place. No `matcher`. No `label`. No `surface`. Claude Code denies the
+switch only; Codex and Cursor deny the prompt and the tool call; Copilot is
+not covered.
+
+```json
+"PreModelSwitch": [
+  {
+    "type": "http",
+    "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=pre-model-switch",
+    "headers": {
+      "Authorization": "Bearer $ARCJET_KEY",
+      "X-Arcjet-Principal": "$USER"
+    },
+    "timeout": 30
+  }
+],
+"PostModelSwitch": [
+  {
+    "type": "http",
+    "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=post-model-switch",
+    "headers": {
+      "Authorization": "Bearer $ARCJET_KEY",
+      "X-Arcjet-Principal": "$USER"
+    },
+    "timeout": 5
+  }
+]
+```
+
+`PostModelSwitch` is observation. It has no denial shape. A non-2xx there is
+a missed capture row, not a blocked switch. The `PreModelSwitch` entry sets
+`timeout: 30`. A slow response can block a legitimate switch. A 401 does not
+block `PreToolUse`, but a `PreModelSwitch` timeout does block the switch.
+
+See <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>.
+
 ### What the hooks do
 
 Claude Code runs every matching hook for an event in parallel, so these entries
@@ -242,9 +313,16 @@ add one request of latency (typically a few tens of milliseconds).
 
 - `PreToolUse` and `PermissionRequest` are the
 tool-call moment; `UserPromptSubmit` and `UserPromptExpansion` are the prompt
-moment.
+moment; `PreModelSwitch` is the model-switch moment. Claude Code denies the
+switch only; Codex and Cursor deny the prompt and the tool call; Copilot is
+not covered. See <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>.
 - `timeout` on every entry. Claude Code's default for an HTTP hook is 600
-seconds, but 5 seconds is a sensible ceiling for a policy decision.
+seconds, but 5 seconds is a sensible ceiling for a policy decision. The
+`PreModelSwitch` entry sets `timeout: 30`. A slow response can block a
+legitimate switch. `PostModelSwitch` is observation. It has no denial shape.
+A non-2xx there is a missed capture row, not a blocked switch.
+- No `matcher`. No `label`. No `surface`. A matcher on a model id would hide
+every other switch or tool call from the policy.
 - `X-Arcjet-Principal` attributes a session to a developer. It's untrusted, but useful extra metadata. `$USER` is unset on
 Windows, so use `$USERNAME` there and add it to both `allowedEnvVars` lists.
 - The hook URLs omit `surface`. Managed settings reach the terminal, IDE
