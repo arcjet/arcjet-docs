@@ -619,35 +619,17 @@ An allow is always `{}`. The hook file does not name a policy.
   stopped. Use Claude Code's own org default or banned-model setting for
   that case. For more information about writing the list, see
   <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>.
-- The other entries record the session. They cover permissions
-  (`PermissionDenied`), tool results (`PostToolUse`, `PostToolUseFailure`),
-  notifications, subagents (`SubagentStart`, `SubagentStop`), tasks
-  (`TaskCreated`, `TaskCompleted`), turns (`Stop`, `StopFailure`), agent
-  teams (`TeammateIdle`), instructions (`InstructionsLoaded`),
-  configuration (`ConfigChange`), the working directory (`CwdChanged`,
-  `DirectoryAdded`), watched files (`FileChanged`), compaction
-  (`PreCompact`, `PostCompact`), model changes after they apply
-  (`PostModelSwitch`), MCP elicitations (`Elicitation`,
-  `ElicitationResult`), and the session (`SessionStart`, `SessionEnd`).
-  `StopFailure` posts as `event=error`, the name Arcjet already records
-  for a failed turn. Claude Code only watches files that a `matcher` or a
-  `watchPaths` response named. This template has no `matcher`, so
-  `FileChanged` records a change only if another hook seeded the watch
-  list.
+- The other entries record the session. `StopFailure` posts as
+  `event=error`. `FileChanged` records a change only if another hook
+  already named the file in a `matcher` or a `watchPaths` response. This
+  template has no `matcher`.
 - The template omits `MessageDisplay`, `PostToolBatch`, `Setup`,
-  `WorktreeCreate`, and `WorktreeRemove`. `MessageDisplay` runs on every
-  streamed batch of assistant text. `PostToolBatch` repeats what
-  `PostToolUse` already records. `Setup` runs for `--init` and
-  `--maintenance`, and Claude Code runs command hooks there, not HTTP.
-  `WorktreeCreate` and `WorktreeRemove` replace Claude Code's default git
-  worktree behavior.
-- `timeout` on every entry. Claude Code's default for an HTTP hook is 600
-  seconds, but 5 seconds is a sensible ceiling for a policy decision. The
-  `PreModelSwitch` entry sets `timeout: 30`. A slow response can block a
-  legitimate switch. `PostModelSwitch` is observation. It has no denial
-  shape. A non-2xx there is a missed capture row, not a blocked switch. A
-  401 doesn't block `PreToolUse`, but a `PreModelSwitch` timeout does
-  block the switch.
+  `WorktreeCreate`, and `WorktreeRemove`. Those fire too often, duplicate
+  `PostToolUse`, run as command hooks only, or replace Claude Code's
+  default git worktree behavior.
+- `timeout` on every entry. Five seconds is a sensible ceiling for a
+  policy decision. `PreModelSwitch` uses `timeout: 30` because a slow
+  response can block a legitimate switch.
 - No `matcher`. No `label`. No `surface`. A matcher on a model id would
   hide every other switch or tool call from the policy.
 - `X-Arcjet-Principal` attributes a session to a developer. It's
