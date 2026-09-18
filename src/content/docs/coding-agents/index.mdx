@@ -85,6 +85,7 @@ enforceable events in the preceding table.
 | `post-model-switch`       | `PostModelSwitch`    | –                       | –                | –                      | The model the session is now using         |
 | `post-tool-use`           | `PostToolUse`        | `postToolUse`           | `PostToolUse`    | `postToolUse` (aliases: `afterShellExecution`, `afterMCPExecution`, `afterFileEdit`) | What the tool returned                     |
 | `post-tool-use-failure`   | `PostToolUseFailure` | `postToolUseFailure`    | –                | `postToolUseFailure`   | Why it did not                             |
+| `post-tool-batch`         | `PostToolBatch`      | –                       | –                | –                      | After a batch of parallel tool calls       |
 | `user-prompt-transformed` | –                    | `userPromptTransformed` | –                | –                      | The model-facing prompt after a rewrite    |
 | `stop`                    | `Stop`               | `agentStop`             | `Stop`           | `stop`                 | The agent's final message                  |
 | `subagent-start`          | `SubagentStart`      | `subagentStart`         | `SubagentStart`  | `subagentStart`        | Work delegated to another agent            |
@@ -94,9 +95,17 @@ enforceable events in the preceding table.
 | `notification`            | `Notification`       | `notification`          | –                | –                      | Permission prompts and elicitations        |
 | `permission-denied`       | `PermissionDenied`   | –                       | –                | –                      | What the agent's own controls stopped      |
 | `pre-compact`             | `PreCompact`         | `preCompact`            | `PreCompact`     | `preCompact`           | Context discarded mid-session              |
+| `post-compact`            | `PostCompact`        | –                       | –                | –                      | After context compaction                   |
 | `error`                   | `StopFailure`        | `errorOccurred`         | –                | –                      | Why a turn failed                          |
 | `config-change`           | `ConfigChange`       | –                       | –                | –                      | Settings changed, which is a tamper signal |
 | `instructions-loaded`     | `InstructionsLoaded` | –                       | –                | –                      | A `CLAUDE.md` entering context             |
+| `task-created`            | `TaskCreated`        | –                       | –                | –                      | A task is being created                    |
+| `task-completed`          | `TaskCompleted`      | –                       | –                | –                      | A task is marked complete                  |
+| `teammate-idle`           | `TeammateIdle`       | –                       | –                | –                      | An agent-team teammate is about to go idle |
+| `cwd-changed`             | `CwdChanged`         | –                       | –                | –                      | The working directory changed              |
+| `directory-added`         | `DirectoryAdded`     | –                       | –                | –                      | A directory added mid-session              |
+| `elicitation`             | `Elicitation`        | –                       | –                | –                      | An MCP server requested user input         |
+| `elicitation-result`      | `ElicitationResult`  | –                       | –                | –                      | The user responded to an MCP elicitation   |
 
 ### What Arcjet answers
 

@@ -7,9 +7,9 @@ import { Aside, Steps } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 
-Claude Code already fires hooks for prompts, tool calls, and model switches.
-Arcjet uses those hooks to enforce your policies and record the session. You
-don't change how developers work.
+Claude Code already fires hooks for prompts, tool calls, model switches, and
+the rest of the session. Arcjet uses those hooks to enforce your policies
+and record the activity. You don't change how developers work.
 
 <WhatIsArcjet />
 
@@ -43,8 +43,9 @@ read [Cloud sessions](#cloud-sessions).
 ## Install the hooks
 
 This template is a complete setup. It installs every enforcement point plus
-the recorded events worth keeping. Replace `ajkey_REPLACE_ME` with your Arcjet
-key and put the file at the managed settings path for the operating system.
+the activity hooks Claude Code fires, so Arcjet can record the session.
+Replace `ajkey_REPLACE_ME` with your Arcjet key and put the file at the
+managed settings path for the operating system.
 
 <details>
 <summary>Show managed-settings.json</summary>
@@ -52,33 +53,20 @@ key and put the file at the managed settings path for the operating system.
 ```json title="managed-settings.json"
 {
   "hooks": {
-    "PreToolUse": [
+    "SessionStart": [
       {
         "hooks": [
           {
             "type": "http",
-            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=pre-tool-use",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=session-start",
             "headers": {
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
             },
-            "allowedEnvVars": ["ARCJET_KEY", "USER"],
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "PermissionRequest": [
-      {
-        "hooks": [
-          {
-            "type": "http",
-            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=permission-request",
-            "headers": {
-              "Authorization": "Bearer $ARCJET_KEY",
-              "X-Arcjet-Principal": "$USER"
-            },
-            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
             "timeout": 5
           }
         ]
@@ -94,7 +82,10 @@ key and put the file at the managed settings path for the operating system.
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
             },
-            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
             "timeout": 5
           }
         ]
@@ -110,71 +101,48 @@ key and put the file at the managed settings path for the operating system.
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
             },
-            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
             "timeout": 5
           }
         ]
       }
     ],
-    "PostToolUse": [
+    "PreToolUse": [
       {
         "hooks": [
           {
             "type": "http",
-            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=post-tool-use",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=pre-tool-use",
             "headers": {
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
             },
-            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
             "timeout": 5
           }
         ]
       }
     ],
-    "Stop": [
+    "PermissionRequest": [
       {
         "hooks": [
           {
             "type": "http",
-            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=stop",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=permission-request",
             "headers": {
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
             },
-            "allowedEnvVars": ["ARCJET_KEY", "USER"],
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "http",
-            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=session-start",
-            "headers": {
-              "Authorization": "Bearer $ARCJET_KEY",
-              "X-Arcjet-Principal": "$USER"
-            },
-            "allowedEnvVars": ["ARCJET_KEY", "USER"],
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "http",
-            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=session-end",
-            "headers": {
-              "Authorization": "Bearer $ARCJET_KEY",
-              "X-Arcjet-Principal": "$USER"
-            },
-            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
             "timeout": 5
           }
         ]
@@ -190,23 +158,219 @@ key and put the file at the managed settings path for the operating system.
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
             },
-            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
             "timeout": 5
           }
         ]
       }
     ],
-    "ConfigChange": [
+    "PostToolUse": [
       {
         "hooks": [
           {
             "type": "http",
-            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=config-change",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=post-tool-use",
             "headers": {
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
             },
-            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=post-tool-use-failure",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolBatch": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=post-tool-batch",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=notification",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=subagent-start",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=subagent-stop",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "TaskCreated": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=task-created",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=task-completed",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=stop",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=error",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "TeammateIdle": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=teammate-idle",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
             "timeout": 5
           }
         ]
@@ -222,7 +386,105 @@ key and put the file at the managed settings path for the operating system.
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
             },
-            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "ConfigChange": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=config-change",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "CwdChanged": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=cwd-changed",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "DirectoryAdded": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=directory-added",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=pre-compact",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=post-compact",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
             "timeout": 5
           }
         ]
@@ -238,7 +500,10 @@ key and put the file at the managed settings path for the operating system.
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
             },
-            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
             "timeout": 30
           }
         ]
@@ -254,17 +519,86 @@ key and put the file at the managed settings path for the operating system.
               "Authorization": "Bearer $ARCJET_KEY",
               "X-Arcjet-Principal": "$USER"
             },
-            "allowedEnvVars": ["ARCJET_KEY", "USER"],
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Elicitation": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=elicitation",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "ElicitationResult": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=elicitation-result",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "http",
+            "url": "https://decide.arcjet.com/v1/agent-hooks/claude-code?event=session-end",
+            "headers": {
+              "Authorization": "Bearer $ARCJET_KEY",
+              "X-Arcjet-Principal": "$USER"
+            },
+            "allowedEnvVars": [
+              "ARCJET_KEY",
+              "USER"
+            ],
             "timeout": 5
           }
         ]
       }
     ]
   },
-  "env": { "ARCJET_KEY": "ajkey_REPLACE_ME" },
-  "allowedHttpHookUrls": ["https://decide.arcjet.com/*"],
-  "httpHookAllowedEnvVars": ["ARCJET_KEY", "USER"],
-  "permissions": { "disableBypassPermissionsMode": "disable" }
+  "env": {
+    "ARCJET_KEY": "ajkey_REPLACE_ME"
+  },
+  "allowedHttpHookUrls": [
+    "https://decide.arcjet.com/*"
+  ],
+  "httpHookAllowedEnvVars": [
+    "ARCJET_KEY",
+    "USER"
+  ],
+  "permissions": {
+    "disableBypassPermissionsMode": "disable"
+  }
 }
 ```
 
@@ -274,6 +608,7 @@ key and put the file at the managed settings path for the operating system.
 
 Claude Code runs every matching hook for an event in parallel, so these
 entries add one request of latency (typically a few tens of milliseconds).
+An allow is always `{}`. The hook file does not name a policy.
 
 - `PreToolUse` and `PermissionRequest` run on **Tool call**.
   `UserPromptSubmit` and `UserPromptExpansion` run on **Prompt**.
@@ -284,6 +619,22 @@ entries add one request of latency (typically a few tens of milliseconds).
   stopped. Use Claude Code's own org default or banned-model setting for
   that case. For more information about writing the list, see
   <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>.
+- The other entries record the session. They cover permissions
+  (`PermissionDenied`), tool results (`PostToolUse`, `PostToolUseFailure`,
+  `PostToolBatch`), notifications, subagents (`SubagentStart`,
+  `SubagentStop`), tasks (`TaskCreated`, `TaskCompleted`), turns (`Stop`,
+  `StopFailure`), agent teams (`TeammateIdle`), instructions
+  (`InstructionsLoaded`), configuration (`ConfigChange`), the working
+  directory (`CwdChanged`, `DirectoryAdded`), compaction (`PreCompact`,
+  `PostCompact`), model changes after they apply (`PostModelSwitch`), MCP
+  elicitations (`Elicitation`, `ElicitationResult`), and the session
+  (`SessionStart`, `SessionEnd`).
+- The template omits `MessageDisplay`, `FileChanged`, `WorktreeCreate`,
+  `WorktreeRemove`, and `Setup`. `MessageDisplay` runs on every streamed
+  batch of assistant text. `FileChanged` only watches files a `matcher`
+  names, and this template has no `matcher`. `WorktreeCreate` and
+  `WorktreeRemove` replace Claude Code's default git worktree behavior.
+  `Setup` runs for `--init` and `--maintenance`, not a developer session.
 - `timeout` on every entry. Claude Code's default for an HTTP hook is 600
   seconds, but 5 seconds is a sensible ceiling for a policy decision. The
   `PreModelSwitch` entry sets `timeout: 30`. A slow response can block a
