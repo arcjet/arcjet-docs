@@ -111,7 +111,26 @@ const PATHS_FROM_SITEMAP = [
 // overly excessive sizes.
 const SCREENSHOT_MAX_HEIGHT_PX = 5000;
 
+// Comments and video embeds keep connections open, so `networkidle` never
+// arrives and the 30s test timeout fails. Do not abort HubSpot: its banner
+// is in the checked-in snapshots.
+const SCREENSHOT_BLOCKED_HOSTS = new Set([
+  "giscus.app",
+  "giscus.github.com",
+  "www.youtube.com",
+  "youtube.com",
+  "www.youtube-nocookie.com",
+  "i.ytimg.com",
+]);
+
 test.describe("Screenshots", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.route(
+      (url) => SCREENSHOT_BLOCKED_HOSTS.has(url.hostname),
+      (route) => route.abort(),
+    );
+  });
+
   for (const path of PATHS_FROM_SITEMAP) {
     for (const colorScheme of ["light", "dark"] as const) {
       const name =
@@ -121,8 +140,13 @@ test.describe("Screenshots", () => {
         await page.emulateMedia({ colorScheme });
 
         const status = await page.goto(path, {
-          waitUntil: "networkidle",
+          waitUntil: "load",
         });
+        // HubSpot can keep a connection open. Give it a short settle, then
+        // continue so a comments page cannot burn the whole test timeout.
+        await page
+          .waitForLoadState("networkidle", { timeout: 10_000 })
+          .catch(() => undefined);
 
         // Verify the page loaded correctly and we are on the expected path.
 
@@ -145,13 +169,20 @@ test.describe("Screenshots", () => {
             el.remove();
           }
 
-          // Giscus iframes cause inconsistent screenshots.
-          for (const el of document.querySelectorAll("div.giscus")) {
-            el.insertAdjacentHTML(
+          // Giscus iframes cause inconsistent screenshots. The widget mounts
+          // from the script, so aborting giscus.app leaves no `div.giscus`.
+          // Replace either node with the same placeholder the snapshots use.
+          const giscus = document.querySelectorAll(
+            "div.giscus, script[src*='giscus.app']",
+          );
+          if (giscus.length > 0) {
+            giscus[0].insertAdjacentHTML(
               "afterend",
               "<p>Giscus comments removed for screenshot test</p>",
             );
-            el.remove();
+            for (const el of giscus) {
+              el.remove();
+            }
           }
 
           // npm version badges are masked, but a missed shields.io load

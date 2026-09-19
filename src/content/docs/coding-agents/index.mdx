@@ -94,9 +94,18 @@ enforceable events in the preceding table.
 | `notification`            | `Notification`       | `notification`          | –                | –                      | Permission prompts and elicitations        |
 | `permission-denied`       | `PermissionDenied`   | –                       | –                | –                      | What the agent's own controls stopped      |
 | `pre-compact`             | `PreCompact`         | `preCompact`            | `PreCompact`     | `preCompact`           | Context discarded mid-session              |
+| `post-compact`            | `PostCompact`        | –                       | –                | –                      | After context compaction                   |
 | `error`                   | `StopFailure`        | `errorOccurred`         | –                | –                      | Why a turn failed                          |
 | `config-change`           | `ConfigChange`       | –                       | –                | –                      | Settings changed, which is a tamper signal |
 | `instructions-loaded`     | `InstructionsLoaded` | –                       | –                | –                      | A `CLAUDE.md` entering context             |
+| `task-created`            | `TaskCreated`        | –                       | –                | –                      | A task is being created                    |
+| `task-completed`          | `TaskCompleted`      | –                       | –                | –                      | A task is marked complete                  |
+| `teammate-idle`           | `TeammateIdle`       | –                       | –                | –                      | An agent-team teammate is about to go idle |
+| `cwd-changed`             | `CwdChanged`         | –                       | –                | –                      | The working directory changed              |
+| `directory-added`         | `DirectoryAdded`     | –                       | –                | –                      | A directory added mid-session              |
+| `file-changed`            | `FileChanged`        | –                       | –                | –                      | A watched file changed on disk             |
+| `elicitation`             | `Elicitation`        | –                       | –                | –                      | An MCP server requested user input         |
+| `elicitation-result`      | `ElicitationResult`  | –                       | –                | –                      | The user responded to an MCP elicitation   |
 
 ### What Arcjet answers
 
