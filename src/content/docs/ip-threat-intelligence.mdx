@@ -31,7 +31,7 @@ frameworks:
 generateMarkdownRoute: true
 ---
 
-import { CardGrid, Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import { CardGrid, TabItem, Tabs } from "@astrojs/starlight/components";
 import Comments from "@/components/Comments.astro";
 import FrameworkLinks from "@/components/FrameworkLinks.astro";
 import SdkReferenceLinkByFramework from "@/components/SdkReferenceLinkByFramework.astro";
@@ -52,9 +52,6 @@ import ReactRouterExample from "@/snippets/ip-threat-intelligence/react-router/E
 import RemixExample from "@/snippets/ip-threat-intelligence/remix/Example.mdx";
 import SvelteKitExample from "@/snippets/ip-threat-intelligence/sveltekit/Example.mdx";
 
-import InspectDecisionTS from "@/snippets/ip-threat-intelligence/shared-js/InspectDecision.ts?raw";
-import InspectDecisionPy from "@/snippets/ip-threat-intelligence/shared-py/InspectDecision.py?raw";
-import InspectDecisionGo from "@/snippets/ip-threat-intelligence/shared-go/InspectDecision.go?raw";
 
 Every Arcjet decision includes analysis of the client IP. Use it to detect and
 deny VPNs, proxies, Tor exit nodes, hosting (data center) IPs, and other
@@ -225,13 +222,119 @@ in a filter. Check that each field is present before you read it.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
-<Code code={InspectDecisionTS} lang="ts" />
+
+```ts
+const decision = await aj.protect(req);
+
+if (decision.isDenied()) {
+  return new Response("Forbidden", { status: 403 });
+}
+
+const ip = decision.ip;
+
+if (ip.isHosting()) {
+  // Hosting and data center IPs are often automated clients.
+}
+
+if (ip.isVpn() || ip.isProxy() || ip.isTor()) {
+  // Apply your policy for anonymized traffic.
+}
+
+if (ip.isAbuser()) {
+  // The IP is associated with known abuse.
+}
+
+if (ip.isRelay() && ip.hasService() && ip.service === "Apple Private Relay") {
+  // Apple Private Relay requires a paid iCloud subscription.
+}
+
+const threat = ip.threat;
+
+if (threat && !threat.isSafe && threat.riskLevel === "critical") {
+  // High-risk IP. threat.activities may include brute_force, scanning, or
+  // botnet. threat.networkTypes may include hosting, vpn, proxy, or tor.
+}
+```
+
 </TabItem>
 <TabItem label="Python">
-<Code code={InspectDecisionPy} lang="py" />
+
+```py
+decision = await aj.protect(request)
+
+if decision.is_denied():
+    return JSONResponse({"error": "Forbidden"}, status_code=403)
+
+ip = decision.ip
+
+if ip.is_hosting():
+    # Hosting and data center IPs are often automated clients.
+    pass
+
+if ip.is_vpn() or ip.is_proxy() or ip.is_tor():
+    # Apply your policy for anonymized traffic.
+    pass
+
+if ip.is_abuser():
+    # The IP is associated with known abuse.
+    pass
+
+if (
+    ip.is_relay()
+    and decision.ip_details
+    and decision.ip_details.service == "Apple Private Relay"
+):
+    # Apple Private Relay requires a paid iCloud subscription.
+    pass
+
+details = decision.ip_details
+threat = details.threat if details else None
+
+if threat and not threat.is_safe and threat.risk_level == "critical":
+    # High-risk IP. threat.activities may include brute_force, scanning, or
+    # botnet. threat.network_types may include hosting, vpn, proxy, or tor.
+    pass
+```
+
 </TabItem>
 <TabItem label="Go">
-<Code code={InspectDecisionGo} lang="go" />
+
+```go
+decision, err := aj.Protect(r.Context(), r)
+if err != nil {
+	http.Error(w, "Unavailable", http.StatusServiceUnavailable)
+	return
+}
+
+if decision.IsDenied() {
+	http.Error(w, "Forbidden", http.StatusForbidden)
+	return
+}
+
+ip := decision.IP
+
+if ip.IsHosting {
+	// Hosting and data center IPs are often automated clients.
+}
+
+if ip.IsVPN || ip.IsProxy || ip.IsTor {
+	// Apply your policy for anonymized traffic.
+}
+
+if ip.IsAbuser {
+	// The IP is associated with known abuse.
+}
+
+if ip.IsRelay && ip.Service == "Apple Private Relay" {
+	// Apple Private Relay requires a paid iCloud subscription.
+}
+
+if threat := ip.Threat; threat != nil && !threat.IsSafe && threat.RiskLevel == "critical" {
+	// High-risk IP. threat.Activities may include brute_force, scanning, or
+	// botnet. threat.NetworkTypes may include hosting, vpn, proxy, or tor.
+}
+```
+
 </TabItem>
 </Tabs>
 
