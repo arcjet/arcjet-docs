@@ -1,0 +1,32 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import ExampleConfig from "./ExampleConfig.js?raw";
+import ExampleMiddleware from "./ExampleMiddleware.js?raw";
+
+Define the filter in `astro.config.mjs`:
+
+<Code code={ExampleConfig} lang="js" title="astro.config.mjs" />
+
+Arcjet protection runs on HTTP requests. That is useful for dynamic routes in
+Astro. It is not useful for static routes, which are pre-rendered at build time.
+
+Astro uses
+[middleware](https://docs.astro.build/en/guides/middleware/)
+to intercept requests. That's where you add Arcjet.
+
+<SelectableContent client:load syncKey="language">
+  <Fragment slotIdx="1" slot="JavaScript">
+
+    Create a `middleware.js` file in the `src/` folder:
+
+    <Code code={ExampleMiddleware} lang="js" title="src/middleware.js" />
+
+  </Fragment>
+  <Fragment slotIdx="2" slot="TypeScript">
+
+    Create a `middleware.ts` file in the `src/` folder:
+
+    <Code code={ExampleMiddleware} lang="ts" title="src/middleware.ts" />
+
+  </Fragment>
+</SelectableContent>

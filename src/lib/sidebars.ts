@@ -518,6 +518,10 @@ export const main = [
         link: "/best-practices",
       },
       {
+        label: "IP threat intelligence",
+        link: "/ip-threat-intelligence",
+      },
+      {
         label: "Remote rules",
         link: "/remote-rules",
       },

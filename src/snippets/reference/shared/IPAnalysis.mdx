@@ -1,4 +1,5 @@
 import { Badge } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
 
 The `ArcjetDecision` object contains an `ip`
 property. This includes additional data about the client IP address:
@@ -80,6 +81,10 @@ need for null-ish checks.
   country of the client IP address.
 
 #### IP threat intelligence
+
+To deny VPNs, proxies, Tor, hosting IPs, or other high-risk networks using
+these fields, see
+<Link.Page href="/ip-threat-intelligence">IP threat intelligence</Link.Page>.
 
 When threat intelligence is available, it is exposed as `decision.ip.threat`.
 Always check for it because older responses and IPs without an assessment omit

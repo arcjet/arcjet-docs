@@ -1,0 +1,300 @@
+---
+title: "IP threat intelligence"
+titleByFramework:
+  astro: "IP threat intelligence for Astro"
+  bun: "IP threat intelligence for Bun"
+  default: "IP threat intelligence"
+  deno: "IP threat intelligence for Deno"
+  fastify: "IP threat intelligence for Fastify"
+  nest-js: "IP threat intelligence for NestJS"
+  next-js: "IP threat intelligence for Next.js"
+  node-js: "IP threat intelligence for Node.js"
+  python-fastapi: "IP threat intelligence for FastAPI"
+  python-flask: "IP threat intelligence for Flask"
+  react-router: "IP threat intelligence for React Router"
+  remix: "IP threat intelligence for Remix"
+  sveltekit: "IP threat intelligence for SvelteKit"
+description: "Detect and block VPNs, proxies, Tor, hosting providers, and other high-risk client IPs with Arcjet IP threat intelligence."
+frameworks:
+  - astro
+  - bun
+  - deno
+  - fastify
+  - nest-js
+  - next-js
+  - node-js
+  - python-fastapi
+  - python-flask
+  - react-router
+  - remix
+  - sveltekit
+generateMarkdownRoute: true
+---
+
+import { CardGrid, Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import Comments from "@/components/Comments.astro";
+import FrameworkLinks from "@/components/FrameworkLinks.astro";
+import SdkReferenceLinkByFramework from "@/components/SdkReferenceLinkByFramework.astro";
+import SlotByFramework from "@/components/SlotByFramework.astro";
+import { Link } from "@/components/link";
+import { frameworks } from "@/lib/prefs";
+
+import AstroExample from "@/snippets/ip-threat-intelligence/astro/Example.mdx";
+import BunExample from "@/snippets/ip-threat-intelligence/bun/Example.mdx";
+import DenoExample from "@/snippets/ip-threat-intelligence/deno/Example.mdx";
+import FastifyExample from "@/snippets/ip-threat-intelligence/fastify/Example.mdx";
+import NestJsExample from "@/snippets/ip-threat-intelligence/nestjs/Example.mdx";
+import NextJsExample from "@/snippets/ip-threat-intelligence/nextjs/Example.mdx";
+import NodeJsExample from "@/snippets/ip-threat-intelligence/nodejs/Example.mdx";
+import PythonFastapiExample from "@/snippets/ip-threat-intelligence/python-fastapi/Example.mdx";
+import PythonFlaskExample from "@/snippets/ip-threat-intelligence/python-flask/Example.mdx";
+import ReactRouterExample from "@/snippets/ip-threat-intelligence/react-router/Example.mdx";
+import RemixExample from "@/snippets/ip-threat-intelligence/remix/Example.mdx";
+import SvelteKitExample from "@/snippets/ip-threat-intelligence/sveltekit/Example.mdx";
+
+import InspectDecisionTS from "@/snippets/ip-threat-intelligence/shared-js/InspectDecision.ts?raw";
+import InspectDecisionPy from "@/snippets/ip-threat-intelligence/shared-py/InspectDecision.py?raw";
+import InspectDecisionGo from "@/snippets/ip-threat-intelligence/shared-go/InspectDecision.go?raw";
+
+Every Arcjet decision includes analysis of the client IP. Use it to detect and
+deny VPNs, proxies, Tor exit nodes, hosting (data center) IPs, and other
+high-risk networks.
+
+You can enforce that analysis in two ways:
+
+- A <Link.Page href="/filters">filter</Link.Page> rule denies matching traffic
+  together with your other Arcjet rules.
+- The `ip` field on the decision lets you customize the response in your
+  handler.
+
+IP analysis fields need data from the Arcjet Cloud API, so they are populated
+when `protect()` calls the API. For more information about each field, see
+IP analysis in the SDK reference for your framework.
+
+## IP threat signals
+
+Arcjet labels each client IP with one or more network types and, when
+available, a threat intelligence assessment.
+
+| Signal | Filter field | JavaScript | Python |
+| --- | --- | --- | --- |
+| VPN | `ip.src.vpn` | `ip.isVpn()` | `ip.is_vpn()` |
+| Proxy | `ip.src.proxy` | `ip.isProxy()` | `ip.is_proxy()` |
+| Tor | `ip.src.tor` | `ip.isTor()` | `ip.is_tor()` |
+| Hosting or data center | `ip.src.hosting` | `ip.isHosting()` | `ip.is_hosting()` |
+| Privacy relay | `ip.src.relay` | `ip.isRelay()` | `ip.is_relay()` |
+| Known abuse | None | `ip.isAbuser()` | `ip.is_abuser()` |
+| Service name | `ip.src.service` | `ip.service` | `ip_details.service` |
+| ASN type | `ip.src.asnum.type` | `ip.asnType` | `ip_details.asn_type` |
+
+In Go, the same signals are fields on `decision.IP`: `IsVPN`, `IsProxy`,
+`IsTor`, `IsHosting`, `IsRelay`, `IsAbuser`, `Service`, and `ASNType`.
+
+`asnType` is one of `isp`, `hosting`, `business`, or `education`. Real users
+are more often on an ISP or business network than on a hosting provider.
+
+A hosting label means the IP belongs to a hosting provider. That raises the
+chance the client is automated, but an API used by other servers can see
+legitimate hosting IPs.
+
+VPN, proxy, and Tor labels mean the client is hiding its origin. People use
+VPNs for privacy or work, so a VPN match alone is not proof of abuse. Treat it
+as a risk signal and decide based on the route.
+
+Privacy relays such as Apple Private Relay are paid services tied to an
+account. They are less likely to be automated than an open proxy. Don't deny
+`ip.src.relay` unless you intend to block those clients.
+
+When threat intelligence is available, the JavaScript SDK exposes it as
+`decision.ip.threat`, the Python SDK as `decision.ip_details.threat`, and the
+Go SDK as `decision.IP.Threat`. Responses without an assessment omit it.
+Typical fields include `riskLevel` (`none`, `low`, `medium`, `high`, or
+`critical`), `confidence`, `reputation`, `isSafe`, `networkTypes`,
+`activities`, `entities`, `entityName`, and `service`. Python uses snake_case
+for the same names (`risk_level`, `network_types`). Go uses PascalCase
+(`RiskLevel`, `NetworkTypes`).
+
+For more information about method signatures, availability checks, and
+geolocation fields, see IP analysis in the
+<Link.Page href="/reference/nextjs#ip-analysis">Next.js SDK reference</Link.Page>,
+<Link.Page href="/reference/nodejs#ip-analysis">Node.js SDK reference</Link.Page>,
+<Link.Page href="/reference/astro#ip-analysis">Astro SDK reference</Link.Page>,
+<Link.Page href="/reference/bun#ip-analysis">Bun SDK reference</Link.Page>,
+<Link.Page href="/reference/nuxt#ip-analysis">Nuxt SDK reference</Link.Page>,
+<Link.Page href="/reference/sveltekit#ip-analysis">SvelteKit SDK reference</Link.Page>,
+<Link.Page href="/reference/remix#ip-analysis">Remix SDK reference</Link.Page>,
+<Link.Page href="/reference/nestjs#ip-analysis">NestJS SDK reference</Link.Page>,
+or
+<Link.Page href="/reference/python#ip-analysis">Python SDK reference</Link.Page>.
+For more information about filter expressions, see the
+<Link.Page href="/filters/reference#fields">filter field reference</Link.Page>.
+
+## Block high-risk networks
+
+The following example denies hosting IPs, VPNs, proxies, and Tor. It does not
+deny privacy relays.
+
+Start the rule in `DRY_RUN` if you want to log matches before you enforce them.
+
+<FrameworkLinks
+  exclude={frameworks
+    .filter((d) => !frontmatter.frameworks.includes(d.key))
+    .map((d) => d.key)}
+/>
+
+<SlotByFramework>
+  <AstroExample slot="astro" />
+  <BunExample slot="bun" />
+  <DenoExample slot="deno" />
+  <FastifyExample slot="fastify" />
+  <NestJsExample slot="nest-js" />
+  <NextJsExample slot="next-js" />
+  <NodeJsExample slot="node-js" />
+  <PythonFastapiExample slot="python-fastapi" />
+  <PythonFlaskExample slot="python-flask" />
+  <ReactRouterExample slot="react-router" />
+  <RemixExample slot="remix" />
+  <SvelteKitExample slot="sveltekit" />
+</SlotByFramework>
+
+If the decision is denied, return HTTP `403` (or your own challenge). Combine
+this filter with
+<Link.Page href="/bot-protection">bot protection</Link.Page> and
+<Link.Page href="/shield">Shield</Link.Page> when you want to deny automated
+clients and common attacks on the same route.
+
+## Block VPN and proxy traffic
+
+To deny only VPNs and proxies, use a narrower filter:
+
+```ts
+filter({
+  deny: ["ip.src.vpn or ip.src.proxy"],
+  mode: "LIVE",
+})
+```
+
+To deny VPNs and leave proxies to another rule, use `ip.src.vpn` on its own.
+
+Many people use VPNs for privacy or work. On a login or checkout form, that
+can be a useful signal. On a public marketing page it can block real
+customers. Prefer `DRY_RUN` first, then review matches in the
+[Arcjet dashboard](https://console.arcjet.com).
+
+## Block hosting and data center IPs
+
+Hosting IPs are a common source of bots and scripted abuse:
+
+```ts
+filter({
+  deny: ["ip.src.hosting"],
+  mode: "LIVE",
+})
+```
+
+You can also match the autonomous system type:
+
+```ts
+filter({
+  deny: ['ip.src.asnum.type eq "hosting"'],
+  mode: "LIVE",
+})
+```
+
+Don't use this on an API that other servers call. Those clients often
+originate from hosting providers.
+
+## Block Tor traffic
+
+Tor exit nodes hide the client origin and are a frequent source of abuse:
+
+```ts
+filter({
+  deny: ["ip.src.tor"],
+  mode: "LIVE",
+})
+```
+
+Tor also has legitimate privacy uses. Deny it on sensitive actions such as
+account creation or payments if that matches your risk tolerance.
+
+## Inspect a decision
+
+Use `decision.ip` when you want to customize the response instead of denying
+in a filter. Check that each field is present before you read it.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+<Code code={InspectDecisionTS} lang="ts" />
+</TabItem>
+<TabItem label="Python">
+<Code code={InspectDecisionPy} lang="py" />
+</TabItem>
+<TabItem label="Go">
+<Code code={InspectDecisionGo} lang="go" />
+</TabItem>
+</Tabs>
+
+You can also manage filter rules as
+<Link.Page href="/remote-rules">remote rules</Link.Page> from the dashboard or
+the <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page> without a
+redeploy. Use `investigate-ip` to look up geo, ASN, and threat intelligence
+for a suspicious IP, then create a filter to deny it.
+
+## Allow a trusted relay
+
+Apple Private Relay is the most common privacy relay. If you deny
+`ip.src.relay`, you also deny those clients. To allow the relay while still
+denying other anonymized networks, inspect the service name after
+`protect()`:
+
+```ts
+const decision = await aj.protect(req);
+
+if (decision.ip.hasService() && decision.ip.service === "Apple Private Relay") {
+  // Allow this client.
+}
+
+if (decision.ip.isVpn() || decision.ip.isProxy() || decision.ip.isTor()) {
+  return new Response("Forbidden", { status: 403 });
+}
+```
+
+A filter can express the same exception:
+
+```ts
+filter({
+  deny: [
+    'ip.src.vpn or ip.src.proxy or ip.src.tor or (ip.src.relay and ip.src.service ne "Apple Private Relay")',
+  ],
+  mode: "LIVE",
+})
+```
+
+## What next?
+
+<CardGrid>
+  <Link.Card
+    title="Filters"
+    href="/filters"
+    description="Write expressions that deny VPNs, proxies, countries, and other request fields."
+  />
+  <Link.Card
+    title="Bot protection"
+    href="/bot-protection"
+    description="Detect and deny automated clients, including bots on hosting IPs."
+  />
+  <Link.Card
+    title="IP geolocation"
+    href="/blueprints/ip-geolocation"
+    description="Customize responses from country, region, and city fields."
+  />
+  <Link.Card
+    title="VPN and proxy detection"
+    href="/blueprints/vpn-proxy-detection"
+    description="A shorter blueprint that focuses on VPN and proxy checks."
+  />
+  <SdkReferenceLinkByFramework />
+</CardGrid>
+
+<Comments />

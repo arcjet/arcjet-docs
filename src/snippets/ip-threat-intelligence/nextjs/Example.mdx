@@ -1,0 +1,26 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import ExampleJs from "./Example.js?raw";
+
+Arcjet protection runs on HTTP requests. Next.js uses
+[middleware](https://nextjs.org/docs/app/api-reference/file-conventions/middleware)
+to handle requests. That's where you add the filter.
+
+<SelectableContent client:load syncKey="language">
+  <Fragment slotIdx="1" slot="JS">
+
+    Create a `middleware.js` file in your project (in `src/` if you have it,
+    next to `app/`):
+
+    <Code code={ExampleJs} lang="js" title="middleware.js" />
+
+  </Fragment>
+  <Fragment slotIdx="2" slot="TS">
+
+    Create a `middleware.ts` file in your project (in `src/` if you have it,
+    next to `app/`):
+
+    <Code code={ExampleJs} lang="ts" title="middleware.ts" />
+
+  </Fragment>
+</SelectableContent>
