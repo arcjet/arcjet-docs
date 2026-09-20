@@ -1,45 +1,12 @@
 ---
 title: "IP threat intelligence"
-titleByFramework:
-  astro: "IP threat intelligence for Astro"
-  bun: "IP threat intelligence for Bun"
-  default: "IP threat intelligence"
-  deno: "IP threat intelligence for Deno"
-  fastify: "IP threat intelligence for Fastify"
-  nest-js: "IP threat intelligence for NestJS"
-  next-js: "IP threat intelligence for Next.js"
-  node-js: "IP threat intelligence for Node.js"
-  nuxt: "IP threat intelligence for Nuxt"
-  python-fastapi: "IP threat intelligence for FastAPI"
-  python-flask: "IP threat intelligence for Flask"
-  react-router: "IP threat intelligence for React Router"
-  remix: "IP threat intelligence for Remix"
-  sveltekit: "IP threat intelligence for SvelteKit"
 description: "Detect and block VPNs, proxies, Tor, hosting providers, and other high-risk client IPs with Arcjet IP threat intelligence."
-frameworks:
-  - astro
-  - bun
-  - deno
-  - fastify
-  - nest-js
-  - next-js
-  - node-js
-  - nuxt
-  - python-fastapi
-  - python-flask
-  - react-router
-  - remix
-  - sveltekit
 generateMarkdownRoute: true
 ---
 
 import { CardGrid, TabItem, Tabs } from "@astrojs/starlight/components";
 import Comments from "@/components/Comments.astro";
-import FrameworkLinks from "@/components/FrameworkLinks.astro";
-import SdkReferenceLinkByFramework from "@/components/SdkReferenceLinkByFramework.astro";
-import SlotByFramework from "@/components/SlotByFramework.astro";
 import { Link } from "@/components/link";
-import { frameworks } from "@/lib/prefs";
 
 import AstroExample from "@/snippets/ip-threat-intelligence/astro/Example.mdx";
 import BunExample from "@/snippets/ip-threat-intelligence/bun/Example.mdx";
@@ -147,31 +114,64 @@ deny privacy relays.
 
 Start the rule in `DRY_RUN` if you want to log matches before you enforce them.
 
-<FrameworkLinks
-  exclude={frameworks
-    .filter((d) => !frontmatter.frameworks.includes(d.key))
-    .map((d) => d.key)}
-/>
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
-<SlotByFramework>
-  <AstroExample slot="astro" />
-  <BunExample slot="bun" />
-  <DenoExample slot="deno" />
-  <FastifyExample slot="fastify" />
-  <NestJsExample slot="nest-js" />
-  <NextJsExample slot="next-js" />
-  <NodeJsExample slot="node-js" />
-  <NuxtExample slot="nuxt" />
-  <PythonFastapiExample slot="python-fastapi" />
-  <PythonFlaskExample slot="python-flask" />
-  <ReactRouterExample slot="react-router" />
-  <RemixExample slot="remix" />
-  <SvelteKitExample slot="sveltekit" />
-</SlotByFramework>
+<Tabs>
+<TabItem label="Next.js">
+<NextJsExample />
+</TabItem>
+<TabItem label="Node.js">
+<NodeJsExample />
+</TabItem>
+<TabItem label="Astro">
+<AstroExample />
+</TabItem>
+<TabItem label="Bun">
+<BunExample />
+</TabItem>
+<TabItem label="Deno">
+<DenoExample />
+</TabItem>
+<TabItem label="Fastify">
+<FastifyExample />
+</TabItem>
+<TabItem label="NestJS">
+<NestJsExample />
+</TabItem>
+<TabItem label="Nuxt">
+<NuxtExample />
+</TabItem>
+<TabItem label="React Router">
+<ReactRouterExample />
+</TabItem>
+<TabItem label="Remix">
+<RemixExample />
+</TabItem>
+<TabItem label="SvelteKit">
+<SvelteKitExample />
+</TabItem>
+</Tabs>
 
-### Go
+</TabItem>
+<TabItem label="Python">
+
+<Tabs>
+<TabItem label="FastAPI">
+<PythonFastapiExample />
+</TabItem>
+<TabItem label="Flask">
+<PythonFlaskExample />
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem label="Go">
 
 <GoExample />
+
+</TabItem>
+</Tabs>
 
 If the decision is denied, return HTTP `403` (or your own challenge). Combine
 this filter with
@@ -798,7 +798,11 @@ arcjet.Filter(arcjet.FilterOptions{
     href="/blueprints/vpn-proxy-detection"
     description="A shorter blueprint that focuses on VPN and proxy checks."
   />
-  <SdkReferenceLinkByFramework />
+  <Link.Card
+    title="SDK reference"
+    href="/reference/nextjs"
+    description="IP analysis fields and method signatures for each SDK."
+  />
 </CardGrid>
 
 <Comments />
