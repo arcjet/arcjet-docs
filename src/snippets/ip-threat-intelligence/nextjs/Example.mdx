@@ -1,0 +1,24 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import ExampleJs from "./Example.js?raw";
+import ExampleTs from "./Example.ts?raw";
+
+Call `protect()` from a route handler, Server Component, or Server Action. This
+example uses an App Router route handler.
+
+<SelectableContent client:load syncKey="language">
+  <Fragment slotIdx="1" slot="JS">
+
+    Create a new API route at `/app/api/arcjet/route.js`:
+
+    <Code code={ExampleJs} lang="js" title="/app/api/arcjet/route.js" />
+
+  </Fragment>
+  <Fragment slotIdx="2" slot="TS">
+
+    Create a new API route at `/app/api/arcjet/route.ts`:
+
+    <Code code={ExampleTs} lang="ts" title="/app/api/arcjet/route.ts" />
+
+  </Fragment>
+</SelectableContent>

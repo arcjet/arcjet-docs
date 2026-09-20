@@ -67,6 +67,7 @@ const PATHS_FROM_SITEMAP = [
   "/integrations/better-auth/",
   "/integrations/clerk/",
   "/ip/",
+  "/ip-threat-intelligence/",
   "/limitations/",
   "/nosecone/quick-start/",
   "/nosecone/reference/",

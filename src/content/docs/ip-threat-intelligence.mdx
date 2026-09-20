@@ -1,0 +1,808 @@
+---
+title: "IP threat intelligence"
+description: "Detect and block VPNs, proxies, Tor, hosting providers, and other high-risk client IPs with Arcjet IP threat intelligence."
+generateMarkdownRoute: true
+---
+
+import { CardGrid, TabItem, Tabs } from "@astrojs/starlight/components";
+import Comments from "@/components/Comments.astro";
+import { Link } from "@/components/link";
+
+import AstroExample from "@/snippets/ip-threat-intelligence/astro/Example.mdx";
+import BunExample from "@/snippets/ip-threat-intelligence/bun/Example.mdx";
+import DenoExample from "@/snippets/ip-threat-intelligence/deno/Example.mdx";
+import FastifyExample from "@/snippets/ip-threat-intelligence/fastify/Example.mdx";
+import GoExample from "@/snippets/ip-threat-intelligence/go/Example.mdx";
+import NestJsExample from "@/snippets/ip-threat-intelligence/nestjs/Example.mdx";
+import NextJsExample from "@/snippets/ip-threat-intelligence/nextjs/Example.mdx";
+import NodeJsExample from "@/snippets/ip-threat-intelligence/nodejs/Example.mdx";
+import NuxtExample from "@/snippets/ip-threat-intelligence/nuxt/Example.mdx";
+import PythonFastapiExample from "@/snippets/ip-threat-intelligence/python-fastapi/Example.mdx";
+import PythonFlaskExample from "@/snippets/ip-threat-intelligence/python-flask/Example.mdx";
+import ReactRouterExample from "@/snippets/ip-threat-intelligence/react-router/Example.mdx";
+import RemixExample from "@/snippets/ip-threat-intelligence/remix/Example.mdx";
+import SvelteKitExample from "@/snippets/ip-threat-intelligence/sveltekit/Example.mdx";
+
+
+Every Arcjet decision includes analysis of the client IP. Use it to detect and
+deny VPNs, proxies, Tor exit nodes, hosting (data center) IPs, and other
+high-risk networks.
+
+You can enforce that analysis in two ways:
+
+- A <Link.Page href="/filters">filter</Link.Page> rule denies matching traffic
+  together with your other Arcjet rules.
+- The `ip` field on the decision lets you customize the response in your
+  handler, including the `ip.threat` assessment when it is present.
+
+IP analysis fields need data from the Arcjet Cloud API, so they are populated
+when `protect()` calls the API. For more information about each field, see
+IP analysis in the SDK reference for your framework.
+
+## IP threat signals
+
+Arcjet labels each client IP with one or more network types and, when
+available, a threat intelligence assessment.
+
+| Signal | Filter field | JavaScript | Python | Go |
+| --- | --- | --- | --- | --- |
+| VPN | `ip.src.vpn` | `ip.isVpn()` | `ip.is_vpn()` | `ip.IsVPN` |
+| Proxy | `ip.src.proxy` | `ip.isProxy()` | `ip.is_proxy()` | `ip.IsProxy` |
+| Tor | `ip.src.tor` | `ip.isTor()` | `ip.is_tor()` | `ip.IsTor` |
+| Hosting or data center | `ip.src.hosting` | `ip.isHosting()` | `ip.is_hosting()` | `ip.IsHosting` |
+| Privacy relay | `ip.src.relay` | `ip.isRelay()` | `ip_details.is_relay` | `ip.IsRelay` |
+| Known abuse | None | `ip.isAbuser()` | `ip.is_abuser()` | `ip.IsAbuser` |
+| Service name | `ip.src.service` | `ip.service` | `ip_details.service` | `ip.Service` |
+| ASN type | `ip.src.asnum.type` | `ip.asnType` | `ip_details.asn_type` | `ip.ASNType` |
+
+`asnType` is one of `isp`, `hosting`, `business`, or `education`. Real users
+are more often on an ISP or business network than on a hosting provider.
+
+A hosting label means the IP belongs to a hosting provider. That raises the
+chance the client is automated, but an API used by other servers can see
+legitimate hosting IPs.
+
+VPN, proxy, and Tor labels mean the client is hiding its origin. People use
+VPNs for privacy or work, so a VPN match alone is not proof of abuse. Treat it
+as a risk signal and decide based on the route.
+
+Privacy relays such as Apple Private Relay are paid services tied to an
+account. They are less likely to be automated than an open proxy. Don't deny
+`ip.src.relay` unless you intend to block those clients.
+
+Filters do not read `ip.threat`. To deny on risk level, reputation, activity,
+or entity, inspect the decision after `protect()`.
+
+When threat intelligence is available, the JavaScript SDK exposes it as
+`decision.ip.threat`, the Python SDK as `decision.ip_details.threat`, and the
+Go SDK as `decision.IP.Threat`. Responses without an assessment omit it.
+
+| Field | JavaScript | Python | Go | Typical values |
+| --- | --- | --- | --- | --- |
+| Risk level | `riskLevel` | `risk_level` | `RiskLevel` | `none`, `low`, `medium`, `high`, `critical` |
+| Confidence | `confidence` | `confidence` | `Confidence` | `low`, `medium`, `high` |
+| Reputation | `reputation` | `reputation` | `Reputation` | `malicious`, `suspicious`, `known`, `safe`, `benign`, `unknown` |
+| Trusted infrastructure | `isSafe` | `is_safe` | `IsSafe` | `true` when the IP is trusted infrastructure |
+| Network types | `networkTypes` | `network_types` | `NetworkTypes` | `hosting`, `vpn`, `proxy`, `tor` |
+| Activities | `activities` | `activities` | `Activities` | `brute_force`, `scanning`, `botnet` |
+| Entities | `entities` | `entities` | `Entities` | `crawler`, `ai_crawler`, `scanner` |
+| Entity name | `entityName` | `entity_name` | `EntityName` | a specific entity, when identified |
+| Service | `service` | `service` | `Service` | a known service or provider, when identified |
+
+Python uses snake_case for the same names. Go uses PascalCase.
+
+For more information about method signatures, availability checks, and
+geolocation fields, see IP analysis in the
+<Link.Page href="/reference/nextjs#ip-analysis">Next.js SDK reference</Link.Page>,
+<Link.Page href="/reference/nodejs#ip-analysis">Node.js SDK reference</Link.Page>,
+<Link.Page href="/reference/astro#ip-analysis">Astro SDK reference</Link.Page>,
+<Link.Page href="/reference/bun#ip-analysis">Bun SDK reference</Link.Page>,
+<Link.Page href="/reference/nuxt#ip-analysis">Nuxt SDK reference</Link.Page>,
+<Link.Page href="/reference/sveltekit#ip-analysis">SvelteKit SDK reference</Link.Page>,
+<Link.Page href="/reference/remix#ip-analysis">Remix SDK reference</Link.Page>,
+<Link.Page href="/reference/nestjs#ip-analysis">NestJS SDK reference</Link.Page>,
+<Link.Page href="/reference/python#ip-analysis">Python SDK reference</Link.Page>,
+or
+<Link.Page href="/reference/go">Go SDK reference</Link.Page>.
+For more information about filter expressions, see the
+<Link.Page href="/filters/reference#fields">filter field reference</Link.Page>.
+
+## Block high-risk networks
+
+The following example denies hosting IPs, VPNs, proxies, and Tor. It does not
+deny privacy relays.
+
+Start the rule in `DRY_RUN` if you want to log matches before you enforce them.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+<Tabs>
+<TabItem label="Next.js">
+<NextJsExample />
+</TabItem>
+<TabItem label="Node.js">
+<NodeJsExample />
+</TabItem>
+<TabItem label="Astro">
+<AstroExample />
+</TabItem>
+<TabItem label="Bun">
+<BunExample />
+</TabItem>
+<TabItem label="Deno">
+<DenoExample />
+</TabItem>
+<TabItem label="Fastify">
+<FastifyExample />
+</TabItem>
+<TabItem label="NestJS">
+<NestJsExample />
+</TabItem>
+<TabItem label="Nuxt">
+<NuxtExample />
+</TabItem>
+<TabItem label="React Router">
+<ReactRouterExample />
+</TabItem>
+<TabItem label="Remix">
+<RemixExample />
+</TabItem>
+<TabItem label="SvelteKit">
+<SvelteKitExample />
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem label="Python">
+
+<Tabs>
+<TabItem label="FastAPI">
+<PythonFastapiExample />
+</TabItem>
+<TabItem label="Flask">
+<PythonFlaskExample />
+</TabItem>
+</Tabs>
+
+</TabItem>
+<TabItem label="Go">
+
+<GoExample />
+
+</TabItem>
+</Tabs>
+
+If the decision is denied, return HTTP `403` (or your own challenge). Combine
+this filter with
+<Link.Page href="/bot-protection">bot protection</Link.Page> and
+<Link.Page href="/shield">Shield</Link.Page> when you want to deny automated
+clients and common attacks on the same route.
+
+## Block VPN and proxy traffic
+
+To deny only VPNs and proxies, use a narrower filter:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+filter({
+  deny: ["ip.src.vpn or ip.src.proxy"],
+  mode: "LIVE",
+})
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+filter_request(
+    deny=["ip.src.vpn or ip.src.proxy"],
+    mode=Mode.LIVE,
+)
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+arcjet.Filter(arcjet.FilterOptions{
+	Deny: []string{"ip.src.vpn or ip.src.proxy"},
+	Mode: arcjet.ModeLive,
+})
+```
+
+</TabItem>
+</Tabs>
+
+To deny VPNs and leave proxies to another rule, use `ip.src.vpn` on its own.
+
+Many people use VPNs for privacy or work. On a login or checkout form, that
+can be a useful signal. On a public marketing page it can block real
+customers. Prefer `DRY_RUN` first, then review matches in the
+[Arcjet dashboard](https://console.arcjet.com).
+
+## Block hosting and data center IPs
+
+Hosting IPs are a common source of bots and scripted abuse:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+filter({
+  deny: ["ip.src.hosting"],
+  mode: "LIVE",
+})
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+filter_request(
+    deny=["ip.src.hosting"],
+    mode=Mode.LIVE,
+)
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+arcjet.Filter(arcjet.FilterOptions{
+	Deny: []string{"ip.src.hosting"},
+	Mode: arcjet.ModeLive,
+})
+```
+
+</TabItem>
+</Tabs>
+
+You can also match the autonomous system type:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+filter({
+  deny: ['ip.src.asnum.type eq "hosting"'],
+  mode: "LIVE",
+})
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+filter_request(
+    deny=['ip.src.asnum.type eq "hosting"'],
+    mode=Mode.LIVE,
+)
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+arcjet.Filter(arcjet.FilterOptions{
+	Deny: []string{`ip.src.asnum.type eq "hosting"`},
+	Mode: arcjet.ModeLive,
+})
+```
+
+</TabItem>
+</Tabs>
+
+Don't use this on an API that other servers call. Those clients often
+originate from hosting providers.
+
+## Block Tor traffic
+
+Tor exit nodes hide the client origin and are a frequent source of abuse:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+filter({
+  deny: ["ip.src.tor"],
+  mode: "LIVE",
+})
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+filter_request(
+    deny=["ip.src.tor"],
+    mode=Mode.LIVE,
+)
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+arcjet.Filter(arcjet.FilterOptions{
+	Deny: []string{"ip.src.tor"},
+	Mode: arcjet.ModeLive,
+})
+```
+
+</TabItem>
+</Tabs>
+
+Tor also has legitimate privacy uses. Deny it on sensitive actions such as
+account creation or payments if that matches your risk tolerance.
+
+## Deny with threat intelligence
+
+`ip.threat` is the assessment for that IP when Arcjet has one. Check that it
+exists before you read it. Then deny on the fields that match your risk
+tolerance.
+
+These patterns run in your handler after `protect()`. They are not filter
+expressions.
+
+### Deny high or critical risk
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+const decision = await aj.protect(req);
+const threat = decision.ip.threat;
+
+if (
+  threat &&
+  !threat.isSafe &&
+  (threat.riskLevel === "high" || threat.riskLevel === "critical")
+) {
+  return new Response("Forbidden", { status: 403 });
+}
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+decision = await aj.protect(request)
+details = decision.ip_details
+threat = details.threat if details else None
+
+if (
+    threat
+    and not threat.is_safe
+    and threat.risk_level in ("high", "critical")
+):
+    return JSONResponse({"error": "Forbidden"}, status_code=403)
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+decision, err := aj.Protect(r.Context(), r)
+if err != nil {
+	log.Printf("arcjet: %v", err)
+} else if threat := decision.IP.Threat; threat != nil && !threat.IsSafe &&
+	(threat.RiskLevel == "high" || threat.RiskLevel == "critical") {
+	http.Error(w, "Forbidden", http.StatusForbidden)
+	return
+}
+```
+
+</TabItem>
+</Tabs>
+
+`isSafe` / `is_safe` / `IsSafe` marks trusted infrastructure. Skip a denial
+when it is true, even if `riskLevel` is elevated.
+
+### Deny known abuse activity
+
+`activities` lists observed behaviors such as `brute_force`, `scanning`, and
+`botnet`:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+const threat = decision.ip.threat;
+const abusive = ["brute_force", "scanning", "botnet"];
+
+if (
+  threat &&
+  !threat.isSafe &&
+  threat.activities.some((activity) => abusive.includes(activity))
+) {
+  return new Response("Forbidden", { status: 403 });
+}
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+threat = decision.ip_details.threat if decision.ip_details else None
+abusive = {"brute_force", "scanning", "botnet"}
+
+if threat and not threat.is_safe and abusive.intersection(threat.activities):
+    return JSONResponse({"error": "Forbidden"}, status_code=403)
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+if threat := decision.IP.Threat; threat != nil && !threat.IsSafe &&
+	(slices.Contains(threat.Activities, "brute_force") ||
+		slices.Contains(threat.Activities, "scanning") ||
+		slices.Contains(threat.Activities, "botnet")) {
+	http.Error(w, "Forbidden", http.StatusForbidden)
+	return
+}
+```
+
+</TabItem>
+</Tabs>
+
+### Deny malicious reputation
+
+`reputation` is the upstream label. `malicious` is the strongest deny signal.
+`suspicious` is weaker – treat it as a signal to challenge or rate limit
+rather than an automatic deny on every route.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+const threat = decision.ip.threat;
+
+if (threat && !threat.isSafe && threat.reputation === "malicious") {
+  return new Response("Forbidden", { status: 403 });
+}
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+threat = decision.ip_details.threat if decision.ip_details else None
+
+if threat and not threat.is_safe and threat.reputation == "malicious":
+    return JSONResponse({"error": "Forbidden"}, status_code=403)
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+if threat := decision.IP.Threat; threat != nil && !threat.IsSafe &&
+	threat.Reputation == "malicious" {
+	http.Error(w, "Forbidden", http.StatusForbidden)
+	return
+}
+```
+
+</TabItem>
+</Tabs>
+
+### Deny automated entities on sensitive routes
+
+`entities` names automated clients such as `crawler`, `ai_crawler`, and
+`scanner`. `entityName` is set when Arcjet identifies a specific client.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+const threat = decision.ip.threat;
+
+if (
+  threat &&
+  !threat.isSafe &&
+  (threat.entities.includes("scanner") ||
+    threat.entities.includes("ai_crawler"))
+) {
+  return new Response("Forbidden", { status: 403 });
+}
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+threat = decision.ip_details.threat if decision.ip_details else None
+
+if threat and not threat.is_safe and (
+    "scanner" in threat.entities or "ai_crawler" in threat.entities
+):
+    return JSONResponse({"error": "Forbidden"}, status_code=403)
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+if threat := decision.IP.Threat; threat != nil && !threat.IsSafe &&
+	(slices.Contains(threat.Entities, "scanner") ||
+		slices.Contains(threat.Entities, "ai_crawler")) {
+	http.Error(w, "Forbidden", http.StatusForbidden)
+	return
+}
+```
+
+</TabItem>
+</Tabs>
+
+`confidence` tells you how sure the assessment is (`low`, `medium`, or
+`high`). Require `medium` or `high` before you deny on a public page.
+
+## Inspect a decision
+
+Use `decision.ip` when you want to customize the response instead of denying
+in a filter. Check that each field is present before you read it.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+const decision = await aj.protect(req);
+
+if (decision.isDenied()) {
+  return new Response("Forbidden", { status: 403 });
+}
+
+const ip = decision.ip;
+
+if (ip.isHosting()) {
+  // Hosting and data center IPs are often automated clients.
+}
+
+if (ip.isVpn() || ip.isProxy() || ip.isTor()) {
+  // Apply your policy for anonymized traffic.
+}
+
+if (ip.isAbuser()) {
+  // The IP is associated with known abuse.
+}
+
+if (ip.isRelay() && ip.hasService() && ip.service === "Apple Private Relay") {
+  // Apple Private Relay requires a paid iCloud subscription.
+}
+
+const threat = ip.threat;
+
+if (threat) {
+  // threat.riskLevel: none, low, medium, high, critical
+  // threat.confidence: low, medium, high
+  // threat.reputation: malicious, suspicious, known, safe, benign, unknown
+  // threat.isSafe: trusted infrastructure
+  // threat.networkTypes: hosting, vpn, proxy, tor
+  // threat.activities: brute_force, scanning, botnet
+  // threat.entities: crawler, ai_crawler, scanner
+  // threat.entityName and threat.service when Arcjet identifies them
+}
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+decision = await aj.protect(request)
+
+if decision.is_denied():
+    return JSONResponse({"error": "Forbidden"}, status_code=403)
+
+ip = decision.ip
+
+if ip.is_hosting():
+    # Hosting and data center IPs are often automated clients.
+    pass
+
+if ip.is_vpn() or ip.is_proxy() or ip.is_tor():
+    # Apply your policy for anonymized traffic.
+    pass
+
+if ip.is_abuser():
+    # The IP is associated with known abuse.
+    pass
+
+if (
+    decision.ip_details
+    and decision.ip_details.is_relay
+    and decision.ip_details.service == "Apple Private Relay"
+):
+    # Apple Private Relay requires a paid iCloud subscription.
+    pass
+
+details = decision.ip_details
+threat = details.threat if details else None
+
+if threat:
+    # threat.risk_level, threat.confidence, threat.reputation
+    # threat.is_safe, threat.network_types, threat.activities
+    # threat.entities, threat.entity_name, threat.service
+    pass
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+decision, err := aj.Protect(r.Context(), r)
+if err != nil {
+	http.Error(w, "Unavailable", http.StatusServiceUnavailable)
+	return
+}
+
+if decision.IsDenied() {
+	http.Error(w, "Forbidden", http.StatusForbidden)
+	return
+}
+
+ip := decision.IP
+
+if ip.IsHosting {
+	// Hosting and data center IPs are often automated clients.
+}
+
+if ip.IsVPN || ip.IsProxy || ip.IsTor {
+	// Apply your policy for anonymized traffic.
+}
+
+if ip.IsAbuser {
+	// The IP is associated with known abuse.
+}
+
+if ip.IsRelay && ip.Service == "Apple Private Relay" {
+	// Apple Private Relay requires a paid iCloud subscription.
+}
+
+if threat := ip.Threat; threat != nil {
+	// threat.RiskLevel, threat.Confidence, threat.Reputation
+	// threat.IsSafe, threat.NetworkTypes, threat.Activities
+	// threat.Entities, threat.EntityName, threat.Service
+}
+```
+
+</TabItem>
+</Tabs>
+
+You can also manage filter rules as
+<Link.Page href="/remote-rules">remote rules</Link.Page> from the dashboard or
+the <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page> without a
+redeploy. Use `investigate-ip` to look up geo, ASN, and threat intelligence
+for a suspicious IP, then create a filter to deny it.
+
+## Allow a trusted relay
+
+Apple Private Relay is the most common privacy relay. If you deny
+`ip.src.relay`, you also deny those clients. To allow the relay while still
+denying other anonymized networks, inspect the service name after
+`protect()`:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+const decision = await aj.protect(req);
+
+if (decision.ip.hasService() && decision.ip.service === "Apple Private Relay") {
+  // Allow this client.
+}
+
+if (decision.ip.isVpn() || decision.ip.isProxy() || decision.ip.isTor()) {
+  return new Response("Forbidden", { status: 403 });
+}
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+decision = await aj.protect(request)
+
+if (
+    decision.ip_details
+    and decision.ip_details.service == "Apple Private Relay"
+):
+    # Allow this client.
+    pass
+elif decision.ip.is_vpn() or decision.ip.is_proxy() or decision.ip.is_tor():
+    return JSONResponse({"error": "Forbidden"}, status_code=403)
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+decision, err := aj.Protect(r.Context(), r)
+if err != nil {
+	log.Printf("arcjet: %v", err)
+} else if decision.IP.Service == "Apple Private Relay" {
+	// Allow this client.
+} else if decision.IP.IsVPN || decision.IP.IsProxy || decision.IP.IsTor {
+	http.Error(w, "Forbidden", http.StatusForbidden)
+	return
+}
+```
+
+</TabItem>
+</Tabs>
+
+A filter can express the same exception:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+filter({
+  deny: [
+    'ip.src.vpn or ip.src.proxy or ip.src.tor or (ip.src.relay and ip.src.service ne "Apple Private Relay")',
+  ],
+  mode: "LIVE",
+})
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+filter_request(
+    deny=[
+        'ip.src.vpn or ip.src.proxy or ip.src.tor or (ip.src.relay and ip.src.service ne "Apple Private Relay")',
+    ],
+    mode=Mode.LIVE,
+)
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+arcjet.Filter(arcjet.FilterOptions{
+	Deny: []string{
+		`ip.src.vpn or ip.src.proxy or ip.src.tor or (ip.src.relay and ip.src.service ne "Apple Private Relay")`,
+	},
+	Mode: arcjet.ModeLive,
+})
+```
+
+</TabItem>
+</Tabs>
+
+## What next?
+
+<CardGrid>
+  <Link.Card
+    title="Filters"
+    href="/filters"
+    description="Write expressions that deny VPNs, proxies, countries, and other request fields."
+  />
+  <Link.Card
+    title="Bot protection"
+    href="/bot-protection"
+    description="Detect and deny automated clients, including bots on hosting IPs."
+  />
+  <Link.Card
+    title="IP geolocation"
+    href="/blueprints/ip-geolocation"
+    description="Customize responses from country, region, and city fields."
+  />
+  <Link.Card
+    title="VPN and proxy detection"
+    href="/blueprints/vpn-proxy-detection"
+    description="A shorter blueprint that focuses on VPN and proxy checks."
+  />
+  <Link.Card
+    title="SDK reference"
+    href="/reference/nextjs"
+    description="IP analysis fields and method signatures for each SDK."
+  />
+</CardGrid>
+
+<Comments />

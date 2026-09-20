@@ -1,0 +1,16 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import ExampleJs from "./Example.js?raw";
+
+<SelectableContent client:load syncKey="language">
+  <Fragment slotIdx="1" slot="JS">
+
+    <Code code={ExampleJs} lang="js" title="main.js" />
+
+  </Fragment>
+  <Fragment slotIdx="2" slot="TS">
+
+    <Code code={ExampleJs} lang="ts" title="main.ts" />
+
+  </Fragment>
+</SelectableContent>

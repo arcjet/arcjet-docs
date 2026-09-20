@@ -29,7 +29,7 @@ You can also access the `ip` field on an Arcjet decision and handle requests man
 *   **Filters** integrate blocking with other Arcjet rules.
 *   **`decision.ip` fields** are better for customizing the response, such as showing a specific message or challenge.
 
-For a concrete example, see the [VPN and proxy detection blueprint](/blueprints/vpn-proxy-detection).
+For examples that deny VPNs, proxies, Tor, and hosting IPs, see [IP threat intelligence](/ip-threat-intelligence). For a shorter VPN-focused walkthrough, see the [VPN and proxy detection blueprint](/blueprints/vpn-proxy-detection).
 
 Using the MCP server
 

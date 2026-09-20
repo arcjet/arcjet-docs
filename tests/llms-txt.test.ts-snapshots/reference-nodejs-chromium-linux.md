@@ -688,6 +688,8 @@ The IP AS fields may be `undefined`, but you can use the `hasASN()` method to ch
 
 #### IP threat intelligence
 
+To deny VPNs, proxies, Tor, hosting IPs, or other high-risk networks using these fields, see [IP threat intelligence](/ip-threat-intelligence).
+
 When threat intelligence is available, it is exposed as `decision.ip.threat`. Always check for it because older responses and IPs without an assessment omit the property:
 
 ```ts

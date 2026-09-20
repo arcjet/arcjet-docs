@@ -1907,6 +1907,10 @@ decision.ip.isProxy()    // true if from a proxy
 decision.ip.isRelay()    // true if from a relay
 ```
 
+Use these fields (or a filter on `ip.src.hosting`, `ip.src.vpn`, `ip.src.proxy`,
+`ip.src.tor`) to deny high-risk networks. Guide:
+https://docs.arcjet.com/ip-threat-intelligence
+
 ### Rate limit metadata
 
 ```ts
@@ -2383,6 +2387,7 @@ blocking one makes the wrapper synchronous.
 - [Content moderation](https://docs.arcjet.com/content-moderation)
 - [Signup form protection](https://docs.arcjet.com/signup-protection)
 - [Filters](https://docs.arcjet.com/filters)
+- [IP threat intelligence](https://docs.arcjet.com/ip-threat-intelligence)
 - [AI protection](https://docs.arcjet.com/ai-protection)
 - [Guards](https://docs.arcjet.com/guards)
 - [Agent guard quick start](https://docs.arcjet.com/guards/quick-start)
