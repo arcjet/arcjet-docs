@@ -1,0 +1,41 @@
+import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import { removeTSCCommentDirectives } from "@/lib/utils";
+import ExampleConfig from "./ExampleConfig.ts?raw";
+import ExampleJs from "@repo/nuxt/server/api/ip-threat-intelligence/Example.get.js?raw";
+import ExampleTs from "@repo/nuxt/server/api/ip-threat-intelligence/Example.get.ts?raw";
+
+Add the Nuxt module in `nuxt.config.ts`:
+
+<Code
+  code={removeTSCCommentDirectives(ExampleConfig)}
+  lang="ts"
+  title="nuxt.config.ts"
+/>
+
+Call `protect()` from a server route.
+
+<SelectableContent client:load syncKey="language">
+  <Fragment slot="TS" slotIdx="1">
+
+    Create a new server route at `server/api/protected.get.ts`:
+
+    <Code
+      code={removeTSCCommentDirectives(ExampleTs)}
+      lang="ts"
+      title="server/api/protected.get.ts"
+    />
+
+  </Fragment>
+  <Fragment slot="JS" slotIdx="2">
+
+    Create a new server route at `server/api/protected.get.js`:
+
+    <Code
+      code={removeTSCCommentDirectives(ExampleJs)}
+      lang="js"
+      title="server/api/protected.get.js"
+    />
+
+  </Fragment>
+</SelectableContent>
