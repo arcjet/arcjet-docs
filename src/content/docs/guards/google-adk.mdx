@@ -161,6 +161,11 @@ wrap these tools with `@arcjet/guard/vercel-ai/v7` or
 | A Runner `plugins` list | `guard_plugin` | `arcjet[google-adk]` | Yes |
 | A session or conversation ID you already have | `google_adk_context` | `arcjet[google-adk]` | No |
 
+`guard_action` and `guard_action_sync` ship in the core `arcjet.guard`
+package, so they need no extra. For more information about those
+helpers, see the
+<Link.Page href="/reference/python#guard_action">Python SDK reference</Link.Page>.
+
 `guard_tool` returns an `LlmAgent.before_tool_callback`
 `(tool, args, tool_context)`. Assign it on
 `LlmAgent(before_tool_callback=...)`. It is not a `FunctionTool`

@@ -4,6 +4,7 @@ description: "Screen user text before a Think turn, attach Guard on `beforeToolC
 ---
 
 import { Link } from "@/components/link";
+import SelectableContent from "@/components/SelectableContent";
 import FrameworkPrimer from "@/snippets/guards/FrameworkPrimer.mdx";
 
 [Cloudflare Think](https://developers.cloudflare.com/agents/think/)
@@ -25,15 +26,37 @@ no `guardTool`. Think's skip point is the hook: a
 
 Until `@arcjet/guard/cloudflare-think/v0` is published, pin
 `@arcjet/guard` to
-[`b06e584d`](https://github.com/arcjet/arcjet-js/commit/b06e584d491d4821f81c9e3083ed8f0c8da15ba7)
-on
-[`david/cursor/cloudflare-think-guard-v0-26f2`](https://github.com/arcjet/arcjet-js/tree/david/cursor/cloudflare-think-guard-v0-26f2).
+[`b06e584d`](https://github.com/arcjet/arcjet-js/commit/b06e584d491d4821f81c9e3083ed8f0c8da15ba7).
 Published `@arcjet/guard` 1.12.0 doesn't export
 `./cloudflare-think/v0`.
 
-```bash
-npm install @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#b06e584d491d4821f81c9e3083ed8f0c8da15ba7 @cloudflare/think
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="packageManager">
+<div slot="npm" slotIdx="1">
+
+```sh
+npm install @cloudflare/think
+npm install @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#b06e584d491d4821f81c9e3083ed8f0c8da15ba7
 ```
+
+</div>
+<div slot="pnpm" slotIdx="2">
+
+```sh
+pnpm add @cloudflare/think
+pnpm add @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#b06e584d491d4821f81c9e3083ed8f0c8da15ba7
+```
+
+</div>
+<div slot="yarn" slotIdx="3">
+
+```sh
+yarn add @cloudflare/think
+yarn add @arcjet/guard@git+https://github.com/arcjet/arcjet-js.git#b06e584d491d4821f81c9e3083ed8f0c8da15ba7
+```
+
+</div>
+</SelectableContent>
 
 `@cloudflare/think` is a peer of `@arcjet/guard`, not a
 dependency of it. If your project already has it in the range that

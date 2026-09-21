@@ -4,6 +4,10 @@ permissions:
   contents: read
 
 on:
+  # Manual dispatch is open to any branch and takes no inputs. GitHub
+  # already limits workflow_dispatch to write access. Rerunning Playwright
+  # on a pull request needs that. This workflow does not push, so it does
+  # not use the branch guard in playwright-update.yml.
   workflow_dispatch:
   push:
     branches: [main]

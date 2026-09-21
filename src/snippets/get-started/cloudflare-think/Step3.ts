@@ -46,6 +46,10 @@ export async function runAgent(
     },
   });
 
+  // `npx wrangler types` generates `Env`. This placeholder lets the
+  // file type-check before that file exists.
+  interface Env {}
+
   class OrderAgent extends Think<Env> {
     getModel() {
       return "@cf/moonshotai/kimi-k2.7-code";

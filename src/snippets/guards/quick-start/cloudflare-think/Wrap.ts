@@ -23,7 +23,7 @@ const emailProvider = {
   send: async (_: { to: string; body: string }) => ({ ok: true }),
 };
 
-let currentUser: {
+type SupportUser = {
   id: string;
   allowedRecipients: string[];
   record: {
@@ -33,28 +33,43 @@ let currentUser: {
   };
 };
 
+// `npx wrangler types` generates `Env`. This placeholder lets the
+// file type-check before that file exists.
+interface Env {}
+
+// Hooks close over the user for this call. Don't keep that user in
+// module scope. Every request in one Workers isolate shares it.
 // Omit actor or inputs and a remote rule that declares those names
 // never fires. There is no guardTool.
-const hooks = guardHooks(arcjet, {
-  action: ({ toolName }) =>
-    toolName === "send_email" ? "email.sent" : "tool.invoked",
-  actor: () => currentUser.id,
-  inputs: ({ toolName, input }) => {
-    if (toolName !== "send_email") {
-      return {};
-    }
-    const { recipient, body } = sendEmailInput.parse(input);
-    return {
-      recipient: policyInput.server.string(recipient),
-      allowed_recipients: policyInput.server.stringList(
-        currentUser.allowedRecipients,
-      ),
-      body: policyInput.local.string(body),
-    };
-  },
-});
+function supportHooks(user: SupportUser) {
+  return guardHooks(arcjet, {
+    action: ({ toolName }) =>
+      toolName === "send_email" ? "email.sent" : "tool.invoked",
+    actor: user.id,
+    inputs: ({ toolName, input }) => {
+      if (toolName !== "send_email") {
+        return {};
+      }
+      const { recipient, body } = sendEmailInput.parse(input);
+      return {
+        recipient: policyInput.server.string(recipient),
+        allowed_recipients: policyInput.server.stringList(
+          user.allowedRecipients,
+        ),
+        body: policyInput.local.string(body),
+      };
+    },
+  });
+}
 
 export class SupportAgent extends Think<Env> {
+  beforeToolCall: ReturnType<typeof supportHooks>["beforeToolCall"];
+
+  constructor(private readonly user: SupportUser) {
+    super();
+    this.beforeToolCall = supportHooks(user).beforeToolCall;
+  }
+
   getModel() {
     return "@cf/moonshotai/kimi-k2.7-code";
   }
@@ -70,12 +85,13 @@ export class SupportAgent extends Think<Env> {
   }
 
   getTools() {
+    const user = this.user;
     return {
       get_client_record: tool({
         description:
           "Get the account details on file for the current customer",
         inputSchema: z.object({}),
-        execute: () => currentUser.record,
+        execute: () => user.record,
       }),
       send_email: tool({
         description: "Send an email",
@@ -85,23 +101,9 @@ export class SupportAgent extends Think<Env> {
       }),
     };
   }
-
-  beforeToolCall = hooks.beforeToolCall;
 }
 
-export async function runEmailAgent(
-  user: {
-    id: string;
-    allowedRecipients: string[];
-    record: {
-      name: string;
-      bankAccount: string;
-      routingNumber: string;
-    };
-  },
-  prompt: string,
-) {
-  currentUser = user;
-  const agent = new SupportAgent();
+export async function runEmailAgent(user: SupportUser, prompt: string) {
+  const agent = new SupportAgent(user);
   return agent.chat(prompt);
 }
