@@ -50,13 +50,21 @@ type emailArgs struct {
 }
 
 // Rampart detects BANK_ACCOUNT and ROUTING_NUMBER on this machine, so the
-// email body never leaves the process. Arcjet receives the verdict only.
+// email body is never sent to Arcjet, which receives the verdict only. That
+// covers the guard call; it says nothing about what your own tools hand the
+// model.
 var backend = must(rampart.New(rampart.Options{}))
 
 var guard = must(arcjet.NewGuardClient(arcjet.GuardConfig{
 	SensitiveInfoBackend: backend,
 }))
 
+// This tool returns real account details so the third scenario has something
+// for the policy to catch. Its result goes to the model provider like any tool
+// result: Rampart keeps the guard's inspection of the email body on this
+// machine, which is a different thing from keeping the record out of the
+// prompt. Return only what the model needs, and put a guard on the tool that
+// reads it if that set is itself sensitive.
 var getClientRecord = functool.MustNew(
 	functool.Config{
 		Name:        "get_client_record",

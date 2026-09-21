@@ -41,7 +41,10 @@ func handleAgent(w http.ResponseWriter, r *http.Request) {
 
 	output, err := RunEmailAgent(r.Context(), user, prompt)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		// Keep the detail in the log. A run error can carry provider and
+		// guard internals, which the browser has no use for.
+		log.Printf("agent run: %v", err)
+		http.Error(w, "the agent could not complete this run", http.StatusInternalServerError)
 		return
 	}
 
