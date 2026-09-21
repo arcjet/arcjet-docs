@@ -20,10 +20,12 @@ Arcjet protects several entry points:
 
 - [Agent get started](https://docs.arcjet.com/agent-get-started): full agent onboarding flow – install a skill, connect the CLI, add protection.
 - [Skills](https://github.com/arcjet/skills): install via `npx skills add arcjet/skills` to give your agent framework-aware integration docs.
-- [Arcjet CLI](https://docs.arcjet.com/cli): create sites, retrieve keys, inspect requests, manage rules from the terminal.
-- [MCP server](https://docs.arcjet.com/mcp-server): same management surface over MCP at `https://api.arcjet.com/mcp` (OAuth).
+- [Arcjet CLI](https://arcjet.com/cli): create sites, retrieve keys, inspect requests, manage rules from the terminal. Installer: https://arcjet.com/cli/install.sh. Command reference: https://docs.arcjet.com/cli
+- [MCP server](https://docs.arcjet.com/mcp-server): same management surface over MCP at `https://api.arcjet.com/mcp` (OAuth required). Discovery: https://arcjet.com/.well-known/mcp-server-card
+- [OpenAPI](https://arcjet.com/openapi.json): HTTP management API at `https://api.arcjet.com` (Bearer token from the CLI).
 - [Arcjet plugin](https://docs.arcjet.com/arcjet-plugin): bundled skills + MCP + coding rules for Claude Code and Cursor.
-- [Create an account](https://console.arcjet.com) or use [agent registration](https://arcjet.com/auth.md).
+- [Create an account](https://console.arcjet.com): 15-day free trial, then a free plan at 10,000 requests/month. Self-serve SDK keys in the Console, CLI, or MCP. Agent registration: https://arcjet.com/auth.md
+- [Contact](https://arcjet.com/contact): support@arcjet.com, security@arcjet.com, Discord, demos.
 - [Quick start guides by framework](https://docs.arcjet.com/get-started)
 
 ## Key facts

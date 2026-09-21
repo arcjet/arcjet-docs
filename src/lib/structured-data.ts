@@ -96,6 +96,18 @@ function siteNodes() {
       logo: { "@id": LOGO_ID },
       image: { "@id": LOGO_ID },
       email: "support@arcjet.com",
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "customer support",
+        email: "support@arcjet.com",
+        url: "https://arcjet.com/contact",
+      },
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "San Francisco",
+        addressRegion: "CA",
+        addressCountry: "US",
+      },
       sameAs: [
         "https://github.com/arcjet",
         "https://www.linkedin.com/company/arcjet",

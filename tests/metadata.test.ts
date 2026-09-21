@@ -111,6 +111,18 @@ test.describe("pageJsonLd", () => {
     const nodes = nodesByType(pageJsonLd(base));
 
     expect(nodes.get("Organization")?.["@id"]).toBe(ORGANIZATION_ID);
+    expect(nodes.get("Organization")?.contactPoint).toEqual({
+      "@type": "ContactPoint",
+      contactType: "customer support",
+      email: "support@arcjet.com",
+      url: "https://arcjet.com/contact",
+    });
+    expect(nodes.get("Organization")?.address).toEqual({
+      "@type": "PostalAddress",
+      addressLocality: "San Francisco",
+      addressRegion: "CA",
+      addressCountry: "US",
+    });
     expect(nodes.get("SoftwareApplication")?.["@id"]).toBe(SOFTWARE_ID);
     expect(nodes.get("WebSite")?.["@id"]).toBe(WEBSITE_ID);
     expect(nodes.get("ImageObject")?.["@id"]).toBe("https://arcjet.com/#logo");
