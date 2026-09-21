@@ -1,7 +1,17 @@
-import Step from "./agent.ts?raw";
-import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import JsWrap from "./js/Wrap.mdx";
+import PyWrap from "./py/Wrap.mdx";
 
-Create one client and pass `guardPlugin` first on the Runner
-`plugins` list. There is no `guardTool`:
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language">
+<div slot="JavaScript / TypeScript" slotIdx="1">
 
-<Code code={Step} lang="ts" title="agent.ts" />
+<JsWrap />
+
+</div>
+<div slot="Python" slotIdx="2">
+
+<PyWrap />
+
+</div>
+</SelectableContent>

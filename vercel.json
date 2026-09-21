@@ -94,6 +94,21 @@
       "permanent": true
     },
     {
+      "source": "/guards/google-adk-py",
+      "destination": "/guards/google-adk",
+      "permanent": true
+    },
+    {
+      "source": "/sdk/google-adk-py",
+      "destination": "/sdk/google-adk/get-started",
+      "permanent": true
+    },
+    {
+      "source": "/sdk/google-adk-py/:path*",
+      "destination": "/sdk/google-adk/:path*",
+      "permanent": true
+    },
+    {
       "source": "/guards/openai-agents-py",
       "destination": "/guards/openai-agents",
       "permanent": true
@@ -385,18 +400,6 @@
         }
       ],
       "destination": "/sdk/google-adk/get-started/",
-      "permanent": true
-    },
-    {
-      "source": "/get-started",
-      "has": [
-        {
-          "type": "query",
-          "key": "f",
-          "value": "google-adk-py"
-        }
-      ],
-      "destination": "/sdk/google-adk-py/get-started/",
       "permanent": true
     },
     {
@@ -3657,18 +3660,6 @@
         {
           "type": "query",
           "key": "f",
-          "value": "google-adk-py"
-        }
-      ],
-      "destination": "/sdk/google-adk-py/guards/quick-start/",
-      "permanent": true
-    },
-    {
-      "source": "/guards/quick-start",
-      "has": [
-        {
-          "type": "query",
-          "key": "f",
           "value": "langchain"
         }
       ],
@@ -3949,6 +3940,30 @@
         }
       ],
       "destination": "/sdk/langchain/sensitive-info/quick-start/",
+      "permanent": true
+    },
+    {
+      "source": "/get-started",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "google-adk-py"
+        }
+      ],
+      "destination": "/sdk/google-adk/get-started/",
+      "permanent": true
+    },
+    {
+      "source": "/guards/quick-start",
+      "has": [
+        {
+          "type": "query",
+          "key": "f",
+          "value": "google-adk-py"
+        }
+      ],
+      "destination": "/sdk/google-adk/guards/quick-start/",
       "permanent": true
     },
     {

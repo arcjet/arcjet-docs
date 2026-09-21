@@ -44,7 +44,6 @@ const sdkIcons: Record<ArcjetRouteSdkKey, IconComponent> = {
   fastify: Fastify,
   genkit: Genkit,
   "google-adk": GoogleAdk,
-  "google-adk-py": GoogleAdk,
   langchain: LangChain,
   langgraph: LangGraph,
   mastra: Mastra,

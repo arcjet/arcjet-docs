@@ -382,9 +382,6 @@ test.describe("pathnameForLegacyFrameworkKey", () => {
       "/sdk/google-adk/get-started/",
     );
     expect(
-      pathnameForLegacyFrameworkKey("google-adk-py", "/get-started"),
-    ).toBe("/sdk/google-adk-py/get-started/");
-    expect(
       pathnameForLegacyFrameworkKey("cloudflare-think", "/get-started"),
     ).toBe("/sdk/cloudflare-think/get-started/");
     expect(
@@ -506,7 +503,7 @@ test.describe("legacyFrameworkVercelRedirects", () => {
         (r) =>
           r.source === "/get-started" &&
           r.has[0]?.value === "google-adk-py" &&
-          r.destination === "/sdk/google-adk-py/get-started/",
+          r.destination === "/sdk/google-adk/get-started/",
       ),
     ).toBeDefined();
     expect(
@@ -607,7 +604,7 @@ test.describe("legacyFrameworkVercelRedirects", () => {
         (r) =>
           r.source === "/guards/quick-start" &&
           r.has[0]?.value === "google-adk-py" &&
-          r.destination === "/sdk/google-adk-py/guards/quick-start/",
+          r.destination === "/sdk/google-adk/guards/quick-start/",
       ),
     ).toBeDefined();
     expect(

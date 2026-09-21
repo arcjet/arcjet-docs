@@ -91,7 +91,7 @@ framework.
 | <Link.Page href="/guards/langgraph">LangGraph</Link.Page> | JavaScript | `@arcjet/guard/langgraph/v1` | `guardTool` on an authored tool, `guardToolNode` on `ToolNode` |
 | <Link.Page href="/guards/genkit">Genkit</Link.Page> | JavaScript | `@arcjet/guard/genkit/v1` | `guardTool` on a `ToolAction`, `guardMiddleware` on the `tool` hook |
 | <Link.Page href="/guards/google-adk">Google ADK</Link.Page> | JavaScript | `@arcjet/guard/google-adk/v2` | `guardPlugin` on `beforeToolCallback` |
-| <Link.Page href="/guards/google-adk-py">Google ADK</Link.Page> | Python | `arcjet.guard.google_adk` | `guard_tool` on `before_tool_callback`, `guard_plugin` on Runner `plugins` |
+| <Link.Page href="/guards/google-adk">Google ADK</Link.Page> | Python | `arcjet.guard.google_adk` | `guard_tool` on `before_tool_callback`, `guard_plugin` on Runner `plugins` |
 | <Link.Page href="/guards/cloudflare-think">Cloudflare Think</Link.Page> | JavaScript | `@arcjet/guard/cloudflare-think/v0` | `guardHooks` on `beforeToolCall` |
 | <Link.Page href="/guards/openai-agents">OpenAI Agents</Link.Page> | JavaScript | `@arcjet/guard/openai-agents/v0` | `guardTool` on `FunctionTool.invoke` |
 | <Link.Page href="/guards/openai-agents">OpenAI Agents</Link.Page> | Python | `arcjet.guard.openai_agents` | `guard_tool` on `FunctionTool.tool_input_guardrails` |
@@ -218,7 +218,7 @@ in a different way:
 | LangGraph | Return `{ arcjetDenied: true, … }`. `ToolNode` wraps a `ToolMessage` with `status: "success"` | Fabricating a `ToolMessage` to force `status: "error"` crashes the graph reducer |
 | LangChain (JavaScript) | `guardTool` returns `{ arcjetDenied: true, … }`. `guardMiddleware` returns a real `ToolMessage` (JSON `content`, default status) | A throw drops the fields. `wrapToolCall` cannot return a bare object. Don't set `status: "error"` |
 | Genkit | Return `{ arcjetDenied: true, … }` as completed `toolResponse.output` | A throw / `interrupt()` is HITL and the wrong envelope |
-| Google ADK | Deny dict from `beforeToolCallback`. `undefined` executes | A throw is the wrong envelope. `undefined` on error executes the tool |
+| Google ADK (JavaScript) | Deny dict from `beforeToolCallback`. `undefined` executes | A throw is the wrong envelope. `undefined` on error executes the tool |
 | Google ADK (Python) | Skip dict with `arcjetDenied`. `None` executes. Never `{}` | A raise is the wrong envelope. `{}` is falsy and the tool would run. `request_confirmation` is HITL |
 | Cloudflare Think | Default substitute `{ action: "substitute", output: ArcjetDenialResult }`. Optional `onDeny: "block"` | A throw is a hook error. `void` on error executes. Fail-closed unavailability always substitutes |
 | Claude Agent SDK (JavaScript) | MCP `CallToolResult` with `isError: true` and the payload on `structuredContent` | A throw is a raw exception. Omitting `isError` looks like success |

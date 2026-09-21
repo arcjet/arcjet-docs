@@ -58,7 +58,6 @@ export const frameworks = [
   { key: "fastify", label: "Fastify" },
   { key: "genkit", label: "Genkit" },
   { key: "google-adk", label: "Google ADK" },
-  { key: "google-adk-py", label: "Google ADK Python" },
   { key: "langchain", label: "LangChain" },
   { key: "langgraph", label: "LangGraph" },
   { key: "mastra", label: "Mastra" },

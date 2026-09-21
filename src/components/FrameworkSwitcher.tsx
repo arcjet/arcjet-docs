@@ -64,7 +64,6 @@ const frameworkIcon = {
   fastify: <IconFastify />,
   genkit: <IconGenkit />,
   "google-adk": <IconGoogleAdk />,
-  "google-adk-py": <IconGoogleAdk />,
   hono: <IconHono />,
   langchain: <IconLangChain />,
   langgraph: <IconLangGraph />,

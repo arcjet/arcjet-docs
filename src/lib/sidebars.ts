@@ -96,10 +96,6 @@ export const main = [
             link: "/guards/google-adk",
           },
           {
-            label: "Google ADK Python",
-            link: "/guards/google-adk-py",
-          },
-          {
             label: "LangChain",
             link: "/guards/langchain",
           },

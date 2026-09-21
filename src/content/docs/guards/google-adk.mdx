@@ -1,33 +1,39 @@
 ---
 title: "Google ADK agent guard"
-description: "Screen user text before `Runner.runAsync`, put `guardPlugin` first on the Runner, and treat `requireConfirmation` as confirmation, not policy."
+description: "Screen user text before the runner, put the Runner plugin first, and treat confirmation as confirmation, not policy, in JavaScript and Python."
 ---
 
+import { Tabs, TabItem } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 import SelectableContent from "@/components/SelectableContent";
 import FrameworkPrimer from "@/snippets/guards/FrameworkPrimer.mdx";
 
-[Google Agent Development Kit](https://adk.dev/get-started/typescript/)
-(ADK) TypeScript `LlmAgent` workflows call authored `FunctionTool`
-handlers from `Runner.runAsync`. Arcjet Guard sits at those
-boundaries so a policy can allow or deny the action before a side
-effect runs.
+[Google Agent Development Kit](https://adk.dev/) (ADK) `LlmAgent`
+workflows call authored tools from the runner. Arcjet Guard sits at
+those boundaries so a policy can allow or deny the action before a
+side effect runs. For more information about the framework, see the
+[TypeScript](https://adk.dev/get-started/typescript/) and
+[Python](https://google.github.io/adk-docs/) Google ADK quick starts.
 
 <FrameworkPrimer />
 
+This page covers both adapters. The JavaScript adapter is
+`@arcjet/guard/google-adk/v2`, which gates `Runner` plugins through
+`BasePlugin.beforeToolCallback`. The Python adapter is
+`arcjet.guard.google_adk`, which assigns `guard_tool` on
+`LlmAgent.before_tool_callback` or puts `guard_plugin` first on the
+Runner `plugins` list. Pick the tab for the language your agent runs
+in and don't mix the two.
+
 Vercel AI SDK, LangChain, CrewAI, Eve, Mastra, LangGraph, OpenAI
-Agents, Genkit, Strands Agents, TanStack AI, and Claude wrappers are
-on
+Agents, Genkit, Strands Agents, TanStack AI, Cloudflare Think, and
+Claude wrappers are on
 <Link.Page href="/guards/framework-integrations">Framework integrations</Link.Page>.
 
-This adapter is Google ADK JS `@google/adk` v2 plus Runner
-`BasePlugin.beforeToolCallback`. It isn't Google GenAI
-(`@google/genai`). It isn't Python ADK. There is no `guardTool`.
-The gate is the plugin callback: a deny dict skips the tool
-`runAsync`; `undefined` executes. Don't also wrap these tools with
-`@arcjet/guard/vercel-ai/v7` or `@arcjet/guard/genkit/v1`.
-
 ## Install
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
 {/* prettier-ignore */}
 <SelectableContent client:load syncKey="packageManager">
@@ -72,7 +78,56 @@ import { launchArcjet } from "@arcjet/guard";
 export const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 ```
 
+</TabItem>
+<TabItem label="Python">
+
+Until `arcjet.guard.google_adk` is published, pin `arcjet` to
+[`a71970dc`](https://github.com/arcjet/arcjet-py/commit/a71970dc6d434a47e77e71e35fd485ac1be7ab14)
+on
+[`david/cursor/google-adk-guard-5549`](https://github.com/arcjet/arcjet-py/tree/david/cursor/google-adk-guard-5549).
+Published `arcjet` on PyPI does not include this extra.
+
+```bash
+pip install "arcjet[google-adk] @ git+https://github.com/arcjet/arcjet-py@a71970dc6d434a47e77e71e35fd485ac1be7ab14"
+```
+
+`arcjet[google-adk]` depends on `google-adk>=2.0.0,<3`. CPython
+3.10 or later.
+
+Import helpers from `arcjet.guard.google_adk`:
+
+```py
+from arcjet.guard.google_adk import (
+    google_adk_context,
+    guard_plugin,
+    guard_tool,
+)
+```
+
+Launch one client at module scope:
+
+```py
+from arcjet.guard import launch_arcjet
+
+arcjet = launch_arcjet(key=ARCJET_KEY)
+```
+
+Use `launch_arcjet_sync` with Flask, Django, or other sync code.
+
+</TabItem>
+</Tabs>
+
 ## Helpers
+
+Pick the surface that matches what you hold when the effect runs.
+
+Both adapters expose a Runner plugin and a correlation-context
+helper. Neither has an inbound helper or an approval helper. The
+JavaScript adapter has no authored-tool wrapper. The Python adapter
+also exposes an agent `before_tool_callback`.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
 The integration exposes two surfaces:
 
@@ -98,7 +153,62 @@ Don't call `createAgentContext` inside an ADK callback. Don't also
 wrap these tools with `@arcjet/guard/vercel-ai/v7` or
 `@arcjet/guard/genkit/v1`.
 
+</TabItem>
+<TabItem label="Python">
+
+| You have | Use | Needs | Blocks a call? |
+| --- | --- | --- | --- |
+| Any Python callable | `guard_action` / `guard_action_sync` | `arcjet` | Yes |
+| An `LlmAgent.before_tool_callback` | `guard_tool` | `arcjet[google-adk]` | Yes |
+| A Runner `plugins` list | `guard_plugin` | `arcjet[google-adk]` | Yes |
+| A session or conversation ID you already have | `google_adk_context` | `arcjet[google-adk]` | No |
+
+`guard_tool` returns an `LlmAgent.before_tool_callback`
+`(tool, args, tool_context)`. Assign it on
+`LlmAgent(before_tool_callback=...)`. It is not a `FunctionTool`
+wrap. On `DENY`, or when Guard cannot be evaluated and
+`on_guard_error` is `"deny"`, the callback returns a skip dict
+with `arcjetDenied` (`ArcjetDenialResult`). The original tool
+never runs. Return `None` to execute. Never return `{}`. An empty
+mapping is falsy in ADK's callback chain, so the tool would run.
+The callback does not raise. `action` is required.
+
+`guard_plugin` is the Runner-wide gate. Pass it first on
+`InMemoryRunner` or `Runner` `plugins`. Its
+`before_tool_callback` uses the same skip dict. PluginManager is
+first-win: the first plugin that returns a truthy dict skips
+remaining plugins and the agent callback. Return `None` to
+execute. The callback does not raise. `action` defaults to
+`{tool_name}.invoked`.
+
+Don't attach `guard_tool` and `guard_plugin` to the same tools.
+Plugins run first and a second gate double-calls Guard. List those
+tool names in `exclude` on `guard_plugin` only if you must stack.
+
+`google_adk_context` reads a caller-owned ID you pass:
+`correlation_id`, then `session_id`, then `conversation_id`.
+Camel-case aliases `correlationId`, `sessionId`, and
+`conversationId` are also read. It never mints an ID. It never
+reads `trace_id` or `traceId`. It never reads an ADK-generated
+`invocation_id`. It never reads `tool_context.session.id` or
+`session.id`. If the caller did not pass an ID, then the call is
+uncorrelated rather than joined to a generated ID.
+
+There is no inbound helper. Screen user text with a direct
+`guard()` call before `runner.run_async`. There is no approval
+helper.
+
+Don't call `create_agent_context` inside an ADK callback. Don't
+also wrap these tools with `@arcjet/guard/google-adk/v2` or
+`@arcjet/guard/vercel-ai/v7`.
+
+</TabItem>
+</Tabs>
+
 ## Helper options
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
 | Option | Helpers | Description |
 | --- | --- | --- |
@@ -111,13 +221,55 @@ wrap these tools with `@arcjet/guard/vercel-ai/v7` or
 | `onGuardError` | `guardPlugin` | `"deny"` (default) or `"allow"`. |
 
 Inbound screening uses direct `guard()`, which takes `label` (not
-`action`) and fails open. See the following section.
+`action`) and fails open.
+
+</TabItem>
+<TabItem label="Python">
+
+`guard_tool` and `guard_plugin` share this contract:
+
+| Option | Helpers | Description |
+| --- | --- | --- |
+| `action` | `guard_tool`, `guard_plugin` | Guard label and capture name. Use `resource.verb` in the past tense. A string, or a function of the tool-call envelope. Required on `guard_tool`. On `guard_plugin` it defaults to `{tool_name}.invoked`. |
+| `rules` | `guard_tool`, `guard_plugin` | SDK rules, or a function of the tool-call envelope. Omit to submit none. The guard call still happens. |
+| `actor` | `guard_tool`, `guard_plugin` | Trusted identity, or a function of the tool-call envelope. Take it from authenticated application state, never from a model-produced argument. |
+| `inputs` | `guard_tool`, `guard_plugin` | Named values built with `server_input.*` or `local_input.*`, or a function of the tool-call envelope. |
+| `metadata` | `guard_tool`, `guard_plugin` | Nested JSON, or a function of the same envelope as `rules`. |
+| `session_id` | `guard_tool`, `guard_plugin` | Caller-owned fallback when the object you pass to `google_adk_context` does not carry one. Prefer putting the ID on `run_async` and the context helper. |
+| `on_guard_error` | `guard_tool`, `guard_plugin` | `"deny"` (default) or `"allow"`. |
+| `exclude` | `guard_plugin` | Tool names already gated by `guard_tool`. Skip those so Guard is not called twice. |
+
+The tool-call envelope is the model-produced arguments plus
+`tool_name`. Read `call["recipient"]`, not `call["input"]`.
+
+Inbound screening uses direct `guard()`, which takes `label` (not
+`action`) and fails open.
+
+</TabItem>
+</Tabs>
 
 ## Denial payload
 
 On `DENY` the original tool never runs. The payload shape is one
-`ArcjetDenialResult`. The envelope is the deny dict from
-`beforeToolCallback`:
+`ArcjetDenialResult`. The envelope differs by surface:
+
+```json
+{
+  "arcjetDenied": true,
+  "reason": "RATE_LIMIT",
+  "message": "Arcjet denied this call (RATE_LIMIT). It may be retried after 30 seconds.",
+  "retryable": true,
+  "retryAfterSeconds": 30
+}
+```
+
+The reason is one of `RATE_LIMIT`, `PROMPT_INJECTION`, `SENSITIVE_INFO`, or
+`ERROR`. Only rate-limit denials set `retryable` to true and include a retry
+delay. Other reasons tell the model not to retry. It is not a throw or a raise,
+and it is not a confirmation pause.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
 - `guardPlugin` returns that object to skip the tool `runAsync`.
 - `undefined` executes the tool.
@@ -126,34 +278,53 @@ It isn't a throw. It isn't `requireConfirmation` or
 `requestConfirmation`. A throw is the wrong envelope. An
 undefined-on-error executes the tool.
 
-```ts
-import type { ArcjetDenialResult } from "@arcjet/guard/google-adk/v2";
-
-const denial: ArcjetDenialResult = {
-  arcjetDenied: true,
-  reason: "RATE_LIMIT", // or PROMPT_INJECTION, SENSITIVE_INFO, ERROR
-  message:
-    "Arcjet denied this call (RATE_LIMIT). It may be retried after 30 seconds.",
-  retryable: true,
-  retryAfterSeconds: 30,
-};
-```
-
-`ArcjetDenialResult` is a type export from
+You can import `ArcjetDenialResult` from
 `@arcjet/guard/google-adk/v2` at the pin in Install.
-
-Only rate-limit denials set `retryable: true` and include
-`retryAfterSeconds`. Other reasons tell the model not to retry.
 
 When Guard is unavailable and `onGuardError` is `"deny"`, the
 model receives `reason: "ERROR"`, `retryable: true`, and
 `retryAfterSeconds: 5`. Fail closed always returns that deny dict
 on error. It never throws. It never returns `undefined` on error.
 
-## Run a guarded `runAsync`
+</TabItem>
+<TabItem label="Python">
 
-Screen inbound text and pass `guardPlugin` first on the Runner
-`plugins` list:
+- `guard_tool` and `guard_plugin` return that object to skip the
+  tool.
+- `None` executes the tool.
+- Never return `{}`. An empty mapping is falsy, so the tool would
+  run.
+
+It is not a raise. It is not `require_confirmation` or
+`request_confirmation`. A raise is the wrong envelope. `None` on
+error executes the tool.
+
+When Guard is unavailable and `on_guard_error` is `"deny"`, the
+model receives `reason: "ERROR"`, `retryable: true`, and
+`retryAfterSeconds: 5`. Fail closed always returns that deny dict
+on error. It never raises. It never returns `None` on error.
+
+</TabItem>
+</Tabs>
+
+## Screen user text before the agent runs
+
+There is no inbound hook, so there is no inbound helper. Put
+prompt-injection and other inbound rules in the application before
+you call the runner.
+
+A direct guard call fails open, so an `ALLOW` is not proof the rules
+ran. Gate inbound on the failed-open check if this call site must
+fail closed. The Runner plugin already defaults to that. On `DENY`,
+don't call the runner.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+Direct
+`client.guard({ label, rules, ...googleAdkContext(appContext) })`
+is the inbound pattern. `guardPlugin` already defaults to fail
+closed.
 
 ```ts
 import {
@@ -251,79 +422,190 @@ export async function runAgent(
 }
 ```
 
-## Screen user text before `runAsync`
+</TabItem>
+<TabItem label="Python">
 
-There is no inbound hook, so there is no `guardInbound`. Put
-prompt-injection and other inbound rules in the application before
-`runner.runAsync`.
+`guard_tool` and `guard_plugin` already default to fail closed.
+This example puts `guard_plugin` first on the Runner `plugins`
+list:
 
-Direct
-`client.guard({ label, rules, ...googleAdkContext(appContext) })`
-is the inbound pattern. Act on that decision. Direct `guard()`
-fails open, so an `ALLOW` isn't proof the rules ran. If this call
-site must fail closed, then gate inbound on
-`decision.hasFailedOpen()`. `guardPlugin` already defaults to
-fail closed.
+```py
+from google.adk.agents import LlmAgent
+from google.adk.runners import InMemoryRunner
+from google.adk.tools import FunctionTool
+from google.genai import types
+from arcjet.guard import (
+    DetectPromptInjection,
+    LocalDetectSensitiveInfo,
+    TokenBucket,
+    launch_arcjet,
+)
+from arcjet.guard.google_adk import (
+    google_adk_context,
+    guard_plugin,
+)
 
-On `DENY`, don't call `runAsync`.
+arcjet = launch_arcjet(key=ARCJET_KEY)
 
-```ts
-import { detectPromptInjection } from "@arcjet/guard";
-import { googleAdkContext } from "@arcjet/guard/google-adk/v2";
-import { arcjet } from "./arcjet.js";
+lookup_limit = TokenBucket(
+    refill_rate=10,
+    interval_seconds=60,
+    max_tokens=10,
+    bucket="lookups",
+)
+detect_pii = LocalDetectSensitiveInfo()
+inbound = DetectPromptInjection()
 
-const inbound = detectPromptInjection();
-const appContext = { sessionId: conversationId };
 
-const decision = await arcjet.guard({
-  label: "message.received",
-  rules: [inbound(userText)],
-  ...googleAdkContext(appContext),
-});
+def lookup_order(order_number: str, note: str) -> dict:
+    """Look up an order by number."""
+    return {
+        "order_number": order_number,
+        "note": note,
+        "status": "shipped",
+    }
 
-if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
-  throw new Error("message blocked");
-}
+
+agent = LlmAgent(
+    name="order_agent",
+    model="gemini-flash-latest",
+    instruction="Look up orders with lookup_order.",
+    tools=[FunctionTool(lookup_order)],
+)
+
+
+async def run_agent(conversation_id: str, user_text: str):
+    app_context = {"session_id": conversation_id}
+    derived = google_adk_context(app_context)
+
+    decision = await arcjet.guard(
+        label="message.received",
+        rules=[inbound(user_text)],
+        correlation_id=derived.correlation_id,
+    )
+    if decision.conclusion == "DENY" or decision.has_failed_open():
+        raise RuntimeError("message blocked")
+
+    def plugin_rules(call):
+        if call["tool_name"] != "lookup_order":
+            return []
+        return [
+            lookup_limit(key=call["order_number"], requested=1),
+            detect_pii(call["note"]),
+        ]
+
+    runner = InMemoryRunner(
+        agent=agent,
+        app_name="orders",
+        plugins=[
+            guard_plugin(
+                guard=arcjet,
+                action="order.looked-up",
+                session_id=conversation_id,
+                on_guard_error="deny",
+                rules=plugin_rules,
+            )
+        ],
+    )
+
+    return runner.run_async(
+        user_id=conversation_id,
+        session_id=conversation_id,
+        new_message=types.Content(
+            role="user",
+            parts=[types.Part.from_text(text=user_text)],
+        ),
+    )
 ```
 
-## Human approval isn't a policy gate
+</TabItem>
+</Tabs>
 
-`requireConfirmation` and `requestConfirmation` are
-human-in-the-loop (HITL) confirmation. They aren't a policy gate.
-Same trap as LangChain `humanInTheLoopMiddleware`, Strands
-`event.interrupt()`, Genkit `interrupt()`, OpenAI `needsApproval`,
-Mastra `requireApproval`, TanStack `needsApproval`, and Claude
-`canUseTool`. There is no `guardApproval`. Don't wrap HITL as
-Guard. Don't use ADK `SecurityPlugin` as the Arcjet policy gate.
-Don't deny by pausing for a human. Policy sits on
-`beforeToolCallback` only.
+## Gate an agent callback
 
-On `DENY` the original tool never runs, so the inner `execute`
-never runs a side effect. `guardPlugin` skips with a deny dict.
-Don't throw. Don't call `requestConfirmation`. Don't pause for a
-human to approve a denied call. Scan free-text args (a note,
-reason, or body). An opaque `orderNumber` or tool-call ID doesn't
-trip email, phone, card, or IP detection, so don't pass it to
-`localDetectSensitiveInfo`. That helper runs on a local ML model
+The JavaScript adapter has no authored-tool wrapper. The Python
+adapter assigns `guard_tool` on the agent when you hold the agent
+instead of the Runner.
+
+On `DENY` the original tool never runs, so the inner handler never
+runs a side effect. Scan free-text arguments (a note, reason, or
+body). An opaque order number or tool-call ID doesn't trip email,
+phone, card, or IP detection, so don't pass it to the local
+sensitive information helper. That helper runs on a local ML model
 backend.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+There is no `guardTool`. Wrapping `FunctionTool.execute` is the
+wrong gate. The plugin callback is the skip point. See the
+following section.
+
+Don't pass `guardTool` from `@arcjet/guard/vercel-ai/v7` or
+`@arcjet/guard/genkit/v1` to Google ADK.
+
+</TabItem>
+<TabItem label="Python">
+
+`guard_tool` is the agent `before_tool_callback`. Assign it on
+`LlmAgent(before_tool_callback=...)`. The callback denies by
+returning a skip dict with `arcjetDenied` without calling the
+tool. Return `None` to execute. Policy sits on
+`before_tool_callback` only.
+
+Wrapping a `FunctionTool` handler is the wrong gate. The callback
+is the skip point. `action` is required.
+
+```py
+from google.adk.agents import LlmAgent
+from google.adk.tools import FunctionTool
+from arcjet.guard.google_adk import guard_tool
+from arcjet.guard import launch_arcjet
+
+arcjet = launch_arcjet(key=ARCJET_KEY)
+
+agent = LlmAgent(
+    name="order_agent",
+    model="gemini-flash-latest",
+    instruction="Look up orders with lookup_order.",
+    tools=[FunctionTool(lookup_order)],
+    before_tool_callback=guard_tool(
+        guard=arcjet,
+        action="order.looked-up",
+        session_id=conversation_id,
+        rules=lambda call: (
+            [lookup_limit(key=call["order_number"], requested=1)]
+            if call["tool_name"] == "lookup_order"
+            else []
+        ),
+    ),
+)
+```
+
+Don't attach `guard_tool` and `guard_plugin` on the same tools. A
+plugin `None` (allow) still runs the agent callback, and Guard is
+called twice.
+
+</TabItem>
+</Tabs>
 
 ## Gate every tool call with the Runner plugin
 
-`guardPlugin` is the Runner `plugins` gate. Put it first in the
-plugin list. `beforeToolCallback` uses the first dictionary that
-a plugin returns. If another plugin returns a dict first, then
+The Runner plugin is the invoke-wide gate. Put it first in the
+plugin list. The before-tool callback uses the first dictionary
+that a plugin returns. If another plugin returns a dict first, then
 Guard never runs.
 
-The hook denies by returning a deny dict without calling the
-tool. That dict is the `ArcjetDenialResult`. Return `undefined`
-to execute. Policy sits on `beforeToolCallback` only.
+The hook denies by returning a deny dict without calling the tool.
+That dict is the `ArcjetDenialResult`. Policy sits on the
+before-tool callback only.
 
-There is no `guardTool`. Wrapping `FunctionTool.execute` is the
-wrong gate. The plugin callback is the skip point.
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
-This isn't Google GenAI. This isn't Python ADK. Don't pass
-`guardTool` from `@arcjet/guard/vercel-ai/v7` or
-`@arcjet/guard/genkit/v1` to Google ADK.
+`guardPlugin` is the Runner `plugins` gate.
+`beforeToolCallback` uses the first dictionary that a plugin
+returns. Return `undefined` to execute.
 
 ```ts
 import { InMemoryRunner } from "@google/adk";
@@ -337,22 +619,107 @@ const runner = new InMemoryRunner({
 });
 ```
 
+</TabItem>
+<TabItem label="Python">
+
+`guard_plugin` is the Runner `plugins` gate.
+`before_tool_callback` uses the first truthy dictionary that a
+plugin returns. Return `None` to execute.
+
+This is not the JavaScript `@arcjet/guard/google-adk/v2` adapter.
+Don't pass `guardPlugin` from that package to a Python Runner.
+
+```py
+from google.adk.runners import InMemoryRunner
+from arcjet.guard.google_adk import guard_plugin
+from arcjet.guard import launch_arcjet
+
+arcjet = launch_arcjet(key=ARCJET_KEY)
+
+runner = InMemoryRunner(
+    agent=agent,
+    app_name="orders",
+    plugins=[guard_plugin(guard=arcjet, session_id=conversation_id)],
+)
+```
+
+</TabItem>
+</Tabs>
+
+## Human approval is not a policy gate
+
+`requireConfirmation`, `requestConfirmation`,
+`require_confirmation`, and `request_confirmation` are
+human-in-the-loop (HITL) confirmation. They ask a person rather
+than evaluating a policy, so they are not a Guard enforcement
+point. Same trap as LangChain `humanInTheLoopMiddleware`, Strands
+`event.interrupt()`, Genkit `interrupt()`, OpenAI `needsApproval`,
+Mastra `requireApproval`, TanStack `needsApproval`, Cloudflare
+Think `needsApproval`, and Claude `canUseTool`. For more
+information, see
+<Link.Page href="/guards/framework-integrations#human-approval-is-not-a-policy-gate">Human approval is not a policy gate</Link.Page>.
+
+There is no approval helper in either adapter. Don't wrap HITL as
+Guard. Don't use ADK `SecurityPlugin` as the Arcjet policy gate.
+Don't deny by pausing for a human. Don't turn a denial into a
+confirmation pause. Policy sits on the before-tool callback only.
+
+## Fail-closed default
+
+The Runner plugin fails closed. If Guard cannot be evaluated, the
+before-tool callback returns the deny dict instead of calling the
+tool.
+
+Fail open only when executing without a complete security decision
+is acceptable, such as a read-only lookup. A `DENY` conclusion
+always blocks, whatever the fail behavior is set to. A direct
+guard call still fails open.
+
+For more information about fail-open versus fail-closed behavior, see
+<Link.Page href="/guards/reference#availability-and-fail-behavior">Availability and fail behavior</Link.Page>.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+`guardPlugin` defaults to `onGuardError: "deny"`. It never throws.
+It never returns `undefined` on that path. The only other accepted
+value is `"allow"`.
+
+</TabItem>
+<TabItem label="Python">
+
+`guard_tool` and `guard_plugin` default to
+`on_guard_error="deny"`. They never raise. They never return
+`None` on that path. The only other accepted value is `"allow"`.
+
+</TabItem>
+</Tabs>
+
 ## Correlation
+
+The agent has no conversation or session ID unless you put one on
+the object you pass. Pass the ID that you already have and don't
+mint one.
+
+Preference order is a caller-owned correlation ID, then a session
+ID, then a conversation ID. The context helper never mints an ID,
+never reads a trace ID, and never reads an ADK-generated invocation
+ID or `session.id`. ADK can generate a session or invocation ID
+when you omit one. That auto-generated value isn't a correlation
+source. If the caller passed none of those keys, the call is
+uncorrelated rather than joined to a generated ID.
+
+A run that pauses on confirmation resumes through a later runner
+call. Pass the same caller-owned ID on that resume call so later
+Guard decisions stay on the Sequence that started it. The
+confirmation payload isn't a correlation source.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
 `googleAdkContext` reads a caller-owned ID from the object you
 pass: `correlationId` first, then `sessionId`, then
-`conversationId`. It never mints an ID. It never reads `traceId`.
-It never reads an ADK-generated `invocationId`. It never reads
-`toolContext.sessionId` or `session.id`. ADK can generate a
-session or invocation ID when you omit one. That auto-generated
-value isn't a correlation source. Don't derive an ID from it.
-Don't mint one. If the caller didn't pass an ID, then the call is
-uncorrelated rather than joined to a generated ID.
-
-A run that pauses on `requestConfirmation` resumes through a
-later `runAsync`. Pass the same caller-owned ID on that resume
-call so later Guard decisions stay on the Sequence that started
-it. The confirmation payload isn't a correlation source.
+`conversationId`. It never reads `toolContext.sessionId`.
 
 Put the same ID on `runAsync({ sessionId })` and as `sessionId`
 on `guardPlugin`.
@@ -372,26 +739,58 @@ await runner.runAsync({
 });
 ```
 
+</TabItem>
+<TabItem label="Python">
+
+`google_adk_context` reads a caller-owned `correlation_id` first,
+then `session_id`, then `conversation_id`. Camel-case aliases are
+also read. It never reads `tool_context.session.id`.
+
+Put the same ID on `run_async(session_id=...)` and as `session_id`
+on `guard_tool` or `guard_plugin`.
+
+```py
+app_context = {"session_id": conversation_id}
+derived = google_adk_context(app_context)
+
+await arcjet.guard(
+    label="message.received",
+    correlation_id=derived.correlation_id,
+)
+
+await runner.run_async(
+    user_id=conversation_id,
+    session_id=conversation_id,
+    new_message=types.Content(
+        role="user",
+        parts=[types.Part.from_text(text=user_text)],
+    ),
+)
+```
+
+</TabItem>
+</Tabs>
+
 ## What not to use
 
-- There is no `guardInbound`. Screen prompt injection before
-  `runner.runAsync`.
-- There is no `guardTool`. The gate is
-  `beforeToolCallback` on `guardPlugin`.
-- There is no `guardApproval`. `requireConfirmation` and
-  `requestConfirmation` are human HITL confirmation, not policy.
+- There is no inbound helper. Screen prompt injection before you
+  call the runner.
+- There is no approval helper. Confirmation is HITL, not policy.
 - Don't use ADK `SecurityPlugin` as the Arcjet policy gate.
-- Don't treat this adapter as Google GenAI (`@google/genai`).
-- Don't treat this adapter as Python ADK.
-- Don't turn a deny into `requestConfirmation` or a human
-  approval pause.
-- Don't mint a correlation ID. Don't use `traceId`, an
-  ADK-generated `invocationId`, `toolContext.sessionId`, or
-  `session.id`. If the caller didn't pass an ID, then leave the
-  call uncorrelated.
-- Don't put Arcjet after another `beforeToolCallback` plugin.
-  The first deny dict wins.
-- Don't throw from `beforeToolCallback` to signal a denial.
+- Don't treat either adapter as Google GenAI (`@google/genai`).
+- Don't turn a deny into a confirmation pause or a human approval.
+- Don't mint a correlation ID. Don't use a trace ID, an
+  ADK-generated invocation ID, or `session.id`. If the caller
+  didn't pass an ID, then leave the call uncorrelated.
+- Don't put Arcjet after another before-tool plugin. The first
+  deny dict wins.
+- Don't signal a denial by throwing or raising.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+- There is no `guardTool`, `guardInbound`, or `guardApproval`.
+  The gate is `beforeToolCallback` on `guardPlugin`.
 - Don't return `undefined` on a Guard error. Fail closed always
   returns the deny dict.
 - Don't call `createAgentContext` inside an ADK callback.
@@ -400,16 +799,46 @@ await runner.runAsync({
 - Don't import `@arcjet/guard/google-adk`. The path is
   `@arcjet/guard/google-adk/v2`.
 
+</TabItem>
+<TabItem label="Python">
+
+- Don't return `None` on a Guard error. Fail closed always
+  returns the deny dict.
+- Don't return `{}` on deny or allow. ADK treats an empty mapping
+  as falsy, so the tool would run.
+- Don't wrap a `FunctionTool` handler as the gate. Use
+  `guard_tool` or `guard_plugin`.
+- Don't attach `guard_tool` and `guard_plugin` to the same tools.
+- Don't call `create_agent_context` inside an ADK callback.
+- Don't wrap these tools with `@arcjet/guard/google-adk/v2` or
+  `@arcjet/guard/vercel-ai/v7`.
+
+</TabItem>
+</Tabs>
+
 ## Send values to a policy
 
-`guardPlugin` takes `actor` and `inputs`, each as a value or a function
-resolved per call. A resolver receives `{ toolName, input }`, then the ADK tool
-context.
+A policy reads the actor and the typed inputs the call carries.
+Both adapters map them. `actor` and `inputs` are optional. Omit
+them and a remote rule that declares those names never fires. A
+resolver that throws is treated as a guard error and follows the
+fail-closed default.
+
+Derive the actor from authenticated application state, never from a
+model-produced tool argument. A policy can be conditioned on the
+actor, so a model that controls it can leave its own policy scope.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+`guardPlugin` takes `actor` and `inputs`, each as a value or a
+function resolved per call. A resolver receives `{ toolName, input }`,
+then the ADK tool context.
 
 Because the helper gates tools it did not wrap, including MCP and
-runtime-discovered tools, `input` is unknown at the type level. Narrow it
-before you read a field, and return nothing for a tool the policy does not
-cover:
+runtime-discovered tools, `input` is unknown at the type level.
+Narrow it before you read a field, and return nothing for a tool
+the policy does not cover:
 
 ```ts
 const guarded = guardPlugin(arcjet, {
@@ -429,12 +858,49 @@ const guarded = guardPlugin(arcjet, {
 });
 ```
 
-Derive the actor from the tool context or the session state, never from a
-model-produced tool input.
+Build every input explicitly with `policyInput.server.*` or
+`policyInput.local.*`. Plain values are rejected, and the adapter
+never discovers arguments for you.
 
-The policy these calls feed declares `recipient` as a `SERVER` string,
-`allowed_recipients` as a `SERVER` string list, and `body` as a `LOCAL` string,
-then denies a recipient that isn't on the list:
+</TabItem>
+<TabItem label="Python">
+
+`guard_tool` and `guard_plugin` take `actor` and `inputs`, each as
+a value or a callable of the tool-call envelope. The envelope is
+the model-produced arguments plus `tool_name`.
+
+```py
+from arcjet.guard import local_input, server_input
+from arcjet.guard.google_adk import guard_tool
+
+guarded_send_email = guard_tool(
+    guard=arcjet,
+    action="email.sent",
+    actor=current_user.id,
+    inputs=lambda call: {
+        "recipient": server_input.string(call["recipient"]),
+        "allowed_recipients": server_input.string_list(
+            current_user.allowed_recipients
+        ),
+        "body": local_input.string(call["body"]),
+    },
+)
+```
+
+Build every input explicitly with `server_input.*` or
+`local_input.*`. Plain values are rejected, and the adapter never
+discovers arguments for you.
+
+`guard_plugin` takes the same two options. Map only what a policy
+needs, and return nothing for a tool the policy does not cover.
+
+</TabItem>
+</Tabs>
+
+The policy these calls feed declares `recipient` as a `SERVER`
+string, `allowed_recipients` as a `SERVER` string list, and `body`
+as a `LOCAL` string, then denies a recipient that isn't on the
+list:
 
 ```rego
 package arcjet.guard
@@ -447,9 +913,7 @@ deny contains "external-recipient" if {
 ```
 
 Map only what a policy needs. Take the actor and any allow list from
-authenticated application state, never from the model's arguments: a policy can
-be conditioned on the actor, so a model that controls it can leave its own
-policy scope.
+authenticated application state, never from the model's arguments.
 
 For the names, kinds, and exposures a policy declares, see
 <Link.Page href="/guards/remote-policies">Policy contract</Link.Page>. For more
@@ -458,93 +922,18 @@ worked policies, see
 
 ## Common patterns
 
-### Rate limit a tool by a trusted ID
-
-Key the bucket on a trusted identifier such as `orderNumber`. Don't
-key it on free-text user input.
-
-```ts
-const lookupLimit = tokenBucket({
-  bucket: "lookups",
-  refillRate: 10,
-  intervalSeconds: 60,
-  maxTokens: 10,
-});
-
-const runner = new InMemoryRunner({
-  agent,
-  appName: "orders",
-  plugins: [
-    guardPlugin(arcjet, {
-      action: "order.looked-up",
-      rules: ({ toolName, input }) => {
-        if (toolName !== "lookup_order") {
-          return [];
-        }
-        const { orderNumber } = z
-          .object({ orderNumber: z.string() })
-          .parse(input);
-        return [lookupLimit({ key: orderNumber, requested: 1 })];
-      },
-    }),
-  ],
-});
-```
-
-### Scan a free-text note for sensitive information
-
-Scan a note, reason, or body. An opaque `orderNumber` doesn't trip
-email, phone, card, or IP detection, so don't pass it to
-`localDetectSensitiveInfo`.
-
-```ts
-import { localDetectSensitiveInfo, tokenBucket } from "@arcjet/guard";
-
-const lookupLimit = tokenBucket({
-  bucket: "lookups",
-  refillRate: 10,
-  intervalSeconds: 60,
-  maxTokens: 10,
-});
-const detectPii = localDetectSensitiveInfo({
-  deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
-});
-
-const runner = new InMemoryRunner({
-  agent,
-  appName: "orders",
-  plugins: [
-    guardPlugin(arcjet, {
-      action: "order.looked-up",
-      rules: ({ toolName, input }) => {
-        if (toolName !== "lookup_order") {
-          return [];
-        }
-        const { orderNumber, note } = z
-          .object({ orderNumber: z.string(), note: z.string() })
-          .parse(input);
-        return [
-          lookupLimit({ key: orderNumber, requested: 1 }),
-          detectPii(note),
-        ];
-      },
-    }),
-  ],
-});
-```
-
-## Fail-closed default
-
-`guardPlugin` defaults to `onGuardError: "deny"`. If Guard
-cannot be evaluated, then `beforeToolCallback` returns the deny
-dict instead of calling the tool. It never throws. It never
-returns `undefined` on that path.
-
-Set `onGuardError: "allow"` only when executing without a complete
-security decision is acceptable, such as a read-only lookup. Direct
-`guard()` still fails open. For more information about fail-open
-versus fail-closed behavior, see
-<Link.Page href="/guards/reference#availability-and-fail-behavior">Availability and fail behavior</Link.Page>.
+- **Prompt injection before the run:** a direct guard call with the
+  prompt injection rule and a failed-open check.
+- **Rate limit per trusted identifier:** key the bucket on a value
+  you own, such as an order number. Don't key it on free-text user
+  input.
+- **Scan a free-text note:** run the local sensitive information
+  rule on a note, reason, or body. An opaque order number is not a
+  personal information sample, so leave it out.
+- **Correlate the run:** put the session ID you already have on the
+  runner call and the context helper. Don't mint an ID.
+- **One gate per tool:** on Python, don't attach `guard_tool` and
+  `guard_plugin` to the same tools.
 
 ## Related
 
@@ -553,11 +942,20 @@ versus fail-closed behavior, see
 - <Link.Page href="/guards/tanstack-ai">TanStack AI agent guard</Link.Page>
 - <Link.Page href="/guards/langchain">LangChain agent guard</Link.Page>
 - <Link.Page href="/guards/strands-agents">Strands Agents agent guard</Link.Page>
+- <Link.Page href="/guards/cloudflare-think">Cloudflare Think agent guard</Link.Page>
 - <Link.Page href="/guards/vercel-ai">Vercel AI SDK agent guard</Link.Page>
 - <Link.Page href="/guards/mastra">Mastra agent guard</Link.Page>
 - <Link.Page href="/guards/openai-agents">OpenAI Agents agent guard</Link.Page>
+- <Link.Page href="/guards/crewai">CrewAI agent guard</Link.Page>
+- <Link.Page href="/reference/python#guard">Python Guard SDK reference</Link.Page>
 - <Link.Page href="/guards">Agent guards</Link.Page>
-- Example:
+- JavaScript example:
   [examples/google-adk-agent](https://github.com/arcjet/examples/tree/main/examples/google-adk-agent)
-- Adapter:
+- JavaScript adapter:
   [`ed4edfb2`](https://github.com/arcjet/arcjet-js/commit/ed4edfb20a470c23817b51a52923359fb1b255f7)
+- Python example:
+  [examples/fastapi-google-adk-guard](https://github.com/arcjet/arcjet-py/tree/a71970dc6d434a47e77e71e35fd485ac1be7ab14/examples/fastapi-google-adk-guard)
+- Python adapter:
+  [`a71970dc`](https://github.com/arcjet/arcjet-py/commit/a71970dc6d434a47e77e71e35fd485ac1be7ab14)
+  on [arcjet-py](https://github.com/arcjet/arcjet-py) until the
+  `google-adk` extra lands

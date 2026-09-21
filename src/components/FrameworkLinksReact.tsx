@@ -113,7 +113,6 @@ function iconFor(key: FrameworkKey): ReactNode {
     case "strands-agents":
       return <IconStrandsAgents />;
     case "google-adk":
-    case "google-adk-py":
       return <IconGoogleAdk />;
     case "cloudflare-think":
       return <IconCloudflareThink />;

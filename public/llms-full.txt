@@ -2232,8 +2232,7 @@ with a tab where more than one language has an adapter for it.
 | LangGraph | `@arcjet/guard/langgraph/v1` | – | – | `guardTool`, `guardToolNode` |
 | CrewAI | – | `arcjet.guard.crewai` | – | `register_arcjet_hooks` on `PRE_TOOL_CALL`, `guard_tool` |
 | Genkit | `@arcjet/guard/genkit/v1` | – | – | `guardTool`, `guardMiddleware` |
-| Google ADK | `@arcjet/guard/google-adk/v2` | – | – | `guardPlugin` (`beforeToolCallback`). No `guardTool` |
-| Google ADK Python | – | `arcjet.guard.google_adk` | – | `guard_tool` / `guard_plugin` (`before_tool_callback`). DENY skip dict. ALLOW `None`. Never `{}` |
+| Google ADK | `@arcjet/guard/google-adk/v2` | `arcjet.guard.google_adk` | – | `guardPlugin` / `guard_plugin` (`beforeToolCallback`). Python also has `guard_tool`. JS has no `guardTool`. Python never returns `{}` |
 | Cloudflare Think | `@arcjet/guard/cloudflare-think/v0` | – | – | `guardHooks` (`beforeToolCall`). Default DENY substitute. `onDeny: "block"` real DENY |
 | OpenAI Agents | `@arcjet/guard/openai-agents/v0` | `arcjet.guard.openai_agents` | – | `guardTool` on `invoke` / `guard_tool` on `tool_input_guardrails` |
 | Strands Agents | `@arcjet/guard/strands-agents/v1` | `arcjet.guard.strands_agents` | – | `guardTool` / `guard_tool`, `guardHooks` / `guard_hooks` |
@@ -2415,7 +2414,6 @@ blocking one makes the wrapper synchronous.
 - [LangGraph agent guard](https://docs.arcjet.com/guards/langgraph)
 - [Genkit agent guard](https://docs.arcjet.com/guards/genkit)
 - [Google ADK agent guard](https://docs.arcjet.com/guards/google-adk)
-- [Google ADK Python agent guard](https://docs.arcjet.com/guards/google-adk-py)
 - [Cloudflare Think agent guard](https://docs.arcjet.com/guards/cloudflare-think)
 - [OpenAI Agents agent guard](https://docs.arcjet.com/guards/openai-agents)
 - [Strands Agents agent guard](https://docs.arcjet.com/guards/strands-agents)
