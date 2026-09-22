@@ -19,8 +19,13 @@ that fail as soon as you commit.
 ```sh
 git commit -m "docs: ..." -- <the files you changed>
 npm run pw:run -- --update-snapshots=changed
+git add tests/
 git commit --amend --no-edit -- <the files you changed> tests/
 ```
+
+`git add tests/` is not optional. A new page produces new snapshot files, and
+a pathspec commit only covers files git already tracks, so without the `add`
+they stay untracked and the commit silently ships without them.
 
 Every page renders a git-derived "Last updated" date. The `<time>` element
 carries `data-playwright-mask` and `tests/screenshot.test.ts` masks that
