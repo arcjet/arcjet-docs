@@ -36,11 +36,23 @@ jobs:
           # Anything that does ask for an old blob still gets it, fetched on
           # demand.
           filter: blob:none
+      # `package-manager-cache: false` turns off the npm download cache. It is
+      # only read when `npm ci` runs, and the node_modules cache below means
+      # that happens at most once per lockfile change, in this job. Restoring
+      # its 522 MB cost 51s of runner time across the six jobs of a run, and
+      # exactly one of them read it. What dropping it costs is a cold `npm ci`
+      # on a miss, measured at 5-15s slower than a warm one, and the loss of a
+      # buffer against a slow registry.
+      #
+      # Dropping the `cache: npm` input is not enough: setup-node v6 defaults
+      # `package-manager-cache` to true and enables caching on its own whenever
+      # package.json has a `packageManager` field naming npm, which this one
+      # does. Removing `cache: npm` alone left the cache running.
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         id: setup-node
         with:
-          cache: npm
           node-version: lts/*
+          package-manager-cache: false
       # setup-node bundles whichever npm ships with Node and has no input to
       # pin a different one, so install package.json's `packageManager` here.
       # Reading the value back rather than repeating the literal is what keeps
@@ -57,12 +69,15 @@ jobs:
       - name: Record Node major version
         env:
           NODE_VERSION: ${{ steps.setup-node.outputs.node-version }}
-        run: echo "NODE_MAJOR=${NODE_VERSION%%.*}" >> "$GITHUB_ENV"
+        run: |
+          major="${NODE_VERSION#v}"
+          echo "NODE_MAJOR=${major%%.*}" >> "$GITHUB_ENV"
       # `npm ci` takes 54s and ran six times per workflow: once here, once in
       # each of the four shards, and once in `merge-reports`. setup-node's
-      # `cache: npm` caches the npm download cache, not the installed tree, so
-      # the install still linked 1562 packages every time. Caching node_modules
-      # itself skips the install outright on an exact hit.
+      # `cache: npm` cached the npm download cache rather than the installed
+      # tree, so every one of those jobs still linked 1562 packages. Caching
+      # node_modules itself skips the install outright on an exact hit, which
+      # is what made the npm download cache redundant.
       #
       # The key hashes the lockfile, every package.json, and patches/**. The
       # lockfile alone is not enough: `prepare` runs `patch-package`, so a tree
@@ -138,18 +153,21 @@ jobs:
         with:
           egress-policy: audit
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      # No npm download cache; see `build`.
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         id: setup-node
         with:
-          cache: npm
           node-version: lts/*
+          package-manager-cache: false
       # See the comment in `build`.
       - name: Install pinned npm
         run: npm install -g "$(node -p "require('./package.json').packageManager.split('+')[0]")"
       - name: Record Node major version
         env:
           NODE_VERSION: ${{ steps.setup-node.outputs.node-version }}
-        run: echo "NODE_MAJOR=${NODE_VERSION%%.*}" >> "$GITHUB_ENV"
+        run: |
+          major="${NODE_VERSION#v}"
+          echo "NODE_MAJOR=${major%%.*}" >> "$GITHUB_ENV"
       # Same key and paths as `build`, whose save has already run by the time a
       # shard starts, so a shard hits the cache even on the run that seeds it.
       # See the comments there for the key and the split restore/save. The
@@ -211,18 +229,21 @@ jobs:
         with:
           egress-policy: audit
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      # No npm download cache; see `build`.
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         id: setup-node
         with:
-          cache: npm
           node-version: lts/*
+          package-manager-cache: false
       # See the comment in `build`.
       - name: Install pinned npm
         run: npm install -g "$(node -p "require('./package.json').packageManager.split('+')[0]")"
       - name: Record Node major version
         env:
           NODE_VERSION: ${{ steps.setup-node.outputs.node-version }}
-        run: echo "NODE_MAJOR=${NODE_VERSION%%.*}" >> "$GITHUB_ENV"
+        run: |
+          major="${NODE_VERSION#v}"
+          echo "NODE_MAJOR=${major%%.*}" >> "$GITHUB_ENV"
       # Same key and paths as `build`; see the comments there. This job only
       # needs Playwright itself, to run `merge-reports`.
       - name: Restore node_modules
