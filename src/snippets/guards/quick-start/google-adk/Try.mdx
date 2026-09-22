@@ -1,6 +1,17 @@
-import Step from "./Try.ts?raw";
-import { Code } from "@astrojs/starlight/components";
+import SelectableContent from "@/components/SelectableContent";
+import JsTry from "./js/Try.mdx";
+import PyTry from "./py/Try.mdx";
 
-Expose a small server endpoint. The browser sends only the scenario name:
+{/* prettier-ignore */}
+<SelectableContent client:load syncKey="language">
+<div slot="JavaScript / TypeScript" slotIdx="1">
 
-<Code code={Step} lang="ts" title="app/api/agent/route.ts" />
+<JsTry />
+
+</div>
+<div slot="Python" slotIdx="2">
+
+<PyTry />
+
+</div>
+</SelectableContent>

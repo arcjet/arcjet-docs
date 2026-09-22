@@ -41,7 +41,7 @@ Detect which one applies by reading the project manifest:
   `*http.Request`.
 - **An agent framework in either manifest** (`ai`, `eve`, `genkit`,
   `langchain`, `@langchain/langgraph`, `@mastra/core`, `@openai/agents`,
-  `@google/adk`, `@strands-agents/sdk`, `@tanstack/ai`, or `crewai`) means the
+  `@google/adk`, `google-adk`, `@cloudflare/think`, `@strands-agents/sdk`, `@tanstack/ai`, or `crewai`) means the
   project builds its own agent. Use the guard adapter for that framework,
   instead of or alongside a request SDK.
 
@@ -177,7 +177,8 @@ a peer.
 | Claude Managed Agents | `npm i @arcjet/guard @anthropic-ai/sdk` or `pip install "arcjet[claude-managed-agents]"`         |
 | CrewAI                | `pip install "arcjet>=1.0.0" "crewai>=1.15.3,<2"`                                                |
 | Genkit                | `npm i @arcjet/guard genkit`                                                                     |
-| Google ADK            | `npm i @arcjet/guard @google/adk`                                                                |
+| Google ADK            | `npm i @arcjet/guard @google/adk` or `pip install "arcjet[google-adk]"`                          |
+| Cloudflare Think      | `npm i @arcjet/guard @cloudflare/think`                                                          |
 | LangChain             | `npm i @arcjet/guard langchain @langchain/core` or `pip install "arcjet[langchain]"`             |
 | LangGraph             | `npm i @arcjet/guard @langchain/langgraph @langchain/core`                                       |
 | Mastra                | `npm i @arcjet/guard @mastra/core`                                                               |
@@ -188,6 +189,7 @@ a peer.
 | Vercel Eve            | `npm i @arcjet/guard eve`                                                                        |
 
 Where a row lists only an `npm` command, that adapter is JavaScript-only.
+Cloudflare Think is JavaScript-only.
 CrewAI is Python-only, and has no `arcjet[crewai]` extra, so install CrewAI
 yourself. LangChain splits its extras: `arcjet[langchain]` covers `guard_tool`
 and the capture handlers, and `arcjet[langchain-agents]` covers

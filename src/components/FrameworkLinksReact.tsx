@@ -2,6 +2,7 @@ import Button from "@/components/Button";
 import { Astro as IconAstro } from "@/components/icons/tech/Astro";
 import { Bun as IconBun } from "@/components/icons/tech/Bun";
 import { ClaudeAgentSdk as IconClaudeAgentSdk } from "@/components/icons/tech/ClaudeAgentSdk";
+import { CloudflareThink as IconCloudflareThink } from "@/components/icons/tech/CloudflareThink";
 import { CrewAi as IconCrewAi } from "@/components/icons/tech/CrewAi";
 import { Cursor as IconCursor } from "@/components/icons/tech/Cursor";
 import { Deno as IconDeno } from "@/components/icons/tech/Deno";
@@ -113,6 +114,8 @@ function iconFor(key: FrameworkKey): ReactNode {
       return <IconStrandsAgents />;
     case "google-adk":
       return <IconGoogleAdk />;
+    case "cloudflare-think":
+      return <IconCloudflareThink />;
     case "sveltekit":
       return <IconSvelteKit />;
     case "tanstack-ai":

@@ -80,6 +80,10 @@ export const main = [
             link: "/guards/claude-managed-agents",
           },
           {
+            label: "Cloudflare Think",
+            link: "/guards/cloudflare-think",
+          },
+          {
             label: "CrewAI",
             link: "/guards/crewai",
           },

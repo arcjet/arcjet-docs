@@ -29,6 +29,7 @@ export type ArcjetSdkKey =
 export type ArcjetGuardSdkKey =
   | "claude-agent-sdk"
   | "claude-managed-agents"
+  | "cloudflare-think"
   | "crewai"
   | "genkit"
   | "google-adk"
@@ -48,6 +49,7 @@ export type ArcjetRouteSdkKey = ArcjetSdkKey | ArcjetGuardSdkKey;
 export const GUARD_SDK_KEYS = [
   "claude-agent-sdk",
   "claude-managed-agents",
+  "cloudflare-think",
   "crewai",
   "genkit",
   "google-adk",
@@ -65,6 +67,7 @@ export const GUARD_SDK_KEYS = [
 const GUARD_SDK_LABELS = {
   "claude-agent-sdk": "Claude Agent SDK",
   "claude-managed-agents": "Claude Managed Agents",
+  "cloudflare-think": "Cloudflare Think",
   crewai: "CrewAI",
   genkit: "Genkit",
   "google-adk": "Google ADK",
@@ -701,6 +704,7 @@ export const MERGED_GUARD_SDK_KEYS = {
   "claude-agent-sdk-py": "claude-agent-sdk",
   "claude-managed-agents-py": "claude-managed-agents",
   "langchain-js": "langchain",
+  "google-adk-py": "google-adk",
   "openai-agents-py": "openai-agents",
   "strands-agents-py": "strands-agents",
 } as const satisfies Record<string, ArcjetGuardSdkKey>;
@@ -728,6 +732,7 @@ const MERGED_GUARD_SDK_LEGACY_DOC_PATHS = {
     "/rate-limiting/reference",
     "/sensitive-info/quick-start",
   ],
+  "google-adk-py": ["/get-started", "/guards/quick-start"],
   "openai-agents-py": ["/guards/quick-start"],
   "strands-agents-py": ["/get-started", "/guards/quick-start"],
 } as const satisfies Record<

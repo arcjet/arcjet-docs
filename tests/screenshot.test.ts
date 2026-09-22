@@ -53,6 +53,7 @@ const PATHS_FROM_SITEMAP = [
   "/guards/framework-integrations/",
   "/guards/genkit/",
   "/guards/google-adk/",
+  "/guards/cloudflare-think/",
   "/guards/langchain/",
   "/guards/langgraph/",
   "/guards/mastra/",

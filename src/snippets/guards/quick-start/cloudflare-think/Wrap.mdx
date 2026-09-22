@@ -1,0 +1,11 @@
+import Step from "./Wrap.ts?raw";
+import { Code } from "@astrojs/starlight/components";
+
+Create one client and assign `guardHooks().beforeToolCall` on the
+Think subclass. Build those hooks for the authenticated user on
+that call, and keep the user on the agent instance. Requests in
+one Workers isolate share a module-level user, so one caller can
+supply another caller's actor and allowed recipients. `Env` comes
+from `npx wrangler types`. There is no `guardTool`:
+
+<Code code={Step} lang="ts" title="agent.ts" />
