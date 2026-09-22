@@ -65,8 +65,12 @@ jobs:
         with:
           cache: npm
           node-version: lts/*
+      # setup-node bundles whichever npm ships with Node and has no input to
+      # pin a different one, so install package.json's `packageManager` here.
+      # Reading the value back rather than repeating the literal keeps the two
+      # from drifting apart, as they did between 2026-08-24 and this commit.
       - name: Install pinned npm
-        run: npm install -g npm@12.0.1
+        run: npm install -g "$(node -p "require('./package.json').packageManager.split('+')[0]")"
       - name: Install dependencies
         run: npm ci
       - name: Install Playwright browsers

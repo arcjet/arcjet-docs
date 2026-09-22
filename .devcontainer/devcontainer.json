@@ -12,14 +12,20 @@
   },
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   // "forwardPorts": [],
-  "onCreateCommand": ["bash", "-i", "-c", "nvm install 24 --latest-npm"],
+  // `--latest-npm` is deliberately absent: the npm version comes from
+  // package.json's `packageManager`, installed in postCreateCommand below.
+  "onCreateCommand": ["bash", "-i", "-c", "nvm install 24"],
   // Install trunk tools inside the container
   // Uses array syntax to skip the shell: https://containers.dev/implementors/json_reference/#formatting-string-vs-array-properties
   "updateContentCommand": ["trunk", "install"],
   // Install npm dependencies within the container
   // Uses array syntax to skip default shell. Instead makes explicit sh call:
   // https://containers.dev/implementors/json_reference/#formatting-string-vs-array-properties
-  "postCreateCommand": ["sh", "-c", "npm ci && npm run pw:install"],
+  "postCreateCommand": [
+    "sh",
+    "-c",
+    "npm install -g \"$(node -p 'require(\"./package.json\").packageManager.split(\"+\")[0]')\" && npm ci && npm run pw:install"
+  ],
   "customizations": {
     "vscode": {
       "extensions": [
