@@ -1,6 +1,6 @@
 ---
 title: "Destination threat detection"
-description: "Score the hosts a Guard call would contact with Arcjet threat intel, deny high-risk destinations, and combine threat findings with outbound allowlists."
+description: "Score the hosts a Guard call would contact with Arcjet threat intel, deny high-risk destinations, and write one policy when an allowlist must bypass threat."
 ---
 
 import { Aside, CardGrid } from "@astrojs/starlight/components";
@@ -120,6 +120,10 @@ An allowlist and destination threat answer different questions:
 Write an allowlist **into** the policy, never as an input the agent supplies. A
 list the agent sent is a list the agent could widen.
 
+The starters below are single-concern policies. If a reviewed host must
+**bypass** destination threat, do not publish them beside each other – see
+[Combine allowlist and threat](#combine-allowlist-and-threat).
+
 ### Domain allowlist for web fetches
 
 The starter `coding-agent.egress-allowlist` compares `domains` – the hosts of
@@ -151,22 +155,59 @@ deny contains "unlisted-mcp-server" if {
 
 ### Combine allowlist and threat
 
-These are separate policies, not one merged document. Publish both on
-**Tool call**. Arcjet runs every policy attached to that moment and applies the
-most restrictive decision; each policy still records its own Activity row.
+The point of an allowlist next to destination threat is that a **reviewed host
+bypasses** the threat deny. That shape needs **one** policy. The Console
+starters `coding-agent.egress-allowlist` and
+`coding-agent.destination-threat` cannot express it: each is a separate row
+with its own deny rule, and neither short-circuits the other.
 
-- The allowlist refuses unreviewed hosts on web tools.
-- Destination threat refuses high or critical risk on any tool that names a
-  destination, including a URL inside a shell command.
+<Aside type="caution" title="Do not publish both starters for allowlist exceptions">
+  Arcjet runs every LIVE policy attached to **Tool call** and applies the most
+  restrictive decision. If you publish both starters, a host on the allowlist
+  that scores high or critical is still denied by destination threat. The
+  allowlist does not carve out an exception. Use one custom policy instead.
+</Aside>
 
-A host on your allowlist can still be denied when Arcjet threat intel scores it
-high or critical. That is intentional: review lists drift, and reputation
-changes after you published the set.
+Write both checks in the same Rego body. Deny unreviewed hosts on web tools.
+Deny high or critical threat only for hosts that are **not** on the allowlist –
+so an allowlisted host is allowed even when threat intel scores it high or
+critical:
+
+```rego
+allowed := {"docs.arcjet.com", "github.com", "raw.githubusercontent.com"}
+
+deny contains "unlisted-domain" if {
+	input.values.tool_kind == "web"
+	some host in input.values.domains
+	not host in allowed
+}
+
+deny contains "malicious-destination" if {
+	some a in input.signals.ip_threat.dest.assessments
+	a.risk_level in {"high", "critical"}
+	not a.host in allowed
+}
+```
+
+Declare the Arcjet threat intel detector with ID `dest` over `destinations`,
+the same inputs the destination-threat starter uses, plus `tool_kind` and
+`domains` for the allowlist rule. Attach the policy to **Tool call**.
+
+| Situation | Expected |
+| --- | --- |
+| Web fetch to an unlisted host | Denied (`unlisted-domain`) |
+| Allowlisted host, high or critical risk | Allowed (threat deny skipped) |
+| Unlisted host, high or critical risk | Denied (`malicious-destination`) |
+| Shell `curl` to a high-risk host not on the allowlist | Denied (`malicious-destination`) |
+
+Publish the two starters only when you want **both** constraints with no
+exception – every host must be allowlisted **and** must not be high or
+critical risk. That is not allowlist-bypass-of-threat.
 
 For application Guard calls, map hosts into a `SERVER` string list, declare an
-Arcjet threat intel detector over that input, and either hardcode an allow set
-in Rego or pass a trusted `allowed_domains` list from application configuration
-– not from the model.
+Arcjet threat intel detector over that input, and hardcode the allow set in
+Rego or pass a trusted `allowed_domains` list from application configuration –
+not from the model. Keep the bypass in the same policy as the threat rule.
 
 ## Fail closed behavior
 
