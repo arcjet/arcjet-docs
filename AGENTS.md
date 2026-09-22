@@ -12,11 +12,43 @@ When editing MDX files, convert any plain markdown internal links to
 
 ## Screenshot generation
 
-After making any changes, regenerate changed screenshots by running:
+**Commit the content change first, then regenerate, then commit the
+snapshots.** Regenerating before the content is committed produces snapshots
+that fail as soon as you commit.
 
 ```sh
+git commit -m "docs: ..." -- <the files you changed>
 npm run pw:run -- --update-snapshots=changed
+git add tests/
+git commit --amend --no-edit -- <the files you changed> tests/
 ```
+
+`git add tests/` is not optional. A new page produces new snapshot files, and
+a pathspec commit only covers files git already tracks, so without the `add`
+they stay untracked and the commit silently ships without them.
+
+Every page renders a git-derived "Last updated" date. The `<time>` element
+carries `data-playwright-mask` and `tests/screenshot.test.ts` masks that
+selector, but Playwright sizes the mask to the element's bounding box, so the
+rendered width of the date still reaches the image. A modified-but-uncommitted
+page shows its *previous* commit's date; committing changes it to today. When
+that changes the width — a single-digit day becoming double-digit is enough —
+the snapshot differs.
+
+Measured on `src/content/docs/examples.mdx`, previously committed on
+2026-09-03: regenerated uncommitted it rendered `Sep 3, 2026`, and the same
+content committed rendered `Sep 22, 2026` and differed by 359 pixels against a
+`maxDiffPixels` of 300. Both images were 1280x4043, so the layout never moved.
+
+This only bites when the width changes, so getting the order wrong is harmless
+most of the time and then is not.
+
+**A change to `src/lib/sidebars.ts` shifts every page.** Adding one top-level
+entry failed all 196 screenshots. Regenerate the whole set rather than the ones
+you expect to move, and prefer the `playwright-update.yml` workflow dispatched
+against your branch: it runs `--update-snapshots=all` on an amd64 runner, which
+is the architecture CI compares against. Note that its push does not retrigger
+the test workflow, so push again or re-run the checks to verify the result.
 
 ## Dependency updates
 
