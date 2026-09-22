@@ -47,9 +47,14 @@ export PATH="$node_dir/bin:\$PATH"
 $profile_end
 EOF
 
-if ! command -v npm >/dev/null || [[ "$(npm --version)" != "11.14.1" ]]; then
-  echo "Installing npm 11.14.1..."
-  npm install --global npm@11.14.1
+# package.json's `packageManager` is the one place the npm version is decided;
+# read it back rather than repeating the literal, which drifted a whole major
+# behind CI. A lockfile written by one npm major hoists differently under
+# another, so an agent installing with npm 11 produced a tree CI never sees.
+npm_pin="$(node -p "require('./package.json').packageManager.split('+')[0]")"
+if ! command -v npm >/dev/null || [[ "npm@$(npm --version)" != "$npm_pin" ]]; then
+  echo "Installing $npm_pin..."
+  npm install --global "$npm_pin"
 fi
 
 dependency_stamp="node_modules/.amp-dependency-hash"
