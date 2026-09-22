@@ -37,6 +37,7 @@ jobs:
           # demand.
           filter: blob:none
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        id: setup-node
         with:
           cache: npm
           node-version: lts/*
@@ -44,8 +45,65 @@ jobs:
       # version pinned in package.json explicitly.
       - name: Install pinned npm
         run: npm install -g npm@12.0.1
+      # node_modules holds native modules compiled against one Node major's
+      # ABI, so the cache key has to change when that major does. arcjet/arcjet
+      # writes the major into the key by hand because it pins `node-version:
+      # 24`; this repository tracks `lts/*`, so read the major back off
+      # setup-node instead and the key follows an LTS rollover on its own.
+      - name: Record Node major version
+        env:
+          NODE_VERSION: ${{ steps.setup-node.outputs.node-version }}
+        run: echo "NODE_MAJOR=${NODE_VERSION%%.*}" >> "$GITHUB_ENV"
+      # `npm ci` takes 54s and ran six times per workflow: once here, once in
+      # each of the four shards, and once in `merge-reports`. setup-node's
+      # `cache: npm` caches the npm download cache, not the installed tree, so
+      # the install still linked 1562 packages every time. Caching node_modules
+      # itself skips the install outright on an exact hit.
+      #
+      # The key hashes the lockfile, every package.json, and patches/**. The
+      # lockfile alone is not enough: `prepare` runs `patch-package`, so a tree
+      # restored after a patch changed would be silently unpatched, which fails
+      # at runtime rather than at install. Hashing every package.json keeps a
+      # metadata edit without a matching lockfile update from skipping `npm
+      # ci`'s consistency check.
+      #
+      # Restore and save are separate steps rather than plain actions/cache
+      # because the combined action's implicit save only runs when the job
+      # succeeds, so one flaky test run would starve the cache.
+      - name: Restore node_modules
+        id: node-modules
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: |
+            node_modules
+            snippets/*/node_modules
+          key: node-modules-${{ runner.os }}-${{ runner.arch }}-node${{ env.NODE_MAJOR }}-${{ hashFiles('package-lock.json', 'package.json', 'snippets/*/package.json', 'patches/**') }}
       - name: Install dependencies
+        if: steps.node-modules.outputs.cache-hit != 'true'
         run: npm ci
+      # Saved immediately after `npm ci`, before the build can write tool caches
+      # into the tree (Astro's .astro/, Nuxt's node_modules/.cache), so the
+      # cached content is exactly what the install produced. A failed install
+      # never reaches this step, so a broken tree cannot be seeded.
+      - name: Save node_modules
+        if: steps.node-modules.outputs.cache-hit != 'true'
+        # Seeding a cache is an optimization: no write failure may fail the job.
+        continue-on-error: true
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: |
+            node_modules
+            snippets/*/node_modules
+          key: node-modules-${{ runner.os }}-${{ runner.arch }}-node${{ env.NODE_MAJOR }}-${{ hashFiles('package-lock.json', 'package.json', 'snippets/*/package.json', 'patches/**') }}
+      # `npm ci` runs `prepare`, which is `patch-package && npm --workspaces run
+      # check`. Nothing else type checks the three snippet workspaces, and
+      # nothing else runs `nuxt prepare` to generate snippets/nuxt/.nuxt, so
+      # when the install is skipped those checks have to run on their own. The
+      # patches are already applied in the cached tree, which is why patches/**
+      # is in the key above.
+      - name: Check snippet workspaces
+        if: steps.node-modules.outputs.cache-hit == 'true'
+        run: npm --workspaces run check
       - name: Build
         run: npm run build
         env:
@@ -77,13 +135,45 @@ jobs:
           egress-policy: audit
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        id: setup-node
         with:
           cache: npm
           node-version: lts/*
       - name: Install pinned npm
         run: npm install -g npm@12.0.1
+      - name: Record Node major version
+        env:
+          NODE_VERSION: ${{ steps.setup-node.outputs.node-version }}
+        run: echo "NODE_MAJOR=${NODE_VERSION%%.*}" >> "$GITHUB_ENV"
+      # Same key and paths as `build`, whose save has already run by the time a
+      # shard starts, so a shard hits the cache even on the run that seeds it.
+      # See the comments there for the key and the split restore/save. The
+      # snippet workspace checks are not repeated here: they are a property of
+      # the source, `build` runs them once, and a shard only needs node_modules
+      # to serve dist/ and drive Playwright.
+      - name: Restore node_modules
+        id: node-modules
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: |
+            node_modules
+            snippets/*/node_modules
+          key: node-modules-${{ runner.os }}-${{ runner.arch }}-node${{ env.NODE_MAJOR }}-${{ hashFiles('package-lock.json', 'package.json', 'snippets/*/package.json', 'patches/**') }}
       - name: Install dependencies
+        if: steps.node-modules.outputs.cache-hit != 'true'
         run: npm ci
+      - name: Save node_modules
+        if: steps.node-modules.outputs.cache-hit != 'true'
+        # Seeding a cache is an optimization: no write failure may fail the job.
+        # All four shards race for this key on a miss; the first wins and the
+        # rest log a benign "unable to reserve cache" notice.
+        continue-on-error: true
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: |
+            node_modules
+            snippets/*/node_modules
+          key: node-modules-${{ runner.os }}-${{ runner.arch }}-node${{ env.NODE_MAJOR }}-${{ hashFiles('package-lock.json', 'package.json', 'snippets/*/package.json', 'patches/**') }}
       - name: Download build output
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -117,13 +207,39 @@ jobs:
           egress-policy: audit
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        id: setup-node
         with:
           cache: npm
           node-version: lts/*
       - name: Install pinned npm
         run: npm install -g npm@12.0.1
+      - name: Record Node major version
+        env:
+          NODE_VERSION: ${{ steps.setup-node.outputs.node-version }}
+        run: echo "NODE_MAJOR=${NODE_VERSION%%.*}" >> "$GITHUB_ENV"
+      # Same key and paths as `build`; see the comments there. This job only
+      # needs Playwright itself, to run `merge-reports`.
+      - name: Restore node_modules
+        id: node-modules
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: |
+            node_modules
+            snippets/*/node_modules
+          key: node-modules-${{ runner.os }}-${{ runner.arch }}-node${{ env.NODE_MAJOR }}-${{ hashFiles('package-lock.json', 'package.json', 'snippets/*/package.json', 'patches/**') }}
       - name: Install dependencies
+        if: steps.node-modules.outputs.cache-hit != 'true'
         run: npm ci
+      - name: Save node_modules
+        if: steps.node-modules.outputs.cache-hit != 'true'
+        # Seeding a cache is an optimization: no write failure may fail the job.
+        continue-on-error: true
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: |
+            node_modules
+            snippets/*/node_modules
+          key: node-modules-${{ runner.os }}-${{ runner.arch }}-node${{ env.NODE_MAJOR }}-${{ hashFiles('package-lock.json', 'package.json', 'snippets/*/package.json', 'patches/**') }}
       - name: Download blob reports
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
