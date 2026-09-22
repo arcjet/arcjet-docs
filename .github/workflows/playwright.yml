@@ -79,12 +79,20 @@ jobs:
       # node_modules itself skips the install outright on an exact hit, which
       # is what made the npm download cache redundant.
       #
-      # The key hashes the lockfile, every package.json, and patches/**. The
-      # lockfile alone is not enough: `prepare` runs `patch-package`, so a tree
-      # restored after a patch changed would be silently unpatched, which fails
-      # at runtime rather than at install. Hashing every package.json keeps a
-      # metadata edit without a matching lockfile update from skipping `npm
-      # ci`'s consistency check.
+      # The key hashes the lockfile, the four workspace manifests, and
+      # patches/**. The lockfile alone is not enough: `prepare` runs
+      # `patch-package`, so a tree restored after a patch changed would be
+      # silently unpatched, which fails at runtime rather than at install.
+      # Hashing the manifests keeps a metadata edit without a matching lockfile
+      # update from skipping `npm ci`'s consistency check.
+      #
+      # Those manifests are listed one pattern at a time rather than globbed as
+      # `**/package.json`. hashFiles applies no exclusions of its own and the
+      # expression form takes none, so once `npm ci` has run a `**` pattern
+      # also matches the 2151 package.json files under node_modules. The save
+      # step re-evaluates the key after the install, so it would write under a
+      # key the restore step can never produce and the cache would stop hitting
+      # without anything going red.
       #
       # Restore and save are separate steps rather than plain actions/cache
       # because the combined action's implicit save only runs when the job
