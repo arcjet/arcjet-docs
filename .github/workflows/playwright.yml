@@ -228,11 +228,26 @@ jobs:
           retention-days: 1
 
   merge-reports:
-    # Failing tests still produce blob reports worth merging, so this runs when
-    # `test` fails. It must not run when `test` never ran: an upstream failure
-    # leaves no reports, `merge-reports` fails on the empty directory, and the
-    # PR shows a report-merging failure instead of the real cause.
-    if: ${{ !cancelled() && needs.test.result != 'skipped' }}
+    # Merge the shard blobs only when a shard failed. This job cannot start
+    # until all four shards have finished, so on a green run it adds 57s to the
+    # end of the workflow to build an HTML report that is only worth reading
+    # when something went wrong.
+    #
+    # `result == 'failure'` also covers what the previous condition guarded
+    # against. A `test` that never ran reports `skipped`, and a cancelled one
+    # reports `cancelled`, so neither reaches the merge step with an empty
+    # directory of blob reports.
+    #
+    # `always()` is required: an `if` with no status check function has
+    # `success()` applied to it, which would demand that `test` succeeded and
+    # contradict the test for failure.
+    #
+    # Each shard uploads its blob whatever the outcome, so the report can still
+    # be rebuilt from a run that went green on a retry:
+    #
+    #   gh run download <run-id> -p 'blob-report-*'
+    #   npx playwright merge-reports --reporter html .
+    if: ${{ always() && needs.test.result == 'failure' }}
     needs: test
     timeout-minutes: 10
     runs-on: ubuntu-latest
