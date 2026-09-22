@@ -24,11 +24,15 @@ import RemixExample from "@/snippets/ip-threat-intelligence/remix/Example.mdx";
 import SvelteKitExample from "@/snippets/ip-threat-intelligence/sveltekit/Example.mdx";
 
 
-Every Arcjet decision includes analysis of the client IP. Use it to detect and
+Protect scores the **caller** of an HTTP request. Use it to detect and
 deny VPNs, proxies, Tor exit nodes, hosting (data center) IPs, and other
 high-risk networks.
 
-You can enforce that analysis in two ways:
+To score the **hosts a Guard call would contact** – outbound destinations on
+an agent tool call – see
+<Link.Page href="/guards/destination-threat">Destination threat detection</Link.Page>.
+
+You can enforce inbound IP analysis in two ways:
 
 - A <Link.Page href="/filters">filter</Link.Page> rule denies matching traffic
   together with your other Arcjet rules.
@@ -778,6 +782,11 @@ arcjet.Filter(arcjet.FilterOptions{
 ## What next?
 
 <CardGrid>
+  <Link.Card
+    title="Destination threat detection"
+    href="/guards/destination-threat"
+    description="Score outbound hosts on a Guard policy with the same threat database."
+  />
   <Link.Card
     title="Filters"
     href="/filters"

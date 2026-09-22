@@ -1,0 +1,210 @@
+---
+title: "Destination threat detection"
+description: "Score the hosts a Guard call would contact with Arcjet IP threat intelligence, deny high-risk destinations, and combine threat findings with outbound allowlists."
+---
+
+import { Aside, CardGrid } from "@astrojs/starlight/components";
+import Comments from "@/components/Comments.astro";
+import { Link } from "@/components/link";
+
+Protect scores the **caller** of an HTTP request. A Guard policy can score the
+**hosts a call would contact** – a WebFetch URL, an absolute URL inside a shell
+command – against the same CrowdSec and IPAPI database. The lookup runs only
+when a published policy declares an IP threat detector. Rego stays pure: it
+reads a bounded verdict under `input.signals.ip_threat`, keyed by the detector
+ID you declared.
+
+For inbound client IP analysis on `protect()`, see
+<Link.Page href="/ip-threat-intelligence">IP threat intelligence</Link.Page>.
+
+## Declare the detector
+
+Give the detector an ID, name a `SERVER` string or string list of hosts, and
+choose the IP threat kind. It takes no configuration.
+
+| Field | Value |
+| --- | --- |
+| Kind | IP threat (`GUARD_POLICY_DETECTOR_KIND_IP_THREAT`) |
+| Input exposure | `SERVER` |
+| Input kind | `STRING` or `STRING_LIST` |
+| Signals group | `input.signals.ip_threat.<detector_id>` |
+
+An empty list is risk `none`. Private, loopback, link-local, CGNAT, multicast,
+and unspecified addresses are not scored. More than eight public destinations
+fails closed: scoring a prefix and still deciding would allow a malicious host
+past the cut.
+
+A coding agent hook fills `destinations` for you. An application Guard call
+maps the hosts it is about to contact into a declared input of the same shape.
+
+## Read the verdict in Rego
+
+The rolled-up fields are worst-wins across every public host that completed
+scoring:
+
+| Field | Meaning |
+| --- | --- |
+| `detected` | `true` when `risk_level` is `high` or `critical` |
+| `risk_level` | `none`, `low`, `medium`, `high`, or `critical` |
+| `reputation` | Upstream label such as `malicious`, `suspicious`, or `unknown` |
+| `activities` | Observed behaviors for the worst host |
+| `host` | Host that produced the worst assessment. Empty when risk is `none` |
+| `ip` | Address looked up for that host |
+| `assessments` | One entry per public destination that completed scoring, in input order |
+
+Name the set of risk levels you deny. A comparison with `>= "high"` is wrong:
+`critical` sorts before `high`, and `none` sorts after it.
+
+```rego
+package arcjet.guard
+
+import rego.v1
+
+deny contains "malicious-destination" if {
+	input.signals.ip_threat.dest.risk_level in {"high", "critical"}
+}
+```
+
+`assessments` is on the same signal object Rego and Activity read. Each entry
+carries `host`, `ip`, `risk_level`, `reputation`, `activities`, and `detected`.
+A host whose lookup failed is omitted: the detector either fails closed or
+already has a high or critical peer that decides the call.
+
+## Sample policy for destination threat
+
+The Console offers `coding-agent.destination-threat` as a starter. Attach it to
+**Tool call**. It declares `tool_kind` and `destinations`, runs detector ID
+`dest` over `destinations`, and denies when risk is high or critical for any
+tool kind.
+
+`destinations` holds the hosts of the tool's URL arguments, plus the hosts of
+absolute URLs inside a shell command. A `curl` in Bash is covered. An allowlist
+that only checks `tool_kind == "web"` is not.
+
+```rego
+deny contains "malicious-destination" if {
+	input.signals.ip_threat.dest.risk_level in {"high", "critical"}
+}
+```
+
+| Situation | Expected |
+| --- | --- |
+| Empty `destinations` | Allowed (risk `none`) |
+| Unlisted host such as `docs.arcjet.com` | Allowed (risk `none`) |
+| Low risk | Allowed |
+| High or critical risk | Denied (`malicious-destination`) |
+
+For demos, `evil.arcjet.com` and its subdomains (for example
+`https://www.evil.arcjet.com/...`) always score high without a DNS or IP
+database lookup. Use that host in a tool call or shell command when the policy
+is enabled.
+
+Do not attach this policy to **Prompt**. `destinations` is empty when a prompt
+is submitted, so a live detector rule with nothing to score fails closed and
+denies every prompt.
+
+For the full coding agent contract and the other starters, see
+<Link.Page href="/coding-agents/policies">Coding agent policies</Link.Page>.
+
+## Create an outbound allowlist
+
+An allowlist and destination threat answer different questions:
+
+| Control | Question it answers |
+| --- | --- |
+| Domain allowlist | Is this host on the list we reviewed? |
+| Destination threat | Does threat intelligence mark this host high or critical risk? |
+
+Write an allowlist **into** the policy, never as an input the agent supplies. A
+list the agent sent is a list the agent could widen.
+
+### Domain allowlist for web fetches
+
+The starter `coding-agent.egress-allowlist` compares `domains` – the hosts of
+URL arguments – against a set you edit in Rego. It scopes to
+`tool_kind == "web"`, so a shell command that embeds a URL does not hit this
+rule.
+
+```rego
+deny contains "unlisted-domain" if {
+	input.values.tool_kind == "web"
+	some host in input.values.domains
+	not host in {"docs.arcjet.com", "github.com", "raw.githubusercontent.com"}
+}
+```
+
+Replace the set with the hosts your organization has reviewed before the rule
+goes live.
+
+### MCP server allowlist
+
+The starter `coding-agent.mcp-allowlist` uses the same pattern for MCP servers:
+
+```rego
+deny contains "unlisted-mcp-server" if {
+	input.values.tool_kind == "mcp"
+	not input.values.mcp_server in {"arcjet", "github", "sentry"}
+}
+```
+
+### Combine allowlist and threat
+
+Publish both policies on **Tool call**. Arcjet runs every policy attached to
+that moment; the answer is the most restrictive decision.
+
+- The allowlist refuses unreviewed hosts on web tools.
+- Destination threat refuses high or critical risk on any tool that names a
+  destination, including a URL inside a shell command.
+
+A host on your allowlist can still be denied when threat intelligence scores it
+high or critical. That is intentional: review lists drift, and reputation
+changes after you published the set.
+
+For application Guard calls, map hosts into a `SERVER` string list, declare the
+IP threat detector over that input, and either hardcode an allow set in Rego or
+pass a trusted `allowed_domains` list from server-side configuration – not from
+the model.
+
+## Fail closed behavior
+
+| Condition | Result |
+| --- | --- |
+| Host missing from the threat database | Risk `none` |
+| Lookup or DNS resolution cannot complete | Live rule is incomplete and denies (`AJP1009`) |
+| One host already high or critical while another lookup fails | High or critical verdict still returned |
+| More than eight public destinations | Fails closed |
+| Deployment cannot reach the IP database when a destination is present | Fails closed |
+
+`AJP1009` is the IP threat lookup code. Model-backed detector outages stay
+`AJP1004`. When both kinds fail on one policy, the expression keeps `AJP1004`
+until every failure was a threat lookup. For more information, see
+<Link.Page href="/guards/errors">Policy error codes</Link.Page>.
+
+The denial reason sent to the agent names rule IDs only.
+
+## What next?
+
+<CardGrid>
+  <Link.Card
+    title="Coding agent policies"
+    href="/coding-agents/policies"
+    description="The fixed input contract, destination-threat, and the other starters."
+  />
+  <Link.Card
+    title="Policy examples"
+    href="/guards/policy-examples"
+    description="Worked Rego for common agent actions, including destination threat."
+  />
+  <Link.Card
+    title="Policy contract"
+    href="/guards/remote-policies"
+    description="Labels, inputs, detectors, and how signals are keyed."
+  />
+  <Link.Card
+    title="IP threat intelligence"
+    href="/ip-threat-intelligence"
+    description="Inbound client IP analysis on protect()."
+  />
+</CardGrid>
+
+<Comments />

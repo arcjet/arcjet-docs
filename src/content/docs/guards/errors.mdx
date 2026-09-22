@@ -33,6 +33,7 @@ result in the decision and in the Console.
 | `AJP1006` | The policy expression couldn't be evaluated                  | The interpreter ran and failed. The message carries the fault and what to do about it. See [Read an expression failure](#read-an-expression-failure). |
 | `AJP1007` | The expression called a built-in with arguments it refuses   | A built-in error. The message names the built-in and the operand position. Test for the value's type before using it. |
 | `AJP1008` | The remote policy for this label couldn't be read            | Arcjet couldn't read the stored policy. Retry.                                                    |
+| `AJP1009` | An IP threat lookup couldn't be completed                    | Transient or a missing IP database binding. Every rule that reads the detector reports it. A host already scored high or critical still returns that verdict when another lookup fails. |
 
 A live rule carrying any of these fails closed for a caller that enforces. A
 dry-run rule reports the code without affecting the decision.
@@ -85,11 +86,13 @@ value because a test input is one you wrote.
 
 ### Why an absent detector fails every dependent rule
 
-Every rule that depends on the detector reports `AJP1004`, not only the rules
+Every rule that depends on the detector reports the same code – `AJP1004` for a
+model-backed detector, `AJP1009` for an IP threat lookup – not only the rules
 that name it. An expression reading
-`input.signals.prompt_injection.message_check.detected` isn't evaluated when
-that detector produced no verdict, because an absent signal would read as "not
-detected" and a live rule written to deny on detection would allow instead.
+`input.signals.prompt_injection.message_check.detected` or
+`input.signals.ip_threat.dest.risk_level` isn't evaluated when that detector
+produced no verdict, because an absent signal would read as "not detected" and
+a live rule written to deny on detection would allow instead.
 
 ### Why a built-in error is not an allow
 
