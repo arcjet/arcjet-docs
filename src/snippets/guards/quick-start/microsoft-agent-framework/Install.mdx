@@ -1,0 +1,14 @@
+The Microsoft Agent Framework helpers are a nested Go module. It requires Go
+1.26, the framework's own floor, while the root SDK requires Go 1.25.
+
+```shell
+go get github.com/arcjet/arcjet-go@latest
+go get github.com/arcjet/arcjet-go/agentframework@latest
+go get github.com/arcjet/arcjet-go/sensitiveinfo/rampart@latest
+go get github.com/microsoft/agent-framework-go@latest
+```
+
+Microsoft Agent Framework for Go is a public preview, so the helpers stay at
+`v0.x` while its API settles. There is no version segment in the import path;
+`agentframework/go.mod` names the framework version it is built against, which
+Go treats as a lower bound.
