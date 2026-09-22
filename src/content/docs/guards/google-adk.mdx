@@ -81,12 +81,8 @@ export const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 </TabItem>
 <TabItem label="Python">
 
-Until `arcjet.guard.google_adk` is published, pin `arcjet` to
-[`a71970dc`](https://github.com/arcjet/arcjet-py/tree/a71970dc6d434a47e77e71e35fd485ac1be7ab14).
-Published `arcjet` on PyPI does not include this extra.
-
 ```bash
-pip install "arcjet[google-adk] @ git+https://github.com/arcjet/arcjet-py@a71970dc6d434a47e77e71e35fd485ac1be7ab14"
+pip install "arcjet[google-adk]"
 ```
 
 `arcjet[google-adk]` depends on `google-adk>=2.0.0,<3`. CPython
@@ -957,8 +953,4 @@ worked policies, see
 - JavaScript adapter:
   [`ed4edfb2`](https://github.com/arcjet/arcjet-js/commit/ed4edfb20a470c23817b51a52923359fb1b255f7)
 - Python example:
-  [examples/fastapi-google-adk-guard](https://github.com/arcjet/arcjet-py/tree/a71970dc6d434a47e77e71e35fd485ac1be7ab14/examples/fastapi-google-adk-guard)
-- Python adapter:
-  [`a71970dc`](https://github.com/arcjet/arcjet-py/commit/a71970dc6d434a47e77e71e35fd485ac1be7ab14)
-  on [arcjet-py](https://github.com/arcjet/arcjet-py) until the
-  `google-adk` extra lands
+  [examples/fastapi-google-adk-guard](https://github.com/arcjet/arcjet-py/tree/main/examples/fastapi-google-adk-guard)
