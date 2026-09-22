@@ -1,6 +1,6 @@
 ---
 title: "Destination threat detection"
-description: "Score the hosts a Guard call would contact with Arcjet IP threat intelligence, deny high-risk destinations, and combine threat findings with outbound allowlists."
+description: "Score the hosts a Guard call would contact with Arcjet threat intel, deny high-risk destinations, and combine threat findings with outbound allowlists."
 ---
 
 import { Aside, CardGrid } from "@astrojs/starlight/components";
@@ -9,10 +9,10 @@ import { Link } from "@/components/link";
 
 Protect scores the **caller** of an HTTP request. A Guard policy can score the
 **hosts a call would contact** – a WebFetch URL, an absolute URL inside a shell
-command – against the same CrowdSec and IPAPI database. The lookup runs only
-when a published policy declares an IP threat detector. Rego stays pure: it
-reads a bounded verdict under `input.signals.ip_threat`, keyed by the detector
-ID you declared.
+command – with Arcjet threat intel. The lookup runs only when a published
+policy declares an Arcjet threat intel detector. Rego stays pure: it reads a
+bounded verdict under `input.signals.ip_threat`, keyed by the detector ID you
+declared.
 
 For inbound client IP analysis on `protect()`, see
 <Link.Page href="/ip-threat-intelligence">IP threat intelligence</Link.Page>.
@@ -20,7 +20,7 @@ For inbound client IP analysis on `protect()`, see
 ## Declare the detector
 
 Give the detector an ID, name a `SERVER` string or string list of hosts, and
-choose the IP threat kind. It takes no configuration.
+choose the Arcjet threat intel (IP threat) kind. It takes no configuration.
 
 | Field | Value |
 | --- | --- |
@@ -94,10 +94,12 @@ deny contains "malicious-destination" if {
 | Low risk | Allowed |
 | High or critical risk | Denied (`malicious-destination`) |
 
-For demos, `evil.arcjet.com` and its subdomains (for example
-`https://www.evil.arcjet.com/...`) always score high without a DNS or IP
-database lookup. Use that host in a tool call or shell command when the policy
-is enabled.
+### Optional: test with a demo host
+
+For live demos of this starter, `evil.arcjet.com` and its subdomains (for
+example `https://www.evil.arcjet.com/...`) always score high without a DNS or
+IP database lookup. Use that host in a tool call or shell command when the
+policy is enabled.
 
 Do not attach this policy to **Prompt**. `destinations` is empty when a prompt
 is submitted, so a live detector rule with nothing to score fails closed and
@@ -113,7 +115,7 @@ An allowlist and destination threat answer different questions:
 | Control | Question it answers |
 | --- | --- |
 | Domain allowlist | Is this host on the list we reviewed? |
-| Destination threat | Does threat intelligence mark this host high or critical risk? |
+| Destination threat | Does Arcjet threat intel mark this host high or critical risk? |
 
 Write an allowlist **into** the policy, never as an input the agent supplies. A
 list the agent sent is a list the agent could widen.
@@ -149,21 +151,22 @@ deny contains "unlisted-mcp-server" if {
 
 ### Combine allowlist and threat
 
-Publish both policies on **Tool call**. Arcjet runs every policy attached to
-that moment; the answer is the most restrictive decision.
+These are separate policies, not one merged document. Publish both on
+**Tool call**. Arcjet runs every policy attached to that moment and applies the
+most restrictive decision; each policy still records its own Activity row.
 
 - The allowlist refuses unreviewed hosts on web tools.
 - Destination threat refuses high or critical risk on any tool that names a
   destination, including a URL inside a shell command.
 
-A host on your allowlist can still be denied when threat intelligence scores it
+A host on your allowlist can still be denied when Arcjet threat intel scores it
 high or critical. That is intentional: review lists drift, and reputation
 changes after you published the set.
 
-For application Guard calls, map hosts into a `SERVER` string list, declare the
-IP threat detector over that input, and either hardcode an allow set in Rego or
-pass a trusted `allowed_domains` list from server-side configuration – not from
-the model.
+For application Guard calls, map hosts into a `SERVER` string list, declare an
+Arcjet threat intel detector over that input, and either hardcode an allow set
+in Rego or pass a trusted `allowed_domains` list from application configuration
+– not from the model.
 
 ## Fail closed behavior
 
@@ -175,10 +178,10 @@ the model.
 | More than eight public destinations | Fails closed |
 | Deployment cannot reach the IP database when a destination is present | Fails closed |
 
-`AJP1009` is the IP threat lookup code. Model-backed detector outages stay
-`AJP1004`. When both kinds fail on one policy, the expression keeps `AJP1004`
-until every failure was a threat lookup. For more information, see
-<Link.Page href="/guards/errors">Policy error codes</Link.Page>.
+`AJP1009` is the Arcjet threat intel lookup code. Model-backed detector outages
+stay `AJP1004`. When both kinds fail on one policy, the expression keeps
+`AJP1004` until every failure was a threat intel lookup. For more information,
+see <Link.Page href="/guards/errors">Policy error codes</Link.Page>.
 
 The denial reason sent to the agent names rule IDs only.
 

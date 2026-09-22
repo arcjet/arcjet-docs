@@ -115,7 +115,7 @@ Arcjet will run every policy attached to the specific event in one round trip so
 | `coding-agent.mcp-allowlist` | MCP servers outside a list written into the policy |
 | `coding-agent.protected-paths` | Writes to CI configuration and version-control internals |
 | `coding-agent.egress-allowlist` | Fetches to hosts outside a list written into the policy |
-| `coding-agent.destination-threat` | A destination whose IP threat risk is high or critical. For demos, `evil.arcjet.com` and its subdomains always score high |
+| `coding-agent.destination-threat` | A destination whose IP threat risk is high or critical |
 | `coding-agent.prompt-injection` | Instructions the injection detector flags in a prompt |
 | `coding-agent.sensitive-info` | Card numbers and Social Security numbers in a prompt |
 | `coding-agent.model-allowlist` | A model switch, prompt, or tool call whose model is outside the list the author wrote in Rego. Claude Code denies the switch only; Codex and Cursor deny the prompt and the tool call; Copilot is not covered. |
@@ -252,9 +252,9 @@ deny contains "unlisted-domain" if {
 
 ### Malicious destination
 
-Deny a tool call whose destination scores high or critical in the same CrowdSec
-and IPAPI database Protect uses for the caller of an HTTP request. Declare a
-**server-side** IP threat detector with the ID `dest` over `destinations`.
+Deny a tool call whose destination scores high or critical in Arcjet threat
+intel – the same assessment Protect uses for the caller of an HTTP request.
+Declare an Arcjet threat intel detector with the ID `dest` over `destinations`.
 
 `destinations` holds the hosts of URL arguments plus the hosts of absolute URLs
 inside a shell command. The rule does not require `tool_kind == "web"`, so a
@@ -272,12 +272,11 @@ Name the set. A comparison with `>= "high"` is wrong: `critical` sorts before
 `high`, and `none` sorts after it. An empty list is risk `none`. A lookup that
 cannot be completed fails the policy closed (`AJP1009`).
 
-For demos, `evil.arcjet.com` and its subdomains always score high without a DNS
-or IP database lookup.
-
-Publish this beside `coding-agent.egress-allowlist` when you want both an
-allowlist of reviewed hosts and a refuse on high-risk destinations. For signal
-fields, limits, and application Guard calls, see
+Publish both this policy and `coding-agent.egress-allowlist` on **Tool call**
+when you want both controls. Arcjet runs every policy attached to that moment
+and applies the most restrictive decision, so each policy still records its own
+row and a host on the allowlist can still be denied when threat intel scores it
+high or critical. For signal fields, limits, and application Guard calls, see
 <Link.Page href="/guards/destination-threat">Destination threat detection</Link.Page>.
 
 ### Prompt injection in a developer's prompt
@@ -405,7 +404,7 @@ for the coverage table and the already-selected-model gap on Claude Code.
 - <Link.Page href="/coding-agents/codex">Secure OpenAI Codex</Link.Page>
 - <Link.Page href="/coding-agents/cursor">Secure Cursor</Link.Page>
 - <Link.Page href="/coding-agents/block-personal-accounts">Block personal coding agent accounts</Link.Page>
-- <Link.Page href="/guards/destination-threat">Destination threat detection</Link.Page> – IP threat signals, allowlists, and fail-closed behavior
+- <Link.Page href="/guards/destination-threat">Destination threat detection</Link.Page> – Arcjet threat intel signals, allowlists, and fail-closed behavior
 - <Link.Page href="/guards/rego">Write policies in Rego</Link.Page> – the language, the profile, and its exclusions
 - <Link.Page href="/guards/authoring">Author and publish policies</Link.Page> – the builder, plain English, tests, and publication
 - <Link.Page href="/guards/errors">Policy error codes</Link.Page>

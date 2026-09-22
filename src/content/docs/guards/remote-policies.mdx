@@ -164,7 +164,7 @@ it an ID, and name the input it reads:
 | Prompt injection                    | A `SERVER` string              | The server | –                                |
 | Sensitive information (SDK-local)   | A `LOCAL` string               | The SDK    | Allowed or denied entity types   |
 | Sensitive information (server-side) | A `SERVER` string              | The server | Allowed or denied entity types   |
-| IP threat                           | A `SERVER` string or string list of hosts | The server | –                       |
+| Arcjet threat intel (IP threat)     | A `SERVER` string or string list of hosts | The server | –                       |
 
 Prompt injection runs on the server because it needs the raw value. The two
 sensitive information kinds differ only in where the value is read. The
@@ -173,9 +173,9 @@ server-side kind reads the value on Arcjet, which is what makes it usable with
 no SDK in the call, such as a <Link.Page href="/coding-agents">coding agent hook</Link.Page>.
 Declaring a detector against the wrong exposure is a compile error, `AJV2007`.
 
-IP threat scores the hosts a call would contact against the same CrowdSec and
-IPAPI database Protect uses for the caller of an HTTP request. An empty value
-is risk `none`. A lookup that cannot be completed fails a live rule closed
+Arcjet threat intel scores the hosts a call would contact with the same
+assessment Protect uses for the caller of an HTTP request. An empty value is
+risk `none`. A lookup that cannot be completed fails a live rule closed
 (`AJP1009`). For signal fields, allowlists, and the coding agent starter, see
 <Link.Page href="/guards/destination-threat">Destination threat detection</Link.Page>.
 
@@ -367,6 +367,6 @@ For more information, see
 
 - <Link.Page href="/guards/rego">Write policies in Rego</Link.Page> – the input document, the profile, and its exclusions
 - <Link.Page href="/guards/policy-examples">Policy examples</Link.Page> – worked policies for common agent actions
-- <Link.Page href="/guards/destination-threat">Destination threat detection</Link.Page> – IP threat signals and outbound allowlists
+- <Link.Page href="/guards/destination-threat">Destination threat detection</Link.Page> – Arcjet threat intel signals and outbound allowlists
 - <Link.Page href="/guards/authoring">Author and publish policies</Link.Page> – the builder, plain English, tests, and publication
 - <Link.Page href="/guards/errors">Policy error codes</Link.Page> – what a rule reports when it can't be evaluated
