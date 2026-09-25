@@ -57,7 +57,9 @@ same directory as the managed `hooks.json`.
 
 vendor=$1
 event=$2
-principal=${USER:-${USERNAME:-}}
+# Prefer Cursor's signed-in email, then an explicit override for cloud VMs
+# (where $USER is always ubuntu), then the OS account.
+principal=${CURSOR_USER_EMAIL:-${ARCJET_PRINCIPAL:-${USER:-${USERNAME:-}}}}
 
 deny() {
   case "${vendor}:${event}" in
@@ -99,7 +101,9 @@ On Windows, save a sibling `arcjet-hook.ps1`:
 
 ```powershell title="arcjet-hook.ps1"
 param([string]$Vendor, [string]$Event)
-$principal = if ($env:USERNAME) { $env:USERNAME } else { $env:USER }
+# Prefer Cursor's signed-in email, then an explicit override for cloud VMs
+# (where $USER is always ubuntu), then the OS account.
+$principal = if ($env:CURSOR_USER_EMAIL) { $env:CURSOR_USER_EMAIL } elseif ($env:ARCJET_PRINCIPAL) { $env:ARCJET_PRINCIPAL } elseif ($env:USERNAME) { $env:USERNAME } else { $env:USER }
 function Deny {
   switch ("$Vendor`:$Event") {
     "cursor:pre-tool-use" { Write-Output '{"permission":"deny","user_message":"arcjet-hook","agent_message":"arcjet-hook"}' }
@@ -264,8 +268,9 @@ request of latency (typically a few tens of milliseconds).
 - `timeout` on every entry. Five seconds is a sensible ceiling for a
   policy decision.
 - `X-Arcjet-Principal` attributes a session to a developer. It's
-  untrusted, but useful extra metadata. `$USER` is unset on Windows, so
-  the script falls back to `$USERNAME`.
+  untrusted, but useful extra metadata. The script prefers
+  `CURSOR_USER_EMAIL`, then `ARCJET_PRINCIPAL`, then `$USER` /
+  `$USERNAME`. See [Attribute the developer](#attribute-the-developer).
 - The hook URLs omit `surface`. The same file reaches the IDE, CLI, and
   cloud, so a hard-coded `ide` mislabels cloud sessions. Arcjet records
   `unknown` when you omit the parameter. Set it only when the hook file
@@ -291,9 +296,30 @@ The script reads `ARCJET_KEY` from the environment. Export it where Cursor
 runs, or inject it through your configuration-management tooling. Never
 commit a literal key.
 
-`X-Arcjet-Principal` uses `$USER` or `$USERNAME`. Cursor also sends
-`user_email` on the hook payload when the developer is signed in. Arcjet
-reads the asserted principal from the header, not from that field.
+## Attribute the developer
+
+Activity's Actor column comes from `X-Arcjet-Principal`. That value is
+**untrusted**: it is an assertion from the same configuration that holds
+the API key, not proof of identity, and it never becomes the Guard actor.
+
+Cursor also sends `user_email` on the hook payload when the developer is
+signed in. Arcjet reads the asserted principal from the header, not from
+that field.
+
+The install script picks the principal in this order:
+
+1. `CURSOR_USER_EMAIL` – set by Cursor for signed-in IDE and CLI sessions
+2. `ARCJET_PRINCIPAL` – an explicit override you inject (cloud agents,
+   MDM, secrets managers)
+3. `$USER`, then `$USERNAME` – the OS account (`$USER` is unset on
+   Windows)
+
+Cloud agent VMs run as `ubuntu`, and Cursor does not set
+`CURSOR_USER_EMAIL` there today. Without an override, Actor shows
+`ubuntu`. Set `ARCJET_PRINCIPAL` (or `CURSOR_USER_EMAIL`) in the cloud
+agent environment or secrets so those sessions attribute to a person. A
+shared team secret attributes every cloud session to one identity until
+Cursor injects the owner email into the hook environment.
 
 ## Lock it down
 
@@ -309,6 +335,11 @@ workspace trust skips the repository file.
 A [cloud agent](https://cursor.com/docs/cloud-agent) runs command hooks
 from the repository. Commit `.cursor/hooks.json` and
 `.cursor/hooks/arcjet-hook.sh` so the cloud VM can execute them.
+
+Also set `ARCJET_PRINCIPAL` or `CURSOR_USER_EMAIL` in the cloud agent
+environment – see [Attribute the developer](#attribute-the-developer).
+Without it, Activity attributes cloud sessions to the VM OS account
+(`ubuntu`).
 
 On Enterprise plans, cloud agents also run Team hooks and
 enterprise-managed hooks from the dashboard.
