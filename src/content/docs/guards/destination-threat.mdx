@@ -50,7 +50,7 @@ scoring:
 | `activities` | Observed behaviors for the worst host |
 | `host` | Host that produced the worst assessment. Empty when risk is `none` |
 | `ip` | Address looked up for that host |
-| `assessments` | One entry per public destination that completed scoring, in input order |
+| `assessments` | One entry per public destination that completed scoring, in input order (failed lookups omitted) |
 
 Name the set of risk levels you deny. A comparison with `>= "high"` is wrong:
 `critical` sorts before `high`, and `none` sorts after it.
