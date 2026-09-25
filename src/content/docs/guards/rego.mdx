@@ -148,6 +148,20 @@ deny contains "card-number-to-external" if {
 }
 ```
 
+An Arcjet threat intel result carries risk level, reputation, and per-host
+assessments. Name the levels you deny – do not compare with `>= "high"`,
+because `critical` sorts before `high`:
+
+```rego
+deny contains "malicious-destination" if {
+	input.signals.ip_threat.dest.risk_level in {"high", "critical"}
+}
+```
+
+For field names, limits, and writing one policy where an allowlist bypasses
+threat (instead of two LIVE starters), see
+<Link.Page href="/guards/destination-threat">Destination threat detection</Link.Page>.
+
 <Aside type="note">
   A detector can also decide a rule on its own, without the expression. That's
   a `DETECTOR` rule, and it's what keeps local sensitive-information detection
@@ -157,8 +171,9 @@ deny contains "card-number-to-external" if {
 </Aside>
 
 When a detector produces no verdict, every rule that depends on it reports
-`AJP1004` and is not evaluated. An absent signal would read as "not detected",
-which would make a rule written to deny on detection allow instead.
+`AJP1004` (model-backed) or `AJP1009` (Arcjet threat intel lookup) and is not
+evaluated. An absent signal would read as "not detected", which would make a
+rule written to deny on detection allow instead.
 
 ## What the profile allows
 
@@ -328,6 +343,7 @@ For how to write and run tests, see
 ## Related
 
 - <Link.Page href="/guards/policy-examples">Policy examples</Link.Page> – worked policies for common agent actions
+- <Link.Page href="/guards/destination-threat">Destination threat detection</Link.Page> – Arcjet threat intel signals and allowlist-bypass patterns
 - <Link.Page href="/guards/remote-policies">Policy contract</Link.Page> – labels, actors, typed inputs, and detectors
 - <Link.Page href="/guards/authoring">Author and publish policies</Link.Page> – the builder, plain English, tests, and publication
 - <Link.Page href="/guards/errors">Policy error codes</Link.Page> – what a rule reports when it can't be evaluated

@@ -300,6 +300,62 @@ deny contains "card-number-emailed" if {
 }
 ```
 
+## Deny a high-risk destination
+
+| Input           | Kind        | Exposure |
+| --------------- | ----------- | -------- |
+| `destinations`  | String list | `SERVER` |
+
+**Detector:** `dest`, Arcjet threat intel over `destinations`
+
+```rego
+deny contains "malicious-destination" if {
+	input.signals.ip_threat.dest.risk_level in {"high", "critical"}
+}
+```
+
+Map the hosts the action is about to contact into `destinations`. An empty list
+is risk `none`. Name the set of levels you deny – `>= "high"` is wrong because
+`critical` sorts before `high`.
+
+On a coding agent hook, Arcjet fills `destinations` from URL arguments and from
+absolute URLs inside a shell command.
+
+### Allowlist that bypasses destination threat
+
+When a reviewed host must pass even if threat intel scores it high or
+critical, put the allowlist and the threat rule in **one** policy. Do not
+publish `coding-agent.egress-allowlist` and `coding-agent.destination-threat`
+as two LIVE policies for that goal: most restrictive wins, so threat DENY still
+blocks an allowlisted host. The starters cannot express the bypass alone.
+
+| Input           | Kind        | Exposure |
+| --------------- | ----------- | -------- |
+| `tool_kind`     | String      | `SERVER` |
+| `domains`       | String list | `SERVER` |
+| `destinations`  | String list | `SERVER` |
+
+**Detector:** `dest`, Arcjet threat intel over `destinations`
+
+```rego
+allowed := {"docs.arcjet.com", "github.com", "raw.githubusercontent.com"}
+
+deny contains "unlisted-domain" if {
+	input.values.tool_kind == "web"
+	some host in input.values.domains
+	not host in allowed
+}
+
+deny contains "malicious-destination" if {
+	some a in input.signals.ip_threat.dest.assessments
+	a.risk_level in {"high", "critical"}
+	not a.host in allowed
+}
+```
+
+For signal fields and fail-closed behavior, see
+<Link.Page href="/guards/destination-threat">Destination threat detection</Link.Page>.
+
 ## Confine a file tool to the workspace
 
 | Input            | Kind   | Exposure |
@@ -445,5 +501,7 @@ rule to production traffic.
 
 - <Link.Page href="/guards/rego">Write policies in Rego</Link.Page> – the input document, the profile, and its exclusions
 - <Link.Page href="/guards/remote-policies">Policy contract</Link.Page> – labels, actors, typed inputs, and detectors
+- <Link.Page href="/guards/destination-threat">Destination threat detection</Link.Page> – Arcjet threat intel signals and allowlist-bypass patterns
 - <Link.Page href="/guards/authoring">Author and publish policies</Link.Page> – the builder, plain English, tests, and publication
 - <Link.Page href="/guards/quick-start">Agent guards quick start</Link.Page> – guard a tool end to end
+- <Link.Page href="/coding-agents/policies">Coding agent policies</Link.Page> – the fixed contract and starter policies

@@ -2396,6 +2396,7 @@ blocking one makes the wrapper synchronous.
 - [Policy contract](https://docs.arcjet.com/guards/remote-policies)
 - [Write policies in Rego](https://docs.arcjet.com/guards/rego)
 - [Policy examples](https://docs.arcjet.com/guards/policy-examples)
+- [Destination threat detection](https://docs.arcjet.com/guards/destination-threat)
 - [Author and publish policies](https://docs.arcjet.com/guards/authoring)
 - [Policy error codes](https://docs.arcjet.com/guards/errors)
 - [Secure coding agents](https://docs.arcjet.com/coding-agents)

@@ -159,11 +159,12 @@ Detectors are native Arcjet operations. A policy can't make a network call or a
 model call; it reads a bounded result Arcjet produced. Declare a detector, give
 it an ID, and name the input it reads:
 
-| Detector                            | Reads             | Runs on    | Options                          |
-| ----------------------------------- | ----------------- | ---------- | -------------------------------- |
-| Prompt injection                    | A `SERVER` string | The server | –                                |
-| Sensitive information (SDK-local)   | A `LOCAL` string  | The SDK    | Allowed or denied entity types   |
-| Sensitive information (server-side) | A `SERVER` string | The server | Allowed or denied entity types   |
+| Detector                            | Reads                          | Runs on    | Options                          |
+| ----------------------------------- | ------------------------------ | ---------- | -------------------------------- |
+| Prompt injection                    | A `SERVER` string              | The server | –                                |
+| Sensitive information (SDK-local)   | A `LOCAL` string               | The SDK    | Allowed or denied entity types   |
+| Sensitive information (server-side) | A `SERVER` string              | The server | Allowed or denied entity types   |
+| Arcjet threat intel (IP threat)     | A `SERVER` string or string list of hosts | The server | –                       |
 
 Prompt injection runs on the server because it needs the raw value. The two
 sensitive information kinds differ only in where the value is read. The
@@ -172,12 +173,20 @@ server-side kind reads the value on Arcjet, which is what makes it usable with
 no SDK in the call, such as a <Link.Page href="/coding-agents">coding agent hook</Link.Page>.
 Declaring a detector against the wrong exposure is a compile error, `AJV2007`.
 
-The server-side detector screens values up to 2&nbsp;KB. A larger value is
+Arcjet threat intel scores the hosts a call would contact with the same
+assessment Protect uses for the caller of an HTTP request. The input must be
+`SERVER` exposure – there is no `LOCAL` variant. An empty value is risk
+`none`. A lookup that cannot be completed fails a live rule closed
+(`AJP1009`). For signal fields, allowlist-bypass patterns, and the coding agent
+starter, see
+<Link.Page href="/guards/destination-threat">Destination threat detection</Link.Page>.
+
+The server-side sensitive information detector screens values up to 2&nbsp;KB. A larger value is
 allowed unscreened with `scanned: false` on the result, so treat
 `detected: false` alone as inconclusive for an input that can exceed that
 size. Prefer the SDK-local kind wherever an SDK is in the call.
 
-Both kinds write their result to `input.signals.sensitive_info`, so moving a
+Both sensitive information kinds write their result to `input.signals.sensitive_info`, so moving a
 policy between them changes the input's exposure and the detector's kind and
 no rule.
 
@@ -188,6 +197,10 @@ detector ID:
 deny contains "injection-on-destructive-tool" if {
 	input.signals.prompt_injection.message_check.detected
 	input.values.destructive
+}
+
+deny contains "malicious-destination" if {
+	input.signals.ip_threat.dest.risk_level in {"high", "critical"}
 }
 ```
 
@@ -356,5 +369,6 @@ For more information, see
 
 - <Link.Page href="/guards/rego">Write policies in Rego</Link.Page> – the input document, the profile, and its exclusions
 - <Link.Page href="/guards/policy-examples">Policy examples</Link.Page> – worked policies for common agent actions
+- <Link.Page href="/guards/destination-threat">Destination threat detection</Link.Page> – Arcjet threat intel signals and allowlist-bypass patterns
 - <Link.Page href="/guards/authoring">Author and publish policies</Link.Page> – the builder, plain English, tests, and publication
 - <Link.Page href="/guards/errors">Policy error codes</Link.Page> – what a rule reports when it can't be evaluated
