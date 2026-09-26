@@ -42,7 +42,7 @@ test.describe("robots, sitemap, redirects, and FAQ structured data", () => {
     const body = await response.text();
     expect(body).toMatch(/User-Agent: \*/i);
     expect(body).toContain(
-      "Content-Signal: search=yes, ai-input=yes, ai-train=no",
+      "Content-Signal: search=yes, ai-input=yes, ai-train=yes",
     );
     expect(body).toMatch(/^Allow: \/$/m);
     expect(body).not.toMatch(/^Disallow:/m);
