@@ -24,7 +24,7 @@ not name it.
 
 | Execute on       | Runs                                                                                            | Rules read                                                                                          |
 | ---------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **Tool call**    | Before the agent runs a command, reads or writes a file, calls an MCP server, or fetches a URL  | `tool_name`, `tool_kind`, `command`, `command_tokens`, `paths`, `domains`, `mcp_server`, `mcp_tool`, `model` |
+| **Tool call**    | Before the agent runs a command, reads or writes a file, calls an MCP server, or fetches a URL  | `tool_name`, `tool_kind`, `command`, `command_tokens`, `paths`, `domains`, `destinations`, `mcp_server`, `mcp_tool`, `model` |
 | **Prompt**       | Before text reaches the model: what the developer typed, and what a slash command expanded into | `prompt`, `model`                                                                                   |
 | **Model switch** | Before Claude Code changes which model the session is using. A denial keeps the current model. Codex and Cursor do not fire this. | `model`                                                                         |
 
@@ -55,6 +55,7 @@ Arcjet builds every input from the hook payload. Read a value in Rego as
 | `command_tokens`  | String list | The command split on whitespace and the shell's chaining operators         |
 | `paths`           | String list | File paths from the call's structured arguments                            |
 | `domains`         | String list | Hosts of the call's URL arguments                                          |
+| `destinations`    | String list | Hosts a call would contact: URL-argument hosts plus hosts of absolute URLs in the shell command. Possibly empty |
 | `mcp_server`      | String      | The MCP server name, for an MCP call                                       |
 | `mcp_tool`        | String      | The MCP tool name, for an MCP call                                         |
 | `prompt`          | String      | The prompt text this event carries                                         |
@@ -114,6 +115,7 @@ Arcjet will run every policy attached to the specific event in one round trip so
 | `coding-agent.mcp-allowlist` | MCP servers outside a list written into the policy |
 | `coding-agent.protected-paths` | Writes to CI configuration and version-control internals |
 | `coding-agent.egress-allowlist` | Fetches to hosts outside a list written into the policy |
+| `coding-agent.destination-threat` | A destination whose IP threat risk is high or critical |
 | `coding-agent.prompt-injection` | Instructions the injection detector flags in a prompt |
 | `coding-agent.sensitive-info` | Card numbers and Social Security numbers in a prompt |
 | `coding-agent.model-allowlist` | A model switch, prompt, or tool call whose model is outside the list the author wrote in Rego. Claude Code denies the switch only; Codex and Cursor deny the prompt and the tool call; Copilot is not covered. |
@@ -234,6 +236,12 @@ deny contains "protected-path-write" if {
 
 ### An outbound domain allowlist
 
+Write the allowlist into the policy. A list the agent supplied would be a list
+the agent could widen. `domains` holds the hosts of URL arguments. The rule
+scopes to `tool_kind == "web"`, so a URL inside a shell command does not hit
+it – use <Link.Page href="/guards/threat-detection">threat detection</Link.Page>
+for that path.
+
 ```rego
 deny contains "unlisted-domain" if {
 	input.values.tool_kind == "web"
@@ -241,6 +249,33 @@ deny contains "unlisted-domain" if {
 	not host in {"docs.arcjet.com", "github.com", "raw.githubusercontent.com"}
 }
 ```
+
+### Threat detection
+
+Deny requests to malicious external destinations like APIs, MCP servers, and other web hosts, before the agent can interact with them.
+
+Attach this to **Tool call**.
+
+```rego
+deny contains "malicious-destination" if {
+	input.signals.ip_threat.dest.risk_level in {"high", "critical"}
+}
+```
+
+Policies are executed in parallel so allowlists should be defined within the same policy:
+
+```rego
+allowed := {"docs.arcjet.com", "github.com", "raw.githubusercontent.com"}
+
+deny contains "malicious-destination" if {
+	some a in input.signals.ip_threat.dest.assessments
+	a.risk_level in {"high", "critical"}
+	not a.host in allowed
+}
+```
+
+For signal fields, limits, and application Guard calls, see
+<Link.Page href="/guards/threat-detection">threat detection</Link.Page>.
 
 ### Prompt injection in a developer's prompt
 
@@ -367,6 +402,7 @@ for the coverage table and the already-selected-model gap on Claude Code.
 - <Link.Page href="/coding-agents/codex">Secure OpenAI Codex</Link.Page>
 - <Link.Page href="/coding-agents/cursor">Secure Cursor</Link.Page>
 - <Link.Page href="/coding-agents/block-personal-accounts">Block personal coding agent accounts</Link.Page>
+- <Link.Page href="/guards/threat-detection">Threat detection</Link.Page> – Arcjet threat intel signals, allowlist bypass, and fail-closed behavior
 - <Link.Page href="/guards/rego">Write policies in Rego</Link.Page> – the language, the profile, and its exclusions
 - <Link.Page href="/guards/authoring">Author and publish policies</Link.Page> – the builder, plain English, tests, and publication
 - <Link.Page href="/guards/errors">Policy error codes</Link.Page>

@@ -164,6 +164,10 @@ export const main = [
         link: "/guards/policy-examples",
       },
       {
+        label: "Threat detection",
+        link: "/guards/threat-detection",
+      },
+      {
         label: "Author and publish",
         link: "/guards/authoring",
       },

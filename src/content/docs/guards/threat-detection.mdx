@@ -1,0 +1,130 @@
+---
+title: "Threat detection"
+description: "Real time threat detection for coding agent actions: protect coding agents against malicious APIs, MCPs, websites, malware, and other threats."
+---
+
+import { Aside, CardGrid } from "@astrojs/starlight/components";
+import Comments from "@/components/Comments.astro";
+import { Link } from "@/components/link";
+
+Arcjet agent threat detection analyzes every external request an
+agent is about to make against Arcjet's threat intelligence. Arcjet maintains a real-time threat intelligence database and continuously updates it with new indicators of compromise, malicious hosts, and other threat data. This helps prevent
+interactions with malicious or risky destinations, such as APIs, MCPs, websites,
+malware, and other threats.
+
+This can be used with both coding agents - preventing them from interacting with malicious or risky destinations on developer machines - as well as custom agents - protecting interactions with external services in any environment where the custom agent operates.
+
+For inbound client IP analysis on `protect()`, see
+<Link.Page href="/ip-threat-intelligence">IP threat intelligence</Link.Page>.
+
+## Declare the detector
+
+Create a threat detection policy for tool call executions or use our pre-configured example policy in the Arcjet Console
+to automatically block malicious or risky destinations. Declaring the detector makes its results available in the Rego policy.
+
+Arcjet populates a `destinations` input for the detector based on the hosts an agent is about to contact. The verdict is returned
+for each host, along with a rolled-up assessment across all hosts. This allows the policy to make decisions based on both individual host risk and the overall risk of all destinations.
+
+### Sample policy for destination threat
+
+The Console offers `coding-agent.destination-threat` as a starter. Attach it to
+**Tool call**.
+
+```rego
+deny contains "malicious-destination" if {
+	input.signals.ip_threat.dest.risk_level in {"high", "critical"}
+}
+```
+
+### Testing the policy
+
+The policy can be tested by asking the agent to make requests to `evil.arcjet.com`, which is hardcoded to always score high.
+
+For example:
+
+```text
+What's on evil.arcjet.com?
+```
+
+If the policy is in live mode, the agent action will be blocked. If it's in dry-run mode, the action will be allowed but logged for review in the Arcjet Console.
+
+## Detector fields
+
+| Field | Value |
+| --- | --- |
+| Kind | IP threat (`GUARD_POLICY_DETECTOR_KIND_IP_THREAT`) |
+| Input exposure | `SERVER` |
+| Input kind | `STRING` or `STRING_LIST` |
+| Signals group | `input.signals.ip_threat.<detector_id>` |
+
+Private, loopback, link-local, CGNAT, multicast, and unspecified addresses are not scored.
+
+The policy should be configured to execute on **Tool call**.
+
+## Rolled-up assessment
+
+The rolled-up fields are worst-wins across every public host that completed
+scoring:
+
+| Field | Meaning |
+| --- | --- |
+| `detected` | `true` when `risk_level` is `high` or `critical` |
+| `risk_level` | `none`, `low`, `medium`, `high`, or `critical` |
+| `reputation` | Label such as `malicious`, `suspicious`, or `unknown` |
+| `activities` | Observed behaviors for the worst host |
+| `host` | Host that produced the worst assessment. Empty when risk is `none` |
+| `ip` | Address looked up for that host |
+| `assessments` | One entry per public destination that completed scoring, in input order (failed lookups omitted) |
+
+Name the set of risk levels you want to deny - in this case, `high` and `critical`. Do not use a comparison like `>= "high"` because string sorting does not reflect the intended risk order.
+
+```rego
+package arcjet.guard
+
+import rego.v1
+
+deny contains "malicious-destination" if {
+	input.signals.ip_threat.dest.risk_level in {"high", "critical"}
+}
+```
+
+## Allowlist
+
+Policies execute in parallel and the most restrictive decision is applied. This means you need to define an allowlist in the same policy where the threat intelligence is evaluated.
+
+```rego
+allowed := {"docs.arcjet.com", "github.com", "raw.githubusercontent.com"}
+
+deny contains "malicious-destination" if {
+	some a in input.signals.ip_threat.dest.assessments
+	a.risk_level in {"high", "critical"}
+	not a.host in allowed
+}
+```
+
+## What next?
+
+<CardGrid>
+  <Link.Card
+    title="Coding agent policies"
+    href="/coding-agents/policies"
+    description="The fixed input contract, destination-threat, and the other starters."
+  />
+  <Link.Card
+    title="Policy examples"
+    href="/guards/policy-examples"
+    description="Worked Rego for common agent actions, including destination threat."
+  />
+  <Link.Card
+    title="Policy contract"
+    href="/guards/remote-policies"
+    description="Labels, inputs, detectors, and how signals are keyed."
+  />
+  <Link.Card
+    title="IP threat intelligence"
+    href="/ip-threat-intelligence"
+    description="Inbound client IP analysis on protect()."
+  />
+</CardGrid>
+
+<Comments />
