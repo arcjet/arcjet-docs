@@ -57,9 +57,9 @@ same directory as the managed `hooks.json`.
 
 vendor=$1
 event=$2
-# Prefer Cursor's signed-in email, then an explicit override for cloud VMs
-# (where $USER is always ubuntu), then the OS account.
-principal=${CURSOR_USER_EMAIL:-${ARCJET_PRINCIPAL:-${USER:-${USERNAME:-}}}}
+# Prefer Cursor's signed-in email, then an explicit override, then the
+# git author Cursor sets on cloud agents, then the OS account.
+principal=${CURSOR_USER_EMAIL:-${ARCJET_PRINCIPAL:-${GIT_AUTHOR_EMAIL:-${GIT_AUTHOR_NAME:-${USER:-${USERNAME:-}}}}}}
 
 deny() {
   case "${vendor}:${event}" in
@@ -101,9 +101,14 @@ On Windows, save a sibling `arcjet-hook.ps1`:
 
 ```powershell title="arcjet-hook.ps1"
 param([string]$Vendor, [string]$Event)
-# Prefer Cursor's signed-in email, then an explicit override for cloud VMs
-# (where $USER is always ubuntu), then the OS account.
-$principal = if ($env:CURSOR_USER_EMAIL) { $env:CURSOR_USER_EMAIL } elseif ($env:ARCJET_PRINCIPAL) { $env:ARCJET_PRINCIPAL } elseif ($env:USERNAME) { $env:USERNAME } else { $env:USER }
+# Prefer Cursor's signed-in email, then an explicit override, then the
+# git author Cursor sets on cloud agents, then the OS account.
+$principal = if ($env:CURSOR_USER_EMAIL) { $env:CURSOR_USER_EMAIL } `
+  elseif ($env:ARCJET_PRINCIPAL) { $env:ARCJET_PRINCIPAL } `
+  elseif ($env:GIT_AUTHOR_EMAIL) { $env:GIT_AUTHOR_EMAIL } `
+  elseif ($env:GIT_AUTHOR_NAME) { $env:GIT_AUTHOR_NAME } `
+  elseif ($env:USERNAME) { $env:USERNAME } `
+  else { $env:USER }
 function Deny {
   switch ("$Vendor`:$Event") {
     "cursor:pre-tool-use" { Write-Output '{"permission":"deny","user_message":"arcjet-hook","agent_message":"arcjet-hook"}' }
@@ -269,7 +274,8 @@ request of latency (typically a few tens of milliseconds).
   policy decision.
 - `X-Arcjet-Principal` attributes a session to a developer. It's
   untrusted, but useful extra metadata. The script prefers
-  `CURSOR_USER_EMAIL`, then `ARCJET_PRINCIPAL`, then `$USER` /
+  `CURSOR_USER_EMAIL`, then `ARCJET_PRINCIPAL`, then
+  `GIT_AUTHOR_EMAIL`, then `GIT_AUTHOR_NAME`, then `$USER` /
   `$USERNAME`. See [Attribute the developer](#attribute-the-developer).
 - The hook URLs omit `surface`. The same file reaches the IDE, CLI, and
   cloud, so a hard-coded `ide` mislabels cloud sessions. Arcjet records
@@ -310,17 +316,17 @@ The install script picks the principal in this order:
 
 1. `CURSOR_USER_EMAIL` – injected by Cursor in local signed-in IDE and
    CLI sessions only; not set in cloud agent VMs
-2. `ARCJET_PRINCIPAL` – an explicit override you inject (cloud agents,
-   MDM, secrets managers)
-3. `$USER`, then `$USERNAME` – the OS account (`$USER` is unset on
+2. `ARCJET_PRINCIPAL` – an explicit override you inject (MDM, secrets
+   managers, or a cloud agent environment)
+3. `GIT_AUTHOR_EMAIL`, then `GIT_AUTHOR_NAME` – the git author Cursor
+   sets on cloud agents to the person who started the run
+4. `$USER`, then `$USERNAME` – the OS account (`$USER` is unset on
    Windows)
 
 Cloud agent VMs run as `ubuntu`, and Cursor does not set
-`CURSOR_USER_EMAIL` there today. Without an override, Actor shows
-`ubuntu`. Set `ARCJET_PRINCIPAL` (or `CURSOR_USER_EMAIL`) in the cloud
-agent environment or secrets so those sessions attribute to a person. A
-shared team secret attributes every cloud session to one identity until
-Cursor injects the owner email into the hook environment.
+`CURSOR_USER_EMAIL` there. The template reads the git author instead,
+so Actor shows the person who started the run. Set `ARCJET_PRINCIPAL`
+only when you want a different assertion than that author.
 
 ## Lock it down
 
@@ -337,10 +343,12 @@ A [cloud agent](https://cursor.com/docs/cloud-agent) runs command hooks
 from the repository. Commit `.cursor/hooks.json` and
 `.cursor/hooks/arcjet-hook.sh` so the cloud VM can execute them.
 
-Also set `ARCJET_PRINCIPAL` or `CURSOR_USER_EMAIL` in the cloud agent
-environment – see [Attribute the developer](#attribute-the-developer).
-Without it, Activity attributes cloud sessions to the VM OS account
-(`ubuntu`).
+The template reads `GIT_AUTHOR_EMAIL` or `GIT_AUTHOR_NAME`, which
+Cursor sets to the person who started the run. Activity attributes
+those sessions to that person, not to the VM OS account (`ubuntu`).
+Set `ARCJET_PRINCIPAL` only when you want a different assertion. For
+more information about the order, see
+[Attribute the developer](#attribute-the-developer).
 
 On Enterprise plans, cloud agents also run Team hooks and
 enterprise-managed hooks from the dashboard.
