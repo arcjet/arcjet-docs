@@ -250,17 +250,11 @@ deny contains "unlisted-domain" if {
 }
 ```
 
-### Malicious destination
+### Threat detection
 
-Deny a tool call whose destination scores high or critical in Arcjet threat
-intel – the same assessment Protect uses for the caller of an HTTP request.
-Declare an Arcjet threat intel detector with the ID `dest` over `destinations`.
+Deny requests to malicious external destinations like APIs, MCP servers, and other web hosts, before the agent can interact with them.
 
-`destinations` holds the hosts of URL arguments plus the hosts of absolute URLs
-inside a shell command. The rule does not require `tool_kind == "web"`, so a
-`curl` in Bash is refused too.
-
-Attach this to **Tool call**. `destinations` is empty on a prompt.
+Attach this to **Tool call**.
 
 ```rego
 deny contains "malicious-destination" if {
@@ -268,25 +262,10 @@ deny contains "malicious-destination" if {
 }
 ```
 
-Name the set. A comparison with `>= "high"` is wrong: `critical` sorts before
-`high`, and `none` sorts after it. An empty list is risk `none`. A lookup that
-cannot be completed fails the policy closed (`AJP1009`).
-
-If a reviewed host must **bypass** destination threat, do **not** publish
-this starter beside `coding-agent.egress-allowlist`. Separate LIVE policies
-take the most restrictive decision, so threat DENY still blocks an allowlisted
-host. Write one custom policy instead: allowlist deny for unreviewed web hosts,
-and threat deny only when the scored host is not on the allowlist. The shipped
-starters cannot express that bypass on their own.
+Policies are executed in parallel so allowlists should be defined within the same policy:
 
 ```rego
 allowed := {"docs.arcjet.com", "github.com", "raw.githubusercontent.com"}
-
-deny contains "unlisted-domain" if {
-	input.values.tool_kind == "web"
-	some host in input.values.domains
-	not host in allowed
-}
 
 deny contains "malicious-destination" if {
 	some a in input.signals.ip_threat.dest.assessments
@@ -295,10 +274,8 @@ deny contains "malicious-destination" if {
 }
 ```
 
-Declare detector ID `dest` over `destinations`, plus `tool_kind` and `domains`.
-Publish both starters only when you want both constraints with no exception.
 For signal fields, limits, and application Guard calls, see
-<Link.Page href="/guards/destination-threat">Destination threat detection</Link.Page>.
+<Link.Page href="/guards/threat-detection">threat detection</Link.Page>.
 
 ### Prompt injection in a developer's prompt
 
