@@ -162,6 +162,11 @@ export const collections = {
         titleByFramework: z
           .custom<{ [key in FrameworkKey]: string }>()
           .optional(),
+        /**
+         * Description for the SDK-scoped copies of a framework-specific page.
+         * `{sdk}` is replaced with the SDK label, e.g. "Node.js + Express".
+         */
+        sdkDescription: z.string().includes("{sdk}").optional(),
       }),
     }),
   }),

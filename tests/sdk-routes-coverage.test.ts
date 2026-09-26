@@ -226,6 +226,31 @@ test.describe("Legacy framework hub SEO metadata", () => {
   }
 });
 
+test.describe("SDK route descriptions", () => {
+  for (const [path, description] of [
+    [
+      "/sdk/next/rate-limiting/quick-start/",
+      "Quick start guide for adding Arcjet rate limiting to your Next.js app.",
+    ],
+    [
+      "/sdk/python/plus/flask/rate-limiting/reference/",
+      "Reference guide for configuring Arcjet rate limiting in your Python + Flask app.",
+    ],
+  ] as const) {
+    test(`${path} names its SDK in the description`, async ({ page }) => {
+      await page.goto(path, { waitUntil: "domcontentloaded" });
+
+      await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+        "content",
+        description,
+      );
+      await expect(
+        page.locator('meta[property="og:description"]'),
+      ).toHaveAttribute("content", description);
+    });
+  }
+});
+
 test.describe("Unsupported SDK copies", () => {
   for (const [from, to] of [
     ["/sdk/nuxt/rate-limiting/quick-start/", "/rate-limiting/quick-start/"],

@@ -194,16 +194,37 @@ export const onRequest = defineRouteMiddleware(async (context) => {
     // Every SDK copy of a page needs its own title. Without a
     // framework-specific one, name the SDK so the copies are distinct. The
     // suffix check keeps a re-used entry from gaining it twice in dev.
-    const suffix = ` for ${sdkDisplayLabelFromPathname(pathname)}`;
+    const label = sdkDisplayLabelFromPathname(pathname) ?? sdk;
+    const suffix = ` for ${label}`;
     const baseTitle = routeData.entry.data.title;
     const title =
       (legacyKey && titleByFramework?.[legacyKey]) ||
       (baseTitle.endsWith(suffix) ? baseTitle : `${baseTitle}${suffix}`);
     routeData.entry.data.title = title;
 
+    // Descriptions need the same treatment. The shared one usually lists
+    // several SDKs, which reads wrong on a copy for a single SDK. Pages set
+    // `sdkDescription` for a natural sentence; otherwise name the SDK.
+    const sdkDescription = routeData.entry.data.sdkDescription;
+    const baseDescription = routeData.entry.data.description;
+    const descriptionSuffix = ` This page covers ${label}.`;
+    const description = sdkDescription
+      ? sdkDescription.replaceAll("{sdk}", label)
+      : baseDescription && !baseDescription.endsWith(descriptionSuffix)
+        ? `${baseDescription}${descriptionSuffix}`
+        : baseDescription;
+    routeData.entry.data.description = description;
+
     for (const tag of routeData.head) {
       if (tag.tag === "title") {
         tag.content = `${title} | Arcjet Docs`;
+      }
+      if (
+        tag.tag === "meta" &&
+        (tag.attrs?.name === "description" ||
+          tag.attrs?.property === "og:description")
+      ) {
+        tag.attrs.content = description;
       }
     }
 
