@@ -308,7 +308,8 @@ that field.
 
 The install script picks the principal in this order:
 
-1. `CURSOR_USER_EMAIL` – set by Cursor for signed-in IDE and CLI sessions
+1. `CURSOR_USER_EMAIL` – injected by Cursor in local signed-in IDE and
+   CLI sessions only; not set in cloud agent VMs
 2. `ARCJET_PRINCIPAL` – an explicit override you inject (cloud agents,
    MDM, secrets managers)
 3. `$USER`, then `$USERNAME` – the OS account (`$USER` is unset on
