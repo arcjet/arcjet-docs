@@ -61,11 +61,12 @@ event=$2
 # the git author Cursor injects, then the Cloud Agent socket (turn
 # email, then owner email). Skip ubuntu. Strip CR/LF so a tainted
 # env value cannot smuggle extra headers.
-principal=${CURSOR_USER_EMAIL:-${ARCJET_PRINCIPAL:-${GIT_AUTHOR_EMAIL:-${GIT_AUTHOR_NAME-}}}}
+principal=${CURSOR_USER_EMAIL:-${ARCJET_PRINCIPAL:-${GIT_AUTHOR_EMAIL:-${GIT_AUTHOR_NAME:-}}}}
 if [ -z "${principal}" ] && [ -n "${CURSOR_AGENT_SOCKET-}" ] \
   && [ -S "${CURSOR_AGENT_SOCKET}" ]; then
   _sock=$(mktemp) || _sock=""
   if [ -n "${_sock}" ]; then
+    trap 'rm -f "${_sock}"' EXIT
     for _path in /v1/meta-data/turn/user-email \
       /v1/meta-data/owner/user-email; do
       _code=$(curl -sS --max-time 1 -o "${_sock}" -w "%{http_code}" \
@@ -363,8 +364,10 @@ The install script picks the principal in this order:
 4. The Cloud Agent socket – `CURSOR_AGENT_SOCKET`. The wrapper
    requests `turn/user-email` (who submitted the current turn), then
    `owner/user-email` (the agent owner), with `curl --unix-socket`.
-   A 200 response with a non-empty body wins. The Windows script
-   skips the socket.
+   A 200 response with a non-empty body wins. Transport errors,
+   non-200 responses, and empty bodies are silent: the wrapper
+   continues to the next source, so a broken socket can leave Actor
+   empty. The Windows script skips the socket.
 5. `$USER`, then `$USERNAME` – the OS account, only when the value is
    not `ubuntu`. Empty is better than a misleading Actor.
 
