@@ -64,7 +64,7 @@ const PATHS_FROM_SITEMAP = [
   "/guards/tanstack-ai/",
   "/guards/vercel-ai/",
   "/guards/vercel-eve/",
-  "/guards/destination-threat/",
+  "/guards/threat-detection/",
   "/inspect/",
   "/integrations/better-auth/",
   "/integrations/clerk/",
