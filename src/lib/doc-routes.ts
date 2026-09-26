@@ -1,7 +1,10 @@
 import { getCollection } from "astro:content";
 import {
+  docPathFromSdkPathname,
   scopeHrefToCurrentSdk,
   scopeHrefToSdk,
+  sdkFromPathname,
+  sdkVariantFromPathname,
   type ArcjetSdkKey,
 } from "@/lib/sdk";
 
@@ -103,6 +106,15 @@ export async function resolveHrefForCurrentSdk(
 
   if (scoped === path || (await pathnameExists(scoped))) {
     return withSuffix(scoped, suffix);
+  }
+
+  // Pages are only copied to the SDKs they support. A plus-variant falls back
+  // to its base SDK, which uses the same package.
+  if (sdkVariantFromPathname(currentPathname)) {
+    const base = `/sdk/${sdkFromPathname(currentPathname)}${docPathFromSdkPathname(scoped)}`;
+    if (await pathnameExists(base)) {
+      return withSuffix(base, suffix);
+    }
   }
 
   return path + suffix;

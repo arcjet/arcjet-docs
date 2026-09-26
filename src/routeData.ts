@@ -2,6 +2,7 @@ import { defineRouteMiddleware } from "@astrojs/starlight/route-data";
 import {
   isFrameworkSpecificEntry,
   legacyKeyFromPathname,
+  sdkDisplayLabelFromPathname,
   sdkFromPathname,
   sdkVariantFromPathname,
 } from "@/lib/sdk";
@@ -181,9 +182,8 @@ export const onRequest = defineRouteMiddleware(async (context) => {
   const variant = sdkVariantFromPathname(pathname);
   const legacyKey = legacyKeyFromPathname(pathname);
 
-  if (variant) {
-    addNoindex(routeData);
-  } else if (!sdk && isFrameworkSpecificEntry(routeData.entry.data)) {
+  // Legacy hubs duplicate the SDK-scoped copies, which are canonical.
+  if (!sdk && isFrameworkSpecificEntry(routeData.entry.data)) {
     addNoindex(routeData);
   }
 
@@ -191,13 +191,19 @@ export const onRequest = defineRouteMiddleware(async (context) => {
     const titleByFramework = routeData.entry.data.titleByFramework as
       | Record<string, string>
       | undefined;
-    if (legacyKey && titleByFramework?.[legacyKey]) {
-      routeData.entry.data.title = titleByFramework[legacyKey];
+    // Every SDK copy of a page needs its own title. Without a
+    // framework-specific one, name the SDK so the copies are distinct. The
+    // suffix check keeps a re-used entry from gaining it twice in dev.
+    const suffix = ` for ${sdkDisplayLabelFromPathname(pathname)}`;
+    const baseTitle = routeData.entry.data.title;
+    const title =
+      (legacyKey && titleByFramework?.[legacyKey]) ||
+      (baseTitle.endsWith(suffix) ? baseTitle : `${baseTitle}${suffix}`);
+    routeData.entry.data.title = title;
 
-      for (const tag of routeData.head) {
-        if (tag.tag === "title") {
-          tag.content = `${titleByFramework[legacyKey]} | Arcjet Docs`;
-        }
+    for (const tag of routeData.head) {
+      if (tag.tag === "title") {
+        tag.content = `${title} | Arcjet Docs`;
       }
     }
 
@@ -220,13 +226,17 @@ export const onRequest = defineRouteMiddleware(async (context) => {
           // External links (`https://github.com/...`) and anchors are not
           // routes on this site, so prefixing them produces nonsense.
           if (entry.href.startsWith("/")) {
-            const sdkPrefix = variant
-              ? `/sdk/${sdk}/plus/${variant.key}`
-              : `/sdk/${sdk}`;
-            const scoped = `${sdkPrefix}${entry.href}`;
-            // Only framework-specific pages are duplicated under `/sdk/`.
-            // Shared pages such as `/testing` stay unscoped so they resolve.
-            if (docPathnameExists(scoped)) {
+            // Only framework-specific pages are duplicated under `/sdk/`, and
+            // only for the SDKs they support. A plus-variant falls back to its
+            // base SDK, which uses the same package. Shared pages such as
+            // `/testing` stay unscoped so they resolve.
+            const candidates = variant
+              ? [`/sdk/${sdk}/plus/${variant.key}`, `/sdk/${sdk}`]
+              : [`/sdk/${sdk}`];
+            const scoped = candidates
+              .map((prefix) => `${prefix}${entry.href}`)
+              .find((href) => docPathnameExists(href));
+            if (scoped) {
               entry.href = scoped;
             }
           }

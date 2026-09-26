@@ -65,7 +65,7 @@ const INDEXABLE_SDK_GET_STARTED_URLS = sdks()
   .filter((entry) => entry.legacyFrameworkKey)
   .map((entry) => `/sdk/${entry.key}/get-started/`);
 
-const NOINDEX_PLUS_GET_STARTED_URLS = sdks().flatMap((entry) =>
+const PLUS_GET_STARTED_URLS = sdks().flatMap((entry) =>
   sdkVariants(entry.key).map(
     (variant) => `/sdk/${entry.key}/plus/${variant.key}/get-started/`,
   ),
@@ -156,19 +156,26 @@ test.describe("Indexable SDK route SEO metadata", () => {
   }
 });
 
+/**
+ * Plus-variant copies are the only copies for their framework. Python has no
+ * base SDK route, so these are its only pages.
+ */
+const INDEXABLE_PLUS_VARIANT_URLS = [
+  ...PLUS_GET_STARTED_URLS,
+  "/sdk/python/plus/fastapi/bot-protection/quick-start/",
+  "/sdk/python/plus/flask/rate-limiting/reference/",
+] as const;
+
 test.describe("Plus-variant SDK route SEO metadata", () => {
-  for (const path of NOINDEX_PLUS_GET_STARTED_URLS) {
-    test(`${path} is noindex with a self-canonical URL`, async ({ page }) => {
+  for (const path of INDEXABLE_PLUS_VARIANT_URLS) {
+    test(`${path} is indexable with a self-canonical URL`, async ({ page }) => {
       await page.goto(path, { waitUntil: "domcontentloaded" });
 
       await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
         "href",
         `${SITE}${path}`,
       );
-      await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
-        "content",
-        /noindex,\s*follow/i,
-      );
+      await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
     });
   }
 
@@ -219,15 +226,53 @@ test.describe("Legacy framework hub SEO metadata", () => {
   }
 });
 
+test.describe("Unsupported SDK copies", () => {
+  for (const [from, to] of [
+    ["/sdk/nuxt/rate-limiting/quick-start/", "/rate-limiting/quick-start/"],
+    [
+      "/sdk/node/plus/express/rate-limiting/quick-start/",
+      "/sdk/node/rate-limiting/quick-start/",
+    ],
+  ] as const) {
+    test(`${from} redirects to ${to}`, async ({ request }) => {
+      const response = await request.get(from, { maxRedirects: 0 });
+      expect([301, 308]).toContain(response.status());
+      expect(new URL(response.headers().location, SITE).pathname).toBe(to);
+    });
+  }
+
+  test("are not linked from the SDK switcher", async ({ page }) => {
+    await page.goto("/sdk/next/rate-limiting/quick-start/", {
+      waitUntil: "domcontentloaded",
+    });
+    const switcher = page.locator(".toc-toggle").first();
+    await switcher.click();
+    await expect(
+      page.locator('a[href="/sdk/node/rate-limiting/quick-start/"]').first(),
+    ).toBeAttached();
+    await expect(
+      page.locator('a[href="/sdk/nuxt/rate-limiting/quick-start/"]'),
+    ).toHaveCount(0);
+  });
+});
+
 test.describe("SDK routes in sitemap", () => {
-  test("plus-variant get-started URLs are omitted", async ({ request }) => {
+  test("plus-variant get-started URLs are listed", async ({ request }) => {
     const response = await request.get("/sitemap-0.xml");
     expect(response.status()).toBe(200);
 
     const urls = sitemapUrls(await response.text());
     for (const spec of PLUS_VARIANT_SPECS) {
-      expect(urls.has(`${SITE}${spec.plusUrl}`)).toBe(false);
+      expect(urls.has(`${SITE}${spec.plusUrl}`)).toBe(true);
     }
+  });
+
+  test("unsupported SDK copies are not listed", async ({ request }) => {
+    const response = await request.get("/sitemap-0.xml");
+    expect(response.status()).toBe(200);
+
+    const urls = sitemapUrls(await response.text());
+    expect(urls.has(`${SITE}/sdk/nuxt/rate-limiting/quick-start/`)).toBe(false);
   });
 
   test("legacy framework hub URLs are omitted", async ({ request }) => {

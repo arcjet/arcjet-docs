@@ -16,6 +16,7 @@ import {
 } from "./src/lib/content-dates";
 import {
   mergedGuardSdkAstroRedirects,
+  retiredSdkDocAstroRedirects,
   shouldExcludeFromSitemap,
   variantOnlySdkAstroRedirects,
 } from "./src/lib/sdk";
@@ -312,6 +313,7 @@ export default defineConfig({
     "/sitemap.xml": "/sitemap-index.xml",
     ...variantOnlySdkAstroRedirects(),
     ...mergedGuardSdkAstroRedirects(),
+    ...retiredSdkDocAstroRedirects(),
     ...withComparisonSdkScopes(comparisonMarketingRedirects),
   },
 });
