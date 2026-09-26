@@ -10,6 +10,7 @@ import {
   sdkFromPathname,
   sdkVariants,
   sdks,
+  entrySupportsFramework,
   isFrameworkSpecificEntry,
   GUARD_SDK_KEYS,
 } from "@/lib/sdk";
@@ -32,13 +33,6 @@ function pathnameForEntryId(entryId: string): string {
     return `/${entryId.slice(0, -"/index".length)}/`;
   }
   return `/${entryId}/`;
-}
-
-function noindexHeadTag() {
-  return {
-    tag: "meta" as const,
-    attrs: { name: "robots", content: "noindex, follow" },
-  };
 }
 
 function canonicalHeadTag(site: string | undefined, pathname: string) {
@@ -69,11 +63,7 @@ function loader(): Loader {
        * Duplicates a docs entry under an SDK-scoped content id unless one
        * already exists.
        */
-      function insertScopedEntry(
-        entry: DataEntry,
-        scopedId: string,
-        options: { noindex?: boolean } = {},
-      ) {
+      function insertScopedEntry(entry: DataEntry, scopedId: string) {
         if (context.store.has(scopedId)) {
           return;
         }
@@ -87,19 +77,19 @@ function loader(): Loader {
             head: [
               ...(Array.isArray(entry.data.head) ? entry.data.head : []),
               /**
-               * SDK-scoped routes are the canonical URLs for framework-specific
-               * documentation. Plus-variant routes stay out of the index.
+               * SDK-scoped routes, plus-variants included, are the canonical
+               * URLs for framework-specific documentation.
                */
               canonicalHeadTag(context.config.site, scopedPathname),
-              ...(options.noindex ? [noindexHeadTag()] : []),
             ],
           },
           id: scopedId,
         });
       }
 
-      // Duplicate every docs entry under each SDK route prefix unless an
-      // SDK-specific version already exists.
+      // Duplicate every framework-specific docs entry under the route prefix
+      // of each SDK it supports, unless an SDK-specific version already
+      // exists. A copy for an unsupported SDK would have no framework content.
       function insertScopedEntries(entry: DataEntry) {
         if (sdkFromPathname(`/${entry.id}`) !== undefined) {
           return;
@@ -110,16 +100,22 @@ function loader(): Loader {
         }
 
         for (const sdk of sdks()) {
-          if (sdk.legacyFrameworkKey) {
+          if (
+            sdk.legacyFrameworkKey &&
+            entrySupportsFramework(entry.data, sdk.legacyFrameworkKey)
+          ) {
             insertScopedEntry(entry, `sdk/${sdk.key}/${entry.id}`);
           }
 
           for (const variant of sdkVariants(sdk.key)) {
-            insertScopedEntry(
-              entry,
-              `sdk/${sdk.key}/plus/${variant.key}/${entry.id}`,
-              { noindex: true },
-            );
+            if (
+              entrySupportsFramework(entry.data, variant.legacyFrameworkKey)
+            ) {
+              insertScopedEntry(
+                entry,
+                `sdk/${sdk.key}/plus/${variant.key}/${entry.id}`,
+              );
+            }
           }
         }
 
@@ -166,6 +162,11 @@ export const collections = {
         titleByFramework: z
           .custom<{ [key in FrameworkKey]: string }>()
           .optional(),
+        /**
+         * Description for the SDK-scoped copies of a framework-specific page.
+         * `{sdk}` is replaced with the SDK label, e.g. "Node.js + Express".
+         */
+        sdkDescription: z.string().includes("{sdk}").optional(),
       }),
     }),
   }),

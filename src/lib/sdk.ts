@@ -527,11 +527,18 @@ export function sdkSwitcherOptions(
   const guardOnlyPage =
     !mixed && (pageIsGuardOnly || (!!currentSdk && isGuardSdkKey(currentSdk)));
 
+  // Framework-specific pages are only published for the SDKs they list, so
+  // offering any other SDK would link to a page that does not exist.
+  const supports = (legacyKey: FrameworkKey) =>
+    !pageFrameworks?.length || pageFrameworks.includes(legacyKey);
+
   if (!guardOnlyPage) {
     for (const sdkItem of sdks()) {
-      const variants = sdkVariants(sdkItem.key);
+      const variants = sdkVariants(sdkItem.key).filter((variant) =>
+        supports(variant.legacyFrameworkKey),
+      );
 
-      if (sdkItem.legacyFrameworkKey) {
+      if (sdkItem.legacyFrameworkKey && supports(sdkItem.legacyFrameworkKey)) {
         options.push({
           id: sdkItem.key,
           label: sdkItem.label,
@@ -1096,6 +1103,367 @@ export function isFrameworkSpecificEntry(data: {
   return false;
 }
 
+/**
+ * Returns whether a framework-specific docs entry should be copied under the
+ * SDK route for `legacyKey`.
+ *
+ * Pages list the frameworks they have content for in `frameworks`
+ * frontmatter. A copy for any other SDK has no framework content, only the
+ * prose every copy shares, so it is left out. Pages with `titleByFramework`
+ * but no `frameworks` list are copied for every SDK.
+ */
+export function entrySupportsFramework(
+  data: { frameworks?: FrameworkKey[] },
+  legacyKey: FrameworkKey,
+): boolean {
+  if (!Array.isArray(data.frameworks) || data.frameworks.length === 0) {
+    return true;
+  }
+
+  return data.frameworks.includes(legacyKey);
+}
+
+/**
+ * SDK-scoped copies of framework-specific pages for SDKs the page does not
+ * support, keyed by the docs route they copied.
+ *
+ * The content loader used to copy every framework-specific page under every
+ * SDK and plus-variant prefix, whatever the page's `frameworks` frontmatter
+ * said. The copies had no framework content, only the prose shared by every
+ * SDK, so they were near-duplicates of each other. The loader now skips them.
+ *
+ * This is a record of URLs that were published, so it is frozen rather than
+ * derived: new pages are never copied to SDKs they do not support. Each route
+ * redirects to the closest page that still exists.
+ */
+export const RETIRED_SDK_DOC_ROUTES = {
+  "/ai-protection/abuse-protection/": [
+    "/sdk/astro",
+    "/sdk/bun",
+    "/sdk/bun/plus/hono",
+    "/sdk/deno",
+    "/sdk/fastify",
+    "/sdk/nest",
+    "/sdk/node",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/react-router",
+    "/sdk/remix",
+    "/sdk/sveltekit",
+  ],
+  "/ai-protection/budget-control/": [
+    "/sdk/astro",
+    "/sdk/bun",
+    "/sdk/bun/plus/hono",
+    "/sdk/deno",
+    "/sdk/fastify",
+    "/sdk/nest",
+    "/sdk/node",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/react-router",
+    "/sdk/remix",
+    "/sdk/sveltekit",
+  ],
+  "/ai-protection/data-loss-prevention/": [
+    "/sdk/astro",
+    "/sdk/bun",
+    "/sdk/bun/plus/hono",
+    "/sdk/deno",
+    "/sdk/fastify",
+    "/sdk/nest",
+    "/sdk/node",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/react-router",
+    "/sdk/remix",
+    "/sdk/sveltekit",
+  ],
+  "/ai-protection/prompt-injection/": [
+    "/sdk/astro",
+    "/sdk/bun",
+    "/sdk/bun/plus/hono",
+    "/sdk/deno",
+    "/sdk/fastify",
+    "/sdk/nest",
+    "/sdk/node",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/react-router",
+    "/sdk/remix",
+    "/sdk/sveltekit",
+  ],
+  "/bot-protection/advanced-signals/": [
+    "/sdk/astro",
+    "/sdk/bun/plus/hono",
+    "/sdk/fastify",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/react-router",
+  ],
+  "/bot-protection/quick-start/": [
+    "/sdk/bun/plus/hono",
+    "/sdk/fastify",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/react-router",
+  ],
+  "/bot-protection/reference/": [
+    "/sdk/astro",
+    "/sdk/bun/plus/hono",
+    "/sdk/fastify",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/react-router",
+  ],
+  "/content-moderation/": [
+    "/sdk/astro",
+    "/sdk/bun/plus/hono",
+    "/sdk/deno",
+    "/sdk/fastify",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/react-router",
+  ],
+  "/content-moderation/quick-start/": [
+    "/sdk/astro",
+    "/sdk/bun/plus/hono",
+    "/sdk/deno",
+    "/sdk/fastify",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/react-router",
+  ],
+  "/email-validation/quick-start/": [
+    "/sdk/astro",
+    "/sdk/bun/plus/hono",
+    "/sdk/deno",
+    "/sdk/fastify",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/react-router",
+  ],
+  "/email-validation/reference/": [
+    "/sdk/astro",
+    "/sdk/bun/plus/hono",
+    "/sdk/deno",
+    "/sdk/fastify",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/react-router",
+  ],
+  "/filters/quick-start/": [
+    "/sdk/bun/plus/hono",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+  ],
+  "/filters/reference/": [
+    "/sdk/astro",
+    "/sdk/bun/plus/hono",
+    "/sdk/fastify",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/react-router",
+  ],
+  "/guards/quick-start/": [
+    "/sdk/astro",
+    "/sdk/bun",
+    "/sdk/bun/plus/hono",
+    "/sdk/deno",
+    "/sdk/fastify",
+    "/sdk/nest",
+    "/sdk/next",
+    "/sdk/node",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/python/plus/fastapi",
+    "/sdk/python/plus/flask",
+    "/sdk/react-router",
+    "/sdk/remix",
+    "/sdk/sveltekit",
+  ],
+  "/nosecone/quick-start/": [
+    "/sdk/astro",
+    "/sdk/bun/plus/hono",
+    "/sdk/fastify",
+    "/sdk/nest",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/python/plus/fastapi",
+    "/sdk/python/plus/flask",
+    "/sdk/react-router",
+    "/sdk/remix",
+  ],
+  "/prompt-injection/quick-start/": [
+    "/sdk/astro",
+    "/sdk/bun",
+    "/sdk/bun/plus/hono",
+    "/sdk/deno",
+    "/sdk/fastify",
+    "/sdk/nest",
+    "/sdk/node",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/react-router",
+    "/sdk/remix",
+    "/sdk/sveltekit",
+  ],
+  "/rate-limiting/quick-start/": [
+    "/sdk/astro",
+    "/sdk/bun/plus/hono",
+    "/sdk/deno",
+    "/sdk/fastify",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/react-router",
+  ],
+  "/rate-limiting/reference/": [
+    "/sdk/astro",
+    "/sdk/bun/plus/hono",
+    "/sdk/deno",
+    "/sdk/fastify",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/react-router",
+  ],
+  "/sensitive-info/quick-start/": [
+    "/sdk/astro",
+    "/sdk/bun/plus/hono",
+    "/sdk/deno",
+    "/sdk/fastify",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/react-router",
+  ],
+  "/sensitive-info/reference/": [
+    "/sdk/astro",
+    "/sdk/bun/plus/hono",
+    "/sdk/deno",
+    "/sdk/fastify",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/react-router",
+  ],
+  "/shield/quick-start/": [
+    "/sdk/astro",
+    "/sdk/bun/plus/hono",
+    "/sdk/deno",
+    "/sdk/fastify",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/react-router",
+  ],
+  "/shield/reference/": [
+    "/sdk/astro",
+    "/sdk/bun/plus/hono",
+    "/sdk/deno",
+    "/sdk/fastify",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/react-router",
+  ],
+  "/signup-protection/quick-start/": [
+    "/sdk/astro",
+    "/sdk/bun/plus/hono",
+    "/sdk/deno",
+    "/sdk/fastify",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/react-router",
+  ],
+  "/signup-protection/reference/": [
+    "/sdk/astro",
+    "/sdk/bun/plus/hono",
+    "/sdk/deno",
+    "/sdk/fastify",
+    "/sdk/node/plus/express",
+    "/sdk/node/plus/hono",
+    "/sdk/nuxt",
+    "/sdk/react-router",
+  ],
+} as const satisfies Record<string, readonly string[]>;
+
+/** Returns whether an SDK-scoped pathname is a retired unsupported copy. */
+function isRetiredSdkDocPathname(pathname: string): boolean {
+  const docPath = docPathFromSdkPathname(pathname);
+  const retired: readonly string[] | undefined =
+    RETIRED_SDK_DOC_ROUTES[docPath as keyof typeof RETIRED_SDK_DOC_ROUTES];
+  if (!retired) return false;
+
+  const prefix = normalizeDocHref(pathname).slice(
+    0,
+    -docPath.length || undefined,
+  );
+  return retired.includes(prefix);
+}
+
+/**
+ * Returns where a retired SDK copy of a page redirects.
+ *
+ * A plus-variant copy goes to the base SDK's copy when that one exists, since
+ * both use the same SDK package. Anything else goes to the unscoped page,
+ * which shows the closest framework the page supports.
+ */
+function retiredSdkDocRedirectTarget(prefix: string, docPath: string): string {
+  const variantMatch = prefix.match(/^(\/sdk\/[a-z-]+)\/plus\/[a-z-]+$/);
+  if (variantMatch) {
+    const basePathname = `${variantMatch[1]}${docPath}`;
+    const baseSdk = sdkFromPathname(basePathname);
+    if (
+      baseSdk &&
+      !isGuardSdkKey(baseSdk) &&
+      ARCJET_SDKS[baseSdk].legacyFrameworkKey &&
+      !isRetiredSdkDocPathname(basePathname)
+    ) {
+      return basePathname;
+    }
+  }
+
+  return docPath;
+}
+
+/**
+ * Astro redirects for retired SDK copies of framework-specific pages.
+ *
+ * @see RETIRED_SDK_DOC_ROUTES
+ */
+export function retiredSdkDocAstroRedirects(): Record<string, string> {
+  const redirects: Record<string, string> = {};
+
+  // `trailingSlash` is `ignore`, so one key per route covers both `/x` and
+  // `/x/`. Emitting both forms makes Astro report a route collision.
+  for (const [docPath, prefixes] of Object.entries(RETIRED_SDK_DOC_ROUTES)) {
+    for (const prefix of prefixes) {
+      redirects[`${prefix}${docPath.replace(/\/$/, "")}`] =
+        retiredSdkDocRedirectTarget(prefix, docPath);
+    }
+  }
+
+  return redirects;
+}
+
 /** Doc paths that historically accepted legacy `?f=` framework query params. */
 export const LEGACY_F_DOC_PATHS = [
   "/get-started",
@@ -1165,11 +1533,14 @@ export function isLegacyFrameworkHubPathname(pathname: string): boolean {
   );
 }
 
-/** Returns whether a URL should be omitted from the sitemap. */
+/**
+ * Returns whether a URL should be omitted from the sitemap.
+ *
+ * Legacy hubs duplicate the SDK-scoped copies and are `noindex`. Plus-variant
+ * routes are the only copies for their framework, so they stay in.
+ */
 export function shouldExcludeFromSitemap(pathname: string): boolean {
-  return (
-    isPlusVariantPathname(pathname) || isLegacyFrameworkHubPathname(pathname)
-  );
+  return isLegacyFrameworkHubPathname(pathname);
 }
 
 export type VercelLegacyFrameworkRedirect = {
@@ -1216,6 +1587,9 @@ export function legacyFrameworkVercelRedirects(): VercelLegacyFrameworkRedirect[
     for (const legacyKey of legacyFrameworkKeysForDocPath(docPath)) {
       const destination = pathnameForLegacyFrameworkKey(legacyKey, docPath);
       if (normalizeDocHref(destination) === normalizedDoc) continue;
+      // The page has no copy for this framework. The hub already reads `?f=`
+      // and picks the closest framework it supports.
+      if (isRetiredSdkDocPathname(destination)) continue;
 
       redirects.push({
         source,

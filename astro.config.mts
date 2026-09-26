@@ -16,6 +16,7 @@ import {
 } from "./src/lib/content-dates";
 import {
   mergedGuardSdkAstroRedirects,
+  retiredSdkDocAstroRedirects,
   shouldExcludeFromSitemap,
   variantOnlySdkAstroRedirects,
 } from "./src/lib/sdk";
@@ -115,15 +116,15 @@ export default defineConfig({
   },
   integrations: [
     robotsTxt({
-      // Match marketing robots.txt: allow crawling, allow AI input, disallow training.
+      // Allow crawling for search, AI input, and AI training.
       transform(content) {
         const replaced = content.replace(
           /User-agent: \*\nAllow: \//,
-          "User-Agent: *\nContent-Signal: search=yes, ai-input=yes, ai-train=no\nAllow: /",
+          "User-Agent: *\nContent-Signal: search=yes, ai-input=yes, ai-train=yes\nAllow: /",
         );
         if (
           !replaced.includes(
-            "Content-Signal: search=yes, ai-input=yes, ai-train=no",
+            "Content-Signal: search=yes, ai-input=yes, ai-train=yes",
           )
         ) {
           throw new Error(
@@ -312,6 +313,7 @@ export default defineConfig({
     "/sitemap.xml": "/sitemap-index.xml",
     ...variantOnlySdkAstroRedirects(),
     ...mergedGuardSdkAstroRedirects(),
+    ...retiredSdkDocAstroRedirects(),
     ...withComparisonSdkScopes(comparisonMarketingRedirects),
   },
 });

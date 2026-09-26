@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import {
   docPathFromSdkPathname,
+  entrySupportsFramework,
   hrefForLegacyFrameworkKey,
   isFrameworkSpecificEntry,
   isLegacyFrameworkHubPathname,
@@ -28,6 +29,8 @@ import {
   MERGED_GUARD_SDK_KEYS,
   mergedGuardSdkAstroRedirects,
   mergedGuardSdkVercelRedirects,
+  RETIRED_SDK_DOC_ROUTES,
+  retiredSdkDocAstroRedirects,
 } from "@/lib/sdk";
 import { moveActiveIndex, typeaheadIndex } from "@/lib/sdk-switcher-keyboard";
 
@@ -37,6 +40,56 @@ test.describe("isRouteSdkKey", () => {
     expect(isRouteSdkKey("langchain")).toBe(true);
     expect(isRouteSdkKey("microsoft-agent-framework")).toBe(true);
     expect(isRouteSdkKey("go")).toBe(false);
+  });
+});
+
+test.describe("entrySupportsFramework", () => {
+  test("follows the frameworks frontmatter", () => {
+    const data = { frameworks: ["next-js", "python-flask"] } as const;
+    expect(
+      entrySupportsFramework({ frameworks: [...data.frameworks] }, "next-js"),
+    ).toBe(true);
+    expect(
+      entrySupportsFramework({ frameworks: [...data.frameworks] }, "nuxt"),
+    ).toBe(false);
+  });
+
+  test("supports every framework without a frameworks list", () => {
+    expect(entrySupportsFramework({}, "nuxt")).toBe(true);
+    expect(entrySupportsFramework({ frameworks: [] }, "nuxt")).toBe(true);
+  });
+});
+
+test.describe("retiredSdkDocAstroRedirects", () => {
+  const redirects = retiredSdkDocAstroRedirects();
+
+  test("covers every retired route", () => {
+    const count = Object.values(RETIRED_SDK_DOC_ROUTES).reduce(
+      (total, prefixes) => total + prefixes.length,
+      0,
+    );
+    expect(Object.keys(redirects)).toHaveLength(count);
+  });
+
+  test("sends unsupported SDKs to the unscoped page", () => {
+    expect(redirects["/sdk/nuxt/rate-limiting/quick-start"]).toBe(
+      "/rate-limiting/quick-start/",
+    );
+  });
+
+  test("sends plus-variants to the base SDK when it has the page", () => {
+    expect(redirects["/sdk/node/plus/express/rate-limiting/quick-start"]).toBe(
+      "/sdk/node/rate-limiting/quick-start/",
+    );
+  });
+
+  test("sends plus-variants to the unscoped page when the base SDK lacks it", () => {
+    expect(redirects["/sdk/node/plus/hono/ai-protection/budget-control"]).toBe(
+      "/ai-protection/budget-control/",
+    );
+    expect(redirects["/sdk/python/plus/flask/nosecone/quick-start"]).toBe(
+      "/nosecone/quick-start/",
+    );
   });
 });
 
@@ -255,6 +308,19 @@ test.describe("sdkSwitcherOptions", () => {
     );
   });
 
+  test("omits HTTP SDKs the page does not support", () => {
+    const options = sdkSwitcherOptions("/sdk/next/rate-limiting/quick-start/", [
+      "next-js",
+      "node-js",
+      "python-fastapi",
+    ]);
+    expect(options.map((option) => option.label)).toEqual([
+      "Next.js",
+      "Node.js",
+      "Python + FastAPI",
+    ]);
+  });
+
   test("lists only guard adapters on hub guard pages", () => {
     const options = sdkSwitcherOptions("/guards/quick-start/", [
       "langchain",
@@ -455,6 +521,24 @@ test.describe("scopeHrefToSdk", () => {
 });
 
 test.describe("legacyFrameworkVercelRedirects", () => {
+  test("leaves ?f= on the hub for frameworks the page does not support", () => {
+    const redirects = legacyFrameworkVercelRedirects();
+    expect(
+      redirects.some(
+        (r) =>
+          r.source === "/rate-limiting/quick-start" &&
+          r.has[0]?.value === "nuxt",
+      ),
+    ).toBe(false);
+    expect(
+      redirects.find(
+        (r) =>
+          r.source === "/rate-limiting/quick-start" &&
+          r.has[0]?.value === "next-js",
+      )?.destination,
+    ).toBe("/sdk/next/rate-limiting/quick-start/");
+  });
+
   test("redirects legacy get-started URLs to SDK routes", () => {
     const redirects = legacyFrameworkVercelRedirects();
     const match = redirects.find(
@@ -652,10 +736,15 @@ test.describe("legacyFrameworkVercelRedirects", () => {
 });
 
 test.describe("shouldExcludeFromSitemap", () => {
-  test("excludes plus-variant SDK routes", () => {
+  test("keeps SDK routes, plus-variants included", () => {
     expect(shouldExcludeFromSitemap("/sdk/bun/plus/hono/get-started/")).toBe(
-      true,
+      false,
     );
+    expect(
+      shouldExcludeFromSitemap(
+        "/sdk/python/plus/flask/bot-protection/quick-start/",
+      ),
+    ).toBe(false);
     expect(shouldExcludeFromSitemap("/sdk/next/get-started/")).toBe(false);
   });
 
