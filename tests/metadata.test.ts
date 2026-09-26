@@ -124,19 +124,39 @@ test.describe("pageJsonLd", () => {
           featureList?: string[];
           sameAs?: string[];
           softwareHelp?: { "@id": string };
-          operatingSystem?: string;
         }
       | undefined;
 
     expect(software?.featureList?.length).toBeGreaterThan(5);
     expect(software?.featureList).toContain("Prompt injection detection");
     expect(software?.softwareHelp).toEqual({ "@id": WEBSITE_ID });
-    expect(software?.operatingSystem).toBe("Any");
-    expect(software?.sameAs).toContain("https://github.com/arcjet/arcjet-js");
-    // Claiming a price or a rating we cannot verify would be a fabrication,
-    // so the node deliberately carries neither.
+    expect(software?.sameAs).toEqual([
+      "https://www.g2.com/products/arcjet/reviews",
+    ]);
+    // arcjet.com only emits `offers` on /pricing, and publishes no rating, so
+    // the site-wide node carries neither.
     expect(software).not.toHaveProperty("offers");
     expect(software).not.toHaveProperty("aggregateRating");
+  });
+
+  test("matches the Organization node published on arcjet.com", () => {
+    const organization = nodesByType(pageJsonLd(base)).get("Organization");
+
+    expect(organization?.legalName).toBe("Arcjet Labs, Inc.");
+    expect(organization?.contactPoint).toEqual({
+      "@type": "ContactPoint",
+      contactType: "customer support",
+      email: "support@arcjet.com",
+    });
+    expect(organization?.address).toEqual({
+      "@type": "PostalAddress",
+      addressLocality: "San Francisco",
+      addressRegion: "CA",
+      addressCountry: "US",
+    });
+    expect(organization?.sameAs).toContain(
+      "https://www.crunchbase.com/organization/arcjet",
+    );
   });
 
   test("builds a breadcrumb trail of real pages, each with an item URL", () => {

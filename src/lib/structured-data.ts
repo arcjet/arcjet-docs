@@ -7,7 +7,10 @@
  * the same `@id` values. Consumers merge nodes by `@id`, which keeps docs pages
  * attached to the same Arcjet entity instead of describing a separate one.
  *
- * Keep the identity fields below in sync with the graph on arcjet.com.
+ * The `ImageObject`, `Organization`, and `SoftwareApplication` nodes copy the
+ * site-wide graph on arcjet.com property for property. Keep them in sync: check
+ * with `curl -s https://arcjet.com/ | grep -o '<script type="application/ld+json">[^<]*'`.
+ * The docs `WebSite`, page, and breadcrumb nodes are docs-specific.
  */
 
 /** Canonical `@id` values shared with arcjet.com. */
@@ -96,6 +99,17 @@ function siteNodes() {
       logo: { "@id": LOGO_ID },
       image: { "@id": LOGO_ID },
       email: "support@arcjet.com",
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "customer support",
+        email: "support@arcjet.com",
+      },
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "San Francisco",
+        addressRegion: "CA",
+        addressCountry: "US",
+      },
       sameAs: [
         "https://github.com/arcjet",
         "https://www.linkedin.com/company/arcjet",
@@ -103,11 +117,14 @@ function siteNodes() {
         "https://www.youtube.com/@arcjethq",
         "https://www.reddit.com/r/arcjet/",
         "https://www.g2.com/sellers/arcjet",
+        "https://www.crunchbase.com/organization/arcjet",
       ],
       knowsAbout: [
         "AI agent runtime security",
+        "Coding agent security",
         "Prompt injection detection",
         "Agent tool-call authorization",
+        "Malicious destination and MCP server detection",
         "Sensitive data protection",
         "Bot and API abuse protection",
         "Application security",
@@ -120,35 +137,23 @@ function siteNodes() {
       url: "https://arcjet.com",
       description: ARCJET_DESCRIPTION,
       applicationCategory: "SecurityApplication",
-      // Arcjet is a library, so it runs wherever the application runs.
-      operatingSystem: "Any",
       publisher: { "@id": ORGANIZATION_ID },
-      author: { "@id": ORGANIZATION_ID },
-      // This site is the product's documentation, so an assistant that lands
-      // on any page can find the rest of it.
-      softwareHelp: { "@id": WEBSITE_ID },
-      // The security building blocks the SDK exposes. Keep this list factual:
-      // every entry maps to a documented rule or helper.
+      sameAs: ["https://www.g2.com/products/arcjet/reviews"],
       featureList: [
+        "Coding agent security",
         "Prompt injection detection",
-        "Agent tool-call authorization with remote policies",
-        "Sensitive information and PII detection",
-        "Content moderation",
-        "Rate limiting with token bucket, fixed window, and sliding window",
-        "Bot detection",
-        "Email validation",
-        "Signup form protection",
-        "Country, VPN, and ASN filters",
-        "Shield WAF for common attacks",
-        "Security headers with Nosecone",
+        "Agent tool-call authorization",
+        "Destination threat analysis for agent requests",
+        "SIEM export",
+        "Sensitive data detection and redaction",
+        "Bot and API abuse protection",
+        "Rate limiting",
       ],
-      sameAs: [
-        "https://github.com/arcjet/arcjet-js",
-        "https://github.com/arcjet/arcjet-py",
-        "https://github.com/arcjet/arcjet-go",
-        "https://www.npmjs.com/package/@arcjet/next",
-        "https://pypi.org/project/arcjet/",
-      ],
+      // Docs-only addition: this site is the product's documentation, so an
+      // assistant that lands on any page can find the rest of it. arcjet.com
+      // does not set it. `offers` is left out because arcjet.com only emits it
+      // on /pricing, not site-wide.
+      softwareHelp: { "@id": WEBSITE_ID },
     },
     {
       "@type": "WebSite",
