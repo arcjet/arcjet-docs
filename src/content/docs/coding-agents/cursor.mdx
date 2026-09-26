@@ -57,9 +57,35 @@ same directory as the managed `hooks.json`.
 
 vendor=$1
 event=$2
-# Prefer Cursor's signed-in email, then an explicit override, then the
-# git author Cursor sets on cloud agents, then the OS account.
-principal=${CURSOR_USER_EMAIL:-${ARCJET_PRINCIPAL:-${GIT_AUTHOR_EMAIL:-${GIT_AUTHOR_NAME:-${USER:-${USERNAME:-}}}}}}
+# Prefer an explicit override, then the git author Cursor injects,
+# then the Cloud Agent socket (turn email, then owner email), then
+# the OS account. Strip CR/LF so a tainted env value cannot smuggle
+# extra headers.
+principal=${ARCJET_PRINCIPAL:-${GIT_AUTHOR_EMAIL:-${GIT_AUTHOR_NAME-}}}
+if [ -z "${principal}" ] && [ -n "${CURSOR_AGENT_SOCKET-}" ] \
+  && [ -S "${CURSOR_AGENT_SOCKET}" ]; then
+  _sock=$(mktemp) || _sock=""
+  if [ -n "${_sock}" ]; then
+    for _path in /v1/meta-data/turn/user-email \
+      /v1/meta-data/owner/user-email; do
+      _code=$(curl -sS --max-time 1 -o "${_sock}" -w "%{http_code}" \
+        --unix-socket "${CURSOR_AGENT_SOCKET}" \
+        "http://localhost${_path}" || printf '%s' "000")
+      if [ "${_code}" = "200" ]; then
+        principal=$(tr -d '\r\n' <"${_sock}")
+        if [ -n "${principal}" ]; then
+          break
+        fi
+      fi
+    done
+    rm -f "${_sock}"
+  fi
+  unset _sock _path _code
+fi
+if [ -z "${principal}" ]; then
+  principal=${USER:-${USERNAME-}}
+fi
+principal=$(printf %s "${principal}" | tr -d '\r\n')
 
 deny() {
   case "${vendor}:${event}" in
@@ -101,14 +127,15 @@ On Windows, save a sibling `arcjet-hook.ps1`:
 
 ```powershell title="arcjet-hook.ps1"
 param([string]$Vendor, [string]$Event)
-# Prefer Cursor's signed-in email, then an explicit override, then the
-# git author Cursor sets on cloud agents, then the OS account.
-$principal = if ($env:CURSOR_USER_EMAIL) { $env:CURSOR_USER_EMAIL } `
-  elseif ($env:ARCJET_PRINCIPAL) { $env:ARCJET_PRINCIPAL } `
+# Prefer an explicit override, then the git author Cursor injects,
+# then the OS account. The Unix socket is a Cloud Agent path;
+# Windows uses the env fallbacks.
+$principal = if ($env:ARCJET_PRINCIPAL) { $env:ARCJET_PRINCIPAL } `
   elseif ($env:GIT_AUTHOR_EMAIL) { $env:GIT_AUTHOR_EMAIL } `
   elseif ($env:GIT_AUTHOR_NAME) { $env:GIT_AUTHOR_NAME } `
   elseif ($env:USERNAME) { $env:USERNAME } `
   else { $env:USER }
+$principal = ($principal -replace '[\r\n]', '')
 function Deny {
   switch ("$Vendor`:$Event") {
     "cursor:pre-tool-use" { Write-Output '{"permission":"deny","user_message":"arcjet-hook","agent_message":"arcjet-hook"}' }
@@ -274,8 +301,8 @@ request of latency (typically a few tens of milliseconds).
   policy decision.
 - `X-Arcjet-Principal` attributes a session to a developer. It's
   untrusted, but useful extra metadata. The script prefers
-  `CURSOR_USER_EMAIL`, then `ARCJET_PRINCIPAL`, then
-  `GIT_AUTHOR_EMAIL`, then `GIT_AUTHOR_NAME`, then `$USER` /
+  `ARCJET_PRINCIPAL`, then `GIT_AUTHOR_EMAIL`, then
+  `GIT_AUTHOR_NAME`, then the Cloud Agent socket, then `$USER` /
   `$USERNAME`. See [Attribute the developer](#attribute-the-developer).
 - The hook URLs omit `surface`. The same file reaches the IDE, CLI, and
   cloud, so a hard-coded `ide` mislabels cloud sessions. Arcjet records
@@ -314,19 +341,25 @@ that field.
 
 The install script picks the principal in this order:
 
-1. `CURSOR_USER_EMAIL` – injected by Cursor in local signed-in IDE and
-   CLI sessions only; not set in cloud agent VMs
-2. `ARCJET_PRINCIPAL` – an explicit override you inject (MDM, secrets
+1. `ARCJET_PRINCIPAL` – an explicit override you inject (MDM, secrets
    managers, or a cloud agent environment)
-3. `GIT_AUTHOR_EMAIL`, then `GIT_AUTHOR_NAME` – the git author Cursor
-   sets on cloud agents to the person who started the run
+2. `GIT_AUTHOR_EMAIL`, then `GIT_AUTHOR_NAME` – the git author Cursor
+   injects on some cloud agents
+3. The Cloud Agent socket – `CURSOR_AGENT_SOCKET`. The wrapper
+   requests `turn/user-email` (who submitted the current turn), then
+   `owner/user-email` (the agent owner), with `curl --unix-socket`.
+   A 200 response with a non-empty body wins. The Windows script
+   skips the socket.
 4. `$USER`, then `$USERNAME` – the OS account (`$USER` is unset on
    Windows)
 
-Cloud agent VMs run as `ubuntu`, and Cursor does not set
-`CURSOR_USER_EMAIL` there. The template reads the git author instead,
-so Actor shows the person who started the run. Set `ARCJET_PRINCIPAL`
-only when you want a different assertion than that author.
+The script does not read `CURSOR_USER_EMAIL` or `git config`. Cursor
+sets `git config` to `Cursor Agent` on cloud VMs, which is the bot.
+
+Cloud agent VMs run as `ubuntu`. When Cursor injects a git author,
+Actor shows that person. When it does not, the template reads the
+socket. Set `ARCJET_PRINCIPAL` only when you want a different
+assertion.
 
 ## Lock it down
 
@@ -343,11 +376,12 @@ A [cloud agent](https://cursor.com/docs/cloud-agent) runs command hooks
 from the repository. Commit `.cursor/hooks.json` and
 `.cursor/hooks/arcjet-hook.sh` so the cloud VM can execute them.
 
-The template reads `GIT_AUTHOR_EMAIL` or `GIT_AUTHOR_NAME`, which
-Cursor sets to the person who started the run. Activity attributes
-those sessions to that person, not to the VM OS account (`ubuntu`).
-Set `ARCJET_PRINCIPAL` only when you want a different assertion. For
-more information about the order, see
+The template prefers `ARCJET_PRINCIPAL`, then the git author Cursor
+injects, then the Cloud Agent socket (`CURSOR_AGENT_SOCKET`, turn
+email then owner email), then `$USER` / `$USERNAME`. Activity
+attributes those sessions to a person, not to the VM OS account
+(`ubuntu`). Set `ARCJET_PRINCIPAL` only when you want a different
+assertion. For more information about the order, see
 [Attribute the developer](#attribute-the-developer).
 
 On Enterprise plans, cloud agents also run Team hooks and
