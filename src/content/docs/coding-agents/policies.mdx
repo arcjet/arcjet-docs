@@ -24,7 +24,7 @@ not name it.
 
 | Execute on       | Runs                                                                                            | Rules read                                                                                          |
 | ---------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **Tool call**    | Before the agent runs a command, reads or writes a file, calls an MCP server, or fetches a URL  | `tool_name`, `tool_kind`, `command`, `command_tokens`, `paths`, `domains`, `destinations`, `mcp_server`, `mcp_tool`, `model` |
+| **Tool call**    | Before the agent runs a command, reads or writes a file, calls an MCP server, or fetches a URL  | `tool_name`, `tool_kind`, `command`, `command_tokens`, `paths`, `domains`, `destinations`, `permission_mode`, `mcp_server`, `mcp_tool`, `model` |
 | **Prompt**       | Before text reaches the model: what the developer typed, and what a slash command expanded into | `prompt`, `model`                                                                                   |
 | **Model switch** | Before Claude Code changes which model the session is using. A denial keeps the current model. Codex and Cursor do not fire this. | `model`                                                                         |
 
@@ -48,7 +48,7 @@ Arcjet builds every input from the hook payload. Read a value in Rego as
 | `session`         | String      | The agent's session ID, which also correlates the recorded activity        |
 | `principal`       | String      | The asserted developer identity from `X-Arcjet-Principal`. Untrusted       |
 | `cwd`             | String      | The agent's working directory                                              |
-| `permission_mode` | String      | The agent's own permission mode, when it reports one                       |
+| `permission_mode` | String      | The agent's own permission mode, when it reports one. Claude Code sends `default`, `plan`, `acceptEdits`, `auto`, `dontAsk`, or `bypassPermissions` (Manual arrives as `default`). Empty when the vendor does not report one. |
 | `tool_name`       | String      | The tool about to be called, verbatim                                      |
 | `tool_kind`       | String      | `shell`, `file_read`, `file_write`, `web`, `mcp`, `agent`, or `other`      |
 | `command`         | String      | The shell command text, for a shell call                                   |
@@ -119,9 +119,14 @@ Arcjet will run every policy attached to the specific event in one round trip so
 | `coding-agent.prompt-injection` | Instructions the injection detector flags in a prompt |
 | `coding-agent.sensitive-info` | Card numbers and Social Security numbers in a prompt |
 | `coding-agent.model-allowlist` | A model switch, prompt, or tool call whose model is outside the list the author wrote in Rego. Claude Code denies the switch only; Codex and Cursor deny the prompt and the tool call; Copilot is not covered. |
+| `coding-agent.tainted-session` | Shell, web, MCP, and file writes while any session-taint flag is active |
+| `coding-agent.no-auto-mode` | Tool calls while Claude Code's `permission_mode` is `auto`, `bypassPermissions`, or `dontAsk` |
+| `coding-agent.aws-access` | The AWS CLI (including `/…/aws`), AWS API hosts in `destinations`, and AWS credential paths / env-name markers |
 
 See <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>
-for the coverage table.
+for the coverage table. For blocking cloud CLIs and requiring human approval,
+see [Block AWS access](#block-aws-access) and
+[Require human approval](#require-human-approval).
 
 Every example assumes the standard preamble:
 
@@ -351,6 +356,107 @@ nothing else.
 
 See <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>
 for the coverage table and the already-selected-model gap on Claude Code.
+
+### Require human approval
+
+Claude Code reports `permission_mode` on hook events. The values are
+`default`, `plan`, `acceptEdits`, `auto`, `dontAsk`, and `bypassPermissions`
+(Manual arrives as `default`). `auto` is autonomous / YOLO mode;
+`bypassPermissions` and `dontAsk` also skip the agent's own permission
+prompts.
+
+Publish `coding-agent.no-auto-mode` on **Tool call** to refuse those modes
+and allow tool calls when the mode is `default`, `plan`, or `acceptEdits`
+(or when the vendor does not report a mode). Copilot, Codex, and Cursor leave
+`permission_mode` empty, so this starter does not deny their calls.
+
+```rego
+autonomous := {"auto", "bypassPermissions", "dontAsk"}
+
+deny contains "autonomous-mode" if {
+	input.values.permission_mode in autonomous
+}
+```
+
+There is no cross-request counter on this path. A "N commands in `auto`, then
+taint" threshold is not something a starter can express: session taint flags
+come from detectors and Jev scoring, not from counting `permission_mode`.
+Block the mode entirely, or leave it alone and layer other policies.
+
+### Block AWS access
+
+Agents work around a single check: rename the CLI, curl the API, or read
+`~/.aws/credentials`. Publish `coding-agent.aws-access` on **Tool call** for
+three layers in one policy:
+
+1. CLI names — the token `aws`, or a path that ends with `/aws`.
+2. Destinations — hosts that end with `.amazonaws.com`, `amazonaws.com`,
+   `.aws.amazon.com`, or `aws.amazon.com` (covers `WebFetch` and hosts inside
+   shell commands such as `curl`).
+3. Credential paths — `.aws/credentials`, `.aws/config`, and env-name markers
+   in `paths` or `command`.
+
+```rego
+cli_names := {"aws"}
+
+aws_hosts := {".amazonaws.com", "amazonaws.com", ".aws.amazon.com", "aws.amazon.com"}
+
+credential_markers := {".aws/credentials", ".aws/config", "AWS_ACCESS_KEY", "AWS_SECRET_ACCESS"}
+
+deny contains "aws-cli" if {
+	input.values.tool_kind == "shell"
+	some token in input.values.command_tokens
+	lower(token) in cli_names
+}
+
+deny contains "aws-cli" if {
+	input.values.tool_kind == "shell"
+	some token in input.values.command_tokens
+	endswith(lower(token), "/aws")
+}
+
+deny contains "aws-destination" if {
+	some host in input.values.destinations
+	some marker in aws_hosts
+	endswith(lower(host), marker)
+}
+
+deny contains "aws-credential" if {
+	some path in input.values.paths
+	some marker in credential_markers
+	contains(path, marker)
+}
+
+deny contains "aws-credential" if {
+	input.values.tool_kind == "shell"
+	some marker in credential_markers
+	contains(input.values.command, marker)
+}
+```
+
+Edit the token and host sets for other clouds the same way. A binary renamed
+to something that never mentions `aws` and never names an AWS host is outside
+the CLI layer — which is why the destination and credential rules sit beside
+it. For broader credential files (SSH keys, `.env`, `.npmrc`), also publish
+`coding-agent.credential-access`.
+
+### Why layered policies
+
+A single rule is easy to work around. Layering means each path the agent can
+take has its own deny:
+
+| Layer | What it stops | Starter |
+| --- | --- | --- |
+| CLI name | `aws s3 ls`, `/usr/local/bin/aws …` | `coding-agent.aws-access` (`aws-cli`) |
+| Destination / API | `curl https://sts.amazonaws.com`, `WebFetch` of an AWS host | `coding-agent.aws-access` (`aws-destination`) |
+| Credential files | Reading `~/.aws/credentials` or naming them in a command | `coding-agent.aws-access` (`aws-credential`), plus `coding-agent.credential-access` for other secrets |
+| Session taint | Further shell, web, MCP, and writes after injection or PII | `coding-agent.tainted-session` |
+
+Publish the layers you need. Arcjet runs every policy attached to the same
+**Execute on** option in one round trip and applies the most restrictive
+decision. Session taint is not raised by a denied AWS CLI call on its own —
+flags come from tool-result screening and Jev. Use `coding-agent.tainted-session`
+when you want risky follow-ups locked after those findings.
 
 ## Write your own
 
