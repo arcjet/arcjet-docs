@@ -58,7 +58,7 @@ on option share inputs. `model` is filled only on the vendors in
 
 | Execute on       | Events                                                      | Inputs the policy can read                                                                          |
 | ---------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **Tool call**    | `pre-tool-use`, `permission-request`                        | `tool_name`, `tool_kind`, `command`, `command_tokens`, `paths`, `domains`, `mcp_server`, `mcp_tool`, `model` |
+| **Tool call**    | `pre-tool-use`, `permission-request`                        | `tool_name`, `tool_kind`, `command`, `command_tokens`, `paths`, `domains`, `destinations`, `permission_mode`, `mcp_server`, `mcp_tool`, `model` |
 | **Prompt**       | `user-prompt-submit`, `user-prompt-expansion`               | `prompt`, `model`                                                                                   |
 | **Model switch** | `pre-model-switch` enforces. `post-model-switch` is recorded and never adjudicated. | `model`                                                                          |
 
@@ -272,7 +272,7 @@ member of any allowlist unless you listed that exact token.
   <Link.Card
     title="Coding agent policies"
     href="/coding-agents/policies"
-    description="The fixed input contract, the starter policies, and how to write your own."
+    description="The fixed input contract, starter policies (including AWS access and no-auto-mode), and how to write your own."
   />
   <Link.Card
     title="Observe agent activity"
