@@ -48,7 +48,7 @@ Arcjet builds every input from the hook payload. Read a value in Rego as
 | `session`         | String      | The agent's session ID, which also correlates the recorded activity        |
 | `principal`       | String      | The asserted developer identity from `X-Arcjet-Principal`. Untrusted       |
 | `cwd`             | String      | The agent's working directory                                              |
-| `permission_mode` | String      | The agent's own permission mode, when it reports one. Claude Code sends `default`, `plan`, `acceptEdits`, `auto`, `dontAsk`, or `bypassPermissions` (Manual arrives as `default`). Codex sends `default`, `acceptEdits`, `plan`, `dontAsk`, or `bypassPermissions` (no `auto`). Empty for Copilot and Cursor, which do not report a mode on the hook payload. |
+| `permission_mode` | String      | The agent's own permission mode, when it reports one. Claude Code sends `default`, `plan`, `acceptEdits`, `auto`, `dontAsk`, or `bypassPermissions` (Manual arrives as `default`). Codex sends `default`, `plan`, `acceptEdits`, `dontAsk`, or `bypassPermissions` (no `auto`). Empty for Copilot and Cursor, which do not report a mode on the hook payload. |
 | `tool_name`       | String      | The tool about to be called, verbatim                                      |
 | `tool_kind`       | String      | `shell`, `file_read`, `file_write`, `web`, `mcp`, `agent`, or `other`      |
 | `command`         | String      | The shell command text, for a shell call                                   |
@@ -389,16 +389,20 @@ Agents work around a single check: rename the CLI, curl the API, or read
 three layers in one policy:
 
 1. CLI names — the token `aws`, or a path that ends with `/aws`.
-2. Destinations — hosts that end with `.amazonaws.com`, `amazonaws.com`,
-   `.aws.amazon.com`, or `aws.amazon.com` (covers `WebFetch` and hosts inside
-   shell commands such as `curl`).
-3. Credential paths — `.aws/credentials`, `.aws/config`, and env-name markers
-   in `paths` or `command`.
+2. Destinations — hosts ending with `.amazonaws.com` or `.aws.amazon.com`,
+   plus the apex hosts `amazonaws.com` and `aws.amazon.com` by exact match
+   (covers `WebFetch` and hosts inside shell commands such as `curl`).
+3. Credential paths — `.aws/credentials`, `.aws/config`, and env-name
+   markers in `paths` or `command`. `AWS_ACCESS_KEY` and `AWS_SECRET_ACCESS`
+   are intentional prefixes under `contains`, so they also match
+   `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
 
 ```rego
 cli_names := {"aws"}
 
-aws_hosts := {".amazonaws.com", "amazonaws.com", ".aws.amazon.com", "aws.amazon.com"}
+aws_hosts_suffix := {".amazonaws.com", ".aws.amazon.com"}
+
+aws_hosts_exact := {"amazonaws.com", "aws.amazon.com"}
 
 credential_markers := {".aws/credentials", ".aws/config", "AWS_ACCESS_KEY", "AWS_SECRET_ACCESS"}
 
@@ -416,8 +420,13 @@ deny contains "aws-cli" if {
 
 deny contains "aws-destination" if {
 	some host in input.values.destinations
-	some marker in aws_hosts
+	some marker in aws_hosts_suffix
 	endswith(lower(host), marker)
+}
+
+deny contains "aws-destination" if {
+	some host in input.values.destinations
+	lower(host) in aws_hosts_exact
 }
 
 deny contains "aws-credential" if {
