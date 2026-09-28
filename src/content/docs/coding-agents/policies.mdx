@@ -48,7 +48,7 @@ Arcjet builds every input from the hook payload. Read a value in Rego as
 | `session`         | String      | The agent's session ID, which also correlates the recorded activity        |
 | `principal`       | String      | The asserted developer identity from `X-Arcjet-Principal`. Untrusted       |
 | `cwd`             | String      | The agent's working directory                                              |
-| `permission_mode` | String      | The agent's own permission mode, when it reports one. Claude Code sends `default`, `plan`, `acceptEdits`, `auto`, `dontAsk`, or `bypassPermissions` (Manual arrives as `default`). Empty when the vendor does not report one. |
+| `permission_mode` | String      | The agent's own permission mode, when it reports one. Claude Code sends `default`, `plan`, `acceptEdits`, `auto`, `dontAsk`, or `bypassPermissions` (Manual arrives as `default`). Codex sends `default`, `acceptEdits`, `plan`, `dontAsk`, or `bypassPermissions` (no `auto`). Empty for Copilot and Cursor, which do not report a mode on the hook payload. |
 | `tool_name`       | String      | The tool about to be called, verbatim                                      |
 | `tool_kind`       | String      | `shell`, `file_read`, `file_write`, `web`, `mcp`, `agent`, or `other`      |
 | `command`         | String      | The shell command text, for a shell call                                   |
@@ -120,7 +120,7 @@ Arcjet will run every policy attached to the specific event in one round trip so
 | `coding-agent.sensitive-info` | Card numbers and Social Security numbers in a prompt |
 | `coding-agent.model-allowlist` | A model switch, prompt, or tool call whose model is outside the list the author wrote in Rego. Claude Code denies the switch only; Codex and Cursor deny the prompt and the tool call; Copilot is not covered. |
 | `coding-agent.tainted-session` | Shell, web, MCP, and file writes while any session-taint flag is active |
-| `coding-agent.no-auto-mode` | Tool calls while Claude Code's `permission_mode` is `auto`, `bypassPermissions`, or `dontAsk` |
+| `coding-agent.no-auto-mode` | Tool calls while `permission_mode` is `auto`, `bypassPermissions`, or `dontAsk` (Claude Code and Codex; Copilot and Cursor do not report a mode) |
 | `coding-agent.aws-access` | The AWS CLI (including `/…/aws`), AWS API hosts in `destinations`, and AWS credential paths / env-name markers |
 
 See <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>
@@ -359,16 +359,20 @@ for the coverage table and the already-selected-model gap on Claude Code.
 
 ### Require human approval
 
-Claude Code reports `permission_mode` on hook events. The values are
-`default`, `plan`, `acceptEdits`, `auto`, `dontAsk`, and `bypassPermissions`
-(Manual arrives as `default`). `auto` is autonomous / YOLO mode;
+Claude Code and Codex report `permission_mode` on hook events. Claude Code
+sends `default`, `plan`, `acceptEdits`, `auto`, `dontAsk`, and
+`bypassPermissions` (Manual arrives as `default`). Codex sends the same set
+without `auto`. `auto` is Claude's autonomous / YOLO mode;
 `bypassPermissions` and `dontAsk` also skip the agent's own permission
 prompts.
 
 Publish `coding-agent.no-auto-mode` on **Tool call** to refuse those modes
 and allow tool calls when the mode is `default`, `plan`, or `acceptEdits`
-(or when the vendor does not report a mode). Copilot, Codex, and Cursor leave
-`permission_mode` empty, so this starter does not deny their calls.
+(or when the vendor does not report a mode). Copilot and Cursor leave
+`permission_mode` empty on the hook payload Arcjet receives, so this starter
+does not deny their calls from mode alone. Copilot's Bypass Approvals /
+Autopilot settings and Cursor's Run Modes are separate product controls;
+enforce tool and destination policies for those agents instead.
 
 ```rego
 autonomous := {"auto", "bypassPermissions", "dontAsk"}
@@ -377,11 +381,6 @@ deny contains "autonomous-mode" if {
 	input.values.permission_mode in autonomous
 }
 ```
-
-There is no cross-request counter on this path. A "N commands in `auto`, then
-taint" threshold is not something a starter can express: session taint flags
-come from detectors and Jev scoring, not from counting `permission_mode`.
-Block the mode entirely, or leave it alone and layer other policies.
 
 ### Block AWS access
 
@@ -454,9 +453,9 @@ take has its own deny:
 
 Publish the layers you need. Arcjet runs every policy attached to the same
 **Execute on** option in one round trip and applies the most restrictive
-decision. Session taint is not raised by a denied AWS CLI call on its own —
-flags come from tool-result screening and Jev. Use `coding-agent.tainted-session`
-when you want risky follow-ups locked after those findings.
+decision. A denied AWS call does not by itself mark the session tainted —
+publish `coding-agent.tainted-session` when you want risky follow-ups locked
+after injection or sensitive-information findings earlier in the session.
 
 ## Write your own
 
