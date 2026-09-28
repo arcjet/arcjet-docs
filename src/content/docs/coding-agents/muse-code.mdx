@@ -159,14 +159,14 @@ somewhere else.
 calls that never ask for approval, so it isn't the control to rely on.
 `PreToolUse` is.
 
-Muse Code has no model-switch hook. A model-list policy refuses the
-prompt and the tool call while a model that isn't in the list is
-selected. For more information about writing the list, see
+Muse Code has no model-switch hook. Official hook docs do not publish a
+model field, so a model-list policy does not refuse Muse Code prompts
+or tool calls. For more information about writing the list, see
 <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>.
 
-The install omits `PreLLMCall` and `PostLLMCall`. Those events are not
-Arcjet ingest events. Installing them returns a client error, and a
-fail-closed wrapper then denies the model call.
+The install omits `PreLLMCall` and `PostLLMCall`. Those events have no
+published payloads. `PostLLMCall` can return extra context, and Arcjet
+does not inject context.
 
 <details>
 <summary>Show .muse/hooks.json</summary>
@@ -246,30 +246,6 @@ fail-closed wrapper then denies the model call.
         ]
       }
     ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh .muse/hooks/arcjet-hook.sh muse-code session-start",
-            "commandWindows": "powershell -NoProfile -File .muse/hooks/arcjet-hook.ps1 -Vendor muse-code -Event session-start",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh .muse/hooks/arcjet-hook.sh muse-code session-end",
-            "commandWindows": "powershell -NoProfile -File .muse/hooks/arcjet-hook.ps1 -Vendor muse-code -Event session-end",
-            "timeout": 3
-          }
-        ]
-      }
-    ],
     "SubagentStart": [
       {
         "hooks": [
@@ -294,6 +270,42 @@ fail-closed wrapper then denies the model call.
         ]
       }
     ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .muse/hooks/arcjet-hook.sh muse-code session-start",
+            "commandWindows": "powershell -NoProfile -File .muse/hooks/arcjet-hook.ps1 -Vendor muse-code -Event session-start",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .muse/hooks/arcjet-hook.sh muse-code session-end",
+            "commandWindows": "powershell -NoProfile -File .muse/hooks/arcjet-hook.ps1 -Vendor muse-code -Event session-end",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .muse/hooks/arcjet-hook.sh muse-code notification",
+            "commandWindows": "powershell -NoProfile -File .muse/hooks/arcjet-hook.ps1 -Vendor muse-code -Event notification",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "PreCompact": [
       {
         "hooks": [
@@ -313,18 +325,6 @@ fail-closed wrapper then denies the model call.
             "type": "command",
             "command": "sh .muse/hooks/arcjet-hook.sh muse-code post-compact",
             "commandWindows": "powershell -NoProfile -File .muse/hooks/arcjet-hook.ps1 -Vendor muse-code -Event post-compact",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh .muse/hooks/arcjet-hook.sh muse-code notification",
-            "commandWindows": "powershell -NoProfile -File .muse/hooks/arcjet-hook.ps1 -Vendor muse-code -Event notification",
             "timeout": 5
           }
         ]
@@ -384,7 +384,7 @@ milliseconds).
 - Keep handler objects to `type`, `command`, `commandWindows`, and
   `timeout`. An unrecognized handler key skips that event.
 - `timeout` on every entry, in seconds. `SessionEnd` is observational:
-  its output cannot stop the session. The install uses 3 seconds there.
+  its output cannot stop the session.
 - `X-Arcjet-Principal` attributes a session to a developer. It's
   untrusted, but useful extra metadata. `$USER` is unset on Windows, so
   the script falls back to `$USERNAME`.

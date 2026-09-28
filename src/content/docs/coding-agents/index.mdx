@@ -62,8 +62,8 @@ on option share inputs. `model` is filled only on the vendors in
 | **Prompt**       | `user-prompt-submit`, `user-prompt-expansion`               | `prompt`, `model`                                                                                   |
 | **Model switch** | `pre-model-switch` enforces. `post-model-switch` is recorded and never adjudicated. | `model`                                                                          |
 
-A `model` rule on Tool call or Prompt does nothing for Claude Code or Copilot,
-and that is intended. It is not an INCOMPLETE policy.
+A `model` rule on Tool call or Prompt does nothing for Claude Code, Copilot,
+or Muse Code, and that is intended. It is not an INCOMPLETE policy.
 
 The hook URL names the vendor. Use `POST /v1/agent-hooks/claude-code`, `/copilot`, `/codex`, `/cursor`, or `/muse-code`, with `event` as a query parameter.
 
@@ -189,24 +189,24 @@ A rule over `model` does two different things, depending on which agent fired
 the hook and which Execute on options you selected:
 
 - On Claude Code it refuses the switch onto a model that is not in the list.
-- On Codex, Cursor, and Muse Code it refuses the prompt and the tool call
-while a model that is not in the list is selected.
+- On Codex and Cursor it refuses the prompt and the tool call while a model
+that is not in the list is selected.
 
 It does not do the second thing on Claude Code, and it does not do either on
-Copilot. Claude Code denies the switch only; Codex, Cursor, and Muse Code
-deny the prompt and the tool call; Copilot is not covered.
+Copilot or Muse Code. Claude Code denies the switch only; Codex and Cursor
+deny the prompt and the tool call; Copilot and Muse Code are not covered.
 
 | Agent | Blocks the switch | Blocks the next prompt | Blocks tool calls | How the hook is installed |
 | --- | --- | --- | --- | --- |
 | Claude Code | Yes. `PreModelSwitch`. | No. Those payloads have no model. | No. Same reason. | HTTP entry, same as the other Claude hooks. |
 | Codex | No. There is no switch hook. | Yes. `UserPromptSubmit` carries `model` and honours `decision: "block"`. | Yes. `PreToolUse` and `PermissionRequest` carry `model` and honour a deny. | Command wrapper. Codex has command and MCP-tool hooks, not HTTP. |
 | Cursor | No. There is no switch hook. | Yes, in the IDE. `beforeSubmitPrompt` carries `model` / `model_id` and honours `continue: false`. | Yes. `preToolUse` carries the same fields and honours `permission: "deny"`. | Command wrapper. Cursor hooks are command-only. |
-| Muse Code | No. There is no switch hook. | Yes. `UserPromptSubmit` carries `model` and honours `decision: "block"`. | Yes. `PreToolUse` and `PermissionRequest` carry `model` and honour a deny. | Command wrapper. Muse Code hooks are command-only. |
+| Muse Code | No. There is no switch hook. | No. Official hook docs do not publish a model field. | No. Same reason. | Command wrapper. Muse Code hooks are command-only. |
 | Copilot | No. | No. | No. | Not this policy. Copilot hook payloads have no model field. |
 
 A session that opened on a disallowed model and never switches is stopped on
-Codex, Cursor, and Muse Code (the next prompt and every tool call) and is
-not stopped on Claude Code. Claude Code still needs the vendor's own org
+Codex and Cursor (the next prompt and every tool call) and is not stopped
+on Claude Code or Muse Code. Claude Code still needs the vendor's own org
 default or banned-model setting for that case.
 
 Cloud agents:
@@ -225,9 +225,9 @@ Muse Code has no hosted cloud-agent surface. Managed hooks from
 
 `auto`, `default`, `inherit`, and a blank model are not members of any
 allowlist unless you listed that exact token. On Cursor they are real
-selector states. On Claude Code and Copilot the field is absent, which is
-a different case: an optional input that is absent does not make the
-binding incomplete. A Cursor session on Auto is denied unless you listed
+selector states. On Claude Code, Copilot, and Muse Code the field is
+absent, which is a different case: an optional input that is absent does
+not make the binding incomplete. A Cursor session on Auto is denied unless you listed
 `auto`. That is a deliberate edit, not a default.
 
 List canonical model ids. Matching is exact, after lowercasing. Not a prefix
@@ -247,13 +247,13 @@ the starter on
 | Execute on | Claude Code | Codex | Cursor | Muse Code | Copilot |
 | --- | --- | --- | --- | --- | --- |
 | **Model switch** | `to_model` | event does not fire | event does not fire | event does not fire | event does not fire |
-| **Prompt** | absent | `model` on `UserPromptSubmit` | `model_id`, else `model`, on `beforeSubmitPrompt` | `model` on `UserPromptSubmit` | absent |
-| **Tool call** | absent | `model` on `PreToolUse` and `PermissionRequest` | `model_id`, else `model`, on `preToolUse` | `model` on `PreToolUse` and `PermissionRequest` | absent |
+| **Prompt** | absent | `model` on `UserPromptSubmit` | `model_id`, else `model`, on `beforeSubmitPrompt` | absent | absent |
+| **Tool call** | absent | `model` on `PreToolUse` and `PermissionRequest` | `model_id`, else `model`, on `preToolUse` | absent | absent |
 
 Absent means the translator does not set the input. It does not set it to
-`""`. On Cursor a blank result is the token `unknown`. Muse Code may send
-`unknown` as the reported model. `unknown` is not a member of any
-allowlist unless you listed that exact token.
+`""`. On Cursor a blank result is the token `unknown`. `unknown` is not a
+member of any allowlist unless you listed that exact token. On Muse Code
+the field is absent. The translator does not invent a model.
 
 ## Get started
 
