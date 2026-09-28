@@ -16,6 +16,7 @@ import { LangChain as IconLangChain } from "@/components/icons/tech/LangChain";
 import { LangGraph as IconLangGraph } from "@/components/icons/tech/LangGraph";
 import { Mastra as IconMastra } from "@/components/icons/tech/Mastra";
 import { MicrosoftAgentFramework as IconMicrosoftAgentFramework } from "@/components/icons/tech/MicrosoftAgentFramework";
+import { MuseCode as IconMuseCode } from "@/components/icons/tech/MuseCode";
 import { NestJs as IconNestJs } from "@/components/icons/tech/NestJs";
 import { NextJs as IconNextJs } from "@/components/icons/tech/NextJs";
 import { NodeJs as IconNodeJs } from "@/components/icons/tech/NodeJs";
@@ -68,6 +69,12 @@ const codingAgents = [
     label: "GitHub Copilot",
     href: "/coding-agents/copilot",
     icon: <IconGitHub />,
+  },
+  {
+    key: "muse-code",
+    label: "Muse Code",
+    href: "/coding-agents/muse-code",
+    icon: <IconMuseCode />,
   },
   {
     key: "openai-codex",
