@@ -364,9 +364,9 @@ The install script picks the principal in this order:
 4. The Cloud Agent socket – `CURSOR_AGENT_SOCKET`. The wrapper
    requests `turn/user-email` (who submitted the current turn), then
    `owner/user-email` (the agent owner), with `curl --unix-socket`.
-   A 200 response with a non-empty body wins. Transport errors,
-   non-200 responses, and empty bodies are silent: the wrapper
-   continues to the next source, so a broken socket can leave Actor
+   A 200 response with a non-empty body wins. If the request fails,
+   returns anything else, or comes back empty, the wrapper tries the
+   next source and says nothing. A broken socket can leave Actor
    empty. The Windows script skips the socket.
 5. `$USER`, then `$USERNAME` – the OS account, only when the value is
    not `ubuntu`. Empty is better than a misleading Actor.
