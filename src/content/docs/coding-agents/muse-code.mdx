@@ -20,16 +20,26 @@ authenticate the Arcjet hooks. It is semi-secret, but can be distributed
 to multiple devices and team members through environment variables or
 configuration management.
 
-Muse Code runs hooks as commands, not as native HTTP handlers. The install
-is a small script that reads the hook payload from standard input, posts
-it to Arcjet, and writes Arcjet's response to standard output. The
+Muse Code has no native HTTP hook type. It runs each hook as a command,
+so the install is a small script: it reads the hook payload from standard
+input, posts that payload to Arcjet, and writes Arcjet's response to
+standard output. Muse Code treats that response as the hook result. The
 machine that runs Muse Code needs `curl`.
 
 ## Choose where to deploy
 
-Muse Code loads hooks from three sources. See
+Muse Code loads the same hook events from three places. The source you
+pick decides who can remove the install. Official details are in
 [Extending and automating](https://dev.meta.ai/docs/muse-code/extending)
 in the Muse Code docs.
+
+Project hooks live in a committed `.muse/hooks.json`. They reach
+sessions in that repository only after you trust the project folder, so
+a committed file is not enough on its own. User hooks live in the
+`hooks` block of `~/.config/muse/settings.json` and apply to that
+developer's sessions without a trust step. Managed hooks live in the
+file that `managed_hooks_path` points to. They also skip the trust step,
+so whoever owns that path owns what executes.
 
 | Mechanism | Where the files go | Reaches | Removable by a developer |
 | --------- | ------------------ | ------- | ------------------------ |
@@ -37,15 +47,16 @@ in the Muse Code docs.
 | User hooks | The `hooks` block in `~/.config/muse/settings.json` | That developer's sessions | Yes |
 | Managed hooks | The file that `managed_hooks_path` points to | Every session that loads that settings file, with no project-trust step | Only by whoever controls the path |
 
-Project hooks run only after you trust the project folder. User hooks and
-managed hooks run without that step. Whoever controls the managed hooks
-file controls what executes.
+Use project hooks when the repository carries the install and a
+developer may delete it. Use the managed path when an administrator
+must keep the file in place. Whichever source you choose, the hook
+entries call the same script.
 
 ## Install the hook script
 
-Save this script next to the hook configuration. In a repository, put it
-at `.muse/hooks/arcjet-hook.sh`. For a managed install, put it next to
-the file at `managed_hooks_path`.
+Save the script next to the hook configuration so the command path
+resolves. In a repository, put it at `.muse/hooks/arcjet-hook.sh`. For
+a managed install, put it next to the file at `managed_hooks_path`.
 
 ```sh title="arcjet-hook.sh"
 #!/bin/sh
@@ -108,7 +119,9 @@ exit 0
 ```
 
 Make the script executable. On Windows, save a sibling `arcjet-hook.ps1`
-and point `commandWindows` at it:
+and point `commandWindows` at it. Muse Code picks `command` or
+`commandWindows` from the same hook entry, so both files belong next
+to the configuration.
 
 ```powershell title="arcjet-hook.ps1"
 param([string]$Vendor, [string]$Event)
@@ -158,9 +171,10 @@ every Muse Code prompt and tool call. The script does not log the body.
 
 ## Install the hooks
 
-The template installs the enforcement events and the recorded events
-that **Activity** uses. It omits `matcher`, so Arcjet sees every tool Muse
-Code reports on `PreToolUse` and `PermissionRequest`. Replace the
+The hook file names the events Muse Code sends to that script. The
+template below installs the enforcement events and the recorded events
+that **Activity** uses. It omits `matcher`, so Arcjet sees every tool
+Muse Code reports on `PreToolUse` and `PermissionRequest`. Replace the
 script path if you install the files somewhere else.
 
 `PermissionRequest` is the other **Tool call** event. It doesn't fire for
@@ -175,6 +189,22 @@ or tool calls. For more information about writing the list, see
 The install omits `PreLLMCall` and `PostLLMCall`. Those events have no
 published payloads. `PostLLMCall` can return extra context, and Arcjet
 does not inject context.
+
+The official events in the template are:
+
+- `PreToolUse`
+- `PermissionRequest`
+- `UserPromptSubmit`
+- `PostToolUse`
+- `PostToolUseFailure`
+- `Stop`
+- `SubagentStart`
+- `SubagentStop`
+- `SessionStart`
+- `SessionEnd`
+- `Notification`
+- `PreCompact`
+- `PostCompact`
 
 <details>
 <summary>Show .muse/hooks.json</summary>
@@ -380,24 +410,29 @@ Windows, set `managed_hooks_path` to an absolute path such as
 Muse Code launches matching command hooks for an event concurrently, so
 these entries add one request. That's usually tens of milliseconds.
 
-- The wrapper posts to `https://decide.arcjet.com/v1/agent-hooks/muse-code`
-  with `event` as a query parameter. Policy inputs identify Muse Code as
-  `agent_vendor: meta` and `agent_product: muse-code`.
-- `PreToolUse` and `PermissionRequest` run on **Tool call**.
-  `UserPromptSubmit` runs on **Prompt**. Muse Code honors a prompt
-  denial. Muse Code doesn't fire prompt expansion.
-- Omit `matcher`. A matcher that lists only `Bash` leaves MCP tools and
-  other function tools outside the policy.
-- Keep handler objects to `type`, `command`, `commandWindows`, and
-  `timeout`. An unrecognized handler key skips that event.
-- `timeout` on every entry, in seconds. `SessionEnd` is observational:
-  its output cannot stop the session.
-- `X-Arcjet-Principal` attributes a session to a developer. It's
-  untrusted extra metadata. `$USER` is unset on Windows, so the script
-  falls back to `$USERNAME`.
-- The hook URLs omit `surface`. The same files reach the terminal and
-  `muse exec`, so a hard-coded `cli` mislabels that traffic. Arcjet
-  records `unknown` when you omit the parameter.
+The wrapper posts to `https://decide.arcjet.com/v1/agent-hooks/muse-code`
+with `event` as a query parameter. Policy inputs identify Muse Code as
+`agent_vendor: meta` and `agent_product: muse-code`.
+
+`PreToolUse` and `PermissionRequest` run on **Tool call**.
+`UserPromptSubmit` runs on **Prompt**. Muse Code honors a prompt
+denial. Muse Code doesn't fire prompt expansion.
+
+Omit `matcher`. A matcher that lists only `Bash` leaves MCP tools and
+other function tools outside the policy.
+
+Keep handler objects to `type`, `command`, `commandWindows`, and
+`timeout`. An unrecognized handler key skips that event. Put `timeout`
+on every entry, in seconds. `SessionEnd` is observational: its output
+cannot stop the session.
+
+`X-Arcjet-Principal` attributes a session to a developer. It's
+untrusted extra metadata. `$USER` is unset on Windows, so the script
+falls back to `$USERNAME`.
+
+The hook URLs omit `surface`. The same files reach the terminal and
+`muse exec`, so a hard-coded `cli` mislabels that traffic. Arcjet
+records `unknown` when you omit the parameter.
 
 Project-local hooks load only after you trust the project folder. Start
 a new session after you change the files; Muse Code discovers hooks at
@@ -406,7 +441,8 @@ session startup.
 ### What Arcjet answers
 
 The wrapper prints Arcjet's JSON to standard output. Muse Code reads
-that as the hook result. Echo the body as-is.
+that as the hook result. Echo the body as-is. The denial shape is
+different for each enforcement event:
 
 | Event                | Denial body | Honored |
 | -------------------- | ----------- | ------- |
@@ -426,7 +462,9 @@ as well.
 ## Supply the Arcjet key
 
 Muse Code runs hook commands with a cleared environment and a small
-allowlist. `USER` and `HOME` reach the script. `ARCJET_KEY` does not.
+allowlist. `USER` and `HOME` reach the script. `ARCJET_KEY` does not,
+which is why the wrapper reads a key file instead of expecting the
+variable.
 
 Write the key as a single line to `$HOME/.config/muse/arcjet.key` and
 restrict the file to the owner:
@@ -447,15 +485,19 @@ the handler: an unrecognized key skips that event.
 
 ## Lock it down
 
-Point `managed_hooks_path` at an admin-owned file. Managed hooks run
-without a project-trust step, so whoever controls that path controls
-what executes.
+Point `managed_hooks_path` at an admin-owned file when a developer must
+not remove the hooks. Managed hooks run without a project-trust step, so
+whoever controls that path controls what executes.
 
 A committed `.muse/hooks.json` is reviewable and deletable. Use it when
-the repository carries the hooks, and use the managed path when a
-developer must not remove them.
+the repository carries the hooks.
 
 ## Verify the install
+
+Muse Code discovers hooks at session startup, so a change in the files
+does not apply to a session that is already open. After you save the
+script, the hook file, and the key, start a new session and confirm
+Arcjet recorded the traffic.
 
 <Steps>
 
