@@ -96,6 +96,7 @@ test.describe("SDK link migration", () => {
       "Claude Code",
       "Cursor",
       "GitHub Copilot",
+      "Muse Code",
       "OpenAI Codex",
     ]);
   });

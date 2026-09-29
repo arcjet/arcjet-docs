@@ -1,6 +1,6 @@
 ---
 title: "Coding agent policies"
-description: "The fixed input contract a coding agent policy reads, the starter policies for Claude Code, GitHub Copilot, OpenAI Codex, and Cursor, and how to write and roll out your own."
+description: "The fixed input contract a coding agent policy reads, the starter policies for Claude Code, GitHub Copilot, Muse Code, OpenAI Codex, and Cursor, and how to write and roll out your own."
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
@@ -26,12 +26,13 @@ not name it.
 | ---------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | **Tool call**    | Before the agent runs a command, reads or writes a file, calls an MCP server, or fetches a URL  | `tool_name`, `tool_kind`, `command`, `command_tokens`, `paths`, `domains`, `destinations`, `permission_mode`, `mcp_server`, `mcp_tool`, `model` |
 | **Prompt**       | Before text reaches the model: what the developer typed, and what a slash command expanded into | `prompt`, `model`                                                                                   |
-| **Model switch** | Before Claude Code changes which model the session is using. A denial keeps the current model. Codex and Cursor do not fire this. | `model`                                                                         |
+| **Model switch** | Before Claude Code changes which model the session is using. A denial keeps the current model. Codex, Cursor, and Muse Code do not fire this. | `model`                                                                         |
 
 Events that share an Execute on option share inputs. `model` is filled
 only on the vendors in [Where `model` is filled](#where-model-is-filled).
-A `model` rule on Tool call or Prompt does nothing for Claude Code or
-Copilot, and that is intended. It is not an INCOMPLETE policy.
+A `model` rule on Tool call or Prompt does nothing for Claude Code,
+Copilot, or Muse Code, and that is intended. It is not an INCOMPLETE
+policy.
 
 ## The input contract
 
@@ -41,14 +42,14 @@ Arcjet builds every input from the hook payload. Read a value in Rego as
 | Input             | Kind        | What it holds                                                              |
 | ----------------- | ----------- | -------------------------------------------------------------------------- |
 | `contract`        | String      | The contract version, always `coding-agent/v1`                             |
-| `agent_vendor`    | String      | `anthropic`, `github`, `openai`, or `cursor`                               |
-| `agent_product`   | String      | `claude-code`, `copilot`, `codex`, or `cursor`                             |
+| `agent_vendor`    | String      | `anthropic`, `github`, `openai`, `cursor`, or `meta`                       |
+| `agent_product`   | String      | `claude-code`, `copilot`, `codex`, `cursor`, or `muse-code`                |
 | `agent_surface`   | String      | The optional `surface` query parameter (`cli`, `ide`, `cloud`), or `unknown` when omitted |
 | `event`           | String      | The lifecycle event, such as `pre-tool-use`                                |
 | `session`         | String      | The agent's session ID, which also correlates the recorded activity        |
 | `principal`       | String      | The asserted developer identity from `X-Arcjet-Principal`. Untrusted       |
 | `cwd`             | String      | The agent's working directory                                              |
-| `permission_mode` | String      | The agent's own permission mode, when it reports one. Claude Code sends `default`, `plan`, `acceptEdits`, `auto`, `dontAsk`, or `bypassPermissions` (Manual arrives as `default`). Codex sends `default`, `plan`, `acceptEdits`, `dontAsk`, or `bypassPermissions` (no `auto`). Empty for Copilot and Cursor, which do not report a mode on the hook payload. |
+| `permission_mode` | String      | The agent's own permission mode, when it reports one. Claude Code sends `default`, `plan`, `acceptEdits`, `auto`, `dontAsk`, or `bypassPermissions` (Manual arrives as `default`). Codex sends `default`, `plan`, `acceptEdits`, `dontAsk`, or `bypassPermissions` (no `auto`). Empty for Copilot, Cursor, and Muse Code, which do not report a mode on the hook payload. |
 | `tool_name`       | String      | The tool about to be called, verbatim                                      |
 | `tool_kind`       | String      | `shell`, `file_read`, `file_write`, `web`, `mcp`, `agent`, or `other`      |
 | `command`         | String      | The shell command text, for a shell call                                   |
@@ -66,24 +67,25 @@ They are not inputs.
 
 ### Where `model` is filled
 
-| Execute on | Claude Code | Codex | Cursor | Copilot |
-| --- | --- | --- | --- | --- |
-| **Model switch** | `to_model` | event does not fire | event does not fire | event does not fire |
-| **Prompt** | absent | `model` on `UserPromptSubmit` | `model_id`, else `model`, on `beforeSubmitPrompt` | absent |
-| **Tool call** | absent | `model` on `PreToolUse` and `PermissionRequest` | `model_id`, else `model`, on `preToolUse` | absent |
+| Execute on | Claude Code | Codex | Cursor | Muse Code | Copilot |
+| --- | --- | --- | --- | --- | --- |
+| **Model switch** | `to_model` | event does not fire | event does not fire | event does not fire | event does not fire |
+| **Prompt** | absent | `model` on `UserPromptSubmit` | `model_id`, else `model`, on `beforeSubmitPrompt` | absent | absent |
+| **Tool call** | absent | `model` on `PreToolUse` and `PermissionRequest` | `model_id`, else `model`, on `preToolUse` | absent | absent |
 
 Absent means the translator does not set the input. It does not set it to
 `""`. An optional input that is absent does not make the binding incomplete.
 A required input that is absent does. That is why `model` is required only on
 `pre-model-switch`, where Claude Code always sends `to_model`. Declaring it
-required on Tool call or Prompt would deny every Claude Code and Copilot
-call.
+required on Tool call or Prompt would deny every Claude Code, Copilot,
+and Muse Code call.
 
 On Cursor, `model_id` if it is a non-blank string, otherwise `model`,
 lowercased. The tokens `auto`, `default`, and `inherit` are kept as those
 tokens. A blank result is the token `unknown`. On Codex, missing or blank is
-treated as absent, not as `unknown`. On Claude Code and Copilot prompt and
-tool events, the field is absent.
+treated as absent, not as `unknown`. On Claude Code, Copilot, and Muse
+Code prompt and tool events, the field is absent. Official Muse hook
+docs do not publish a model field. The translator does not invent one.
 
 `contains` is not used. `contains "fable"` misses `claude-fable-5` and hits
 any id that happens to include those letters.
@@ -118,9 +120,9 @@ Arcjet will run every policy attached to the specific event in one round trip so
 | `coding-agent.destination-threat` | A destination whose IP threat risk is high or critical |
 | `coding-agent.prompt-injection` | Instructions the injection detector flags in a prompt |
 | `coding-agent.sensitive-info` | Card numbers and Social Security numbers in a prompt |
-| `coding-agent.model-allowlist` | A model switch, prompt, or tool call whose model is outside the list the author wrote in Rego. Claude Code denies the switch only; Codex and Cursor deny the prompt and the tool call; Copilot is not covered. |
+| `coding-agent.model-allowlist` | A model switch, prompt, or tool call whose model is outside the list the author wrote in Rego. Claude Code denies the switch only; Codex and Cursor deny the prompt and the tool call; Copilot and Muse Code are not covered. |
 | `coding-agent.tainted-session` | Shell, web, MCP, and file writes while any session-taint flag is active |
-| `coding-agent.no-auto-mode` | Tool calls while `permission_mode` is `auto`, `bypassPermissions`, or `dontAsk` (Claude Code and Codex; Copilot and Cursor do not report a mode) |
+| `coding-agent.no-auto-mode` | Tool calls while `permission_mode` is `auto`, `bypassPermissions`, or `dontAsk` (Claude Code and Codex; Copilot, Cursor, and Muse Code do not report a mode) |
 | `coding-agent.aws-access` | The AWS CLI (including `/…/aws`), AWS API hosts in `destinations`, and AWS credential paths / env-name markers |
 
 See <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>
@@ -324,14 +326,15 @@ when it runs: **Tool call**, **Prompt**, and **Model switch**. The hook file
 does not name the policy.
 
 A model switch, prompt, or tool call whose model is outside the list in the
-policy. Claude Code denies the switch only; Codex and Cursor deny the prompt
-and the tool call; Copilot is not covered.
+policy. Claude Code denies the switch only; Codex and Cursor deny the
+prompt and the tool call; Copilot and Muse Code are not covered.
 
 Selecting all three Execute on options is how you get that coverage. A
 policy that reads `model` and is attached only to Tool call refuses Codex
-and Cursor tools and never sees a Claude Code switch. Clearing Model switch
-leaves Claude Code unenforced. Clearing Tool call and Prompt leaves Codex
-and Cursor unenforced.
+and Cursor tools and never sees a Claude Code switch. Clearing Model
+switch leaves Claude Code unenforced. Clearing Tool call and Prompt
+leaves Codex and Cursor unenforced. Muse Code has no switch hook and no
+published model field, so this starter does not cover it.
 
 The set in the example is a placeholder. The three ids are one per vendor
 we enforce, so you can see that the list is not Claude-only. Replace it
@@ -347,9 +350,10 @@ deny contains "disallowed-model" if {
 ```
 
 `input.values.model` is false when the input is absent or `""`, so Claude
-Code and Copilot prompt and tool events do not match. Claude Code
-`pre-model-switch` always has the input, so an id outside the list matches.
-Codex and Cursor match whenever the translated id is outside the list.
+Code, Copilot, and Muse Code prompt and tool events do not match. Claude
+Code `pre-model-switch` always has the input, so an id outside the list
+matches. Codex and Cursor match whenever the translated id is outside
+the list.
 
 The denial reason sent to the agent is the rule id `disallowed-model` and
 nothing else.
@@ -368,11 +372,11 @@ prompts.
 
 Publish `coding-agent.no-auto-mode` on **Tool call** to refuse those modes
 and allow tool calls when the mode is `default`, `plan`, or `acceptEdits`
-(or when the vendor does not report a mode). Copilot and Cursor leave
-`permission_mode` empty on the hook payload Arcjet receives, so this starter
-does not deny their calls from mode alone. Copilot's Bypass Approvals /
-Autopilot settings and Cursor's Run Modes are separate product controls;
-enforce tool and destination policies for those agents instead.
+(or when the vendor does not report a mode). Copilot, Cursor, and Muse
+Code leave `permission_mode` empty on the hook payload Arcjet receives, so
+this starter does not deny their calls from mode alone. Copilot's Bypass
+Approvals / Autopilot settings and Cursor's Run Modes are separate product
+controls; enforce tool and destination policies for those agents instead.
 
 ```rego
 autonomous := {"auto", "bypassPermissions", "dontAsk"}
@@ -513,6 +517,7 @@ after injection or sensitive-information findings earlier in the session.
 - <Link.Page href="/coding-agents">Secure coding agents</Link.Page> – the endpoint, the events, and where enforcement stops
 - <Link.Page href="/coding-agents/claude-code">Secure Claude Code</Link.Page>
 - <Link.Page href="/coding-agents/copilot">Secure GitHub Copilot</Link.Page>
+- <Link.Page href="/coding-agents/muse-code">Secure Muse Code</Link.Page>
 - <Link.Page href="/coding-agents/codex">Secure OpenAI Codex</Link.Page>
 - <Link.Page href="/coding-agents/cursor">Secure Cursor</Link.Page>
 - <Link.Page href="/coding-agents/block-personal-accounts">Block personal coding agent accounts</Link.Page>

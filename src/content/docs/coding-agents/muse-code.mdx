@@ -1,0 +1,526 @@
+---
+title: "Secure Muse Code"
+description: "Install Arcjet hooks for Muse Code through a command wrapper, a repository, user settings, or a managed hooks file, supply the site key, and verify."
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
+
+Muse Code already fires hooks for prompts and tool calls. Arcjet uses
+those hooks to enforce your policies and record the session. You don't
+change the Muse Code workflow.
+
+<WhatIsArcjet />
+
+## Before you start
+
+[Create a free Arcjet account](https://console.arcjet.com) then use the key to
+authenticate the Arcjet hooks. It is semi-secret, but can be distributed
+to multiple devices and team members through environment variables or
+configuration management.
+
+Muse Code has no native HTTP hook type. It runs each hook as a command,
+so the install is a small script: it reads the hook payload from standard
+input, posts that payload to Arcjet, and writes Arcjet's response to
+standard output. Muse Code treats that response as the hook result. The
+machine that runs Muse Code needs `curl`.
+
+## Choose where to deploy
+
+Muse Code loads the same hook events from three places. The source you
+pick decides who can remove the install. Official details are in
+[Extending and automating](https://dev.meta.ai/docs/muse-code/extending)
+in the Muse Code docs.
+
+Project hooks live in a committed `.muse/hooks.json`. They reach
+sessions in that repository only after you trust the project folder, so
+a committed file is not enough on its own. User hooks live in the
+`hooks` block of `~/.config/muse/settings.json` and apply to that
+developer's sessions without a trust step. Managed hooks live in the
+file that `managed_hooks_path` points to. They also skip the trust step,
+so whoever owns that path owns what executes.
+
+| Mechanism | Where the files go | Reaches | Removable by a developer |
+| --------- | ------------------ | ------- | ------------------------ |
+| Project hooks | `.muse/hooks.json`, committed | Sessions in that repository, after you trust the project folder | Yes |
+| User hooks | The `hooks` block in `~/.config/muse/settings.json` | That developer's sessions | Yes |
+| Managed hooks | The file that `managed_hooks_path` points to | Every session that loads that settings file, with no project-trust step | Only by whoever controls the path |
+
+Use project hooks when the repository carries the install and a
+developer may delete it. Use the managed path when an administrator
+must keep the file in place. Whichever source you choose, the hook
+entries call the same script.
+
+## Install the hook script
+
+Save the script next to the hook configuration so the command path
+resolves. In a repository, put it at `.muse/hooks/arcjet-hook.sh`. For
+a managed install, put it next to the file at `managed_hooks_path`.
+
+```sh title="arcjet-hook.sh"
+#!/bin/sh
+# Usage: arcjet-hook.sh VENDOR EVENT
+# Reads one hook payload from stdin and posts it to Arcjet.
+# On success: print the body and exit 0.
+# On any transport failure, non-2xx, or non-JSON 2xx: print the
+# vendor denial shape and exit 2.
+
+vendor=$1
+event=$2
+principal=${USER:-${USERNAME:-}}
+
+# Muse Code runs hooks with a cleared environment. ARCJET_KEY is not
+# in the default allowlist; USER and HOME are. Read the key from the
+# sibling file when the environment did not pass it through.
+if [ -z "${ARCJET_KEY:-}" ] && [ -r "${HOME}/.config/muse/arcjet.key" ]; then
+  ARCJET_KEY=$(tr -d '\r\n' < "${HOME}/.config/muse/arcjet.key")
+fi
+
+deny() {
+  case "${vendor}:${event}" in
+    muse-code:pre-tool-use)
+      printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"arcjet-hook"}}' ;;
+    muse-code:permission-request)
+      printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PermissionRequest","decision":{"behavior":"deny","message":"arcjet-hook"}}}' ;;
+    muse-code:user-prompt-submit)
+      printf '%s\n' '{"decision":"block","reason":"arcjet-hook"}' ;;
+    *)
+      printf '%s\n' '{}' ;;
+  esac
+  exit 2
+}
+
+# Deny locally when the key is still empty so a missing file does not
+# send Authorization: Bearer (empty) and look like a remote 401.
+if [ -z "${ARCJET_KEY:-}" ]; then
+  deny
+fi
+
+tmp=$(mktemp) || deny
+trap 'rm -f "$tmp"' EXIT
+code=$(curl -sS --max-time 5 -o "$tmp" -w '%{http_code}' -X POST \
+  "https://decide.arcjet.com/v1/agent-hooks/${vendor}?event=${event}" \
+  -H "Authorization: Bearer ${ARCJET_KEY}" \
+  -H "Content-Type: application/json" \
+  -H "X-Arcjet-Principal: ${principal}" \
+  --data-binary @-) || deny
+case "$code" in
+  2??) ;;
+  *) deny ;;
+esac
+head=$(dd if="$tmp" bs=1 count=1 2>/dev/null) || deny
+case "$head" in
+  \{|\[) ;;
+  *) deny ;;
+esac
+cat "$tmp"
+exit 0
+```
+
+Make the script executable. On Windows, save a sibling `arcjet-hook.ps1`
+and point `commandWindows` at it. Muse Code picks `command` or
+`commandWindows` from the same hook entry, so both files belong next
+to the configuration.
+
+```powershell title="arcjet-hook.ps1"
+param([string]$Vendor, [string]$Event)
+$principal = if ($env:USERNAME) { $env:USERNAME } else { $env:USER }
+$keyFile = Join-Path $HOME ".config/muse/arcjet.key"
+# Sets $env:ARCJET_KEY for this process only. It does not persist
+# after the hook exits.
+if (-not $env:ARCJET_KEY -and (Test-Path $keyFile)) {
+  $env:ARCJET_KEY = ((Get-Content -Raw $keyFile) -replace '[\r\n]', '')
+}
+function Deny {
+  switch ("$Vendor`:$Event") {
+    "muse-code:pre-tool-use" { Write-Output '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"arcjet-hook"}}' }
+    "muse-code:permission-request" { Write-Output '{"hookSpecificOutput":{"hookEventName":"PermissionRequest","decision":{"behavior":"deny","message":"arcjet-hook"}}}' }
+    "muse-code:user-prompt-submit" { Write-Output '{"decision":"block","reason":"arcjet-hook"}' }
+    default { Write-Output '{}' }
+  }
+  exit 2
+}
+if (-not $env:ARCJET_KEY) { Deny }
+try {
+  $body = [Console]::In.ReadToEnd()
+  $headers = @{
+    Authorization = "Bearer $env:ARCJET_KEY"
+    "Content-Type" = "application/json"
+    "X-Arcjet-Principal" = "$principal"
+  }
+  $response = Invoke-WebRequest -Method Post -TimeoutSec 5 `
+    -Uri "https://decide.arcjet.com/v1/agent-hooks/$Vendor`?event=$Event" `
+    -Headers $headers -Body $body
+  if ($response.StatusCode -lt 200 -or $response.StatusCode -ge 300) { Deny }
+  $content = $response.Content
+  if ($content.Length -lt 1 -or ($content[0] -ne '{' -and $content[0] -ne '[')) { Deny }
+  Write-Output $content
+} catch {
+  Deny
+}
+```
+
+`arcjet-hook` reads stdin, POSTs it to
+`https://decide.arcjet.com/v1/agent-hooks/<vendor>?event=<event>` with
+`Authorization: Bearer $ARCJET_KEY`, prints the body, and exits 0. On
+failure it prints the denial shape for that vendor and event and exits 2.
+Exit 2 is what Muse Code treats as a deny on `PreToolUse` and
+`UserPromptSubmit`. A missing key denies locally. A wrong key denies
+every Muse Code prompt and tool call. The script does not log the body.
+
+## Install the hooks
+
+The hook file names the events Muse Code sends to that script. The
+template below installs the enforcement events and the recorded events
+that **Activity** uses. It omits `matcher`, so Arcjet sees every tool
+Muse Code reports on `PreToolUse` and `PermissionRequest`. Replace the
+script path if you install the files somewhere else.
+
+`PermissionRequest` is the other **Tool call** event. It doesn't fire for
+calls that never ask for approval, so it isn't the control to rely on.
+`PreToolUse` is.
+
+Muse Code has no model-switch hook. Official hook docs do not publish a
+model field, so a model-list policy does not refuse Muse Code prompts
+or tool calls. For more information about writing the list, see
+<Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>.
+
+The install omits `PreLLMCall` and `PostLLMCall`. Those events have no
+published payloads. `PostLLMCall` can return extra context, and Arcjet
+does not inject context.
+
+The official events in the template are:
+
+- `PreToolUse`
+- `PermissionRequest`
+- `UserPromptSubmit`
+- `PostToolUse`
+- `PostToolUseFailure`
+- `Stop`
+- `SubagentStart`
+- `SubagentStop`
+- `SessionStart`
+- `SessionEnd`
+- `Notification`
+- `PreCompact`
+- `PostCompact`
+
+<details>
+<summary>Show .muse/hooks.json</summary>
+
+```json title=".muse/hooks.json"
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .muse/hooks/arcjet-hook.sh muse-code pre-tool-use",
+            "commandWindows": "powershell -NoProfile -File .muse/hooks/arcjet-hook.ps1 -Vendor muse-code -Event pre-tool-use",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .muse/hooks/arcjet-hook.sh muse-code permission-request",
+            "commandWindows": "powershell -NoProfile -File .muse/hooks/arcjet-hook.ps1 -Vendor muse-code -Event permission-request",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .muse/hooks/arcjet-hook.sh muse-code user-prompt-submit",
+            "commandWindows": "powershell -NoProfile -File .muse/hooks/arcjet-hook.ps1 -Vendor muse-code -Event user-prompt-submit",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .muse/hooks/arcjet-hook.sh muse-code post-tool-use",
+            "commandWindows": "powershell -NoProfile -File .muse/hooks/arcjet-hook.ps1 -Vendor muse-code -Event post-tool-use",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .muse/hooks/arcjet-hook.sh muse-code post-tool-use-failure",
+            "commandWindows": "powershell -NoProfile -File .muse/hooks/arcjet-hook.ps1 -Vendor muse-code -Event post-tool-use-failure",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .muse/hooks/arcjet-hook.sh muse-code stop",
+            "commandWindows": "powershell -NoProfile -File .muse/hooks/arcjet-hook.ps1 -Vendor muse-code -Event stop",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .muse/hooks/arcjet-hook.sh muse-code subagent-start",
+            "commandWindows": "powershell -NoProfile -File .muse/hooks/arcjet-hook.ps1 -Vendor muse-code -Event subagent-start",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .muse/hooks/arcjet-hook.sh muse-code subagent-stop",
+            "commandWindows": "powershell -NoProfile -File .muse/hooks/arcjet-hook.ps1 -Vendor muse-code -Event subagent-stop",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .muse/hooks/arcjet-hook.sh muse-code session-start",
+            "commandWindows": "powershell -NoProfile -File .muse/hooks/arcjet-hook.ps1 -Vendor muse-code -Event session-start",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .muse/hooks/arcjet-hook.sh muse-code session-end",
+            "commandWindows": "powershell -NoProfile -File .muse/hooks/arcjet-hook.ps1 -Vendor muse-code -Event session-end",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .muse/hooks/arcjet-hook.sh muse-code notification",
+            "commandWindows": "powershell -NoProfile -File .muse/hooks/arcjet-hook.ps1 -Vendor muse-code -Event notification",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .muse/hooks/arcjet-hook.sh muse-code pre-compact",
+            "commandWindows": "powershell -NoProfile -File .muse/hooks/arcjet-hook.ps1 -Vendor muse-code -Event pre-compact",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh .muse/hooks/arcjet-hook.sh muse-code post-compact",
+            "commandWindows": "powershell -NoProfile -File .muse/hooks/arcjet-hook.ps1 -Vendor muse-code -Event post-compact",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+</details>
+
+The repository template uses a path relative to the project directory
+Muse Code is running in. Don't wrap it in `git rev-parse --show-toplevel`:
+outside a git working tree that resolves to `/` and the hook never runs.
+
+For a user-level install, put the same events in
+`~/.config/muse/settings.json` and change each command to
+`sh ~/.config/muse/hooks/arcjet-hook.sh muse-code EVENT`. That file must
+set `"schema_version": 1`.
+
+For a managed install, point `managed_hooks_path` at an absolute hooks
+file and use absolute script paths. Managed hooks run without a
+project-trust step.
+
+<details>
+<summary>Show managed settings.json</summary>
+
+```json title="settings.json"
+{
+  "schema_version": 1,
+  "managed_hooks_path": "/etc/muse/hooks.json"
+}
+```
+
+Copy the project `hooks.json` to `/etc/muse/hooks.json` and change each
+command to `sh /etc/muse/hooks/arcjet-hook.sh muse-code EVENT`. On
+Windows, set `managed_hooks_path` to an absolute path such as
+`C:\\ProgramData\\Muse\\hooks.json` and point `commandWindows` at
+`C:\\ProgramData\\Muse\\hooks\\arcjet-hook.ps1`.
+
+</details>
+
+### What the hooks do
+
+Muse Code launches matching command hooks for an event concurrently, so
+these entries add one request. That's usually tens of milliseconds.
+
+The wrapper posts to `https://decide.arcjet.com/v1/agent-hooks/muse-code`
+with `event` as a query parameter. Policy inputs identify Muse Code as
+`agent_vendor: meta` and `agent_product: muse-code`.
+
+`PreToolUse` and `PermissionRequest` run on **Tool call**.
+`UserPromptSubmit` runs on **Prompt**. Muse Code honors a prompt
+denial. Muse Code doesn't fire prompt expansion.
+
+Omit `matcher`. A matcher that lists only `Bash` leaves MCP tools and
+other function tools outside the policy.
+
+Keep handler objects to `type`, `command`, `commandWindows`, and
+`timeout`. An unrecognized handler key skips that event. Put `timeout`
+on every entry, in seconds. `SessionEnd` is observational: its output
+cannot stop the session.
+
+`X-Arcjet-Principal` attributes a session to a developer. It's
+untrusted extra metadata. `$USER` is unset on Windows, so the script
+falls back to `$USERNAME`.
+
+The hook URLs omit `surface`. The same files reach the terminal and
+`muse exec`, so a hard-coded `cli` mislabels that traffic. Arcjet
+records `unknown` when you omit the parameter.
+
+Project-local hooks load only after you trust the project folder. Start
+a new session after you change the files; Muse Code discovers hooks at
+session startup.
+
+### What Arcjet answers
+
+The wrapper prints Arcjet's JSON to standard output. Muse Code reads
+that as the hook result. Echo the body as-is. The denial shape is
+different for each enforcement event:
+
+| Event                | Denial body | Honored |
+| -------------------- | ----------- | ------- |
+| `pre-tool-use`       | `{ "hookSpecificOutput": { "hookEventName": "PreToolUse", "permissionDecision": "deny", "permissionDecisionReason": "RULE_ID" } }` | Yes |
+| `permission-request` | `{ "hookSpecificOutput": { "hookEventName": "PermissionRequest", "decision": { "behavior": "deny", "message": "RULE_ID" } } }` | Yes |
+| `user-prompt-submit` | `{ "decision": "block", "reason": "RULE_ID" }` | Yes |
+
+An allow is `{}`. Muse Code treats `permissionDecision: "allow"` as a
+grant that skips its own permission flow. The denial reason names the
+rule IDs that fired and nothing else.
+
+`SessionEnd` is recorded only. Muse Code treats that event as
+observational, so a denial there cannot stop the session. The other
+installed events besides **Tool call** and **Prompt** are capture-only
+as well.
+
+## Supply the Arcjet key
+
+Muse Code runs hook commands with a cleared environment and a small
+allowlist. `USER` and `HOME` reach the script. `ARCJET_KEY` does not,
+which is why the wrapper reads a key file instead of expecting the
+variable.
+
+Write the key as a single line to `$HOME/.config/muse/arcjet.key` and
+restrict the file to the owner:
+
+```sh
+umask 077
+printf '%s\n' "AJ_KEY" > "$HOME/.config/muse/arcjet.key"
+```
+
+Replace `AJ_KEY` with the site key from the
+[Arcjet Console](https://console.arcjet.com). Never commit a literal key.
+
+A managed enterprise policy can pin `extensions.hooks.allowed_env_vars`
+so `ARCJET_KEY` reaches the script instead. Don't put an `env` object on
+the handler: an unrecognized key skips that event.
+
+`X-Arcjet-Principal` uses `$USER` or `$USERNAME`.
+
+## Lock it down
+
+Point `managed_hooks_path` at an admin-owned file when a developer must
+not remove the hooks. Managed hooks run without a project-trust step, so
+whoever controls that path controls what executes.
+
+A committed `.muse/hooks.json` is reviewable and deletable. Use it when
+the repository carries the hooks.
+
+## Verify the install
+
+Muse Code discovers hooks at session startup, so a change in the files
+does not apply to a session that is already open. After you save the
+script, the hook file, and the key, start a new session and confirm
+Arcjet recorded the traffic.
+
+<Steps>
+
+1. Start a new Muse Code session in a trusted project folder so the
+   hooks reload.
+
+2. Ask Muse Code to list a directory.
+
+3. Open the site's **Activity** in the [Arcjet Console](https://console.arcjet.com)
+   and confirm the session and the tool call appear.
+
+</Steps>
+
+A malformed project or managed hook file contributes no handlers from
+that source and produces a startup warning. Fix the reported
+configuration and start a new session.
+
+## Related
+
+- <Link.Page href="/coding-agents">Secure coding agents</Link.Page> – the endpoint, the events, and where enforcement stops
+- <Link.Page href="/coding-agents/policies">Coding agent policies</Link.Page> – the input contract and the starter policies
+- <Link.Page href="/coding-agents/claude-code">Secure Claude Code</Link.Page>
+- <Link.Page href="/coding-agents/copilot">Secure GitHub Copilot</Link.Page>
+- <Link.Page href="/coding-agents/codex">Secure OpenAI Codex</Link.Page>
+- <Link.Page href="/coding-agents/cursor">Secure Cursor</Link.Page>
+- <Link.Page href="/coding-agents/block-personal-accounts">Block personal coding agent accounts</Link.Page> – keep personal Muse Code and other agents off the managed network

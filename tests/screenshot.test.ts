@@ -44,6 +44,7 @@ const PATHS_FROM_SITEMAP = [
   "/coding-agents/copilot/",
   "/coding-agents/codex/",
   "/coding-agents/cursor/",
+  "/coding-agents/muse-code/",
   "/coding-agents/policies/",
   "/coding-agents/block-personal-accounts/",
   "/guards/",

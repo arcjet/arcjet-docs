@@ -38,6 +38,10 @@ export const main = [
         link: "/coding-agents/copilot",
       },
       {
+        label: "Muse Code",
+        link: "/coding-agents/muse-code",
+      },
+      {
         label: "OpenAI Codex",
         link: "/coding-agents/codex",
       },
