@@ -9,7 +9,7 @@ import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 
 Muse Code already fires hooks for prompts and tool calls. Arcjet uses
 those hooks to enforce your policies and record the session. You don't
-change how developers work.
+change the Muse Code workflow.
 
 <WhatIsArcjet />
 
@@ -80,6 +80,12 @@ deny() {
   exit 2
 }
 
+# Deny locally when the key is still empty so a missing file does not
+# send Authorization: Bearer (empty) and look like a remote 401.
+if [ -z "${ARCJET_KEY:-}" ]; then
+  deny
+fi
+
 tmp=$(mktemp) || deny
 trap 'rm -f "$tmp"' EXIT
 code=$(curl -sS --max-time 5 -o "$tmp" -w '%{http_code}' -X POST \
@@ -108,6 +114,8 @@ and point `commandWindows` at it:
 param([string]$Vendor, [string]$Event)
 $principal = if ($env:USERNAME) { $env:USERNAME } else { $env:USER }
 $keyFile = Join-Path $HOME ".config/muse/arcjet.key"
+# Sets $env:ARCJET_KEY for this process only. It does not persist
+# after the hook exits.
 if (-not $env:ARCJET_KEY -and (Test-Path $keyFile)) {
   $env:ARCJET_KEY = ((Get-Content -Raw $keyFile) -replace '[\r\n]', '')
 }
@@ -120,6 +128,7 @@ function Deny {
   }
   exit 2
 }
+if (-not $env:ARCJET_KEY) { Deny }
 try {
   $body = [Console]::In.ReadToEnd()
   $headers = @{
@@ -132,7 +141,7 @@ try {
     -Headers $headers -Body $body
   if ($response.StatusCode -lt 200 -or $response.StatusCode -ge 300) { Deny }
   $content = $response.Content
-  if ($content -notmatch '^\s*[\{\[]') { Deny }
+  if ($content.Length -lt 1 -or ($content[0] -ne '{' -and $content[0] -ne '[')) { Deny }
   Write-Output $content
 } catch {
   Deny
@@ -144,16 +153,15 @@ try {
 `Authorization: Bearer $ARCJET_KEY`, prints the body, and exits 0. On
 failure it prints the denial shape for that vendor and event and exits 2.
 Exit 2 is what Muse Code treats as a deny on `PreToolUse` and
-`UserPromptSubmit`. A wrong key denies every Muse Code prompt and tool
-call. The script does not log the body.
+`UserPromptSubmit`. A missing key denies locally. A wrong key denies
+every Muse Code prompt and tool call. The script does not log the body.
 
 ## Install the hooks
 
-This template is a complete setup. It installs every enforcement point
-plus the recorded events worth keeping. It omits `matcher`, so Arcjet
-sees every tool Muse Code reports on `PreToolUse` and
-`PermissionRequest`. Replace the script path if you install the files
-somewhere else.
+The template installs the enforcement events and the recorded events
+that **Activity** uses. It omits `matcher`, so Arcjet sees every tool Muse
+Code reports on `PreToolUse` and `PermissionRequest`. Replace the
+script path if you install the files somewhere else.
 
 `PermissionRequest` is the other **Tool call** event. It doesn't fire for
 calls that never ask for approval, so it isn't the control to rely on.
@@ -370,8 +378,7 @@ Windows, set `managed_hooks_path` to an absolute path such as
 ### What the hooks do
 
 Muse Code launches matching command hooks for an event concurrently, so
-these entries add one request of latency (typically a few tens of
-milliseconds).
+these entries add one request. That's usually tens of milliseconds.
 
 - The wrapper posts to `https://decide.arcjet.com/v1/agent-hooks/muse-code`
   with `event` as a query parameter. Policy inputs identify Muse Code as
@@ -386,8 +393,8 @@ milliseconds).
 - `timeout` on every entry, in seconds. `SessionEnd` is observational:
   its output cannot stop the session.
 - `X-Arcjet-Principal` attributes a session to a developer. It's
-  untrusted, but useful extra metadata. `$USER` is unset on Windows, so
-  the script falls back to `$USERNAME`.
+  untrusted extra metadata. `$USER` is unset on Windows, so the script
+  falls back to `$USERNAME`.
 - The hook URLs omit `surface`. The same files reach the terminal and
   `muse exec`, so a hard-coded `cli` mislabels that traffic. Arcjet
   records `unknown` when you omit the parameter.
@@ -455,8 +462,7 @@ developer must not remove them.
 1. Start a new Muse Code session in a trusted project folder so the
    hooks reload.
 
-2. Ask Muse Code to run a harmless command, such as listing a
-   directory.
+2. Ask Muse Code to list a directory.
 
 3. Open the site's **Activity** in the [Arcjet Console](https://console.arcjet.com)
    and confirm the session and the tool call appear.

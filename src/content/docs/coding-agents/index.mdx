@@ -192,9 +192,8 @@ the hook and which Execute on options you selected:
 - On Codex and Cursor it refuses the prompt and the tool call while a model
 that is not in the list is selected.
 
-It does not do the second thing on Claude Code, and it does not do either on
-Copilot or Muse Code. Claude Code denies the switch only; Codex and Cursor
-deny the prompt and the tool call; Copilot and Muse Code are not covered.
+Claude Code denies the switch only. Codex and Cursor deny the prompt
+and the tool call. Copilot and Muse Code are not covered.
 
 | Agent | Blocks the switch | Blocks the next prompt | Blocks tool calls | How the hook is installed |
 | --- | --- | --- | --- | --- |
@@ -253,7 +252,7 @@ the starter on
 Absent means the translator does not set the input. It does not set it to
 `""`. On Cursor a blank result is the token `unknown`. `unknown` is not a
 member of any allowlist unless you listed that exact token. On Muse Code
-the field is absent. The translator does not invent a model.
+the field is absent – the translator does not invent a model.
 
 ## Get started
 
