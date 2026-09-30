@@ -81,19 +81,131 @@ When threat intelligence is available, the JavaScript SDK exposes it as
 `decision.ip.threat`, the Python SDK as `decision.ip_details.threat`, and the
 Go SDK as `decision.IP.Threat`. Responses without an assessment omit it.
 
-| Field | JavaScript | Python | Go | Typical values |
-| --- | --- | --- | --- | --- |
-| Risk level | `riskLevel` | `risk_level` | `RiskLevel` | `none`, `low`, `medium`, `high`, `critical` |
-| Confidence | `confidence` | `confidence` | `Confidence` | `low`, `medium`, `high` |
-| Reputation | `reputation` | `reputation` | `Reputation` | `malicious`, `suspicious`, `known`, `safe`, `benign`, `unknown` |
-| Trusted infrastructure | `isSafe` | `is_safe` | `IsSafe` | `true` when the IP is trusted infrastructure |
-| Network types | `networkTypes` | `network_types` | `NetworkTypes` | `hosting`, `vpn`, `proxy`, `tor` |
-| Activities | `activities` | `activities` | `Activities` | `brute_force`, `scanning`, `botnet` |
-| Entities | `entities` | `entities` | `Entities` | `crawler`, `ai_crawler`, `scanner` |
-| Entity name | `entityName` | `entity_name` | `EntityName` | a specific entity, when identified |
-| Service | `service` | `service` | `Service` | a known service or provider, when identified |
+Python uses snake_case for the same names. Go uses PascalCase. The following
+sections list every field Arcjet exposes and the string values you can match
+on.
 
-Python uses snake_case for the same names. Go uses PascalCase.
+### Threat assessment fields
+
+| Field | JavaScript | Python | Go |
+| --- | --- | --- | --- |
+| Risk level | `riskLevel` | `risk_level` | `RiskLevel` |
+| Confidence | `confidence` | `confidence` | `Confidence` |
+| Reputation | `reputation` | `reputation` | `Reputation` |
+| Trusted infrastructure | `isSafe` | `is_safe` | `IsSafe` |
+| Network types | `networkTypes` | `network_types` | `NetworkTypes` |
+| Activities | `activities` | `activities` | `Activities` |
+| Entities | `entities` | `entities` | `Entities` |
+| Entity name | `entityName` | `entity_name` | `EntityName` |
+| Service | `service` | `service` | `Service` |
+
+`isSafe` / `is_safe` / `IsSafe` is a boolean. When it is `true`, Arcjet
+treats the IP as trusted infrastructure: `riskLevel` is `none`, and threat
+activities are suppressed. Network types and entity labels can still appear
+for context.
+
+`entityName` and `service` are free-form strings when Arcjet identifies a
+specific client or provider (for example a scanner or crawler name). They
+are empty when unidentified. Compare them only when you know the exact
+value you want to allow or deny.
+
+For outbound destination scoring on Guard policies, Rego reads a subset of
+these fields under `input.signals.ip_threat.<id>`. For more information, see
+<Link.Page href="/guards/threat-detection">Threat detection</Link.Page>.
+
+#### Risk level
+
+`riskLevel` is the overall assessment for the IP:
+
+| Value | Meaning |
+| --- | --- |
+| `none` | No elevated risk, or the IP is trusted infrastructure (`isSafe`) |
+| `low` | Weak signals only, such as a network type without confirmed abuse |
+| `medium` | Observed activity or combined signals that warrant caution |
+| `high` | Strong abuse signals, such as brute force or multiple activities |
+| `critical` | Severe signals, such as botnet, exploit, or malware activity |
+
+Name the levels you deny. Do not compare with `>= "high"` – string sorting
+does not match the risk order.
+
+#### Confidence
+
+`confidence` is how sure Arcjet is in the assessment:
+
+| Value | Meaning |
+| --- | --- |
+| `low` | Limited evidence for the classification |
+| `medium` | Moderate evidence |
+| `high` | Strong evidence |
+
+Require `medium` or `high` before you deny on a public page.
+
+#### Reputation
+
+`reputation` is the threat-intelligence label for the IP:
+
+| Value | Meaning |
+| --- | --- |
+| `malicious` | Strongly associated with abuse |
+| `suspicious` | Elevated risk without a confirmed malicious label |
+| `known` | Previously observed, without a malicious or safe verdict |
+| `safe` | Trusted infrastructure (also sets `isSafe`) |
+| `benign` | Benign infrastructure (also sets `isSafe`) |
+| `unknown` | No reputation label available |
+
+`malicious` is the strongest deny signal. Treat `suspicious` as a signal to
+challenge or rate limit rather than an automatic deny on every route.
+
+#### Network types
+
+`networkTypes` lists zero or more network classifications for the IP:
+
+| Value | Meaning |
+| --- | --- |
+| `hosting` | Hosting or data center network |
+| `vpn` | VPN exit |
+| `proxy` | Open or commercial proxy |
+| `tor` | Tor exit node |
+| `relay` | Privacy relay (for example Apple Private Relay) |
+| `mobile` | Mobile carrier network |
+| `residential` | Residential network |
+
+An IP can belong to more than one type. These values describe the network;
+they are not a deny decision on their own. Prefer the filter fields
+(`ip.src.vpn`, `ip.src.hosting`, and so on) when you want to deny network
+types without reading `ip.threat`.
+
+#### Activities
+
+`activities` lists observed abuse behaviors. An IP can have several:
+
+| Value | Meaning |
+| --- | --- |
+| `brute_force` | Repeated login or credential-guessing attempts |
+| `scanning` | Probing for open ports, paths, or misconfigurations |
+| `exploit` | Attempts to exploit known vulnerabilities |
+| `denial_of_service` | High-volume traffic aimed at overwhelming a service |
+| `spam` | Bulk unwanted submissions, often through forms |
+| `botnet` | Coordinated traffic from compromised machines |
+| `malware` | Distribution or control of malicious software |
+| `crawling` | Aggressive automated crawling |
+| `fraud` | Activity consistent with fraudulent transactions |
+| `post_exploitation` | Activity consistent with a host already under attacker control |
+| `audit` | Security scanning consistent with auditing tooling |
+| `abuse` | General abuse when no more specific activity applies |
+
+#### Entities
+
+`entities` lists automated client kinds associated with the IP:
+
+| Value | Meaning |
+| --- | --- |
+| `crawler` | Web crawler |
+| `ai_crawler` | AI training or indexing crawler |
+| `ai_search` | AI search agent traffic |
+| `bot` | Generic automated client |
+| `scanner` | Internet-wide or security scanner |
+| `compromised_device` | Device or appliance with known weaknesses, or likely botnet membership |
 
 For more information about method signatures, availability checks, and
 geolocation fields, see IP analysis in the
@@ -407,15 +519,23 @@ when it is true, even if `riskLevel` is elevated.
 
 ### Deny known abuse activity
 
-`activities` lists observed behaviors such as `brute_force`, `scanning`, and
-`botnet`:
+`activities` lists observed behaviors such as `brute_force`, `scanning`,
+`botnet`, and `malware`. For the full list, see
+[Activities](#activities).
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
 
 ```ts
 const threat = decision.ip.threat;
-const abusive = ["brute_force", "scanning", "botnet"];
+const abusive = [
+  "brute_force",
+  "scanning",
+  "botnet",
+  "malware",
+  "exploit",
+  "denial_of_service",
+];
 
 if (
   threat &&
@@ -431,7 +551,14 @@ if (
 
 ```py
 threat = decision.ip_details.threat if decision.ip_details else None
-abusive = {"brute_force", "scanning", "botnet"}
+abusive = {
+    "brute_force",
+    "scanning",
+    "botnet",
+    "malware",
+    "exploit",
+    "denial_of_service",
+}
 
 if threat and not threat.is_safe and abusive.intersection(threat.activities):
     return JSONResponse({"error": "Forbidden"}, status_code=403)
@@ -444,7 +571,10 @@ if threat and not threat.is_safe and abusive.intersection(threat.activities):
 if threat := decision.IP.Threat; threat != nil && !threat.IsSafe &&
 	(slices.Contains(threat.Activities, "brute_force") ||
 		slices.Contains(threat.Activities, "scanning") ||
-		slices.Contains(threat.Activities, "botnet")) {
+		slices.Contains(threat.Activities, "botnet") ||
+		slices.Contains(threat.Activities, "malware") ||
+		slices.Contains(threat.Activities, "exploit") ||
+		slices.Contains(threat.Activities, "denial_of_service")) {
 	http.Error(w, "Forbidden", http.StatusForbidden)
 	return
 }
@@ -496,8 +626,9 @@ if threat := decision.IP.Threat; threat != nil && !threat.IsSafe &&
 
 ### Deny automated entities on sensitive routes
 
-`entities` names automated clients such as `crawler`, `ai_crawler`, and
-`scanner`. `entityName` is set when Arcjet identifies a specific client.
+`entities` names automated clients such as `crawler`, `ai_crawler`, `bot`,
+and `scanner`. For the full list, see [Entities](#entities). `entityName`
+is set when Arcjet identifies a specific client.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -509,7 +640,8 @@ if (
   threat &&
   !threat.isSafe &&
   (threat.entities.includes("scanner") ||
-    threat.entities.includes("ai_crawler"))
+    threat.entities.includes("ai_crawler") ||
+    threat.entities.includes("compromised_device"))
 ) {
   return new Response("Forbidden", { status: 403 });
 }
@@ -522,7 +654,9 @@ if (
 threat = decision.ip_details.threat if decision.ip_details else None
 
 if threat and not threat.is_safe and (
-    "scanner" in threat.entities or "ai_crawler" in threat.entities
+    "scanner" in threat.entities
+    or "ai_crawler" in threat.entities
+    or "compromised_device" in threat.entities
 ):
     return JSONResponse({"error": "Forbidden"}, status_code=403)
 ```
@@ -533,7 +667,8 @@ if threat and not threat.is_safe and (
 ```go
 if threat := decision.IP.Threat; threat != nil && !threat.IsSafe &&
 	(slices.Contains(threat.Entities, "scanner") ||
-		slices.Contains(threat.Entities, "ai_crawler")) {
+		slices.Contains(threat.Entities, "ai_crawler") ||
+		slices.Contains(threat.Entities, "compromised_device")) {
 	http.Error(w, "Forbidden", http.StatusForbidden)
 	return
 }
@@ -581,13 +716,8 @@ if (ip.isRelay() && ip.hasService() && ip.service === "Apple Private Relay") {
 const threat = ip.threat;
 
 if (threat) {
-  // threat.riskLevel: none, low, medium, high, critical
-  // threat.confidence: low, medium, high
-  // threat.reputation: malicious, suspicious, known, safe, benign, unknown
-  // threat.isSafe: trusted infrastructure
-  // threat.networkTypes: hosting, vpn, proxy, tor
-  // threat.activities: brute_force, scanning, botnet
-  // threat.entities: crawler, ai_crawler, scanner
+  // See Threat assessment fields for every riskLevel, reputation,
+  // networkTypes, activities, and entities value.
   // threat.entityName and threat.service when Arcjet identifies them
 }
 ```
@@ -627,9 +757,8 @@ details = decision.ip_details
 threat = details.threat if details else None
 
 if threat:
-    # threat.risk_level, threat.confidence, threat.reputation
-    # threat.is_safe, threat.network_types, threat.activities
-    # threat.entities, threat.entity_name, threat.service
+    # See Threat assessment fields for every risk_level, reputation,
+    # network_types, activities, and entities value.
     pass
 ```
 
@@ -667,9 +796,8 @@ if ip.IsRelay && ip.Service == "Apple Private Relay" {
 }
 
 if threat := ip.Threat; threat != nil {
-	// threat.RiskLevel, threat.Confidence, threat.Reputation
-	// threat.IsSafe, threat.NetworkTypes, threat.Activities
-	// threat.Entities, threat.EntityName, threat.Service
+	// See Threat assessment fields for every RiskLevel, Reputation,
+	// NetworkTypes, Activities, and Entities value.
 }
 ```
 

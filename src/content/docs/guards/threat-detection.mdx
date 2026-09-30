@@ -64,19 +64,25 @@ The policy should be configured to execute on **Tool call**.
 ## Rolled-up assessment
 
 The rolled-up fields are worst-wins across every public host that completed
-scoring:
+scoring. Rego reads them under `input.signals.ip_threat.<detector_id>`
+(for example `input.signals.ip_threat.dest` when the detector id is `dest`):
 
 | Field | Meaning |
 | --- | --- |
 | `detected` | `true` when `risk_level` is `high` or `critical` |
-| `risk_level` | `none`, `low`, `medium`, `high`, or `critical` |
-| `reputation` | Label such as `malicious`, `suspicious`, or `unknown` |
-| `activities` | Observed behaviors for the worst host |
+| `risk_level` | Overall risk for the worst host |
+| `reputation` | Reputation label for that host |
+| `activities` | Observed activities for that host |
 | `host` | Host that produced the worst assessment. Empty when risk is `none` |
 | `ip` | Address looked up for that host |
 | `assessments` | One entry per public destination that completed scoring, in input order (failed lookups omitted) |
 
-Name the set of risk levels you want to deny - in this case, `high` and `critical`. Do not use a comparison like `>= "high"` because string sorting does not reflect the intended risk order.
+Each `assessments` entry carries `host`, `ip`, `risk_level`, `reputation`,
+`activities`, and `detected` for that destination.
+
+Name the set of risk levels you want to deny – in this case, `high` and
+`critical`. Do not use a comparison like `>= "high"` because string sorting
+does not reflect the intended risk order.
 
 ```rego
 package arcjet.guard
@@ -88,6 +94,72 @@ deny contains "malicious-destination" if {
 }
 ```
 
+Guard destination threat exposes a subset of the Protect `ip.threat`
+fields. It does not surface `confidence`, `is_safe`, `network_types`,
+`entities`, `entity_name`, or `service` under `input.signals.ip_threat`.
+For the inbound Protect surface, see
+<Link.Page href="/ip-threat-intelligence">IP threat intelligence</Link.Page>.
+
+### Risk level values
+
+| Value | Meaning |
+| --- | --- |
+| `none` | No elevated risk for the scored host |
+| `low` | Weak signals only |
+| `medium` | Observed activity or combined signals that warrant caution |
+| `high` | Strong abuse signals (`detected` is `true`) |
+| `critical` | Severe signals such as botnet, exploit, or malware (`detected` is `true`) |
+
+### Reputation values
+
+| Value | Meaning |
+| --- | --- |
+| `malicious` | Strongly associated with abuse |
+| `suspicious` | Elevated risk without a confirmed malicious label |
+| `known` | Previously observed, without a malicious or safe verdict |
+| `safe` | Trusted infrastructure |
+| `benign` | Benign infrastructure |
+| `unknown` | No reputation label available |
+
+A clean destination (nothing listed, or only private addresses) uses
+`risk_level` `none` and `reputation` `unknown`.
+
+### Activity values
+
+`activities` uses the same strings as Protect `ip.threat.activities`:
+
+| Value | Meaning |
+| --- | --- |
+| `brute_force` | Repeated login or credential-guessing attempts |
+| `scanning` | Probing for open ports, paths, or misconfigurations |
+| `exploit` | Attempts to exploit known vulnerabilities |
+| `denial_of_service` | High-volume traffic aimed at overwhelming a service |
+| `spam` | Bulk unwanted submissions |
+| `botnet` | Coordinated traffic from compromised machines |
+| `malware` | Distribution or control of malicious software |
+| `crawling` | Aggressive automated crawling |
+| `fraud` | Activity consistent with fraudulent transactions |
+| `post_exploitation` | Activity consistent with a host already under attacker control |
+| `audit` | Security scanning consistent with auditing tooling |
+| `abuse` | General abuse when no more specific activity applies |
+
+Deny on a specific activity when risk level alone is too broad:
+
+```rego
+deny contains "malware-destination" if {
+	"malware" in input.signals.ip_threat.dest.activities
+}
+```
+
+Or require both a high risk and a specific activity on any assessed host:
+
+```rego
+deny contains "botnet-destination" if {
+	some a in input.signals.ip_threat.dest.assessments
+	a.risk_level in {"high", "critical"}
+	"botnet" in a.activities
+}
+```
 ## Allowlist
 
 Policies execute in parallel and the most restrictive decision is applied. This means you need to define an allowlist in the same policy where the threat intelligence is evaluated.
