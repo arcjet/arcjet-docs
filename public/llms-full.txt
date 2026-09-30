@@ -1905,11 +1905,28 @@ decision.ip.isVpn()      // true if from a VPN
 decision.ip.isTor()      // true if from Tor
 decision.ip.isProxy()    // true if from a proxy
 decision.ip.isRelay()    // true if from a relay
+
+// Optional threat intelligence (omitted when unavailable)
+const threat = decision.ip.threat;
+// threat.riskLevel: none | low | medium | high | critical
+// threat.confidence: low | medium | high
+// threat.reputation: malicious | suspicious | known | safe | benign | unknown
+// threat.isSafe: trusted infrastructure
+// threat.networkTypes: hosting | vpn | proxy | tor | relay | mobile | residential
+// threat.activities: brute_force | scanning | exploit | denial_of_service |
+//   spam | botnet | malware | crawling | fraud | post_exploitation | audit | abuse
+// threat.entities: crawler | ai_crawler | ai_search | bot | scanner |
+//   compromised_device
 ```
 
 Use these fields (or a filter on `ip.src.hosting`, `ip.src.vpn`, `ip.src.proxy`,
-`ip.src.tor`) to deny high-risk networks. Guide:
+`ip.src.tor`) to deny high-risk networks. Full field reference:
 https://docs.arcjet.com/ip-threat-intelligence
+
+Guard destination threat (Rego `input.signals.ip_threat.<id>`) exposes
+`detected`, `risk_level`, `reputation`, `activities`, `host`, `ip`, and
+`assessments` with the same risk, reputation, and activity strings:
+https://docs.arcjet.com/guards/threat-detection
 
 ### Rate limit metadata
 
