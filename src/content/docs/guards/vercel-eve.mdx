@@ -46,7 +46,7 @@ The integration exposes four surfaces:
   `action.result`. Returning the `ArcjetDenialResult` payload is opt-in with
   `onDeny: "result"` so an `outputSchema` is not silently violated.
 - `guardApproval()` gates a tool or a connection before it runs. Set
-  `response` to authorize who may approve a parked request.
+  `response` to authorize who may approve or cancel a parked request.
 - `guardInbound()` screens inbound text on a channel.
 - `arcjetHooks()` observes agent lifecycle events.
 
@@ -123,7 +123,7 @@ export default guardTool(
 | `correlationId` | `guardInbound` | Required. Use a stable conversation ID, not `crypto.randomUUID()`. |
 | `onGuardError` | All | `"deny"` (default) or `"allow"`. |
 | `onAllow` | `guardApproval` | `"user-approval"` parks the call for a human after the request-time gate. |
-| `response` | `guardApproval` | Authorizes who may approve a parked request. |
+| `response` | `guardApproval` | Authorizes who may approve or cancel a parked request. |
 | `onDeny` | `guardTool` | Reshape the denial, or pass `"result"` to return `ArcjetDenialResult` instead of throwing. |
 
 ## Inbound screening
@@ -253,13 +253,18 @@ export default defineOpenAPIConnection({
 });
 ```
 
-Set `response` when you need to authorize who may approve a parked request.
+Set `response` when you need to authorize who may approve or cancel a parked
+request.
 The `response` object is a `GuardApprovalResponsePolicy` with `action` and
 optional `rules`, `metadata`, and `onGuardError`. Rules and metadata run
 against Eve's `ApprovalResponseContext`, which includes `response.principal`
 (the responder), `request.toolName`, `request.toolInput`, `request.callId`,
 `request.requestId`, and `session`. Eve releases before 0.69 expose the same
 value as `ctx.responder`.
+
+From Eve 0.69 the response policy also runs when a responder cancels the
+request (`ctx.response.decision` is `"approve"` or `"cancel"`), so its rules
+apply to cancels too: a responder it rejects can neither approve nor cancel.
 
 Response-time `ALLOW` returns `{ status: "allowed" }`. If the response policy
 denies the responder, or if Arcjet is unreachable and `onGuardError` is
