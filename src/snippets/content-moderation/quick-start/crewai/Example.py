@@ -8,7 +8,7 @@ moderate = ModerateContent()
 
 
 def screen_prompt(user_text: str) -> None:
-    decision = arcjet.guard_sync(
+    decision = arcjet.guard(
         label="message.received",
         rules=[moderate(user_text)],
     )

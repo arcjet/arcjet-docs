@@ -12,7 +12,7 @@ moderate = ModerateContent()
 @app.post("/messages")
 def create_message():
     text = request.get_json()["message"]
-    decision = arcjet.guard_sync(
+    decision = arcjet.guard(
         label="message.received",
         rules=[moderate(text)],
     )
