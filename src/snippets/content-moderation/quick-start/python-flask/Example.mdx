@@ -6,8 +6,8 @@ This example screens inbound text with content moderation before you store or
 display it.
 
 Content moderation is a Guard rule, so this example uses `arcjet.guard` inside
-your Flask route – not `protect()`. Use `launch_arcjet_sync` with
-`guard_sync()` in sync Flask code.
+your Flask route – not `protect()`. Use `launch_arcjet_sync` in sync Flask
+code: its `guard()` returns the decision without `await`.
 
 We assume you already have a Flask project set up. For helper options and
 denial behavior, see the <Link.Page href="/guards">Agent guards</Link.Page>

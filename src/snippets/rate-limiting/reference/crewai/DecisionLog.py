@@ -8,7 +8,7 @@ inbound = DetectPromptInjection()
 
 
 def screen_prompt(prompt: str) -> None:
-    decision = arcjet.guard_sync(
+    decision = arcjet.guard(
         label="message.received",
         rules=[inbound(prompt)],
     )

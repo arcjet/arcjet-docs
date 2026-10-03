@@ -38,7 +38,7 @@ handle = register_arcjet_hooks(
 
 def run_crew(crew, user_text: str) -> str:
     # There is no inbound hook, so screen user text before kickoff.
-    decision = arcjet.guard_sync(
+    decision = arcjet.guard(
         label="message.received",
         rules=[inbound(user_text)],
     )
