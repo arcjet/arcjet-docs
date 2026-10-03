@@ -1,7 +1,7 @@
 import os
 
 from arcjet.guard import TokenBucket, launch_arcjet
-from langchain_core.tools import tool
+from langchain_core.tools import ToolException, tool
 
 arcjet = launch_arcjet(key=os.environ["ARCJET_KEY"])
 token_budget = TokenBucket(
@@ -13,7 +13,9 @@ token_budget = TokenBucket(
 
 
 # guard_tool takes a fixed list of rules, so a check that needs the
-# argument value goes in the tool body, before the work happens.
+# argument value goes in the tool body, before the work happens. A
+# ToolException with handle_tool_error set reaches the model as an error
+# result instead of ending the run.
 @tool
 async def complete_prompt(prompt: str, estimated_tokens: int) -> dict:
     """Complete a user prompt."""
@@ -26,7 +28,12 @@ async def complete_prompt(prompt: str, estimated_tokens: int) -> dict:
             )
         ],
     )
-    if decision.conclusion == "DENY" or decision.has_failed_open():
-        raise RuntimeError("Token budget exceeded")
+    if decision.conclusion == "DENY":
+        raise ToolException("Token budget exceeded")
+    if decision.has_failed_open():
+        raise ToolException("Token budget could not be checked")
 
     return {"prompt": prompt}
+
+
+complete_prompt.handle_tool_error = True
