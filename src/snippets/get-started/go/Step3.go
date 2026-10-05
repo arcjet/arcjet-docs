@@ -72,8 +72,7 @@ func chat(w http.ResponseWriter, r *http.Request) {
 		status := http.StatusForbidden
 		if decision.Reason.IsRateLimit() {
 			status = http.StatusTooManyRequests
-		}
-		if decision.Reason.IsPromptInjection() {
+		} else if decision.Reason.IsPromptInjection() {
 			status = http.StatusBadRequest
 		}
 		http.Error(w, "denied", status)

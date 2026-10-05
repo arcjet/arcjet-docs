@@ -417,6 +417,9 @@ go get github.com/arcjet/arcjet-go/sensitiveinfo/rampart
 
 ```go
 backend, err := rampart.New(rampart.Options{})
+if err != nil {
+	log.Fatal(err)
+}
 detectPII, err := arcjet.GuardSensitiveInfo(arcjet.GuardSensitiveInfoOptions{
 	Mode: arcjet.ModeLive,
 	Deny: []arcjet.EntityType{

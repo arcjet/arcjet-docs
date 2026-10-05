@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -26,11 +25,6 @@ var aj = must(arcjet.NewClient(arcjet.Config{
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
-	if email == "" {
-		body, _ := io.ReadAll(r.Body)
-		_ = body
-		email = r.URL.Query().Get("email")
-	}
 	log.Printf("Email received: %s", email)
 
 	decision, err := aj.Protect(r.Context(), r, arcjet.WithEmail(email))
