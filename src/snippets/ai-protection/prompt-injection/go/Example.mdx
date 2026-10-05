@@ -1,0 +1,20 @@
+import { Code } from "@astrojs/starlight/components";
+import Example from "./Example.go?raw";
+
+This example protects a chat handler with Shield and prompt injection
+detection. The LLM call is stubbed so the sample compiles without a model
+key.
+
+```shell
+export ARCJET_KEY="ajkey_..."
+go get github.com/arcjet/arcjet-go
+```
+
+<Code code={Example} lang="go" title="main.go" />
+
+```shell
+go run .
+curl -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What is the capital of France?"}'
+```

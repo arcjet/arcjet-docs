@@ -3,6 +3,7 @@ title: "Email validation"
 titleByFramework:
   default: "Email validation"
   bun: "Email validation for Bun"
+  go: "Email validation for Go"
   nest-js: "Email validation for NestJS"
   next-js: "Email validation for Next.js"
   node-js: "Email validation for Node.js"
@@ -14,6 +15,7 @@ description: "Quick start guide for adding Arcjet email validation to your Next.
 sdkDescription: "Quick start guide for adding Arcjet email validation to your {sdk} app."
 frameworks:
   - bun
+  - go
   - nest-js
   - next-js
   - node-js
@@ -33,7 +35,7 @@ ajToc:
         anchor: "3-validate-an-email-address"
       - text: 4. Start server
         anchor: "4-start-server"
-        framework: ["bun", "node-js", "python-fastapi", "python-flask"]
+        framework: ["bun", "go", "node-js", "python-fastapi", "python-flask"]
       - text: 4. Start app
         anchor: "4-start-app"
         framework: ["nest-js", "next-js", "sveltekit"]
@@ -83,6 +85,10 @@ import Step4PythonFastapi from "@/snippets/email-validation/quick-start/python-f
 import Step4PythonFlask from "@/snippets/email-validation/quick-start/python-flask/Step4.mdx";
 import FAQs from "/src/components/FAQs.astro";
 import Comments from "/src/components/Comments.astro";
+import GoStep1 from "@/snippets/email-validation/quick-start/go/Step1.mdx";
+import GoStep2 from "@/snippets/email-validation/quick-start/go/Step2.mdx";
+import GoStep3 from "@/snippets/email-validation/quick-start/go/Step3.mdx";
+import GoStep4 from "@/snippets/email-validation/quick-start/go/Step4.mdx";
 
 Arcjet lets you validate and verify an email address. This is useful for
 preventing users from signing up with fake email addresses and can significantly
@@ -108,6 +114,7 @@ In your project root, install the SDK:
 
 <SlotByFramework>
   <Step1Bun slot="bun" />
+  <GoStep1 slot="go" />
   <Step1NestJs slot="nest-js" />
   <Step1NextJs slot="next-js" />
   <Step1NodeJs slot="node-js" />
@@ -125,6 +132,7 @@ project root.
 
 <SlotByFramework>
   <Step2SetEnv slot="bun" />
+  <GoStep2 slot="go" />
   <Step2 slot="next-js" />
   <Step2SetEnv slot="nest-js" />
   <Step2SetEnv slot="node-js" />
@@ -143,6 +151,7 @@ allows no email types.
 
 <SlotByFramework>
   <Step3Bun slot="bun" />
+  <GoStep3 slot="go" />
   <Step3NestJs slot="nest-js" />
   <Step3NextJs slot="next-js" />
   <Step3NodeJs slot="node-js" />
@@ -154,6 +163,7 @@ allows no email types.
 
 <SlotByFramework>
   <Step4Bun slot="bun" />
+  <GoStep4 slot="go" />
   <Step4NestJs slot="nest-js" />
   <Step4 slot="next-js" />
   <Step4NodeJs slot="node-js" />

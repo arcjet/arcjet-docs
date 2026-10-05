@@ -3,6 +3,7 @@ title: "Shield WAF"
 titleByFramework:
   default: "Shield WAF"
   bun: "Shield WAF for Bun"
+  go: "Shield WAF for Go"
   nest-js: "Shield WAF for NestJS"
   next-js: "Shield WAF for Next.js"
   node-js: "Shield WAF for Node.js"
@@ -14,6 +15,7 @@ description: "Quick start guide for adding protection to your Next.js, Node.js, 
 sdkDescription: "Quick start guide for protecting your {sdk} app with Arcjet Shield WAF."
 frameworks:
   - bun
+  - go
   - nest-js
   - next-js
   - node-js
@@ -33,7 +35,7 @@ ajToc:
         anchor: "3-protect-a-route"
       - text: 4. Start server
         anchor: "4-start-server"
-        framework: ["bun", "node-js", "python-fastapi", "python-flask"]
+        framework: ["bun", "go", "node-js", "python-fastapi", "python-flask"]
       - text: 4. Start app
         anchor: "4-start-app"
         framework: ["nest-js", "next-js", "remix", "sveltekit"]
@@ -94,6 +96,11 @@ import Step1SvelteKit from "@/snippets/shield/quick-start/sveltekit/Step1.mdx";
 import Step3SvelteKit from "@/snippets/shield/quick-start/sveltekit/Step3.mdx";
 import Step4SvelteKit from "@/snippets/shield/quick-start/sveltekit/Step4.mdx";
 import Step5SvelteKit from "@/snippets/shield/quick-start/sveltekit/Step5.mdx";
+import GoStep1 from "@/snippets/shield/quick-start/go/Step1.mdx";
+import GoStep2 from "@/snippets/shield/quick-start/go/Step2.mdx";
+import GoStep3 from "@/snippets/shield/quick-start/go/Step3.mdx";
+import GoStep4 from "@/snippets/shield/quick-start/go/Step4.mdx";
+import GoStep5 from "@/snippets/shield/quick-start/go/Step5.mdx";
 
 Arcjet Shield WAF protects your application against common attacks, including
 the [OWASP Top 10](https://owasp.org/www-project-top-ten/).
@@ -118,6 +125,7 @@ In your project root, install the SDK:
 
 <SlotByFramework>
   <Step1Bun slot="bun" />
+  <GoStep1 slot="go" />
   <Step1NestJs slot="nest-js" />
   <Step1NextJs slot="next-js" />
   <Step1NodeJs slot="node-js" />
@@ -135,6 +143,7 @@ project root.
 
 <SlotByFramework>
   <Step2SetEnv slot="bun" />
+  <GoStep2 slot="go" />
   <Step2SetEnv slot="nest-js" />
   <Step2 slot="next-js" />
   <Step2SetEnv slot="node-js" />
@@ -148,6 +157,7 @@ project root.
 
 <SlotByFramework>
   <Step3Bun slot="bun" />
+  <GoStep3 slot="go" />
   <Step3NestJs slot="nest-js" />
   <Step3NextJs slot="next-js" />
   <Step3NodeJs slot="node-js" />
@@ -159,6 +169,7 @@ project root.
 
 <SlotByFramework>
   <Step4Bun slot="bun" />
+  <GoStep4 slot="go" />
   <Step4NestJs slot="nest-js" />
   <Step4 slot="next-js" />
   <Step4NodeJs slot="node-js" />
@@ -177,6 +188,7 @@ constant, so you can use it as part of your tests.
 
 <SlotByFramework>
   <Step5Bun slot="bun" />
+  <GoStep5 slot="go" />
   <Step5NestJs slot="nest-js" />
   <Step5 slot="next-js" />
   <Step5NodeJs slot="node-js" />

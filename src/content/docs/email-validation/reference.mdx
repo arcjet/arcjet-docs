@@ -4,6 +4,7 @@ description: "Reference guide for adding Arcjet email validation to your Next.js
 sdkDescription: "Reference guide for configuring Arcjet email validation in your {sdk} app."
 frameworks:
   - bun
+  - go
   - nest-js
   - next-js
   - node-js
@@ -61,6 +62,9 @@ import ErrorsSvelteKit from "@/snippets/email-validation/reference/sveltekit/Err
 import NextJsPagesServerActions from "@/snippets/email-validation/reference/nextjs/PagesServerActions.mdx";
 import NestJsGuardDecision from "@/snippets/email-validation/reference/nestjs/GuardDecision.mdx";
 import Comments from "/src/components/Comments.astro";
+import DecisionLogAllowGo from "@/snippets/email-validation/reference/go/DecisionLogAllow.mdx";
+import DecisionLogDenyGo from "@/snippets/email-validation/reference/go/DecisionLogDeny.mdx";
+import ErrorsGo from "@/snippets/email-validation/reference/go/Errors.mdx";
 
 Arcjet lets you validate and verify an email address. This is useful for
 preventing users from signing up with fake email addresses and can significantly
@@ -290,6 +294,7 @@ This example logs the full result as well as the email validation rule:
 
 <SlotByFramework>
   <DecisionLogDenyBun slot="bun" />
+  <DecisionLogDenyGo slot="go" />
   <DecisionLogDenyNestJs slot="nest-js" />
   <DecisionLogDenyNextJs slot="next-js" />
   <DecisionLogDenyNodeJs slot="node-js" />
@@ -306,6 +311,7 @@ Arcjet to only allow specific email types and Arcjet blocks all other types.
 
 <SlotByFramework>
   <DecisionLogAllowBun slot="bun" />
+  <DecisionLogAllowGo slot="go" />
   <DecisionLogAllowNestJs slot="nest-js" />
   <DecisionLogAllowNextJs slot="next-js" />
   <DecisionLogAllowNodeJs slot="node-js" />
@@ -417,6 +423,7 @@ Arcjet conclusion is `ERROR`.
 
 <SlotByFramework>
   <ErrorsBun slot="bun" />
+  <ErrorsGo slot="go" />
   <ErrorsNestJs slot="nest-js" />
   <ErrorsNextJs slot="next-js" />
   <ErrorsNodeJs slot="node-js" />

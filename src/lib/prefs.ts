@@ -57,6 +57,7 @@ export const frameworks = [
   { key: "deno", label: "Deno" },
   { key: "fastify", label: "Fastify" },
   { key: "genkit", label: "Genkit" },
+  { key: "go", label: "Go" },
   { key: "google-adk", label: "Google ADK" },
   { key: "langchain", label: "LangChain" },
   { key: "langgraph", label: "LangGraph" },

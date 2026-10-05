@@ -11,6 +11,7 @@ export type ArcjetSdkKey =
   | "bun"
   | "deno"
   | "fastify"
+  | "go"
   | "nest"
   | "next"
   | "node"
@@ -184,6 +185,11 @@ const ARCJET_SDKS = {
     key: "fastify",
     label: "Fastify",
     legacyFrameworkKey: "fastify",
+  },
+  go: {
+    key: "go",
+    label: "Go",
+    legacyFrameworkKey: "go",
   },
   nest: {
     key: "nest",

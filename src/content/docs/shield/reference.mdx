@@ -4,6 +4,7 @@ description: "Reference guide for adding Arcjet Shield WAF to your Next.js, Node
 sdkDescription: "Reference guide for configuring Arcjet Shield WAF in your {sdk} app."
 frameworks:
   - bun
+  - go
   - nest-js
   - next-js
   - node-js
@@ -93,6 +94,8 @@ import RemixLoaderVsAction from "@/snippets/shield/reference/remix/LoaderVsActio
 import DecisionLogSvelteKit from "@/snippets/shield/reference/sveltekit/DecisionLog.mdx";
 import ErrorsSvelteKit from "@/snippets/shield/reference/sveltekit/Errors.mdx";
 import PerRouteVsHooksSvelteKit from "@/snippets/shield/reference/sveltekit/PerRouteVsHooks.mdx";
+import DecisionLogGo from "@/snippets/shield/reference/go/DecisionLog.mdx";
+import ErrorsGo from "@/snippets/shield/reference/go/Errors.mdx";
 
 Arcjet Shield WAF protects your application against common attacks, including
 the [OWASP Top 10](https://owasp.org/www-project-top-ten/).
@@ -182,6 +185,7 @@ This example logs the full result as well as the shield rule:
 
 <SlotByFramework>
   <DecisionLogBun slot="bun" />
+  <DecisionLogGo slot="go" />
   <DecisionLogNestJs slot="nest-js" />
   <DecisionLogNextJs slot="next-js" />
   <DecisionLogNodeJs slot="node-js" />
@@ -207,6 +211,7 @@ Arcjet conclusion is `ERROR`.
 
 <SlotByFramework>
   <ErrorsBun slot="bun" />
+  <ErrorsGo slot="go" />
   <ErrorsNestJs slot="nest-js" />
   <ErrorsNextJs slot="next-js" />
   <ErrorsNodeJs slot="node-js" />

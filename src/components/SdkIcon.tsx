@@ -9,6 +9,7 @@ import { FastApi } from "@/components/icons/tech/FastApi";
 import { Fastify } from "@/components/icons/tech/Fastify";
 import { Flask } from "@/components/icons/tech/Flask";
 import { Genkit } from "@/components/icons/tech/Genkit";
+import { Go } from "@/components/icons/tech/Go";
 import { GoogleAdk } from "@/components/icons/tech/GoogleAdk";
 import { Hono } from "@/components/icons/tech/Hono";
 import { LangChain } from "@/components/icons/tech/LangChain";
@@ -43,6 +44,7 @@ const sdkIcons: Record<ArcjetRouteSdkKey, IconComponent> = {
   deno: Deno,
   fastify: Fastify,
   genkit: Genkit,
+  go: Go,
   "google-adk": GoogleAdk,
   langchain: LangChain,
   langgraph: LangGraph,

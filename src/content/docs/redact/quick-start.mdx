@@ -3,13 +3,15 @@ title: "Arcjet Redact"
 description: "Quick start guide for redacting sensitive information locally."
 ---
 
-import { Code } from "@astrojs/starlight/components";
+import { Code, Tabs, TabItem } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 import { CardGrid } from "@astrojs/starlight/components";
 import WhatAreArcjetUtilities from "@/components/WhatAreArcjetUtilities.astro";
 import FAQs from "/src/components/FAQs.astro";
 import QuickStartRedact from "/src/snippets/redact/QuickStartRedact.ts?raw";
 import QuickStartUnredact from "/src/snippets/redact/QuickStartUnredact.ts?raw";
+import QuickStartRedactGo from "/src/snippets/redact/QuickStartRedact.go?raw";
+import QuickStartUnredactGo from "/src/snippets/redact/QuickStartUnredact.go?raw";
 import Comments from "/src/components/Comments.astro";
 import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 
@@ -25,31 +27,67 @@ Follow these steps to get started:
 
 In your project root, install the Arcjet redact library:
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
 ```bash
 npm i @arcjet/redact
 ```
+
+</TabItem>
+<TabItem label="Go">
+
+```bash
+go get github.com/arcjet/arcjet-go/redact
+```
+
+</TabItem>
+</Tabs>
 
 ### 2. Redact some text
 
 Now all you have to do to Redact text is to call the `redact` function. It can
 be configured to redact a number of built-in entity types, or else you can
 provide a custom detect function to redact your own types. The types that we support
-by default are: `email`, `phone-number`, `ip-address`, `credit-card`.
+by default are: `email`, `phone-number`, `ip-address`, `credit-card`. In Go,
+create a `Redactor` once with `redact.New` and reuse it.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
 <Code code={QuickStartRedact} lang="ts" />
+
+</TabItem>
+<TabItem label="Go">
+
+<Code code={QuickStartRedactGo} lang="go" title="main.go" />
+
+</TabItem>
+</Tabs>
 
 ### 3. Unredact a response
 
 If you want to un-redact some text that contains the replacements from the
 redact function, call `unredact`. Arcjet passes it as the value in the return
-array.
+array. In Go, `Redact` returns the redacted string and an `unredact` function.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
 <Code code={QuickStartUnredact} lang="ts" />
+
+</TabItem>
+<TabItem label="Go">
+
+<Code code={QuickStartUnredactGo} lang="go" title="main.go" />
+
+</TabItem>
+</Tabs>
 
 ## What next?
 
 <Link.Card
-  title="@arcjet/redact reference"
+  title="Redact reference"
   href="/redact/reference"
   description="Full details about the Arcjet redact utility."
 />

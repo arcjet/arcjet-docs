@@ -1,0 +1,29 @@
+import { Code } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+import Example from "./Example.go?raw";
+
+This example screens inbound text with content moderation before you store or
+display it.
+
+Content moderation is a Guard rule, so this example uses `NewGuardClient` and
+`Guard` – not `Protect`.
+
+We assume you already have a Go module. For helper options and denial
+behavior, see the <Link.Page href="/guards">Agent guards</Link.Page> guide.
+
+Install the SDK:
+
+```shell
+# Export your Arcjet API key from https://console.arcjet.com
+export ARCJET_KEY="ajkey_..."
+
+go get github.com/arcjet/arcjet-go
+```
+
+Create the example:
+
+<Code code={Example} lang="go" title="main.go" />
+
+Then send a test `POST` request to `/messages`.
+
+Requests appear in your [Arcjet dashboard](https://console.arcjet.com) in real time.
