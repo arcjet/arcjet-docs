@@ -164,11 +164,13 @@ The `arcjet` client can be configured with one or more Sensitive information
 rules. In JavaScript / TypeScript these are constructed with
 `sensitiveInfo(options: SensitiveInfoOptionsAllow | SensitiveInfoOptionsDeny)`.
 In Python they are constructed with the `detect_sensitive_info(...)` factory.
-`allow` and `deny` are mutually exclusive in both languages.
+In Go they are constructed with `arcjet.SensitiveInfo(arcjet.SensitiveInfoOptions{...})`.
+`allow` and `deny` (Go: `Allow` and `Deny`) are mutually exclusive in all three
+languages.
 
 The optional `backend` selects which [detection backend](#detection-backends)
-runs – omit it to use the built-in engine, or pass `rampart()` for on-device NER
-detection.
+runs – omit it to use the built-in engine, or pass `rampart()` (JS / Python) or
+`Backend` from `rampart.New` (Go) for on-device NER detection.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -239,6 +241,32 @@ def detect_sensitive_info(
 ```
 
 </TabItem>
+<TabItem label="Go">
+
+```go
+type SensitiveInfoOptions struct {
+	Mode              Mode
+	Allow             []EntityType // mutually exclusive with Deny
+	Deny              []EntityType
+	ContextWindowSize int
+	Backend           SensitiveInfoBackend // optional; omit for the built-in engine
+}
+
+// Built-in WASM types:
+//   SensitiveInfoEmail, SensitiveInfoPhoneNumber,
+//   SensitiveInfoIPAddress, SensitiveInfoCreditCardNumber
+//
+// Rampart-only types (need Backend from rampart.New, or a SensitiveInfoDetect
+// callback): SensitiveInfoGivenName, SensitiveInfoSurname, SensitiveInfoSSN,
+// SensitiveInfoURL, SensitiveInfoTaxID, SensitiveInfoBankAccount,
+// SensitiveInfoRoutingNumber, SensitiveInfoGovernmentID, SensitiveInfoPassport,
+// SensitiveInfoDriversLicense, SensitiveInfoBuildingNumber,
+// SensitiveInfoStreetName, SensitiveInfoSecondaryAddress, SensitiveInfoCity,
+// SensitiveInfoState, SensitiveInfoZipCode.
+// Or deny the whole set with rampart.Entities().
+```
+
+</TabItem>
 </Tabs>
 
 <DisplayType type="ArcjetSensitiveInfoType" from="arcjet" />
@@ -279,11 +307,13 @@ own patterns.
 For broader coverage, an optional Rampart package provides a backend powered by
 the on-device
 [Rampart](https://huggingface.co/nationaldesignstudio/rampart)
-named-entity-recognition (NER) model. It runs a ~15&nbsp;MB quantized ONNX model
-locally so the rule can detect **names, addresses, and government or financial
-identifiers** in addition to the built-in structured types. Everything runs in
-your own environment – the model weights are bundled with the package, so
-nothing is fetched at runtime and no data leaves your infrastructure.
+named-entity-recognition (NER) model. JavaScript and Python run a ~15&nbsp;MB
+quantized ONNX model. Go embeds the same ~15&nbsp;MB of weights in a nested
+module and infers in pure Go (no cgo, no ONNX runtime). Either way, the rule
+can detect **names, addresses, and government or financial identifiers** in
+addition to the built-in structured types. Everything runs in your own
+environment – the model weights are bundled with the package, so nothing is
+fetched at runtime and no data leaves your infrastructure.
 
 Install the package alongside your Arcjet SDK. In Python it ships as an optional
 extra of the `arcjet` package. In Go it is a nested module so the ~15&nbsp;MB
@@ -505,7 +535,10 @@ backend, err := rampart.New(rampart.Options{
 </TabItem>
 </Tabs>
 
-The model loads once on first use and is reused for every subsequent request.
+In JavaScript and Python, the model loads once on first use and is reused for
+every subsequent request. In Go, `rampart.New` loads and dequantizes the
+weights – create the backend once at startup and reuse it. It is safe for
+concurrent use.
 
 :::note
 The token-based [`detect`](#custom-entity-detection) callback of the sensitive
@@ -515,14 +548,19 @@ rather than tokens. Add a `recognizer` instead to perform custom detection.
 
 ### Bundlers and runtimes
 
-The Rampart backend loads a native ONNX runtime and reads its bundled model
-weights from disk at runtime. As a result:
+In JavaScript and Python, the Rampart backend loads a native ONNX runtime and
+reads its bundled model weights from disk at runtime. As a result:
 
 - It requires a server runtime with filesystem and native-addon access. In JS
   that means Node.js, Bun, or Deno – it does **not** run on edge runtimes. In
   Python it runs anywhere the SDK does (Python 3.10+).
 - A server build must not bundle it, or the runtime fails to locate the model
   weights.
+
+Go is different: inference is pure Go with weights compiled into the nested
+module. There is no ONNX runtime, no native addon, and no extra files to keep
+off a bundler. The ~15&nbsp;MB of weights are in the binary of applications
+that import the module.
 
 In Python, the backend depends on
 [ONNX Runtime](https://onnxruntime.ai/) (`onnxruntime`), which is installed for

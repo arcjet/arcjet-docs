@@ -1,7 +1,7 @@
 | Entity type          | Built-in engine (default) | Rampart backend         |
 | -------------------- | :-----------------------: | :---------------------- |
 | `EMAIL`              |            ✅             | ✅ Model + recognizer   |
-| `PHONE_NUMBER`       |            ✅             | ✅ Model + recognizer   |
+| `PHONE_NUMBER`       |            ✅             | ✅ Model (Go); model + recognizer (JS, Python) |
 | `IP_ADDRESS`         |            ✅             | ✅ Recognizer           |
 | `CREDIT_CARD_NUMBER` |            ✅             | ✅ Recognizer           |
 | `URL`                |             –             | ✅ Model + recognizer   |
@@ -26,3 +26,8 @@ For the Rampart backend, **Model** means the type is detected by the on-device
 NER model, and **Recognizer** means it is detected by a deterministic, validated
 pattern (mirroring Rampart's deterministic redaction layer). Where the model and
 a recognizer overlap on the same text, the recognizer wins.
+
+On the Go Rampart backend, phone numbers are left to the model because their
+digit shape overlaps with financial and government identifiers. They are not in
+`rampart.DefaultRecognizers`. Pass any of these types to `Allow` or `Deny`, or
+use `rampart.Entities()` for the full set.
