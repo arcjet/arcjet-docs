@@ -49,8 +49,7 @@ go get github.com/arcjet/arcjet-go/redact
 Now all you have to do to Redact text is to call the `redact` function. It can
 be configured to redact a number of built-in entity types, or else you can
 provide a custom detect function to redact your own types. The types that we support
-by default are: `email`, `phone-number`, `ip-address`, `credit-card`. In Go,
-create a `Redactor` once with `redact.New` and reuse it.
+by default are: `email`, `phone-number`, `ip-address`, `credit-card`.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -59,6 +58,9 @@ create a `Redactor` once with `redact.New` and reuse it.
 
 </TabItem>
 <TabItem label="Go">
+
+Create a `Redactor` once with `redact.New` and reuse it. Built-in types are
+`email`, `phone-number`, `ip-address`, and `credit-card-number`.
 
 <Code code={QuickStartRedactGo} lang="go" title="main.go" />
 
@@ -69,7 +71,7 @@ create a `Redactor` once with `redact.New` and reuse it.
 
 If you want to un-redact some text that contains the replacements from the
 redact function, call `unredact`. Arcjet passes it as the value in the return
-array. In Go, `Redact` returns the redacted string and an `unredact` function.
+array.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -78,6 +80,8 @@ array. In Go, `Redact` returns the redacted string and an `unredact` function.
 
 </TabItem>
 <TabItem label="Go">
+
+`Redact` returns the redacted string and an `unredact` function.
 
 <Code code={QuickStartUnredactGo} lang="go" title="main.go" />
 

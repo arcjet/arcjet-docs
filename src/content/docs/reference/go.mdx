@@ -273,7 +273,7 @@ The built-in analyzer detects `SensitiveInfoEmail`,
 `SensitiveInfoPhoneNumber`, `SensitiveInfoIPAddress`, and
 `SensitiveInfoCreditCardNumber`. `Allow` and `Deny` are mutually exclusive.
 
-For names, addresses, SSNs, tax and government IDs, and more, set `Backend` to
+For names, addresses, and government or financial identifiers, set `Backend` to
 the optional
 [`github.com/arcjet/arcjet-go/sensitiveinfo/rampart`](https://github.com/arcjet/arcjet-go/tree/main/sensitiveinfo/rampart)
 module. Create it once at startup with `rampart.New` and reuse it:
@@ -356,7 +356,8 @@ redacted, unredact, err := r.Redact(ctx, "Contact me at test@example.com")
 answer := unredact(modelResponse)
 ```
 
-Reuse the `Redactor`. See <Link.Page href="/redact">Arcjet Redact</Link.Page>.
+Reuse the `Redactor`. For more information about redacting strings, see
+<Link.Page href="/redact">Arcjet Redact</Link.Page>.
 
 ## Error handling
 

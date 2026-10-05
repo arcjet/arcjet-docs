@@ -161,16 +161,14 @@ name. With `deny`, Arcjet allows any detected sensitive information that the
 list does not name.
 
 The `arcjet` client can be configured with one or more Sensitive information
-rules. In JavaScript / TypeScript these are constructed with
-`sensitiveInfo(options: SensitiveInfoOptionsAllow | SensitiveInfoOptionsDeny)`.
-In Python they are constructed with the `detect_sensitive_info(...)` factory.
-In Go they are constructed with `arcjet.SensitiveInfo(arcjet.SensitiveInfoOptions{...})`.
-`allow` and `deny` (Go: `Allow` and `Deny`) are mutually exclusive in all three
-languages.
+rules. Construct them with `sensitiveInfo(...)` in JavaScript / TypeScript,
+`detect_sensitive_info(...)` in Python, or
+`arcjet.SensitiveInfo(arcjet.SensitiveInfoOptions{...})` in Go. The lists are
+`allow` / `deny` in JS and Python, and `Allow` / `Deny` in Go.
 
 The optional `backend` selects which [detection backend](#detection-backends)
-runs – omit it to use the built-in engine, or pass `rampart()` (JS / Python) or
-`Backend` from `rampart.New` (Go) for on-device NER detection.
+runs. Omit it to use the built-in engine. Pass `rampart()` (JS / Python) or
+`Backend` from `rampart.New` (Go) for on-device NER.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -309,11 +307,10 @@ the on-device
 [Rampart](https://huggingface.co/nationaldesignstudio/rampart)
 named-entity-recognition (NER) model. JavaScript and Python run a ~15&nbsp;MB
 quantized ONNX model. Go embeds the same ~15&nbsp;MB of weights in a nested
-module and infers in pure Go (no cgo, no ONNX runtime). Either way, the rule
-can detect **names, addresses, and government or financial identifiers** in
-addition to the built-in structured types. Everything runs in your own
-environment – the model weights are bundled with the package, so nothing is
-fetched at runtime and no data leaves your infrastructure.
+module and infers in pure Go, with no cgo or ONNX runtime. The rule can detect
+names, addresses, and government or financial identifiers in addition to the
+built-in structured types. The model weights are bundled, so nothing is fetched
+at runtime and scanned text stays in your environment.
 
 Install the package alongside your Arcjet SDK. In Python it ships as an optional
 extra of the `arcjet` package. In Go it is a nested module so the ~15&nbsp;MB
@@ -366,15 +363,14 @@ package is entirely opt-in.
 
 :::note
 The same backend also works with the local sensitive info rule in
-<Link.Page href="/guards">Arcjet Guards</Link.Page> – pass `backend: rampart()`
-(JS) / `backend=rampart()` (Python) / `Backend: backend` from `rampart.New`
-(Go) there too to scan text inside agent tool calls and pipelines that don't
-route through HTTP.
+<Link.Page href="/guards">Arcjet Guards</Link.Page>. Pass `backend: rampart()`
+(JS) / `backend=rampart()` (Python) / `Backend` from `rampart.New` (Go) to scan
+text in agent tool calls that never arrive over HTTP.
 :::
 
 The full set of types the backend supports is exported as `rampartEntities`
-(JS) / `rampart_entities` (Python) / `rampart.Entities()` (Go), which is
-convenient when you want to deny everything it can detect:
+(JS) / `rampart_entities` (Python) / `rampart.Entities()` (Go). Use it to deny
+every type the backend can detect:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -557,10 +553,10 @@ reads its bundled model weights from disk at runtime. As a result:
 - A server build must not bundle it, or the runtime fails to locate the model
   weights.
 
-Go is different: inference is pure Go with weights compiled into the nested
-module. There is no ONNX runtime, no native addon, and no extra files to keep
-off a bundler. The ~15&nbsp;MB of weights are in the binary of applications
-that import the module.
+In Go, inference is pure Go. Weights are compiled into the nested module, so
+there is no ONNX runtime, native addon, or extra file for a bundler to miss.
+Applications that import the module include about 15&nbsp;MB of weights in the
+binary.
 
 In Python, the backend depends on
 [ONNX Runtime](https://onnxruntime.ai/) (`onnxruntime`), which is installed for
@@ -680,11 +676,9 @@ your own types with [custom entity detection](#custom-entity-detection).
 
 <EntityDetectionTable />
 
-In Go, pass any of those types to `Allow` or `Deny`, or use
-`rampart.Entities()` for the full set the backend can detect. On the Go Rampart
-backend, phone numbers are model-only – they are not in
-`rampart.DefaultRecognizers`. Listing a non-built-in type without a backend (or
-a `SensitiveInfoDetect` callback) is a configuration error.
+In Go, pass those types to `Allow` or `Deny`, or use `rampart.Entities()` for
+the full set. Listing a non-built-in type without a backend or a
+`SensitiveInfoDetect` callback is a configuration error.
 
 ### Structured type matching
 

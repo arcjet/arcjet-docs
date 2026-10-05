@@ -383,12 +383,9 @@ see the <Link.Page href="/sensitive-info/reference#on-device-detection-with-ramp
 </div>
 <div slot="go">
 
-The built-in types cover structured data, but AI prompts are full of free-form
-PII – a pasted résumé, a shipping address, and someone's full name. The optional
+The built-in types cover structured data. The optional
 <Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart backend</Link.Page>
-runs an on-device NER model that detects these, plus government and financial
-identifiers (SSNs, tax IDs, passports, driver's licenses, bank and routing
-numbers).
+adds names, addresses, and government or financial identifiers.
 
 Install the nested module and pass `rampart.New` as the rule's `Backend`.
 Create the backend once at startup:
@@ -440,8 +437,7 @@ Pass the text to scan as `sensitiveInfoValue` (JS) / `sensitive_info_value`
 (Python) / `WithSensitiveInfoValue` (Go). For a chat endpoint this is usually
 the user's most recent message.
 Pass the full conversation history instead if you want to scan every message,
-not just the latest one – useful when PII may have been introduced earlier in
-the exchange.
+not only the most recent one – PII can appear earlier in the exchange.
 
 ### Test before you block
 

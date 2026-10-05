@@ -51,9 +51,10 @@ type Options struct {
 
 - `entities`: The list of entities that you wish to redact. If undefined then all
   entities are redacted. Valid values are: `email`, `phone-number`,
-  `ip-address`, `credit-card`, or any string returned from `detect`. In Go use
-  `redact.EntityEmail`, `redact.EntityPhoneNumber`, `redact.EntityIPAddress`,
-  and `redact.EntityCreditCardNumber` (`credit-card-number`).
+  `ip-address`, `credit-card`, or any string returned from `detect`. In Go the
+  constants are `redact.EntityEmail`, `redact.EntityPhoneNumber`,
+  `redact.EntityIPAddress`, and `redact.EntityCreditCardNumber`
+  (`credit-card-number`).
 - `contextWindowSize` - How many tokens to pass to the `detect` function at a
   time. Setting this to a higher value allows for more context to be used when
   determining if a token is sensitive or not. For best performance, set this to
@@ -72,7 +73,7 @@ The Arcjet Redaction library can be used to both redact and unredact text. First
 you redact using the `redact()` function which returns both the redacted text
 and an `unredact()` function as a tuple. You can use the `unredact()` function
 later on to replace redacted entities with their originals. In Go, `redact.New`
-compiles the WebAssembly component once; reuse the `Redactor` across calls and
+compiles the WebAssembly component once. Reuse the `Redactor` across calls, and
 call `Close` on shutdown.
 
 <Tabs syncKey="language">
