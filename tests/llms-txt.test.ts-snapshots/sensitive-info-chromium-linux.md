@@ -181,7 +181,7 @@ Custom
 
 For the Rampart backend, **Model** means the type is detected by the on-device NER model, and **Recognizer** means it is detected by a deterministic, validated pattern (mirroring Rampart’s deterministic redaction layer). Where the model and a recognizer overlap on the same text, the recognizer wins.
 
-On the Go Rampart backend, phone numbers are left to the model because their digit shape overlaps with financial and government identifiers. They are not in `rampart.DefaultRecognizers`. Pass any of these types to `Allow` or `Deny`, or use `rampart.Entities()` for the full set.
+On the Go Rampart backend, phone numbers are left to the model because their digit shape overlaps with financial and government identifiers. They are not in `rampart.DefaultRecognizers`.
 
 The Rampart model is compact (a ~14.7 MB, 4-bit quantized artifact) and fast – around 6.6 ms median inference on Node.js – so it runs inline on each request, and recalls ~98% of private terms across the seven Latin-script languages it supports. See the [reference](/sensitive-info/reference#model-accuracy-and-performance) and the [model card](https://huggingface.co/nationaldesignstudio/rampart) for the full accuracy and latency breakdown.
 
