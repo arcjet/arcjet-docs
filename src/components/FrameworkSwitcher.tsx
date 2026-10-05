@@ -9,6 +9,7 @@ import { FastApi as IconFastApi } from "@/components/icons/tech/FastApi";
 import { Fastify as IconFastify } from "@/components/icons/tech/Fastify";
 import { Flask as IconFlask } from "@/components/icons/tech/Flask";
 import { Genkit as IconGenkit } from "@/components/icons/tech/Genkit";
+import { Go as IconGo } from "@/components/icons/tech/Go";
 import { GoogleAdk as IconGoogleAdk } from "@/components/icons/tech/GoogleAdk";
 import { Hono as IconHono } from "@/components/icons/tech/Hono";
 import { LangChain as IconLangChain } from "@/components/icons/tech/LangChain";
@@ -63,6 +64,7 @@ const frameworkIcon = {
   express: <IconExpress />,
   fastify: <IconFastify />,
   genkit: <IconGenkit />,
+  go: <IconGo />,
   "google-adk": <IconGoogleAdk />,
   hono: <IconHono />,
   langchain: <IconLangChain />,

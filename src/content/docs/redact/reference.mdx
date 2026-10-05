@@ -1,14 +1,17 @@
 ---
 title: "Arcjet Redact reference"
-description: "Reference for `@arcjet/redact`, which replaces sensitive strings with tokens before they reach an LLM or a log, and restores them afterwards."
+description: "Reference for `@arcjet/redact` and `github.com/arcjet/arcjet-go/redact`, which replace sensitive strings with tokens before they reach an LLM or a log, and restore them afterwards."
 ---
 
-import { Code } from "@astrojs/starlight/components";
+import { Code, Tabs, TabItem } from "@astrojs/starlight/components";
 import WhatAreArcjetUtilities from "@/components/WhatAreArcjetUtilities.astro";
 import FAQs from "/src/components/FAQs.astro";
 import CustomEntities from "/src/snippets/redact/CustomEntities.ts?raw";
 import CustomRedact from "/src/snippets/redact/CustomRedact.ts?raw";
 import QuickStartUnredact from "/src/snippets/redact/QuickStartUnredact.ts?raw";
+import CustomEntitiesGo from "/src/snippets/redact/CustomEntities.go?raw";
+import CustomRedactGo from "/src/snippets/redact/CustomRedact.go?raw";
+import QuickStartUnredactGo from "/src/snippets/redact/QuickStartUnredact.go?raw";
 import Comments from "/src/components/Comments.astro";
 
 The Arcjet Redaction library helps you redact sensitive information locally.
@@ -19,6 +22,9 @@ The Arcjet Redaction library helps you redact sensitive information locally.
 
 The configuration definition is:
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
 ```ts
 type RedactOptions = {
   entities?: Array<SensitiveInfoType>;
@@ -28,9 +34,27 @@ type RedactOptions = {
 };
 ```
 
+</TabItem>
+<TabItem label="Go">
+
+```go
+type Options struct {
+	Entities          []string
+	ContextWindowSize int
+	Detect            func(tokens []string) []string
+	Replace           func(entity, plaintext string) (replacement string, ok bool)
+}
+```
+
+</TabItem>
+</Tabs>
+
 - `entities`: The list of entities that you wish to redact. If undefined then all
   entities are redacted. Valid values are: `email`, `phone-number`,
-  `ip-address`, '`credit-card`, or any string returned from `detect`.
+  `ip-address`, `credit-card`, or any string returned from `detect`. In Go the
+  constants are `redact.EntityEmail`, `redact.EntityPhoneNumber`,
+  `redact.EntityIPAddress`, and `redact.EntityCreditCardNumber`
+  (`credit-card-number`).
 - `contextWindowSize` - How many tokens to pass to the `detect` function at a
   time. Setting this to a higher value allows for more context to be used when
   determining if a token is sensitive or not. For best performance, set this to
@@ -39,18 +63,31 @@ type RedactOptions = {
   passes it a list of tokens as big as `contextWindowSize`, and it must return a
   list of detected entities of the same length.
 - `replace` - An optional function that lets you define your own replacements
-  for detected entities. Arcjet passes it a string with the type of entity
-  detected, and it must return either a replacement for that entity type or
-  `undefined`.
+  for detected entities. In JavaScript, Arcjet passes it the entity type and it
+  must return a replacement or `undefined`. In Go it receives the entity type
+  and the plaintext, and returns `(replacement, ok)`.
 
 ## Redact and unredact text
 
 The Arcjet Redaction library can be used to both redact and unredact text. First
 you redact using the `redact()` function which returns both the redacted text
 and an `unredact()` function as a tuple. You can use the `unredact()` function
-later on to replace redacted entities with their originals.
+later on to replace redacted entities with their originals. In Go, `redact.New`
+compiles the WebAssembly component once. Reuse the `Redactor` across calls, and
+call `Close` on shutdown.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
 <Code code={QuickStartUnredact} lang="ts" />
+
+</TabItem>
+<TabItem label="Go">
+
+<Code code={QuickStartUnredactGo} lang="go" title="main.go" />
+
+</TabItem>
+</Tabs>
 
 ## Custom entity detection
 
@@ -67,7 +104,18 @@ value.
 
 In cases of a conflict the first identified entity type is used.
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
 <Code code={CustomEntities} lang="ts" />
+
+</TabItem>
+<TabItem label="Go">
+
+<Code code={CustomEntitiesGo} lang="go" title="main.go" />
+
+</TabItem>
+</Tabs>
 
 ## Custom entity redaction
 
@@ -82,4 +130,15 @@ unique. If the same string replaces many pieces of sensitive info, then
 unredaction doesn't work correctly.
 :::
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
 <Code code={CustomRedact} lang="ts" />
+
+</TabItem>
+<TabItem label="Go">
+
+<Code code={CustomRedactGo} lang="go" title="main.go" />
+
+</TabItem>
+</Tabs>

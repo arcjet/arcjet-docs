@@ -5,6 +5,7 @@ sdkDescription: "Reference guide for configuring Arcjet bot protection in your {
 frameworks:
   - bun
   - deno
+  - go
   - nest-js
   - next-js
   - node-js
@@ -163,6 +164,13 @@ import SvelteKitErrors from "@/snippets/bot-protection/reference/sveltekit/Error
 import SvelteKitFiltering from "@/snippets/bot-protection/reference/sveltekit/Filtering.mdx";
 import SvelteKitIdentifiedBots from "@/snippets/bot-protection/reference/sveltekit/IdentifiedBots.mdx";
 import SvelteKitPerRouteVsHooks from "@/snippets/bot-protection/reference/sveltekit/PerRouteVsHooks.mdx";
+import GoAllowingBots from "@/snippets/bot-protection/reference/go/AllowingBots.mdx";
+import GoDecisionLog from "@/snippets/bot-protection/reference/go/DecisionLog.mdx";
+import GoDenyingBots from "@/snippets/bot-protection/reference/go/DenyingBots.mdx";
+import GoErrors from "@/snippets/bot-protection/reference/go/Errors.mdx";
+import GoFiltering from "@/snippets/bot-protection/reference/go/Filtering.mdx";
+import GoIdentifiedBots from "@/snippets/bot-protection/reference/go/IdentifiedBots.mdx";
+
 
 Arcjet bot detection lets you manage traffic by automated clients and bots.
 
@@ -252,6 +260,7 @@ bots](https://arcjet.com/bot-list), from <Link.Page href="/bot-protection/identi
 <SlotByFramework>
   <BunAllowingBots slot="bun" />
   <DenoAllowingBots slot="deno" />
+  <GoAllowingBots slot="go" />
   <NestJsAllowingBots slot="nest-js" />
   <NextJsAllowingBots slot="next-js" />
   <NodeJsAllowingBots slot="node-js" />
@@ -273,6 +282,7 @@ bots](https://arcjet.com/bot-list), from <Link.Page href="/bot-protection/identi
 <SlotByFramework>
   <BunDenyingBots slot="bun" />
   <DenoDenyingBots slot="deno" />
+  <GoDenyingBots slot="go" />
   <NestJsDenyingBots slot="nest-js" />
   <NextJsDenyingBots slot="next-js" />
   <NodeJsDenyingBots slot="node-js" />
@@ -350,6 +360,7 @@ for result in decision.results:
 <SlotByFramework>
   <BunDecisionLog slot="bun" />
   <DenoDecisionLog slot="deno" />
+  <GoDecisionLog slot="go" />
   <NestJsDecisionLog slot="nest-js" />
   <NextJsDecisionLog slot="next-js" />
   <NodeJsDecisionLog slot="node-js" />
@@ -368,6 +379,7 @@ available on the `decision.allowed` and `decision.denied` properties.
 <SlotByFramework>
   <BunIdentifiedBots slot="bun" />
   <DenoIdentifiedBots slot="deno" />
+  <GoIdentifiedBots slot="go" />
   <NestJsIdentifiedBots slot="nest-js" />
   <NextJsIdentifiedBots slot="next-js" />
   <NodeJsIdentifiedBots slot="node-js" />
@@ -403,6 +415,7 @@ See <Link.Page href="/bot-protection/reference#user-agent-header">an example of 
 <SlotByFramework>
   <BunErrors slot="bun" />
   <DenoErrors slot="deno" />
+  <GoErrors slot="go" />
   <NestJsErrors slot="nest-js" />
   <NextJsErrors slot="next-js" />
   <NodeJsErrors slot="node-js" />
@@ -421,6 +434,7 @@ their "advertising quality" bot.
 <SlotByFramework>
   <BunFiltering slot="bun" />
   <DenoFiltering slot="deno" />
+  <GoFiltering slot="go" />
   <NestJsFiltering slot="nest-js" />
   <NextJsFiltering slot="next-js" />
   <NodeJsFiltering slot="node-js" />

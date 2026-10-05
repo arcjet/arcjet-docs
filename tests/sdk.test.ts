@@ -39,7 +39,7 @@ test.describe("isRouteSdkKey", () => {
     expect(isRouteSdkKey("next")).toBe(true);
     expect(isRouteSdkKey("langchain")).toBe(true);
     expect(isRouteSdkKey("microsoft-agent-framework")).toBe(true);
-    expect(isRouteSdkKey("go")).toBe(false);
+    expect(isRouteSdkKey("go")).toBe(true);
   });
 });
 
@@ -120,7 +120,7 @@ test.describe("sdkFromPathname", () => {
     ["/sdk/python/plus/fastapi/get-started/", "python"],
     ["/sdk/langchain/guards/quick-start/", "langchain"],
     ["/get-started/", undefined],
-    ["/sdk/go/get-started/", undefined],
+    ["/sdk/go/get-started/", "go"],
   ];
 
   for (const [pathname, expected] of cases) {

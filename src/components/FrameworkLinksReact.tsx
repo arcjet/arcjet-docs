@@ -10,6 +10,7 @@ import { FastApi as IconFastApi } from "@/components/icons/tech/FastApi";
 import { Fastify as IconFastify } from "@/components/icons/tech/Fastify";
 import { Flask as IconFlask } from "@/components/icons/tech/Flask";
 import { Genkit as IconGenkit } from "@/components/icons/tech/Genkit";
+import { Go as IconGo } from "@/components/icons/tech/Go";
 import { GitHub as IconGitHub } from "@/components/icons/tech/GitHub";
 import { GoogleAdk as IconGoogleAdk } from "@/components/icons/tech/GoogleAdk";
 import { LangChain as IconLangChain } from "@/components/icons/tech/LangChain";
@@ -99,6 +100,8 @@ function iconFor(key: FrameworkKey): ReactNode {
       return <IconFastify />;
     case "genkit":
       return <IconGenkit />;
+    case "go":
+      return <IconGo />;
     case "nest-js":
       return <IconNestJs />;
     case "next-js":

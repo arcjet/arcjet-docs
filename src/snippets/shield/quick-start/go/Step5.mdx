@@ -1,0 +1,7 @@
+```sh
+curl -v -H "x-arcjet-suspicious: true" http://localhost:8000
+```
+
+After a few requests, Shield triggers. The rule result conclusion is `DENY`,
+but the overall decision can still be `ALLOW` because the rule is in dry run
+mode. Switch it to `arcjet.ModeLive` to block the request.

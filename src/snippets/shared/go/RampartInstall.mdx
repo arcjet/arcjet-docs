@@ -1,0 +1,10 @@
+The on-device Rampart NER backend is a separate module so the ~15&nbsp;MB
+of model weights stay optional:
+
+```sh
+go get github.com/arcjet/arcjet-go
+go get github.com/arcjet/arcjet-go/sensitiveinfo/rampart
+```
+
+Create the backend once at startup with `rampart.New` and reuse it. Loading
+dequantizes the weights.

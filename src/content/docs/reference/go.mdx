@@ -161,6 +161,40 @@ same priority keep their declaration order. The first denial from a
 `SensitiveInfo` runs first so a denial happens before another rule can
 forward the payload.
 
+`ProtectSignup` bundles a sliding-window rate limit, bot detection, and email
+validation into one `[]Rule` for a signup form:
+
+```go
+aj, err := arcjet.NewClient(arcjet.Config{
+	Key: os.Getenv("ARCJET_KEY"),
+	Rules: arcjet.ProtectSignup(arcjet.ProtectSignupOptions{
+		RateLimit: arcjet.SlidingWindowOptions{
+			Mode:        arcjet.ModeLive,
+			Interval:    time.Hour,
+			MaxRequests: 5,
+		},
+		Bots:  arcjet.BotOptions{Mode: arcjet.ModeLive, Allow: nil},
+		Email: arcjet.EmailOptions{
+			Mode: arcjet.ModeLive,
+			Deny: []arcjet.EmailType{
+				arcjet.EmailTypeDisposable,
+				arcjet.EmailTypeInvalid,
+				arcjet.EmailTypeNoMXRecords,
+			},
+		},
+	}),
+})
+```
+
+Call `arcjet.SetRateLimitHeaders(w, decision)` after `Protect` to advertise
+the limit with `RateLimit` and `RateLimit-Policy`. It is a no-op when the
+decision has no rate limit, so you can call it unconditionally.
+
+For more information, see
+<Link.Page href="/signup-protection">Signup form protection</Link.Page>
+and
+<Link.Page href="/rate-limiting/reference#rate-limit-headers">Rate limit headers</Link.Page>.
+
 Pass dynamic inputs with the following `Protect` options:
 
 - `WithCharacteristics(...)` for rate-limit keys such as a user or tenant ID.
@@ -235,10 +269,49 @@ certify your deployment.
 Use `SensitiveInfo` on the HTTP client and pass the text to scan with
 `WithSensitiveInfoValue`. Detection runs locally.
 
+The built-in analyzer detects `SensitiveInfoEmail`,
+`SensitiveInfoPhoneNumber`, `SensitiveInfoIPAddress`, and
+`SensitiveInfoCreditCardNumber`. `Allow` and `Deny` are mutually exclusive.
+
+For names, addresses, and government or financial identifiers, set `Backend` to
+the optional
+[`github.com/arcjet/arcjet-go/sensitiveinfo/rampart`](https://github.com/arcjet/arcjet-go/tree/main/sensitiveinfo/rampart)
+module. Create it once at startup with `rampart.New` and reuse it:
+
+```go
+backend, err := rampart.New(rampart.Options{})
+if err != nil {
+	log.Fatal(err)
+}
+
+aj, err := arcjet.NewClient(arcjet.Config{
+	Key: os.Getenv("ARCJET_KEY"),
+	Rules: []arcjet.Rule{
+		arcjet.SensitiveInfo(arcjet.SensitiveInfoOptions{
+			Mode: arcjet.ModeLive,
+			Deny: []arcjet.EntityType{
+				arcjet.SensitiveInfoGivenName,
+				arcjet.SensitiveInfoSurname,
+				arcjet.SensitiveInfoEmail,
+				arcjet.SensitiveInfoSSN,
+			},
+			Backend: backend,
+		}),
+	},
+})
+```
+
+`rampart.Entities()` returns every type that backend can detect. On Rampart,
+phone numbers are model-only because their digit shape overlaps with financial
+and government identifiers. Listing a non-built-in type without a backend (or a
+`SensitiveInfoDetect` callback) is a configuration error. The default
+`MaxInputChars` is `4096`; longer input is truncated.
+
 `SensitiveInfoOptions.ContextWindowSize` is the number of adjacent tokens
 passed to `Config.SensitiveInfoDetect` at a time. When the value is zero or
 negative, the SDK uses 1. This matches JS `contextWindowSize` and Python
-`context_window_size`.
+`context_window_size`. The Rampart backend ignores that token callback; extend
+it with `Options.Recognizers` instead.
 
 ```go
 aj, err := arcjet.NewClient(arcjet.Config{
@@ -257,10 +330,34 @@ aj, err := arcjet.NewClient(arcjet.Config{
 ```
 
 `GuardSensitiveInfoRule` does not expose `ContextWindowSize`. Guard scans
-use a window of 1.
+use a window of 1. Pass the same `Backend` on `GuardSensitiveInfoOptions` when
+you need the extra entity types on a tool call.
 
 For more information about scanning request text, see
 <Link.Page href="/sensitive-info">Sensitive information detection</Link.Page>.
+
+### Redact
+
+The `github.com/arcjet/arcjet-go/redact` package detects and redacts emails,
+phone numbers, IP addresses, credit card numbers, and custom entities
+in-process. The text is never sent to Arcjet. It runs the same WebAssembly
+component as `@arcjet/redact`.
+
+```go
+r, err := redact.New(ctx, redact.Options{
+	Entities: []string{redact.EntityEmail},
+})
+if err != nil {
+	log.Fatal(err)
+}
+defer r.Close(ctx)
+
+redacted, unredact, err := r.Redact(ctx, "Contact me at test@example.com")
+answer := unredact(modelResponse)
+```
+
+Reuse the `Redactor`. For more information about redacting strings, see
+<Link.Page href="/redact">Arcjet Redact</Link.Page>.
 
 ## Error handling
 
@@ -579,4 +676,5 @@ so do not log them.
 - <Link.Page href="/rate-limiting">Rate limiting</Link.Page>
 - <Link.Page href="/prompt-injection">Prompt injection detection</Link.Page>
 - <Link.Page href="/sensitive-info">Sensitive information detection</Link.Page>
+- <Link.Page href="/redact">Redact</Link.Page>
 - [Go SDK source and examples](https://github.com/arcjet/arcjet-go)

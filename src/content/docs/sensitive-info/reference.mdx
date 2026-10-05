@@ -4,6 +4,7 @@ description: "Reference guide for detecting sensitive information (PII) with Arc
 sdkDescription: "Reference guide for detecting sensitive information (PII) with Arcjet in your {sdk} app."
 frameworks:
   - bun
+  - go
   - nest-js
   - next-js
   - node-js
@@ -71,7 +72,7 @@ ajToc:
     anchor: "custom-entity-detection"
   - text: "Accessing the body"
     anchor: "access-the-body"
-    framework: ["node-js"]
+    framework: ["go", "node-js"]
   - text: "Error handling"
     anchor: "error-handling"
   - text: "Testing"
@@ -131,6 +132,11 @@ import RampartBackendRemix from "@/snippets/sensitive-info/reference/remix/Rampa
 import RampartBackendSvelteKit from "@/snippets/sensitive-info/reference/sveltekit/RampartBackend.mdx";
 
 import EntityDetectionTable from "@/snippets/sensitive-info/EntityDetectionTable.mdx";
+import RampartBackendGo from "@/snippets/sensitive-info/reference/go/RampartBackend.mdx";
+import CustomDetectGo from "@/snippets/sensitive-info/reference/go/CustomDetect.mdx";
+import DecisionLogGo from "@/snippets/sensitive-info/reference/go/DecisionLog.mdx";
+import ErrorsGo from "@/snippets/sensitive-info/reference/go/Errors.mdx";
+
 
 Arcjet Sensitive Information Detection protects against clients sending you
 sensitive information such as PII that you do not wish to handle. All detection
@@ -155,14 +161,14 @@ name. With `deny`, Arcjet allows any detected sensitive information that the
 list does not name.
 
 The `arcjet` client can be configured with one or more Sensitive information
-rules. In JavaScript / TypeScript these are constructed with
-`sensitiveInfo(options: SensitiveInfoOptionsAllow | SensitiveInfoOptionsDeny)`.
-In Python they are constructed with the `detect_sensitive_info(...)` factory.
-`allow` and `deny` are mutually exclusive in both languages.
+rules. Construct them with `sensitiveInfo(...)` in JavaScript / TypeScript,
+`detect_sensitive_info(...)` in Python, or
+`arcjet.SensitiveInfo(arcjet.SensitiveInfoOptions{...})` in Go. The lists are
+`allow` / `deny` in JS and Python, and `Allow` / `Deny` in Go.
 
 The optional `backend` selects which [detection backend](#detection-backends)
-runs – omit it to use the built-in engine, or pass `rampart()` for on-device NER
-detection.
+runs. Omit it to use the built-in engine. Pass `rampart()` (JS / Python) or
+`Backend` from `rampart.New` (Go) for on-device NER.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -233,6 +239,32 @@ def detect_sensitive_info(
 ```
 
 </TabItem>
+<TabItem label="Go">
+
+```go
+type SensitiveInfoOptions struct {
+	Mode              Mode
+	Allow             []EntityType // mutually exclusive with Deny
+	Deny              []EntityType
+	ContextWindowSize int
+	Backend           SensitiveInfoBackend // optional; omit for the built-in engine
+}
+
+// Built-in WASM types:
+//   SensitiveInfoEmail, SensitiveInfoPhoneNumber,
+//   SensitiveInfoIPAddress, SensitiveInfoCreditCardNumber
+//
+// Rampart-only types (need Backend from rampart.New, or a SensitiveInfoDetect
+// callback): SensitiveInfoGivenName, SensitiveInfoSurname, SensitiveInfoSSN,
+// SensitiveInfoURL, SensitiveInfoTaxID, SensitiveInfoBankAccount,
+// SensitiveInfoRoutingNumber, SensitiveInfoGovernmentID, SensitiveInfoPassport,
+// SensitiveInfoDriversLicense, SensitiveInfoBuildingNumber,
+// SensitiveInfoStreetName, SensitiveInfoSecondaryAddress, SensitiveInfoCity,
+// SensitiveInfoState, SensitiveInfoZipCode.
+// Or deny the whole set with rampart.Entities().
+```
+
+</TabItem>
 </Tabs>
 
 <DisplayType type="ArcjetSensitiveInfoType" from="arcjet" />
@@ -273,14 +305,16 @@ own patterns.
 For broader coverage, an optional Rampart package provides a backend powered by
 the on-device
 [Rampart](https://huggingface.co/nationaldesignstudio/rampart)
-named-entity-recognition (NER) model. It runs a ~15&nbsp;MB quantized ONNX model
-locally so the rule can detect **names, addresses, and government or financial
-identifiers** in addition to the built-in structured types. Everything runs in
-your own environment – the model weights are bundled with the package, so
-nothing is fetched at runtime and no data leaves your infrastructure.
+named-entity-recognition (NER) model. JavaScript and Python run a ~15&nbsp;MB
+quantized ONNX model. Go embeds the same ~15&nbsp;MB of weights in a nested
+module and infers in pure Go, with no cgo or ONNX runtime. The rule can detect
+names, addresses, and government or financial identifiers in addition to the
+built-in structured types. The model weights are bundled, so nothing is fetched
+at runtime and scanned text stays in your environment.
 
 Install the package alongside your Arcjet SDK. In Python it ships as an optional
-extra of the `arcjet` package:
+extra of the `arcjet` package. In Go it is a nested module so the ~15&nbsp;MB
+of model weights stay optional:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -297,15 +331,24 @@ pip install "arcjet[sensitive-info-rampart]"
 ```
 
 </TabItem>
+<TabItem label="Go">
+
+```shell
+go get github.com/arcjet/arcjet-go/sensitiveinfo/rampart
+```
+
+</TabItem>
 </Tabs>
 
-Then import `rampart` and pass it as the rule's `backend`. Every entity the
+Then import `rampart` and pass it as the rule's `backend`. Create the Go
+backend once at startup with `rampart.New` and reuse it. Every entity the
 model detects is a built-in sensitive info type (`ArcjetSensitiveInfoType` in
-JS, `SensitiveInfoEntityType` in Python), so you can list the types directly in
-`allow` or `deny`:
+JS, `SensitiveInfoEntityType` in Python, `arcjet.EntityType` in Go), so you can
+list the types directly in `allow` or `deny`:
 
 <SlotByFramework>
   <RampartBackendBun slot="bun" />
+  <RampartBackendGo slot="go" />
   <RampartBackendNestJs slot="nest-js" />
   <RampartBackendNextJs slot="next-js" />
   <RampartBackendNodeJs slot="node-js" />
@@ -320,14 +363,14 @@ package is entirely opt-in.
 
 :::note
 The same backend also works with the local sensitive info rule in
-<Link.Page href="/guards">Arcjet Guards</Link.Page> – pass `backend: rampart()`
-(JS) / `backend=rampart()` (Python) there too to scan text inside agent tool
-calls and pipelines that don't route through HTTP.
+<Link.Page href="/guards">Arcjet Guards</Link.Page>. Pass `backend: rampart()`
+(JS) / `backend=rampart()` (Python) / `Backend` from `rampart.New` (Go) to scan
+text in agent tool calls that never arrive over HTTP.
 :::
 
 The full set of types the backend supports is exported as `rampartEntities`
-(JS) / `rampart_entities` (Python), which is convenient when you want to deny
-everything it can detect:
+(JS) / `rampart_entities` (Python) / `rampart.Entities()` (Go). Use it to deny
+every type the backend can detect:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -349,6 +392,18 @@ detect_sensitive_info(mode=Mode.LIVE, deny=rampart_entities, backend=rampart())
 ```
 
 </TabItem>
+<TabItem label="Go">
+
+```go
+backend, err := rampart.New(rampart.Options{})
+arcjet.SensitiveInfo(arcjet.SensitiveInfoOptions{
+	Mode:    arcjet.ModeLive,
+	Deny:    rampart.Entities(),
+	Backend: backend,
+})
+```
+
+</TabItem>
 </Tabs>
 
 ### Model accuracy and performance
@@ -360,7 +415,9 @@ inference is **~6.6&nbsp;ms**, dropping to **~3.9&nbsp;ms** p50 on WebGPU (set
 `device: "webgpu"` in the JS SDK). The Python backend runs on [ONNX
 Runtime](https://onnxruntime.ai/) and defaults to CPU execution; select a
 different accelerator with the `providers` option (described later on this
-page).
+page). The Go backend is a nested module that embeds the same ~15&nbsp;MB
+weights and runs inference in pure Go (no cgo). Create it once with
+`rampart.New` and reuse it. The default `MaxInputChars` is `4096`.
 
 On the model author's held-out benchmark it recalls **~98%** of private terms
 across the seven Latin-script languages it supports (English, Spanish, French,
@@ -383,7 +440,8 @@ has the full per-language breakdown, calibration data, and limitations.
 
 ### Rampart options
 
-The `rampart()` factory accepts an optional configuration object:
+The `rampart()` factory (JS and Python) or `rampart.New` (Go) accepts optional
+configuration:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -450,9 +508,33 @@ rampart(
 ```
 
 </TabItem>
+<TabItem label="Go">
+
+`rampart.New` takes `rampart.Options`. Inference is pure Go (no cgo). There is
+no `device` or ONNX provider option:
+
+```go
+backend, err := rampart.New(rampart.Options{
+	// Minimum confidence score for a model token to count (default: 0.5).
+	Threshold: 0.6,
+	// Character ceiling scanned per call (default: 4096). Longer input is
+	// truncated. Raise this only if you can afford the extra latency.
+	MaxInputChars: 4096,
+	// Deterministic recognizers run alongside the model (default:
+	// rampart.DefaultRecognizers). Pass an empty non-nil slice to rely on the
+	// model alone. Phone numbers are left to the model because their digit
+	// shape overlaps with financial and government identifiers.
+	// Recognizers: []rampart.Recognizer{},
+})
+```
+
+</TabItem>
 </Tabs>
 
-The model loads once on first use and is reused for every subsequent request.
+In JavaScript and Python, the model loads once on first use and is reused for
+every subsequent request. In Go, `rampart.New` loads and dequantizes the
+weights – create the backend once at startup and reuse it. It is safe for
+concurrent use.
 
 :::note
 The token-based [`detect`](#custom-entity-detection) callback of the sensitive
@@ -462,14 +544,19 @@ rather than tokens. Add a `recognizer` instead to perform custom detection.
 
 ### Bundlers and runtimes
 
-The Rampart backend loads a native ONNX runtime and reads its bundled model
-weights from disk at runtime. As a result:
+In JavaScript and Python, the Rampart backend loads a native ONNX runtime and
+reads its bundled model weights from disk at runtime. As a result:
 
 - It requires a server runtime with filesystem and native-addon access. In JS
   that means Node.js, Bun, or Deno – it does **not** run on edge runtimes. In
   Python it runs anywhere the SDK does (Python 3.10+).
 - A server build must not bundle it, or the runtime fails to locate the model
   weights.
+
+In Go, inference is pure Go. Weights are compiled into the nested module, so
+there is no ONNX runtime, native addon, or extra file for a bundler to miss.
+Applications that import the module include about 15&nbsp;MB of weights in the
+binary.
 
 In Python, the backend depends on
 [ONNX Runtime](https://onnxruntime.ai/) (`onnxruntime`), which is installed for
@@ -532,7 +619,7 @@ This function returns a `Promise` that resolves to an
 To check whether a sensitive info rule returned a deny conclusion, use
 `decision.isDenied()` and `decision.reason.isSensitiveInfo()` (JS) /
 `decision.is_denied()` and `decision.reason_v2.type == "SENSITIVE_INFO"`
-(Python).
+(Python) / `decision.IsDenied()` and `decision.Reason.IsSensitiveInfo()` (Go).
 
 You can iterate through the results and check whether a sensitive info rule was applied:
 
@@ -554,12 +641,22 @@ for result in decision.results:
 ```
 
 </TabItem>
+<TabItem label="Go">
+
+```go
+for _, result := range decision.Results {
+	log.Printf("Rule Result %+v", result)
+}
+```
+
+</TabItem>
 </Tabs>
 
 This example logs the full result as well as the sensitive info rule:
 
 <SlotByFramework>
   <DecisionLogBun slot="bun" />
+  <DecisionLogGo slot="go" />
   <DecisionLogNestJs slot="nest-js" />
   <DecisionLogNextJs slot="next-js" />
   <DecisionLogNodeJs slot="node-js" />
@@ -578,6 +675,10 @@ type that the active backend doesn't detect never matches. You can also detect
 your own types with [custom entity detection](#custom-entity-detection).
 
 <EntityDetectionTable />
+
+In Go, pass those types to `Allow` or `Deny`, or use `rampart.Entities()` for
+the full set. Listing a non-built-in type without a backend or a
+`SensitiveInfoDetect` callback is a configuration error.
 
 ### Structured type matching
 
@@ -639,6 +740,7 @@ value.
 
 <SlotByFramework>
   <CustomDetectBun slot="bun" />
+  <CustomDetectGo slot="go" />
   <CustomDetectNestJs slot="nest-js" />
   <CustomDetectNextJs slot="next-js" />
   <CustomDetectNodeJs slot="node-js" />
@@ -671,6 +773,7 @@ Arcjet conclusion is `ERROR`.
 
 <SlotByFramework>
   <ErrorsBun slot="bun" />
+  <ErrorsGo slot="go" />
   <ErrorsNestJs slot="nest-js" />
   <ErrorsNextJs slot="next-js" />
   <ErrorsNodeJs slot="node-js" />

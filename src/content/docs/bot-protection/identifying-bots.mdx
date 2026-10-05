@@ -16,7 +16,8 @@ allow or deny all bots in a category, or both.
 If you are using TypeScript, these appear as autocomplete values for the `allow`
 or `deny` options while writing your rules. In Python, the same string
 identifiers are accepted on `allow` / `deny`; categories are also available
-through the `BotCategory` enum.
+through the `BotCategory` enum. In Go, use the same strings or a
+`BotCategory*` constant such as `arcjet.BotCategorySearchEngine`.
 
 ## Individual bots
 
@@ -56,6 +57,21 @@ detect_bot(
         "CURL",
     ],
 )
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+arcjet.DetectBot(arcjet.BotOptions{
+	Mode: arcjet.ModeLive, // Blocks requests. Use ModeDryRun to log only.
+	Allow: []string{
+		"GOOGLE_CRAWLER",
+		"GOOGLE_CRAWLER_NEWS",
+		"BING_CRAWLER",
+		"CURL",
+	},
+})
 ```
 
 </TabItem>

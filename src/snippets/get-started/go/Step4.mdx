@@ -1,0 +1,20 @@
+import { Link } from "@/components/link";
+
+## 4. Start app
+
+```sh
+go run .
+```
+
+Send a chat message:
+
+```sh
+curl -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What is the capital of France?"}'
+```
+
+Visit [`http://localhost:8000/chat`](http://localhost:8000/chat) a few times
+to hit the rate limit. You get a `403` response from `curl` because `curl`
+is considered a bot by default
+(<Link.Page href="/bot-protection/identifying-bots">customizable</Link.Page>).
