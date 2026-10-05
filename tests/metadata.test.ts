@@ -64,8 +64,12 @@ test.describe("routeForSitemapUrl", () => {
       "https://docs.arcjet.com/sdk/vercel-ai/rate-limiting/quick-start/",
       "/rate-limiting/quick-start/",
     ],
-    // `go` is not an SDK key, so the segment must not be stripped.
-    ["https://docs.arcjet.com/sdk/go/architecture/", "/sdk/go/architecture/"],
+    ["https://docs.arcjet.com/sdk/go/architecture/", "/architecture/"],
+    // An unknown SDK segment is left on the path.
+    [
+      "https://docs.arcjet.com/sdk/not-an-sdk/architecture/",
+      "/sdk/not-an-sdk/architecture/",
+    ],
     // Neither is a slug that merely starts like one.
     [
       "https://docs.arcjet.com/sdk/astro-extra/architecture/",

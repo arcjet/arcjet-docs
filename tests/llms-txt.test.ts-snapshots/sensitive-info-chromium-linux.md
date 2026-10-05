@@ -4,7 +4,7 @@ Arcjet sensitive information detection lets you detect and block sensitive data 
 
 Sensitive information detection is Arcjet’s [AI Data Loss Prevention layer](/ai-protection/data-loss-prevention) – stopping PII from leaking into AI model context, training data, or third-party tool calls made by agents. When a user pastes a credit card number or email address into a chat prompt, Arcjet catches it before it reaches your AI provider. All detection runs entirely locally in your own environment. No request body data ever leaves your infrastructure. To apply the same detection inside agent tool handlers and pipelines, see [Arcjet Guards](/guards).
 
-Detection runs through a pluggable [backend](/sensitive-info/reference#detection-backends). The built-in WebAssembly engine ships with the SDK and detects email addresses, card numbers, IP addresses, and phone numbers. For broader coverage, an optional Rampart package (`@arcjet/sensitive-info-rampart` for JavaScript, the `arcjet[sensitive-info-rampart]` extra for Python) runs an on-device named-entity-recognition (NER) model that also detects **names, addresses, and government or financial identifiers** – all still local to your environment, with the model weights bundled so nothing is fetched at runtime. Either backend can be extended with custom patterns you define.
+Detection runs through a pluggable [backend](/sensitive-info/reference#detection-backends). The built-in WebAssembly engine ships with the SDK and detects email addresses, card numbers, IP addresses, and phone numbers. For broader coverage, an optional Rampart package (`@arcjet/sensitive-info-rampart` for JavaScript, the `arcjet[sensitive-info-rampart]` extra for Python, or `github.com/arcjet/arcjet-go/sensitiveinfo/rampart` for Go) runs an on-device named-entity-recognition (NER) model that also detects **names, addresses, and government or financial identifiers** – all still local to your environment, with the model weights bundled so nothing is fetched at runtime. Either backend can be extended with custom patterns you define.
 
 Sensitive info detection works on the request body. To detect specific information in headers or other request fields, use [Arcjet filters](/filters). For AI endpoints, pair sensitive info detection with [prompt injection detection](/prompt-injection) to also block hostile instructions and jailbreak attempts before they reach your model.
 
@@ -63,7 +63,7 @@ Rampart backend
 
 ✅
 
-✅ Model + recognizer
+✅ Model (Go); model + recognizer (JS, Python)
 
 `IP_ADDRESS`
 
@@ -180,6 +180,8 @@ Custom
 ✅ `recognizers` option
 
 For the Rampart backend, **Model** means the type is detected by the on-device NER model, and **Recognizer** means it is detected by a deterministic, validated pattern (mirroring Rampart’s deterministic redaction layer). Where the model and a recognizer overlap on the same text, the recognizer wins.
+
+On the Go Rampart backend, phone numbers are left to the model because their digit shape overlaps with financial and government identifiers. They are not in `rampart.DefaultRecognizers`. Pass any of these types to `Allow` or `Deny`, or use `rampart.Entities()` for the full set.
 
 The Rampart model is compact (a ~14.7 MB, 4-bit quantized artifact) and fast – around 6.6 ms median inference on Node.js – so it runs inline on each request, and recalls ~98% of private terms across the seven Latin-script languages it supports. See the [reference](/sensitive-info/reference#model-accuracy-and-performance) and the [model card](https://huggingface.co/nationaldesignstudio/rampart) for the full accuracy and latency breakdown.
 

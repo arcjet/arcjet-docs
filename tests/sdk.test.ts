@@ -120,7 +120,7 @@ test.describe("sdkFromPathname", () => {
     ["/sdk/python/plus/fastapi/get-started/", "python"],
     ["/sdk/langchain/guards/quick-start/", "langchain"],
     ["/get-started/", undefined],
-    ["/sdk/go/get-started/", undefined],
+    ["/sdk/go/get-started/", "go"],
   ];
 
   for (const [pathname, expected] of cases) {
