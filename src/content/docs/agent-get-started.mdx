@@ -347,9 +347,11 @@ if decision.conclusion == "DENY":
     raise RuntimeError(f"Denied: {decision.reason}")
 ```
 
-Labels are slugs: lowercase letters, digits, dash, underscore, and dot. They
-must start and end with a lowercase letter or digit. Uppercase is rejected, so
-use `tools.get-weather` or `tools.get_weather`, not `tools.getWeather`.
+Labels are slugs: ASCII letters, digits, dash, underscore, and dot. They must
+start and end with a letter or digit, and they are case-sensitive, so
+`tools.getWeather` and `tools.getweather` are different labels. Uppercase
+letters need `@arcjet/guard` 1.14.1, `arcjet` 1.4.0 for Python, or `arcjet-go`
+v1.2.0 or later; earlier versions reject them.
 Hardcode them rather than building them from user input, so they stay
 greppable and the Console can group by them.
 

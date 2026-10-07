@@ -37,9 +37,11 @@ see <Link.Page href="/guards/authoring#generate-the-sdk-call">Generate the SDK c
 
 `label` identifies the action boundary and selects its policy. Use a hardcoded,
 past-tense action name such as `email.sent` or `refund.issued`. Labels use
-lowercase letters, digits, dashes, underscores, and dots, must start and end
-with a lowercase letter or digit, and are limited to 256 bytes. One policy owns
-a label.
+ASCII letters, digits, dashes, underscores, and dots, must start and end with a
+letter or digit, are case-sensitive, and are limited to 256 bytes. Uppercase
+letters need `@arcjet/guard` 1.14.1, `arcjet` 1.4.0 for Python, or `arcjet-go`
+v1.2.0 or later. One policy owns a label, and a policy whose label differs from
+another live policy's only in case cannot be saved.
 
 A label the service will not match reads as `ALLOW` with `hasFailedOpen()` /
 `has_failed_open()` / `HasFailedOpen()` false, so the guard does not run.

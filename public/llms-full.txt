@@ -307,8 +307,9 @@ if decision.HasFailedOpen() {
 
 Guard also supports rate limiting, sensitive information detection, custom
 local rules, and content moderation (`GuardModerateContent`). Use `Capture`
-to record what happened after a Guard call. Labels and buckets must be
-lowercase slugs containing letters, digits, dashes, or dots. Standard
+to record what happened after a Guard call. Labels and buckets are slugs
+containing ASCII letters, digits, dashes, underscores, or dots; uppercase
+letters need v1.2.0 or later. Standard
 `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` variables configure outbound calls.
 
 Every Guard rule constructor requires `Mode` (`ModeLive` or `ModeDryRun`). An
