@@ -1,7 +1,8 @@
 import os
 
 from arcjet.guard import LocalDetectSensitiveInfo, launch_arcjet
-from langchain_core.tools import ToolException, tool
+from arcjet.guard.langchain import guard_tool
+from langchain_core.tools import tool
 
 arcjet = launch_arcjet(key=os.environ["ARCJET_KEY"])
 detect_pii = LocalDetectSensitiveInfo(
@@ -9,23 +10,19 @@ detect_pii = LocalDetectSensitiveInfo(
 )
 
 
-# guard_tool takes a fixed list of rules, so a check that needs the
-# argument value goes in the tool body, before the work happens. A
-# ToolException with handle_tool_error set reaches the model as an error
-# result instead of ending the run.
 @tool
 async def save_note(order_id: str, note: str) -> dict:
     """Save a free-text note on an order."""
-    decision = await arcjet.guard(
-        label="note.saved",
-        rules=[detect_pii(note)],
-    )
-    if decision.conclusion == "DENY":
-        raise ToolException("Note contains sensitive information")
-    if decision.has_failed_open():
-        raise ToolException("Note could not be checked for sensitive information")
-
     return {"order_id": order_id, "note": note}
 
 
+# A denial reaches the model as an error result instead of ending the run.
 save_note.handle_tool_error = True
+
+save_note = guard_tool(
+    guard=arcjet,
+    tool=save_note,
+    action="note.saved",
+    # Called with the tool call's arguments, before the tool runs.
+    rules=lambda arguments, _config: [detect_pii(arguments["note"])],
+)
