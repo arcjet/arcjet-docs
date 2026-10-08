@@ -459,10 +459,11 @@ func must[T any](value T, err error) T {
 }
 ```
 
-Guard labels are slugs: lowercase letters, digits, dashes, underscores, and
-dots, starting and ending with a lowercase letter or digit. Uppercase is
-rejected, so use `tools.get-weather` or `tools.get_weather`, not
-`tools.getWeather`. Use a stable, hardcoded label for each operation and an
+Guard labels are slugs: ASCII letters, digits, dashes, underscores, and dots,
+starting and ending with a letter or digit. They are case-sensitive, so
+`tools.getWeather` and `tools.getweather` are different labels. Uppercase
+letters need `arcjet-go` v1.2.0 or later. Use a stable, hardcoded label for
+each operation and an
 explicit rate-limit key such as a user ID, session ID, or API key.
 
 `Bucket` on a rate-limit rule is a separate identifier from the Guard label.

@@ -1014,7 +1014,7 @@ bound rule inputs, and optional metadata:
 
 | Parameter   | Type                      | Description |
 | ----------- | ------------------------- | ----------- |
-| `label`     | `str`                     | Label identifying this guard call (required). A slug: lowercase letters, digits, dash (`-`), dot (`.`), and underscore (`_`); must start and end with a lowercase letter or digit |
+| `label`     | `str`                     | Label identifying this guard call (required). A slug: ASCII letters, digits, dash (`-`), dot (`.`), and underscore (`_`); must start and end with a letter or digit. Case-sensitive; uppercase letters need `arcjet` 1.4.0 or later |
 | `rules`     | `Sequence[RuleWithInput]` | Bound rule inputs. Defaults to empty, which still contacts Guard so a remote policy selected by `label` can apply |
 | `actor`     | `str \| None`             | Trusted, application-asserted identity. The SDK never derives it from a request or from tool arguments |
 | `inputs`    | `PolicyInputMap \| None`  | Named values built with `server_input.*` or `local_input.*` – see <Link.Page href="/guards/remote-policies">Policy contract</Link.Page> |
@@ -1074,10 +1074,11 @@ window results expose `remaining_requests`, `max_requests`, and
 `reset_at_unix_seconds`.
 
 Hardcode the `label` argument to `guard()` as a string literal (for example,
-`"tools.get-weather"`, not `f"tools.{name}"`). Labels are slugs – lowercase
+`"tools.get-weather"`, not `f"tools.{name}"`). Labels are slugs – ASCII
 letters, digits, dash (`-`), dot (`.`), and underscore (`_`) – and must start
-and end with a lowercase letter or digit. Uppercase is rejected, so use
-`tools.get-weather` or `tools.get_weather`, not `tools.getWeather`. Hardcoded
+and end with a letter or digit. They are case-sensitive, so `tools.getWeather`
+and `tools.getweather` are different labels. Uppercase letters need `arcjet`
+1.4.0 or later. Hardcoded
 labels stay greppable and the dashboard groups by them. Pass `metadata`
 whenever you have useful auditing context – nested objects and arrays are
 accepted, and it shows up in the dashboard.
