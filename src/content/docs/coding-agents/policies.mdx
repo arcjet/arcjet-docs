@@ -125,7 +125,7 @@ Arcjet will run every policy attached to the specific event in one round trip so
 | `coding-agent.no-auto-mode` | Tool calls while `permission_mode` is `auto`, `bypassPermissions`, or `dontAsk` (Claude Code and Codex; Copilot, Cursor, and Muse Code do not report a mode) |
 | `coding-agent.aws-access` | The AWS CLI (including `/…/aws`), AWS API hosts in `destinations`, and AWS credential paths / env-name markers |
 
-See <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>
+See <Link.Page href="/coding-agents/hooks#allowed-models">Allowed models</Link.Page>
 for the coverage table. For blocking cloud CLIs and requiring human approval,
 see [Block AWS access](#block-aws-access) and
 [Require human approval](#require-human-approval).
@@ -359,7 +359,7 @@ The denial reason sent to the agent names the rule ID `disallowed-model`,
 the policy label, and the decision ID. It never includes the rule's
 description.
 
-See <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>
+See <Link.Page href="/coding-agents/hooks#allowed-models">Allowed models</Link.Page>
 for the coverage table and the already-selected-model gap on Claude Code.
 
 ### Require human approval
@@ -516,7 +516,7 @@ after injection or sensitive-information findings earlier in the session.
 
 ## Related
 
-- <Link.Page href="/coding-agents">Secure coding agents</Link.Page> – the endpoint, the events, and where enforcement stops
+- <Link.Page href="/coding-agents/hooks">Coding agent hook reference</Link.Page> – the endpoint, the events, and where enforcement stops
 - <Link.Page href="/coding-agents/claude-code">Secure Claude Code</Link.Page>
 - <Link.Page href="/coding-agents/copilot">Secure GitHub Copilot</Link.Page>
 - <Link.Page href="/coding-agents/muse-code">Secure Muse Code</Link.Page>
