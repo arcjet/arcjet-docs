@@ -121,7 +121,7 @@ Arcjet will run every policy attached to the specific event in one round trip so
 | `coding-agent.prompt-injection` | Instructions the injection detector flags in a prompt |
 | `coding-agent.sensitive-info` | Card numbers and Social Security numbers in a prompt |
 | `coding-agent.model-allowlist` | A model switch, prompt, or tool call whose model is outside the list the author wrote in Rego. Claude Code denies the switch only; Codex and Cursor deny the prompt and the tool call; Copilot and Muse Code are not covered. |
-| `coding-agent.session-analysis` | Shell, web, MCP, and file writes while any session-taint flag is active |
+| `coding-agent.session-analysis` | Shell, web, MCP, and file writes once the session is flagged `prompt_injection`, `data_exfiltration`, `code_execution_risk`, `sensitive_data_exposure`, or `elevated_risk`; only web and MCP calls when it's flagged `credential_access`, so local shell commands and writes continue |
 | `coding-agent.no-auto-mode` | Tool calls while `permission_mode` is `auto`, `bypassPermissions`, or `dontAsk` (Claude Code and Codex; Copilot, Cursor, and Muse Code do not report a mode) |
 | `coding-agent.aws-access` | The AWS CLI (including `/…/aws`), AWS API hosts in `destinations`, and AWS credential paths / env-name markers |
 
