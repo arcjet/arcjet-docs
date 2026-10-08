@@ -95,12 +95,26 @@ Cursor's `permission: "allow"`, because both are grants that skip the agent's
 own permission flow. Codex can also rewrite the call when an allow carries
 `updatedInput`.
 
-A denial uses the agent's own hook-output shape and names the rule ID that
-fired, for example:
+A denial uses the agent's own hook-output shape and carries a denial reason.
+The reason names the rule IDs that fired, the label of the policy that denied
+the action, the decision ID, and a link to report a false positive, for
+example:
 
 ```text
-Blocked by Arcjet policy: destructive-command.
+Blocked by Arcjet policy: destructive-command. Policy: coding-agent.destructive-command. Decision: gdec_01jz8k3m4n5p6q7r8s9t0v1w2x. Report false positive: https://console.arcjet.com/report/fp/gdec_01jz8k3m4n5p6q7r8s9t0v1w2x.
 ```
+
+Use the decision ID to find the matching row in the site's **Activity** in
+the Console. The reason also has the following variations:
+
+- If the session carries session-taint flags, the reason names them before
+  the policy label, such as `Category: credential_access.`
+- If more than one policy denies the action, the reason lists every label
+  and decision ID.
+- If a policy fails closed without a rule firing, the reason starts with
+  `Blocked by Arcjet: this action was not allowed by policy.` instead.
+
+The reason never includes a rule's description.
 
 | Event                   | Claude Code / Codex / Muse Code                        | Copilot                                         | Cursor                                              |
 | ----------------------- | ------------------------------------------------------ | ----------------------------------------------- | --------------------------------------------------- |
@@ -115,15 +129,15 @@ the shape needs more detail.
 
 | Event                   | Vendor      | Denial |
 | ----------------------- | ----------- | ------ |
-| `pre-model-switch`      | Claude Code | `hookSpecificOutput.hookEventName` is `PreModelSwitch`, `permissionDecision` is `deny`, `permissionDecisionReason` is the rule ID. Exit 0 with that JSON. |
-| `pre-tool-use`          | Codex       | `hookSpecificOutput.hookEventName` is `PreToolUse`, `permissionDecision` is `deny`, `permissionDecisionReason` is the rule ID. Codex also accepts the legacy `{decision: "block", reason}` shape; send the `permissionDecision` shape only. |
-| `permission-request`    | Codex       | `hookSpecificOutput.decision.behavior` is `deny`, `message` is the rule ID. |
-| `user-prompt-submit`    | Codex       | Top-level `{decision: "block", reason}`. `reason` is the rule ID. |
-| `pre-tool-use`          | Muse Code   | `hookSpecificOutput.hookEventName` is `PreToolUse`, `permissionDecision` is `deny`, `permissionDecisionReason` is the rule ID. |
-| `permission-request`    | Muse Code   | `hookSpecificOutput.decision.behavior` is `deny`, `message` is the rule ID. |
-| `user-prompt-submit`    | Muse Code   | Top-level `{decision: "block", reason}`. `reason` is the rule ID. |
-| `pre-tool-use`          | Cursor      | `{permission: "deny", user_message, agent_message}`. Both messages are the rule ID. Arcjet doesn't send `ask`: Cursor accepts it on this event and doesn't enforce it. |
-| `user-prompt-submit`    | Cursor      | `{continue: false, user_message}`. `user_message` is the rule ID. This is `beforeSubmitPrompt`. |
+| `pre-model-switch`      | Claude Code | `hookSpecificOutput.hookEventName` is `PreModelSwitch`, `permissionDecision` is `deny`, `permissionDecisionReason` is the denial reason. Exit 0 with that JSON. |
+| `pre-tool-use`          | Codex       | `hookSpecificOutput.hookEventName` is `PreToolUse`, `permissionDecision` is `deny`, `permissionDecisionReason` is the denial reason. Codex also accepts the legacy `{decision: "block", reason}` shape; send the `permissionDecision` shape only. |
+| `permission-request`    | Codex       | `hookSpecificOutput.decision.behavior` is `deny`, `message` is the denial reason. |
+| `user-prompt-submit`    | Codex       | Top-level `{decision: "block", reason}`. `reason` is the denial reason. |
+| `pre-tool-use`          | Muse Code   | `hookSpecificOutput.hookEventName` is `PreToolUse`, `permissionDecision` is `deny`, `permissionDecisionReason` is the denial reason. |
+| `permission-request`    | Muse Code   | `hookSpecificOutput.decision.behavior` is `deny`, `message` is the denial reason. |
+| `user-prompt-submit`    | Muse Code   | Top-level `{decision: "block", reason}`. `reason` is the denial reason. |
+| `pre-tool-use`          | Cursor      | `{permission: "deny", user_message, agent_message}`. Both messages are the denial reason. Arcjet doesn't send `ask`: Cursor accepts it on this event and doesn't enforce it. |
+| `user-prompt-submit`    | Cursor      | `{continue: false, user_message}`. `user_message` is the denial reason. This is `beforeSubmitPrompt`. |
 
 ## Enforcement limitations
 

@@ -330,12 +330,13 @@ the hook result. Echo the body as-is.
 
 | Event                | Denial body | Honored |
 | -------------------- | ----------- | ------- |
-| `pre-tool-use`       | `{ "permission": "deny", "user_message": "RULE_ID", "agent_message": "RULE_ID" }` | Yes |
-| `user-prompt-submit` | `{ "continue": false, "user_message": "RULE_ID" }` | Yes |
+| `pre-tool-use`       | `{ "permission": "deny", "user_message": "REASON", "agent_message": "REASON" }` | Yes |
+| `user-prompt-submit` | `{ "continue": false, "user_message": "REASON" }` | Yes |
 
 An allow is `{}`. Cursor treats `permission: "allow"` as a grant that
-skips its own permission flow. The denial reason names the rule IDs that
-fired and nothing else.
+skips its own permission flow. `REASON` is the denial reason. It names the
+rule IDs that fired, the denying policy's label and decision ID, and a link
+to report a false positive. It never includes a rule's description.
 
 ## Supply the Arcjet key
 
