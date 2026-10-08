@@ -50,6 +50,10 @@ export const main = [
         link: "/coding-agents/policies",
       },
       {
+        label: "Hook reference",
+        link: "/coding-agents/hooks",
+      },
+      {
         label: "Block personal accounts",
         link: "/coding-agents/block-personal-accounts",
       },

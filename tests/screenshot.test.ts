@@ -46,6 +46,7 @@ const PATHS_FROM_SITEMAP = [
   "/coding-agents/cursor/",
   "/coding-agents/muse-code/",
   "/coding-agents/policies/",
+  "/coding-agents/hooks/",
   "/coding-agents/block-personal-accounts/",
   "/guards/",
   "/guards/claude-agent-sdk/",
