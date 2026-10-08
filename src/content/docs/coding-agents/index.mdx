@@ -21,9 +21,9 @@ supported agent.
 
 Arcjet adds the following controls to a coding agent:
 
-- Block risky tool calls before they run, such as `rm -rf`, a read of
-  `~/.aws/credentials`, a `git push --force`, or a call to an unapproved MCP
-  server.
+- Block risky tool calls before they run, such as destructive shell commands
+  or reads of credential files. Each check is a separate policy, so you
+  publish only the ones you need.
 - Screen prompts for prompt injection and sensitive information before they
   reach the model.
 - Limit outbound requests to approved domains, and deny destinations that
@@ -117,7 +117,7 @@ starters, and how to write your own, see
 
 | Agent                                                              | Hook type       | Tool call | Prompt        | Model switch  | If Arcjet doesn't answer |
 | ------------------------------------------------------------------ | --------------- | --------- | ------------- | ------------- | ------------------------ |
-| <Link.Page href="/coding-agents/claude-code">Claude Code</Link.Page> | HTTP            | Enforced  | Enforced      | Enforced      | Fails open, except a model switch |
+| <Link.Page href="/coding-agents/claude-code">Claude Code</Link.Page> | HTTP            | Enforced  | Enforced      | Enforced      | Fails open; a model switch fails closed |
 | <Link.Page href="/coding-agents/cursor">Cursor</Link.Page>         | Command wrapper | Enforced  | Enforced      | Not available | Fails closed             |
 | <Link.Page href="/coding-agents/copilot">GitHub Copilot</Link.Page> | HTTP            | Enforced  | Recorded only | Not available | Fails open               |
 | <Link.Page href="/coding-agents/muse-code">Muse Code</Link.Page>   | Command wrapper | Enforced  | Enforced      | Not available | Fails closed             |
