@@ -121,7 +121,7 @@ Arcjet will run every policy attached to the specific event in one round trip so
 | `coding-agent.prompt-injection` | Instructions the injection detector flags in a prompt |
 | `coding-agent.sensitive-info` | Card numbers and Social Security numbers in a prompt |
 | `coding-agent.model-allowlist` | A model switch, prompt, or tool call whose model is outside the list the author wrote in Rego. Claude Code denies the switch only; Codex and Cursor deny the prompt and the tool call; Copilot and Muse Code are not covered. |
-| `coding-agent.tainted-session` | Shell, web, MCP, and file writes while any session-taint flag is active |
+| `coding-agent.session-analysis` | Shell, web, MCP, and file writes while any session-taint flag is active |
 | `coding-agent.no-auto-mode` | Tool calls while `permission_mode` is `auto`, `bypassPermissions`, or `dontAsk` (Claude Code and Codex; Copilot, Cursor, and Muse Code do not report a mode) |
 | `coding-agent.aws-access` | The AWS CLI (including `/…/aws`), AWS API hosts in `destinations`, and AWS credential paths / env-name markers |
 
@@ -355,8 +355,9 @@ Code `pre-model-switch` always has the input, so an id outside the list
 matches. Codex and Cursor match whenever the translated id is outside
 the list.
 
-The denial reason sent to the agent is the rule id `disallowed-model` and
-nothing else.
+The denial reason sent to the agent names the rule ID `disallowed-model`,
+the policy label, and the decision ID. It never includes the rule's
+description.
 
 See <Link.Page href="/coding-agents#allowed-models">Allowed models</Link.Page>
 for the coverage table and the already-selected-model gap on Claude Code.
@@ -462,12 +463,12 @@ take has its own deny:
 | CLI name | `aws s3 ls`, `/usr/local/bin/aws …` | `coding-agent.aws-access` (`aws-cli`) |
 | Destination / API | `curl https://sts.amazonaws.com`, `WebFetch` of an AWS host | `coding-agent.aws-access` (`aws-destination`) |
 | Credential files | Reading `~/.aws/credentials` or naming them in a command | `coding-agent.aws-access` (`aws-credential`), plus `coding-agent.credential-access` for other secrets |
-| Session taint | Further shell, web, MCP, and writes after injection or PII | `coding-agent.tainted-session` |
+| Session taint | Further shell, web, MCP, and writes after injection or PII | `coding-agent.session-analysis` |
 
 Publish the layers you need. Arcjet runs every policy attached to the same
 **Execute on** option in one round trip and applies the most restrictive
-decision. A denied AWS call does not by itself mark the session tainted —
-publish `coding-agent.tainted-session` when you want risky follow-ups locked
+decision. A denied AWS call does not by itself mark the session tainted –
+publish `coding-agent.session-analysis` when you want risky follow-ups locked
 after injection or sensitive-information findings earlier in the session.
 
 ## Write your own
@@ -509,8 +510,9 @@ after injection or sensitive-information findings earlier in the session.
 2. Let developers work, then open the site's **Activity** in the Console and
    read the tool calls each dry-run rule would have denied.
 3. Set the rule live in a second edit.
-4. Watch the denial reasons developers see. A denial names the rule ID, so a
-   rule ID a developer can understand is one they can work around properly.
+4. Watch the denial reasons developers see. A denial names the rule ID and
+   the policy label, so a rule ID and label a developer can understand are
+   ones they can work around properly.
 
 ## Related
 

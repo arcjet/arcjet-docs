@@ -42,12 +42,26 @@ small.
 Policies work across every supported coding agent, so you don't write a
 separate policy for each one.
 
-If a policy denies an action, the agent is told the rule ID, for
+If a policy denies an action, Arcjet sends the agent a denial reason. The
+reason names the rule IDs that fired, the label of the policy that denied
+the action, the decision ID, and a link to report a false positive, for
 example:
 
 ```text
-Blocked by Arcjet policy: destructive-command.
+Blocked by Arcjet policy: destructive-command. Policy: coding-agent.destructive-command. Decision: gdec_01jz8k3m4n5p6q7r8s9t0v1w2x. Report false positive: https://console.arcjet.com/report/fp/gdec_01jz8k3m4n5p6q7r8s9t0v1w2x.
 ```
+
+Use the decision ID to find the matching row in the site's **Activity** in
+the Console. The reason also has the following variations:
+
+- If the session carries session-taint flags, the reason names them before
+  the policy label, such as `Category: credential_access.`
+- If more than one policy denies the action, the reason lists every label
+  and decision ID.
+- If a policy fails closed without a rule firing, the reason starts with
+  `Blocked by Arcjet: this action was not allowed by policy.` instead.
+
+The reason never includes a rule's description.
 
 ### Policy enforcement
 
@@ -125,15 +139,15 @@ permission flow. Codex can also rewrite the call when an allow carries
 
 | Event                   | Vendor      | Denial |
 | ----------------------- | ----------- | ------ |
-| `pre-model-switch`      | Claude Code | `hookSpecificOutput.hookEventName` is `PreModelSwitch`, `permissionDecision` is `deny`, `permissionDecisionReason` is the rule id. Exit 0 with that JSON. |
-| `pre-tool-use`          | Codex       | `hookSpecificOutput.hookEventName` is `PreToolUse`, `permissionDecision` is `deny`, `permissionDecisionReason` is the rule id. The legacy `{decision: "block", reason}` shape is also accepted by Codex; send the `permissionDecision` shape only. |
-| `permission-request`    | Codex       | `hookSpecificOutput.decision.behavior` is `deny`, `message` is the rule id. |
-| `user-prompt-submit`    | Codex       | Top-level `{decision: "block", reason}`. `reason` is the rule id. |
-| `pre-tool-use`          | Muse Code   | `hookSpecificOutput.hookEventName` is `PreToolUse`, `permissionDecision` is `deny`, `permissionDecisionReason` is the rule id. |
-| `permission-request`    | Muse Code   | `hookSpecificOutput.decision.behavior` is `deny`, `message` is the rule id. |
-| `user-prompt-submit`    | Muse Code   | Top-level `{decision: "block", reason}`. `reason` is the rule id. |
-| `pre-tool-use`          | Cursor      | `{permission: "deny", user_message, agent_message}`. Both messages are the rule id. `ask` is not sent: Cursor accepts it on this event and does not enforce it. |
-| `user-prompt-submit`    | Cursor      | `{continue: false, user_message}`. `user_message` is the rule id. This is `beforeSubmitPrompt`. |
+| `pre-model-switch`      | Claude Code | `hookSpecificOutput.hookEventName` is `PreModelSwitch`, `permissionDecision` is `deny`, `permissionDecisionReason` is the denial reason. Exit 0 with that JSON. |
+| `pre-tool-use`          | Codex       | `hookSpecificOutput.hookEventName` is `PreToolUse`, `permissionDecision` is `deny`, `permissionDecisionReason` is the denial reason. The legacy `{decision: "block", reason}` shape is also accepted by Codex; send the `permissionDecision` shape only. |
+| `permission-request`    | Codex       | `hookSpecificOutput.decision.behavior` is `deny`, `message` is the denial reason. |
+| `user-prompt-submit`    | Codex       | Top-level `{decision: "block", reason}`. `reason` is the denial reason. |
+| `pre-tool-use`          | Muse Code   | `hookSpecificOutput.hookEventName` is `PreToolUse`, `permissionDecision` is `deny`, `permissionDecisionReason` is the denial reason. |
+| `permission-request`    | Muse Code   | `hookSpecificOutput.decision.behavior` is `deny`, `message` is the denial reason. |
+| `user-prompt-submit`    | Muse Code   | Top-level `{decision: "block", reason}`. `reason` is the denial reason. |
+| `pre-tool-use`          | Cursor      | `{permission: "deny", user_message, agent_message}`. Both messages are the denial reason. `ask` is not sent: Cursor accepts it on this event and does not enforce it. |
+| `user-prompt-submit`    | Cursor      | `{continue: false, user_message}`. `user_message` is the denial reason. This is `beforeSubmitPrompt`. |
 
 Policy inputs identify the agent as `agent_vendor` / `agent_product`:
 `anthropic` / `claude-code`, `github` / `copilot`, `openai` / `codex`,
