@@ -28,12 +28,12 @@ renaming a policy isn't a move.
 The create page asks whether the policy guards a coding agent or an action in
 your own application, and the answer decides the editor.
 
-|               | Application policy                                  | Coding agent policy                                              |
-| ------------- | --------------------------------------------------- | ---------------------------------------------------------------- |
-| Guards        | An action your own code takes                       | A tool call a developer's Claude Code, Copilot, Codex, or Cursor session makes |
-| Selected by   | The `label` a `guard()` call passes                 | What it **executes on**: Tool call or Prompt                     |
-| Inputs        | You declare them and the application sends them     | Fixed. Arcjet builds every value from the agent's hook payload   |
-| To turn it on | Write the `guard()` call                            | Publish it                                                       |
+|               | Application policy                              | Coding agent policy                                                                                             |
+| ------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Guards        | An action your own code takes                   | A tool call, prompt, or model switch in a developer's Claude Code, Copilot, Codex, Cursor, or Muse Code session |
+| Selected by   | The `label` a `guard()` call passes             | What it **executes on**: **Tool call**, **Prompt**, **Model switch**, or a combination                          |
+| Inputs        | You declare them and the application sends them | Fixed. Arcjet builds every value from the agent's hook payload                                                  |
+| To turn it on | Write the `guard()` call                        | Publish it                                                                                                      |
 
 The rest of this page applies to both kinds. For the coding agent contract and
 its starter policies, see
