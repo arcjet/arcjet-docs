@@ -77,14 +77,16 @@ Every policy input is named and explicitly constructed. Plain values are
 rejected; the SDK doesn't inspect the tool schema or discover arguments for
 you.
 
-| Exposure | Type        | JavaScript / TypeScript                | Python                            | Example value                        |
-| -------- | ----------- | -------------------------------------- | --------------------------------- | ------------------------------------ |
-| `SERVER` | String      | `policyInput.server.string(value)`     | `server_input.string(value)`      | `"customer@example.com"`             |
-| `SERVER` | Boolean     | `policyInput.server.boolean(value)`    | `server_input.boolean(value)`     | `true`                               |
-| `SERVER` | Integer     | `policyInput.server.integer(value)`    | `server_input.integer(value)`     | `3`                                  |
-| `SERVER` | Number      | `policyInput.server.number(value)`     | `server_input.number(value)`      | `49.95`                              |
-| `SERVER` | String list | `policyInput.server.stringList(value)` | `server_input.string_list(value)` | `["a@example.com", "b@example.com"]` |
-| `LOCAL`  | String      | `policyInput.local.string(value)`      | `local_input.string(value)`       | `"Email body to inspect"`            |
+| Exposure | Type        | JavaScript / TypeScript                | Python                            | Go                                          | Example value                        |
+| -------- | ----------- | -------------------------------------- | --------------------------------- | ------------------------------------------- | ------------------------------------ |
+| `SERVER` | String      | `policyInput.server.string(value)`     | `server_input.string(value)`      | `arcjet.GuardPolicyServerString(value)`     | `"customer@example.com"`             |
+| `SERVER` | Boolean     | `policyInput.server.boolean(value)`    | `server_input.boolean(value)`     | `arcjet.GuardPolicyServerBoolean(value)`    | `true`                               |
+| `SERVER` | Integer     | `policyInput.server.integer(value)`    | `server_input.integer(value)`     | `arcjet.GuardPolicyServerInteger(value)`    | `3`                                  |
+| `SERVER` | Number      | `policyInput.server.number(value)`     | `server_input.number(value)`      | `arcjet.GuardPolicyServerNumber(value)`     | `49.95`                              |
+| `SERVER` | String list | `policyInput.server.stringList(value)` | `server_input.string_list(value)` | `arcjet.GuardPolicyServerStringList(value)` | `["a@example.com", "b@example.com"]` |
+| `LOCAL`  | String      | `policyInput.local.string(value)`      | `local_input.string(value)`       | `arcjet.GuardPolicyLocalString(value)`      | `"Email body to inspect"`            |
+
+In Go, an integer input takes an `int64` and a number input takes a `float64`.
 
 An email policy can receive a selected recipient, the trusted allow list to
 compare it with, and a message body that stays local:
