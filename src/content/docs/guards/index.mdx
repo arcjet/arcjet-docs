@@ -13,11 +13,17 @@ runs, and they record every decision so that you can see what happened and why.
 An agent turns model output into real actions: it sends email, issues refunds,
 queries databases, fetches URLs, and calls MCP servers. Those actions often run
 inside a tool handler, a queue consumer, or a workflow step, with no HTTP
-request for a firewall or `protect()` to inspect. You add one `guard()` call
-immediately before the action and pass it the values that matter, such as the
-recipient, the amount, or the user. Arcjet evaluates the policy for that action
-and returns `ALLOW` or `DENY`. Your security team can change the policy in the
-Arcjet Console without a deployment.
+request for a firewall to inspect. The same applies to Arcjet's own
+<Link.Page href="/get-started">`protect()`</Link.Page> function, which checks
+each HTTP request in your route handlers.
+
+Agent guards cover those actions instead. Add a call to the Arcjet SDK's
+<Link.Page href="/guards/reference#direct-guard-api">`guard()`</Link.Page>
+function immediately before the action, and pass it the values that matter,
+such as the recipient, the amount, or the user. Arcjet evaluates the Guard
+policy for that action and returns `ALLOW` or `DENY`. A Guard policy is the
+set of rules for one action, which your security team publishes and changes in
+the [Arcjet Console](https://console.arcjet.com) without a deployment.
 
 ## Capabilities
 
@@ -25,17 +31,19 @@ Agent guards add the following controls to your own agents and applications:
 
 - Deny an action based on application state that only your code knows, such as
   a refund over the user's approval limit or an email to an external domain.
-- Act on Arcjet detector findings, such as prompt injection in the message
-  that triggered the action or sensitive information in a body that's about to
-  leave.
+- Act on findings from Arcjet's detectors, which screen a value for threats,
+  such as prompt injection in the message that triggered the action or
+  sensitive information in a body that's about to leave.
 - Screen sensitive information in your own process, so that the raw value
   never reaches Arcjet.
-- Score the hosts that a tool would contact with Arcjet IP threat
-  intelligence, and deny high-risk destinations.
+- Score the hosts that a tool would contact with
+  <Link.Page href="/ip-threat-intelligence">Arcjet IP threat intelligence</Link.Page>,
+  and deny high-risk destinations.
 - Rate limit actions per user, per tool, or per tenant, including actions that
   never arrive over HTTP.
 - Change a policy without redeploying the application, and run each rule in
-  dry run before you set it live.
+  dry run, which records what it would deny without denying it, before you set
+  it live.
 - Record each decision with the policy revision and the inputs it read, and
   record what an allowed action did afterward with
   <Link.Page href="/guards/capture">capture events</Link.Page>.
@@ -75,17 +83,19 @@ adapt.
 ```
 
 1. You call `guard()` immediately before the action, or wrap a tool with a
-   framework integration that makes the call for you. The call names the
-   action with a `label`, such as `email.sent`, and carries the actor and the
-   typed inputs the policy reads.
+   framework integration, an Arcjet adapter for your agent framework that
+   makes the call for you. The call names the action with a `label`, such as
+   `email.sent`. It carries the actor, which is the user or service
+   responsible, and the typed values that the policy reads, called inputs.
 2. Arcjet selects the published policy for that label and evaluates it at the
-   edge. The SDK evaluates inputs marked `LOCAL` in your process.
+   edge, in the Arcjet data center closest to your application. An input that
+   you mark `LOCAL` never leaves your process, so the SDK evaluates it there.
 3. Arcjet returns one `ALLOW` or `DENY` decision. Your code, or the framework
    integration, runs the action only on `ALLOW`. A denied tool call returns a
    result the model can read.
 4. Arcjet records the decision with the policy revision and the inputs it
-   read. It appears in the site's **Activity** in the
-   [Arcjet Console](https://console.arcjet.com).
+   read. It appears in the Console on the **Activity** page of your site, the
+   Arcjet project that your `ARCJET_KEY` belongs to.
 
 For the full call, the decision fields, and fail behavior, see
 <Link.Page href="/guards/reference">Agent guards testing and reference</Link.Page>.
