@@ -30,7 +30,9 @@ the [Arcjet Console](https://console.arcjet.com) without a deployment.
 Agent guards add the following controls to your own agents and applications:
 
 - Deny an action based on application state that only your code knows, such as
-  a refund over the user's approval limit or an email to an external domain.
+  a refund over the user's approval limit, an email to an external domain, a
+  run that would exceed its spend budget, or a production change that nobody
+  reviewed.
 - Act on findings from Arcjet's detectors, which screen a value for threats,
   such as prompt injection in the message that triggered the action or
   sensitive information in a body that's about to leave.
@@ -88,8 +90,9 @@ adapt.
    `email.sent`. It carries the actor, which is the user or service
    responsible, and the typed values that the policy reads, called inputs.
 2. Arcjet selects the published policy for that label and evaluates it at the
-   edge, in the Arcjet data center closest to your application. An input that
-   you mark `LOCAL` never leaves your process, so the SDK evaluates it there.
+   edge, in the <Link.Page href="/regions">Arcjet region</Link.Page> closest to
+   your application. An input that you mark `LOCAL` never leaves your
+   process, so the SDK evaluates it there.
 3. Arcjet returns one `ALLOW` or `DENY` decision. Your code, or the framework
    integration, runs the action only on `ALLOW`. A denied tool call returns a
    result the model can read.
