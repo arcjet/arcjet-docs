@@ -1,4 +1,5 @@
 import { WithArcjetRules, sensitiveInfo } from "@arcjet/nest";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 import { Body, Injectable, Post, Req } from "@nestjs/common";
 
 // This would normally go in your controller file, such as:
@@ -10,7 +11,8 @@ import { Body, Injectable, Post, Req } from "@nestjs/common";
   sensitiveInfo({
     mode: "LIVE", // Will block requests, use "DRY_RUN" to log only
     // allow: ["EMAIL"], Will block all sensitive information types other than email.
-    deny: ["EMAIL"], // Will block email addresses
+    deny: ["EMAIL"], // Will block email addresses,
+    backend: rampart(),
   }),
 ])
 export class PageController {

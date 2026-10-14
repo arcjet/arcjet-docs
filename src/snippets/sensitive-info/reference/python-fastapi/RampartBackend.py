@@ -5,8 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-# The Rampart backend ships in the optional `arcjet[sensitive-info-rampart]`
-# extra. Install it with: pip install "arcjet[sensitive-info-rampart]"
+# Install the Rampart backend with: pip install "arcjet[sensitive-info-rampart]"
 from arcjet_sensitive_info_rampart import rampart
 
 aj = arcjet(
@@ -14,8 +13,8 @@ aj = arcjet(
     rules=[
         detect_sensitive_info(
             mode=Mode.LIVE,  # Will block requests, use Mode.DRY_RUN to log only
-            # The Rampart model detects names, addresses, and government /
-            # financial identifiers in addition to the built-in types.
+            # Rampart detects names and addresses as well as email addresses
+            # and government identifiers. See the reference for the full list.
             deny=[
                 SensitiveInfoEntityType.EMAIL,
                 SensitiveInfoEntityType.GIVEN_NAME,
@@ -23,8 +22,7 @@ aj = arcjet(
                 SensitiveInfoEntityType.STREET_NAME,
                 SensitiveInfoEntityType.SSN,
             ],
-            # Run detection on-device with the Rampart NER model instead of the
-            # default WebAssembly engine.
+            # Run detection on-device with the Rampart NER model.
             backend=rampart(),
         ),
     ],

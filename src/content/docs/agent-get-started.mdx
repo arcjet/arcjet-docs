@@ -380,11 +380,12 @@ parameter reference and decision API, see [llms-full.txt](/llms-full.txt).
 | Queue worker or background job (Guard) | `tokenBucket` (keyed by user) + `detectPromptInjection` + `localDetectSensitiveInfo`                            |
 | Claude Managed Agents (Guard)          | `tokenBucket` + `detectPromptInjection` + `localDetectSensitiveInfo` on inbound `user.message` and custom tools |
 
-`localDetectSensitiveInfo` detects `EMAIL`, `PHONE_NUMBER`, `IP_ADDRESS`, and
-`CREDIT_CARD_NUMBER` with the bundled detector, entirely on-device. Names,
-addresses, and government or financial identifiers need the Rampart backend.
-Pass `backend: rampart()` on the rule, or `sensitiveInfoBackend: rampart()` on
-the client to cover the sensitive information rule in a remote policy too.
+Run `localDetectSensitiveInfo` with the Rampart backend from
+`@arcjet/sensitive-info-rampart`. Detection runs on-device and covers email
+addresses, phone numbers, IP addresses, card numbers, names, street addresses,
+and government or financial identifiers. Pass `backend: rampart()` on the rule,
+and `sensitiveInfoBackend: rampart()` on the client to cover the sensitive
+information rule in a remote policy too.
 
 ## Secure the coding agent
 

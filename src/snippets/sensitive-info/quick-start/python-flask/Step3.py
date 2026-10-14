@@ -18,7 +18,7 @@ aj = arcjet_sync(
                 SensitiveInfoEntityType.GIVEN_NAME,
                 SensitiveInfoEntityType.SURNAME,
             ],
-            # Use the on-device Rampart NER model instead of the built-in engine.
+            # Run detection on-device with the Rampart NER model.
             backend=rampart(),
         ),
     ],

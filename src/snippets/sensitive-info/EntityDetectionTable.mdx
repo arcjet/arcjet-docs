@@ -1,32 +1,32 @@
-| Entity type          | Built-in engine (default) | Rampart backend         |
-| -------------------- | :-----------------------: | :---------------------- |
-| `EMAIL`              |            ✅             | ✅ Model + recognizer   |
-| `PHONE_NUMBER`       |            ✅             | ✅ Model (Go); model + recognizer (JS, Python) |
-| `IP_ADDRESS`         |            ✅             | ✅ Recognizer           |
-| `CREDIT_CARD_NUMBER` |            ✅             | ✅ Recognizer           |
-| `URL`                |             –             | ✅ Model + recognizer   |
-| `SSN`                |             –             | ✅ Recognizer           |
-| `GIVEN_NAME`         |             –             | ✅ Model                |
-| `SURNAME`            |             –             | ✅ Model                |
-| `TAX_ID`             |             –             | ✅ Model                |
-| `BANK_ACCOUNT`       |             –             | ✅ Model                |
-| `ROUTING_NUMBER`     |             –             | ✅ Model                |
-| `GOVERNMENT_ID`      |             –             | ✅ Model                |
-| `PASSPORT`           |             –             | ✅ Model                |
-| `DRIVERS_LICENSE`    |             –             | ✅ Model                |
-| `BUILDING_NUMBER`    |             –             | ✅ Model                |
-| `STREET_NAME`        |             –             | ✅ Model                |
-| `SECONDARY_ADDRESS`  |             –             | ✅ Model                |
-| `CITY`               |             –             | ✅ Model                |
-| `STATE`              |             –             | ✅ Model                |
-| `ZIP_CODE`           |             –             | ✅ Model                |
-| Custom               |    ✅ `detect` callback   | ✅ `recognizers` option |
+| Entity type          | Detected by             |
+| -------------------- | :---------------------- |
+| `EMAIL`              | Model and recognizer    |
+| `PHONE_NUMBER`       | Model                   |
+| `IP_ADDRESS`         | Recognizer              |
+| `CREDIT_CARD_NUMBER` | Recognizer              |
+| `URL`                | Model and recognizer    |
+| `SSN`                | Recognizer              |
+| `GIVEN_NAME`         | Model                   |
+| `SURNAME`            | Model                   |
+| `TAX_ID`             | Model                   |
+| `BANK_ACCOUNT`       | Model                   |
+| `ROUTING_NUMBER`     | Model                   |
+| `GOVERNMENT_ID`      | Model                   |
+| `PASSPORT`           | Model                   |
+| `DRIVERS_LICENSE`    | Model                   |
+| `BUILDING_NUMBER`    | Model                   |
+| `STREET_NAME`        | Model                   |
+| `SECONDARY_ADDRESS`  | Model                   |
+| `CITY`               | Model                   |
+| `STATE`              | Model                   |
+| `ZIP_CODE`           | Model                   |
+| Custom               | Your own recognizers    |
 
-For the Rampart backend, **Model** means the type is detected by the on-device
-NER model, and **Recognizer** means it is detected by a deterministic, validated
-pattern (mirroring Rampart's deterministic redaction layer). Where the model and
-a recognizer overlap on the same text, the recognizer wins.
+**Model** means the on-device Rampart NER model detects the type. **Recognizer**
+means a deterministic, validated pattern detects it – for example, card numbers
+must pass the Luhn checksum. Where the model and a recognizer overlap on the
+same text, the recognizer wins.
 
-On the Go Rampart backend, phone numbers are left to the model because their
-digit shape overlaps with financial and government identifiers. They are not in
-`rampart.DefaultRecognizers`.
+Phone numbers are left to the model because their digit shape overlaps with
+financial and government identifiers, so the default recognizers don't include
+a phone number pattern.

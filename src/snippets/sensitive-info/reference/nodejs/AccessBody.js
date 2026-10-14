@@ -1,4 +1,5 @@
 import arcjet, { sensitiveInfo } from "@arcjet/node";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 import express from "express";
 
 const app = express();
@@ -10,6 +11,7 @@ const aj = arcjet({
     sensitiveInfo({
       mode: "LIVE",
       deny: ["EMAIL"],
+      backend: rampart(),
     }),
   ],
 });

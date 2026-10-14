@@ -2,12 +2,14 @@ import os
 
 from arcjet.guard import LocalDetectSensitiveInfo, launch_arcjet_sync
 from arcjet.guard.crewai import free_text_arguments, register_arcjet_hooks
+from arcjet_sensitive_info_rampart import rampart
 from crewai.tools import tool
 
 # CrewAI hooks are synchronous, so use launch_arcjet_sync.
 arcjet = launch_arcjet_sync(key=os.environ["ARCJET_KEY"])
 detect_pii = LocalDetectSensitiveInfo(
     deny=["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+    backend=rampart(),
 )
 
 

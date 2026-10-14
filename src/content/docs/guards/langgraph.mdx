@@ -156,8 +156,8 @@ whose `status` is `success`. The denial rides in the payload
 to force `status: "error"`. That crashes the graph reducer. Scan free-text
 args (a note, reason, or body). An opaque
 `orderNumber` or `tool_call_id` will not trip email / phone / card / IP, so
-don't pass it to `localDetectSensitiveInfo`. That helper runs on a local ML
-model backend.
+don't pass it to `localDetectSensitiveInfo`. That helper runs the Rampart model
+on-device.
 
 Policy factories (`action` / `rules` / `metadata` functions) are try/caught. If
 a factory throws, the helper treats it as a guard error (fail-closed by
@@ -168,6 +168,7 @@ import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import { guardTool } from "@arcjet/guard/langgraph/v1";
 import { tokenBucket, localDetectSensitiveInfo } from "@arcjet/guard";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 import { arcjet } from "./arcjet.js";
 
 const lookupLimit = tokenBucket({
@@ -179,6 +180,7 @@ const lookupLimit = tokenBucket({
 // Factory then text. Same shape as `detectPromptInjection()(text)`.
 const detectPii = localDetectSensitiveInfo({
   deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+  backend: rampart(),
 });
 
 export const lookupOrder = guardTool(

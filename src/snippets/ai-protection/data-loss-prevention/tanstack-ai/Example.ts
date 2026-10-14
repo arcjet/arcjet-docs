@@ -1,11 +1,13 @@
 import { launchArcjet, localDetectSensitiveInfo } from "@arcjet/guard";
 import { guardMiddleware } from "@arcjet/guard/tanstack-ai/v0";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 import { toolDefinition } from "@tanstack/ai";
 import { z } from "zod";
 
 const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 const detectPii = localDetectSensitiveInfo({
   deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+  backend: rampart(),
 });
 
 const saveNoteInput = z.object({

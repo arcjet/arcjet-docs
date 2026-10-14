@@ -24,7 +24,7 @@ var aj = must(arcjet.NewClient(arcjet.Config{
 				arcjet.SensitiveInfoGivenName,
 				arcjet.SensitiveInfoSurname,
 			},
-			// Use the on-device Rampart NER model instead of the built-in analyzer.
+			// Run detection on-device with the Rampart NER model.
 			Backend: backend,
 		}),
 	},

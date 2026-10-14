@@ -12,7 +12,7 @@ const aj = arcjet({
       mode: "LIVE", // Will block requests, use "DRY_RUN" to log only
       // Detect names and email addresses. See the reference for the full list.
       deny: ["EMAIL", "GIVEN_NAME", "SURNAME"],
-      // Use the on-device Rampart NER model instead of the built-in engine.
+      // Run detection on-device with the Rampart NER model.
       backend: rampart(),
     }),
   ],

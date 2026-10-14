@@ -1,4 +1,5 @@
 import arcjet, { sensitiveInfo, shield } from "@arcjet/node";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 import http from "node:http";
 import { text } from "node:stream/consumers";
 
@@ -8,6 +9,7 @@ const aj = arcjet({
     sensitiveInfo({
       deny: ["EMAIL"],
       mode: "LIVE",
+      backend: rampart(),
     }),
     shield({
       mode: "LIVE",

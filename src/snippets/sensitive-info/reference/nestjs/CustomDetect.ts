@@ -1,5 +1,10 @@
 import { ARCJET, type ArcjetNest, sensitiveInfo } from "@arcjet/nest";
 import {
+  defaultRecognizers,
+  type DetectedSpan,
+  rampart,
+} from "@arcjet/sensitive-info-rampart";
+import {
   Body,
   Controller,
   HttpException,
@@ -26,14 +31,18 @@ export class PageService {
 
 // This would normally go in your controller file, such as:
 // src/page/page.controller.ts
-// This function is called by the`sensitiveInfo` rule to perform custom
-// detection on strings.
-function detectDash(tokens: string[]): Array<"CONTAINS_DASH" | undefined> {
-  return tokens.map((token) => {
-    if (token.includes("-")) {
-      return "CONTAINS_DASH";
-    }
-  });
+// A recognizer receives the full text and returns the spans it matched. This
+// one reports IBANs as bank account numbers.
+function detectIban(value: string): DetectedSpan[] {
+  const spans: DetectedSpan[] = [];
+  for (const match of value.matchAll(/\b[A-Z]{2}\d{2}[A-Z0-9]{11,30}\b/g)) {
+    spans.push({
+      start: match.index,
+      end: match.index + match[0].length,
+      type: "BANK_ACCOUNT",
+    });
+  }
+  return spans;
 }
 
 @Controller("page")
@@ -60,9 +69,11 @@ export class PageController {
         sensitiveInfo({
           mode: "LIVE", // Will block requests, use "DRY_RUN" to log only
           // allow: ["EMAIL"], Will block all sensitive information types other than email.
-          deny: ["EMAIL", "CONTAINS_DASH"], // Will block email addresses and strings containing a dash
-          detect: detectDash,
-          contextWindowSize: 2,
+          deny: ["EMAIL", "BANK_ACCOUNT"], // Will block email addresses and IBANs
+          backend: rampart({
+            // Keep the default recognizers and add your own.
+            recognizers: [...defaultRecognizers, detectIban],
+          }),
         }),
       )
       .protect(req);

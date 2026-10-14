@@ -1,23 +1,35 @@
 import arcjet, { sensitiveInfo } from "@arcjet/bun";
+import {
+  defaultRecognizers,
+  type DetectedSpan,
+  rampart,
+} from "@arcjet/sensitive-info-rampart";
 import { env } from "bun";
 
-// This function is called by the `sensitiveInfo` rule to perform custom detection on strings.
-function detectDash(tokens: string[]): Array<"CONTAINS_DASH" | undefined> {
-  return tokens.map((token) => {
-    if (token.includes("-")) {
-      return "CONTAINS_DASH";
-    }
-  });
+// A recognizer receives the full text and returns the spans it matched. This
+// one reports IBANs as bank account numbers.
+function detectIban(value: string): DetectedSpan[] {
+  const spans: DetectedSpan[] = [];
+  for (const match of value.matchAll(/\b[A-Z]{2}\d{2}[A-Z0-9]{11,30}\b/g)) {
+    spans.push({
+      start: match.index,
+      end: match.index + match[0].length,
+      type: "BANK_ACCOUNT",
+    });
+  }
+  return spans;
 }
 
 const aj = arcjet({
   key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
   rules: [
     sensitiveInfo({
-      deny: ["EMAIL", "CONTAINS_DASH"],
+      deny: ["EMAIL", "BANK_ACCOUNT"],
       mode: "LIVE",
-      detect: detectDash,
-      contextWindowSize: 2,
+      backend: rampart({
+        // Keep the default recognizers and add your own.
+        recognizers: [...defaultRecognizers, detectIban],
+      }),
     }),
   ],
 });

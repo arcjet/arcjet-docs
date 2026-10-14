@@ -1,4 +1,5 @@
 import arcjet, { createMiddleware, sensitiveInfo } from "@arcjet/next";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 export const config = {
   // matcher tells Next.js which routes to run the middleware on.
   // This runs the middleware on all routes except for static assets.
@@ -11,6 +12,7 @@ const aj = arcjet({
     sensitiveInfo({
       deny: ["EMAIL"],
       mode: "LIVE",
+      backend: rampart(),
     }),
   ],
 });

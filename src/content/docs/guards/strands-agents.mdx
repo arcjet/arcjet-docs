@@ -308,6 +308,7 @@ import {
   guardHooks,
   strandsAgentContext,
 } from "@arcjet/guard/strands-agents/v1";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 import { Agent, tool } from "@strands-agents/sdk";
 import { z } from "zod";
 
@@ -321,6 +322,7 @@ const lookupLimit = tokenBucket({
 });
 const detectPii = localDetectSensitiveInfo({
   deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+  backend: rampart(),
 });
 const inbound = detectPromptInjection();
 
@@ -415,8 +417,8 @@ inner handler never runs a side effect.
 
 Scan free-text arguments (a note, reason, or body). An opaque order number or
 tool use ID doesn't trip email, phone, card, or IP detection, so don't pass it
-to the local sensitive information helper. That helper runs on a local ML model
-backend.
+to the local sensitive information helper. That helper runs the Rampart model
+on-device.
 
 Pass wrapped tools on the agent's tools list.
 
@@ -432,6 +434,7 @@ import { tool } from "@strands-agents/sdk";
 import { z } from "zod";
 import { guardTool } from "@arcjet/guard/strands-agents/v1";
 import { tokenBucket, localDetectSensitiveInfo } from "@arcjet/guard";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 import { arcjet } from "./arcjet.js";
 
 const lookupLimit = tokenBucket({
@@ -442,6 +445,7 @@ const lookupLimit = tokenBucket({
 });
 const detectPii = localDetectSensitiveInfo({
   deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+  backend: rampart(),
 });
 
 const lookupOrder = guardTool(
@@ -485,6 +489,7 @@ from arcjet.guard import (
     launch_arcjet,
 )
 from arcjet.guard.strands_agents import guard_tool
+from arcjet_sensitive_info_rampart import rampart
 
 arcjet = launch_arcjet(key=ARCJET_KEY)
 lookup_limit = TokenBucket(
@@ -495,6 +500,7 @@ lookup_limit = TokenBucket(
 )
 detect_pii = LocalDetectSensitiveInfo(
     deny=["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+    backend=rampart(),
 )
 
 

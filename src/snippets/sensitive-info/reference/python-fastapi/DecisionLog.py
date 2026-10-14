@@ -2,6 +2,7 @@ import logging
 import os
 
 from arcjet import Mode, SensitiveInfoEntityType, arcjet, detect_sensitive_info
+from arcjet_sensitive_info_rampart import rampart
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -16,6 +17,7 @@ aj = arcjet(
         detect_sensitive_info(
             mode=Mode.LIVE,
             deny=[SensitiveInfoEntityType.EMAIL],
+            backend=rampart(),
         ),
     ],
 )

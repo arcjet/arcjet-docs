@@ -6,6 +6,7 @@ import arcjet, {
   shield,
   tokenBucket,
 } from "@arcjet/next";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 import { convertToModelMessages, isTextUIPart, streamText } from "ai";
 
 const aj = arcjet({
@@ -33,6 +34,7 @@ const aj = arcjet({
       // Block PII types that should never appear in AI prompts.
       // Remove types your app legitimately handles (for example, EMAIL for a support bot).
       deny: ["CREDIT_CARD_NUMBER", "EMAIL"],
+      backend: rampart(),
     }),
     // Detect prompt injection attacks before they reach your AI model
     detectPromptInjection({

@@ -1,4 +1,5 @@
 import arcjet, { shield, sensitiveInfo } from "@arcjet/remix";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 import type { ActionFunctionArgs } from "@remix-run/node";
 
 const aj = arcjet({
@@ -7,6 +8,7 @@ const aj = arcjet({
     sensitiveInfo({
       deny: ["EMAIL"],
       mode: "LIVE",
+      backend: rampart(),
     }),
     shield({
       mode: "LIVE",

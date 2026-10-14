@@ -1,5 +1,6 @@
 import { openai } from "@ai-sdk/openai";
 import arcjet, { sensitiveInfo } from "@arcjet/next";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 import type { UIMessage } from "ai";
 import { convertToModelMessages, isTextUIPart, streamText } from "ai";
 
@@ -11,6 +12,7 @@ const aj = arcjet({
       // Block PII types that should never appear in AI prompts.
       // Remove types your app legitimately handles (for example, EMAIL for a support bot).
       deny: ["CREDIT_CARD_NUMBER", "EMAIL"],
+      backend: rampart(),
     }),
   ],
 });

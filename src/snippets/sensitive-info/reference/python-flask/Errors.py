@@ -2,6 +2,7 @@ import logging
 import os
 
 from arcjet import Mode, SensitiveInfoEntityType, arcjet_sync, detect_sensitive_info
+from arcjet_sensitive_info_rampart import rampart
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
@@ -14,6 +15,7 @@ aj = arcjet_sync(
         detect_sensitive_info(
             mode=Mode.LIVE,
             deny=[SensitiveInfoEntityType.EMAIL],
+            backend=rampart(),
         ),
     ],
 )
