@@ -740,7 +740,7 @@ Both take the same parameters:
 | `timeout_ms` | `int` | Request timeout. Defaults to 2000 |
 | `base_url` | `str \| None` | Override the Arcjet endpoint |
 | `logger` | `Logger \| None` | Receives `AJxxxx` diagnostics. Without one, local failures are coalesced |
-| `sensitive_info_backend` | `Backend \| None` | On-device backend for sensitive information detection – see [Sensitive information backends](#sensitive-information-backends) |
+| `sensitive_info_backend` | `Backend \| None` | Rampart backend for sensitive information rules in remote policies – see [Sensitive information in remote policies](#sensitive-information-in-remote-policies) |
 
 <Code code={Guard} title="main.py" lang="py" />
 
@@ -934,29 +934,36 @@ decision = await aj.guard(
 
 #### Sensitive information detection
 
-Runs locally in WebAssembly – the raw text never leaves the SDK; only a SHA-256
-hash is sent alongside the local result. The built-in entity types are
-`"EMAIL"`, `"PHONE_NUMBER"`, `"IP_ADDRESS"`, and `"CREDIT_CARD_NUMBER"`.
-
-```py
-from arcjet.guard import LocalDetectSensitiveInfo
-
-sensitive = LocalDetectSensitiveInfo(
-    deny=["EMAIL", "CREDIT_CARD_NUMBER"],
-)
-```
-
-`allow` and `deny` are mutually exclusive.
-
-##### Sensitive information backends
-
-An on-device backend adds entity types that pattern matching alone doesn't
-reach, such as `"BANK_ACCOUNT"`, `"ROUTING_NUMBER"`, names, and addresses.
-Install the extra, then pass the backend when you create the client:
+Runs on-device with the Rampart backend – the raw text never leaves the SDK;
+only a SHA-256 hash is sent alongside the local result. Install the extra:
 
 ```bash
 pip install "arcjet[sensitive-info-rampart]"
 ```
+
+Then pass `backend=rampart()` to the rule:
+
+```py
+from arcjet.guard import LocalDetectSensitiveInfo
+from arcjet_sensitive_info_rampart import rampart
+
+sensitive = LocalDetectSensitiveInfo(
+    deny=["EMAIL", "CREDIT_CARD_NUMBER"],
+    backend=rampart(),
+)
+```
+
+Rampart detects names, addresses, and government and financial identifiers
+such as `"BANK_ACCOUNT"` and `"ROUTING_NUMBER"`, as well as email addresses,
+phone numbers, IP addresses, and card numbers. `allow` and `deny` are mutually
+exclusive.
+
+##### Sensitive information in remote policies
+
+The sensitive information rule in an
+<Link.Page href="/guards/remote-policies">agent guard remote policy</Link.Page>
+runs in the SDK too. Pass the backend when you create the client so those rules
+use Rampart:
 
 ```py
 from arcjet_sensitive_info_rampart import rampart
@@ -968,11 +975,9 @@ arcjet = launch_arcjet(
 )
 ```
 
-Every `LocalDetectSensitiveInfo` rule on that client uses the backend, and so
-does the sensitive information rule in an
-<Link.Page href="/guards/remote-policies">agent guard remote policy</Link.Page>.
-The first guarded call loads the model, so it takes noticeably longer than the
-ones after it.
+The client-level backend applies only to remote policies. Set `backend` on
+each `LocalDetectSensitiveInfo` rule you write in code. The first guarded call
+loads the model, so it takes noticeably longer than the ones after it.
 
 #### Content moderation
 

@@ -267,16 +267,16 @@ certify your deployment.
 ### Sensitive information detection
 
 Use `SensitiveInfo` on the HTTP client and pass the text to scan with
-`WithSensitiveInfoValue`. Detection runs locally.
-
-The built-in analyzer detects `SensitiveInfoEmail`,
-`SensitiveInfoPhoneNumber`, `SensitiveInfoIPAddress`, and
-`SensitiveInfoCreditCardNumber`. `Allow` and `Deny` are mutually exclusive.
-
-For names, addresses, and government or financial identifiers, set `Backend` to
-the optional
+`WithSensitiveInfoValue`. Detection runs on-device with the
 [`github.com/arcjet/arcjet-go/sensitiveinfo/rampart`](https://github.com/arcjet/arcjet-go/tree/main/sensitiveinfo/rampart)
-module. Create it once at startup with `rampart.New` and reuse it:
+module. Install it with the SDK:
+
+```shell
+go get github.com/arcjet/arcjet-go/sensitiveinfo/rampart
+```
+
+Create the backend once at startup with `rampart.New`, reuse it, and set it as
+`Backend`. `Allow` and `Deny` are mutually exclusive.
 
 ```go
 backend, err := rampart.New(rampart.Options{})
@@ -301,37 +301,37 @@ aj, err := arcjet.NewClient(arcjet.Config{
 })
 ```
 
-`rampart.Entities()` returns every type that backend can detect. On Rampart,
-phone numbers are model-only because their digit shape overlaps with financial
-and government identifiers. Listing a non-built-in type without a backend (or a
-`SensitiveInfoDetect` callback) is a configuration error. The default
-`MaxInputChars` is `4096`; longer input is truncated.
+`rampart.Entities()` returns every type the backend can detect. Only the model
+detects phone numbers, because their digit shape overlaps with financial and
+government identifiers. The default `MaxInputChars` is `4096`;
+longer input is truncated.
 
-`SensitiveInfoOptions.ContextWindowSize` is the number of adjacent tokens
-passed to `Config.SensitiveInfoDetect` at a time. When the value is zero or
-negative, the SDK uses 1. This matches JS `contextWindowSize` and Python
-`context_window_size`. The Rampart backend ignores that token callback; extend
-it with `Options.Recognizers` instead.
+To detect your own entity types, add a recognizer to `Options.Recognizers`. A
+recognizer receives the text and returns the spans it matched, with byte
+offsets:
 
 ```go
-aj, err := arcjet.NewClient(arcjet.Config{
-	Key: os.Getenv("ARCJET_KEY"),
-	SensitiveInfoDetect: func(_ context.Context, tokens []string) []arcjet.EntityType {
-		// tokens is a window of ContextWindowSize
-		return make([]arcjet.EntityType, len(tokens))
-	},
-	Rules: []arcjet.Rule{
-		arcjet.SensitiveInfo(arcjet.SensitiveInfoOptions{
-			Mode:              arcjet.ModeLive,
-			ContextWindowSize: 3,
-		}),
-	},
+var ibanPattern = regexp.MustCompile(`\b[A-Z]{2}\d{2}[A-Z0-9]{11,30}\b`)
+
+func detectIBAN(text string) []rampart.DetectedSpan {
+	var spans []rampart.DetectedSpan
+	for _, loc := range ibanPattern.FindAllStringIndex(text, -1) {
+		spans = append(spans, rampart.DetectedSpan{
+			Start: loc[0],
+			End:   loc[1],
+			Type:  arcjet.SensitiveInfoBankAccount,
+		})
+	}
+	return spans
+}
+
+backend, err := rampart.New(rampart.Options{
+	// Keep the default recognizers and add your own.
+	Recognizers: append(rampart.DefaultRecognizers, detectIBAN),
 })
 ```
 
-`GuardSensitiveInfoRule` does not expose `ContextWindowSize`. Guard scans
-use a window of 1. Pass the same `Backend` on `GuardSensitiveInfoOptions` when
-you need the extra entity types on a tool call.
+On a Guard client, pass the same `Backend` on `GuardSensitiveInfoOptions`.
 
 For more information about scanning request text, see
 <Link.Page href="/sensitive-info">Sensitive information detection</Link.Page>.

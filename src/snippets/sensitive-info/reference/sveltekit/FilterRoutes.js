@@ -1,5 +1,6 @@
 import { env } from "$env/dynamic/private";
 import arcjet, { sensitiveInfo } from "@arcjet/sveltekit";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 import { error } from "@sveltejs/kit";
 
 const aj = arcjet({
@@ -8,6 +9,7 @@ const aj = arcjet({
     sensitiveInfo({
       deny: ["EMAIL"],
       mode: "LIVE",
+      backend: rampart(),
     }),
   ],
 });

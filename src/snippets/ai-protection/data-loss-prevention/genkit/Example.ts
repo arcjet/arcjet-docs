@@ -1,5 +1,6 @@
 import { launchArcjet, localDetectSensitiveInfo } from "@arcjet/guard";
 import { guardTool } from "@arcjet/guard/genkit/v1";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 import { genkit, z } from "genkit";
 
 const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
@@ -8,6 +9,7 @@ const ai = genkit({
 });
 const detectPii = localDetectSensitiveInfo({
   deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+  backend: rampart(),
 });
 
 export const saveNote = guardTool(

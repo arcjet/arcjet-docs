@@ -185,7 +185,7 @@ the tool still runs.
 Scan free-text args (a note, reason, or body) with
 `free_text_arguments`. An opaque `order_id` is stripped from that
 mapping, so don't pass it to `LocalDetectSensitiveInfo`. That helper
-runs on a local ML model backend.
+runs the Rampart model on-device.
 
 ```py
 from arcjet.guard import (
@@ -194,6 +194,7 @@ from arcjet.guard import (
     launch_arcjet_sync,
 )
 from arcjet.guard.crewai import free_text_arguments, register_arcjet_hooks
+from arcjet_sensitive_info_rampart import rampart
 from crewai.tools import tool
 
 arcjet = launch_arcjet_sync(key=ARCJET_KEY)
@@ -205,6 +206,7 @@ lookup_limit = TokenBucket(
 )
 detect_pii = LocalDetectSensitiveInfo(
     deny=["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+    backend=rampart(),
 )
 
 
@@ -412,9 +414,11 @@ Scan a note, reason, or body from `free_text_arguments`. An opaque
 ```py
 from arcjet.guard import LocalDetectSensitiveInfo, TokenBucket
 from arcjet.guard.crewai import free_text_arguments, register_arcjet_hooks
+from arcjet_sensitive_info_rampart import rampart
 
 detect_pii = LocalDetectSensitiveInfo(
     deny=["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+    backend=rampart(),
 )
 
 register_arcjet_hooks(

@@ -22,6 +22,7 @@ arcjet = launch_arcjet(
 )
 detect_pii = LocalDetectSensitiveInfo(
     deny=["BANK_ACCOUNT", "ROUTING_NUMBER"],
+    backend=rampart(),
 )
 
 

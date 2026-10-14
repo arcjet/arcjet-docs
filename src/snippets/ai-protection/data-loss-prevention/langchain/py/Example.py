@@ -2,11 +2,13 @@ import os
 
 from arcjet.guard import LocalDetectSensitiveInfo, launch_arcjet
 from arcjet.guard.langchain import guard_tool
+from arcjet_sensitive_info_rampart import rampart
 from langchain_core.tools import tool
 
 arcjet = launch_arcjet(key=os.environ["ARCJET_KEY"])
 detect_pii = LocalDetectSensitiveInfo(
     deny=["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+    backend=rampart(),
 )
 
 

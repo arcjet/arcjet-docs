@@ -7,7 +7,10 @@ import (
 	"os"
 
 	"github.com/arcjet/arcjet-go"
+	"github.com/arcjet/arcjet-go/sensitiveinfo/rampart"
 )
+
+var backend = must(rampart.New(rampart.Options{}))
 
 var aj = must(arcjet.NewClient(arcjet.Config{
 	Key: os.Getenv("ARCJET_KEY"),
@@ -18,6 +21,7 @@ var aj = must(arcjet.NewClient(arcjet.Config{
 				arcjet.SensitiveInfoCreditCardNumber,
 				arcjet.SensitiveInfoEmail,
 			},
+			Backend: backend,
 		}),
 	},
 }))

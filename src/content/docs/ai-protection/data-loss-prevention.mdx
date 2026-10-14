@@ -134,22 +134,19 @@ choose what happens next: block the request, strip the data, or warn the user.
 
 ## How detection works
 
-Sensitive info detection runs through a
-<Link.Page href="/sensitive-info/reference#detection-backends">detection backend</Link.Page>
- – the engine that scans the text and identifies entities. There are two:
+Sensitive info detection runs on-device with
+<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart</Link.Page>,
+a named-entity-recognition (NER) model paired with deterministic recognizers:
 
-- **Built-in engine (default).** A WebAssembly engine bundled with the SDK. It
-  detects four structured types – card numbers, email addresses, phone numbers,
-  and IP addresses – runs anywhere the SDK runs (including edge runtimes), and
-  needs no extra dependencies.
-- **Rampart backend (optional).** An on-device
-  named-entity-recognition (NER) model that adds the free-form PII people
-  actually paste into prompts – **names, street addresses, and government or
-  financial identifiers**. This is often the more valuable engine for AI data
-  loss prevention, because that is exactly the data a structured-pattern matcher
-  can't catch.
+- **Deterministic recognizers** match structured types with validated
+  patterns – card numbers, email addresses, IP addresses, URLs, and Social
+  Security numbers.
+- **The NER model** detects the free-form PII people actually paste into
+  prompts – **names, street addresses, phone numbers, and government or
+  financial identifiers**. This is the data a structured-pattern matcher can't
+  catch.
 
-Both engines run entirely on your own infrastructure. Nothing is sent to a
+Detection runs entirely on your own infrastructure. Nothing is sent to a
 third party for analysis, which is what makes this safe to put in front of an AI
 provider in the first place.
 
@@ -169,6 +166,7 @@ your app – for a support bot that legitimately collects phone numbers, leave
 sensitiveInfo({
   mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
   deny: ["CREDIT_CARD_NUMBER", "EMAIL"],
+  backend: rampart(),
 });
 ```
 
@@ -182,6 +180,7 @@ detect_sensitive_info(
         SensitiveInfoEntityType.CREDIT_CARD_NUMBER,
         SensitiveInfoEntityType.EMAIL,
     ],
+    backend=rampart(),
 )
 ```
 
@@ -195,6 +194,7 @@ detect_sensitive_info(
         SensitiveInfoEntityType.CREDIT_CARD_NUMBER,
         SensitiveInfoEntityType.EMAIL,
     ],
+    backend=rampart(),
 )
 ```
 
@@ -208,6 +208,7 @@ arcjet.SensitiveInfo(arcjet.SensitiveInfoOptions{
 		arcjet.SensitiveInfoCreditCardNumber,
 		arcjet.SensitiveInfoEmail,
 	},
+	Backend: backend, // Create once with rampart.New
 })
 ```
 
@@ -221,35 +222,29 @@ arcjet.GuardSensitiveInfo(arcjet.GuardSensitiveInfoOptions{
 		arcjet.SensitiveInfoCreditCardNumber,
 		arcjet.SensitiveInfoEmail,
 	},
+	Backend: backend, // Create once with rampart.New
 })
 ```
 
 </div>
 </SlotByFramework>
 
-The built-in engine detects `CREDIT_CARD_NUMBER`, `PHONE_NUMBER`, `EMAIL`, and
-`IP_ADDRESS`. See the
+See the
 <Link.Page href="/sensitive-info/reference#entity-detection">entity detection table</Link.Page>
-for every type each backend supports, and for defining your own custom
-detectors.
+for every type Rampart supports, and for defining your own custom
+recognizers.
 
 ### Detect names, addresses, and IDs
 
 <SlotByFramework>
 <div slot="next-js">
 
-The built-in types cover structured data, but AI prompts are full of _free-form_
-PII – a pasted résumé, a shipping address, and someone's full name. The optional
-<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart backend</Link.Page>
-runs an on-device NER model that detects these, plus government and financial
-identifiers (SSNs, tax IDs, passports, driver's licenses, bank and routing
-numbers).
-
-Install the package and pass `rampart()` as the rule's `backend`:
-
-```shell
-npm install @arcjet/sensitive-info-rampart
-```
+AI prompts are full of _free-form_ PII – a pasted résumé, a shipping address,
+and someone's full name. The
+<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart</Link.Page>
+NER model detects these, plus government and financial identifiers (SSNs, tax
+IDs, passports, driver's licenses, bank and routing numbers). Add them to
+`deny`:
 
 ```ts
 import arcjet, { sensitiveInfo } from "@arcjet/next";
@@ -289,17 +284,12 @@ accuracy and latency breakdown, see the <Link.Page href="/sensitive-info/referen
 </div>
 <div slot="python-fastapi">
 
-The built-in types cover structured data, but AI prompts are full of _free-form_
-PII – a pasted résumé, a shipping address, and someone's full name. The optional <Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart backend</Link.Page>
-runs an on-device NER model that detects these, plus government and financial
-identifiers (SSNs, tax IDs, passports, driver's licenses, bank and routing
-numbers).
-
-Install the optional extra and pass `rampart()` as the rule's `backend`:
-
-```shell
-pip install "arcjet[sensitive-info-rampart]"
-```
+AI prompts are full of _free-form_ PII – a pasted résumé, a shipping address,
+and someone's full name. The
+<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart</Link.Page>
+NER model detects these, plus government and financial identifiers (SSNs, tax
+IDs, passports, driver's licenses, bank and routing numbers). Add them to
+`deny`:
 
 ```py
 import os
@@ -336,17 +326,12 @@ see the <Link.Page href="/sensitive-info/reference#on-device-detection-with-ramp
 </div>
 <div slot="python-flask">
 
-The built-in types cover structured data, but AI prompts are full of _free-form_
-PII – a pasted résumé, a shipping address, and someone's full name. The optional <Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart backend</Link.Page>
-runs an on-device NER model that detects these, plus government and financial
-identifiers (SSNs, tax IDs, passports, driver's licenses, bank and routing
-numbers).
-
-Install the optional extra and pass `rampart()` as the rule's `backend`:
-
-```shell
-pip install "arcjet[sensitive-info-rampart]"
-```
+AI prompts are full of _free-form_ PII – a pasted résumé, a shipping address,
+and someone's full name. The
+<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart</Link.Page>
+NER model detects these, plus government and financial identifiers (SSNs, tax
+IDs, passports, driver's licenses, bank and routing numbers). Add them to
+`deny`:
 
 ```py
 import os
@@ -383,16 +368,10 @@ see the <Link.Page href="/sensitive-info/reference#on-device-detection-with-ramp
 </div>
 <div slot="go">
 
-The built-in types cover structured data. The optional
-<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart backend</Link.Page>
-adds names, addresses, and government or financial identifiers.
-
-Install the nested module and pass `rampart.New` as the rule's `Backend`.
-Create the backend once at startup:
-
-```shell
-go get github.com/arcjet/arcjet-go/sensitiveinfo/rampart
-```
+The
+<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart</Link.Page>
+NER model detects names, addresses, and government or financial identifiers.
+Add them to `Deny`. Create the backend once at startup with `rampart.New`:
 
 <RampartGo />
 
@@ -406,14 +385,9 @@ the full entity list, see the
 </div>
 <div slot="microsoft-agent-framework">
 
-The built-in types cover structured data. For names, addresses, and government
-or financial identifiers, create a Rampart backend once and pass it as
-`Backend` on `GuardSensitiveInfo`. Listing `GIVEN_NAME` or `SURNAME` without a
-backend is a configuration error.
-
-```shell
-go get github.com/arcjet/arcjet-go/sensitiveinfo/rampart
-```
+The Rampart NER model detects names, addresses, and government or financial
+identifiers. Add them to `Deny`, and create the backend once at startup with
+`rampart.New`:
 
 ```go
 backend, err := rampart.New(rampart.Options{})

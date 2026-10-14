@@ -5,11 +5,13 @@ import {
   guardCustomTool,
 } from "@arcjet/guard/claude-managed-agents/v0";
 import type { AgentCustomToolUseEvent } from "@arcjet/guard/claude-managed-agents/v0";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 
 const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 const client = new Anthropic();
 const detectPii = localDetectSensitiveInfo({
   deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+  backend: rampart(),
 });
 
 // Anthropic runs built-in tools in its own environment, so a custom tool

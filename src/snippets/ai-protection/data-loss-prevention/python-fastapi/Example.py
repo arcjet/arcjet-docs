@@ -2,6 +2,7 @@ import logging
 import os
 
 from arcjet import Mode, SensitiveInfoEntityType, arcjet, detect_sensitive_info
+from arcjet_sensitive_info_rampart import rampart
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from langchain_core.output_parsers import StrOutputParser
@@ -53,6 +54,7 @@ aj = arcjet(
                 SensitiveInfoEntityType.CREDIT_CARD_NUMBER,
                 SensitiveInfoEntityType.EMAIL,
             ],
+            backend=rampart(),
         ),
     ],
 )

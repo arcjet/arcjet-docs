@@ -45,11 +45,10 @@ export class PageController {
       .withRule(
         sensitiveInfo({
           mode: "LIVE", // Will block requests, use "DRY_RUN" to log only
-          // The Rampart model detects names, addresses, and
-          // government/financial identifiers in addition to the built-in types.
+          // Rampart detects names and addresses as well as email addresses
+          // and government identifiers. See the reference for the full list.
           deny: ["EMAIL", "GIVEN_NAME", "SURNAME", "STREET_NAME", "SSN"],
-          // Run detection on-device with the Rampart NER model instead of the
-          // default WebAssembly engine.
+          // Run detection on-device with the Rampart NER model.
           backend: rampart(),
         }),
       )

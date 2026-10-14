@@ -1,4 +1,5 @@
 import { ArcjetModule, sensitiveInfo } from "@arcjet/nest";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 
@@ -16,7 +17,8 @@ import { ConfigModule } from "@nestjs/config";
         sensitiveInfo({
           mode: "LIVE", // Will block requests, use "DRY_RUN" to log only
           // allow: ["EMAIL"], Will block all sensitive information types other than email.
-          deny: ["EMAIL"], // Will block email addresses
+          deny: ["EMAIL"], // Will block email addresses,
+          backend: rampart(),
         }),
       ],
     }),

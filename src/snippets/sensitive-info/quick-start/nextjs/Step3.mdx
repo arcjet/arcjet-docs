@@ -2,7 +2,7 @@ import Step3AppJS from "./Step3App.js?raw";
 import Step3AppTS from "./Step3App.ts?raw";
 import Step3PagesJS from "./Step3Pages.js?raw";
 import Step3PagesTS from "./Step3Pages.ts?raw";
-import { Code, Aside } from "@astrojs/starlight/components";
+import { Code } from "@astrojs/starlight/components";
 import SelectableContent from "@/components/SelectableContent";
 
 <SelectableContent client:load syncKey="language">
@@ -65,10 +65,3 @@ const nextConfig = {
 
 module.exports = nextConfig;
 ```
-
-<Aside type="note">
-  Prefer the built-in engine (no native dependencies, runs on edge)? Drop the
-  `backend: rampart()` line and the `@arcjet/sensitive-info-rampart` import to
-  use it instead. For the trade-offs, see the [detection backends
-  reference](/sensitive-info/reference#detection-backends).
-</Aside>

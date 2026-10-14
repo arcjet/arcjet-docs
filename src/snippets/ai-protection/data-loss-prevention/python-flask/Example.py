@@ -7,6 +7,7 @@ from arcjet import (
     arcjet_sync,
     detect_sensitive_info,
 )
+from arcjet_sensitive_info_rampart import rampart
 from flask import Flask, jsonify, request
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
@@ -51,6 +52,7 @@ aj = arcjet_sync(
                 SensitiveInfoEntityType.CREDIT_CARD_NUMBER,
                 SensitiveInfoEntityType.EMAIL,
             ],
+            backend=rampart(),
         ),
     ],
 )

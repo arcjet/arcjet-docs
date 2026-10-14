@@ -1,4 +1,5 @@
 import arcjet, { sensitiveInfo } from "@arcjet/next";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY,
@@ -6,6 +7,7 @@ const aj = arcjet({
     sensitiveInfo({
       deny: ["EMAIL"],
       mode: "LIVE",
+      backend: rampart(),
     }),
   ],
 });

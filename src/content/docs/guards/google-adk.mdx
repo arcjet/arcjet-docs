@@ -336,6 +336,7 @@ import {
   guardPlugin,
   googleAdkContext,
 } from "@arcjet/guard/google-adk/v2";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 import { FunctionTool, InMemoryRunner, LlmAgent } from "@google/adk";
 import { z } from "zod";
 
@@ -349,6 +350,7 @@ const lookupLimit = tokenBucket({
 });
 const detectPii = localDetectSensitiveInfo({
   deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+  backend: rampart(),
 });
 const inbound = detectPromptInjection();
 
@@ -443,6 +445,7 @@ from arcjet.guard.google_adk import (
     google_adk_context,
     guard_plugin,
 )
+from arcjet_sensitive_info_rampart import rampart
 
 arcjet = launch_arcjet(key=ARCJET_KEY)
 
@@ -452,7 +455,7 @@ lookup_limit = TokenBucket(
     max_tokens=10,
     bucket="lookups",
 )
-detect_pii = LocalDetectSensitiveInfo()
+detect_pii = LocalDetectSensitiveInfo(backend=rampart())
 inbound = DetectPromptInjection()
 
 
@@ -530,8 +533,8 @@ On `DENY` the original tool never runs, so the inner handler never
 runs a side effect. Scan free-text arguments (a note, reason, or
 body). An opaque order number or tool-call ID doesn't trip email,
 phone, card, or IP detection, so don't pass it to the local
-sensitive information helper. That helper runs on a local ML model
-backend.
+sensitive information helper. That helper runs the Rampart model
+on-device.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">

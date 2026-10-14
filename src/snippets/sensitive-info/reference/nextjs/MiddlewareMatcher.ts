@@ -1,4 +1,5 @@
 import arcjet, { createMiddleware, sensitiveInfo } from "@arcjet/next";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 export const config = {
   // The matcher prevents the middleware executing on static assets and the
   // /api/hello API route because you already installed Arcjet directly
@@ -10,6 +11,7 @@ const aj = arcjet({
     sensitiveInfo({
       deny: ["EMAIL"],
       mode: "LIVE",
+      backend: rampart(),
     }),
   ],
 });

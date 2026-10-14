@@ -1,17 +1,28 @@
 import os
-from typing import Optional
+import re
 
 from arcjet import Mode, arcjet, detect_sensitive_info
+from arcjet_sensitive_info_rampart import (
+    DetectedSpan,
+    RampartOptions,
+    default_recognizers,
+    rampart,
+)
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 
-# This function is called by the `detect_sensitive_info` rule to perform custom
-# detection on strings. It receives a list of tokens and must return a same-
-# length list of either an entity type name (string) or None.
-def detect_secret(tokens: list[str]) -> list[Optional[str]]:
-    return ["CUSTOM_PII" if "secret" in token.lower() else None for token in tokens]
+# A recognizer receives the full text and returns the spans it matched. This
+# one reports IBANs as bank account numbers.
+IBAN_PATTERN = re.compile(r"\b[A-Z]{2}\d{2}[A-Z0-9]{11,30}\b")
+
+
+def detect_iban(value: str) -> list[DetectedSpan]:
+    return [
+        DetectedSpan(start=match.start(), end=match.end(), type="BANK_ACCOUNT")
+        for match in IBAN_PATTERN.finditer(value)
+    ]
 
 
 aj = arcjet(
@@ -19,9 +30,11 @@ aj = arcjet(
     rules=[
         detect_sensitive_info(
             mode=Mode.LIVE,
-            deny=["EMAIL", "CUSTOM_PII"],
-            detect=detect_secret,
-            context_window_size=2,
+            deny=["EMAIL", "BANK_ACCOUNT"],
+            backend=rampart(
+                # Keep the default recognizers and add your own.
+                RampartOptions(recognizers=[*default_recognizers, detect_iban]),
+            ),
         ),
     ],
 )

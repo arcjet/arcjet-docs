@@ -48,13 +48,9 @@ ajToc:
         anchor: "hooks"
       - text: "Avoiding double protection with hooks"
         anchor: "avoid-double-protection-with-hooks"
-  - text: "Detection backends"
-    anchor: "detection-backends"
+  - text: "On-device detection with Rampart"
+    anchor: "on-device-detection-with-rampart"
     children:
-      - text: "Built-in engine"
-        anchor: "built-in-engine"
-      - text: "On-device detection with Rampart"
-        anchor: "on-device-detection-with-rampart"
       - text: "Model accuracy and performance"
         anchor: "model-accuracy-and-performance"
       - text: "Rampart options"
@@ -140,10 +136,10 @@ import ErrorsGo from "@/snippets/sensitive-info/reference/go/Errors.mdx";
 
 Arcjet Sensitive Information Detection protects against clients sending you
 sensitive information such as PII that you do not wish to handle. All detection
-runs locally in your own environment through a pluggable
-[detection backend](#detection-backends): a built-in WebAssembly engine (the
-default) or the on-device Rampart NER model, which detects names, addresses, and
-government or financial identifiers in addition to the structured types.
+runs locally in your own environment with the on-device
+[Rampart](#on-device-detection-with-rampart) NER model, which detects names,
+addresses, and government or financial identifiers as well as structured types
+such as email addresses and card numbers.
 
 <FrameworkLinks
   exclude={frameworks
@@ -166,9 +162,9 @@ rules. Construct them with `sensitiveInfo(...)` in JavaScript / TypeScript,
 `arcjet.SensitiveInfo(arcjet.SensitiveInfoOptions{...})` in Go. The lists are
 `allow` / `deny` in JS and Python, and `Allow` / `Deny` in Go.
 
-The optional `backend` selects which [detection backend](#detection-backends)
-runs. Omit it to use the built-in engine. Pass `rampart()` (JS / Python) or
-`Backend` from `rampart.New` (Go) for on-device NER.
+Set `backend` to the [Rampart backend](#on-device-detection-with-rampart):
+`rampart()` in JS and Python, or the `Backend` you create with `rampart.New` in
+Go.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -177,12 +173,8 @@ runs. Omit it to use the built-in engine. Pass `rampart()` (JS / Python) or
 type SensitiveInfoOptionsAllow = {
   mode?: "LIVE" | "DRY_RUN";
   allow?: Array<ArcjetSensitiveInfoType>;
-  contextWindowSize?: number;
-  // You can also provide a custom detection function to detect other types
-  // of sensitive information (see below).
-  detect?: (tokens: string[]) -> Array<SensitiveInfoType | undefined>;
-  // Optionally swap the default WebAssembly detection engine for a custom
-  // backend, such as the on-device Rampart NER model (see below).
+  // The detection backend. Pass `rampart()` from
+  // `@arcjet/sensitive-info-rampart` (see below).
   backend?: SensitiveInfoBackend;
 };
 ```
@@ -191,12 +183,8 @@ type SensitiveInfoOptionsAllow = {
 type SensitiveInfoOptionsDeny = {
   mode?: "LIVE" | "DRY_RUN";
   deny?: Array<ArcjetSensitiveInfoType>;
-  contextWindowSize?: number;
-  // You can also provide a custom detection function to detect other types
-  // of sensitive information (see below).
-  detect?: (tokens: string[]) -> Array<SensitiveInfoType | undefined>;
-  // Optionally swap the default WebAssembly detection engine for a custom
-  // backend, such as the on-device Rampart NER model (see below).
+  // The detection backend. Pass `rampart()` from
+  // `@arcjet/sensitive-info-rampart` (see below).
   backend?: SensitiveInfoBackend;
 };
 ```
@@ -214,28 +202,16 @@ def detect_sensitive_info(
     allow: Sequence[str | SensitiveInfoEntityType] = (),
     # Entity types to deny. Mutually exclusive with `allow`.
     deny: Sequence[str | SensitiveInfoEntityType] = (),
-    # Optional context window size for detection
-    context_window_size: int | None = None,
-    # You can also provide a custom detection function to detect other types
-    # of sensitive information (see below).
-    detect: Callable[[list[str]], Sequence[str | None]] | None = None,
-    # Optionally swap the default WebAssembly detection engine for a custom
-    # backend, such as the on-device Rampart NER model (see below).
+    # The detection backend. Pass `rampart()` from
+    # `arcjet_sensitive_info_rampart` (see below).
     backend: SensitiveInfoBackend | None = None,
     # Rate-limit characteristics (see https://docs.arcjet.com/fingerprints)
     characteristics: Sequence[str] = (),
 ) -> SensitiveInfoDetection: ...
 
-# Entity types the default (WASM) backend detects natively
-# (SensitiveInfoEntityType enum members):
-# - SensitiveInfoEntityType.EMAIL
-# - SensitiveInfoEntityType.PHONE_NUMBER
-# - SensitiveInfoEntityType.IP_ADDRESS
-# - SensitiveInfoEntityType.CREDIT_CARD_NUMBER
-#
-# The enum also defines backend-only types (GIVEN_NAME, SURNAME, SSN, URL,
-# TAX_ID, and more – see the entity detection table below). Listing one without
-# a `backend` that supports it – such as `rampart()` – raises an error.
+# Entity types are SensitiveInfoEntityType enum members or their string
+# names, such as SensitiveInfoEntityType.EMAIL or "GIVEN_NAME". See the entity
+# detection table below for the full list.
 ```
 
 </TabItem>
@@ -243,21 +219,17 @@ def detect_sensitive_info(
 
 ```go
 type SensitiveInfoOptions struct {
-	Mode              Mode
-	Allow             []EntityType // mutually exclusive with Deny
-	Deny              []EntityType
-	ContextWindowSize int
-	Backend           SensitiveInfoBackend // optional; omit for the built-in engine
+	Mode    Mode
+	Allow   []EntityType // mutually exclusive with Deny
+	Deny    []EntityType
+	Backend SensitiveInfoBackend // create with rampart.New
 }
 
-// Built-in WASM types:
-//   SensitiveInfoEmail, SensitiveInfoPhoneNumber,
-//   SensitiveInfoIPAddress, SensitiveInfoCreditCardNumber
-//
-// Rampart-only types (need Backend from rampart.New, or a SensitiveInfoDetect
-// callback): SensitiveInfoGivenName, SensitiveInfoSurname, SensitiveInfoSSN,
-// SensitiveInfoURL, SensitiveInfoTaxID, SensitiveInfoBankAccount,
-// SensitiveInfoRoutingNumber, SensitiveInfoGovernmentID, SensitiveInfoPassport,
+// Entity types: SensitiveInfoEmail, SensitiveInfoPhoneNumber,
+// SensitiveInfoIPAddress, SensitiveInfoCreditCardNumber, SensitiveInfoURL,
+// SensitiveInfoSSN, SensitiveInfoGivenName, SensitiveInfoSurname,
+// SensitiveInfoTaxID, SensitiveInfoBankAccount, SensitiveInfoRoutingNumber,
+// SensitiveInfoGovernmentID, SensitiveInfoPassport,
 // SensitiveInfoDriversLicense, SensitiveInfoBuildingNumber,
 // SensitiveInfoStreetName, SensitiveInfoSecondaryAddress, SensitiveInfoCity,
 // SensitiveInfoState, SensitiveInfoZipCode.
@@ -282,39 +254,22 @@ examining the execution results, see [decision](#decision).
   <PerRouteVsHooksSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
-## Detection backends
+## On-device detection with Rampart
 
-Sensitive information detection runs through a **detection backend** – the
-engine that scans the request body and identifies entities. The rest of the rule
-(`mode`, `allow`/`deny`, and the result shape) is the same whichever backend you
-choose. For exactly what each backend detects, see [Entity
-detection](#entity-detection).
-
-### Built-in engine
-
-By default – when you don't set a `backend` – the rule runs a WebAssembly engine
-that detects four structured types: email addresses, phone numbers, IP
-addresses, and credit card numbers. It runs anywhere the SDK runs, including edge
-runtimes, needs no extra dependencies, and adds negligible latency, so it's the
-right choice for most applications. Extend it with a
-[custom `detect` function](#custom-entity-detection) when you need to match your
-own patterns.
-
-### On-device detection with Rampart
-
-For broader coverage, an optional Rampart package provides a backend powered by
-the on-device
+Sensitive information detection runs on-device with the
 [Rampart](https://huggingface.co/nationaldesignstudio/rampart)
-named-entity-recognition (NER) model. JavaScript and Python run a ~15&nbsp;MB
-quantized ONNX model. Go embeds the same ~15&nbsp;MB of weights in a nested
-module and infers in pure Go, with no cgo or ONNX runtime. The rule can detect
-names, addresses, and government or financial identifiers in addition to the
-built-in structured types. The model weights are bundled, so nothing is fetched
-at runtime and scanned text stays in your environment.
+named-entity-recognition (NER) model, paired with deterministic recognizers
+for structured types. JavaScript and Python run a ~15&nbsp;MB quantized ONNX
+model. Go embeds the same ~15&nbsp;MB of weights in a nested module and infers
+in pure Go, with no cgo or ONNX runtime. The rule detects names, addresses, and
+government or financial identifiers, as well as email addresses, card numbers,
+IP addresses, and phone numbers. The model weights are bundled, so nothing is
+fetched at runtime and scanned text stays in your environment. For exactly
+what Rampart detects, see [Entity detection](#entity-detection).
 
-Install the package alongside your Arcjet SDK. In Python it ships as an optional
-extra of the `arcjet` package. In Go it is a nested module so the ~15&nbsp;MB
-of model weights stay optional:
+Install the Rampart package alongside your Arcjet SDK. In Python it ships as
+the `sensitive-info-rampart` extra of the `arcjet` package. In Go it is a nested
+module that bundles the model weights:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -341,10 +296,8 @@ go get github.com/arcjet/arcjet-go/sensitiveinfo/rampart
 </Tabs>
 
 Then import `rampart` and pass it as the rule's `backend`. Create the Go
-backend once at startup with `rampart.New` and reuse it. Every entity the
-model detects is a built-in sensitive info type (`ArcjetSensitiveInfoType` in
-JS, `SensitiveInfoEntityType` in Python, `arcjet.EntityType` in Go), so you can
-list the types directly in `allow` or `deny`:
+backend once at startup with `rampart.New` and reuse it. List the entity types
+to detect in `allow` or `deny`:
 
 <SlotByFramework>
   <RampartBackendBun slot="bun" />
@@ -358,9 +311,6 @@ list the types directly in `allow` or `deny`:
   <RampartBackendSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
-Without a `backend`, the rule continues to use the built-in engine – this
-package is entirely opt-in.
-
 :::note
 The same backend also works with the local sensitive info rule in
 <Link.Page href="/guards">Arcjet Guards</Link.Page>. Pass `backend: rampart()`
@@ -368,9 +318,9 @@ The same backend also works with the local sensitive info rule in
 text in agent tool calls that never arrive over HTTP.
 :::
 
-The full set of types the backend supports is exported as `rampartEntities`
+The full set of types Rampart supports is exported as `rampartEntities`
 (JS) / `rampart_entities` (Python) / `rampart.Entities()` (Go). Use it to deny
-every type the backend can detect:
+every type Rampart can detect:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -440,8 +390,8 @@ has the full per-language breakdown, calibration data, and limitations.
 
 ### Rampart options
 
-The `rampart()` factory (JS and Python) or `rampart.New` (Go) accepts optional
-configuration:
+The `rampart()` factory (JS and Python) or `rampart.New` (Go) accepts these
+options:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -456,9 +406,9 @@ rampart({
   // Minimum confidence score for a model token to count (default: 0.5).
   threshold: 0.6,
   // Deterministic recognizers to run alongside the model (default:
-  // `defaultRecognizers`). This is the extension point for custom detection
-  // with this backend – add a recognizer that returns matched spans. Pass `[]`
-  // to rely on the model alone.
+  // `defaultRecognizers`). This is the extension point for custom detection –
+  // add a recognizer that returns matched spans. Pass `[]` to rely on the
+  // model alone.
   recognizers: [
     ...defaultRecognizers,
     (value) => {
@@ -495,8 +445,8 @@ rampart(
         max_input_chars=100_000,
         # Deterministic recognizers to run alongside the model (default:
         # `default_recognizers`). This is the extension point for custom
-        # detection with this backend – add a recognizer that returns matched
-        # spans. Pass () to rely on the model alone.
+        # detection – add a recognizer that returns matched spans. Pass () to
+        # rely on the model alone.
         recognizers=(
             *default_recognizers,
             lambda value: [],  # Return a list of DetectedSpan(start, end, type).
@@ -536,11 +486,8 @@ every subsequent request. In Go, `rampart.New` loads and dequantizes the
 weights – create the backend once at startup and reuse it. It is safe for
 concurrent use.
 
-:::note
-The token-based [`detect`](#custom-entity-detection) callback of the sensitive
-info rule is **not** used by the Rampart backend, which works on character spans
-rather than tokens. Add a `recognizer` instead to perform custom detection.
-:::
+To detect your own entity types, add a recognizer. See
+[Custom entity detection](#custom-entity-detection).
 
 ### Bundlers and runtimes
 
@@ -668,75 +615,66 @@ This example logs the full result as well as the sensitive info rule:
 
 ## Entity detection
 
-The entity types available to `allow`/`deny` depend on the active [detection
-backend](#detection-backends). Every type in the following list is a built-in
-`ArcjetSensitiveInfoType`, so you can list any of them regardless of backend – a
-type that the active backend doesn't detect never matches. You can also detect
-your own types with [custom entity detection](#custom-entity-detection).
+Rampart detects the following entity types. List any of them in `allow` or
+`deny`. Each one is an `ArcjetSensitiveInfoType` in JS, a
+`SensitiveInfoEntityType` in Python, and an `arcjet.EntityType` in Go. You can
+also detect more patterns with
+[custom entity detection](#custom-entity-detection).
 
 <EntityDetectionTable />
 
-In Go, pass those types to `Allow` or `Deny`, or use `rampart.Entities()` for
-the full set. Listing a non-built-in type without a backend or a
-`SensitiveInfoDetect` callback is a configuration error.
+To list every type at once, use `rampartEntities` (JS), `rampart_entities`
+(Python), or `rampart.Entities()` (Go).
 
 ### Structured type matching
 
-The structured types are matched the same way by the built-in engine and by the
-Rampart recognizers.
+The default recognizers match these structured types with deterministic,
+validated patterns.
 
 #### Card numbers
 
-Card numbers can be detected.
-The values `4242424242424242`, `4000 0566 5566 5556`, and `3782-8224-6310005`
-match but `4242424242424241` does not.
-Whether something looks like a card number is based on its initial and final
-digits.
-The initial digits determine the expected length (min, max) of the total
-number.
-The final digit is a [Luhn](https://en.wikipedia.org/wiki/Luhn_algorithm)
-check digit.
-Spaces and dashes are ignored because users often group digits.
+Card numbers of 13 to 19 digits are detected when the final digit is a valid
+[Luhn](https://en.wikipedia.org/wiki/Luhn_algorithm) check digit. The values
+`4242424242424242`, `4000 0566 5566 5556`, and `3782-8224-6310005` match but
+`4242424242424241` does not. Spaces and dashes are ignored because users often
+group digits.
 
 #### Email addresses
 
-Email addresses can be detected.
 The values `alice@example.com` and `bob.smith@subdomain.example.com` match but
 `alice.example.com` does not.
-A dotless domain (`user@localhost`) and a domain literal (`user@[127.0.0.1]`,
-if it contains a valid IP) also match.
 
 #### IP addresses
 
-IP addresses can be detected.
-The values `127.0.0.1` and `::1` match but `012.004.002.000` does not.
-IP v4 and v6 addresses are supported.
-Whether something looks like an IP address is based on whether it parses
-as [`IpAddr` from `std::net`](https://doc.rust-lang.org/std/net/enum.IpAddr.html).
+IPv4 and IPv6 addresses are detected. The values `127.0.0.1` and `::1` match.
+
+#### Social Security numbers
+
+US Social Security numbers in the dashed form, such as `123-45-6789`, are
+detected.
+
+#### URLs
+
+URLs that start with `http://`, `https://`, or `www.` are detected. The model
+also detects URLs from context.
 
 #### Phone numbers
 
-Phone numbers can be detected.
-The values `+1 (555) 555-5555` and `(020) 334 4522` match but `555-1234` does not.
-As phone numbers have a wide variety of sizes and formats,
-special short numbers such as `911` or `14 020` are not detected.
-Several characters such as dots (`.`), dashes (`-`), and spaces are allowed
-to separate digit groups.
-The country code can be prefixed with plus (`+`) or omitted,
-the next region group can be in parentheses.
+The Rampart model detects phone numbers from context. The default recognizers
+don't include a phone number pattern, because a run of digits can also be a
+bank account, routing number, or government identifier, and a pattern can't
+tell which one it is.
 
 ## Custom entity detection
 
-When using the [built-in engine](#built-in-engine) you can provide a custom
-`detect` function, which lets you detect entities that Arcjet doesn't support
-out of the box using custom logic.
+To detect patterns that the default recognizers don't cover, add your own
+recognizer to the Rampart `recognizers` option. A recognizer receives the full
+text and returns the spans it matched, each with a start offset, an end offset,
+and an entity type. Recognizer results take precedence over the model where
+they overlap.
 
-The function takes a list of tokens and must return a list of the same length.
-Each element is `undefined` if the corresponding token is not sensitive, or the
-name of the entity if it matches. The number of tokens that are provided to the
-function is controlled by the `contextWindowSize` option, which defaults to 1.
-If you need additional context to perform detections then you can increase this
-value.
+Keep the default recognizers in the list unless you want to replace them. The
+following example adds a recognizer that reports IBANs as `BANK_ACCOUNT`:
 
 <SlotByFramework>
   <CustomDetectBun slot="bun" />
@@ -750,12 +688,9 @@ value.
   <CustomDetectSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
-:::note
-The `detect` callback applies to the built-in engine only. With the
-[Rampart backend](#on-device-detection-with-rampart), add a
-[`recognizer`](#rampart-options) instead – it works on character spans rather
-than tokens.
-:::
+Offsets are UTF-16 code unit indexes in JS, code point indexes in Python, and
+byte offsets in Go – the indexes each language's regular expression matches
+return.
 
 ## Error handling
 

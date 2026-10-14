@@ -1,5 +1,6 @@
 import { env } from "$env/dynamic/private";
 import arcjet, { sensitiveInfo } from "@arcjet/sveltekit";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 import { error } from "@sveltejs/kit";
 
 const aj = arcjet({
@@ -9,7 +10,8 @@ const aj = arcjet({
     sensitiveInfo({
       mode: "LIVE", // Will block requests, use "DRY_RUN" to log only
       // allow: ["EMAIL"], Will block all sensitive information types other than email.
-      deny: ["EMAIL"], // Will block email addresses
+      deny: ["EMAIL"], // Will block email addresses,
+      backend: rampart(),
     }),
   ],
 });

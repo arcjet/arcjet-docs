@@ -1,11 +1,13 @@
 import { launchArcjet, localDetectSensitiveInfo } from "@arcjet/guard";
 import { guardPlugin } from "@arcjet/guard/google-adk/v2";
+import { rampart } from "@arcjet/sensitive-info-rampart";
 import { FunctionTool, InMemoryRunner, LlmAgent } from "@google/adk";
 import { z } from "zod";
 
 const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 const detectPii = localDetectSensitiveInfo({
   deny: ["EMAIL", "PHONE_NUMBER", "IP_ADDRESS", "CREDIT_CARD_NUMBER"],
+  backend: rampart(),
 });
 
 const saveNoteInput = z.object({
