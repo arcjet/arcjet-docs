@@ -53,8 +53,8 @@ policies and to show activity in the Console. That can include:
   correlation identifiers.
 - An actor identifier when your application asserts one.
 - Server policy inputs that you map for a Guard policy – for example a
-  recipient address, a tool name, a command, or paths and domains derived from
-  a tool call.
+  recipient address, a command, or paths and domains derived from a tool
+  call.
 - Tool call details, prompts, and related session metadata from coding agents
   or other agent submissions.
 
@@ -75,11 +75,10 @@ product surface, a retained record can include:
 
 How far back you can view those records depends on your plan's log retention.
 See [Arcjet pricing](https://arcjet.com/pricing) for the windows on each plan.
-Enterprise plans can include custom retention.
-
-By default, Arcjet retains decision and activity data for up to 30 days for
-historical analysis. Aggregated data is retained for longer so that you can
-review traffic patterns over time.
+Enterprise plans can include custom retention. Unless your plan includes a
+longer retention window, Arcjet retains decision and activity data for up to
+30 days for historical analysis. Aggregated data is retained for longer so that
+you can review traffic patterns over time.
 
 ## Zero data retention
 
@@ -91,18 +90,27 @@ Under ZDR, Arcjet still evaluates requests and actions as usual. What changes
 is what remains after the response:
 
 - Decision structure is still recorded – for example the allow or deny
-  conclusion, which rules fired, timings, tool names and kinds, and the shapes
-  of policy inputs.
+  conclusion, which rules fired, timings, structural metadata such as tool
+  names and kinds, and the shapes of policy inputs.
 - Customer content is not retained – for example prompts, tool arguments,
-  server policy input values, and other value-bearing metadata.
+  server policy input values, and other value-bearing metadata. A tool name
+  that Arcjet records as decision metadata is kept; the same string stored as
+  a server policy input value is not.
+- Request records from `protect()` still retain the request metadata that was
+  processed remotely, such as IP address, headers, custom characteristics, and
+  email addresses used for validation. Zero data retention omits customer
+  content from Guard and agent records; it does not scrub that request
+  metadata.
 
 Log exports that Arcjet sends on your behalf receive the same scrubbed records.
 
 ### Session data under zero data retention
 
-When agent session analysis is enabled, data is temporarily retained while the
-session is active and for up to 24 hours after. This allows sessions to be
-resumed and for locked sessions to be reviewed by administrators.
+When agent session analysis is enabled, session data such as prompts, tool call
+details, and findings used for analysis is temporarily retained while the
+session is active and for up to 24 hours after. That window lets sessions be
+resumed and lets administrators review locked sessions. The data is then purged
+automatically.
 
 ## Geographic processing
 
