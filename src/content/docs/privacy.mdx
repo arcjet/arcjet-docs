@@ -42,12 +42,12 @@ your environment. For example,
 <Link.Page href="/sensitive-info">sensitive information detection</Link.Page>
 on HTTP request bodies runs locally and does not send the body to Arcjet.
 
-### Guards and coding agents
+### Guards and agents
 
-When you call `guard()`, or when a
-<Link.Page href="/coding-agents">coding agent</Link.Page> posts a hook event,
-Arcjet processes the values that are needed to evaluate your policies and to
-show activity in the Console. That can include:
+When you call `guard()`, use a
+<Link.Page href="/coding-agents">coding agent</Link.Page>, or submit other
+agent activity, Arcjet processes the values that are needed to evaluate your
+policies and to show activity in the Console. That can include:
 
 - Decision metadata, such as the conclusion, which rules fired, timings, and
   correlation identifiers.
@@ -55,8 +55,8 @@ show activity in the Console. That can include:
 - Server policy inputs that you map for a Guard policy – for example a
   recipient address, a tool name, a command, or paths and domains derived from
   a tool call.
-- For coding agents: tool call details, prompts, and related session metadata
-  that the agent's hooks send.
+- Tool call details, prompts, and related session metadata from coding agents
+  or other agent submissions.
 
 Values that you mark as local policy inputs stay in your environment. Only their
 declared kind and evaluation result leave the SDK.
@@ -77,9 +77,9 @@ How far back you can view those records depends on your plan's log retention.
 See [Arcjet pricing](https://arcjet.com/pricing) for the windows on each plan.
 Enterprise plans can include custom retention.
 
-Arcjet retains decision and activity data for up to 30 days for historical
-analysis. Aggregated data is retained for longer so that you can review traffic
-patterns over time.
+By default, Arcjet retains decision and activity data for up to 30 days for
+historical analysis. Aggregated data is retained for longer so that you can
+review traffic patterns over time.
 
 ## Zero data retention
 
@@ -94,24 +94,15 @@ is what remains after the response:
   conclusion, which rules fired, timings, tool names and kinds, and the shapes
   of policy inputs.
 - Customer content is not retained – for example prompts, tool arguments,
-  server policy input values, and other value-bearing metadata that would
-  otherwise appear in **Activity** detail.
+  server policy input values, and other value-bearing metadata.
 
 Log exports that Arcjet sends on your behalf receive the same scrubbed records.
 
 ### Session data under zero data retention
 
-Zero data retention is not the same as zero processing. Arcjet still needs the
-full values while it evaluates a request or tool call.
-
-A short-lived exception also applies to session data that security features
-such as [session tainting](https://arcjet.com/learn/what-is-session-tainting)
-depend on. When a session is locked, an administrator may need to review a
-brief excerpt of the finding to clear the lock. That session data can remain
-available to administrators for up to 24 hours, and then it expires. It is not
-kept in long-term decision history.
-
-Zero data retention does not change account, billing, or Console login data.
+When agent session analysis is enabled, data is temporarily retained while the
+session is active and for up to 24 hours after. This allows sessions to be
+resumed and for locked sessions to be reviewed by administrators.
 
 ## Geographic processing
 
