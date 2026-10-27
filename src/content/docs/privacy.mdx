@@ -5,19 +5,19 @@ description: "Details about the data processed by Arcjet. What data does Arcjet 
 
 import { Link } from "@/components/link";
 
-Arcjet is designed to process data primarily within your environment to minimize
-latency and reduce the amount of sensitive information sent to our systems.
-However, we do process some data remotely through our real-time Cloud API to
-enhance analysis and reporting.
+Arcjet uses a hybrid architecture. The SDK runs some analysis in your
+environment – for example with a sandboxed WebAssembly module that inspects
+request details locally – and Arcjet's Cloud API processes request, Guard, and
+agent data for real-time decisions, background analysis, and Console reporting.
 
 Our [privacy policy](https://arcjet.com/privacy) details the legal basis for
-data processing. This page provides additional technical details.
+data processing. This page provides additional technical details about what is
+processed locally, what is processed in the cloud, and how long Arcjet retains
+it.
 
 ## Data processed remotely
 
-The Arcjet SDK uses a sandboxed WebAssembly module within your environment to
-analyze request details. Additionally, our real-time Cloud API processes some
-data for the following purposes:
+Arcjet's Cloud API processes data for the following purposes:
 
 - Provide real-time analysis and decisions.
 - Enhance background analysis and reporting.
