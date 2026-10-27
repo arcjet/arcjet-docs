@@ -1,123 +1,122 @@
 ---
 title: "Arcjet privacy"
-description: "Details about the data processed by Arcjet. What data does Arcjet collect, store, and retain?"
+description: "What data Arcjet processes in your environment and in the cloud, what it retains and for how long, and how zero data retention changes that."
 ---
 
 import { Link } from "@/components/link";
 
-Arcjet uses a hybrid architecture. The SDK runs some analysis in your
-environment – for example with a sandboxed WebAssembly module that inspects
-request details locally – and Arcjet's Cloud API processes request, Guard, and
-agent data for real-time decisions, background analysis, and Console reporting.
+Arcjet splits processing between your environment and the Arcjet cloud. The SDK
+analyzes what it can locally – a sandboxed WebAssembly module inspects request
+details, and the request body doesn't leave your application. The Arcjet Cloud
+API handles the work that local analysis can't do on its own: real-time
+decisions, background analysis, and the activity that you review in the Arcjet
+Console.
 
-Our [privacy policy](https://arcjet.com/privacy) details the legal basis for
-data processing. This page provides additional technical details about what is
-processed locally, what is processed in the cloud, and how long Arcjet retains
-it.
+The [Arcjet privacy policy](https://arcjet.com/privacy) sets out the legal basis
+for processing. This page describes what Arcjet processes, where, and for how
+long.
 
-## Data processed remotely
+## Where Arcjet processes data
 
-Arcjet's Cloud API processes data for the following purposes:
+The following table summarizes where each kind of data is processed:
 
-- Provide real-time analysis and decisions.
-- Enhance background analysis and reporting.
-- Display request and agent activity in your dashboard.
+| Data                                                                     | Where it's processed |
+| ------------------------------------------------------------------------ | -------------------- |
+| Request body                                                             | Your environment     |
+| Local policy inputs                                                      | Your environment     |
+| Request IP address, headers, custom characteristics, and email addresses | Arcjet cloud         |
+| Decision metadata and server policy inputs                               | Arcjet cloud         |
+| Coding agent and other agent activity                                    | Arcjet cloud         |
+
+Arcjet uses the data that it processes in the cloud for the following purposes:
+
+- Make real-time decisions.
+- Run background analysis and reporting.
+- Show request and agent activity in the Console.
 
 ### Request protection
 
-When you call `protect()`, Arcjet processes the following request data remotely:
+When you call `protect()`, the SDK sends the following request data to Arcjet:
 
-- Request IP address.
-- Request headers.
-- If you use
-  <Link.Page href="/fingerprints#custom-characteristics">custom characteristics</Link.Page>
-  for request
-  <Link.Page href="/fingerprints">fingerprints</Link.Page>: any provided
-  characteristics.
-- If you use <Link.Page href="/email-validation">email validation</Link.Page>:
-  the provided email address.
+- The IP address.
+- The headers.
+- Any <Link.Page href="/fingerprints#custom-characteristics">custom characteristics</Link.Page> that you use for <Link.Page href="/fingerprints">fingerprints</Link.Page>.
+- The email address, if you use <Link.Page href="/email-validation">email validation</Link.Page>.
 
-All other request data, including the request body, is processed entirely within
-your environment. For example,
-<Link.Page href="/sensitive-info">sensitive information detection</Link.Page>
-on HTTP request bodies runs locally and does not send the body to Arcjet.
+Everything else, including the request body, stays in your environment. For
+example, <Link.Page href="/sensitive-info">sensitive information detection</Link.Page> on HTTP request bodies runs locally, so the body isn't sent to Arcjet.
 
 ### Guards and agents
 
-When you call `guard()`, use a
-<Link.Page href="/coding-agents">coding agent</Link.Page>, or submit other
-agent activity, Arcjet processes the values that are needed to evaluate your
-policies and to show activity in the Console. That can include:
+When you call `guard()`, use a <Link.Page href="/coding-agents">coding agent</Link.Page>, or submit other agent
+activity, Arcjet receives the values that it needs to evaluate your policies and
+show the activity in the Console. These values can include the following:
 
-- Decision metadata, such as the conclusion, which rules fired, timings, and
+- Decision metadata, such as the conclusion, the rules that fired, timings, and
   correlation identifiers.
-- An actor identifier when your application asserts one.
+- An actor identifier, when your application asserts one.
 - Server policy inputs that you map for a Guard policy – for example a
-  recipient address, a command, or paths and domains derived from a tool
-  call.
+  recipient address, a command, or the paths and domains in a tool call.
 - Tool call details, prompts, and related session metadata from coding agents
-  or other agent submissions.
+  and other agent submissions.
 
-Values that you mark as local policy inputs stay in your environment. Only their
-declared kind and evaluation result leave the SDK.
+Values that you mark as local policy inputs stay in your environment. Only
+their declared kind and evaluation result leave the SDK.
 
 ## Data retention
 
-Arcjet stores decision and activity records so that you can investigate traffic
-and agent sessions in the Console, API, CLI, and MCP tools. Depending on the
-product surface, a retained record can include:
+Arcjet retains decision and activity records so that you can investigate
+traffic and agent sessions in the Console, API, CLI, and MCP server. Depending
+on the product, a record can include the following:
 
-- Request or Guard decision outcomes and the rules that contributed to them.
-- Request metadata that was processed remotely, such as IP address and
-  headers.
-- Server policy inputs and coding-agent session details that were evaluated,
-  when those values were sent for a decision.
+- Request and Guard decision outcomes, and the rules that contributed to them.
+- Request metadata processed in the cloud, such as the IP address and headers.
+- Server policy inputs and agent session details that were sent for a decision.
 
-How far back you can view those records depends on your plan's log retention.
-See [Arcjet pricing](https://arcjet.com/pricing) for the windows on each plan.
-Enterprise plans can include custom retention. Unless your plan includes a
-longer retention window, Arcjet retains decision and activity data for up to
-30 days for historical analysis. Aggregated data is retained for longer so that
-you can review traffic patterns over time.
+Arcjet retains this data for up to 30 days, unless your plan includes a longer
+retention window. Your plan's log retention sets how far back you can view
+records, and Enterprise plans can include custom retention. For each plan's
+window, see [Arcjet pricing](https://arcjet.com/pricing). Arcjet keeps
+aggregated data for longer, so that you can review traffic patterns over time.
 
 ## Zero data retention
 
-Organizations that need stricter handling can opt in to zero data retention
-(ZDR). Contact [support@arcjet.com](mailto:support@arcjet.com) to discuss
-eligibility.
+For organizations that can't allow a vendor to store customer content, Arcjet
+offers zero data retention (ZDR). To find out whether your organization is
+eligible, contact [support@arcjet.com](mailto:support@arcjet.com).
 
-Under ZDR, Arcjet still evaluates requests and actions as usual. What changes
-is what remains after the response:
+With ZDR, Arcjet evaluates requests and actions as usual, so your protections
+work the same way. The difference is what Arcjet keeps after it responds:
 
-- Decision structure is still recorded – for example the allow or deny
-  conclusion, which rules fired, timings, structural metadata such as tool
-  names and kinds, and the shapes of policy inputs.
-- Customer content is not retained – for example prompts, tool arguments,
-  server policy input values, and other value-bearing metadata. A tool name
-  that Arcjet records as decision metadata is kept; the same string stored as
-  a server policy input value is not.
-- Request records from `protect()` still retain the request metadata that was
-  processed remotely, such as IP address, headers, custom characteristics, and
-  email addresses used for validation. Zero data retention omits customer
-  content from Guard and agent records; it does not scrub that request
-  metadata.
+- **Kept: decision structure.** The allow or deny conclusion, the rules that
+  fired, timings, structural metadata such as tool names and kinds, and the
+  shape of each policy input.
+- **Not kept: customer content.** Prompts, tool arguments, server policy input
+  values, and other metadata that carries a value. A tool name that Arcjet
+  records as decision metadata is kept, but the same text sent as a server
+  policy input value isn't.
+- **Unchanged: request metadata.** Records from `protect()` still include the
+  request metadata processed in the cloud – the IP address, headers, custom
+  characteristics, and email addresses used for validation.
 
-Log exports that Arcjet sends on your behalf receive the same scrubbed records.
+Log exports that Arcjet sends for you contain the same records, without the
+customer content.
 
-### Session data under zero data retention
+### Agent session data
 
-When agent session analysis is enabled, session data such as prompts, tool call
-details, and findings used for analysis is temporarily retained while the
-session is active and for up to 24 hours after. That window lets sessions be
-resumed and lets administrators review locked sessions. The data is then purged
-automatically.
+Agent session analysis needs recent session context to work. When it's enabled,
+Arcjet temporarily retains session data – such as prompts, tool call details,
+and analysis findings – while the session is active and for up to 24 hours
+after. That window lets you resume a session and lets administrators review a
+locked session. Arcjet then deletes the data automatically.
 
 ## Geographic processing
 
-Our API operates in multiple regions across various platforms to help provide
-low-latency responses. While we aim to process requests in the same region as
-your application, this is not guaranteed due to redundancy and failover
-mechanisms.
+Arcjet runs its API in multiple regions, across several platforms, to keep
+response times low. Arcjet aims to process each request in the same region as
+your application, but redundancy and failover can route a request to another
+region.
 
-If you require data processing in a specific region, we offer a paid add-on. For
-more information, email [support@arcjet.com](mailto:support@arcjet.com).
+If you need processing to stay in a specific region, Arcjet offers that as a
+paid add-on. For more information, email
+[support@arcjet.com](mailto:support@arcjet.com).
