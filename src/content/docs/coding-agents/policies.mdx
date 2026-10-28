@@ -122,7 +122,7 @@ Arcjet will run every policy attached to the specific event in one round trip so
 | `coding-agent.prompt-injection` | Instructions the injection detector flags in a prompt |
 | `coding-agent.sensitive-info` | Card numbers and Social Security numbers in a prompt |
 | `coding-agent.model-allowlist` | A model switch, prompt, or tool call whose model is outside the list the author wrote in Rego. Claude Code denies the switch only; Codex and Cursor deny the prompt and the tool call; Copilot and Muse Code are not covered. |
-| `coding-agent.session-analysis` | Shell, web, MCP, and file writes once the session is flagged `prompt_injection`, `data_exfiltration`, `code_execution_risk`, or `elevated_risk`; only web and MCP calls when it's flagged `credential_access` or `sensitive_data_exposure`, so local shell commands and writes continue. See [Session analysis](#session-analysis) |
+| `coding-agent.session-analysis` | Risky follow-up calls once Arcjet flags the session, such as after a confirmed prompt injection. See [Session analysis](#session-analysis) |
 | `coding-agent.no-auto-mode` | Tool calls while `permission_mode` is `auto`, `bypassPermissions`, or `dontAsk` (Claude Code and Codex; Copilot, Cursor, and Muse Code do not report a mode) |
 | `coding-agent.aws-access` | The AWS CLI (including `/…/aws`), AWS API hosts in `destinations`, and AWS credential paths / env-name markers |
 
@@ -365,28 +365,38 @@ for the coverage table and the already-selected-model gap on Claude Code.
 
 ### Session analysis
 
-Arcjet flags a session when it screens a tool result or reviews the session's
-activity, and passes the active flags to every later tool call as the
-`session_flags` input. `coding-agent.session-analysis` reads that input on
-**Tool call** and refuses risky follow-up calls. A tool result can't be
-withheld, because the tool has already run, so the lock applies to the next
-risky call. An administrator clears a flag in the Console.
+An attack rarely stops at one tool call. A web page or MCP result that carries a
+prompt injection can redirect every call that follows it. `coding-agent.session-analysis` helps you
+contain that: once Arcjet flags the session, the policy refuses the risky calls
+that come next, and the agent keeps the tools it needs for local work.
 
-| Flag | Set when | The starter refuses |
+Arcjet sets the flags, and the agent can't set or clear them. Arcjet screens
+each tool result as it arrives, reviews the session's activity in the
+background, and passes the active flags to every later tool call as the
+`session_flags` input. A tool result can't be withheld once the tool has run,
+so the lock takes effect from the next risky call. To clear a flag, an
+administrator reviews the session in the Console.
+
+| Flag | Arcjet sets it when | The starter refuses |
 | --- | --- | --- |
-| `prompt_injection` | A tool result contains an instruction override that background review confirms | Shell, web, MCP, and file writes |
-| `data_exfiltration` | Session review scores an upload of local content. On a shell call, the command must also contain an upload | Shell, web, MCP, and file writes |
+| `prompt_injection` | Background review confirms an instruction override in a tool result | Shell, web, MCP, and file writes |
+| `data_exfiltration` | Session review scores an upload of local content. A shell command must also contain an upload | Shell, web, MCP, and file writes |
 | `code_execution_risk` | Session review scores a call as running untrusted code | Shell, web, MCP, and file writes |
 | `elevated_risk` | Review of the whole session escalates | Shell, web, MCP, and file writes |
 | `credential_access` | A tool call reads credentials | Web and MCP calls |
-| `sensitive_data_exposure` | A tool result contains an entity type the policy denies | Web and MCP calls |
-| `workspace_transfer` | An exfiltration score lands on a Notion, Linear, or Slack MCP call with no credential-shaped arguments | Nothing |
-| `incomplete_screen` | A tool result couldn't be screened in full | Nothing |
+| `sensitive_data_exposure` | A tool result contains an entity type that the policy denies | Web and MCP calls |
+| `workspace_transfer` | An exfiltration score lands on a Notion, Linear, or Slack MCP call that has no credential-shaped arguments | Nothing |
+| `incomplete_screen` | Arcjet couldn't screen a tool result in full | Nothing |
 
-Writes to Notion, Linear, and Slack send project text out by design, so the
-starter records them as `workspace_transfer` and doesn't lock on them. A call
-to one of those servers that also reads credentials is flagged
-`data_exfiltration` instead.
+The starter keeps local work moving where it can. A credential or sensitive
+information finding locks only the web and MCP calls that could send data out,
+so shell commands and file writes continue. Writes to Notion, Linear, and Slack
+send project text out by design, so an exfiltration score on one of them is
+recorded as `workspace_transfer` and doesn't lock the session. A call to one of
+those servers that also reads credentials is flagged `data_exfiltration`.
+
+The starter expresses these rules as two sets of flags, each over the tool kinds
+that it locks:
 
 ```rego
 # Shell, egress, and writes - tools a full lock can refuse.
@@ -416,8 +426,9 @@ deny contains "tainted-session-risky" if {
 }
 ```
 
-To lock more, move a flag into `full_lock` or `egress_lock`. To lock less,
-remove it.
+To tune the policy, move a flag between `full_lock` and `egress_lock`, or remove
+it to stop locking on it. To lock on workspace writes, add `workspace_transfer`
+to `full_lock`.
 
 `workspace_transfer` has the following limits:
 
@@ -527,7 +538,7 @@ take has its own deny:
 | CLI name | `aws s3 ls`, `/usr/local/bin/aws …` | `coding-agent.aws-access` (`aws-cli`) |
 | Destination / API | `curl https://sts.amazonaws.com`, `WebFetch` of an AWS host | `coding-agent.aws-access` (`aws-destination`) |
 | Credential files | Reading `~/.aws/credentials` or naming them in a command | `coding-agent.aws-access` (`aws-credential`), plus `coding-agent.credential-access` for other secrets |
-| Session taint | Further shell, web, MCP, and writes after injection; further web and MCP calls after credential or sensitive information findings | `coding-agent.session-analysis` |
+| Session taint | Further risky calls after Arcjet flags the session | `coding-agent.session-analysis` |
 
 Publish the layers you need. Arcjet runs every policy attached to the same
 **Execute on** option in one round trip and applies the most restrictive
