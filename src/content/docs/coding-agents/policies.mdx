@@ -121,7 +121,7 @@ Arcjet will run every policy attached to the specific event in one round trip so
 | `coding-agent.prompt-injection` | Instructions the injection detector flags in a prompt |
 | `coding-agent.sensitive-info` | Card numbers and Social Security numbers in a prompt |
 | `coding-agent.model-allowlist` | A model switch, prompt, or tool call whose model is outside the list the author wrote in Rego. Claude Code denies the switch only; Codex and Cursor deny the prompt and the tool call; Copilot and Muse Code are not covered. |
-| `coding-agent.session-analysis` | Shell, web, MCP, and file writes once the session is flagged `prompt_injection`, `data_exfiltration`, `code_execution_risk`, `sensitive_data_exposure`, or `elevated_risk`; only web and MCP calls when it's flagged `credential_access`, so local shell commands and writes continue |
+| `coding-agent.session-analysis` | Shell, web, MCP, and file writes once the session is flagged `prompt_injection`, `data_exfiltration`, `code_execution_risk`, or `elevated_risk`; only web and MCP calls when it's flagged `credential_access` or `sensitive_data_exposure`, so local shell commands and writes continue. See [Session analysis](#session-analysis) |
 | `coding-agent.no-auto-mode` | Tool calls while `permission_mode` is `auto`, `bypassPermissions`, or `dontAsk` (Claude Code and Codex; Copilot, Cursor, and Muse Code do not report a mode) |
 | `coding-agent.aws-access` | The AWS CLI (including `/…/aws`), AWS API hosts in `destinations`, and AWS credential paths / env-name markers |
 
@@ -362,6 +362,82 @@ description.
 See <Link.Page href="/coding-agents/hooks#allowed-models">Allowed models</Link.Page>
 for the coverage table and the already-selected-model gap on Claude Code.
 
+### Session analysis
+
+Arcjet flags a session when it screens a tool result or reviews the session's
+activity, and passes the active flags to every later tool call as the
+`session_flags` input. `coding-agent.session-analysis` reads that input on
+**Tool call** and refuses risky follow-up calls. A tool result can't be
+withheld, because the tool has already run, so the lock applies to the next
+risky call. An administrator clears a flag in the Console.
+
+| Flag | Set when | The starter refuses |
+| --- | --- | --- |
+| `prompt_injection` | A tool result contains an instruction override that background review confirms | Shell, web, MCP, and file writes |
+| `data_exfiltration` | Session review scores an upload of local content. On a shell call, the command must also contain an upload | Shell, web, MCP, and file writes |
+| `code_execution_risk` | Session review scores a call as running untrusted code | Shell, web, MCP, and file writes |
+| `elevated_risk` | Review of the whole session escalates | Shell, web, MCP, and file writes |
+| `credential_access` | A tool call reads credentials | Web and MCP calls |
+| `sensitive_data_exposure` | A tool result contains an entity type the policy denies | Web and MCP calls |
+| `workspace_transfer` | An exfiltration score lands on a Notion, Linear, or Slack MCP call with no credential-shaped arguments | Nothing |
+| `incomplete_screen` | A tool result couldn't be screened in full | Nothing |
+
+Writes to Notion, Linear, and Slack send project text out by design, so the
+starter records them as `workspace_transfer` and doesn't lock on them. A call
+to one of those servers that also reads credentials is flagged
+`data_exfiltration` instead.
+
+```rego
+# Shell, egress, and writes - tools a full lock can refuse.
+risky := {"shell", "web", "mcp", "file_write"}
+
+full_lock := {
+	"prompt_injection",
+	"data_exfiltration",
+	"code_execution_risk",
+	"elevated_risk",
+}
+
+# Only lock egress, so local shell commands and writes continue.
+egress := {"web", "mcp"}
+egress_lock := {"credential_access", "sensitive_data_exposure"}
+
+deny contains "tainted-session-risky" if {
+	some flag in input.values.session_flags
+	flag in full_lock
+	input.values.tool_kind in risky
+}
+
+deny contains "tainted-session-risky" if {
+	some flag in input.values.session_flags
+	flag in egress_lock
+	input.values.tool_kind in egress
+}
+```
+
+To lock more, move a flag into `full_lock` or `egress_lock`. To lock less,
+remove it.
+
+#### Update a copy of the starter
+
+A policy copied from the starter keeps the Rego it had when you copied it.
+To match the starter, make the following changes:
+
+- To keep locking Notion, Linear, and Slack writes that score as
+  exfiltration, add `workspace_transfer` to `full_lock`. Arcjet flags those
+  calls `workspace_transfer`, so a policy that names only
+  `data_exfiltration` doesn't lock them.
+- To let shell commands and writes continue after a sensitive information
+  finding, move `sensitive_data_exposure` from `full_lock` to `egress_lock`,
+  and add the second `deny` rule if your copy doesn't have it.
+
+`workspace_transfer` has the following limits:
+
+- Arcjet matches the server name from the agent's MCP configuration, so a
+  local server named `notion` also raises `workspace_transfer`.
+- The credential check reads file paths and commands, not message text, so a
+  secret pasted into a Slack message raises only `workspace_transfer`.
+
 ### Require human approval
 
 Claude Code and Codex report `permission_mode` on hook events. Claude Code
@@ -463,7 +539,7 @@ take has its own deny:
 | CLI name | `aws s3 ls`, `/usr/local/bin/aws …` | `coding-agent.aws-access` (`aws-cli`) |
 | Destination / API | `curl https://sts.amazonaws.com`, `WebFetch` of an AWS host | `coding-agent.aws-access` (`aws-destination`) |
 | Credential files | Reading `~/.aws/credentials` or naming them in a command | `coding-agent.aws-access` (`aws-credential`), plus `coding-agent.credential-access` for other secrets |
-| Session taint | Further shell, web, MCP, and writes after injection or PII | `coding-agent.session-analysis` |
+| Session taint | Further shell, web, MCP, and writes after injection; further web and MCP calls after credential or sensitive information findings | `coding-agent.session-analysis` |
 
 Publish the layers you need. Arcjet runs every policy attached to the same
 **Execute on** option in one round trip and applies the most restrictive
