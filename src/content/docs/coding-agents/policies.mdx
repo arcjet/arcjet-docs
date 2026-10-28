@@ -61,6 +61,7 @@ Arcjet builds every input from the hook payload. Read a value in Rego as
 | `mcp_tool`        | String      | The MCP tool name, for an MCP call                                         |
 | `prompt`          | String      | The prompt text this event carries                                         |
 | `model`           | String      | The canonical id being switched to, or the id selected for the prompt or tool call. Exact match, after lowercasing. Not a prefix and not `contains`. Required on `pre-model-switch` only. |
+| `session_flags`   | String list | The session's active taint flags, set by Arcjet and never by the agent. Empty when the session is clean. See [Session analysis](#session-analysis) |
 
 `from_model`, switch source, effort, and thinking level are metadata only.
 They are not inputs.
