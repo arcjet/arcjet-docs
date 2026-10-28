@@ -418,19 +418,6 @@ deny contains "tainted-session-risky" if {
 To lock more, move a flag into `full_lock` or `egress_lock`. To lock less,
 remove it.
 
-#### Update a copy of the starter
-
-A policy copied from the starter keeps the Rego it had when you copied it.
-To match the starter, make the following changes:
-
-- To keep locking Notion, Linear, and Slack writes that score as
-  exfiltration, add `workspace_transfer` to `full_lock`. Arcjet flags those
-  calls `workspace_transfer`, so a policy that names only
-  `data_exfiltration` doesn't lock them.
-- To let shell commands and writes continue after a sensitive information
-  finding, move `sensitive_data_exposure` from `full_lock` to `egress_lock`,
-  and add the second `deny` rule if your copy doesn't have it.
-
 `workspace_transfer` has the following limits:
 
 - Arcjet matches the server name from the agent's MCP configuration, so a
