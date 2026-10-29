@@ -1,55 +1,122 @@
 ---
 title: "Arcjet privacy"
-description: "Details about the data processed by Arcjet. What data does Arcjet collect?"
+description: "What data Arcjet processes in your environment and in the cloud, what it retains and for how long, and how zero data retention changes that."
 ---
 
 import { Link } from "@/components/link";
 
-Arcjet is designed to process data primarily within your environment to minimize
-latency and reduce the amount of sensitive information sent to our systems.
-However, we do process some data remotely through our real-time Cloud API to
-enhance analysis and reporting.
+Arcjet splits processing between your environment and the Arcjet cloud. The SDK
+analyzes what it can locally – a sandboxed WebAssembly module inspects request
+details, and the request body doesn't leave your application. The Arcjet Cloud
+API handles the work that local analysis can't do on its own: real-time
+decisions, background analysis, and the activity that you review in the Arcjet
+Console.
 
-Our [privacy policy](https://arcjet.com/privacy) details the legal basis for
-data processing. This page provides additional technical details.
+The [Arcjet privacy policy](https://arcjet.com/privacy) sets out the legal basis
+for processing. This page describes what Arcjet processes, where, and for how
+long.
 
-## Data processed remotely
+## Where Arcjet processes data
 
-The Arcjet SDK uses a sandboxed WebAssembly module within your environment to
-analyze request details. Additionally, our real-time Cloud API processes some
-data for the following purposes:
+The following table summarizes where each kind of data is processed:
 
-- Provide real-time analysis and decisions.
-- Enhance background analysis and reporting.
-- Display request details in your dashboard.
+| Data                                                                     | Where it's processed |
+| ------------------------------------------------------------------------ | -------------------- |
+| Request body                                                             | Your environment     |
+| Local policy inputs                                                      | Your environment     |
+| Request IP address, headers, custom characteristics, and email addresses | Arcjet cloud         |
+| Decision metadata and server policy inputs                               | Arcjet cloud         |
+| Coding agent and other agent activity                                    | Arcjet cloud         |
 
-Arcjet processes the following request data remotely:
+Arcjet uses the data that it processes in the cloud for the following purposes:
 
-- Request IP address.
-- Request headers.
-- If you use
-  <Link.Page href="/fingerprints#custom-characteristics">custom characteristics</Link.Page>
-  for request
-  <Link.Page href="/fingerprints">fingerprints</Link.Page>: any provided
-  characteristics.
-- If you use <Link.Page href="/email-validation">email validation</Link.Page>:
-  the provided email address.
+- Make real-time decisions.
+- Run background analysis and reporting.
+- Show request and agent activity in the Console.
 
-All other request data, including the request body, is processed entirely within
-your environment.
+### Request protection
+
+When you call `protect()`, the SDK sends the following request data to Arcjet:
+
+- The IP address.
+- The headers.
+- Any <Link.Page href="/fingerprints#custom-characteristics">custom characteristics</Link.Page> that you use for <Link.Page href="/fingerprints">fingerprints</Link.Page>.
+- The email address, if you use <Link.Page href="/email-validation">email validation</Link.Page>.
+
+Everything else, including the request body, stays in your environment. For
+example, <Link.Page href="/sensitive-info">sensitive information detection</Link.Page> on HTTP request bodies runs locally, so the body isn't sent to Arcjet.
+
+### Guards and agents
+
+When you call `guard()`, use a <Link.Page href="/coding-agents">coding agent</Link.Page>, or submit other agent
+activity, Arcjet receives the values that it needs to evaluate your policies and
+show the activity in the Console. These values can include the following:
+
+- Decision metadata, such as the conclusion, the rules that fired, timings, and
+  correlation identifiers.
+- An actor identifier, when your application asserts one.
+- Server policy inputs that you map for a Guard policy – for example a
+  recipient address, a command, or the paths and domains in a tool call.
+- Tool call details, prompts, and related session metadata from coding agents
+  and other agent submissions.
+
+Values that you mark as local policy inputs stay in your environment. Only
+their declared kind and evaluation result leave the SDK.
 
 ## Data retention
 
-Arcjet retains data for 30 days to provide historical analysis, and retains
-aggregated data for longer to give you insights into your application's traffic
-patterns.
+Arcjet retains decision and activity records so that you can investigate
+traffic and agent sessions in the Console, API, CLI, and MCP server. Depending
+on the product, a record can include the following:
+
+- Request and Guard decision outcomes, and the rules that contributed to them.
+- Request metadata processed in the cloud, such as the IP address and headers.
+- Server policy inputs and agent session details that were sent for a decision.
+
+Arcjet retains this data for up to 30 days, unless your plan includes a longer
+retention window. Your plan's log retention sets how far back you can view
+records, and Enterprise plans can include custom retention. For each plan's
+window, see [Arcjet pricing](https://arcjet.com/pricing). Arcjet keeps
+aggregated data for longer, so that you can review traffic patterns over time.
+
+## Zero data retention
+
+For organizations that can't allow a vendor to store customer content, Arcjet
+offers zero data retention (ZDR). To find out whether your organization is
+eligible, contact [support@arcjet.com](mailto:support@arcjet.com).
+
+With ZDR, Arcjet evaluates requests and actions as usual, so your protections
+work the same way. The difference is what Arcjet keeps after it responds:
+
+- **Kept: decision structure.** The allow or deny conclusion, the rules that
+  fired, timings, structural metadata such as tool names and kinds, and the
+  shape of each policy input.
+- **Not kept: customer content.** Prompts, tool arguments, server policy input
+  values, and other metadata that carries a value. A tool name that Arcjet
+  records as decision metadata is kept, but the same text sent as a server
+  policy input value isn't.
+- **Unchanged: request metadata.** Records from `protect()` still include the
+  request metadata processed in the cloud – the IP address, headers, custom
+  characteristics, and email addresses used for validation.
+
+Log exports that Arcjet sends for you contain the same records, without the
+customer content.
+
+### Agent session data
+
+Agent session analysis needs recent session context to work. When it's enabled,
+Arcjet temporarily retains session data – such as prompts, tool call details,
+and analysis findings – while the session is active and for up to 24 hours
+after. That window lets you resume a session and lets administrators review a
+locked session. Arcjet then deletes the data automatically.
 
 ## Geographic processing
 
-Our API operates in multiple regions across various platforms to help provide
-low-latency responses. While we aim to process requests in the same region as
-your application, this is not guaranteed due to redundancy and failover
-mechanisms.
+Arcjet runs its API in multiple regions, across several platforms, to keep
+response times low. Arcjet aims to process each request in the same region as
+your application, but redundancy and failover can route a request to another
+region.
 
-If you require data processing in a specific region, we offer a paid add-on. For
-more information, email [support@arcjet.com](mailto:support@arcjet.com).
+If you need processing to stay in a specific region, Arcjet offers that as a
+paid add-on. For more information, email
+[support@arcjet.com](mailto:support@arcjet.com).
