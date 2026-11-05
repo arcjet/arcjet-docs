@@ -75,10 +75,20 @@ scoring. Rego reads them under `input.signals.ip_threat.<detector_id>`
 | `activities` | Observed activities for that host |
 | `host` | Host that produced the worst assessment. Empty when risk is `none` |
 | `ip` | Address looked up for that host |
-| `assessments` | One entry per public destination that completed scoring, in input order (failed lookups omitted) |
+| `assessments` | One entry per public destination the detector considered, in input order |
 
 Each `assessments` entry carries `host`, `ip`, `risk_level`, `reputation`,
 `activities`, and `detected` for that destination.
+
+The detector has the following limits:
+
+- Arcjet scores at most 30 distinct public hosts in one call. A call that names
+  more fails a live rule closed with `AJP1009`.
+- If a host's DNS lookup fails, the host appears in `assessments` with
+  `risk_level` `none` and an empty `ip`. If an IP lookup fails, Arcjet also
+  scores the host as `none`. A rule that must deny when a host can't be
+  verified can't rely on this detector alone.
+- Private, loopback, and link-local addresses aren't scored.
 
 Name the set of risk levels you want to deny – in this case, `high` and
 `critical`. Do not use a comparison like `>= "high"` because string sorting
@@ -164,7 +174,7 @@ deny contains "botnet-destination" if {
 
 ## Allowlist
 
-Policies execute in parallel and the most restrictive decision is applied. This means you need to define an allowlist in the same policy where the threat intelligence is evaluated.
+For coding agents, every policy attached to the same **Execute on** option runs in parallel, and Arcjet applies the most restrictive decision. This means you need to define an allowlist in the same policy where the threat intelligence is evaluated.
 
 ```rego
 allowed := {"docs.arcjet.com", "github.com", "raw.githubusercontent.com"}

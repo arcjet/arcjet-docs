@@ -132,21 +132,24 @@ If the email syntax is valid, the SDK passes the email address to the Arcjet
 cloud API for verification. This performs several checks:
 
 - MX validation: checks whether the domain has valid MX records.
-- Email type: checks whether the email address is a free, disposable, or
-  role-based email address.
+- Email type: checks whether the email address belongs to a free or disposable
+  email service.
 - Has Gravatar: checks whether the email address has a
   [Gravatar](https://gravatar.com) image associated with it. This is useful for
   checking if the email address is a real person.
 
-This metadata is returned as part of the Arcjet SDK response so you can decide
-what to do next. For example, you might decide to block signups from domains
-without MX records and from disposable email addresses, but add a flag to
-manually review those from free email providers.
+Arcjet runs only the checks for types that your rule can block. With `deny`,
+Arcjet checks the types you list. With `allow`, Arcjet checks every type that
+you don't allow. The SDK response lists the types that caused a deny, so a type
+that your rule doesn't block never appears in it. For example, you might decide
+to block signups from domains without MX records and from disposable email
+addresses. To flag signups from free email providers for manual review without
+blocking them, add a separate email rule in `DRY_RUN` mode that denies `FREE`.
 
 #### Email types
 
-The Arcjet SDK provides an analysis of the email type, returning one or several
-of the following:
+When a rule denies an email address, the SDK response lists one or more of the
+following types:
 
 - **Disposable:** The email address is disposable, which means it's registered to a
   service that allows throwaway email addresses. Although these are sometimes
@@ -159,10 +162,13 @@ of the following:
   transaction.
 - **No MX records:** This email address is registered to a domain name which has
   no MX records configured. This means it cannot receive email. We recommend
-  blocking these.
+  blocking these. If the DNS lookup times out or fails, Arcjet treats the
+  domain as having MX records, so a transient DNS failure doesn't block the
+  address.
 - **No Gravatar**: This email has no Gravatar attached to the email from which
   makes it slightly less likely to be a valid signup. This can be used for your
-  own risk scoring or to trigger a manual review.
+  own risk scoring or to trigger a manual review. If the Gravatar lookup times
+  out, Arcjet treats the address as having a Gravatar.
 
 ## Configuration
 

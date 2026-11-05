@@ -92,10 +92,46 @@ This template is a complete setup. Put this file in the repository as
         "timeoutSec": 5
       }
     ],
+    "postToolUseFailure": [
+      {
+        "type": "http",
+        "url": "https://decide.arcjet.com/v1/agent-hooks/copilot?event=post-tool-use-failure",
+        "headers": {
+          "Authorization": "Bearer $ARCJET_KEY",
+          "X-Arcjet-Principal": "$USER"
+        },
+        "allowedEnvVars": ["ARCJET_KEY", "USER"],
+        "timeoutSec": 5
+      }
+    ],
     "agentStop": [
       {
         "type": "http",
         "url": "https://decide.arcjet.com/v1/agent-hooks/copilot?event=stop",
+        "headers": {
+          "Authorization": "Bearer $ARCJET_KEY",
+          "X-Arcjet-Principal": "$USER"
+        },
+        "allowedEnvVars": ["ARCJET_KEY", "USER"],
+        "timeoutSec": 5
+      }
+    ],
+    "subagentStart": [
+      {
+        "type": "http",
+        "url": "https://decide.arcjet.com/v1/agent-hooks/copilot?event=subagent-start",
+        "headers": {
+          "Authorization": "Bearer $ARCJET_KEY",
+          "X-Arcjet-Principal": "$USER"
+        },
+        "allowedEnvVars": ["ARCJET_KEY", "USER"],
+        "timeoutSec": 5
+      }
+    ],
+    "subagentStop": [
+      {
+        "type": "http",
+        "url": "https://decide.arcjet.com/v1/agent-hooks/copilot?event=subagent-stop",
         "headers": {
           "Authorization": "Bearer $ARCJET_KEY",
           "X-Arcjet-Principal": "$USER"
@@ -120,6 +156,42 @@ This template is a complete setup. Put this file in the repository as
       {
         "type": "http",
         "url": "https://decide.arcjet.com/v1/agent-hooks/copilot?event=session-end",
+        "headers": {
+          "Authorization": "Bearer $ARCJET_KEY",
+          "X-Arcjet-Principal": "$USER"
+        },
+        "allowedEnvVars": ["ARCJET_KEY", "USER"],
+        "timeoutSec": 5
+      }
+    ],
+    "notification": [
+      {
+        "type": "http",
+        "url": "https://decide.arcjet.com/v1/agent-hooks/copilot?event=notification",
+        "headers": {
+          "Authorization": "Bearer $ARCJET_KEY",
+          "X-Arcjet-Principal": "$USER"
+        },
+        "allowedEnvVars": ["ARCJET_KEY", "USER"],
+        "timeoutSec": 5
+      }
+    ],
+    "preCompact": [
+      {
+        "type": "http",
+        "url": "https://decide.arcjet.com/v1/agent-hooks/copilot?event=pre-compact",
+        "headers": {
+          "Authorization": "Bearer $ARCJET_KEY",
+          "X-Arcjet-Principal": "$USER"
+        },
+        "allowedEnvVars": ["ARCJET_KEY", "USER"],
+        "timeoutSec": 5
+      }
+    ],
+    "errorOccurred": [
+      {
+        "type": "http",
+        "url": "https://decide.arcjet.com/v1/agent-hooks/copilot?event=error",
         "headers": {
           "Authorization": "Bearer $ARCJET_KEY",
           "X-Arcjet-Principal": "$USER"

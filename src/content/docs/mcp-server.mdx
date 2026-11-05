@@ -15,17 +15,20 @@ prompt, and tool call, and keep the evidence to prove what happened. Detect
 prompt injection, authorize agent tool calls, redact PII, and block bots and
 abuse.
 
-The Arcjet MCP server is one of two transports that connect [Arcjet
-skills](/agent-get-started#skills) to the Arcjet API. The other is the [Arcjet
-CLI](/cli). Use the MCP server with AI coding tools that have no shell access,
-such as ChatGPT and Claude Desktop. It also works with editors that have
+The Arcjet MCP server is one of two transports that connect
+<Link.Page href="/agent-get-started#install-a-skill">Arcjet skills</Link.Page>
+to the Arcjet API. The other is the
+<Link.Page href="/cli">Arcjet CLI</Link.Page>. Use the MCP server with AI
+coding tools that have no shell access, such as ChatGPT and Claude Desktop. It also works with editors that have
 built-in MCP support, such as VS Code Copilot, Windsurf, and Cursor. Use the CLI
 when you are working in a terminal session.
 
-Both transports expose the same management-plane surface – teams, sites, keys,
-requests, decisions, traffic analysis, anomaly detection, IP investigation,
-security briefings, and remote rule management. For the full reference, see
-[Available tools](#available-tools).
+The two transports overlap but aren't identical. Both cover teams, sites,
+keys, requests, guard decisions, traffic analysis, anomaly detection, IP
+investigation, security briefings, and remote rule management. Agent guard
+policies, session analysis, and error reports are available only as MCP tools.
+Live streaming with `watch` is available only in the CLI. For the full
+reference, see [Available tools](#available-tools).
 
 The MCP server is available at:
 
@@ -33,15 +36,15 @@ The MCP server is available at:
 https://api.arcjet.com/mcp
 ```
 
-It implements the 2025-06-18 revision of the
-[MCP Authorization](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization)
-and
-[Streamable HTTP](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#streamable-http)
-specifications, with OAuth-based authentication.
+It implements [MCP protocol version 2026-07-28](https://modelcontextprotocol.io/specification/2026-07-28)
+over Streamable HTTP, with OAuth-based authentication. Arcjet negotiates the
+protocol version on each request, so clients that use the
+[2025-06-18 revision](https://modelcontextprotocol.io/specification/2025-06-18)
+also work.
 
 ## Supported clients
 
-Any client that supports the 2025-06-18 [MCP
+Any client that supports the 2025-06-18 or a later [MCP
 specification](https://modelcontextprotocol.io/specification/2025-06-18) with
 [Streamable HTTP transport](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#streamable-http)
 and [OAuth authorization](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization)
@@ -170,9 +173,14 @@ Once connected, the following tools are available to your AI assistant:
 - **`list-sites`** – Lists sites within a specified team.
 - **`create-site`** – Creates a new site within a specified team.
 - **`get-site-key`** – Returns the SDK key (`ARCJET_KEY`) for a specific site.
+- **`submit-feedback`** – Reports a problem the assistant hit while using the Arcjet tools, such as a confusing result or a missing tool. It doesn't change any security configuration.
 - **`list-requests`** – Lists recent requests for a site. Supports filtering by conclusion (`ALLOW`, `DENY`, `ERROR`) and pagination.
 - **`get-request-details`** – Returns full details for a specific request including headers, rules executed, and decision information.
 - **`explain-decision`** – Explains why Arcjet allowed or denied a specific request. Returns a natural language summary, per-rule breakdown, and suggested next steps.
+- **`list-guards`** – Lists recent guard decisions for a site. Supports filtering by conclusion, time range, and `correlationId`, such as a coding agent session ID, and pagination.
+- **`get-guard`** – Returns the full record for a guard decision, including each rule's mode and result, the policy that matched, and the detector results the policy read.
+- **`get-session-taint`** – Explains why a coding agent session is or was flagged by session analysis, including the active flags and the activity that set each one. It doesn't unlock the session.
+- **`submit-error-report`** – Reports a coding agent guard decision as a false positive or a false negative. It doesn't unlock a session.
 - **`get-site-quota`** – Returns quota usage and limits for a site in the current billing window.
 - **`analyze-traffic`** – Analyzes request traffic over a time period. Returns total requests, denials, denial rate, top paths, top IPs, top denial reasons, and trend compared with the previous period.
 - **`get-anomalies`** – Detects unusual security patterns by comparing current traffic to the previous period. Identifies traffic spikes, geographic shifts, new threat activities, new bot signatures, risk escalation, and suspicious IP patterns.
@@ -244,8 +252,9 @@ a filter rule can't see the amount.
 
 ### Remote rules
 
-Remote rules are managed through the MCP server or the Arcjet dashboard – no
-code changes or redeployment needed. They apply globally to all requests for a
+Remote rules are managed through the MCP server, the
+<Link.Page href="/cli">Arcjet CLI</Link.Page>, or the Arcjet Console – no code changes or redeployment
+needed. They apply globally to all requests for a
 site. Only `rate_limit`, `bot`, `shield`, and `filter` rule types are supported
 as remote rules. Rules that need parsed request body content (`email`,
 `sensitive_info`, `prompt_injection`) require the SDK.

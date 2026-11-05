@@ -598,7 +598,8 @@ managed settings path for the operating system.
   ],
   "permissions": {
     "disableBypassPermissionsMode": "disable"
-  }
+  },
+  "allowManagedHooksOnly": true
 }
 ```
 
@@ -653,7 +654,8 @@ enters the agent's environment. Prefer this in a root-owned managed settings fil
 
 ## Lock it down
 
-The last four keys in the template are the lockdown:
+The `allowManagedHooksOnly`, `permissions`, and `allowedHttpHookUrls` keys in
+the template are the lockdown:
 
 ```json
 {

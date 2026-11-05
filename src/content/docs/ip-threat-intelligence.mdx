@@ -825,9 +825,11 @@ const decision = await aj.protect(req);
 
 if (decision.ip.hasService() && decision.ip.service === "Apple Private Relay") {
   // Allow this client.
-}
-
-if (decision.ip.isVpn() || decision.ip.isProxy() || decision.ip.isTor()) {
+} else if (
+  decision.ip.isVpn() ||
+  decision.ip.isProxy() ||
+  decision.ip.isTor()
+) {
   return new Response("Forbidden", { status: 403 });
 }
 ```

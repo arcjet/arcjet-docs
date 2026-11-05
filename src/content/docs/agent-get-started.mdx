@@ -91,7 +91,8 @@ agent needs to talk to the Arcjet API. There are two transports:
   Codex CLI, Cursor, VS Code with Copilot, Windsurf).
 
 The two transports overlap but aren't identical. Both cover teams, sites,
-remote rules, traffic analysis, and request inspection. **Agent guard policies
+remote rules, traffic analysis, request inspection, and guard decisions.
+**Agent guard policies
 are MCP-only**, so an agent that has to author or publish a policy needs the
 MCP server. For the full surface, see the
 [CLI command reference](/cli#command-reference) and the
@@ -467,9 +468,18 @@ After adding protection and starting the app:
    The equivalent MCP tools are `list-requests`, `get-request-details`,
    `explain-decision`, and `analyze-traffic`.
 
-4. For guard decisions, check the [Arcjet Console](https://console.arcjet.com).
-   The CLI and MCP request commands cover request-based protection only, so
-   there is no terminal equivalent for guards.
+4. For guard decisions, list, inspect, and stream decisions from the terminal:
+
+   ```bash
+   arcjet guards list --site-id site_01abc123 --conclusion DENY
+   arcjet guards details --site-id site_01abc123 --decision-id <decision-id>
+   arcjet guards watch --site-id site_01abc123
+   ```
+
+   The equivalent MCP tools are `list-guards` and `get-guard`. `get-guard`
+   returns each rule's result, the policy that matched, and the detector
+   results the policy read. To scope `list-guards` to one coding agent
+   session, filter by its `correlationId`.
 
 <Aside type="caution">
   No decision at all is not the same as a denial. If a model declined to call

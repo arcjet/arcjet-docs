@@ -1,6 +1,6 @@
 ---
 title: "Arcjet CLI"
-description: "Manage Arcjet from the terminal. The Arcjet CLI gives AI coding agents and humans the same management-plane surface as the MCP server – teams, sites, rules, traffic, and live requests – without leaving the shell."
+description: "Manage Arcjet from the terminal. The Arcjet CLI gives AI coding agents and humans teams, sites, rules, traffic, and live requests without leaving the shell."
 prev: false
 next: false
 ---
@@ -11,7 +11,7 @@ import Comments from "/src/components/Comments.astro";
 
 [Arcjet](https://arcjet.com) is the AI agent runtime security platform. Discover the agents running in your organization, enforce policy across every action, prompt, and tool call, and keep the evidence to prove what happened. Detect prompt injection, authorize agent tool calls, redact PII, and block bots and abuse.
 
-The Arcjet CLI is one of two ways to connect <Link.Page href="/agent-get-started#skills">Arcjet skills</Link.Page> to the Arcjet API. The other is the <Link.Page href="/mcp-server">MCP server</Link.Page>. Both transports expose the same management-plane surface: teams, sites, rules, traffic analysis, request inspection, and live monitoring. Use the CLI when you are working in a terminal, and the MCP server when you are working in an online client without shell access.
+The Arcjet CLI is one of two ways to connect <Link.Page href="/agent-get-started#install-a-skill">Arcjet skills</Link.Page> to the Arcjet API. The other is the <Link.Page href="/mcp-server">MCP server</Link.Page>. The two transports overlap but aren't identical. Both cover teams, sites, rules, traffic analysis, and request inspection. Live monitoring with `watch` is available only in the CLI, and agent guard policies are available only in the MCP server. Use the CLI when you are working in a terminal, and the MCP server when you are working in an online client without shell access.
 
 <Aside type="tip">
   This page is written for AI coding agents working in a terminal session or
@@ -170,7 +170,7 @@ Run `arcjet --help` to see all available commands, or `arcjet <command> --help` 
 | Command                                | Description                                                     |
 | -------------------------------------- | --------------------------------------------------------------- |
 | `arcjet rules list --site-id <id>`     | List remote rules configured for a site.                        |
-| `arcjet rules create --site-id <id>`   | Create a remote rule in `DRY_RUN` or `LIVE` mode (`--confirm`). |
+| `arcjet rules create --site-id <id>`   | Create a remote rule in `DRY_RUN` mode (`--confirm`). To set it live, use `rules promote`. |
 | `arcjet rules update --site-id <id>`   | Replace an existing remote rule's configuration (`--confirm`).  |
 | `arcjet rules delete --site-id <id>`   | Delete a remote rule (`--confirm`).                             |
 | `arcjet rules promote --site-id <id>`  | Promote a remote rule from `DRY_RUN` to `LIVE` (`--confirm`).   |
@@ -227,7 +227,7 @@ on a suspicious IP.
 
 ## Skills
 
-Skills are documented in <Link.Page href="/agent-get-started#skills">Agent get started</Link.Page>. The CLI is one of the transports that connects skills to the Arcjet API – it is not itself a skill surface.
+Skills are documented in <Link.Page href="/agent-get-started#install-a-skill">Agent get started</Link.Page>. The CLI is one of the transports that connects skills to the Arcjet API – it is not itself a skill surface.
 
 ## Invariants
 

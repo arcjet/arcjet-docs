@@ -127,8 +127,9 @@ or size, reports `AJP1003` naming the input, and a live rule fails closed. An
 input the policy doesn't declare reaches no rule, so Arcjet drops it, evaluates
 the policy, and adds an `AJ1060` warning naming it to the decision. Renaming an
 input in the policy therefore can't fail every deployed SDK closed, but it can
-leave a rule reading an input nobody sends, so check the warnings after a
-rename.
+leave a rule reading an input nobody sends. After a rename, log
+`decision.warnings` in your application and check for `AJ1060`. The Console
+doesn't show warnings.
 
 ## Where inputs are evaluated
 
@@ -180,15 +181,21 @@ Declaring a detector against the wrong exposure is a compile error, `AJV2007`.
 Arcjet threat intel scores the hosts a call would contact with the same
 assessment Protect uses for the caller of an HTTP request. The input must be
 `SERVER` exposure – there is no `LOCAL` variant. An empty value is risk
-`none`. A lookup that cannot be completed fails a live rule closed
-(`AJP1009`). For signal fields, allowlist-bypass patterns, and the coding agent
+`none`. If a DNS or IP lookup fails, Arcjet scores that host as risk `none`,
+so a rule that must deny when a host can't be verified can't rely on this
+detector alone. A call that names more than 30 distinct public hosts fails a
+live rule closed (`AJP1009`). For signal fields, allowlist-bypass patterns, and the coding agent
 starter, see
 <Link.Page href="/guards/threat-detection">Threat detection</Link.Page>.
 
-The server-side sensitive information detector screens values up to 2&nbsp;KB. A larger value is
-allowed unscreened with `scanned: false` on the result, so treat
-`detected: false` alone as inconclusive for an input that can exceed that
-size. Prefer the SDK-local kind wherever an SDK is in the call.
+The server-side sensitive information detector screens values up to about
+100&nbsp;KB. If a value up to 2&nbsp;KB can't be screened within 2 seconds, a
+live rule fails closed. A longer value takes more time to screen, and the
+request waits up to 3 seconds for the result. If that scan doesn't complete,
+Arcjet allows the value unscreened and doesn't bill for it, so treat
+`detected: false` as inconclusive for an input that can exceed 2&nbsp;KB. Each
+request screens at most two distinct long values. Prefer the SDK-local kind
+wherever an SDK is in the call.
 
 Both sensitive information kinds write their result to `input.signals.sensitive_info`, so moving a
 policy between them changes the input's exposure and the detector's kind and

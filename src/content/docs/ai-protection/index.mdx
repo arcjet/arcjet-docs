@@ -41,7 +41,6 @@ Production AI failures follow three patterns:
 Arcjet's core features map directly onto these problems. These guides cover
 HTTP middleware for web frameworks. If you're building agentic pipelines or need
 security inside tool handlers – where there's no `Request` object – see
-
 <Link.Page href="/guards">Agent guards</Link.Page>.
 
 ## AI abuse protection
@@ -113,10 +112,11 @@ quotas to rate limits tracked by tokens.
 **Building blocks:** Sensitive information detection
 
 Prevent PII and sensitive data from leaking into AI model context, logs, or
-third-party tool calls. Arcjet detects card numbers, email addresses, phone
-numbers, and custom patterns in request bodies – and, with the optional
-on-device NER backend, names, addresses, and government or financial identifiers -
-entirely locally, with no data leaving your infrastructure.
+third-party tool calls. Arcjet detects card numbers, email addresses, and
+custom patterns in request bodies with deterministic recognizers. The on-device
+NER model detects phone numbers, names, addresses, and government or financial
+identifiers. Detection runs entirely locally, with no data leaving your
+infrastructure.
 
 <CardGrid>
   <Link.Card

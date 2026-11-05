@@ -546,9 +546,10 @@ instead of returning an error.
 
 ### Correlate decisions
 
-A correlation ID groups the decisions of one run into a single Sequence in the
-Arcjet Console. `GuardAction` and the agent framework helpers read it from the
-context:
+A correlation ID links the decisions and capture events of one run. In the
+Arcjet Console, a Sequence is the capture events that share a correlation ID,
+so decisions alone don't form a Sequence. `GuardAction` and the agent
+framework helpers read the correlation ID from the context:
 
 ```go
 ctx = arcjet.ContextWithCorrelationID(ctx, conversationID)

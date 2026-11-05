@@ -49,9 +49,9 @@ never both.
 
 | Mode              | Use it when                                                                        |
 | ----------------- | ----------------------------------------------------------------------------------- |
-| Visual builder    | The rule is a list of comparisons over declared inputs. This is where a policy starts. |
+| Visual builder    | The rule is a list of comparisons over declared inputs. A condition can compare an input with a fixed value or with another declared input. This is where a policy starts. |
 | Plain English     | You know what to refuse but not which comparisons express it.                      |
-| Rego              | You need boolean grouping, a comparison between two inputs, a derived value, or logic over a collection. |
+| Rego              | You need boolean grouping, a derived value, or logic over a collection.            |
 
 <Aside type="caution">
   Converting a builder policy to Rego is one-way. Setting the Rego source
@@ -192,11 +192,11 @@ Detector-backed rules are exempt: a detector decides at request time and
 compiles to no artifact. New rules default to dry run, so publishing a draft
 can't start denying production traffic before you've seen it evaluate.
 
-### Revisions and rollback
+### Revisions
 
-Every publication creates an immutable revision recording the compiled bundle
-and the compiler and profile versions that produced it. A rollback republishes
-those bytes. A published policy stays active until a replacement or a deletion
+Every save creates an immutable revision, and each decision records the
+revision that produced it. To revert a change, edit the policy and save it
+again. A published policy stays active until a replacement or a deletion
 supersedes it, so a connectivity problem doesn't retire it.
 
 Decisions record the artifact digest, the declared inputs, and the detector

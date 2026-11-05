@@ -90,7 +90,8 @@ or make your AI behave in unintended ways.
 Arcjet prompt injection detection evaluates each incoming message for
 injection patterns inside your application before it reaches the AI provider.
 Detected attacks are blocked before the AI call is made, protecting both your
-application behavior and your AI budget.
+application behavior and your AI budget. Detection runs on Arcjet Himalia 1,
+one of <Link.Page href="/prompt-injection#arcjet-ai-security-models">Arcjet's own AI security models</Link.Page>.
 
 ## Get started
 
@@ -293,7 +294,7 @@ async def chat(request: Request, body: ChatRequest):
             logger.warning("Request blocked due to prompt injection")
             return JSONResponse(
                 {"error": "Prompt injection detected – rephrase your message"},
-                status_code=400,
+                status_code=403,
             )
         if decision.reason_v2.type == "SENSITIVE_INFO":
             logger.warning("Request blocked due to sensitive information")

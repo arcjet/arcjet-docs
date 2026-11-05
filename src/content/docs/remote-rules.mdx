@@ -1,6 +1,6 @@
 ---
 title: "Remote rules"
-description: "Manage Arcjet rules from the dashboard or MCP server without code changes or redeployment."
+description: "Manage Arcjet rules from the Arcjet Console, the CLI, or the MCP server without code changes or redeployment."
 ---
 
 import Comments from "/src/components/Comments.astro";
@@ -19,8 +19,8 @@ through `guard()`.
 
 Remote rules are the operational side of Arcjet's policy model. Developers put
 the enforcement point in the application with the SDK. SecOps, AppSec, or
-operations teams tune site-wide rules from the dashboard or
-
+operations teams tune site-wide rules from the Arcjet Console, the
+<Link.Page href="/cli">Arcjet CLI</Link.Page>, or the
 <Link.Page href="/mcp-server">MCP server</Link.Page>.
 
 ## How remote rules work
@@ -48,7 +48,8 @@ For the recommended rollout pattern, see
 <Link.Page href="/best-practices#start-in-dry-run-mode">Start in dry run mode</Link.Page>
 in the best practices guide. To measure how a dry-run rule would behave if
 promoted, use the
-<Link.Page href="/mcp-server">`get-dry-run-impact` MCP tool</Link.Page>.
+<Link.Page href="/mcp-server">`get-dry-run-impact` MCP tool</Link.Page> or the
+<Link.Page href="/cli">`arcjet analyze dry-run-impact` CLI command</Link.Page>.
 
 ## When to use remote rules
 
@@ -109,11 +110,15 @@ These must be configured in code with the SDK.
 
 ## Manage remote rules
 
-There are two ways to manage remote rules:
+There are three ways to manage remote rules:
 
-- **Arcjet dashboard.** Open your site in the
-  [Arcjet dashboard](https://console.arcjet.com) and go to the **Remote rules**
+- **Arcjet Console.** Open your site in the
+  [Arcjet Console](https://console.arcjet.com) and go to the **Remote rules**
   section to list, create, update, promote, and delete rules.
+- **Arcjet CLI.** Use the <Link.Page href="/cli">Arcjet CLI</Link.Page>
+  commands `arcjet rules list`, `rules create`, `rules update`,
+  `rules promote`, and `rules delete`. A rule created with the CLI starts in
+  `DRY_RUN` mode.
 - **Arcjet MCP server.** Connect an MCP-compatible AI assistant (Claude Code,
   Cursor, and others) to the
   <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page> and use the

@@ -340,6 +340,14 @@ alongside Shield for the custom allow/deny logic they are designed for.
 | `ip.src.tor`             | `boolean`     | `false`                                       |
 | `ip.src.vpn`             | `boolean`     | `false`                                       |
 | `ip.src`                 | `Ip`          | `8.8.8.8`                                     |
+| `local`                  | `Map<string>` | `{userId: "admin"}`                           |
+
+The `local` field holds values that your application passes to the SDK with
+the filter local option, which is `filterLocal` in JavaScript, `filter_local`
+in Python, and `arcjet.WithFilterLocal` in Go. Read a value with `local["userId"]`. The
+field is available only to filter rules defined in the SDK. In
+<Link.Page href="/remote-rules">remote rules</Link.Page>, `local` is always
+empty.
 
 All `ip.src.*` fields reflect information about the client IP address (the
 request source IP). These fields require data from our IP reputation database so
@@ -511,3 +519,5 @@ the docs.
 
 - A maximum of 10 expressions can be specified.
 - Each expression can be a maximum of 1024 bytes.
+- Each expression can contain a maximum of 64 parentheses and `not` operators
+  combined.

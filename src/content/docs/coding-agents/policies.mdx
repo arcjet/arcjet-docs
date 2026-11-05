@@ -24,9 +24,9 @@ not name it.
 
 | Execute on       | Runs                                                                                            | Rules read                                                                                          |
 | ---------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **Tool call**    | Before the agent runs a command, reads or writes a file, calls an MCP server, or fetches a URL  | `tool_name`, `tool_kind`, `command`, `command_tokens`, `paths`, `domains`, `destinations`, `permission_mode`, `mcp_server`, `mcp_tool`, `model` |
+| **Tool call**    | Before the agent runs a command, reads or writes a file, calls an MCP server, or fetches a URL  | `tool_name`, `tool_kind`, `command`, `command_tokens`, `paths`, `domains`, `destinations`, `permission_mode`, `mcp_server`, `mcp_tool`, `model`, `session_flags` |
 | **Prompt**       | Before text reaches the model: what the developer typed, and what a slash command expanded into | `prompt`, `model`                                                                                   |
-| **Model switch** | Before Claude Code changes which model the session is using. A denial keeps the current model. Codex, Cursor, and Muse Code do not fire this. | `model`                                                                         |
+| **Model switch** | Before Claude Code changes which model the session is using. A denial keeps the current model. Only Claude Code fires this. | `model`                                                                         |
 
 Events that share an Execute on option share inputs. `model` is filled
 only on the vendors in [Where `model` is filled](#where-model-is-filled).
@@ -55,8 +55,8 @@ Arcjet builds every input from the hook payload. Read a value in Rego as
 | `command`         | String      | The shell command text, for a shell call                                   |
 | `command_tokens`  | String list | The command split on whitespace and the shell's chaining operators         |
 | `paths`           | String list | File paths from the call's structured arguments                            |
-| `domains`         | String list | Hosts of the call's URL arguments                                          |
-| `destinations`    | String list | Hosts a call would contact: URL-argument hosts plus hosts of absolute URLs in the shell command. Possibly empty |
+| `domains`         | String list | Hosts of the call's URL arguments, written as absolute URLs or bare hostnames |
+| `destinations`    | String list | Hosts a call would contact: the hosts of its URL arguments (absolute URLs or bare hostnames), plus hosts that a shell command names. A shell command contributes absolute URLs anywhere in the command, and the bare connection targets of network tools such as `curl`, `wget`, `ssh`, `dig`, and `git`. Possibly empty |
 | `mcp_server`      | String      | The MCP server name, for an MCP call                                       |
 | `mcp_tool`        | String      | The MCP tool name, for an MCP call                                         |
 | `prompt`          | String      | The prompt text this event carries                                         |
@@ -93,17 +93,17 @@ any id that happens to include those letters.
 
 ### Compare `tool_kind`, not `tool_name`
 
-The agents spell their tools differently so Arcjet normalizes them to a consistent `tool_kind`. Matching is case-insensitive. A name that isn't in this table is `tool_kind: other`, so a rule over the kind never matches it.
+The agents spell their tools differently so Arcjet normalizes them to a consistent `tool_kind`. Matching is case-insensitive. Muse Code also accepts the Claude Code names. A name that isn't in this table is `tool_kind: other`, so a rule over the kind never matches it.
 
-| `tool_kind`  | Claude Code and Copilot                                    | Copilot CLI                                   | Codex                                                          | Cursor                          |
-| ------------ | ---------------------------------------------------------- | --------------------------------------------- | -------------------------------------------------------------- | ------------------------------- |
-| `shell`      | `Bash`, `BashOutput`, `KillShell`                          | `powershell`                                  | `Bash`, `exec_command`                                         | `Shell`                         |
-| `file_read`  | `Read`, `Glob`, `Grep`, `NotebookRead`                     | `view`, `rg`                                  | `Read`, `Glob`, `Grep`, `NotebookRead`                         | `Read`, `Grep`                  |
-| `file_write` | `Edit`, `Write`, `MultiEdit`, `NotebookEdit`               | `create`, `str_replace_editor`, `apply_patch` | `apply_patch`, `Edit`, `Write`, `MultiEdit`, `NotebookEdit`    | `Write`, `Delete`               |
-| `web`        | `WebFetch`, `WebSearch`                                    | `web_fetch`, `web_search`                     | `WebFetch` (hosted `WebSearch` skips `PreToolUse`)             | `WebFetch`, `WebSearch`         |
-| `mcp`        | Any `mcp__<server>__<tool>` name                           | Any MCP tool                                  | Any `mcp__<server>__<tool>` or `@<server>/<tool>` name         | Any namespaced MCP name         |
-| `agent`      | `Agent`, `Task`                                            |                                               | `Agent`, `Task`, `spawn_agent`                                 | `Task`                          |
-| `other`      | Everything else, such as `AskUserQuestion` and `TodoWrite` | `ask_user`, `update_todo`                     | `update_plan`                                                  |                                 |
+| `tool_kind`  | Claude Code and Copilot                                    | Copilot CLI                                   | Codex                                                          | Cursor                          | Muse Code                                  |
+| ------------ | ---------------------------------------------------------- | --------------------------------------------- | -------------------------------------------------------------- | ------------------------------- | ------------------------------------------ |
+| `shell`      | `Bash`, `BashOutput`, `KillShell`                          | `powershell`                                  | `Bash`, `exec_command`                                         | `Shell`                         | `bash`                                     |
+| `file_read`  | `Read`, `Glob`, `Grep`, `NotebookRead`                     | `view`, `rg`                                  | `Read`, `Glob`, `Grep`, `NotebookRead`                         | `Read`, `Grep`                  |                                            |
+| `file_write` | `Edit`, `Write`, `MultiEdit`, `NotebookEdit`               | `create`, `str_replace_editor`, `apply_patch` | `apply_patch`, `Edit`, `Write`, `MultiEdit`, `NotebookEdit`    | `Write`, `Delete`               | `write_file`, `edit_file`                  |
+| `web`        | `WebFetch`, `WebSearch`                                    | `web_fetch`, `web_search`                     | `WebFetch` (hosted `WebSearch` skips `PreToolUse`)             | `WebFetch`, `WebSearch`         | `web_search`                               |
+| `mcp`        | Any `mcp__<server>__<tool>` name                           | Any MCP tool                                  | Any `mcp__<server>__<tool>` or `@<server>/<tool>` name         | Any namespaced MCP name         | Any `mcp__<server>__<tool>` name           |
+| `agent`      | `Agent`, `Task`                                            |                                               | `Agent`, `Task`, `spawn_agent`                                 | `Task`                          |                                            |
+| `other`      | Everything else, such as `AskUserQuestion` and `TodoWrite` | `ask_user`, `update_todo`                     | `update_plan`                                                  |                                 | `work_status`, `work_stop`, `read_skill`   |
 
 ## Starter policies
 
@@ -119,7 +119,6 @@ Arcjet will run every policy attached to the specific event in one round trip so
 | `coding-agent.protected-paths` | Writes to CI configuration and version-control internals |
 | `coding-agent.egress-allowlist` | Fetches to hosts outside a list written into the policy |
 | `coding-agent.destination-threat` | A destination whose IP threat risk is high or critical |
-| `coding-agent.prompt-injection` | Instructions the injection detector flags in a prompt |
 | `coding-agent.sensitive-info` | Card numbers and Social Security numbers in a prompt |
 | `coding-agent.model-allowlist` | A model switch, prompt, or tool call whose model is outside the list the author wrote in Rego. Claude Code denies the switch only; Codex and Cursor deny the prompt and the tool call; Copilot and Muse Code are not covered. |
 | `coding-agent.session-analysis` | Risky follow-up calls once Arcjet flags the session, such as after a confirmed prompt injection. See [Session analysis](#session-analysis) |
@@ -285,7 +284,12 @@ deny contains "malicious-destination" if {
 For signal fields, limits, and application Guard calls, see
 <Link.Page href="/guards/threat-detection">threat detection</Link.Page>.
 
-### Prompt injection in a developer's prompt
+### Write your own: prompt injection in a developer's prompt
+
+Arcjet doesn't offer this policy as a starter. Legitimate coding tasks often
+quote or investigate injection text, so a detector over the developer's own
+prompt produces false positives. If you write this policy, start it in dry run
+and review what it would have denied before you set it live.
 
 Arcjet runs prompt injection detection over the `prompt` input, so a hook can
 refuse a turn whose instructions came from somewhere other than the developer:
@@ -310,6 +314,10 @@ Security number into the prompt.
 
 Declare a **server-side** sensitive information detector with the ID `pii`
 over `prompt`, denying the `CREDIT_CARD_NUMBER` and `SSN` entity types.
+
+Set **Execute on** to **Prompt** only. A tool call carries an empty `prompt`,
+so on **Tool call** the detector has nothing to screen and allows every call
+with the `AJ1062` warning.
 
 ```rego
 prompt_events := {"user-prompt-submit", "user-prompt-expansion", "user-prompt-transformed"}
@@ -385,7 +393,7 @@ administrator reviews the session in the Console.
 | `elevated_risk` | Review of the whole session escalates | Shell, web, MCP, and file writes |
 | `credential_access` | A tool call reads credentials | Web and MCP calls |
 | `sensitive_data_exposure` | A tool result contains an entity type that the policy denies | Web and MCP calls |
-| `workspace_transfer` | An exfiltration score lands on a Notion, Linear, or Slack MCP call that has no credential-shaped arguments | Nothing |
+| `workspace_transfer` | An exfiltration score lands on a Notion, Linear, or Slack MCP call that has no credential-shaped arguments, or on an upload whose payloads are only images, such as a screenshot posted to an API. An MCP call that sends no local content sets no exfiltration flag | Nothing |
 | `incomplete_screen` | Arcjet couldn't screen a tool result in full | Nothing |
 
 The starter keeps local work moving where it can. A credential or sensitive
@@ -598,7 +606,7 @@ after injection or sensitive-information findings earlier in the session.
 - <Link.Page href="/coding-agents/codex">Secure OpenAI Codex</Link.Page>
 - <Link.Page href="/coding-agents/cursor">Secure Cursor</Link.Page>
 - <Link.Page href="/coding-agents/block-personal-accounts">Block personal coding agent accounts</Link.Page>
-- <Link.Page href="/guards/threat-detection">Threat detection</Link.Page> – Arcjet threat intel signals, allowlist bypass, and fail-closed behavior
+- <Link.Page href="/guards/threat-detection">Threat detection</Link.Page> – Arcjet threat intel signals, allowlist bypass, and limits
 - <Link.Page href="/guards/rego">Write policies in Rego</Link.Page> – the language, the profile, and its exclusions
 - <Link.Page href="/guards/authoring">Author and publish policies</Link.Page> – the builder, plain English, tests, and publication
 - <Link.Page href="/guards/errors">Policy error codes</Link.Page>
