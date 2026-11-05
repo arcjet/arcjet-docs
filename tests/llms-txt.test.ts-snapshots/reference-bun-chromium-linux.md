@@ -47,7 +47,7 @@ Create a new `Arcjet` object with your API key and rules.
 
 The following fields are required:
 
-*   `key` (`string`) – Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://console.arcjet.com).
+*   `key` (`string`) – Your Arcjet key. Copy the actor key from the actor’s page in the [Arcjet Console](https://console.arcjet.com).
 *   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these, such as [shield](/sdk/bun/shield/reference/), [rate limiting](/sdk/bun/rate-limiting/reference/), [bot protection](/sdk/bun/bot-protection/reference/), [email validation](/sdk/bun/email-validation/reference/).
 
 The following fields are optional:
@@ -63,7 +63,7 @@ import arcjet, { shield } from "@arcjet/bun";
 import { env } from "bun";
 
 export const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
+  key: env.ARCJET_KEY!, // Get your Arcjet key from https://console.arcjet.com
   rules: [
     // Protect against common attacks with Arcjet Shield
     shield({
@@ -78,7 +78,7 @@ import arcjet, { shield } from "@arcjet/bun";
 import { env } from "bun";
 
 export const aj = arcjet({
-  key: env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
+  key: env.ARCJET_KEY, // Get your Arcjet key from https://console.arcjet.com
   rules: [
     // Protect against common attacks with Arcjet Shield
     shield({
@@ -166,7 +166,7 @@ import { env } from "bun";
 
 // Create an Arcjet instance with multiple rules
 const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
+  key: env.ARCJET_KEY!, // Get your Arcjet key from https://console.arcjet.com
   rules: [
     tokenBucket({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
@@ -190,7 +190,7 @@ import { env } from "bun";
 
 // Create an Arcjet instance with multiple rules
 const aj = arcjet({
-  key: env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
+  key: env.ARCJET_KEY, // Get your Arcjet key from https://console.arcjet.com
   rules: [
     tokenBucket({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
@@ -405,7 +405,7 @@ import arcjet, { shield } from "@arcjet/bun";
 import { env } from "bun";
 
 const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
+  key: env.ARCJET_KEY!, // Get your Arcjet key from https://console.arcjet.com
   rules: [
     // Protect against common attacks with Arcjet Shield
     shield({
@@ -434,7 +434,7 @@ import arcjet, { shield } from "@arcjet/bun";
 import { env } from "bun";
 
 const aj = arcjet({
-  key: env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
+  key: env.ARCJET_KEY, // Get your Arcjet key from https://console.arcjet.com
   rules: [
     // Protect against common attacks with Arcjet Shield
     shield({
@@ -518,7 +518,7 @@ import { isSpoofedBot } from "@arcjet/inspect";
 import { env } from "bun";
 
 const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
+  key: env.ARCJET_KEY!, // Get your actor key from https://console.arcjet.com
   rules: [
     // Shield protects your app from common attacks such as SQL injection
     shield({ mode: "LIVE" }),
@@ -582,7 +582,7 @@ Decision
 
 The `protect` function function returns a `Promise` that resolves to an `ArcjetDecision` object. This contains the following properties:
 
-*   `id` (`string`) – The unique ID for the request. This can be used to look up the request in the Arcjet dashboard. It is prefixed with `req_` for decisions involving the Arcjet cloud API. For decisions taken locally, the prefix is `lreq_`.
+*   `id` (`string`) – The unique ID for the request. This can be used to look up the request in the Arcjet Console. It is prefixed with `req_` for decisions involving the Arcjet cloud API. For decisions taken locally, the prefix is `lreq_`.
 *   `conclusion` (`"ALLOW" | "DENY" | "CHALLENGE" | "ERROR"`) – The final conclusion based on evaluating each of the configured rules. If you wish to accept Arcjet’s recommended action based on the configured rules then you can use this property.
 *   `reason` (`ArcjetReason`) – An object containing more detailed information about the conclusion.
 *   `results` (`ArcjetRuleResult[]`) – An array of `ArcjetRuleResult` objects containing the results of each rule that was executed.

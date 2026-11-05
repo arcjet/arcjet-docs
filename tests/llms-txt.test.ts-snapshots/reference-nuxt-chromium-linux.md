@@ -78,12 +78,12 @@ Arcjet is configured as an integration in your `nuxt.config.ts` file. Add your C
 
 [Section titled “API key”](#api-key)
 
-First, get your site key from the [Arcjet dashboard](https://console.arcjet.com). Set it as an environment variable called `ARCJET_KEY` in your `.env` file:
+First, get your actor key from the [Arcjet Console](https://console.arcjet.com). Set it as an environment variable called `ARCJET_KEY` in your `.env` file:
 
 Terminal window
 
 ```bash
-ARCJET_KEY=your_site_key_here
+ARCJET_KEY=your_actor_key_here
 ```
 
 ### Nuxt integration
@@ -107,7 +107,7 @@ export default defineNuxtConfig({
 
 The following fields are required:
 
-*   `key` (`string`) – Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://console.arcjet.com).
+*   `key` (`string`) – Your Arcjet key. Copy the actor key from the actor’s page in the [Arcjet Console](https://console.arcjet.com).
 
 *   [TS](#tab-panel-XXX-0)
 *   [JS](#tab-panel-XXX-1)
@@ -573,7 +573,7 @@ Decision
 
 The `protect` function function returns a `Promise` that resolves to an `ArcjetDecision` object. This contains the following properties:
 
-*   `id` (`string`) – The unique ID for the request. This can be used to look up the request in the Arcjet dashboard. It is prefixed with `req_` for decisions involving the Arcjet cloud API. For decisions taken locally, the prefix is `lreq_`.
+*   `id` (`string`) – The unique ID for the request. This can be used to look up the request in the Arcjet Console. It is prefixed with `req_` for decisions involving the Arcjet cloud API. For decisions taken locally, the prefix is `lreq_`.
 *   `conclusion` (`"ALLOW" | "DENY" | "CHALLENGE" | "ERROR"`) – The final conclusion based on evaluating each of the configured rules. If you wish to accept Arcjet’s recommended action based on the configured rules then you can use this property.
 *   `reason` (`ArcjetReason`) – An object containing more detailed information about the conclusion.
 *   `results` (`ArcjetRuleResult[]`) – An array of `ArcjetRuleResult` objects containing the results of each rule that was executed.

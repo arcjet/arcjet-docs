@@ -55,12 +55,12 @@ The main way to configure Arcjet is to pass options to the `arcjet` function. Th
 
 For all available fields, see [`ArcjetOptions` in the readme](https://github.com/arcjet/arcjet-js/tree/main/arcjet-react-router#arcjetoptions).
 
-Get the Arcjet key for your site from the [Arcjet dashboard](https://console.arcjet.com). Set it as an environment variable called `ARCJET_KEY` in your `.env` file:
+Get your actor key from the [Arcjet Console](https://console.arcjet.com). Set it as an environment variable called `ARCJET_KEY` in your `.env` file:
 
 Terminal window
 
 ```sh
-ARCJET_KEY=your_site_key_here
+ARCJET_KEY=your_actor_key_here
 ```
 
 #### Environment variables

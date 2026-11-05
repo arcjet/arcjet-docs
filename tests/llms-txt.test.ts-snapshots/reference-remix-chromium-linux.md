@@ -56,7 +56,7 @@ Create a new `Arcjet` object with your API key and rules. Create it outside of t
 
 The following fields are required:
 
-*   `key` (`string`) – Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://console.arcjet.com).
+*   `key` (`string`) – Your Arcjet key. Copy the actor key from the actor’s page in the [Arcjet Console](https://console.arcjet.com).
 *   `rules` - The rules to apply to the request. See the various sections of the docs for how to configure these, such as [shield](/sdk/remix/shield/reference/), [rate limiting](/sdk/remix/rate-limiting/reference/), [bot protection](/sdk/remix/bot-protection/reference/), [email validation](/sdk/remix/email-validation/reference/).
 
 The following fields are optional:
@@ -71,7 +71,7 @@ The following fields are optional:
 import arcjet, { shield } from "@arcjet/remix";
 
 const aj = arcjet({
-  // Get your site key from https://console.arcjet.com
+  // Get your Arcjet key from https://console.arcjet.com
   // and set it as an environment variable rather than hard coding.
   // See: https://www.npmjs.com/package/dotenv
   key: process.env.ARCJET_KEY!,
@@ -88,7 +88,7 @@ const aj = arcjet({
 import arcjet, { shield } from "@arcjet/remix";
 
 const aj = arcjet({
-  // Get your site key from https://console.arcjet.com
+  // Get your Arcjet key from https://console.arcjet.com
   // and set it as an environment variable rather than hard coding.
   // See: https://www.npmjs.com/package/dotenv
   key: process.env.ARCJET_KEY,
@@ -147,7 +147,7 @@ import arcjet, { detectBot, tokenBucket } from "@arcjet/remix";
 
 // Create an Arcjet instance with multiple rules
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
+  key: process.env.ARCJET_KEY!, // Get your Arcjet key from https://console.arcjet.com
   rules: [
     tokenBucket({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
@@ -170,7 +170,7 @@ import arcjet, { detectBot, tokenBucket } from "@arcjet/remix";
 
 // Create an Arcjet instance with multiple rules
 const aj = arcjet({
-  key: process.env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
+  key: process.env.ARCJET_KEY, // Get your Arcjet key from https://console.arcjet.com
   rules: [
     tokenBucket({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
@@ -357,7 +357,7 @@ import arcjet, { tokenBucket } from "@arcjet/remix";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
+  key: process.env.ARCJET_KEY!, // Get your Arcjet key from https://console.arcjet.com
   rules: [
     // Create a token bucket rate limit. Other algorithms are supported.
     tokenBucket({
@@ -394,7 +394,7 @@ export async function loader(args: LoaderFunctionArgs) {
 import arcjet, { tokenBucket } from "@arcjet/remix";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
+  key: process.env.ARCJET_KEY, // Get your Arcjet key from https://console.arcjet.com
   rules: [
     // Create a token bucket rate limit. Other algorithms are supported.
     tokenBucket({
@@ -471,7 +471,7 @@ Decision
 
 The `protect` function function returns a `Promise` that resolves to an `ArcjetDecision` object. This contains the following properties:
 
-*   `id` (`string`) – The unique ID for the request. This can be used to look up the request in the Arcjet dashboard. It is prefixed with `req_` for decisions involving the Arcjet cloud API. For decisions taken locally, the prefix is `lreq_`.
+*   `id` (`string`) – The unique ID for the request. This can be used to look up the request in the Arcjet Console. It is prefixed with `req_` for decisions involving the Arcjet cloud API. For decisions taken locally, the prefix is `lreq_`.
 *   `conclusion` (`"ALLOW" | "DENY" | "CHALLENGE" | "ERROR"`) – The final conclusion based on evaluating each of the configured rules. If you wish to accept Arcjet’s recommended action based on the configured rules then you can use this property.
 *   `reason` (`ArcjetReason`) – An object containing more detailed information about the conclusion.
 *   `results` (`ArcjetRuleResult[]`) – An array of `ArcjetRuleResult` objects containing the results of each rule that was executed.
@@ -717,7 +717,7 @@ import arcjet, { shield } from "@arcjet/remix";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
+  key: process.env.ARCJET_KEY!, // Get your Arcjet key from https://console.arcjet.com
   rules: [
     shield({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
@@ -750,7 +750,7 @@ export async function loader(args: LoaderFunctionArgs) {
 import arcjet, { shield } from "@arcjet/remix";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
+  key: process.env.ARCJET_KEY, // Get your Arcjet key from https://console.arcjet.com
   rules: [
     shield({
       mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
@@ -970,7 +970,7 @@ import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/remix";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
+  key: process.env.ARCJET_KEY!, // Get your Arcjet key from https://console.arcjet.com
   rules: [
     // Protect against common attacks with Arcjet Shield
     shield({
@@ -1028,7 +1028,7 @@ export async function loader(args: LoaderFunctionArgs) {
 import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/remix";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
+  key: process.env.ARCJET_KEY, // Get your Arcjet key from https://console.arcjet.com
   rules: [
     // Protect against common attacks with Arcjet Shield
     shield({
