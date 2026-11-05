@@ -22,7 +22,10 @@ A `User-Agent` header and an IP address work well for identifying crawlers such
 as Googlebot, which send their own `User-Agent` from published address ranges.
 They don't work for browser agents. An agent such as ChatGPT's cloud browser
 runs a real browser, sends a standard browser `User-Agent`, and connects from
-shared cloud networks. Nothing in the request says which operator sent it.
+shared cloud networks. Arcjet
+<Link.Page href="/bot-protection/advanced-signals">advanced signals</Link.Page>
+can detect that the browser is automated, but nothing in the request says which
+operator sent it.
 
 Web Bot Auth solves this with public-key cryptography. The operator publishes
 its public keys on its own domain and signs each request with the matching
@@ -54,9 +57,13 @@ rule. It parses the headers, fetches and caches the operator's keys, and checks
 the signature. You don't run a key fetcher or write signature parsing code.
 
 A verified signature adds a named bot identity to the decision. It doesn't
-replace the other checks. Arcjet still matches the `User-Agent`, verifies IP
-addresses and reverse DNS, and evaluates <Link.Page href="/bot-protection/advanced-signals">advanced signals</Link.Page> on
-every request, so unsigned requests still go through every check.
+replace the other checks. Arcjet still runs them where your rule applies
+them: `User-Agent` matching, IP address and reverse DNS verification, and
+advanced signals. Unsigned requests go through the same checks as before. Some
+checks don't apply to every rule. For example, deny rules skip IP address and
+reverse DNS verification, and a signer that you allow by name skips advanced
+signals. For the full list, see
+<Link.Page href="#how-a-verified-signature-changes-the-decision">How a verified signature changes the decision</Link.Page>.
 
 The JavaScript SDK supports Web Bot Auth from version 1.15.0. The examples on
 this page use `@arcjet/node`.
