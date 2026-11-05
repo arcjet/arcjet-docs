@@ -286,10 +286,19 @@ For signal fields, limits, and application Guard calls, see
 
 ### Write your own: prompt injection in a developer's prompt
 
-Arcjet doesn't offer this policy as a starter. Legitimate coding tasks often
-quote or investigate injection text, so a detector over the developer's own
-prompt produces false positives. If you write this policy, start it in dry run
-and review what it would have denied before you set it live.
+Arcjet doesn't offer this policy as a starter yet. Legitimate coding tasks
+often quote or investigate injection text, so a general prompt injection
+detector over the developer's own prompt produces false positives. Arcjet
+Thebe 1, a prompt injection model trained on coding agent activity, is in early
+access, and a starter will follow when it's available.
+
+Coding agents still get prompt injection protection through
+<Link.Page href="#session-analysis">session analysis</Link.Page>. Arcjet screens
+what the agent reads, such as tool results and fetched pages, for prompt
+injection. When the `coding-agent.session-analysis` starter is published and a
+finding is confirmed, it refuses the risky calls that follow. If you write this policy,
+start it in dry run and review what it would have denied before you set it
+live.
 
 Arcjet runs prompt injection detection over the `prompt` input, so a hook can
 refuse a turn whose instructions came from somewhere other than the developer:
