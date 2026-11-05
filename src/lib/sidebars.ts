@@ -265,6 +265,10 @@ export const main = [
             link: "/bot-protection/identifying-bots",
           },
           {
+            label: "Web Bot Auth",
+            link: "/bot-protection/web-bot-auth",
+          },
+          {
             label: "Advanced signals",
             link: "/bot-protection/advanced-signals",
           },

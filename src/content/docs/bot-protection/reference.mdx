@@ -405,7 +405,8 @@ Arcjet conclusion is `ERROR`.
 
 :::note
 Requests without `User-Agent` headers might not be identified as any particular
-bot and could be marked as an errored result. Our recommendation is to block
+bot and could be marked as an errored result, unless the request carries a
+verified <Link.Page href="/bot-protection/web-bot-auth">Web Bot Auth</Link.Page> signature. Our recommendation is to block
 requests without `User-Agent` headers because most legitimate clients send this
 header.
 
@@ -453,10 +454,16 @@ of detected bots by checking IP data and performing reverse DNS lookups.
 This helps protect against spoofed bots where clients pretend to be someone
 else.
 
+Arcjet also verifies <Link.Page href="/bot-protection/web-bot-auth">Web Bot Auth</Link.Page> signatures, which bots and AI
+agents use to prove which operator sent a request. Signature verification runs
+for both `allow` and `deny` rules.
+
 :::note
-Because verification is only helpful when you want to specifically `allow`
-certain bots, any `deny` rules bypass verification and block bots matching the
-`deny` list.
+Because IP and reverse DNS verification is only helpful when you want to
+specifically `allow` certain bots, `deny` rules skip it and block bots matching
+the `deny` list. A `deny` list that names a signed bot denies a request with a
+verified signature from that bot, even when its `User-Agent` looks like a
+browser.
 :::
 
 ### Example: Allowing verified bots
@@ -611,7 +618,8 @@ for result in decision.results:
 ### `User-Agent` header
 
 Requests without `User-Agent` headers cannot be identified as any particular
-bot and are marked as an errored result.
+bot and are marked as an errored result. The exception is a request that
+carries a verified <Link.Page href="/bot-protection/web-bot-auth">Web Bot Auth</Link.Page> signature, which may omit the header.
 
 Most legitimate clients send it because HTTP/1.1 (RFC 7231) says it _should_ be
 sent.

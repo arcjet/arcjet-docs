@@ -98,7 +98,7 @@ application-aware bot rules and avoid blocking legitimate users.
 
 ## How Arcjet bot detection works
 
-Arcjet detects more than 600 different bots (such as `GOOGLE_CRAWLER`) and
+Arcjet detects more than 800 different bots (such as `GOOGLE_CRAWLER`) and
 classifies them into 23 categories (such as `CATEGORY:AI`). You can specify
 individual bots or entire categories to allow or deny. Each bot rule takes
 exactly one of `allow` or `deny`. An empty `allow` list blocks every detected
@@ -124,6 +124,24 @@ Clients are tracked using configurable
 to identify unique clients. Fingerprints let you track anonymous users and
 attach rules and detections to known users through session tokens or other
 identifiers.
+
+## How Arcjet verifies bots
+
+A `User-Agent` header is easy to fake, so Arcjet checks that a bot is who it
+claims to be. Arcjet uses the following kinds of proof:
+
+- **IP address ranges.** Many operators publish the addresses that their bots
+  use, and Arcjet checks the request's IP address against them.
+- **Reverse DNS.** Arcjet looks up the hostname for the request's IP address and
+  confirms that it belongs to the operator, such as a Googlebot address that
+  resolves to a Google hostname.
+- **Cryptographic signatures.** Bots and AI agents that support Web Bot Auth sign
+  each request with a key that the operator publishes on its own domain. Arcjet
+  verifies the signature to confirm which operator sent the request, even when
+  the agent uses a standard browser `User-Agent`.
+
+For more information about signatures, see <Link.Page href="/bot-protection/web-bot-auth">Verify signed bots with Web Bot Auth</Link.Page>.
+For more information about IP and reverse DNS checks, see <Link.Page href="/bot-protection/reference#bot-verification">Bot verification</Link.Page>.
 
 ## Pricing
 

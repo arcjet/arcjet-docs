@@ -155,7 +155,13 @@ ones. If you need a specific category, open an issue on the
 
 ## Custom bots
 
-To block a particular bot that is not on our list, you can use <Link.Page href="/filters">Arcjet Filters</Link.Page>. For how to
+If a bot that is not on our list signs its requests with Web Bot Auth, you can
+allow or deny it by its key directory URL, for example
+`SIGNED_BOT:https://bot.example.com/.well-known/http-message-signatures-directory`.
+For details, see <Link.Page href="/bot-protection/web-bot-auth">Verify signed bots with Web Bot Auth</Link.Page>.
+
+To block a particular bot that is not on our list and doesn't sign its
+requests, you can use <Link.Page href="/filters">Arcjet Filters</Link.Page>. For how to
 block custom bots, see the <Link.Page href="/blueprints/malicious-traffic">Malicious traffic</Link.Page> blueprint.
 
 ## Detection
@@ -168,7 +174,8 @@ allow).
 
 :::note
 Requests without `User-Agent` headers might not be identified as any particular
-bot and could be marked as an errored result. Our recommendation is to block
+bot and could be marked as an errored result, unless the request carries a
+verified <Link.Page href="/bot-protection/web-bot-auth">Web Bot Auth</Link.Page> signature. Our recommendation is to block
 requests without `User-Agent` headers because most legitimate clients send this
 header.
 
@@ -183,10 +190,12 @@ owner and any variations.
 
 We welcome contributions to the
 [arcjet/well-known-bots](https://github.com/arcjet/well-known-bots) repository,
-whether you're adding new bots or updating detection patterns. Once merged, the
-updates are included in the next SDK release. Because bot detection is handled
-within the Arcjet WebAssembly module bundled with the SDK, new patterns must be
-compiled into the module as part of the release process.
+whether you're adding new bots or updating detection patterns. After a change is
+merged, Arcjet updates its pinned copy of the catalog. The update reaches Arcjet
+Cloud when Arcjet deploys it, and the SDK's local detection in the next SDK
+release. The SDK runs local bot detection in the Arcjet
+WebAssembly module bundled with the SDK, so new patterns must be compiled into
+the module as part of the release process.
 
 For instructions on how to contribute to our bot detection, read the
 repository's [README.md](https://github.com/arcjet/well-known-bots/blob/main/README.md).

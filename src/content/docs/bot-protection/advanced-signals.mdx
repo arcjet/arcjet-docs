@@ -136,12 +136,16 @@ on CAPTCHAs or user challenges, so legitimate users are not interrupted.
 1. A browser script loads and starts a WebAssembly-based signal collector.
 2. The collector gathers signals and sends them to the Arcjet API. Arcjet then returns
    a continue token, which is stored in the `aj_signals` cookie.
-3. That cookie remains valid for a period of time, so the collected signals can be
+3. That cookie remains valid for about 15 minutes, so the collected signals can be
    reused on later requests instead of being collected again on every page load.
+   After the cookie expires, the script collects signals again on the next page load.
 4. On the next request, the browser sends the `aj_signals` cookie. An Arcjet `detectBot`
    rule can then read it server-side, for example in a form `POST` handler.
-5. If the signals suggest automation, or if the cookie is missing, Arcjet denies the
-   request and includes `ARCJET_SIGNALS` as the denial reason.
+5. If the signals suggest automation, or if the cookie holds a token that is
+   invalid, expired, or unknown, Arcjet denies the request and includes
+   `ARCJET_SIGNALS` as the denial reason. A missing cookie isn't a signal on its
+   own, so `detectBot` doesn't deny a request for it. To require the cookie, use
+   the filter rule in [Step 3](#step-3-enforce-with-a-filter-rule).
 
 ## Pricing
 
@@ -203,6 +207,11 @@ high-sensitivity endpoints:
 
 If the result indicates automation, the request is denied with `ARCJET_SIGNALS`
 in the denial reason. You can see this in your logs and in the [Arcjet dashboard](https://console.arcjet.com).
+
+:::note
+A bot or AI agent that you allow by name and that sends a verified Web Bot Auth
+signature skips the signals check. For details, see <Link.Page href="/bot-protection/web-bot-auth#how-a-verified-signature-changes-the-decision">How a verified signature changes the decision</Link.Page>.
+:::
 
 #### Deny signals explicitly
 
