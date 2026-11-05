@@ -3,7 +3,7 @@ title: "Capture events"
 description: "Record what an application did after a Guard decision with best-effort capture events."
 ---
 
-import { Tabs, TabItem } from "@astrojs/starlight/components";
+import { Aside, Tabs, TabItem } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 
 `guard()` decides whether an action is allowed. `capture()` records that the
@@ -12,6 +12,12 @@ want to gate – a refund issued, a document exported, a tool call completed.
 
 Captures are visibility data. They never change a `guard()` or `protect()`
 conclusion and never set `hasFailedOpen()` / `HasFailedOpen()`.
+
+<Aside>
+  A client that only captures can use your project key (`aj_prj_key_`). A
+  client that also calls `guard()` or `protect()` needs an actor key
+  (`ajkey_`), and its captures are attributed to that actor.
+</Aside>
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">

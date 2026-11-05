@@ -87,7 +87,7 @@ information about the deadline, see
 
 ### `ARCJET_KEY`
 
-Arcjet key for your site (`string`). In most cases, this variable name is a
+Arcjet key for your actor (`string`). In most cases, this variable name is a
 recommended convention.
 
 The Go SDK reads `ARCJET_KEY` when `Key` is empty on `NewClient` or
@@ -103,10 +103,12 @@ retrieve the value and pass it yourself.
 
 For more information, see <Link.Page href="/environment#how-to-read-environment-variables">How to read environment variables</Link.Page>.
 
-You can find your site key in the [Arcjet dashboard](https://console.arcjet.com).
-Select your site, select "SDK configuration", then click to copy.
+You can find the key in the [Arcjet Console](https://console.arcjet.com). Open
+the actor, then copy the key. After the actor reports its first request, the key
+is on its **SDK Configuration** tab.
 
-Arcjet keys are secrets that are always prefixed with `ajkey_`.
+Arcjet keys are secrets. Actor keys start with `ajkey_` and project keys start
+with `aj_prj_key_`. The SDK needs an actor key.
 As this is a secret, do not commit it to source control or otherwise expose it.
 
 <a name="arcjet-log-level" />

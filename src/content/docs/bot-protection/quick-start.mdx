@@ -66,6 +66,7 @@ import FrameworkLinks from "@/components/FrameworkLinks.astro";
 import Comments from "/src/components/Comments.astro";
 import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 
+import GetKey from "@/snippets/shared/GetKey.mdx";
 import AstroStep1 from "@/snippets/shared/astro/InstallWithInspect.mdx";
 import AstroStep2 from "@/snippets/get-started/astro/Step2.mdx";
 import AstroStep3 from "@/snippets/bot-protection/quick-start/astro/Step3.mdx";
@@ -162,8 +163,7 @@ In your project root, install the SDK:
 
 ### 2. Set your key
 
-[Create a free Arcjet account](https://console.arcjet.com) then follow the
-instructions to add a site and get a key.
+<GetKey />
 
 <SlotByFramework>
   <AstroStep2 slot="astro" />
@@ -212,7 +212,8 @@ instructions to add a site and get a key.
   <SvelteKitStep4 slot="sveltekit" />
 </SlotByFramework>
 
-The requests also appear in the [Arcjet dashboard](https://console.arcjet.com).
+The requests also appear on the actor's **Activity** tab in the
+[Arcjet Console](https://console.arcjet.com).
 
 ### 5. Choose bots to allow or deny
 

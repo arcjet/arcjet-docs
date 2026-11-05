@@ -20,6 +20,12 @@ authenticate the Arcjet hooks. It is semi-secret, but can be distributed
 to multiple devices and team members through environment variables or
 configuration management.
 
+<Aside>
+  The hooks accept your project key (`aj_prj_key_`), which is on your
+  project's **Configuration** tab in the Arcjet Console, or an actor key
+  (`ajkey_`).
+</Aside>
+
 Cursor runs hooks as commands, not as native HTTP handlers. The install is a
 small script that reads the hook payload from standard input, posts it to
 Arcjet, and writes Arcjet's response to standard output. The machine that

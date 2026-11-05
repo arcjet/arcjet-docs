@@ -114,9 +114,8 @@ server-only module in `/src/lib/server/`.
 
 The following fields are required:
 
-- `key` (`string`) – Your Arcjet site key. This can be found in the SDK
-  Installation section for the site in the [Arcjet
-  Dashboard](https://console.arcjet.com).
+- `key` (`string`) – Your Arcjet key. Copy the actor key from the actor's page in
+  the [Arcjet Console](https://console.arcjet.com).
 - `rules` - The rules to apply to the request. See the various sections of the
   docs for how to configure these, such as
   <Link.ToSdk href="/shield/reference" sdk="sveltekit">shield</Link.ToSdk>,
@@ -342,7 +341,7 @@ The `protect` function function returns a `Promise` that resolves to an
 `ArcjetDecision` object. This contains the following properties:
 
 - `id` (`string`) – The unique ID for the request. This can be used to look up
-  the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
+  the request in the Arcjet Console. It is prefixed with `req_` for decisions
   involving the Arcjet cloud API. For decisions taken locally, the prefix is
   `lreq_`.
 - `conclusion` (`"ALLOW" | "DENY" | "CHALLENGE" | "ERROR"`) – The final

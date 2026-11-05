@@ -150,11 +150,14 @@ security checks.
 ✦Aj Encountered problem getting remote decision: [unauthenticated] invalid key
 ```
 
-This error means that the Arcjet key you are using is invalid. Each site has a
-unique key to identify it within Arcjet. You can find your key in the Arcjet
-dashboard by clicking your site name and then going to the SDK installation tab.
+This error means that the Arcjet key you are using is invalid. Each actor has a
+unique key to identify it within Arcjet. The API and CLI call an actor a site.
+To find the key, open the actor in the
+[Arcjet Console](https://console.arcjet.com). After the actor reports its first
+request, the key is on its **SDK Configuration** tab.
 
-Arcjet keys are always prefixed with `ajkey_`
+Actor keys start with `ajkey_` and project keys start with `aj_prj_key_`. The
+SDK needs an actor key.
 
 You provide the Arcjet SDK with the key when instantiating the client. For
 example in this case the key is defined in an environment variable called
@@ -358,7 +361,7 @@ Shield rule:
 import arcjet, { shield } from "@arcjet/next";
 
 const aj = arcjet({
-  // Arcjet key for your site (from <https://console.arcjet.com>).
+  // Arcjet key for your actor (from <https://console.arcjet.com>).
   // More info: <https://docs.arcjet.com/environment#arcjet-key>.
   key: process.env.ARCJET_KEY,
   rules: [
@@ -378,7 +381,7 @@ import os
 from arcjet import Mode, arcjet, shield
 
 aj = arcjet(
-    # Arcjet key for your site (from <https://console.arcjet.com>).
+    # Arcjet key for your actor (from <https://console.arcjet.com>).
     # More info: <https://docs.arcjet.com/environment#arcjet-key>.
     key=os.environ["ARCJET_KEY"],
     rules=[

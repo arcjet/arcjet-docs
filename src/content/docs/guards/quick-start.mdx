@@ -67,6 +67,7 @@ import { Link } from "@/components/link";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import SdkReferenceLinkByFramework from "@/components/SdkReferenceLinkByFramework.astro";
 
+import GetKey from "@/snippets/shared/GetKey.mdx";
 import ClaudeInstall from "@/snippets/guards/quick-start/claude-agent-sdk/Install.mdx";
 import ClaudeWrap from "@/snippets/guards/quick-start/claude-agent-sdk/Wrap.mdx";
 import ClaudeTry from "@/snippets/guards/quick-start/claude-agent-sdk/Try.mdx";
@@ -275,8 +276,7 @@ In your project root, install the SDK:
 
 ### 3. Set your key
 
-[Create a free Arcjet account](https://console.arcjet.com) and follow the
-instructions to add a site and get a key.
+<GetKey />
 
 <SlotByFramework>
   <ClaudeKey slot="claude-agent-sdk" />
@@ -389,8 +389,9 @@ made, and no decision is returned.
 
 That is the outcome to watch for, because it looks like the guard worked. A
 reader with a broken policy, a wrong label, or a missing key sees "nothing
-was sent" and concludes the guard is enforcing. Check the decision in the
-[Arcjet dashboard](https://console.arcjet.com) or in your logs. No decision
+was sent" and concludes the guard is enforcing. Check the decision on the
+actor's **Activity** tab in the [Arcjet Console](https://console.arcjet.com) or
+in your logs. No decision
 means the model declined, not that the guard denied.
 
 The same distinction is the reason to guard the tool at all. An unguarded
