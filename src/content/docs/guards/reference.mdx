@@ -22,9 +22,9 @@ effect. For each guarded tool, cover:
 | Capture after an allowed action       | Event is recorded with the expected `action`         |
 
 Use deterministic inputs for each rule: a recipient outside an allowed list,
-a string outside the configured byte-length range, known sensitive test data,
-and a clear prompt-injection fixture. Review `policyResults` /
-`policy_results` to identify the specific remote rule that matched.
+a string longer than the policy allows, known sensitive test data, and a clear
+prompt-injection fixture. Review `policyResults` / `policy_results` to
+identify the specific policy rule that matched.
 
 `DRY_RUN` is useful for evaluating a policy against real calls before enabling
 enforcement, but it does not replace a test that proves the side effect is
@@ -207,6 +207,8 @@ The type of a policy rule result follows the kind of the rule that produced it:
 | `POLICY_EXPRESSION` | A rule decided by the policy's Rego. Carries the rule's conclusion.    |
 | `PROMPT_INJECTION`  | A rule decided directly by a prompt injection detector.                |
 | `SENSITIVE_INFO`    | A rule decided directly by a sensitive information detector.           |
+| `IP_THREAT`         | A rule decided directly by an Arcjet threat intel detector.            |
+| `NOT_RUN`           | A rule that Arcjet skipped on purpose, such as a server rule after the SDK denied locally. |
 | `ERROR`             | A rule that couldn't be evaluated. Carries a stable code and message.  |
 
 `POLICY_EXPRESSION` is the type most rules produce, and it carries the

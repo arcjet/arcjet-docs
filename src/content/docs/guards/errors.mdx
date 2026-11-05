@@ -33,7 +33,8 @@ result in the decision and in the Console.
 | `AJP1006` | The policy expression couldn't be evaluated                  | The interpreter ran and failed. The message carries the fault and what to do about it. See [Read an expression failure](#read-an-expression-failure). |
 | `AJP1007` | The expression called a built-in with arguments it refuses   | A built-in error. The message names the built-in and the operand position. Test for the value's type before using it. |
 | `AJP1008` | The remote policy for this label couldn't be read            | Arcjet couldn't read the stored policy. Retry.                                                    |
-| `AJP1009` | An Arcjet threat intel lookup couldn't be completed          | Transient or a missing IP database binding. Every rule that reads the detector reports it. A host already scored high or critical still returns that verdict when another lookup fails. |
+| `AJP1009` | An Arcjet threat intel assessment couldn't be completed      | The call named more than 30 distinct public hosts. Split the call or reduce the list. Every rule that reads the detector reports it. A DNS or IP lookup failure doesn't produce this code, because Arcjet scores that host as risk `none`. |
+| `AJP1010` | A dry-run local detection withheld the rule's server inputs   | An SDK-local sensitive information detector found a match in dry run and withheld the policy's `SERVER` inputs, so a live server rule couldn't run. The policy is incomplete, so a caller that enforces is denied. |
 
 A live rule carrying any of these fails closed for a caller that enforces. A
 dry-run rule reports the code without affecting the decision.
@@ -45,16 +46,18 @@ gets no rule results at all, because there's nothing it could act on.
 
 An input the policy doesn't declare isn't an error. It reaches no rule, so
 Arcjet drops it, evaluates the policy, and adds a non-fatal warning to the
-decision:
+decision. An empty input to a text detector also produces a warning:
 
 | Code     | Meaning                                                                 |
 | -------- | ----------------------------------------------------------------------- |
 | `AJ1060` | The call carried an input the policy doesn't declare. The warning names it. |
 | `AJ1061` | The call carried an input whose name is outside the input-name grammar. Counted, never repeated back. |
+| `AJ1062` | A text detector's input was empty or only whitespace. Arcjet allowed the call without screening, and the warning names the input. |
 
 A typo in an optional input therefore doesn't fail the call closed, but the
 rule that reads the intended name sees nothing. When a rule you expect to fire
-never does, read the warnings on the decision.
+never does, log `decision.warnings` in your application. Arcjet returns
+warnings to the SDK only, and the Console doesn't show them.
 
 ### Read an expression failure
 
@@ -87,7 +90,7 @@ value because a test input is one you wrote.
 ### Why an absent detector fails every dependent rule
 
 Every rule that depends on the detector reports the same code – `AJP1004` for a
-model-backed detector, `AJP1009` for an Arcjet threat intel lookup – not only
+model-backed detector, `AJP1009` for an Arcjet threat intel assessment – not only
 the rules that name it. An expression reading
 `input.signals.prompt_injection.message_check.detected` or
 `input.signals.ip_threat.dest.risk_level` isn't evaluated when that detector
@@ -102,6 +105,21 @@ Agent aborts evaluation for the third, so the policy didn't decide and a live
 rule fails closed. Returning undefined instead would let
 `indexof(body, needle) == 0`, a "starts with" check, fire for an empty needle
 on a rule that was never evaluated.
+
+## Prompt injection and content moderation rule codes
+
+The prompt injection and content moderation rules on a guard call report an
+error result with one of the following codes. An errored rule fails open, so
+it doesn't deny the call.
+
+| Code     | Meaning                                                                                    |
+| -------- | ------------------------------------------------------------------------------------------ |
+| `AJ1130` | The prompt injection rule has no text to scan. Pass the text to check.                    |
+| `AJ1131` | The prompt injection text is larger than 128&nbsp;KiB.                                     |
+| `AJ1140` | The content moderation rule has no text to scan. Pass the text to check.                  |
+| `AJ1141` | The content moderation text is larger than 128&nbsp;KiB.                                   |
+| `AJ1995` | Content moderation had a temporary issue. Retry, or contact Arcjet support if it persists. |
+| `AJ1996` | Prompt injection detection had a temporary issue. Retry, or contact Arcjet support if it persists. |
 
 ## Compile codes
 
@@ -122,6 +140,7 @@ publish. Each one carries the position in your source.
 | `AJR1011` | `deny` can add a rule ID the policy doesn't declare             |
 | `AJR1012` | The policy nests deeper than 16 levels                         |
 | `AJR1013` | A declaration in the policy document is invalid                |
+| `AJR1014` | Comprehensions nest deeper than 6 levels                       |
 
 Two of these come up far more than the rest.
 
@@ -160,12 +179,13 @@ These are the ones you're most likely to see:
 
 | Code      | Meaning                                                   | What to do                                                                        |
 | --------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `AJV2007` | A detector requires a `SERVER` or `LOCAL` input           | Prompt injection needs a `SERVER` string; sensitive information needs a `LOCAL` one |
+| `AJV2007` | A detector requires a `SERVER` or `LOCAL` input           | Prompt injection, server-side sensitive information, and Arcjet threat intel need a `SERVER` input. SDK-local sensitive information needs a `LOCAL` input |
 | `AJV2008` | A rule's execution doesn't match its detector             | Execution is derived. Let the Console or the compiler set it                       |
 | `AJV2012` | The policy doesn't satisfy its stored tests               | Validate to list every failing test at once                                        |
 | `AJV2015` | A live rule needs at least one stored test                | Add a test, or leave every rule in dry run until you have one                      |
 | `AJV2016` | A coding agent policy executes on something other than Tool call, Prompt, or Model switch | Pick one or more of the three. Omit the setting for an application policy |
 | `AJV2017` | The policy declares a detector kind that isn't available   | Choose a detector the site can run                                                 |
+| `AJV2018` | Validating or evaluating the policy took longer than 10 seconds | Simplify the rule or the test input. A nested comprehension over a large input list is the usual cause |
 
 `AJV2007` isn't a preference you can override. Prompt injection runs on the
 server and needs the raw value, SDK-local sensitive information runs in the SDK

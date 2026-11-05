@@ -54,10 +54,13 @@ clients, and
 <Link.Page href="/sensitive-info">sensitive information detection</Link.Page>
 to prevent PII from entering model context.
 
-:::note[SDK-only rule]
+:::note[Request remote rules]
 Prompt injection detection needs the prompt content from the request body, so
-it must be configured in code with the SDK. It is not available as a
-<Link.Page href="/remote-rules">remote rule</Link.Page>.
+on a request it must be configured in code with the SDK. It isn't available as
+a request <Link.Page href="/remote-rules">remote rule</Link.Page>. To run it
+from a policy that you manage in the Arcjet Console, declare a prompt
+injection detector in an
+<Link.Page href="/guards/remote-policies">agent guard policy</Link.Page>.
 :::
 
 ## How Arcjet prompt injection detection works
@@ -102,6 +105,22 @@ The verdict is binary. In JavaScript, use
 
 Python `detect_prompt_injection` accepts only `mode`, which is required.
 Omitting `mode` or passing `threshold=` raises `TypeError`.
+
+## Arcjet AI security models
+
+Arcjet trains its own models to analyze AI agent activity. What counts as
+prompt injection depends on where the model runs. SQL or a shell command is
+suspicious in a support chat and routine in a coding agent. Each model in the
+family is trained for one of these situations:
+
+| Model            | Built for                                                                                                           | Availability                                                       |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Arcjet Himalia 1 | General-purpose prompt injection detection for chatbots and model endpoints                                         | Runs Arcjet prompt injection detection for every SDK call that uses it |
+| Arcjet Thebe 1   | Coding agents, where most of the risk comes from tool output, fetched web pages, and installed skills               | Early access                                                       |
+| Arcjet Carme 1   | Autonomous security agents, which read advisories, issues, and other content that describes attacks by design      | Early access                                                       |
+
+For more information about how Arcjet trained and evaluated these models, see
+[Introducing Arcjet's custom AI security models](https://arcjet.com/blog/introducing-arcjets-custom-ai-security-models).
 
 ## Pricing
 

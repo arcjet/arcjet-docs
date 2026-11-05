@@ -43,7 +43,7 @@ Arcjet separates where enforcement runs from who operates policy. Developers add
 the SDK at the application boundary and keep app-specific rules close to the
 routes, tools, and workflows they protect. Security and operations teams can use
 <Link.Page href="/remote-rules">remote rules</Link.Page> to adjust site-wide
-rules from the Arcjet dashboard or
+rules from the Arcjet Console or
 <Link.Page href="/mcp-server">MCP server</Link.Page> without waiting for a code
 change.
 
@@ -83,6 +83,12 @@ Arcjet has two components:
 1. **Arcjet SDK** installed into your application.
 2. **Arcjet Cloud API** used to make or report decisions.
 
+Agent activity can also reach Arcjet without the SDK. Coding agents call the
+Cloud API through <Link.Page href="/coding-agents">hooks</Link.Page>, which can
+also refuse a tool call. To record what agents do, you can export
+OpenTelemetry data to Arcjet or connect the Claude Compliance API. For more
+information, see <Link.Page href="/observe">Observe agent activity</Link.Page>.
+
 ### Arcjet SDK
 
 The SDK integrates Arcjet into your application. Security rules are configured
@@ -93,7 +99,7 @@ request or more advanced like flagging an account for review.
 
 Rules can also be configured outside of your application as
 <Link.Page href="/remote-rules">remote rules</Link.Page>, managed from the
-Arcjet dashboard or through the
+Arcjet Console or through the
 <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page>. Remote rules are
 evaluated by the Cloud API and combined with SDK rule results into a single
 decision, so SecOps can change protection behavior for a site without editing
@@ -102,7 +108,7 @@ the code path.
 
 The SDK includes a WebAssembly module which is used to analyze requests locally
 in your own environment. Where possible, a decision is taken locally and then
-reported to Arcjet so that you can view the details in the Arcjet dashboard.
+reported to Arcjet so that you can view the details in the Arcjet Console.
 Decisions may also be cached in memory.
 
 #### Example: Local analysis
@@ -271,6 +277,12 @@ A call to the Cloud API is required when:
   address fields such as `ip.src.vpn`, `ip.src.asnum.domain`, or
   `ip.src.country`. These fields require data from our IP reputation database so
   a call to the Cloud API is required. Other fields are analyzed locally.
+- A <Link.Page href="/prompt-injection">Prompt injection detection</Link.Page>
+  rule is configured. The detection model runs on the Cloud API, so the prompt
+  text is always evaluated remotely.
+- You call <Link.Page href="/guards">`guard()`</Link.Page>. Arcjet evaluates
+  the published policy for the call's label at the edge. Only inputs that you
+  mark `LOCAL` are evaluated in your process.
 
 #### API latency
 
@@ -337,7 +349,7 @@ for that client for a period of time.
 This threshold is dynamic and regularly updated based on the latest attack
 patterns. This protection is automatic and does not require any configuration.
 You can see the details of all requests, including those that are denied, in
-the [Arcjet dashboard](https://console.arcjet.com).
+the [Arcjet Console](https://console.arcjet.com).
 
 The results of this analysis are used regardless of the rules configured. This
 means Arcjet is continuously analyzing requests to your application and

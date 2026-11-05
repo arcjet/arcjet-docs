@@ -38,7 +38,7 @@ inputs. `model` is filled only on the vendors listed in
 
 | Execute on       | Events                                                      | Inputs the policy can read                                                                          |
 | ---------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **Tool call**    | `pre-tool-use`, `permission-request`                        | `tool_name`, `tool_kind`, `command`, `command_tokens`, `paths`, `domains`, `destinations`, `permission_mode`, `mcp_server`, `mcp_tool`, `model` |
+| **Tool call**    | `pre-tool-use`, `permission-request`                        | `tool_name`, `tool_kind`, `command`, `command_tokens`, `paths`, `domains`, `destinations`, `permission_mode`, `mcp_server`, `mcp_tool`, `model`, `session_flags` |
 | **Prompt**       | `user-prompt-submit`, `user-prompt-expansion`               | `prompt`, `model`                                                                                   |
 | **Model switch** | `pre-model-switch` enforces. `post-model-switch` is recorded and never adjudicated. | `model`                                                                          |
 
@@ -97,11 +97,11 @@ own permission flow. Codex can also rewrite the call when an allow carries
 
 A denial uses the agent's own hook-output shape and carries a denial reason.
 The reason names the rule IDs that fired, the label of the policy that denied
-the action, the decision ID, and a link to report a false positive, for
-example:
+the action, the decision ID, and a link to report an error. Use the link to
+report a false positive or a false negative. For example:
 
 ```text
-Blocked by Arcjet policy: destructive-command. Policy: coding-agent.destructive-command. Decision: gdec_01jz8k3m4n5p6q7r8s9t0v1w2x. Report false positive: https://console.arcjet.com/report/fp/gdec_01jz8k3m4n5p6q7r8s9t0v1w2x.
+Blocked by Arcjet policy: destructive-command. Policy: coding-agent.destructive-command. Decision: gdec_01jz8k3m4n5p6q7r8s9t0v1w2x. Report an error: https://console.arcjet.com/report/error/gdec_01jz8k3m4n5p6q7r8s9t0v1w2x.
 ```
 
 Use the decision ID to find the matching row in the site's **Activity** in
@@ -122,7 +122,7 @@ The reason never includes a rule's description.
 | `permission-request`    | `hookSpecificOutput.decision: {behavior, message}`     | Flat `behavior` / `message`                     | No such hook                                        |
 | `user-prompt-submit`    | Top-level `{ decision: "block", reason }`              | Output dropped. Can't enforce                   | `{ continue: false, user_message }`                 |
 | `user-prompt-expansion` | Top-level `{ decision: "block", reason }` (Claude Code) | No such hook                                    | No such hook                                        |
-| `pre-model-switch`      | `hookSpecificOutput.permissionDecision: "deny"` (Claude Code). Codex, Cursor, and Muse Code don't fire this. | – | – |
+| `pre-model-switch`      | `hookSpecificOutput.permissionDecision: "deny"` (Claude Code). Only Claude Code fires this. | – | – |
 
 The following table gives the exact denial for the events and agents where
 the shape needs more detail.

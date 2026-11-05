@@ -110,10 +110,11 @@ deny contains "unsupported-currency" if {
 }
 ```
 
-Comparing two inputs is the reason to reach for Rego rather than the builder,
-which compares an input to a fixed value. Resolve `approval_limit` from the
-authenticated user's own entitlements on the server, so the limit travels with
-the call and the policy stays one rule for every role.
+You can build both rules in the visual builder, because a builder condition
+can compare an input with another declared input as well as with a fixed
+value. Resolve `approval_limit` from the authenticated user's own entitlements
+on the server, so the limit travels with the call and the policy stays one rule
+for every role.
 
 Work in minor units. Arcjet reproduces Open Policy Agent's arithmetic exactly,
 so decimals compare correctly, but integers avoid the question.
@@ -471,7 +472,7 @@ the denial.
 ## Combine several conditions
 
 One policy can carry every rule for an action. This `email.sent` policy uses
-both detector kinds and both rule modes:
+two detector kinds and both rule modes:
 
 | Rule                    | Kind         | Mode      | What it does                                       |
 | ----------------------- | ------------ | --------- | -------------------------------------------------- |

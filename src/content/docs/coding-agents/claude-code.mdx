@@ -604,6 +604,10 @@ managed settings path for the operating system.
 
 </details>
 
+The template leaves out `allowManagedHooksOnly` because it turns off every hook
+that isn't in managed settings, including hooks your developers or other tools
+already use. To add it, see <Link.Page href="#lock-it-down">Lock it down</Link.Page>.
+
 ### What the hooks do
 
 Claude Code runs every matching hook for an event in parallel, so these
@@ -653,18 +657,21 @@ enters the agent's environment. Prefer this in a root-owned managed settings fil
 
 ## Lock it down
 
-The last four keys in the template are the lockdown:
+The `permissions` and `allowedHttpHookUrls` keys in the template are the
+lockdown:
 
 ```json
 {
-  "allowManagedHooksOnly": true,
   "permissions": { "disableBypassPermissionsMode": "disable" },
   "allowedHttpHookUrls": ["https://decide.arcjet.com/*"]
 }
 ```
 
-Hook entries merge across settings levels, so without `allowManagedHooksOnly`
-a developer's own hooks run alongside yours.
+Hook entries merge across settings levels, so a developer's own hooks run
+alongside yours. To run only the hooks in managed settings, also add
+`"allowManagedHooksOnly": true`. This turns off every other hook, including
+ones that your developers or other tools rely on, so check what's already in
+use before you add it.
 
 `disableBypassPermissionsMode` keeps the agent's own permission flow in place.
 To refuse tool calls when Claude Code is already in `auto`,
