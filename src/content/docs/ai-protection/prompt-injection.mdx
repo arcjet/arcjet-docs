@@ -154,7 +154,7 @@ import type { UIMessage } from "ai";
 import { convertToModelMessages, isTextUIPart, streamText } from "ai";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
+  key: process.env.ARCJET_KEY!, // Get your Arcjet key from https://console.arcjet.com
   rules: [
     // Shield protects against common web attacks such as SQL injection
     shield({ mode: "LIVE" }),
@@ -257,7 +257,7 @@ class ChatRequest(BaseModel):
 
 
 aj = arcjet(
-    key=os.environ["ARCJET_KEY"],  # Get your site key from https://console.arcjet.com
+    key=os.environ["ARCJET_KEY"],  # Get your Arcjet key from https://console.arcjet.com
     rules=[
         # Shield protects against common web attacks such as SQL injection
         shield(mode=Mode.LIVE),

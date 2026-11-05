@@ -3,7 +3,7 @@ import { rampart } from "@arcjet/sensitive-info-rampart";
 import { env } from "bun";
 
 const aj = arcjet({
-  key: env.ARCJET_KEY, // Get your site key from https://console.arcjet.com
+  key: env.ARCJET_KEY, // Get your Arcjet key from https://console.arcjet.com
   rules: [
     sensitiveInfo({
       deny: ["EMAIL"],

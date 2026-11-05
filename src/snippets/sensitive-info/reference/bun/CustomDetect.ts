@@ -21,7 +21,7 @@ function detectIban(value: string): DetectedSpan[] {
 }
 
 const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
+  key: env.ARCJET_KEY!, // Get your Arcjet key from https://console.arcjet.com
   rules: [
     sensitiveInfo({
       deny: ["EMAIL", "BANK_ACCOUNT"],
