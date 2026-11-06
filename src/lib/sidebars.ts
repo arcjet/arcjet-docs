@@ -8,16 +8,6 @@ export const main = [
     link: "/agent-get-started",
   },
   {
-    label: "Arcjet skills",
-    link: "https://github.com/arcjet/skills",
-    attrs: { target: "_blank", class: "external-link" },
-  },
-  {
-    label: "llms.txt",
-    link: "/llms.txt",
-    attrs: { target: "_blank", class: "external-link" },
-  },
-  {
     label: "Coding agents",
     collapsed: false,
     items: [
@@ -78,6 +68,10 @@ export const main = [
       {
         label: "What Discovery collects",
         link: "/shadow-ai/data-collected",
+      },
+      {
+        label: "OpenTelemetry and Claude Compliance",
+        link: "/observe",
       },
     ],
   },
@@ -168,10 +162,6 @@ export const main = [
         link: "/guards/capture",
       },
       {
-        label: "Observe agent activity",
-        link: "/observe",
-      },
-      {
         label: "Testing and reference",
         link: "/guards/reference",
       },
@@ -208,7 +198,7 @@ export const main = [
     ],
   },
   {
-    label: "Building blocks",
+    label: "AI detections",
     collapsed: false,
     items: [
       {
@@ -276,6 +266,12 @@ export const main = [
           },
         ],
       },
+    ],
+  },
+  {
+    label: "Request protection",
+    collapsed: false,
+    items: [
       {
         label: "Bot protection",
         collapsed: true,
@@ -417,6 +413,114 @@ export const main = [
         ],
         label: "Filters",
       },
+      {
+        label: "IP threat intelligence",
+        link: "/ip-threat-intelligence",
+      },
+      {
+        label: "Remote rules",
+        link: "/remote-rules",
+      },
+    ],
+  },
+  {
+    label: "Use cases",
+    collapsed: false,
+    items: [
+      {
+        label: "AI app protection",
+        collapsed: true,
+        items: [
+          {
+            label: "Overview",
+            link: "/ai-protection",
+          },
+          {
+            label: "Abuse protection",
+            link: "/ai-protection/abuse-protection",
+          },
+          {
+            label: "Budget control",
+            link: "/ai-protection/budget-control",
+          },
+          {
+            label: "Data loss prevention",
+            link: "/ai-protection/data-loss-prevention",
+          },
+          {
+            label: "Content safety",
+            link: "/ai-protection/content-safety",
+          },
+          {
+            label: "Prompt injection detection",
+            link: "/ai-protection/prompt-injection",
+          },
+        ],
+      },
+      {
+        label: "Blueprints",
+        collapsed: true,
+        items: [
+          {
+            label: "AI quota control",
+            link: "/blueprints/ai-quota-control",
+          },
+          {
+            label: "Per-user quotas",
+            link: "/blueprints/per-user-quotas",
+          },
+          {
+            label: "Feedback forms",
+            link: "/blueprints/feedback-form",
+          },
+          {
+            label: "Payment forms",
+            link: "/blueprints/payment-form",
+          },
+          {
+            label: "Malicious traffic",
+            link: "/blueprints/malicious-traffic",
+          },
+          {
+            label: "VPN and proxy detection",
+            link: "/blueprints/vpn-proxy-detection",
+          },
+          {
+            label: "IP geolocation",
+            link: "/blueprints/ip-geolocation",
+          },
+          {
+            label: "Cookie banner",
+            link: "/blueprints/cookie-banner",
+          },
+          {
+            label: "Sampling traffic",
+            link: "/blueprints/sampling",
+          },
+          {
+            label: "Custom rules",
+            link: "/blueprints/defining-custom-rules",
+          },
+        ],
+      },
+      {
+        label: "Auth integrations",
+        collapsed: true,
+        items: [
+          {
+            label: "Better Auth",
+            link: "/integrations/better-auth",
+          },
+          {
+            label: "Clerk",
+            link: "/integrations/clerk",
+          },
+        ],
+      },
+      {
+        label: "Example apps",
+        link: "/examples",
+      },
     ],
   },
   {
@@ -457,37 +561,7 @@ export const main = [
     ],
   },
   {
-    label: "AI runtime protection",
-    collapsed: false,
-    items: [
-      {
-        label: "Overview",
-        link: "/ai-protection",
-      },
-      {
-        label: "Abuse protection",
-        link: "/ai-protection/abuse-protection",
-      },
-      {
-        label: "Budget control",
-        link: "/ai-protection/budget-control",
-      },
-      {
-        label: "Data loss prevention",
-        link: "/ai-protection/data-loss-prevention",
-      },
-      {
-        label: "Content safety",
-        link: "/ai-protection/content-safety",
-      },
-      {
-        label: "Prompt injection detection",
-        link: "/ai-protection/prompt-injection",
-      },
-    ],
-  },
-  {
-    label: "Advanced",
+    label: "Reference",
     collapsed: false,
     items: [
       {
@@ -549,6 +623,10 @@ export const main = [
         ],
       },
       {
+        label: "Environment variables",
+        link: "/environment",
+      },
+      {
         label: "Upgrading",
         collapsed: true,
         items: [
@@ -576,18 +654,6 @@ export const main = [
         link: "/best-practices",
       },
       {
-        label: "IP threat intelligence",
-        link: "/ip-threat-intelligence",
-      },
-      {
-        label: "Remote rules",
-        link: "/remote-rules",
-      },
-      {
-        label: "Environment variables",
-        link: "/environment",
-      },
-      {
         label: "Platform",
         collapsed: true,
         items: [
@@ -596,7 +662,7 @@ export const main = [
             link: "/architecture",
           },
           {
-            label: "Fingerprints ",
+            label: "Fingerprints",
             link: "/fingerprints",
           },
           {

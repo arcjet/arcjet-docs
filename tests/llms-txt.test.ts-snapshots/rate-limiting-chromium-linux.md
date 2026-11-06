@@ -98,5 +98,11 @@ IP-based limits are useful for anonymous traffic and broad abuse throttles, but 
 
 Matching fingerprints to the right identifiers is critical to applying rate limits fairly and avoiding unintended blocking.
 
+For worked examples, see the following pages:
+
+*   [Per-user quotas](/blueprints/per-user-quotas) sets limits from each user’s pricing plan.
+*   [AI quota control](/blueprints/ai-quota-control) limits AI token usage for each user.
+*   [Clerk integration](/integrations/clerk) keys limits on the signed-in user or organization.
+
 Discussion
 ----------
