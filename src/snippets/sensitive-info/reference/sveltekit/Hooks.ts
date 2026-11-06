@@ -4,7 +4,7 @@ import { rampart } from "@arcjet/sensitive-info-rampart";
 import { error, type RequestEvent } from "@sveltejs/kit";
 
 const aj = arcjet({
-  key: env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
+  key: env.ARCJET_KEY!, // Get your Arcjet key from https://console.arcjet.com
   rules: [
     // This allows all sensitive entities other than email addresses and those containing a dash character.
     sensitiveInfo({

@@ -70,9 +70,8 @@ default rules you want to apply to every route. This is usually in the `app.modu
 
 The following fields are required:
 
-- `key` (`string`) – Your Arcjet site key. This can be found in the SDK
-  Installation section for the site in the [Arcjet
-  Dashboard](https://console.arcjet.com).
+- `key` (`string`) – Your Arcjet key. Copy the actor key from the actor's page in
+  the [Arcjet Console](https://console.arcjet.com).
 - `rules` - The rules to apply to the request. This can be empty in the root
   object so you can set rules within each controller. See the various sections
   of the docs for how to configure these, such as
@@ -218,7 +217,7 @@ The decision available when you call `protect` directly contains the following
 properties:
 
 - `id` (`string`) – The unique ID for the request. This can be used to look up
-  the request in the Arcjet dashboard. It is prefixed with `req_` for decisions
+  the request in the Arcjet Console. It is prefixed with `req_` for decisions
   involving the Arcjet cloud API. For decisions taken locally, the prefix is
   `lreq_`.
 - `conclusion` (`"ALLOW" | "DENY" | "CHALLENGE" | "ERROR"`) – The final

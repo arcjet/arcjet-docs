@@ -12,7 +12,7 @@ app = FastAPI()
 logger = logging.getLogger(__name__)
 
 aj = arcjet(
-    key=os.environ["ARCJET_KEY"],  # Get your site key from https://console.arcjet.com
+    key=os.environ["ARCJET_KEY"],  # Get your Arcjet key from https://console.arcjet.com
     rules=[
         detect_sensitive_info(
             mode=Mode.LIVE,

@@ -60,6 +60,7 @@ import FAQs from "/src/components/FAQs.astro";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 
+import GetKey from "@/snippets/shared/GetKey.mdx";
 import Step1Bun from "@/snippets/shield/quick-start/bun/Step1.mdx";
 import Step3Bun from "@/snippets/shield/quick-start/bun/Step3.mdx";
 import Step4Bun from "@/snippets/shield/quick-start/bun/Step4.mdx";
@@ -137,9 +138,9 @@ In your project root, install the SDK:
 
 ### 2. Set your key
 
-[Create a free Arcjet account](https://console.arcjet.com) then follow the
-instructions to add a site and get a key. Add it to a `.env.local` file in your
-project root.
+<GetKey />
+
+Add the actor key to a `.env.local` file in your project root.
 
 <SlotByFramework>
   <Step2SetEnv slot="bun" />
@@ -198,7 +199,8 @@ is a constant, so you can use it as part of your tests.
   <Step5SvelteKit slot="sveltekit" />
 </SlotByFramework>
 
-The requests also appear in the [Arcjet dashboard](https://console.arcjet.com).
+The requests also appear on the actor's **Activity** tab in the
+[Arcjet Console](https://console.arcjet.com).
 
 ## FAQs
 

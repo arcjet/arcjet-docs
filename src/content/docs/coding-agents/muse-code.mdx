@@ -1,6 +1,6 @@
 ---
 title: "Secure Muse Code"
-description: "Install Arcjet hooks for Muse Code through a command wrapper, a repository, user settings, or a managed hooks file, supply the site key, and verify."
+description: "Install Arcjet hooks for Muse Code through a command wrapper, a repository, user settings, or a managed hooks file, supply the Arcjet key, and verify."
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
@@ -19,6 +19,12 @@ change the Muse Code workflow.
 authenticate the Arcjet hooks. It is semi-secret, but can be distributed
 to multiple devices and team members through environment variables or
 configuration management.
+
+<Aside>
+  The hooks accept your project key (`aj_prj_key_`), which is on your
+  project's **Configuration** tab in the Arcjet Console, or an actor key
+  (`ajkey_`).
+</Aside>
 
 Muse Code has no native HTTP hook type. It runs each hook as a command,
 so the install is a small script: it reads the hook payload from standard
@@ -476,7 +482,7 @@ umask 077
 printf '%s\n' "AJ_KEY" > "$HOME/.config/muse/arcjet.key"
 ```
 
-Replace `AJ_KEY` with the site key from the
+Replace `AJ_KEY` with your Arcjet key from the
 [Arcjet Console](https://console.arcjet.com). Never commit a literal key.
 
 A managed enterprise policy can pin `extensions.hooks.allowed_env_vars`

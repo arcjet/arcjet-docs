@@ -89,6 +89,7 @@ import Comments from "@/components/Comments.astro";
 import { frameworks } from "@/lib/prefs";
 import SdkReferenceLinkByFramework from "/src/components/SdkReferenceLinkByFramework.astro";
 
+import GetKey from "@/snippets/shared/GetKey.mdx";
 import BunStep1 from "@/snippets/rate-limiting/quick-start/bun/Step1.mdx";
 import BunStep2 from "@/snippets/rate-limiting/quick-start/bun/Step2.mdx";
 import BunStep3 from "@/snippets/rate-limiting/quick-start/bun/Step3.mdx";
@@ -251,8 +252,7 @@ In your project root, install the SDK:
 
 ### 2. Set your key
 
-[Create a free Arcjet account](https://console.arcjet.com) then follow the
-instructions to add a site and get a key.
+<GetKey />
 
 <SlotByFramework>
   <BunStep2 slot="bun" />
@@ -339,7 +339,8 @@ tokens every 10 seconds. Each request consumes 5 tokens.
   <VercelEveStep4 slot="vercel-eve" />
 </SlotByFramework>
 
-The requests also appear in the [Arcjet dashboard](https://console.arcjet.com).
+The requests also appear on the actor's **Activity** tab in the
+[Arcjet Console](https://console.arcjet.com).
 
 ## FAQs
 

@@ -11,7 +11,7 @@ import (
 )
 
 var aj = must(arcjet.NewClient(arcjet.Config{
-	Key: os.Getenv("ARCJET_KEY"), // Get your site key from https://console.arcjet.com
+	Key: os.Getenv("ARCJET_KEY"), // Get your Arcjet key from https://console.arcjet.com
 	Rules: []arcjet.Rule{
 		// Create a token bucket rate limit. Other algorithms are supported.
 		arcjet.TokenBucket(arcjet.TokenBucketOptions{

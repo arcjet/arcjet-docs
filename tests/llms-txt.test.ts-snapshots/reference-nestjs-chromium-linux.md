@@ -55,7 +55,7 @@ Create a new root `ArcjetModule.forRoot` object with your API key and any defaul
 
 The following fields are required:
 
-*   `key` (`string`) – Your Arcjet site key. This can be found in the SDK Installation section for the site in the [Arcjet Dashboard](https://console.arcjet.com).
+*   `key` (`string`) – Your Arcjet key. Copy the actor key from the actor’s page in the [Arcjet Console](https://console.arcjet.com).
 *   `rules` - The rules to apply to the request. This can be empty in the root object so you can set rules within each controller. See the various sections of the docs for how to configure these, such as [shield](/sdk/nest/shield/reference/), [rate limiting](/sdk/nest/rate-limiting/reference/), [bot protection](/sdk/nest/bot-protection/reference/), [email validation](/sdk/nest/email-validation/reference/).
 
 The following fields are optional:
@@ -319,7 +319,7 @@ For limits, drop behavior, and language-specific notes, see [Guard metadata](/gu
 
 The decision available when you call `protect` directly contains the following properties:
 
-*   `id` (`string`) – The unique ID for the request. This can be used to look up the request in the Arcjet dashboard. It is prefixed with `req_` for decisions involving the Arcjet cloud API. For decisions taken locally, the prefix is `lreq_`.
+*   `id` (`string`) – The unique ID for the request. This can be used to look up the request in the Arcjet Console. It is prefixed with `req_` for decisions involving the Arcjet cloud API. For decisions taken locally, the prefix is `lreq_`.
 *   `conclusion` (`"ALLOW" | "DENY" | "CHALLENGE" | "ERROR"`) – The final conclusion based on evaluating each of the configured rules. If you wish to accept Arcjet’s recommended action based on the configured rules then you can use this property.
 *   `reason` (`ArcjetReason`) – An object containing more detailed information about the conclusion.
 *   `results` (`ArcjetRuleResult[]`) – An array of `ArcjetRuleResult` objects containing the results of each rule that was executed.

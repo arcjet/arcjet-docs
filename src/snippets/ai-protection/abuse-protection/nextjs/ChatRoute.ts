@@ -4,7 +4,7 @@ import type { UIMessage } from "ai";
 import { convertToModelMessages, streamText } from "ai";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
+  key: process.env.ARCJET_KEY!, // Get your Arcjet key from https://console.arcjet.com
   rules: [
     // Shield protects against common web attacks such as SQL injection
     shield({ mode: "LIVE" }),

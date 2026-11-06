@@ -11,7 +11,7 @@ import type { UIMessage } from "ai";
 import { convertToModelMessages, isTextUIPart, streamText } from "ai";
 
 const aj = arcjet({
-  key: process.env.ARCJET_KEY!, // Get your site key from https://console.arcjet.com
+  key: process.env.ARCJET_KEY!, // Get your actor key from https://console.arcjet.com
   // Track budgets per user – replace "userId" with any stable identifier
   characteristics: ["userId"],
   rules: [

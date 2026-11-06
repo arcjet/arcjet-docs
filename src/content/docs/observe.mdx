@@ -25,10 +25,10 @@ whether an action runs, add an enforcement point with
 <Link.Page href="/guards">agent guards</Link.Page> or install the hooks.
 
 <Aside type="caution">
-  Don't run more than one path against the same site. Each session is ingested
-  twice, under different identifiers, with no way to correlate the copies. Where
-  you run hooks, keep the other paths as a backstop on a separate site to find
-  sessions the hooks didn't reach.
+  Don't run more than one path against the same project. Each session is
+  ingested twice, under different identifiers, with no way to correlate the
+  copies. Where you run hooks, keep the other paths as a backstop on a separate
+  project to find sessions the hooks didn't reach.
 </Aside>
 
 ## Send OpenTelemetry data to Arcjet
@@ -52,7 +52,9 @@ export OTEL_LOG_USER_PROMPTS=1
 export OTEL_LOG_TOOL_DETAILS=1
 ```
 
-Replace `ARCJET_KEY` with the key for the site the activity belongs to.
+Replace `ARCJET_KEY` with the project key from your project's
+**Configuration** tab in the Arcjet Console. It starts with `aj_prj_key_`. To
+attribute the activity to one actor, use that actor's key (`ajkey_`) instead.
 
 `OTEL_LOG_USER_PROMPTS` and `OTEL_LOG_TOOL_DETAILS` enrich the audit trail with
 prompt text and tool arguments. Leave them unset if that content shouldn't
@@ -91,7 +93,7 @@ Three details decide whether this works:
 
 The same managed settings file can carry the
 <Link.Page href="/coding-agents/claude-code">coding agent hooks</Link.Page>,
-but use one or the other for a given site.
+but use one or the other for a given project.
 
 ### What Arcjet records
 
@@ -166,16 +168,16 @@ For more information about the two credentials, see Anthropic's
 1. In the [Arcjet Console](https://console.arcjet.com), open your team, then
    go to **Settings** > **Integrations** > **Claude Compliance**.
 2. Select which Claude product your organization uses.
-3. Enter the key and select the destination site. A team with one site skips
-   this choice.
+3. Enter the key and select the destination project. A team with one project
+   skips this choice.
 4. Select **Connect**. Arcjet validates the key against Anthropic before
    storing it, so a key that doesn't work is never stored.
 
 A team admin has to do this, because the credential is a team resource: one
-key, one connection, one destination site. You can change the destination later
-without reconnecting. The connection keeps its position in the feed, so ingest
-continues where it left off, but events already imported stay with the site
-that received them.
+key, one connection, one destination project. You can change the destination
+later without reconnecting. The connection keeps its position in the feed, so
+ingest continues where it left off, but events already imported stay with the
+project that received them.
 
 The key never comes back from any API, never returns to the browser after you
 submit it, and is never written to Arcjet's databases. Arcjet stores a masked
@@ -218,11 +220,12 @@ read, the last error, and whether the connection is rate limited.
 
 ## Read the activity
 
-Ingested activity appears in the Console under the site's **Activity**,
-alongside the guard and protect decisions Arcjet made. Each row carries the
-sender, the asserted principal, and the correlation ID that joins the events
-of one session, so you can follow a session from its first prompt to its last
-tool call.
+Ingested activity appears on the project's **Activity** tab in the Console,
+alongside the guard and protect decisions Arcjet made. Activity that you send
+with an actor key also appears on that actor's **Activity** tab. Each row
+carries the sender, the asserted principal, and the correlation ID that joins
+the events of one session, so you can follow a session from its first prompt to
+its last tool call.
 
 An ingested event is asserted context, so an action that appears in the
 activity with no decision beside it is an action nothing enforced. That gap is
