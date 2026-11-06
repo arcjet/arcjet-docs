@@ -30,7 +30,7 @@ Rate limiting is complementary to [Arcjet Shield WAF](/shield). Shield analyzes 
 
 Configure without code changes
 
-Fixed window and sliding window rate limits can also be configured as [remote rules](/remote-rules) from the Arcjet dashboard or through the [Arcjet MCP server](/mcp-server), with no code changes or redeployment. Token bucket is SDK-only because it requires the SDK to declare how many tokens each request consumes. Developers can keep per-user, per-plan, or token-consumption limits in code, while SecOps can use remote rate limits for global throttles, incident response, and temporary site-wide controls.
+Fixed window and sliding window rate limits can also be configured as [remote rules](/remote-rules) from the Arcjet Console or through the [Arcjet MCP server](/mcp-server), with no code changes or redeployment. Token bucket is SDK-only because it requires the SDK to declare how many tokens each request consumes. Developers can keep per-user, per-plan, or token-consumption limits in code, while SecOps can use remote rate limits for global throttles, incident response, and temporary site-wide controls.
 
 How Arcjet rate limiting works
 ------------------------------
