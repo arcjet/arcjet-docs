@@ -128,29 +128,34 @@ over the detector instead. For more examples, see
 ## Combine PHI types with other entity types
 
 HIPAA's Safe Harbor method lists 18 classes of identifier. Health information
-is de-identified under that method when all 18 are removed. The PHI types fill
-some of the classes, and the other entity types fill others. List both in a
-detector's filter to cover more of them:
+is de-identified under that method when all 18 are removed. The PHI types cover
+some of the classes, and the other entity types cover others. List both in a
+detector's filter to cover more of them. The following table maps each class
+to the Arcjet entity types that detect it:
 
-| Safe Harbor identifier                        | Entity types                                                              |
-| --------------------------------------------- | ------------------------------------------------------------------------- |
-| Names                                         | `GIVEN_NAME`, `SURNAME`                                                   |
-| Geographic subdivisions smaller than a state  | `BUILDING_NUMBER`, `STREET_NAME`, `SECONDARY_ADDRESS`, `CITY`, `ZIP_CODE` |
-| Telephone and fax numbers                     | `PHONE_NUMBER`                                                            |
-| Email addresses                               | `EMAIL`                                                                   |
-| Social Security numbers                       | `SSN`                                                                     |
-| Medical record numbers                        | `MEDICAL_RECORD_NUMBER`                                                   |
-| Health plan beneficiary numbers               | `HEALTH_PLAN_BENEFICIARY_NUMBER`                                          |
-| Account numbers                               | `BANK_ACCOUNT` covers bank accounts only                                  |
-| Certificate and license numbers               | `DRIVERS_LICENSE` covers driver's licenses only                           |
-| Vehicle identifiers, including license plates | `LICENSE_PLATE_NUMBER`, `VEHICLE_IDENTIFICATION_NUMBER`                   |
-| Device identifiers and serial numbers         | `DEVICE_IDENTIFIER`                                                       |
-| Web URLs                                      | `URL`                                                                     |
-| IP addresses                                  | `IP_ADDRESS`                                                              |
+| HIPAA identifier class                                                 | Arcjet entity types                                                       |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Names                                                                  | `GIVEN_NAME`, `SURNAME`                                                   |
+| Geographic subdivisions smaller than a state, including ZIP codes      | `BUILDING_NUMBER`, `STREET_NAME`, `SECONDARY_ADDRESS`, `CITY`, `ZIP_CODE` |
+| Dates related to a person, other than the year, and ages over 89       | Unsupported                                                               |
+| Telephone numbers                                                      | `PHONE_NUMBER`                                                            |
+| Fax numbers                                                            | `PHONE_NUMBER`                                                            |
+| Email addresses                                                        | `EMAIL`                                                                   |
+| Social Security numbers                                                | `SSN`                                                                     |
+| Medical record numbers                                                 | `MEDICAL_RECORD_NUMBER`                                                   |
+| Health plan beneficiary numbers                                        | `HEALTH_PLAN_BENEFICIARY_NUMBER`                                          |
+| Account numbers                                                        | `BANK_ACCOUNT` (bank accounts only)                                       |
+| Certificate and license numbers                                        | `DRIVERS_LICENSE` (driver's licenses only)                                |
+| Vehicle identifiers and serial numbers, including license plate numbers | `LICENSE_PLATE_NUMBER`, `VEHICLE_IDENTIFICATION_NUMBER`                   |
+| Device identifiers and serial numbers                                  | `DEVICE_IDENTIFIER`                                                       |
+| Web URLs                                                               | `URL`                                                                     |
+| IP addresses                                                           | `IP_ADDRESS`                                                              |
+| Biometric identifiers, including finger and voice prints               | Unsupported                                                               |
+| Full-face photographs and comparable images                            | Unsupported                                                               |
+| Any other unique identifying number, characteristic, or code           | Unsupported                                                               |
 
-Arcjet has no entity type for the remaining classes: dates related to a person
-and ages over 89, biometric identifiers, full-face photographs, and any other
-unique identifying code.
+For what each entity type matches, see
+<Link.Page href="/sensitive-info/entity-types">Sensitive information entity types</Link.Page>.
 
 <Aside type="caution">
   Detection helps you find identifiers. It doesn't de-identify data or make a
