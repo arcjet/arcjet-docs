@@ -3,6 +3,9 @@
   "include": [".astro/types.d.ts", "**/*", "**/*.js"],
   "exclude": ["dist"],
   "compilerOptions": {
-    "checkJs": true
+    "checkJs": true,
+    // TypeScript 6 defaults `strict` to true. Keep the non-strict checking
+    // that `astro/tsconfigs/base` was written for, so untyped JS samples pass.
+    "strict": false
   }
 }
