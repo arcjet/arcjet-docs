@@ -2,7 +2,7 @@ Arcjet sensitive information detection lets you detect and block sensitive data 
 
 **What is Arcjet?** [Arcjet](https://arcjet.com) is the AI agent runtime security platform. Discover the agents running in your organization, enforce policy across every action, prompt, and tool call, and keep the evidence to prove what happened. Detect prompt injection, authorize agent tool calls, redact PII, and block bots and abuse.
 
-Sensitive information detection is Arcjet’s [AI Data Loss Prevention layer](/ai-protection/data-loss-prevention) – stopping PII from leaking into AI model context, training data, or third-party tool calls made by agents. When a user pastes a credit card number or email address into a chat prompt, Arcjet catches it before it reaches your AI provider. All detection runs entirely locally in your own environment. No request body data ever leaves your infrastructure. To apply the same detection inside agent tool handlers and pipelines, see [Arcjet Guards](/guards).
+Sensitive information detection is Arcjet’s [AI Data Loss Prevention layer](/ai-protection/data-loss-prevention) – stopping PII from leaking into AI model context, training data, or third-party tool calls made by agents. When a user pastes a credit card number or email address into a chat prompt, Arcjet catches it before it reaches your AI provider. The SDK rule runs detection locally in your own environment, so the request body doesn’t leave your infrastructure. To apply the same detection inside agent tool handlers and pipelines, see [Arcjet Guards](/guards).
 
 Detection runs on-device with [Rampart](/sensitive-info/reference#on-device-detection-with-rampart), a named-entity-recognition (NER) model paired with deterministic recognizers. It detects email addresses, card numbers, IP addresses, and phone numbers, as well as **names, addresses, and government or financial identifiers**. Install `@arcjet/sensitive-info-rampart` for JavaScript, the `arcjet[sensitive-info-rampart]` extra for Python, or `github.com/arcjet/arcjet-go/sensitiveinfo/rampart` for Go. The model weights are bundled, so nothing is fetched at runtime. You can extend detection with custom recognizers you define.
 
@@ -38,7 +38,7 @@ Arcjet analyzes the body of each request locally in your application environment
 2.  Deterministic recognizers match structured types such as card numbers, IP addresses, and Social Security numbers, along with any custom recognizers you configure.
 3.  If sensitive information is found, Arcjet returns a decision so your application can block, sanitize, or otherwise handle the request.
 
-All of this logic runs locally and in-process. The raw request body is never sent to Arcjet.
+All of this logic runs locally and in-process. The SDK doesn’t send the raw request body to Arcjet.
 
 ### Detected entities
 
@@ -146,9 +146,11 @@ You can add your own [custom recognizers](/sensitive-info/reference#custom-entit
 
 [Section titled “Privacy and reporting”](#privacy-and-reporting)
 
-Sensitive info detection runs entirely locally. Arcjet reports only the decision (for example, whether sensitive data was detected) to your dashboard; the actual request body content is not sent to the Arcjet Cloud API.
+The SDK rule runs detection locally. The SDK reports the decision to Arcjet, along with the type and position of each finding, but not the matched text. The request body isn’t sent to the Arcjet Cloud API.
 
 This lets you enforce PII detection and compliance controls while keeping sensitive data within your own environment.
+
+The server-side sensitive information detector in an [agent guard policy](/guards/remote-policies#detectors) and [coding agent hooks](/coding-agents) screen text on Arcjet’s side. With these paths, the SDK or the coding agent sends the text to Arcjet for screening. For what Arcjet stores, see [Arcjet privacy](/privacy).
 
 Pricing
 -------
