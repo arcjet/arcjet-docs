@@ -50,6 +50,10 @@ export const main = [
         link: "/coding-agents/policies",
       },
       {
+        label: "Session analysis",
+        link: "/coding-agents/session-analysis",
+      },
+      {
         label: "Hook reference",
         link: "/coding-agents/hooks",
       },

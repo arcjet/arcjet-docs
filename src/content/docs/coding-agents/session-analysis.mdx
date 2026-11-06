@@ -1,0 +1,311 @@
+---
+title: "Lock risky sessions with session analysis"
+description: "Arcjet screens what a coding agent reads and reviews what it does, flags the session when it finds a risk, and a published policy refuses the risky tool calls that follow."
+---
+
+import { Steps } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+A coding agent reads web pages, MCP results, and files as it works. Any of them
+can carry a prompt injection, which is text that tells the agent to stop
+following the developer and do something else, such as send credentials to
+another server.
+The hook that reports a tool result runs after the tool has run, so Arcjet
+can't block the result or withhold it from the agent.
+
+Session analysis limits what the agent can do next. Arcjet screens what the agent
+reads and reviews the session's tool calls. When it finds a risk, it flags the
+session. A published policy reads those flags on every later tool call and
+refuses the risky ones, such as shell commands, web requests, MCP calls, and
+file writes. The agent can still read files and answer the developer, so the
+developer can see what happened.
+
+Arcjet sets the flags, and the agent can't set or clear them. A Console user
+clears them after reviewing the session, or they expire.
+
+## How session analysis works
+
+1. The agent runs a tool, and the hook sends the result to Arcjet.
+2. Arcjet screens the result and reviews the session's activity for signs of
+   an attack, such as prompt injection, credential access, or data
+   exfiltration. Some of this analysis runs in the background.
+3. A finding sets a flag on the session. Arcjet passes the session's active
+   flags to every later tool-call policy as the `session_flags` input.
+4. The `coding-agent.session-analysis` policy refuses risky tool kinds while a
+   flag is active, and the denial names the flag.
+
+Arcjet sets flags only when a published policy reads `session_flags`. Without
+one, confirmed prompt injection findings still appear in **Activity**, but
+nothing locks.
+
+## What sets each flag
+
+| Flag | What it means | The starter refuses |
+| --- | --- | --- |
+| `prompt_injection` | A tool result tried to override the agent's instructions | Shell, web, MCP, and file writes |
+| `data_exfiltration` | A tool call looks like it sends local data out | Shell, web, MCP, and file writes |
+| `code_execution_risk` | A tool call looks like it runs untrusted code | Shell, web, MCP, and file writes |
+| `elevated_risk` | The session as a whole looks like an attack | Shell, web, MCP, and file writes |
+| `credential_access` | A tool call looks like it reads credentials | Web and MCP calls |
+| `sensitive_data_exposure` | A tool result contains an entity type that the policy's sensitive information detector denies | Web and MCP calls |
+| `workspace_transfer` | The agent sent project content to a collaboration tool, such as an issue tracker or team chat, where sharing it is often expected | Nothing |
+| `incomplete_screen` | Arcjet couldn't screen a tool result in full | Nothing |
+
+Arcjet keeps improving how it detects each of these, so the signals behind a
+flag can change without notice. Write policies against the flag names, not
+against assumptions about what triggers them.
+
+The starter keeps local work moving where it can. A credential or sensitive
+information finding locks only the web and MCP calls that could send data out,
+so shell commands and file writes continue. `workspace_transfer` and
+`incomplete_screen` are recorded for review and don't lock the session unless
+you add them to the policy.
+
+## When flags apply
+
+Arcjet screens some tool results before it answers the hook, so the next tool
+call usually sees the flag. Other analysis runs in the background, and its
+flag applies from the first tool call after the analysis finishes. The agent
+can make more tool calls before then, and Arcjet doesn't refuse those.
+
+## Turn on session analysis
+
+The Console includes a `coding-agent.session-analysis` starter. Start from it
+rather than copying the Rego into a new policy, because the starter's detector
+declarations are what switch the tool-result screens on.
+
+<Steps>
+
+1. In the [Arcjet Console](https://console.arcjet.com), go to **Policies** and
+   create a coding agent policy from the `coding-agent.session-analysis`
+   starter.
+2. Keep **Execute on** set to **Tool call** only.
+3. Optional: set the `tainted-session-risky` rule to dry run. Arcjet still sets
+   flags, and **Activity** shows the tool calls that the rule would have
+   refused.
+4. Publish the policy.
+
+</Steps>
+
+### The starter's detectors
+
+The starter declares two detectors over the `prompt` input. A tool call
+carries an empty `prompt`, so neither detector refuses a call. Arcjet reads
+them to decide which tool-result screens to run:
+
+- A sensitive information detector with a non-empty deny list turns on
+  sensitive information screening. A result that contains a listed entity type
+  sets `sensitive_data_exposure`. The starter lists `CREDIT_CARD_NUMBER` and
+  `SSN`. An empty list detects nothing.
+- A prompt injection detector turns on the `evil.arcjet.com` test trigger.
+
+Remove a detector to turn its screen off. A policy that has only the Rego
+screens nothing.
+
+The starter's inputs and detectors, as the Console publishes them:
+
+```json
+{
+  "label": "coding-agent.session-analysis",
+  "codingAgentMoments": ["tool-call"],
+  "inputs": [
+    {
+      "name": "tool_kind",
+      "kind": "GUARD_POLICY_INPUT_KIND_STRING",
+      "exposure": "GUARD_POLICY_INPUT_EXPOSURE_SERVER",
+      "required": true
+    },
+    {
+      "name": "prompt",
+      "kind": "GUARD_POLICY_INPUT_KIND_STRING",
+      "exposure": "GUARD_POLICY_INPUT_EXPOSURE_SERVER",
+      "required": true
+    },
+    {
+      "name": "session_flags",
+      "kind": "GUARD_POLICY_INPUT_KIND_STRING_LIST",
+      "exposure": "GUARD_POLICY_INPUT_EXPOSURE_SERVER",
+      "required": true
+    }
+  ],
+  "detectors": [
+    {
+      "id": "oip",
+      "kind": "GUARD_POLICY_DETECTOR_KIND_PROMPT_INJECTION",
+      "inputName": "prompt"
+    },
+    {
+      "id": "pii",
+      "kind": "GUARD_POLICY_DETECTOR_KIND_SENSITIVE_INFO",
+      "inputName": "prompt",
+      "sensitiveInfo": {
+        "entitiesDeny": {
+          "entities": ["CREDIT_CARD_NUMBER", "SSN"]
+        }
+      }
+    }
+  ]
+}
+```
+
+### The starter's Rego
+
+The Rego expresses the lock as two sets of flags, each over the tool kinds
+that it refuses:
+
+```rego
+package arcjet.guard
+
+import rego.v1
+
+# Tool kinds that a full lock refuses.
+risky := {"shell", "web", "mcp", "file_write"}
+
+# Flags that lock every risky follow-up call.
+full_lock := {
+	"prompt_injection",
+	"data_exfiltration",
+	"code_execution_risk",
+	"elevated_risk",
+}
+
+# Flags that lock only calls that can send data out.
+egress := {"web", "mcp"}
+egress_lock := {"credential_access", "sensitive_data_exposure"}
+
+deny contains "tainted-session-risky" if {
+	some flag in input.values.session_flags
+	flag in full_lock
+	input.values.tool_kind in risky
+}
+
+deny contains "tainted-session-risky" if {
+	some flag in input.values.session_flags
+	flag in egress_lock
+	input.values.tool_kind in egress
+}
+```
+
+### Tune the starter
+
+Edit the sets in place rather than publishing a second policy:
+
+- To lock on a flag that the starter ignores, add it to `full_lock` or
+  `egress_lock`. For example, add `workspace_transfer` to `full_lock` to lock
+  on workspace writes.
+- To make a flag less strict, move it from `full_lock` to `egress_lock`, or
+  remove it to stop locking on it.
+- To refuse shell commands such as `curl` after a credential or sensitive
+  information finding, add `shell` to `egress`.
+- To change which entity types set `sensitive_data_exposure`, edit
+  `entitiesDeny` on the `pii` detector.
+
+## What a locked denial says
+
+A denial from a flagged session names the active flags after the rule ID. For
+example:
+
+```text
+Blocked by Arcjet policy: tainted-session-risky. Category: prompt_injection. Policy: coding-agent.session-analysis. Decision: gdec_01jz8k3m4n5p6q7r8s9t0v1w2x. Report an error: https://console.arcjet.com/report/error/gdec_01jz8k3m4n5p6q7r8s9t0v1w2x.
+```
+
+With more than one active flag, the reason lists them, such as
+`Categories: credential_access, prompt_injection.` The reason never includes
+the screened text or why the flag was set. For the denial format of each
+agent, see
+<Link.Page href="/coding-agents/hooks#responses">Responses</Link.Page>.
+
+## Review a flagged session in Activity
+
+In the Console, open **Activity**. Select **Only show flagged activity** to
+list only the activity that flagged a session. The timeline marks the activity
+that set each flag.
+
+Open the session to see its status. The status reads **Session locked** when a
+live rule refuses follow-up calls, and **Session flagged (dry run)** when the
+rule is in dry run. For each flag, the session shows the tool call that set
+it and a short excerpt of the screened text.
+
+A denial caused by a flag shows **View source capture**, which opens the
+activity that set the flag.
+
+## Clear a flag
+
+A Console user who can edit the project can clear a session's flags. An agent
+can't clear them. The Arcjet MCP server and the hook URL have no way to clear a
+flag, and ending the session doesn't clear it.
+
+To clear the flags, open the session in **Activity**, click **Clear taint**,
+enter a **Reason**, and confirm. Clearing removes every active flag on the
+session. The reason is required. Arcjet stores it on the session's activity,
+uses it to tune detection, and writes the clear to the audit log. A later
+finding can flag the session again.
+
+On the project's **Reviews** page, the **Pending** tab lists the sessions that
+are waiting to be cleared:
+
+- A flagged session with no request. Click **Clear taint** to clear it.
+- A clear-taint request from a developer. The request names the session and
+  can include why the developer thinks the lock is a false alarm. Click
+  **Approve** to clear the session, and enter a note, which becomes the clear
+  reason. Click **Reject** to leave the session flagged.
+
+The **All** tab also lists error reports filed from the link in a denial. An
+error report helps Arcjet improve detection and doesn't unlock a session.
+
+## Expiry
+
+Flags expire automatically after a period with no new findings, and an
+`incomplete_screen` flag on its own expires sooner. A new session starts with
+no flags.
+
+## Check a session from an MCP client
+
+The Arcjet MCP server's read-only `get-session-taint` tool takes a site ID and
+the session ID. It returns whether the session is flagged, its active flags,
+whether a published policy locks on them or runs in dry run, and past
+clears. It doesn't unlock the session. For the tool list, see
+<Link.Page href="/mcp-server">Arcjet MCP server</Link.Page>.
+
+## Test session analysis
+
+The host `evil.arcjet.com` is reserved for testing. When the policy declares a
+prompt injection detector, a page that the agent fetches from it sets
+`prompt_injection`.
+
+1. Publish the `coding-agent.session-analysis` starter.
+2. In a session with the Arcjet hooks installed, ask the agent to fetch the
+   page:
+
+   ```text
+   What's on evil.arcjet.com?
+   ```
+
+3. Ask the agent to run a harmless shell command, such as `echo hello`. If the
+   rule is live, the agent reports a denial that names
+   `Category: prompt_injection`.
+4. In **Activity**, open the session, review the flag, and clear it with a
+   reason.
+
+If `coding-agent.destination-threat` is live, it refuses the fetch before it
+runs, so no result reaches the screen. Set that policy to dry run while you
+test.
+
+## Limits
+
+- Session analysis can't undo what the agent did before a flag was set. The
+  agent has already read the result, and a background flag can arrive after
+  more tool calls.
+- Detection reduces risk but doesn't catch every attack. Use session analysis
+  alongside policies that restrict what the agent can reach, such as
+  <Link.Page href="/guards/threat-detection">threat detection</Link.Page>.
+- After a credential or sensitive information finding, the starter leaves
+  shell commands open, so a command such as `curl` can still send data out.
+  For how to change that, see [Tune the starter](#tune-the-starter).
+
+## Related
+
+- <Link.Page href="/coding-agents/policies">Coding agent policies</Link.Page> – the input contract and the starter policies
+- <Link.Page href="/coding-agents/hooks">Coding agent hook reference</Link.Page> – the endpoint, the events, and where enforcement stops
+- <Link.Page href="/guards/threat-detection">Threat detection</Link.Page> – deny high-risk destinations before the agent contacts them
+- <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page>

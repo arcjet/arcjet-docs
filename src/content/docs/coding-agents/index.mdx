@@ -29,6 +29,9 @@ Arcjet adds the following controls to a coding agent:
 - Limit outbound requests to approved domains, and deny destinations that
   Arcjet IP threat intelligence rates as high or critical risk.
 - Limit which models developers can use.
+- Flag a session when Arcjet finds a risk in what the agent read or did, such
+  as a prompt injection in a fetched page, and refuse the risky tool calls that
+  follow.
 - Record each session in the Console, including prompts, tool calls, tool
   results, subagents, and session start and end.
 - Run each rule in dry run first, review what it would have denied, and then
@@ -53,6 +56,7 @@ from the Console and adjust.
 | Allow only approved models                                     | <Link.Page href="/coding-agents/policies#allowed-models">`coding-agent.model-allowlist`</Link.Page>               |
 | Refuse tool calls while the agent skips its own approvals      | <Link.Page href="/coding-agents/policies#require-human-approval">`coding-agent.no-auto-mode`</Link.Page>          |
 | Block the AWS CLI, AWS APIs, and AWS credentials               | <Link.Page href="/coding-agents/policies#block-aws-access">`coding-agent.aws-access`</Link.Page>                  |
+| Lock a session after a prompt injection, credential read, or exfiltration attempt | <Link.Page href="/coding-agents/session-analysis">`coding-agent.session-analysis`</Link.Page> |
 
 ## How it works
 
@@ -84,6 +88,10 @@ from the Console and adjust.
 4. Arcjet records the event, along with the events that no policy runs on,
    such as tool results and session start and end. The session appears in the
    site's **Activity** in the [Arcjet Console](https://console.arcjet.com).
+5. With <Link.Page href="/coding-agents/session-analysis">session analysis</Link.Page>,
+   Arcjet also screens the tool results it records and flags the session when
+   it finds a risk. A published policy then refuses the risky tool calls that
+   follow.
 
 For the endpoint, the full event list, and each agent's denial format, see
 <Link.Page href="/coding-agents/hooks">Coding agent hook reference</Link.Page>.
@@ -139,7 +147,10 @@ selected. For coverage by agent, see
   Code wrappers fail closed: if Arcjet can't be reached or the key is wrong,
   the agent's prompts and tool calls are denied.
 - Arcjet can't block what a tool returns. A poisoned web page or MCP response
-  arrives after the tool has run, so Arcjet records it but can't withhold it.
+  arrives after the tool has run, so Arcjet can't withhold it from the agent.
+  Arcjet screens the result instead and can flag the session, so a published
+  policy refuses the risky tool calls that follow. For more information, see
+  <Link.Page href="/coding-agents/session-analysis">Session analysis</Link.Page>.
 - A hook covers one installed client. To find sessions that never reached a
   hook, use <Link.Page href="/observe">OpenTelemetry or Compliance API ingest</Link.Page>.
   To keep personal accounts off managed devices, see
@@ -183,6 +194,11 @@ in dry run.
     title="Coding agent policies"
     href="/coding-agents/policies"
     description="The input contract, the starter policies, and how to write and roll out your own."
+  />
+  <Link.Card
+    title="Session analysis"
+    href="/coding-agents/session-analysis"
+    description="Flag a session after a risky finding, refuse the risky calls that follow, and review and clear flagged sessions."
   />
   <Link.Card
     title="Hook reference"
