@@ -63,7 +63,7 @@ How Arcjet bot detection works
 
 [Section titled “How Arcjet bot detection works”](#how-arcjet-bot-detection-works)
 
-Arcjet detects more than 600 different bots (such as `GOOGLE_CRAWLER`) and classifies them into 23 categories (such as `CATEGORY:AI`). You can specify individual bots or entire categories to allow or deny. Each bot rule takes exactly one of `allow` or `deny`. An empty `allow` list blocks every detected bot.
+Arcjet detects more than 800 different bots (such as `GOOGLE_CRAWLER`) and classifies them into 23 categories (such as `CATEGORY:AI`). You can specify individual bots or entire categories to allow or deny. Each bot rule takes exactly one of `allow` or `deny`. An empty `allow` list blocks every detected bot.
 
 The identifiers of specific bots and categories, and their corresponding detection and verification patterns, are open source and maintained in [`arcjet/well-known-bots`](https://github.com/arcjet/well-known-bots), which ships with the Arcjet SDK. Names and categories are autocompleted in your editor if you use TypeScript.
 
@@ -72,6 +72,19 @@ For basic bot detection, regular expressions are applied to the `user-agent` hea
 Advanced bot detection adds IP reputation, [verification](/bot-protection/reference#bot-verification), machine learning, and [advanced signals](/bot-protection/advanced-signals) to identify bots more accurately and distinguish real users from automated traffic.
 
 Clients are tracked using configurable [fingerprints](/fingerprints) (IP address by default) to identify unique clients. Fingerprints let you track anonymous users and attach rules and detections to known users through session tokens or other identifiers.
+
+How Arcjet verifies bots
+------------------------
+
+[Section titled “How Arcjet verifies bots”](#how-arcjet-verifies-bots)
+
+A `User-Agent` header is easy to fake, so Arcjet checks that a bot is who it claims to be. Arcjet uses the following kinds of proof:
+
+*   **IP address ranges.** Many operators publish the addresses that their bots use, and Arcjet checks the request’s IP address against them.
+*   **Reverse DNS.** Arcjet looks up the hostname for the request’s IP address and confirms that it belongs to the operator, such as a Googlebot address that resolves to a Google hostname.
+*   **Cryptographic signatures.** Bots and AI agents that support Web Bot Auth sign each request with a key that the operator publishes on its own domain. Arcjet verifies the signature to confirm which operator sent the request, even when the agent uses a standard browser `User-Agent`.
+
+For more information about signatures, see [Verify signed bots with Web Bot Auth](/bot-protection/web-bot-auth). For more information about IP and reverse DNS checks, see [Bot verification](/bot-protection/reference#bot-verification).
 
 Pricing
 -------

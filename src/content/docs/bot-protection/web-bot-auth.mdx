@@ -1,0 +1,262 @@
+---
+title: "Verify signed bots with Web Bot Auth"
+description: "Use Arcjet to verify Web Bot Auth signatures from AI agents and bots, and allow or deny them by verified identity instead of User-Agent."
+---
+
+import { Code } from "@astrojs/starlight/components";
+import Comments from "@/components/Comments.astro";
+import { Link } from "@/components/link";
+
+import AllowSigners from "@/snippets/bot-protection/web-bot-auth/AllowSigners.ts?raw";
+import DenySigners from "@/snippets/bot-protection/web-bot-auth/DenySigners.ts?raw";
+import CustomSigner from "@/snippets/bot-protection/web-bot-auth/CustomSigner.ts?raw";
+
+Some bots and AI agents sign their HTTP requests so that the site they visit
+can check who sent them. Arcjet verifies these signatures as part of the
+`detectBot` rule. You can allow or deny a signed agent by its verified identity,
+next to the bots and categories that you already configure.
+
+## What Web Bot Auth is
+
+A `User-Agent` header and an IP address work well for identifying crawlers such
+as Googlebot, which send their own `User-Agent` from published address ranges.
+They don't work for browser agents. An agent such as ChatGPT's cloud browser
+runs a real browser, sends a standard browser `User-Agent`, and connects from
+shared cloud networks. Arcjet
+<Link.Page href="/bot-protection/advanced-signals">advanced signals</Link.Page>
+can detect that the browser is automated, but nothing in the request says which
+operator sent it.
+
+Web Bot Auth solves this with public-key cryptography. The operator publishes
+its public keys on its own domain and signs each request with the matching
+private key. Your server checks the signature against those keys. A valid
+signature proves that the request came from whoever controls that domain.
+
+A signed request carries the following headers:
+
+- `Signature-Agent` names the operator's origin, such as `https://chatgpt.com`.
+- `Signature-Input` lists the parts of the request that are signed, when the
+  signature was created and expires, which key signed it, and the tag
+  `web-bot-auth`.
+- `Signature` carries the signature bytes.
+
+The operator publishes its keys as a JSON Web Key Set at
+`/.well-known/http-message-signatures-directory` on its origin. This URL is the
+operator's key directory. The signature format is
+[RFC 9421 HTTP Message Signatures](https://www.rfc-editor.org/rfc/rfc9421.html),
+and Web Bot Auth is an IETF draft that builds on it.
+
+For more information about how the protocol works, how to sign requests as a
+bot operator, and how to verify signatures yourself, see the
+[Web Bot Auth guide](https://arcjet.com/learn/web-bot-auth).
+
+## How Arcjet uses signatures
+
+Arcjet Cloud verifies Web Bot Auth signatures while it evaluates a `detectBot`
+rule. It parses the headers, fetches and caches the operator's keys, and checks
+the signature. You don't run a key fetcher or write signature parsing code.
+
+A verified signature adds a named bot identity to the decision. It doesn't
+replace the other checks. Arcjet still runs them where your rule applies
+them: `User-Agent` matching, IP address and reverse DNS verification, and
+advanced signals. Unsigned requests go through the same checks as before. Some
+checks don't apply to every rule. For example, deny rules skip IP address and
+reverse DNS verification, and a signer that you allow by name skips advanced
+signals. For the full list, see
+<Link.Page href="#how-a-verified-signature-changes-the-decision">How a verified signature changes the decision</Link.Page>.
+
+The JavaScript SDK supports Web Bot Auth from version 1.15.0. The examples on
+this page use `@arcjet/node`.
+
+## Allow or deny a signed bot by ID
+
+The [well-known-bots](https://github.com/arcjet/well-known-bots) catalog records
+the key directory for each operator that publishes one. Arcjet verifies these
+signers by their bot ID, so you configure them the same way as any other bot:
+
+| Bot ID                   | Key directory origin                                                | Categories                              |
+| ------------------------ | ------------------------------------------------------------------- | --------------------------------------- |
+| `BROWSERBASE`            | `https://www.browserbase.com`                                       | `CATEGORY:AI`, `CATEGORY:TOOL`          |
+| `CHATGPT_AGENT`          | `https://chatgpt.com`                                               | `CATEGORY:AI`                           |
+| `CLOUDFLARE_BROWSER_RUN` | `https://web-bot-auth.cloudflare-browser-rendering-085.workers.dev` | `CATEGORY:TOOL`                         |
+| `CONTEXT7_CRAWLER`       | `https://context7.com`                                              | `CATEGORY:AI`, `CATEGORY:SEARCH_ENGINE` |
+| `DUCKASSIST_BOT`         | `https://assistbot.duckduckgo.com`                                  | `CATEGORY:AI`, `CATEGORY:SEARCH_ENGINE` |
+| `EXA_SEARCHBOT`          | `https://crawler.exa.ai`                                            | `CATEGORY:AI`, `CATEGORY:SEARCH_ENGINE` |
+| `GOOGLE_AGENT`           | `https://agent.bot.goog`                                            | `CATEGORY:AI`, `CATEGORY:GOOGLE`        |
+| `ISONAI_USER`            | `https://www.isonai.com`                                            | `CATEGORY:AI`                           |
+| `ISONSEARCH_CRAWLER`     | `https://search.isonai.com`                                         | `CATEGORY:SEARCH_ENGINE`                |
+| `KERNEL_AGENT`           | `https://www.kernel.sh`                                             | `CATEGORY:TOOL`                         |
+| `KERNEL_SEARCH`          | `https://search.bot.kernel.sh`                                      | `CATEGORY:SEARCH_ENGINE`                |
+| `LANE_AGENT`             | `https://agent.getonlane.com`                                       | `CATEGORY:TOOL`                         |
+| `LINER_BOT`              | `https://liner-bot.liner.com`                                       | `CATEGORY:AI`, `CATEGORY:SEARCH_ENGINE` |
+| `LINER_USER`             | `https://liner-user.liner.com`                                      | `CATEGORY:AI`                           |
+| `MANUS_BOT`              | `https://api.manus.im`                                              | `CATEGORY:AI`                           |
+| `OSANO_BOT`              | `https://bots.osano.com`                                            | `CATEGORY:MONITOR`                      |
+| `SHOPIFY_CLOUDSURF`      | `https://cloudsurf.shopify.io`                                      | `CATEGORY:TOOL`                         |
+| `YOU_CRAWLER`            | `https://you.com`                                                   | `CATEGORY:AI`, `CATEGORY:SEARCH_ENGINE` |
+
+A category that contains a signer also matches it. For example,
+`CATEGORY:SEARCH_ENGINE` allows a verified DuckAssistBot request.
+
+The following example allows search engines, ChatGPT's agent, and Google's
+agent, and denies every other detected bot:
+
+<Code code={AllowSigners} lang="ts" title="index.ts" />
+
+`isVerifiedBot` is true when Arcjet confirmed a named bot, whether by IP
+address, reverse DNS, or a signature. Check `isDenied()` first, then use
+`isVerifiedBot` to decide what an allowed client gets.
+
+To block a signed agent, add its ID to a `deny` list. The following rule allows
+other bots but denies verified Browserbase and Manus sessions, without blocking
+every browser user on the same cloud networks:
+
+<Code code={DenySigners} lang="ts" title="index.ts" />
+
+## Allow or deny a custom signer
+
+To trust or block an operator that isn't in the catalog, add `SIGNED_BOT:`
+followed by the operator's key directory URL to an `allow` or `deny` list. You
+don't need to wait for the operator to be added to the catalog.
+
+<Code code={CustomSigner} lang="ts" title="index.ts" />
+
+The directory URL must meet the following requirements:
+
+- It uses `https://` and a lowercase public hostname.
+- Its path is exactly `/.well-known/http-message-signatures-directory`.
+- It has no port, IP address, credentials, query string, or fragment.
+- Its hostname isn't a reserved name such as `localhost`, or a host under
+  `.internal`, `.local`, or `.test`.
+
+The SDK checks the scheme, path, query string, and fragment when you create
+the `detectBot` rule. Arcjet Cloud checks the rest. An entry that fails only the Arcjet
+Cloud checks passes the SDK, but Arcjet never fetches its directory, so that
+signer never verifies.
+
+The operator must serve the directory with a `200` status code and the
+`application/http-message-signatures-directory+json` media type. Arcjet doesn't
+follow redirects. Arcjet fetches only directories from the catalog and
+directories that one of your active rules names, so a request header can't
+make Arcjet fetch any other URL.
+
+If you write a `SIGNED_BOT:` entry for a directory that's already in the
+catalog, such as ChatGPT's, Arcjet treats it as the catalog ID. Both forms match
+the same requests.
+
+## How a verified signature changes the decision
+
+After a signature verifies, Arcjet treats the operator as a named bot, and your
+rule applies to it the same way that it applies to Googlebot. The following
+rules follow from that:
+
+- **An allow list that names the signer allows it.** This includes a category
+  that contains the signer.
+- **An allow list that doesn't name the signer denies it.** A verified signer is
+  a bot. If your rule allows only search engines, a verified Browserbase
+  session is denied, even though its browser `User-Agent` alone would have
+  passed. Add the signers that you want before you rely on an allow list.
+- **A deny list that names the signer denies it.** This works even when the
+  request looks like an ordinary browser. A deny list that doesn't name the
+  signer allows it, like any other bot that isn't on the list.
+- **An explicitly allowed signer skips the advanced signals check.** An agent
+  that you allow by name isn't denied for lacking an `aj_signals` cookie, unless
+  another check denies it.
+- **A signature doesn't cancel independent evidence.** If the IP address or a
+  match for another named bot denies the request, the decision stays denied.
+- **A verified signer may omit the `User-Agent` header.** Unsigned requests
+  without a `User-Agent` header still produce an error result.
+
+## First requests and key caching
+
+Arcjet keeps key fetches out of the request path wherever the operator allows
+it. Arcjet Cloud caches each directory for as long as its `Cache-Control`
+header allows, up to one hour, and for five minutes when the header doesn't
+set a lifetime. It refreshes the keys before they expire.
+
+When a request names a signer whose keys aren't cached yet, Arcjet fetches them
+in the background and decides that request with the other bot signals. The
+request doesn't wait for the operator's server. Later requests verify from the
+cache.
+
+Some directories forbid caching, and ChatGPT's is one of them. Arcjet reads
+those directories during each signed request, with a 150&nbsp;ms limit. All key
+lookups for one request share a 250&nbsp;ms budget. If the operator's server is
+slow or unavailable, the signature stays unverified and Arcjet decides the
+request with the other checks.
+
+A signed request that arrives before Arcjet has the operator's keys isn't
+verified. Don't make a signature the only way that a request can succeed on the
+first try. Signatures work best for adding trust to traffic that your other
+rules already handle, or for removing friction for an agent that you've chosen
+to allow.
+
+## Supported signatures and frameworks
+
+Arcjet verifies signatures that cover the following components:
+
+- `@authority`, which every signature must cover
+- `signature-agent`, which every signature must cover
+- `@method`
+- `@path`
+- Ordinary request headers
+
+A signature that covers any other component is treated as unverified. This
+includes the query string (`@query` and `@query-param`), `@target-uri`,
+`@scheme`, `@request-target`, and the body digest (`content-digest`). Arcjet
+never verifies part of a signature.
+
+A signature must also carry the `web-bot-auth` tag, have a lifetime of 24 hours
+or less, and use the Ed25519, RSA-PSS with SHA-512, or ECDSA P-256 with SHA-256
+algorithm. Arcjet accepts both the dictionary form and the older quoted-string
+form of the `Signature-Agent` header.
+
+A signature that covers `@path` signs the path exactly as the client sent it.
+Many frameworks give your code a parsed URL that decodes or normalizes the
+path, so Arcjet needs the SDK adapter to forward the original path. The
+following adapters forward it:
+
+- Node.js (`@arcjet/node`), including Express
+- Fastify (`@arcjet/fastify`)
+- NestJS (`@arcjet/nest`)
+- Next.js Pages Router API routes (`@arcjet/next`)
+
+The Next.js App Router and middleware, Bun, Deno, SvelteKit, Remix, React
+Router, Astro, and Nuxt adapters don't forward the original path. With these
+adapters, signatures that cover only `@authority`, such as DuckAssistBot's,
+still verify. Signatures that cover `@path`, such as ChatGPT's, stay unverified,
+and Arcjet decides the request with the other bot signals.
+
+A reverse proxy can also break verification if it strips the signature
+headers, rewrites the `Host` header, or mounts your app under a path prefix. If
+legitimate signed traffic doesn't verify, check that `Signature`,
+`Signature-Input`, and `Signature-Agent` reach your application unchanged.
+
+## Test a signer
+
+To test a signer without blocking traffic, add it to a rule in `DRY_RUN` mode
+and send signed requests to that route. The first request starts a background
+key fetch, so check the decision for a later request.
+
+## Security considerations
+
+Keep the following limits in mind when you write rules for signed agents:
+
+- **A signature identifies the operator, not the end user.** When the operator
+  is a platform, such as a cloud browser vendor, a verified signature proves
+  that the request came through that platform. It doesn't tell you which of the
+  platform's customers sent it.
+- **A signature isn't authorization.** A signature that covers only
+  `@authority` can be replayed against any path on the same host until it
+  expires. Authorize sensitive actions, such as signups, purchases, and data
+  changes, with your own checks.
+- **Keep rate limits on.** A verified operator can still send too many requests.
+  Combine `detectBot` with <Link.Page href="/rate-limiting">rate limiting</Link.Page>.
+- **Keep your other checks.** Not every request from a signing operator is
+  signed, so a missing signature isn't evidence of a fake.
+
+The SDK doesn't cache a denial for a request that carries a `Signature-Input`
+header, because its cache can't tell signed requests apart. Arcjet checks each
+of those requests.
+
+<Comments />
