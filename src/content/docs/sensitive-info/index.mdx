@@ -8,7 +8,6 @@ generateMarkdownRoute: true
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
 import Comments from "../../../components/Comments.astro";
 import { Link } from "@/components/link";
-import EntityDetectionTable from "@/snippets/sensitive-info/EntityDetectionTable.mdx";
 
 Arcjet sensitive information detection lets you detect and block sensitive data
 in request bodies before it enters your application. Use it to prevent clients
@@ -59,6 +58,10 @@ Use sensitive information detection for any of the following purposes:
 - Prevent users from pasting card numbers or other sensitive data into generic
   text fields (for example, support forms, feedback forms, or chat boxes).
 - Enforce rules that certain endpoints must not receive PII at all.
+- Keep protected health information (PHI), such as medical record numbers and
+  health plan member IDs, out of agent prompts and tool calls. For the PHI
+  entity types, see
+  <Link.Page href="/sensitive-info/phi">Detect protected health information (PHI)</Link.Page>.
 
 For email addresses specifically, you can also use
 <Link.Page href="/email-validation">Arcjet email validation</Link.Page> to
@@ -89,9 +92,10 @@ request body to Arcjet.
 
 ### Detected entities
 
-Rampart detects the following entity types:
-
-<EntityDetectionTable />
+Rampart detects email addresses, phone numbers, IP addresses, URLs, names,
+street addresses, and financial and government identifiers. For every entity type and where
+Arcjet detects it, see
+<Link.Page href="/sensitive-info/entity-types">Entity types</Link.Page>.
 
 The Rampart model is compact (a ~14.7&nbsp;MB, 4-bit quantized artifact) and
 fast – around 6.6&nbsp;ms median inference on Node.js – so it runs inline on

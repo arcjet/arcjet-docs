@@ -1,0 +1,178 @@
+---
+title: "Detect protected health information (PHI)"
+description: "Detect medical record numbers, health plan numbers, vehicle identifiers, and device identifiers with Arcjet's server-side sensitive information detector, and combine them with names, addresses, and contact details to cover HIPAA identifiers."
+---
+
+import { Aside } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+import PhiPolicy from "@/snippets/sensitive-info/phi/PhiPolicy.mdx";
+
+Protected health information (PHI) is health information that can be linked to
+a specific person. Under the US Health Insurance Portability and Accountability
+Act (HIPAA), health information is identifiable when it carries an identifier,
+such as a patient's name, a medical record number, a health plan member ID, or
+a phone number.
+
+PHI leaks through the same paths as other personal data. A clinician pastes a
+discharge summary into a chat assistant. A support agent copies an insurance
+member ID into a ticket that an AI tool summarizes. A coding agent reads a
+fixture file with real patient records and sends it to a model provider.
+Agents make this more likely, because they move text between tools, prompts,
+and third-party services without a person reviewing each step.
+
+Arcjet detects the identifiers that make health information PHI, so a policy
+can block the request or tool call before the identifier reaches a model, a
+log, or an external service.
+
+## PHI entity types
+
+Arcjet detects five entity types for HIPAA identifiers that the other
+sensitive information types don't cover: medical record numbers, health plan
+beneficiary numbers, license plate numbers, vehicle identification numbers, and
+device identifiers. For the type names and what each one matches, see
+<Link.Page href="/sensitive-info/entity-types">Entity types</Link.Page>.
+
+## How PHI detection works
+
+Some health identifiers have a fixed format, and some don't. Arcjet recognizes
+identifiers with a fixed format, such as a VIN, an IMEI, or a MAC address, from
+their structure. Identifiers with no fixed format, such as a medical record
+number, a member ID, or a license plate, look like any other short code, so
+Arcjet recognizes them from the text around them, such as a label like `MRN`,
+`Member ID`, or `License plate` next to the value.
+
+Arcjet detects identifiers. It doesn't decide whether the surrounding text is
+health information, and it doesn't de-identify or redact data for you. Use the
+findings to block the request or tool call, or to route it for review.
+
+Test detection against text that looks like your own traffic before you block
+on it. Put new rules in dry run first, as described in
+<Link.Page href="/guards/authoring">Author and publish policies</Link.Page>.
+
+## Where PHI detection runs
+
+PHI detection runs in the server-side sensitive information detector of an
+agent guard policy. Arcjet reads the value on its own servers, so the detector
+reads a `SERVER` policy input. You can use it in the following places:
+
+- **Agent guard policies.** A `guard()` call in your application passes the
+  text as a server input, and the policy denies the call when the detector
+  finds a PHI identifier. For the policy model, see
+  <Link.Page href="/guards/remote-policies">Policy contract</Link.Page>.
+- **Coding agent policies.** A coding agent policy screens developer prompts
+  and tool results with the same detector. For the starter policies, see
+  <Link.Page href="/coding-agents/policies">Coding agent policies</Link.Page>.
+
+The SDK-local options don't detect the PHI types. The `sensitiveInfo` HTTP
+rule and the SDK-local detector in a policy run in your process with
+<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart</Link.Page>
+and detect the version 1 types.
+
+A server input sends its raw value to Arcjet. For what Arcjet receives and how
+long it keeps it, see <Link.Page href="/privacy">Privacy</Link.Page>. For how
+Arcjet secures its platform, see
+<Link.Page href="/security">Arcjet security</Link.Page> and the
+[Arcjet Trust Center](https://trust.arcjet.com).
+
+<Aside type="caution" title="HIPAA and business associate agreements">
+  Arcjet supports HIPAA compliance and offers a HIPAA-compliant environment.
+  Arcjet enters into a business associate agreement (BAA) with Enterprise-level
+  customers whose use of Arcjet services involves PHI. Both parties must
+  formally execute the BAA before any PHI is processed through Arcjet. Using
+  Arcjet services for PHI without a signed BAA may result in non-compliance for
+  your organization.
+</Aside>
+
+## Taxonomy versions
+
+The sensitive information taxonomy is the list of entity types that Arcjet
+detects. When Arcjet supports new entity types, the taxonomy version moves
+forward. For every entity type and the version that added it, see
+<Link.Page href="/sensitive-info/entity-types">Entity types</Link.Page>.
+Each server-side detector stays on the
+version it was written against, so newly supported types don't trigger
+unexpected detections in a policy that you already published. A detector that
+you add uses the current version and covers the PHI types, and you can move an
+existing detector forward. For more information, see
+<Link.Page href="/guards/remote-policies#sensitive-information-taxonomy-versions">Sensitive information taxonomy versions</Link.Page>.
+
+## Example policy
+
+The following policy screens a note that an agent writes before it sends the
+note to another system. It declares the following inputs:
+
+| Input      | Kind    | Exposure |
+| ---------- | ------- | -------- |
+| `note`     | String  | `SERVER` |
+| `external` | Boolean | `SERVER` |
+
+In the policy editor, add a sensitive information detector with the ID `phi`
+that reads `note`. In its deny list, select the PHI types along with Social
+Security numbers, email addresses, and phone numbers:
+
+- `MEDICAL_RECORD_NUMBER`
+- `HEALTH_PLAN_BENEFICIARY_NUMBER`
+- `LICENSE_PLATE_NUMBER`
+- `VEHICLE_IDENTIFICATION_NUMBER`
+- `DEVICE_IDENTIFIER`
+- `SSN`
+- `EMAIL`
+- `PHONE_NUMBER`
+
+A detector with a deny list acts only on the types that the list names, so
+list each PHI type that you want to block.
+
+The policy's Rego denies a note that carries a PHI identifier anywhere, and a
+note that carries any listed identifier when it leaves your organization:
+
+<PhiPolicy />
+
+The detector's result is under `input.signals.sensitive_info.phi`. `detected`
+is `true` when the detector finds a listed type, and `entities` lists the types
+it found. To deny on every listed type with no Rego, declare a `DETECTOR` rule
+over the detector instead. For more examples, see
+<Link.Page href="/guards/policy-examples">Policy examples</Link.Page>.
+
+## Combine PHI types with other entity types
+
+HIPAA's Safe Harbor method lists 18 classes of identifier. Health information
+is de-identified under that method when all 18 are removed. The PHI types cover
+some of the classes, and the other entity types cover others. List both in a
+detector's filter to cover more of them. The following table maps each class
+to the Arcjet entity types that detect it:
+
+| HIPAA identifier class                                                 | Arcjet entity types                                                       |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Names                                                                  | `GIVEN_NAME`, `SURNAME`                                                   |
+| Geographic subdivisions smaller than a state, including ZIP codes      | `BUILDING_NUMBER`, `STREET_NAME`, `SECONDARY_ADDRESS`, `CITY`, `ZIP_CODE` |
+| Dates related to a person, other than the year, and ages over 89       | Unsupported                                                               |
+| Telephone numbers                                                      | `PHONE_NUMBER`                                                            |
+| Fax numbers                                                            | `PHONE_NUMBER`                                                            |
+| Email addresses                                                        | `EMAIL`                                                                   |
+| Social Security numbers                                                | `SSN`                                                                     |
+| Medical record numbers                                                 | `MEDICAL_RECORD_NUMBER`                                                   |
+| Health plan beneficiary numbers                                        | `HEALTH_PLAN_BENEFICIARY_NUMBER`                                          |
+| Account numbers                                                        | `BANK_ACCOUNT` (bank accounts only)                                       |
+| Certificate and license numbers                                        | `DRIVERS_LICENSE` (driver's licenses only)                                |
+| Vehicle identifiers and serial numbers, including license plate numbers | `LICENSE_PLATE_NUMBER`, `VEHICLE_IDENTIFICATION_NUMBER`                   |
+| Device identifiers and serial numbers                                  | `DEVICE_IDENTIFIER`                                                       |
+| Web URLs                                                               | `URL`                                                                     |
+| IP addresses                                                           | `IP_ADDRESS`                                                              |
+| Biometric identifiers, including finger and voice prints               | Unsupported                                                               |
+| Full-face photographs and comparable images                            | Unsupported                                                               |
+| Any other unique identifying number, characteristic, or code           | Unsupported                                                               |
+
+For what each entity type matches, see
+<Link.Page href="/sensitive-info/entity-types">Sensitive information entity types</Link.Page>.
+
+<Aside type="caution">
+  Detection helps you find identifiers. It doesn't de-identify data or make a
+  system HIPAA compliant on its own.
+</Aside>
+
+## Related
+
+- <Link.Page href="/sensitive-info/entity-types">Entity types</Link.Page> – every sensitive information entity type and where Arcjet detects it
+- <Link.Page href="/guards/remote-policies#sensitive-information-taxonomy-versions">Sensitive information taxonomy versions</Link.Page> – how a detector's version works
+- <Link.Page href="/coding-agents/policies">Coding agent policies</Link.Page> – screen prompts and tool results from coding agents
+- <Link.Page href="/ai-protection/data-loss-prevention">AI data loss prevention</Link.Page> – keep personal data out of AI prompts

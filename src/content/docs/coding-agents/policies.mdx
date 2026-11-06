@@ -323,6 +323,9 @@ Security number into the prompt.
 
 Declare a **server-side** sensitive information detector with the ID `pii`
 over `prompt`, denying the `CREDIT_CARD_NUMBER` and `SSN` entity types.
+To also block protected health information, add the PHI entity types, such as
+`MEDICAL_RECORD_NUMBER`, to the deny list. For more information, see
+<Link.Page href="/sensitive-info/phi">Detect protected health information (PHI)</Link.Page>.
 
 Set **Execute on** to **Prompt** only. A tool call carries an empty `prompt`,
 so on **Tool call** the detector has nothing to screen and allows every call

@@ -1,0 +1,141 @@
+---
+title: "Sensitive information entity types"
+description: "Every sensitive information entity type that Arcjet detects, grouped by category, with the taxonomy version that added it and where Arcjet detects it."
+---
+
+import { Link } from "@/components/link";
+
+An entity type is a kind of sensitive information that Arcjet can find in text,
+such as an email address or a card number. You list entity types in a
+sensitive information rule or detector to choose what Arcjet allows or denies.
+This page lists every entity type, grouped by category.
+
+Each entry shows what the type matches, then the following:
+
+- **Version** is the sensitive information taxonomy version that added the
+  type. As Arcjet supports new types, the version moves forward. For how a
+  detector uses the version, see
+  <Link.Page href="/guards/remote-policies#sensitive-information-taxonomy-versions">Sensitive information taxonomy versions</Link.Page>.
+- **Detected in** shows where Arcjet detects the type:
+  - **SDK** is the SDK-local `sensitiveInfo` rule and the SDK-local detector in
+    an agent guard policy. Both run
+    <Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart</Link.Page>
+    in your process. For which types Rampart matches with a validated pattern
+    and which it leaves to its model, see
+    <Link.Page href="/sensitive-info/reference#structured-type-matching">Structured type matching</Link.Page>.
+  - **Server** is the server-side sensitive information detector in an agent
+    guard or coding agent policy. For more information, see
+    <Link.Page href="/guards/remote-policies#detectors">Detectors</Link.Page>.
+
+In the SDK, each type is an `ArcjetSensitiveInfoType` in JavaScript, a
+`SensitiveInfoEntityType` in Python, and an `arcjet.EntityType` in Go. To detect
+types that aren't on this page, use
+<Link.Page href="/sensitive-info/reference#custom-entity-detection">custom entity detection</Link.Page>.
+
+## All entity types
+
+| Entity type | Detected | Version |
+| --- | --- | :-: |
+| `EMAIL` | Local and server | 1 |
+| `PHONE_NUMBER` | Local and server | 1 |
+| `IP_ADDRESS` | Local and server | 1 |
+| `URL` | Local and server | 1 |
+| `CREDIT_CARD_NUMBER` | Local and server | 1 |
+| `BANK_ACCOUNT` | Local and server | 1 |
+| `ROUTING_NUMBER` | Local and server | 1 |
+| `SSN` | Local and server | 1 |
+| `TAX_ID` | Local and server | 1 |
+| `GOVERNMENT_ID` | Local and server | 1 |
+| `PASSPORT` | Local and server | 1 |
+| `DRIVERS_LICENSE` | Local and server | 1 |
+| `GIVEN_NAME` | Local and server | 1 |
+| `SURNAME` | Local and server | 1 |
+| `BUILDING_NUMBER` | Local and server | 1 |
+| `STREET_NAME` | Local and server | 1 |
+| `SECONDARY_ADDRESS` | Local and server | 1 |
+| `CITY` | Local and server | 1 |
+| `STATE` | Local and server | 1 |
+| `ZIP_CODE` | Local and server | 1 |
+| `MEDICAL_RECORD_NUMBER` | Server | 2 |
+| `HEALTH_PLAN_BENEFICIARY_NUMBER` | Server | 2 |
+| `LICENSE_PLATE_NUMBER` | Server | 2 |
+| `VEHICLE_IDENTIFICATION_NUMBER` | Server | 2 |
+| `DEVICE_IDENTIFIER` | Server | 2 |
+
+**Local** means the SDK detects the type in your process. **Server** means the server-side detector in a policy detects it. The sections that follow describe each type by category.
+
+## Contact
+
+Ways to reach a person directly.
+
+- `EMAIL`: An email address. _Version 1. Detected in the SDK and on the server._
+- `PHONE_NUMBER`: A telephone or fax number. _Version 1. Detected in the SDK and on the server._
+
+## Network
+
+Addresses that identify a host or a resource on a network.
+
+- `IP_ADDRESS`: An IPv4 or IPv6 address. _Version 1. Detected in the SDK and on the server._
+- `URL`: A web address, with or without its scheme. _Version 1. Detected in the SDK and on the server._
+
+## Financial
+
+Payment and banking details.
+
+- `CREDIT_CARD_NUMBER`: A credit, debit, or prepaid card number. _Version 1. Detected in the SDK and on the server._
+- `BANK_ACCOUNT`: A bank account number, including an IBAN. _Version 1. Detected in the SDK and on the server._
+- `ROUTING_NUMBER`: A bank routing number, such as a US ABA number or a UK sort code. _Version 1. Detected in the SDK and on the server._
+
+## Government ID
+
+Identifiers that a government issues to a person or a business.
+
+- `SSN`: A US Social Security number. _Version 1. Detected in the SDK and on the server._
+- `TAX_ID`: A tax ID other than an SSN, such as an employer ID or a VAT number. _Version 1. Detected in the SDK and on the server._
+- `GOVERNMENT_ID`: A national ID or other government-issued ID with no more specific type. _Version 1. Detected in the SDK and on the server._
+- `PASSPORT`: A passport number. _Version 1. Detected in the SDK and on the server._
+- `DRIVERS_LICENSE`: A driver's license number. _Version 1. Detected in the SDK and on the server._
+
+## Personal
+
+A person's name.
+
+- `GIVEN_NAME`: A person's first or middle name. _Version 1. Detected in the SDK and on the server._
+- `SURNAME`: A person's family name. _Version 1. Detected in the SDK and on the server._
+
+## Address
+
+The parts of a postal address. Arcjet detects each part separately, so a policy can deny a full address or only some of its parts.
+
+- `BUILDING_NUMBER`: The house or building number in a street address. _Version 1. Detected in the SDK and on the server._
+- `STREET_NAME`: A street name, such as Main Street. _Version 1. Detected in the SDK and on the server._
+- `SECONDARY_ADDRESS`: An apartment, suite, unit, or floor, such as Apt 4B. _Version 1. Detected in the SDK and on the server._
+- `CITY`: A city, town, or village. _Version 1. Detected in the SDK and on the server._
+- `STATE`: A state, province, or region. _Version 1. Detected in the SDK and on the server._
+- `ZIP_CODE`: A postal code. _Version 1. Detected in the SDK and on the server._
+
+## Health
+
+Identifiers that link a record to a patient or a health plan member. These are protected health information (PHI) identifiers. For how to detect them, see <Link.Page href="/sensitive-info/phi">Detect protected health information (PHI)</Link.Page>.
+
+- `MEDICAL_RECORD_NUMBER`: A medical record number assigned by a provider or facility. _Version 2. Detected on the server._
+- `HEALTH_PLAN_BENEFICIARY_NUMBER`: A health plan member, subscriber, or beneficiary number. _Version 2. Detected on the server._
+
+## Vehicle
+
+Identifiers that link a vehicle to its owner. HIPAA treats them as PHI identifiers.
+
+- `LICENSE_PLATE_NUMBER`: A vehicle registration plate number. _Version 2. Detected on the server._
+- `VEHICLE_IDENTIFICATION_NUMBER`: A number that identifies a vehicle, other than its plate, such as a VIN. _Version 2. Detected on the server._
+
+## Device
+
+Identifiers that link a device to its user. HIPAA treats them as PHI identifiers.
+
+- `DEVICE_IDENTIFIER`: A number that identifies a device, such as an IMEI, a MAC address, or a serial number. _Version 2. Detected on the server._
+
+## Related
+
+- <Link.Page href="/sensitive-info">Sensitive information detection</Link.Page>
+- <Link.Page href="/sensitive-info/phi">Detect protected health information (PHI)</Link.Page>
+- <Link.Page href="/sensitive-info/reference">Sensitive information reference</Link.Page>
