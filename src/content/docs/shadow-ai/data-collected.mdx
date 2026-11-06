@@ -1,0 +1,41 @@
+---
+title: "What Discovery collects"
+description: "The data that the Arcjet Discovery endpoint agent reports to find shadow AI on managed devices, and how local accounts relate to people."
+---
+
+import { Link } from "@/components/link";
+
+The Arcjet Discovery endpoint agent reports connections to AI services on
+your managed devices, so that you can see which AI apps and services your
+organization uses.
+
+## Connections the agent reports
+
+The agent reports a connection when it goes to a known AI service or comes
+from a known AI app. It discards other connections on the device without
+reporting them.
+
+For each reported connection, the agent collects the following metadata:
+
+- **Destination**: the name of the service that the connection goes to, and
+  the AI provider that Arcjet identifies from it.
+- **App**: the app that made the connection, and the publisher that signed it.
+- **Device**: the device that the connection came from.
+- **Local account**: the account on the device that the app ran under.
+- **Time**: when the connection happened.
+
+The agent also reports whether it's running, so that the Console can show
+whether each device is reporting.
+
+## Local accounts and people
+
+The agent reports the local account that an app ran under. A local account is
+evidence for an administrator to review, not a verified identity. Several
+people can share one account, and an account name doesn't prove who used it.
+
+In the [Arcjet Console](https://console.arcjet.com), an administrator assigns
+each local account to a person. Discovery then attributes the account's
+activity to that person. Shared, system, and unidentified accounts don't
+inherit the device's owner, and their activity stays visible without a person.
+
+For more information about how Discovery fits with the rest of Arcjet, see <Link.Page href="/shadow-ai">Discover shadow AI</Link.Page>.

@@ -1,0 +1,80 @@
+---
+title: "Discover shadow AI"
+description: "Shadow AI is the AI apps and services that people use without the security team knowing. Arcjet Discovery finds it on managed macOS and Windows devices."
+---
+
+import { Link } from "@/components/link";
+
+Shadow AI is the set of AI apps and services that people in your organization
+use without the security team knowing about them or approving them. It
+includes a chat assistant in a browser tab, a desktop AI app, a coding agent
+on a developer's laptop, and a script that calls an AI API. Arcjet Discovery
+finds shadow AI on your organization's computers and shows you who uses which
+AI services, from which app, and on which device.
+
+## Why shadow AI is a security risk
+
+Every AI service that someone uses is a place that company data can reach. A
+developer might paste source code into a chat assistant, or run a coding agent
+with a personal account that your organization's agreements with the vendor
+don't cover. You can't review, approve, or restrict a tool that you don't know
+about.
+
+Software inventory and network logs each show part of the picture. An
+inventory lists installed apps, but it misses command-line tools and AI
+services used in a browser. Network logs show that a device reached an AI
+service, but they don't show which app made the connection. Discovery records
+both facts for each connection: the AI service and the app that connected to
+it.
+
+## How Discovery finds shadow AI
+
+Discovery uses an endpoint agent that runs on your organization's managed
+macOS and Windows devices. You deploy it with your device management (MDM)
+tool, and each device then reports to your Arcjet project. For more
+information, see <Link.Page href="/shadow-ai/deploy">Deploy the endpoint agent</Link.Page>.
+
+The agent observes outbound connections on the device. When a connection goes
+to an AI service, or comes from a known AI app, the agent records the
+following details:
+
+- The AI service that the connection goes to.
+- The app that made the connection, and the publisher that signed it.
+- The device and the local account that the app ran under.
+- When the connection happened.
+
+For more information, see <Link.Page href="/shadow-ai/data-collected">What Discovery collects</Link.Page>.
+
+## Review shadow AI in the Arcjet Console
+
+To see what Discovery found, open your project in the
+[Arcjet Console](https://console.arcjet.com) and select the **Discovery** tab.
+It has the following views:
+
+- **People**: which people use AI services, with their devices, apps, and
+  providers.
+- **Devices**: each device that runs the agent, whether it's reporting, and
+  the apps and AI activity observed on it.
+- **Providers**: each AI provider that your organization reaches, with the
+  people, devices, and apps that connect to it. Use this view to investigate a
+  service that you didn't expect to see.
+
+The agent reports the local account that an app ran under, which doesn't
+identify a person by itself. On a device's page, you assign each local account
+to a person, such as a member of your Arcjet team or a person that you add. Activity from an account without a person stays visible,
+so you can still investigate it.
+
+## Discovery and other Arcjet data sources
+
+Arcjet has other ways to see AI agent activity. Coding agent hooks and
+OpenTelemetry report activity from the agents that you configured to send data
+to Arcjet. The Claude Compliance API reports Claude activity from your
+organization's Anthropic account. Discovery finds the AI apps and services on
+your managed devices that nobody registered with Arcjet.
+
+Use Discovery to learn which AI tools people use. Then bring the coding agents
+that you approve under policy with the hooks, which can refuse a tool call
+before it runs. For more information, see the following pages:
+
+- <Link.Page href="/coding-agents">Secure coding agents</Link.Page>
+- <Link.Page href="/observe">Observe agent activity</Link.Page>

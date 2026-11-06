@@ -1,0 +1,64 @@
+---
+title: "Deploy the endpoint agent"
+description: "Deploy the Arcjet Discovery endpoint agent to managed macOS and Windows devices with your MDM tool, so that you can find shadow AI across your organization."
+---
+
+import { Link } from "@/components/link";
+
+Arcjet Discovery finds shadow AI with an endpoint agent that runs on your
+organization's managed macOS and Windows devices. You deploy the agent with the
+device management (MDM) tool that you already use. Each device then reports
+connections to AI services to your Arcjet project.
+
+The agent runs in the background as a system service, so it keeps reporting
+without anyone opening an app. For more information about what it reports, see <Link.Page href="/shadow-ai/data-collected">What Discovery collects</Link.Page>.
+
+## Before you begin
+
+Make sure that you have the following:
+
+- Administrator access to your Arcjet team.
+- Devices enrolled in your MDM tool, and permission to deploy software to
+  them.
+
+Tell the people whose devices you deploy to that the agent records which AI
+services and apps they use.
+
+## Deploy the agent
+
+To deploy the agent to your devices, do the following:
+
+1. In the [Arcjet Console](https://console.arcjet.com), open your project and
+   select the **Discovery** tab.
+2. Open the deployment steps, and then create an enrollment token. The token
+   connects devices to your project. Copy the token when it appears, because
+   the Console shows it only once.
+3. Download the agent from the Console.
+4. In your MDM tool, deploy the agent and the enrollment token to your devices
+   by following the steps in the Console. Start with a small group of devices.
+5. In the **Discovery** tab, open **Devices** and confirm that each device is
+   reporting.
+
+Treat the enrollment token like a password. Deliver it to devices only through
+your MDM tool.
+
+The agent needs system-level permissions to observe network connections. When
+your MDM tool installs the agent, it grants those permissions, so people don't
+need to approve anything on their device.
+
+## Confirm that devices are reporting
+
+The **Devices** view lists each enrolled device and shows whether it's
+reporting. A device's first AI activity appears after someone on it uses an AI
+app or opens an AI service in a browser. Activity then appears in the
+**People**, **Devices**, and **Providers** views.
+
+After the first devices report, deploy the agent to the rest of your fleet.
+
+## Update or remove the agent
+
+To update the agent, deploy the new version with your MDM tool.
+
+To stop a device from reporting, revoke its access from **Devices** in the
+Console. A revoked device needs a new enrollment token before it can report
+again. To uninstall the agent, remove it with your MDM tool.
