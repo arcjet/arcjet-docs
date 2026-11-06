@@ -223,6 +223,24 @@ deny contains "malicious-destination" if {
 }
 ```
 
+### Sensitive information taxonomy versions
+
+The sensitive information taxonomy is the list of entity types that Arcjet
+detects. When Arcjet supports new entity types, the taxonomy version moves
+forward. For every entity type and the version that added it, see
+<Link.Page href="/sensitive-info/reference#entity-types">Entity types</Link.Page>.
+
+A server-side sensitive information detector stays on the version it was
+written against, which the policy records in `sensitiveInfo.taxonomyVersion`.
+Arcjet ignores a finding of a type from a later version, so newly supported
+types don't trigger unexpected detections in a policy that you already
+published. A detector that you add uses the current version, and you can move
+an existing detector forward when you want its new types. The SDK-local kind
+doesn't use a version.
+
+Validating or saving a policy warns you about a filter entry that the
+detector's version doesn't cover. The entry has no effect until you fix it.
+
 ## Rules
 
 A rule is a stable identity, a mode, and how it's decided.

@@ -59,8 +59,8 @@ ajToc:
         anchor: "bundlers-and-runtimes"
   - text: "Decision"
     anchor: "decision"
-  - text: "Entity detection"
-    anchor: "entity-detection"
+  - text: "Entity types"
+    anchor: "entity-types"
     children:
       - text: "Structured type matching"
         anchor: "structured-type-matching"
@@ -127,7 +127,7 @@ import RampartBackendPythonFlask from "@/snippets/sensitive-info/reference/pytho
 import RampartBackendRemix from "@/snippets/sensitive-info/reference/remix/RampartBackend.mdx";
 import RampartBackendSvelteKit from "@/snippets/sensitive-info/reference/sveltekit/RampartBackend.mdx";
 
-import EntityDetectionTable from "@/snippets/sensitive-info/EntityDetectionTable.mdx";
+import EntityTypesTable from "@/snippets/sensitive-info/EntityTypesTable.mdx";
 import RampartBackendGo from "@/snippets/sensitive-info/reference/go/RampartBackend.mdx";
 import CustomDetectGo from "@/snippets/sensitive-info/reference/go/CustomDetect.mdx";
 import DecisionLogGo from "@/snippets/sensitive-info/reference/go/DecisionLog.mdx";
@@ -211,7 +211,7 @@ def detect_sensitive_info(
 
 # Entity types are SensitiveInfoEntityType enum members or their string
 # names, such as SensitiveInfoEntityType.EMAIL or "GIVEN_NAME". See the entity
-# detection table below for the full list.
+# types table later on this page for the full list.
 ```
 
 </TabItem>
@@ -265,7 +265,7 @@ in pure Go, with no cgo or ONNX runtime. The rule detects names, addresses, and
 government or financial identifiers, as well as email addresses, card numbers,
 IP addresses, and phone numbers. The model weights are bundled, so nothing is
 fetched at runtime and scanned text stays in your environment. For exactly
-what Rampart detects, see [Entity detection](#entity-detection).
+what Rampart detects, see [Entity types](#entity-types).
 
 Install the Rampart package alongside your Arcjet SDK. In Python it ships as
 the `sensitive-info-rampart` extra of the `arcjet` package. In Go it is a nested
@@ -613,15 +613,16 @@ This example logs the full result as well as the sensitive info rule:
   <DecisionLogSvelteKit slot="sveltekit" />
 </SlotByFramework>
 
-## Entity detection
+## Entity types
 
-Rampart detects the following entity types. List any of them in `allow` or
-`deny`. Each one is an `ArcjetSensitiveInfoType` in JS, a
-`SensitiveInfoEntityType` in Python, and an `arcjet.EntityType` in Go. You can
-also detect more patterns with
-[custom entity detection](#custom-entity-detection).
+The following table lists every sensitive information entity type that Arcjet
+detects. The SDK detects the version 1 types with Rampart. List any of them in
+`allow` or `deny`. Each one is an `ArcjetSensitiveInfoType` in JS, a
+`SensitiveInfoEntityType` in Python, and an `arcjet.EntityType` in Go. The
+server-side sensitive information detector in a policy detects every type,
+including the protected health information (PHI) types.
 
-<EntityDetectionTable />
+<EntityTypesTable />
 
 To list every type at once, use `rampartEntities` (JS), `rampart_entities`
 (Python), or `rampart.Entities()` (Go).

@@ -1686,11 +1686,12 @@ Parameters:
   WebAssembly engine; pass the on-device Rampart NER model to also detect names,
   addresses, and government/financial identifiers. All detection stays local.
 
-Entity types detected by the built-in engine: `CREDIT_CARD_NUMBER`, `EMAIL`,
-`PHONE_NUMBER`, `IP_ADDRESS`. The optional Rampart backend adds `GIVEN_NAME`,
-`SURNAME`, `SSN`, `URL`, `TAX_ID`, `BANK_ACCOUNT`, `ROUTING_NUMBER`,
-`GOVERNMENT_ID`, `PASSPORT`, `DRIVERS_LICENSE`, and address parts (`BUILDING_NUMBER`,
-`STREET_NAME`, `SECONDARY_ADDRESS`, `CITY`, `STATE`, `ZIP_CODE`).
+The SDK detects email addresses, phone numbers, IP addresses, URLs, names,
+street addresses, and financial and government identifiers. The server-side
+sensitive information detector in an agent guard policy also detects protected
+health information (PHI) types. For every entity type, its category, its
+taxonomy version, and where Arcjet detects it, see
+https://docs.arcjet.com/sensitive-info/reference#entity-types
 
 Rampart is an optional package: `@arcjet/sensitive-info-rampart` for the
 JavaScript SDKs, or the `arcjet[sensitive-info-rampart]` extra for Python. Import
@@ -2402,6 +2403,7 @@ blocking one makes the wrapper synchronous.
 - [Bot protection](https://docs.arcjet.com/bot-protection)
 - [Email validation](https://docs.arcjet.com/email-validation)
 - [Sensitive information](https://docs.arcjet.com/sensitive-info)
+- [Detect protected health information (PHI)](https://docs.arcjet.com/sensitive-info/phi)
 - [Prompt injection](https://docs.arcjet.com/prompt-injection)
 - [Content moderation](https://docs.arcjet.com/content-moderation)
 - [Signup form protection](https://docs.arcjet.com/signup-protection)

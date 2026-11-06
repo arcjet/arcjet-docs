@@ -186,6 +186,7 @@ These are the ones you're most likely to see:
 | `AJV2016` | A coding agent policy executes on something other than Tool call, Prompt, or Model switch | Pick one or more of the three. Omit the setting for an application policy |
 | `AJV2017` | The policy declares a detector kind that isn't available   | Choose a detector the site can run                                                 |
 | `AJV2018` | Validating or evaluating the policy took longer than 10 seconds | Simplify the rule or the test input. A nested comprehension over a large input list is the usual cause |
+| `AJV2019` | A sensitive information detector sets a taxonomy version newer than Arcjet supports | Set `taxonomyVersion` to a supported version, or omit it. See <Link.Page href="/guards/remote-policies#sensitive-information-taxonomy-versions">Sensitive information taxonomy versions</Link.Page> |
 
 `AJV2007` isn't a preference you can override. Prompt injection runs on the
 server and needs the raw value, SDK-local sensitive information runs in the SDK

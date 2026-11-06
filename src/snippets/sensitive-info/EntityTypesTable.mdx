@@ -1,0 +1,54 @@
+import { Link } from "@/components/link";
+
+| Entity type                      | Category      | What it matches                                                                       | Version | Detected by                      |
+| -------------------------------- | ------------- | ------------------------------------------------------------------------------------- | :-----: | -------------------------------- |
+| `EMAIL`                          | Contact       | An email address                                                                      |    1    | SDK model and recognizer, server |
+| `PHONE_NUMBER`                   | Contact       | A telephone or fax number                                                             |    1    | SDK model, server                |
+| `IP_ADDRESS`                     | Network       | An IPv4 or IPv6 address                                                               |    1    | SDK recognizer, server           |
+| `URL`                            | Network       | A web address, with or without its scheme                                             |    1    | SDK model and recognizer, server |
+| `CREDIT_CARD_NUMBER`             | Financial     | A credit, debit, or prepaid card number                                               |    1    | SDK recognizer, server           |
+| `BANK_ACCOUNT`                   | Financial     | A bank account number, including an IBAN                                              |    1    | SDK model, server                |
+| `ROUTING_NUMBER`                 | Financial     | A bank routing number, such as a US ABA number or a UK sort code                      |    1    | SDK model, server                |
+| `SSN`                            | Government ID | A US Social Security number                                                           |    1    | SDK recognizer, server           |
+| `TAX_ID`                         | Government ID | A tax ID other than an SSN, such as an employer ID or a VAT number                    |    1    | SDK model, server                |
+| `GOVERNMENT_ID`                  | Government ID | A national ID or other government-issued ID with no more specific type                |    1    | SDK model, server                |
+| `PASSPORT`                       | Government ID | A passport number                                                                     |    1    | SDK model, server                |
+| `DRIVERS_LICENSE`                | Government ID | A driver's license number                                                             |    1    | SDK model, server                |
+| `GIVEN_NAME`                     | Personal      | A person's first or middle name                                                       |    1    | SDK model, server                |
+| `SURNAME`                        | Personal      | A person's family name                                                                |    1    | SDK model, server                |
+| `BUILDING_NUMBER`                | Address       | The house or building number in a street address                                      |    1    | SDK model, server                |
+| `STREET_NAME`                    | Address       | A street name, such as Main Street                                                    |    1    | SDK model, server                |
+| `SECONDARY_ADDRESS`              | Address       | An apartment, suite, unit, or floor, such as Apt 4B                                   |    1    | SDK model, server                |
+| `CITY`                           | Address       | A city, town, or village                                                              |    1    | SDK model, server                |
+| `STATE`                          | Address       | A state, province, or region                                                          |    1    | SDK model, server                |
+| `ZIP_CODE`                       | Address       | A postal code                                                                         |    1    | SDK model, server                |
+| `MEDICAL_RECORD_NUMBER`          | Health        | A medical record number assigned by a provider or facility                            |    2    | Server                           |
+| `HEALTH_PLAN_BENEFICIARY_NUMBER` | Health        | A health plan member, subscriber, or beneficiary number                               |    2    | Server                           |
+| `LICENSE_PLATE_NUMBER`           | Vehicle       | A vehicle registration plate number                                                   |    2    | Server                           |
+| `VEHICLE_IDENTIFICATION_NUMBER`  | Vehicle       | A number that identifies a vehicle, other than its plate, such as a VIN               |    2    | Server                           |
+| `DEVICE_IDENTIFIER`              | Device        | A number that identifies a device, such as an IMEI, a MAC address, or a serial number |    2    | Server                           |
+
+The **Detected by** column shows where Arcjet can detect each type:
+
+- **SDK** means the SDK-local `sensitiveInfo` rule and the SDK-local detector in
+  an agent guard policy, both of which run
+  [Rampart](#on-device-detection-with-rampart) in your process. In the SDK,
+  _model_ means the Rampart NER model detects the type, and _recognizer_ means
+  a deterministic, validated pattern detects it. For example, card numbers must
+  pass the Luhn checksum. Where the model and a recognizer overlap on the same
+  text, the recognizer wins.
+- **Server** means the server-side sensitive information detector in an agent
+  guard or coding agent policy. For more information, see
+  <Link.Page href="/guards/remote-policies#detectors">Detectors</Link.Page>.
+
+The **Version** column shows the taxonomy version that added each type. The
+version 2 types identify protected health information (PHI). For how versions
+work, see
+<Link.Page href="/guards/remote-policies#sensitive-information-taxonomy-versions">Sensitive information taxonomy versions</Link.Page>.
+For how to detect PHI, see
+<Link.Page href="/sensitive-info/phi">Detect protected health information (PHI)</Link.Page>.
+
+Phone numbers are left to the model because their digit shape overlaps with
+financial and government identifiers, so the default recognizers don't include
+a phone number pattern. In the SDK, you can also detect your own types with
+[custom entity detection](#custom-entity-detection).

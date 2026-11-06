@@ -99,6 +99,7 @@ const PATHS_FROM_SITEMAP = [
   "/security/",
   "/sensitive-info/",
   "/sensitive-info/quick-start/",
+  "/sensitive-info/phi/",
   "/sensitive-info/reference/",
   "/shadow-ai/",
   "/shadow-ai/deploy/",

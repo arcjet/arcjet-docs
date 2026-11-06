@@ -263,6 +263,10 @@ export const main = [
             attrs: { class: "feature sensitive-information" },
           },
           {
+            label: "Protected health information",
+            link: "/sensitive-info/phi",
+          },
+          {
             label: "Reference",
             link: "/sensitive-info/reference",
           },
