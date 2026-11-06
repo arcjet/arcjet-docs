@@ -424,6 +424,10 @@ export const main = [
     collapsed: false,
     items: [
       {
+        label: "Overview",
+        link: "/tools-for-ai",
+      },
+      {
         label: "Arcjet plugin",
         link: "/arcjet-plugin",
       },
