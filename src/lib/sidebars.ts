@@ -64,6 +64,24 @@ export const main = [
     ],
   },
   {
+    label: "Shadow AI discovery",
+    collapsed: false,
+    items: [
+      {
+        label: "Overview",
+        link: "/shadow-ai",
+      },
+      {
+        label: "Deploy the endpoint agent",
+        link: "/shadow-ai/deploy",
+      },
+      {
+        label: "What Discovery collects",
+        link: "/shadow-ai/data-collected",
+      },
+    ],
+  },
+  {
     label: "Custom agents",
     collapsed: false,
     items: [
