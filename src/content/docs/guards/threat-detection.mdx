@@ -258,8 +258,8 @@ The detector scores what it can look up and reports the rest as follows:
   risk level `none`. Don't rely on this detector alone to deny hosts that can't
   be verified. To allow only known destinations, add an allowlist rule that
   denies every other host.
-- **A call that names too many hosts fails closed.** If one call names too many
-  distinct public hosts, Arcjet doesn't score a partial list. A live rule that
+- **A call that names more than 30 hosts fails closed.** If one call names more
+  than 30 distinct public hosts, Arcjet doesn't score a partial list. A live rule that
   reads the detector fails closed with `AJP1009`. Send the hosts in several
   calls instead.
 
