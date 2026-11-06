@@ -107,8 +107,10 @@ Blocked by Arcjet policy: destructive-command. Policy: coding-agent.destructive-
 Use the decision ID to find the matching row in the site's **Activity** in
 the Console. The reason also has the following variations:
 
-- If the session carries session-taint flags, the reason names them before
-  the policy label, such as `Category: credential_access.`
+- If the session carries
+  <Link.Page href="/coding-agents/session-analysis">session analysis</Link.Page>
+  flags, the reason names them before the policy label, such as
+  `Category: credential_access.`
 - If more than one policy denies the action, the reason lists every label
   and decision ID.
 - If a policy fails closed without a rule firing, the reason starts with
@@ -165,7 +167,10 @@ the shape needs more detail.
 - **A recorded event can't block.** No supported agent offers a point where
   Arcjet could withhold a tool result. A poisoned web page or MCP response is
   the most common route for an injection into a coding agent, and the hook
-  can't catch it, because the tool has already run.
+  can't stop the agent from reading it, because the tool has already run.
+  Arcjet screens the result instead and can flag the session, so a published
+  policy refuses the risky tool calls that follow. For more information, see
+  <Link.Page href="/coding-agents/session-analysis">Session analysis</Link.Page>.
 - **A hook binds one client, not one person.** A repository-level hook can be
   deleted, a third-party model provider skips the server-managed settings
   fetch, and a developer calling the API from another tool is outside all of
@@ -239,6 +244,7 @@ For where each agent fills `model`, see
 
 - <Link.Page href="/coding-agents">Secure coding agents</Link.Page>
 - <Link.Page href="/coding-agents/policies">Coding agent policies</Link.Page> – the input contract and the starter policies
+- <Link.Page href="/coding-agents/session-analysis">Session analysis</Link.Page> – flag a session after a risky finding and refuse the risky calls that follow
 - <Link.Page href="/coding-agents/claude-code">Secure Claude Code</Link.Page>
 - <Link.Page href="/coding-agents/copilot">Secure GitHub Copilot</Link.Page>
 - <Link.Page href="/coding-agents/codex">Secure OpenAI Codex</Link.Page>
