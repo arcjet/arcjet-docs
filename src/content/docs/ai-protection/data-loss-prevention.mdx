@@ -99,9 +99,10 @@ outputs, well outside your control.
 
 Arcjet sensitive info detection scans prompt content **inside your application**,
 before it reaches the AI provider. Detection runs locally in your own
-environment, so the raw text never leaves your app: only the decision – whether
-sensitive data was found – is reported to Arcjet. When something is detected you
-choose what happens next: block the request, strip the data, or warn the user.
+environment, so the raw text doesn't leave your app. The SDK reports the
+decision to Arcjet, along with the type and position of each finding, but not
+the matched text. When something is detected you choose what happens next:
+block the request, strip the data, or warn the user.
 
 ## Get started
 
@@ -146,9 +147,12 @@ a named-entity-recognition (NER) model paired with deterministic recognizers:
   financial identifiers**. This is the data a structured-pattern matcher can't
   catch.
 
-Detection runs entirely on your own infrastructure. Nothing is sent to a
-third party for analysis, which is what makes this safe to put in front of an AI
-provider in the first place.
+The SDK rule runs detection on your own infrastructure, so the text isn't sent
+to Arcjet or a third party for analysis. That's what makes it suitable to put in
+front of an AI provider. The server-side sensitive information detector in an
+<Link.Page href="/guards/remote-policies#detectors">agent guard policy</Link.Page>
+and <Link.Page href="/coding-agents">coding agent hooks</Link.Page> screen text
+on Arcjet's side instead.
 
 ## Configure detection
 
