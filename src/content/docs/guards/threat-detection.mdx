@@ -1,98 +1,117 @@
 ---
 title: "Threat detection"
-description: "Real time threat detection for coding agent actions: protect coding agents against malicious APIs, MCPs, websites, malware, and other threats."
+description: "Score the hosts an agent is about to contact with Arcjet threat intelligence, and deny malicious destinations in a guard policy. Works for your own agents and for coding agents."
 ---
 
-import { Aside, CardGrid } from "@astrojs/starlight/components";
+import { Code, CardGrid, Tabs, TabItem } from "@astrojs/starlight/components";
 import Comments from "@/components/Comments.astro";
 import { Link } from "@/components/link";
+import FetchToolTs from "@/snippets/guards/threat-detection/FetchTool.ts?raw";
+import FetchToolPy from "@/snippets/guards/threat-detection/FetchTool.py?raw";
+import FetchToolGo from "@/snippets/guards/threat-detection/FetchTool.go?raw";
 
-Arcjet agent threat detection analyzes every external request an
-agent is about to make against Arcjet's threat intelligence. Arcjet maintains a real-time threat intelligence database and continuously updates it with new indicators of compromise, malicious hosts, and other threat data. This helps prevent
-interactions with malicious or risky destinations, such as APIs, MCPs, websites,
-malware, and other threats.
+An agent that fetches web pages, calls APIs, or connects to MCP servers
+contacts hosts that a model chose. Text the agent read earlier, such as a web
+page or a tool result, can steer that choice toward a host an attacker
+controls. Threat detection scores each host before the agent contacts it, so a
+guard policy can deny the call when a destination is known for abuse.
 
-This can be used with both coding agents - preventing them from interacting with malicious or risky destinations on developer machines - as well as custom agents - protecting interactions with external services in any environment where the custom agent operates.
-
-For inbound client IP analysis on `protect()`, see
+The detector uses the same IP threat intelligence that Protect uses to score
+the client of an HTTP request. For that inbound check, see
 <Link.Page href="/ip-threat-intelligence">IP threat intelligence</Link.Page>.
 
-## Declare the detector
+## What the detector checks
 
-Create a threat detection policy for tool call executions or use our pre-configured example policy in the Arcjet Console
-to automatically block malicious or risky destinations. Declaring the detector makes its results available in the Rego policy.
+Threat detection is a detector kind, IP threat, that you declare on a guard
+policy. On each call, Arcjet does the following:
 
-Arcjet populates a `destinations` input for the detector based on the hosts an agent is about to contact. The verdict is returned
-for each host, along with a rolled-up assessment across all hosts. This allows the policy to make decisions based on both individual host risk and the overall risk of all destinations.
+1. Reads the host from each value in the detector's input.
+1. Resolves each hostname to its addresses. An IP address is looked up
+   directly.
+1. Looks up each public address in Arcjet's threat intelligence and scores the
+   host with its riskiest address.
+1. Gives the policy one assessment per host and a rolled-up assessment for the
+   riskiest host in the call.
 
-### Sample policy for destination threat
+The policy's rules read those assessments and decide whether to deny. Arcjet
+doesn't fetch the URLs or follow redirects. It scores only the hosts that it
+receives.
 
-The Console offers `coding-agent.destination-threat` as a starter. Attach it to
-**Tool call**.
+The detector works in two places:
 
-```rego
-deny contains "malicious-destination" if {
-	input.signals.ip_threat.dest.risk_level in {"high", "critical"}
-}
-```
+- **Your own agents.** Your application calls `guard()` and sends the URLs or
+  hosts that a tool is about to contact.
+- **Coding agents.** Arcjet reads the hosts from each tool call that the agent
+  makes and fills the input for you. For more information, see
+  [Coding agents](#coding-agents).
 
-### Testing the policy
+## Declare the detector on a policy
 
-The policy can be tested by asking the agent to make requests to `evil.arcjet.com`, which is hardcoded to always score high.
+A policy for your own agent declares an input, an IP threat detector that reads
+it, and a rule over the detector's result.
 
-For example:
+| Part     | What to declare                                                                                   |
+| -------- | ------------------------------------------------------------------------------------------------- |
+| Input    | A `SERVER` input of kind string list or string, for example `destinations`. Mark it required.     |
+| Detector | Kind **IP threat** (`GUARD_POLICY_DETECTOR_KIND_IP_THREAT`) with an ID, for example `dest`, that reads the input |
+| Rule     | An expression rule, for example `malicious-destination`, that denies on the detector's result      |
 
-```text
-What's on evil.arcjet.com?
-```
+The input must use `SERVER` exposure, because Arcjet needs the hosts to look
+them up. A `LOCAL` input is a compile error, `AJV2007`. The detector takes no
+options. Rules read its result under `input.signals.ip_threat.<detector_id>`.
 
-If the policy is in live mode, the agent action will be blocked. If it's in dry-run mode, the action will be allowed but logged for review in the Arcjet Console.
+For how inputs, detectors, and rules fit together, see
+<Link.Page href="/guards/remote-policies">Policy contract</Link.Page>. For the
+editor, see <Link.Page href="/guards/authoring">Author and publish policies</Link.Page>.
 
-## Detector fields
+## Send destinations from your application
 
-| Field | Value |
-| --- | --- |
-| Kind | IP threat (`GUARD_POLICY_DETECTOR_KIND_IP_THREAT`) |
-| Input exposure | `SERVER` |
-| Input kind | `STRING` or `STRING_LIST` |
-| Signals group | `input.signals.ip_threat.<detector_id>` |
+Map the hosts that the tool is about to contact to the policy's input. Arcjet
+reads each value as follows:
 
-Private, loopback, link-local, CGNAT, multicast, and unspecified addresses are not scored.
+| Value you send                               | What Arcjet scores                                       |
+| -------------------------------------------- | -------------------------------------------------------- |
+| An absolute URL, such as `https://api.example.com/v1/items` | Its host, `api.example.com`                |
+| A bare hostname, such as `api.example.com`   | The hostname                                             |
+| An IP address, such as `203.0.113.10`        | The address                                              |
+| Any other text, such as a path or a sentence | Nothing. Arcjet ignores the value                        |
 
-The policy should be configured to execute on **Tool call**.
+Arcjet lowercases hosts and scores each distinct host once. A host with a port
+and no scheme, such as `api.example.com:8443`, is ignored, so send it as an
+absolute URL. An empty list, or an empty string, scores as risk `none`.
 
-## Rolled-up assessment
+Private, loopback, link-local, carrier-grade NAT, multicast, and unspecified
+addresses aren't scored, and neither is a hostname that resolves only to those
+addresses. The detector isn't a defense against server-side request forgery
+(SSRF). If a tool must not reach internal addresses, deny them in your
+application or in a separate rule.
 
-The rolled-up fields are worst-wins across every public host that completed
-scoring. Rego reads them under `input.signals.ip_threat.<detector_id>`
-(for example `input.signals.ip_threat.dest` when the detector id is `dest`):
+## Guard an agent's fetch tool
 
-| Field | Meaning |
-| --- | --- |
-| `detected` | `true` when `risk_level` is `high` or `critical` |
-| `risk_level` | Overall risk for the worst host |
-| `reputation` | Reputation label for that host |
-| `activities` | Observed activities for that host |
-| `host` | Host that produced the worst assessment. Empty when risk is `none` |
-| `ip` | Address looked up for that host |
-| `assessments` | One entry per public destination the detector considered, in input order |
+The following tool takes the URLs that the model asked for, calls `guard()`
+with them, and fetches the pages only when the decision allows it.
 
-Each `assessments` entry carries `host`, `ip`, `risk_level`, `reputation`,
-`activities`, and `detected` for that destination.
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
 
-The detector has the following limits:
+<Code code={FetchToolTs} lang="ts" title="fetch-tool.ts" />
 
-- Arcjet scores at most 30 distinct public hosts in one call. A call that names
-  more fails a live rule closed with `AJP1009`.
-- If a host's DNS lookup fails, the host appears in `assessments` with
-  `risk_level` `none` and an empty `ip`. If an IP lookup fails, Arcjet also
-  scores the host as `none`. A rule that must deny when a host can't be
-  verified can't rely on this detector alone.
-- Private, loopback, and link-local addresses aren't scored.
+</TabItem>
+<TabItem label="Python">
 
-Name the set of risk levels you want to deny – in this case, `high` and
-`critical`. Do not use a comparison like `>= "high"` because string sorting
-does not reflect the intended risk order.
+<Code code={FetchToolPy} lang="py" title="fetch_tool.py" />
+
+</TabItem>
+<TabItem label="Go">
+
+<Code code={FetchToolGo} lang="go" title="fetch_tool.go" />
+
+</TabItem>
+</Tabs>
+
+The `web.fetched` policy declares the `destinations` input and an IP threat
+detector with the ID `dest`. Its rule denies when the riskiest host is high or
+critical risk:
 
 ```rego
 package arcjet.guard
@@ -104,57 +123,90 @@ deny contains "malicious-destination" if {
 }
 ```
 
-Guard destination threat exposes a subset of the Protect `ip.threat`
-fields. It does not surface `confidence`, `isSafe`, `networkTypes`,
-`entities`, `entityName`, or `service` under `input.signals.ip_threat`.
-For the inbound Protect surface, see
-<Link.Page href="/ip-threat-intelligence">IP threat intelligence</Link.Page>.
+To build the same rule in the visual builder, add a condition to
+`malicious-destination` that reads **dest (detector)** with the comparison
+**detected something**. A detector's `detected` field is `true` when the risk
+level is `high` or `critical`.
+
+The example treats a decision that failed open as a denial, because fetching an
+unchecked host is the outcome the policy exists to prevent. For the other fail
+behaviors, see
+<Link.Page href="/guards/reference#availability-and-fail-behavior">Availability and fail behavior</Link.Page>.
+
+## Signals
+
+The rolled-up fields describe the riskiest host in the call. Rules read them
+under `input.signals.ip_threat.<detector_id>`, for example
+`input.signals.ip_threat.dest` when the detector ID is `dest`.
+
+| Field         | Meaning                                                                     |
+| ------------- | --------------------------------------------------------------------------- |
+| `detected`    | `true` when `risk_level` is `high` or `critical`                            |
+| `risk_level`  | Risk level of the riskiest host                                             |
+| `reputation`  | Reputation label of that host                                               |
+| `activities`  | Observed activities of that host                                            |
+| `host`        | The riskiest host. Empty when the risk level is `none`                      |
+| `ip`          | The address that Arcjet looked up for that host. Empty when the risk level is `none` |
+| `assessments` | One entry for each public host that the detector considered, in input order |
+
+Each `assessments` entry carries `host`, `ip`, `risk_level`, `reputation`,
+`activities`, and `detected` for that host. A hostname that resolves only to
+private addresses appears with risk level `none` and an empty `ip`.
+
+When you deny on risk level, name the set of levels to deny, as the example
+does. Don't use a comparison like `>= "high"`, because string order doesn't
+match risk order.
+
+The detector exposes a subset of the Protect `ip.threat` fields. It doesn't
+include `confidence`, `isSafe`, `networkTypes`, `entities`, `entityName`, or
+`service`.
 
 ### Risk level values
 
-| Value | Meaning |
-| --- | --- |
-| `none` | No elevated risk for the scored host |
-| `low` | Weak signals only |
-| `medium` | Observed activity or combined signals that warrant caution |
-| `high` | Strong abuse signals (`detected` is `true`) |
+| Value      | Meaning                                                                   |
+| ---------- | ------------------------------------------------------------------------- |
+| `none`     | No elevated risk for the scored host                                      |
+| `low`      | Weak signals only                                                         |
+| `medium`   | Observed activity or combined signals that warrant caution                |
+| `high`     | Strong abuse signals (`detected` is `true`)                               |
 | `critical` | Severe signals such as botnet, exploit, or malware (`detected` is `true`) |
 
 ### Reputation values
 
-| Value | Meaning |
-| --- | --- |
-| `malicious` | Strongly associated with abuse |
-| `suspicious` | Elevated risk without a confirmed malicious label |
-| `known` | Previously observed, without a malicious or safe verdict |
-| `safe` | Trusted infrastructure |
-| `benign` | Benign infrastructure |
-| `unknown` | No reputation label available |
+| Value        | Meaning                                                   |
+| ------------ | --------------------------------------------------------- |
+| `malicious`  | Strongly associated with abuse                            |
+| `suspicious` | Elevated risk without a confirmed malicious label         |
+| `known`      | Previously observed, without a malicious or safe verdict  |
+| `safe`       | Trusted infrastructure                                    |
+| `benign`     | Benign infrastructure                                     |
+| `unknown`    | No reputation label available                             |
 
-A clean destination (nothing listed, or only private addresses) uses
-`risk_level` `none` and `reputation` `unknown`.
+A clean call, with nothing to score or only unlisted addresses, has risk level
+`none` and reputation `unknown`.
 
 ### Activity values
 
 `activities` uses the same strings as Protect
 <Link.Page href="/ip-threat-intelligence#activities">`ip.threat.activities`</Link.Page>:
 
-| Value | Meaning |
-| --- | --- |
-| `brute_force` | Repeated login or credential-guessing attempts |
-| `scanning` | Probing for open ports, paths, or misconfigurations |
-| `exploit` | Attempts to exploit known vulnerabilities |
-| `denial_of_service` | High-volume traffic aimed at overwhelming a service |
-| `spam` | Bulk unwanted submissions |
-| `botnet` | Coordinated traffic from compromised machines |
-| `malware` | Distribution or control of malicious software |
-| `crawling` | Aggressive automated crawling |
-| `fraud` | Activity consistent with fraudulent transactions |
-| `post_exploitation` | Activity consistent with a host already under attacker control |
-| `audit` | Security scanning consistent with auditing tooling |
-| `abuse` | General abuse when no more specific activity applies |
+| Value               | Meaning                                                         |
+| ------------------- | --------------------------------------------------------------- |
+| `brute_force`       | Repeated login or credential-guessing attempts                  |
+| `scanning`          | Probing for open ports, paths, or misconfigurations             |
+| `exploit`           | Attempts to exploit known vulnerabilities                       |
+| `denial_of_service` | High-volume traffic aimed at overwhelming a service             |
+| `spam`              | Bulk unwanted submissions                                       |
+| `botnet`            | Coordinated traffic from compromised machines                   |
+| `malware`           | Distribution or control of malicious software                   |
+| `crawling`          | Aggressive automated crawling                                   |
+| `fraud`             | Activity consistent with fraudulent transactions                |
+| `post_exploitation` | Activity consistent with a host already under attacker control  |
+| `audit`             | Security scanning consistent with auditing tooling              |
+| `abuse`             | General abuse when no more specific activity applies            |
 
-Deny on a specific activity when risk level alone is too broad:
+To deny on a specific activity when risk level alone is too broad, read
+`activities`:
 
 ```rego
 deny contains "malware-destination" if {
@@ -162,7 +214,8 @@ deny contains "malware-destination" if {
 }
 ```
 
-Or require both a high risk and a specific activity on any assessed host:
+To require both a high risk and a specific activity on the same host, iterate
+over `assessments`:
 
 ```rego
 deny contains "botnet-destination" if {
@@ -172,9 +225,10 @@ deny contains "botnet-destination" if {
 }
 ```
 
-## Allowlist
+## Allowlists
 
-For coding agents, every policy attached to the same **Execute on** option runs in parallel, and Arcjet applies the most restrictive decision. This means you need to define an allowlist in the same policy where the threat intelligence is evaluated.
+To exempt hosts that you trust, write the allowlist into the same policy as the
+threat rule and check each entry in `assessments`:
 
 ```rego
 allowed := {"docs.arcjet.com", "github.com", "raw.githubusercontent.com"}
@@ -186,23 +240,84 @@ deny contains "malicious-destination" if {
 }
 ```
 
+Hosts in `assessments` are lowercase, so write the allowlist in lowercase. The
+match is exact, so `github.com` doesn't cover `api.github.com`.
+
+The allowlist belongs in the same policy for a different reason in each case.
+A `guard()` call selects exactly one policy, the one whose label it passes. For
+coding agents, every policy attached to the same moment runs and Arcjet applies
+the most restrictive decision, so an allowlist in a separate policy can't
+override another policy's denial.
+
+## Failure behavior
+
+The detector scores what it can look up and reports the rest as follows:
+
+- **A host that can't be looked up scores as no risk.** If Arcjet can't resolve
+  a hostname or look up its address, the host appears in `assessments` with
+  risk level `none`. Don't rely on this detector alone to deny hosts that can't
+  be verified. To allow only known destinations, add an allowlist rule that
+  denies every other host.
+- **A call that names too many hosts fails closed.** If one call names too many
+  distinct public hosts, Arcjet doesn't score a partial list. A live rule that
+  reads the detector fails closed with `AJP1009`. Send the hosts in several
+  calls instead.
+
+For every error code, see <Link.Page href="/guards/errors">Errors</Link.Page>.
+
+## Coding agents
+
+For a coding agent, you don't send anything. Arcjet fills the `destinations`
+input from each tool call. It includes the hosts of the call's URL arguments
+and the hosts that a shell command names, such as absolute URLs and the
+connection targets of `curl`, `wget`, `ssh`, `dig`, and `git`.
+
+The Console offers `coding-agent.destination-threat` as a starter policy.
+Attach it to **Tool call**. It declares an IP threat detector with the ID
+`dest` over `destinations` and denies high and critical risk:
+
+```rego
+deny contains "malicious-destination" if {
+	input.signals.ip_threat.dest.risk_level in {"high", "critical"}
+}
+```
+
+For the fixed input contract and the other starters, see
+<Link.Page href="/coding-agents/policies">Coding agent policies</Link.Page>.
+
+## Test the policy
+
+`evil.arcjet.com` and its subdomains always score `high` risk with reputation
+`malicious`, so you can test a policy without a real malicious host.
+
+- **Your own agent.** Call your tool with `https://evil.arcjet.com/` in the
+  list of URLs.
+- **Coding agent.** Ask the agent to contact the host, for example:
+
+  ```text
+  What's on evil.arcjet.com?
+  ```
+
+If the rule is in live mode, the call is denied. If it's in dry run mode, the
+call is allowed and the decision is recorded for review in the Arcjet Console.
+
 ## What next?
 
 <CardGrid>
   <Link.Card
-    title="Coding agent policies"
-    href="/coding-agents/policies"
-    description="The fixed input contract, destination-threat, and the other starters."
+    title="Policy contract"
+    href="/guards/remote-policies"
+    description="Labels, inputs, detectors, and how signals are keyed."
   />
   <Link.Card
     title="Policy examples"
     href="/guards/policy-examples"
-    description="Worked Rego for common agent actions, including destination threat."
+    description="Worked Rego for common agent actions."
   />
   <Link.Card
-    title="Policy contract"
-    href="/guards/remote-policies"
-    description="Labels, inputs, detectors, and how signals are keyed."
+    title="Coding agent policies"
+    href="/coding-agents/policies"
+    description="The fixed input contract, destination threat, and the other starters."
   />
   <Link.Card
     title="IP threat intelligence"

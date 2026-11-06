@@ -33,7 +33,7 @@ result in the decision and in the Console.
 | `AJP1006` | The policy expression couldn't be evaluated                  | The interpreter ran and failed. The message carries the fault and what to do about it. See [Read an expression failure](#read-an-expression-failure). |
 | `AJP1007` | The expression called a built-in with arguments it refuses   | A built-in error. The message names the built-in and the operand position. Test for the value's type before using it. |
 | `AJP1008` | The remote policy for this label couldn't be read            | Arcjet couldn't read the stored policy. Retry.                                                    |
-| `AJP1009` | An Arcjet threat intel assessment couldn't be completed      | The call named more than 30 distinct public hosts. Split the call or reduce the list. Every rule that reads the detector reports it. A DNS or IP lookup failure doesn't produce this code, because Arcjet scores that host as risk `none`. |
+| `AJP1009` | An Arcjet threat intel assessment couldn't be completed      | The call named too many distinct public hosts. Split the call or reduce the list. Every rule that reads the detector reports it. A DNS or IP lookup failure doesn't produce this code, because Arcjet scores that host as risk `none`. |
 | `AJP1010` | A dry-run local detection withheld the rule's server inputs   | An SDK-local sensitive information detector found a match in dry run and withheld the policy's `SERVER` inputs, so a live server rule couldn't run. The policy is incomplete, so a caller that enforces is denied. |
 
 A live rule carrying any of these fails closed for a caller that enforces. A
