@@ -41,4 +41,30 @@ to our API, so it cannot be used for analysis.
 
 Local request body analysis is on the Arcjet roadmap for Shield.
 
+## Limits on agent activity
+
+Capture events, OpenTelemetry ingest, and the Arcjet Console views built on them
+have the following limits:
+
+- **Capture is best effort.** The SDK queues capture events in memory and sends
+  them in batches. It never retries a failed batch, so an event can be lost, for
+  example when a serverless runtime freezes before the batch is sent. Don't make
+  application behavior depend on a capture call. For more information, see
+  <Link.Page href="/guards/capture#delivery">Delivery</Link.Page>.
+- **OpenTelemetry ingest uses HTTP only.** Arcjet accepts the `http/protobuf`
+  and `http/json` OTLP protocols. It doesn't accept OTLP over gRPC. For more
+  information, see
+  <Link.Page href="/observe#send-opentelemetry-data-to-arcjet">Send OpenTelemetry data to Arcjet</Link.Page>.
+- **A Sequence needs capture events.** A Sequence is the capture events that
+  share a correlation ID. Decisions with a correlation ID appear on the Sequence
+  for that ID, but decisions alone don't form a Sequence.
+- **An AI summary needs a single key.** The Arcjet Console summarizes a Sequence
+  only when all of its activity arrives under one key, either one actor key or
+  the project key alone. If two keys use the same correlation ID, the Sequence
+  has no AI summary.
+- **Log retention limits how far back you can look.** Your plan's log retention
+  sets how far back you can view captures, decisions, and Sequences. For more
+  information, see
+  <Link.Page href="/privacy#data-retention">Data retention</Link.Page>.
+
 <Comments />

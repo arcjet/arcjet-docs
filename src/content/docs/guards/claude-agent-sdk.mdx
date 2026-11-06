@@ -609,9 +609,11 @@ Arcjet's:
    query exits with an already-in-use error. Continue an existing conversation
    by resuming it.
 
-So mint one UUID per conversation and resume it on later turns. That is also
-what keeps a multi-turn conversation on a single Sequence: because the context
-helper prefers the hook's `session_id`, a fresh UUID per turn splits
+So mint one UUID per conversation and resume it on later turns. That keeps the
+decisions and capture events of a multi-turn conversation on one correlation
+ID. In the Arcjet Console, a Sequence is the capture events that share a
+correlation ID, so the conversation's captures form a single Sequence. Because
+the context helper prefers the hook's `session_id`, a fresh UUID per turn splits
 correlation silently instead of erroring.
 
 The context helper never mints an ID. If it receives no valid 1-256

@@ -1,0 +1,219 @@
+---
+title: "AI content safety"
+description: "Keep harmful content out of AI prompts and model outputs. Arcjet content moderation checks the text your users send and the text your model returns, in JavaScript, Python, and Go."
+prev: true
+next: true
+ajToc:
+  - text: "Why content safety matters"
+    anchor: "why-content-safety-matters"
+  - text: "Moderate input and output"
+    anchor: "moderate-input-and-output"
+  - text: "Combine with prompt injection detection"
+    anchor: "combine-with-prompt-injection-detection"
+  - text: "Handle errors"
+    anchor: "handle-errors"
+  - text: "Learn more"
+    anchor: "learn-more"
+---
+
+import { Link } from "@/components/link";
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+AI applications accept text from users and generate text of their own. Either
+side can contain harmful content: a user can ask for sexual or hateful
+material, and a model can produce it even from an innocent prompt.
+
+Arcjet content moderation checks text for harmful content before you send it to
+a model, store it, or show it to a user. It's a Guard rule, so you call it with
+`guard()` at the point where the text crosses a boundary in your application.
+
+## Why content safety matters
+
+Harmful content in prompts and outputs is a product problem and a compliance
+problem:
+
+- **Payment processors and card networks** set rules for businesses that use
+  their payment rails, and those rules cover generated content. An AI
+  application that generates sexual or suggestive material can fall out of
+  compliance and risk fines or losing the ability to take payments.
+- **App stores** review apps for objectionable content. An app that shows
+  user-generated or AI-generated text needs a way to filter it.
+- **Your users** see what your model returns. Harmful output that reaches a
+  customer damages trust in your product.
+
+The default content moderation policy enforces sexual content most strictly
+because that's the main risk for payment processor compliance. It also covers
+misconduct, hate speech, and insults. For more information about the
+categories, see the
+<Link.Page href="/content-moderation/policy">content moderation policy</Link.Page>.
+
+## Moderate input and output
+
+Check the user's message before it reaches the model, then check the model's
+reply before you show it. Configure the rule once and reuse it for both checks.
+Use a different label for each check so you can tell input and output decisions
+apart in the Arcjet Console.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+import { launchArcjet, moderateContent } from "@arcjet/guard";
+
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+const moderate = moderateContent();
+
+export async function chat(userId: string, message: string) {
+  // Check the user's message before it reaches the model
+  const inputDecision = await arcjet.guard({
+    label: "chat.input",
+    metadata: { userId },
+    rules: [moderate(message)],
+  });
+
+  if (inputDecision.conclusion === "DENY") {
+    return "This message can't be processed. Rephrase it and try again.";
+  }
+
+  // Replace with your model call
+  const reply = await generateReply(message);
+
+  // Check the model's reply before you show it
+  const outputDecision = await arcjet.guard({
+    label: "chat.output",
+    metadata: { userId },
+    rules: [moderate(reply)],
+  });
+
+  if (outputDecision.conclusion === "DENY") {
+    return "This response can't be shown. Try a different request.";
+  }
+
+  return reply;
+}
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+import os
+
+from arcjet.guard import ModerateContent, launch_arcjet
+
+arcjet = launch_arcjet(key=os.environ["ARCJET_KEY"])
+moderate = ModerateContent()
+
+
+async def chat(user_id: str, message: str) -> str:
+    # Check the user's message before it reaches the model
+    input_decision = await arcjet.guard(
+        label="chat.input",
+        metadata={"user_id": user_id},
+        rules=[moderate(message)],
+    )
+
+    if input_decision.conclusion == "DENY":
+        return "This message can't be processed. Rephrase it and try again."
+
+    # Replace with your model call
+    reply = await generate_reply(message)
+
+    # Check the model's reply before you show it
+    output_decision = await arcjet.guard(
+        label="chat.output",
+        metadata={"user_id": user_id},
+        rules=[moderate(reply)],
+    )
+
+    if output_decision.conclusion == "DENY":
+        return "This response can't be shown. Try a different request."
+
+    return reply
+```
+
+</TabItem>
+</Tabs>
+
+Keep denied responses generic. Don't explain exactly what was flagged, and
+don't copy the checked text into `metadata`.
+
+## Combine with prompt injection detection
+
+Content moderation checks whether text is harmful. Prompt injection detection
+checks whether text tries to override your model's instructions. A user message
+can do either, so check both in the same `guard()` call:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+import {
+  detectPromptInjection,
+  launchArcjet,
+  moderateContent,
+} from "@arcjet/guard";
+
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+const moderate = moderateContent();
+const detectInjection = detectPromptInjection();
+
+export async function checkMessage(userId: string, message: string) {
+  const decision = await arcjet.guard({
+    label: "chat.input",
+    metadata: { userId },
+    rules: [moderate(message), detectInjection(message)],
+  });
+
+  // Returns true when the message can go to the model
+  return decision.conclusion !== "DENY";
+}
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+import os
+
+from arcjet.guard import DetectPromptInjection, ModerateContent, launch_arcjet
+
+arcjet = launch_arcjet(key=os.environ["ARCJET_KEY"])
+moderate = ModerateContent()
+detect_injection = DetectPromptInjection()
+
+
+async def check_message(user_id: str, message: str) -> bool:
+    decision = await arcjet.guard(
+        label="chat.input",
+        metadata={"user_id": user_id},
+        rules=[moderate(message), detect_injection(message)],
+    )
+
+    # Returns True when the message can go to the model
+    return decision.conclusion != "DENY"
+```
+
+</TabItem>
+</Tabs>
+
+The decision is `DENY` when either rule detects a problem. For more
+information about prompt injection, see
+<Link.Page href="/ai-protection/prompt-injection">AI prompt injection detection</Link.Page>.
+
+## Handle errors
+
+If Arcjet can't complete a content moderation check, the rule returns an error
+result and the call is allowed, so a service issue doesn't block your
+application. If your application can't accept unchecked text, check
+`decision.hasFailedOpen()` in JavaScript or `decision.has_failed_open()` in
+Python and deny the action yourself. For more information, see
+<Link.Page href="/content-moderation#errors-and-timeouts">Errors and timeouts</Link.Page>.
+
+## Learn more
+
+- <Link.Page href="/content-moderation">Content moderation introduction</Link.Page>
+- <Link.Page href="/content-moderation/quick-start">Content moderation quick start</Link.Page>
+- <Link.Page href="/content-moderation/policy">Content moderation policy</Link.Page>
+- <Link.Page href="/ai-protection/prompt-injection">AI prompt injection detection</Link.Page>
+- <Link.Page href="/guards">Agent guards</Link.Page>

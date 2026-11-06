@@ -477,6 +477,10 @@ export const main = [
         link: "/ai-protection/data-loss-prevention",
       },
       {
+        label: "Content safety",
+        link: "/ai-protection/content-safety",
+      },
+      {
         label: "Prompt injection detection",
         link: "/ai-protection/prompt-injection",
       },
