@@ -55,5 +55,7 @@ These checks help you decide whether to accept, reject, or flag an email address
 
 Configure each email validation rule with exactly one of `allow` or `deny`. An empty `allow` list allows no email types.
 
+For email validation on a form, see the [feedback form blueprint](/blueprints/feedback-form).
+
 Discussion
 ----------
