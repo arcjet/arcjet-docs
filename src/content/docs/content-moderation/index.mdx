@@ -213,11 +213,26 @@ rule returns an error result instead of a verdict. An error result doesn't
 deny, so the call is allowed. This keeps a service issue from blocking your
 application.
 
+Text larger than 128&nbsp;KiB is different. Arcjet can't check it, so a live
+rule denies the call instead of returning an error result. A rule in dry run
+mode doesn't block.
+
 To detect an error result, use `decision.hasFailedOpen()` in JavaScript,
 `decision.has_failed_open()` in Python, or `decision.HasFailedOpen()` in Go.
 Log the error, and deny the action yourself if your application can't accept
 unchecked text. For the error codes, see
 <Link.Page href="/guards/errors#prompt-injection-and-content-moderation-rule-codes">Prompt injection and content moderation rule codes</Link.Page>.
+
+### Long text
+
+When the text is under 128&nbsp;KiB but longer than Arcjet moderates in one
+pass, Arcjet moderates the leading part and adds the warning `AJ1142` to
+`decision.warnings` (`decision.Warnings` in Go). The decision stands, and the
+rest of the text isn't moderated.
+
+To moderate all of the text, split it into parts and moderate each one. The
+warning message gives the size of each part. Each part is a separate call and
+is billed separately.
 
 ## Data handling
 
