@@ -106,6 +106,42 @@ The verdict is binary. In JavaScript, use
 Python `detect_prompt_injection` accepts only `mode`, which is required.
 Omitting `mode` or passing `threshold=` raises `TypeError`.
 
+### Errors and timeouts
+
+If Arcjet can't complete the check in time, or the text to check is missing,
+the rule returns an error result instead of a verdict. An error result doesn't
+deny, so the request is allowed. This keeps a service issue from blocking your
+AI features.
+
+To detect an error result, check the decision:
+
+- With `protect()`, use `decision.isErrored()` in JavaScript,
+  `decision.is_error()` in Python, or `decision.IsErrored()` in Go.
+- With `guard()`, use `decision.hasFailedOpen()` in JavaScript,
+  `decision.has_failed_open()` in Python, or `decision.HasFailedOpen()` in Go.
+
+Log the error, and deny the request yourself if your application can't accept
+an unchecked prompt. In an
+<Link.Page href="/guards/remote-policies">agent guard policy</Link.Page>, a live
+rule that reads a prompt injection detector fails closed when the detector
+doesn't return a verdict. For
+the error codes that a guard call reports, see
+<Link.Page href="/guards/errors#prompt-injection-and-content-moderation-rule-codes">Prompt injection and content moderation rule codes</Link.Page>.
+
+## Data handling
+
+Prompt injection detection runs on Arcjet, so the text that you pass to the
+rule is sent to the Arcjet Cloud API. By default, Arcjet stores that text with
+the decision, so that you can investigate a detection or confirm a false
+positive. This applies to the text that you pass to `protect()`, the text in a
+Guard prompt injection rule, and the server policy inputs that a prompt
+injection detector reads.
+
+To stop Arcjet from storing prompt injection text for your organization,
+contact [support@arcjet.com](mailto:support@arcjet.com). For how long Arcjet
+stores decisions, and for zero data retention, see
+<Link.Page href="/privacy">Arcjet privacy</Link.Page>.
+
 ## Arcjet AI security models
 
 Arcjet trains its own models to analyze AI agent activity. What counts as

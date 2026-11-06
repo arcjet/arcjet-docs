@@ -38,6 +38,10 @@ ajToc:
     anchor: "examples"
   - text: "Dry run mode"
     anchor: "dry-run-mode"
+  - text: "Errors and timeouts"
+    anchor: "errors-and-timeouts"
+  - text: "Data handling"
+    anchor: "data-handling"
   - text: "Pricing"
     anchor: "pricing"
 ---
@@ -201,6 +205,28 @@ For install steps and framework-specific wrappers, see the
 
 `mode: "DRY_RUN"` / `ModeDryRun` evaluates the rule without blocking. Use this
 to measure detections before switching to `"LIVE"`.
+
+### Errors and timeouts
+
+If Arcjet can't complete the check in time, or the text to check is empty, the
+rule returns an error result instead of a verdict. An error result doesn't
+deny, so the call is allowed. This keeps a service issue from blocking your
+application.
+
+To detect an error result, use `decision.hasFailedOpen()` in JavaScript,
+`decision.has_failed_open()` in Python, or `decision.HasFailedOpen()` in Go.
+Log the error, and deny the action yourself if your application can't accept
+unchecked text. For the error codes, see
+<Link.Page href="/guards/errors#prompt-injection-and-content-moderation-rule-codes">Prompt injection and content moderation rule codes</Link.Page>.
+
+## Data handling
+
+Content moderation runs on Arcjet, so the text that you pass to the rule is
+sent to the Arcjet Cloud API for evaluation. Arcjet doesn't store the text. The
+decision keeps the verdict, the billing count, and the label and metadata that
+you attach to the call, so don't copy the text into metadata. For what else
+Arcjet stores and for how long, see
+<Link.Page href="/privacy">Arcjet privacy</Link.Page>.
 
 ## Pricing
 

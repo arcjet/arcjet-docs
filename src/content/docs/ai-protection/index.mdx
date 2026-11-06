@@ -115,8 +115,12 @@ Prevent PII and sensitive data from leaking into AI model context, logs, or
 third-party tool calls. Arcjet detects card numbers, email addresses, and
 custom patterns in request bodies with deterministic recognizers. The on-device
 NER model detects phone numbers, names, addresses, and government or financial
-identifiers. Detection runs entirely locally, with no data leaving your
-infrastructure.
+identifiers. The SDK rule runs detection locally and reports the type and
+position of each finding, but not the matched text. The server-side sensitive
+information detector in an
+<Link.Page href="/guards/remote-policies#detectors">agent guard policy</Link.Page>
+and <Link.Page href="/coding-agents">coding agent hooks</Link.Page> screen text
+on Arcjet's side.
 
 <CardGrid>
   <Link.Card
