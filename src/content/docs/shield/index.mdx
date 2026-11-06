@@ -53,7 +53,7 @@ the following:
 :::tip[Enable without code changes]
 Shield can also be enabled as a
 <Link.Page href="/remote-rules">remote rule</Link.Page> from the Arcjet
-dashboard or through the
+Console or through the
 <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page>, with no code
 changes or redeployment.
 :::
@@ -103,6 +103,18 @@ match your concept of a "user". For example:
 
 Aligning fingerprints with the right identifiers avoids blocking the wrong users
 and makes Shield's decisions more meaningful.
+
+### When Shield blocks a client
+
+Arcjet analyzes each request after it returns the decision, so Shield doesn't
+block the request that makes a client suspicious. Shield allows that request.
+Once a client crosses the threshold, Arcjet blocks its later requests for a
+period of time.
+
+Shield blocks clients by fingerprint. Every request that shares a blocked
+fingerprint is blocked, so a fingerprint based only on the IP address can block
+every client behind a shared IP address, such as users on the same office
+network. Choose fingerprint characteristics that identify a single client.
 
 ### Respond to suspicious requests
 

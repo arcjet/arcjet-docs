@@ -12,6 +12,7 @@ const PATHS_FROM_SITEMAP = [
   "/ai-protection/",
   "/ai-protection/abuse-protection",
   "/ai-protection/budget-control",
+  "/ai-protection/content-safety",
   "/ai-protection/data-loss-prevention",
   "/architecture/",
   "/best-practices/",

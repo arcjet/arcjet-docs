@@ -126,8 +126,8 @@ var emailAgent = anthropicprovider.NewAgent(anthropic.NewClient(), anthropicprov
 	},
 })
 
-// RunEmailAgent runs one turn for a user. The correlation ID groups every
-// decision from this turn into one Sequence in the Arcjet console.
+// RunEmailAgent runs one turn for a user. The correlation ID links every
+// decision and capture event from this turn in the Arcjet Console.
 func RunEmailAgent(ctx context.Context, u *User, prompt string) (string, error) {
 	ctx = WithUser(ctx, u)
 	ctx = arcjet.ContextWithCorrelationID(ctx, "turn_"+u.ID)

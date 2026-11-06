@@ -302,9 +302,10 @@ and `GuardMiddleware` will not wrap it a second time.
 
 ## Correlation
 
-A correlation ID groups every decision from one conversation into a single
-Sequence in the Arcjet Console. Put an ID the application already has on the
-context before the run:
+A correlation ID links the decisions and capture events of one conversation. In
+the Arcjet Console, a Sequence is the capture events that share a correlation
+ID, so decisions alone don't form a Sequence. Put an ID the application already
+has on the context before the run:
 
 ```go
 ctx = arcjet.ContextWithCorrelationID(ctx, conversationID)
