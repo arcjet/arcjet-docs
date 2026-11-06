@@ -21,7 +21,8 @@ Arcjet protects several entry points:
 - [Agent get started](https://docs.arcjet.com/agent-get-started): full agent onboarding flow – install a skill, connect the CLI, add protection.
 - [Skills](https://github.com/arcjet/skills): install via `npx skills add arcjet/skills` to give your agent framework-aware integration docs.
 - [Arcjet CLI](https://docs.arcjet.com/cli): create sites, retrieve keys, inspect requests, manage rules from the terminal.
-- [MCP server](https://docs.arcjet.com/mcp-server): same management surface over MCP at `https://api.arcjet.com/mcp` (OAuth).
+- [MCP server](https://docs.arcjet.com/mcp-server): manage your account over MCP at `https://api.arcjet.com/mcp` (OAuth). Overlaps with the CLI; Guard policy tools are MCP-only, projects and live watch are CLI-only.
+- [Tools for AI coding agents](https://docs.arcjet.com/tools-for-ai): which of skills, MCP, CLI, plugin, and llms.txt to use, with a comparison table.
 - [Arcjet plugin](https://docs.arcjet.com/arcjet-plugin): bundled skills + MCP + coding rules for Claude Code and Cursor.
 - [Create an account](https://console.arcjet.com) or use [agent registration](https://arcjet.com/auth.md).
 - [Quick start guides by framework](https://docs.arcjet.com/get-started)

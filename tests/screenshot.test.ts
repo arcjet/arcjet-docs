@@ -113,6 +113,7 @@ const PATHS_FROM_SITEMAP = [
   "/signup-protection/reference/",
   "/support/",
   "/testing/",
+  "/tools-for-ai/",
   "/troubleshooting/",
   "/upgrading/sdk-migration/",
 ];

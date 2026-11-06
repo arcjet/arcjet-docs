@@ -1,0 +1,93 @@
+---
+title: "Tools for AI coding agents"
+description: "Arcjet skills, the MCP server, the CLI, the Arcjet plugin, and llms.txt: what each tool does, where it runs, how it authenticates, and which one to use."
+prev: false
+next: false
+---
+
+import { Link } from "@/components/link";
+import Comments from "/src/components/Comments.astro";
+
+Arcjet gives AI coding agents two kinds of help. Arcjet skills teach an agent how to add Arcjet protection to your code. The MCP server and the CLI connect an agent to the Arcjet API, so it can create sites, fetch keys, inspect decisions, and manage remote configuration in your account. The Arcjet plugin bundles these for Claude Code and Cursor, and `llms.txt` serves the documentation in a form agents can read.
+
+## Choose a tool
+
+Work through the following list in order, and use the first option that fits your agent:
+
+1. **Install Arcjet skills.** Skills are the main way to set up Arcjet with an agent, in any client that supports them.
+2. **Connect to the Arcjet API.** Use the CLI if the agent can run shell commands, such as Claude Code, Codex, or a headless agent in CI. Use the MCP server if the agent has no shell, such as claude.ai, Claude Desktop, or ChatGPT, or if your editor has built-in MCP support.
+3. **Install the Arcjet plugin** if you use Claude Code or Cursor and prefer one bundled install to installing skills and connecting the API yourself.
+4. **Point the agent at `llms.txt`** when none of these are set up. It gives the agent the documentation, but no access to your account.
+
+For a step-by-step setup with skills and the CLI or MCP server, see <Link.Page href="/agent-get-started">Agent get started</Link.Page>.
+
+## Compare the tools
+
+| Tool          | What it does                                                          | Where it runs                                                                        | How it authenticates                                                         |
+| ------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| Arcjet skills | Guides the agent through adding Arcjet protection to your code.       | Inside your coding agent: Claude Code, Cursor, VS Code with Copilot, and other clients that support skills. | None. To reach your account, the agent uses the CLI or the MCP server.       |
+| MCP server    | Manages your Arcjet account through MCP tools.                        | Hosted at `https://api.arcjet.com/mcp`, for any compatible MCP client.               | OAuth. Your client opens an Arcjet sign-in the first time it connects.       |
+| CLI           | Manages your Arcjet account from the terminal.                       | Your terminal, scripts, and CI.                                                      | Browser sign-in with `arcjet auth login`, or the `ARCJET_TOKEN` variable.    |
+| Arcjet plugin | Bundles skills, coding rules, a security analyst agent, and the MCP server. | Claude Code and Cursor.                                                       | Through the MCP server's OAuth sign-in.                                      |
+| `llms.txt`    | Serves the Arcjet documentation as plain text.                        | Any agent that can fetch a URL.                                                      | None. The files are public.                                                  |
+
+The CLI and the MCP server both call the Arcjet API, but they don't offer exactly the same operations. The following table shows what each one covers:
+
+| Task                                                            | CLI                                 | MCP server                                   |
+| --------------------------------------------------------------- | ----------------------------------- | -------------------------------------------- |
+| List teams and sites, create sites, and get site keys           | ✅                                  | ✅                                           |
+| List and create projects, and get project keys                  | ✅                                  | –                                            |
+| List, inspect, and explain requests                             | ✅                                  | ✅                                           |
+| List and inspect guard decisions                                | ✅                                  | ✅, also by coding agent session             |
+| Stream live requests and guard decisions                        | ✅ `watch` and `guards watch`       | –                                            |
+| Analyze traffic, anomalies, and IP addresses, and get a briefing | ✅                                 | ✅                                           |
+| Check quota usage                                               | In `briefing`                       | ✅ `get-site-quota`                          |
+| Create, update, delete, and promote remote rules                | ✅                                  | ✅                                           |
+| Author, test, and publish Guard policies                        | –                                   | ✅                                           |
+| See why a coding agent session was flagged                      | –                                   | ✅ `get-session-taint`                       |
+| Report a false positive or false negative on a coding agent     | –                                   | ✅ `submit-error-report`                     |
+
+## Arcjet skills
+
+A skill is a set of instructions and reference material that a coding agent loads when a task needs it. Arcjet skills use the [Agent Skills](https://agentskills.io) format. They help your agent detect your framework, install the right Arcjet SDK, and add protection to HTTP route handlers, AI agent tool calls, MCP servers, background jobs, and queue workers.
+
+To install the skills in your project, use the `skills` tool:
+
+```bash
+npx skills add arcjet/skills
+```
+
+Then describe what you want to protect. Skills work on your code. To create a site or fetch its key, the agent also needs the CLI or the MCP server. For the source, see [github.com/arcjet/skills](https://github.com/arcjet/skills).
+
+## MCP server
+
+The <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page> exposes your Arcjet account as tools over the Model Context Protocol (MCP). Use it with AI clients that have no shell access, such as claude.ai, Claude Desktop, and ChatGPT, and with editors that have built-in MCP support, such as Cursor, VS Code with Copilot, and Windsurf.
+
+The server is the only tool that authors and publishes Guard policies, explains why a coding agent session was flagged, and reports false positives. Your client signs in with OAuth, and can show you each tool call for confirmation before it runs. Clients that support MCP skills also get Arcjet workflows from the server, such as onboarding a site or managing remote rules.
+
+## CLI
+
+The <Link.Page href="/cli">Arcjet CLI</Link.Page> (`arcjet`) manages your Arcjet account from a terminal. Use it when you or your agent can run shell commands. It returns stable JSON, uses exit codes that scripts can branch on, and asks for `--confirm` before any change.
+
+The CLI is the only tool that manages projects and streams live requests and guard decisions with `arcjet watch` and `arcjet guards watch`. It also runs in CI with an `ARCJET_TOKEN`.
+
+## Arcjet plugin
+
+The <Link.Page href="/arcjet-plugin">Arcjet plugin</Link.Page> is a single install for Claude Code and Cursor:
+
+```bash
+npx plugins add arcjet/arcjet-plugin
+```
+
+It bundles Arcjet skills, security-aware coding rules for your framework, a security analyst agent, and a connection to the MCP server. Use it if you prefer one install with everything included. Otherwise, install the skills directly, which works in more clients.
+
+## llms.txt
+
+Arcjet publishes its documentation in plain text for AI agents:
+
+- [`llms.txt`](/llms.txt) is a short index of the documentation with key facts.
+- [`llms-full.txt`](/llms-full.txt) is the full reference, with framework examples and rule parameters.
+
+Use them when your agent has no skills, CLI, or MCP connection. They give the agent the same information as these docs, but no access to your account.
+
+<Comments />
