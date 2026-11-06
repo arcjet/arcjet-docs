@@ -418,7 +418,7 @@ import aj from "arcjet:client";
 const decision = await aj.protect(Astro.request);
 
 if (decision.isDenied()) {
-  return Astro.redirect("/blocked", 403);
+  return new Response("Forbidden", { status: 403 });
 }
 ---
 

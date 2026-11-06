@@ -273,7 +273,7 @@ Then, create a custom logger that logs to JSON in production and pretty prints i
 index.ts
 
 ```ts
-import { dev } from "$app/environment";
+import { dev } from "$app/env";
 import { env } from "$env/dynamic/private";
 import arcjet, { shield } from "@arcjet/sveltekit";
 import pino, { type Logger } from "pino";
@@ -308,7 +308,7 @@ const aj = arcjet({
 index.js
 
 ```js
-import { dev } from "$app/environment";
+import { dev } from "$app/env";
 import { env } from "$env/dynamic/private";
 import arcjet, { shield } from "@arcjet/node";
 import pino from "pino";

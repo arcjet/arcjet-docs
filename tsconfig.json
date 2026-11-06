@@ -4,6 +4,13 @@
     "jsx": "react-jsx",
     "jsxImportSource": "react",
     "experimentalDecorators": true,
+    // TypeScript 6 loads no `@types/*` packages by default. The snippets rely
+    // on ambient globals from several runtimes (`Deno`, `Bun`, Node), so load
+    // them all as TypeScript 5 did.
+    "types": ["*"],
+    // TypeScript 6 checks side-effect imports by default. Deno snippets import
+    // `jsr:` specifiers, which only Deno can resolve.
+    "noUncheckedSideEffectImports": false,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],

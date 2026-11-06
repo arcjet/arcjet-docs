@@ -1,4 +1,4 @@
-import { dev } from "$app/environment";
+import { dev } from "$app/env";
 import { env } from "$env/dynamic/private";
 import arcjet, { shield } from "@arcjet/sveltekit";
 import pino, { type Logger } from "pino";
