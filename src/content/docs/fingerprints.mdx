@@ -5,6 +5,7 @@ next: false
 ---
 
 import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
 import CharacteristicsGlobalRule from "@/snippets/rate-limiting/reference/nextjs/CharacteristicsGlobalRule.ts?raw";
 import FixedWindowCustomCharacteristicRule from "@/snippets/rate-limiting/reference/nextjs/FixedWindowCustomCharacteristicRule.ts?raw";
 import FixedWindowCustomCharacteristicFingerprintRule from "@/snippets/rate-limiting/reference/nextjs/FixedWindowCustomCharacteristicFingerprintRule.ts?raw";
@@ -72,7 +73,8 @@ references for more details.
 You can use custom characteristics to track clients based on various attributes.
 For example, you can set up a limit for a logged in user by setting their user
 ID as the identifier. This applies the limit to all requests made by that user
-regardless of their device and IP address.
+regardless of their device and IP address. For an example with an
+authentication provider, see <Link.Page href="/integrations/clerk">Clerk integration</Link.Page>.
 
 Custom characteristics are defined with a string key when configuring the sdk.
 The value is then passed as a `string`, `number` or `boolean` when
