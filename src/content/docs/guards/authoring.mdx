@@ -1,27 +1,36 @@
 ---
 title: "Author and publish policies"
-description: "Build an Arcjet agent guard policy with the visual builder, plain English, or Rego, then test and publish it."
+description: "Create an Arcjet agent guard policy in the Arcjet Console with the visual builder, plain English, or Rego, then test it and save it to publish."
 ---
 
-import { Aside } from "@astrojs/starlight/components";
+import { Aside, Steps } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
 
 A policy changes what a guarded action can do without changing the
 application. You author it in the Arcjet Console or from a coding agent over
-MCP, then publish it, and the next guard call carrying that label uses the new
-policy.
+MCP. Saving a policy publishes it, and guard calls that carry its label pick
+it up without a deployment. For how quickly a change takes effect, see
+<Link.Page href="/guards/remote-policies#policy-updates-and-availability">Policy updates and availability</Link.Page>.
 
-This page covers authoring, testing, and publication. For the contract a policy
-declares, see <Link.Page href="/guards/remote-policies">Policy contract</Link.Page>.
-For the expression language, see
+This page walks through the policy editor in the Console: creating a policy,
+writing its conditions, testing it, and saving, editing, and deleting it. For
+the contract a policy declares, see
+<Link.Page href="/guards/remote-policies">Policy contract</Link.Page>. For the
+expression language, see
 <Link.Page href="/guards/rego">Write policies in Rego</Link.Page>.
 
 ## Where policies live
 
-Policies are scoped to a site and live in the Console under **Policies**.
-Each policy has a server-generated ID that never changes and a Guard label that
-you can edit. The runtime selects on the label and the SDK call passes it, so
-renaming a policy isn't a move.
+Policies belong to a site and live in the Console under **Policies**. The
+**Policies** page lists each policy with its status and how many of its rules
+are in dry run and live. Select a policy to open it in the editor.
+
+Each policy has a Guard label that's unique within the site. A `guard()` call
+selects a policy by its label, so if you rename a label, update the calls that
+pass it.
+
+Site membership authorizes policy operations. Validating and trying a policy
+write nothing, so they need only read permission.
 
 ## Two kinds of policy
 
@@ -33,218 +42,456 @@ your own application, and the answer decides the editor.
 | Guards        | An action your own code takes                   | A tool call, prompt, or model switch in a developer's Claude Code, Copilot, Codex, Cursor, or Muse Code session |
 | Selected by   | The `label` a `guard()` call passes             | What it **executes on**: **Tool call**, **Prompt**, **Model switch**, or a combination                          |
 | Inputs        | You declare them and the application sends them | Fixed. Arcjet builds every value from the agent's hook payload                                                  |
-| To turn it on | Write the `guard()` call                        | Publish it                                                                                                      |
+| To turn it on | Write the `guard()` call                        | Save it                                                                                                         |
 
-The rest of this page applies to both kinds. For the coding agent contract and
-its starter policies, see
+Both kinds use the same editor, and the rest of this page applies to both. A
+coding agent policy has a **Name** field in place of **Label**, an
+**Execute on** setting in place of **Inputs**, and an **Examples** helper with
+ready-made policies in place of **Implement**. For its input contract and
+starter policies, see
 <Link.Page href="/coding-agents/policies">Coding agent policies</Link.Page>.
 
-Site membership authorizes policy operations. Validation and evaluation write
-nothing, so they need only read permission.
+## Create a policy
+
+<Steps>
+
+1. In the [Arcjet Console](https://console.arcjet.com), open the site and go
+   to **Policies**.
+
+2. Click **New policy**.
+
+3. Under **Select what to guard**, choose **Your application**. To guard a
+   coding agent instead, choose **Coding agent**.
+
+4. In the **Label** field, enter the Guard label that your `guard()` call
+   passes, such as `email.sent`.
+
+5. Optional: To require the application to say who is acting, under
+   **Actor**, select **Require an actor**.
+
+6. Under **Inputs**, click **Add input** for each value the application
+   sends, and set the following fields:
+
+   - **Name**: the name the `guard()` call sends the value under.
+   - **Evaluated by**: **Arcjet Cloud** sends the value to Arcjet.
+     **Local SDK** keeps it in your application, where only a sensitive
+     information detector can read it.
+   - **Value type**: **String**, **Boolean**, **Integer**, **Number**, or
+     **String list**.
+   - **Required**: select it if every call must send the value.
+
+7. Add detectors, rules, conditions, and tests, as described in the following
+   sections.
+
+8. Click **Save**.
+
+</Steps>
+
+The **Policy helpers** panel beside the form holds **Describe**, **Try it**,
+and **Implement**. None of them is part of the policy. They write a draft,
+evaluate it, or show how to call it.
+
+To leave without saving, click the close control in the form heading. If
+you've made changes, the Console asks you to confirm that you want to discard
+them.
 
 ## Choose an authoring mode
 
-A policy's conditions come from either a builder specification or Rego source,
-never both.
+A rule's conditions come from either the visual builder or Rego source, never
+both.
 
-| Mode              | Use it when                                                                        |
-| ----------------- | ----------------------------------------------------------------------------------- |
-| Visual builder    | The rule is a list of comparisons over declared inputs. A condition can compare an input with a fixed value or with another declared input. This is where a policy starts. |
-| Plain English     | You know what to refuse but not which comparisons express it.                      |
-| Rego              | You need boolean grouping, a derived value, or logic over a collection.            |
+| Mode           | Use it when                                                                                                                                                                 |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Visual builder | The rule is a list of comparisons over declared inputs. A condition can compare an input with a fixed value or with another declared input. This is where a policy starts. |
+| Plain English  | You know what to refuse but not which comparisons express it. **Describe** writes the builder conditions for you.                                                          |
+| Rego           | You need nested boolean grouping, a derived value, or logic over a collection.                                                                                             |
 
 <Aside type="caution">
-  Converting a builder policy to Rego is one-way. Setting the Rego source
-  clears the specification, and Rego can't be turned back into one. The Console
-  asks you to confirm, because from then on you own the program.
+  Switching a policy from the builder to Rego is one-way. Rego can't be turned
+  back into builder conditions, so the Console asks you to confirm before it
+  replaces them.
 </Aside>
-
-### Build a policy visually
-
-The builder edits a flat list of conditions for each expression rule, joined by
-a single **AND** or **OR**. There's no nesting: a rule that needs grouping is a
-rule for Rego. It reads declared `SERVER` inputs and detector results only,
-because a `LOCAL` value never reaches Arcjet.
-
-The builder offers only the comparisons that fit the input's kind, each with
-its negated form, so "the domain is not ours" is one condition. The
-email-domain comparisons lowercase both sides and require exactly one `@`,
-so `alice@EXAMPLE.ORG` matches `example.org` and
-`attacker@evil.example@example.org` doesn't.
-
-The generated Rego appears beneath the builder, read-only, and refreshes when
-you validate. Read it before you convert, because it's the program you'd be
-taking on.
 
 ### Describe a policy in English
 
-Describe what the action must refuse, and Arcjet writes the conditions. On the
-**Policies** page, enter a Guard label and a description, and the builder opens
-filled in.
+Describe what the action must refuse, and Arcjet writes the conditions.
 
-The model never writes Rego. It emits a builder specification, the same
-structured form the builder edits, which Arcjet renders to Rego
-deterministically. Every shape it can emit is one you could have built by
-hand. Three further bounds apply:
+<Steps>
 
-- **A generated policy compiles.** A candidate that fails goes back to the
-  model with the compiler's diagnostic. You receive a document that compiled,
-  or an error.
-- **A description can't widen a policy's reach.** The label, the detectors,
-  and the inputs of a policy that already declares some come from the site,
-  not from the model. Only a policy that declares nothing lets the model
-  propose the input contract too.
-- **Every generated rule is in dry run.** A draft reaches the edge only when
-  you publish it, so a model's mistake can't become an outage.
+1. Enter the policy's **Label**. Arcjet files the generated rules under it.
 
-Your description is untrusted text and the output shape is constrained, so the
-worst an injected instruction achieves is a policy you see in the builder
-before anything is published.
+2. In **Policy helpers**, open **Describe**.
+
+3. Describe what the policy must refuse, then click
+   **Generate conditions**.
+
+4. Read the rules and conditions that Arcjet wrote, and edit them in the
+   builder.
+
+</Steps>
+
+Generation replaces the policy's rules and conditions. Your tests stay, and
+any expected denial that names a rule that no longer exists is cleared. For a
+policy that declares no inputs yet, Arcjet also proposes the inputs and
+detectors that its rules read.
+
+Generation is bounded so that a draft can't do anything you haven't reviewed:
+
+- **A generated policy compiles.** Arcjet writes builder conditions, never
+  Rego, and checks that they compile before it returns them. You get a draft
+  that compiles, or an error.
+- **A description can't widen a policy's reach.** The label, and the inputs of
+  a policy that already declares some, come from the policy. A generated
+  condition can read only what the policy declares.
+- **Every generated rule is in dry run.** Nothing is published until you
+  click **Save**, and a dry run rule records a denial without blocking the
+  action.
+
+Your description is untrusted text and the output shape is fixed, so the worst
+that an injected instruction can produce is a draft that you read before you
+save it.
 
 #### Write a description that works
 
-The model turns prose into comparisons over declared inputs, so a description
-works when it names them:
+A description works when it names declared inputs and the comparison to make.
+**Describe** lists examples under **Descriptions that work well**. Click one to
+put it in the box and edit it.
 
 - **Say what to refuse.** A rule denies. "Only allow senders at our domain"
   becomes "deny when the sender is not at our domain".
 - **Name the input.** `recipient`, `attachment_count`. A description that
-  names no declared input gives the model nothing to attach a condition to.
+  names no declared input gives Arcjet nothing to attach a condition to.
 - **Give the comparison and the value.** "More than 10 attachments" is
   actionable. "Too many attachments" isn't.
 - **One rule per sentence.** Several ideas in one sentence usually produce one
   rule that means none of them.
 
-Arcjet refuses to generate for a policy whose inputs no condition can read,
-such as `LOCAL` inputs with no detector, with a message naming the fix.
+If a policy's inputs can't be read by any condition, such as `LOCAL` inputs
+with no detector, Arcjet refuses to generate and says what to change.
 
 ### Take a suggestion
 
-Arcjet proposes policies from the site's own traffic. Each suggestion carries
-a description you can edit and regenerate from, a ready-made rule set the
-builder can load, and its own label.
+When a site already sends guard calls, **Describe** also lists suggestions
+under **Suggested by your recent traffic**, each with the reason it was
+suggested. Click a suggestion to put its description in the box, edit it if
+you want, and click **Generate conditions**. Once the policy has a label,
+**Describe** shows only the suggestions for that label.
 
-Suggestions come from input shapes, never values: the names, kinds, and
-exposures your application sends. No model is involved, so the same traffic
-gives the same suggestions, and a suggestion can propose a domain rule about
-`recipient` without anyone having read one.
+Suggestions come from the shape of your traffic, never its values: the names,
+types, and evaluation locations of the inputs that your application sends.
+The same traffic gives the same suggestions, and a suggestion can propose a
+domain rule about `recipient` without anyone having read one.
+
+### Build conditions visually
+
+Each rule that the expression decides gets its own set of conditions.
+
+<Steps>
+
+1. Under **Rules**, click **Add rule**. The builder generates the **Rule ID**
+   that denials are reported under. Set the following fields:
+
+   - **Mode**: **Dry run** or **Live**. For more information, see
+     [Dry run and live rules](#dry-run-and-live-rules).
+   - **Decided by**: **Rego expression** for a rule with conditions, or
+     **A detector directly** for a rule that denies whenever a detector
+     reports a finding.
+   - **Description**: what the rule refuses.
+
+2. Under **Conditions**, find the rule and set its first condition:
+
+   - **Reads**: a declared input that Arcjet Cloud evaluates, or a detector.
+   - **Comparison**: how to compare it.
+   - **Value**: the value to compare with. For **is one of** and
+     **is not one of**, enter one value per line.
+
+3. Optional: To compare with another declared input instead of a fixed value,
+   click **Compare to another input** and choose the input. To go back, click
+   **Use a fixed value**.
+
+4. Optional: Click **Add condition** for each further condition, then in
+   **Match**, choose **all of these conditions**,
+   **any of these conditions**, or **none of these conditions**.
+
+</Steps>
+
+The builder reads only inputs that Arcjet Cloud evaluates and detector
+results, because a `LOCAL` value never reaches Arcjet. It offers only the
+comparisons that fit the input's type:
+
+| Input type        | Comparisons                                                                                                                                                                                                                                     |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| String            | **is**, **is not**, **is one of**, **is not one of**, **contains**, **does not contain**, **starts with**, **does not start with**, **ends with**, **does not end with**, **email domain is**, **email domain is not**, **length is at least**, **length is at most** |
+| String list       | **length is at least**, **length is at most**                                                                                                                                                                                                  |
+| Integer or number | **is**, **is not**, **is greater than**, **is less than**                                                                                                                                                                                      |
+| Boolean           | **is**, **is not**                                                                                                                                                                                                                              |
+| Detector          | **detected something**                                                                                                                                                                                                                          |
+
+The email domain comparisons lowercase both sides and require exactly one
+`@`, so `alice@EXAMPLE.ORG` matches `example.org` and
+`attacker@evil.example@example.org` doesn't.
+
+Under **Generated Rego**, the builder shows the Rego that its conditions
+compile to, read-only. Click **Validate** to refresh it. Read it before you
+switch to Rego, because it's the program you'd be taking on.
+
+### Write the policy in Rego
+
+<Steps>
+
+1. Under **Generated Rego**, click **Validate** so the Rego matches the
+   conditions as they stand.
+
+2. Click **Take over as Rego**.
+
+3. To confirm, click **Take over as Rego**. To keep the builder, click
+   **Keep using conditions**.
+
+</Steps>
+
+The **Rego** field replaces the conditions. Under **Rules**, the **Rule ID**
+field becomes editable, and each ID must match a `deny contains "RULE_ID"`
+line in the Rego, where `RULE_ID` is the rule's ID.
+
+As you edit, Arcjet validates the policy after you pause typing and when you
+leave the field. A compile error is underlined on the line that caused it,
+marked in the gutter, and summarized at the end of that line. Hold the pointer
+over the gutter marker for the full message, or click **Go to Line** under the
+field to move the cursor there. Network access, time, randomness, and regular
+expressions aren't available. For more information, see
+<Link.Page href="/guards/rego">Write policies in Rego</Link.Page>.
+
+## Add detectors
+
+A detector runs one of Arcjet's security checks on a declared input, and its
+result is available to the policy's rules.
+
+<Steps>
+
+1. Under **Detectors**, click **Add detector**.
+
+2. In **Detector**, choose **Prompt injection**, **Sensitive information**, or
+   **IP threat**.
+
+3. For sensitive information on an application policy, in **Runs in**, choose
+   **SDK** to keep the value in your application, or **Arcjet Cloud** to send
+   it to Arcjet. The other detectors run in Arcjet Cloud.
+
+4. In **Input**, choose the declared input that the detector reads. A
+   detector that runs in the SDK reads a **Local SDK** string. One that runs
+   in Arcjet Cloud reads an **Arcjet Cloud** string, and IP threat also
+   accepts a string list.
+
+5. Optional: For sensitive information, in **Entity types**, choose
+   **Deny only these** or **Allow only these**, then add types with
+   **Add type**. **Evaluator default** reports every type that the detector
+   finds.
+
+</Steps>
+
+To act on a detector, add a rule with **Decided by** set to
+**A detector directly**, or add a condition that reads the detector with
+**detected something**. For what each detector checks and the sensitive
+information taxonomy versions, see
+<Link.Page href="/guards/remote-policies#detectors">Detectors</Link.Page>.
 
 ## Test a policy
 
-Store tests with the policy. Each test supplies a sample input document and the
-rule IDs it expects to fire:
+Tests are saved with the policy and run each time you save it. A policy that
+fails its own tests can't be published.
+
+<Steps>
+
+1. Under **Tests**, click **Add test**.
+
+2. In **Name**, describe the case, such as `external recipient is denied`.
+
+3. In **Input**, enter a sample input document. The editor highlights JSON
+   errors, and **Format JSON** tidies the document.
+
+4. Under **Expected denials**, select each declared rule that you expect to
+   deny this input. Leave none selected to expect an allow.
+
+</Steps>
+
+A test input uses the shape of the
+<Link.Page href="/guards/rego#the-input-document">input document</Link.Page>:
 
 ```json
 {
-  "name": "external recipient is denied",
-  "inputJson": "{\"values\":{\"recipient\":\"someone@example.com\",\"allowed_recipients\":[\"approved@example.com\"]}}",
-  "expectRuleIds": ["external-recipient"]
+  "values": {
+    "recipient": "someone@example.com",
+    "allowed_recipients": ["approved@example.com"]
+  }
 }
 ```
 
-Tests are versioned with the policy revision and run at publication, so
-they're a gate rather than documentation. Two habits make them worth having:
+Two habits make tests worth having:
 
-- **Assert the near miss, not just the hit.** A test for `dev@mail.example.org`
+- **Test the near miss, not just the hit.** A test for `dev@mail.example.org`
   catches a suffix match creeping in. A test for an obvious external address
   passes either way.
-- **Assert the allow.** An empty `expectRuleIds` states that an input is
+- **Test the allow.** A test with no expected denials states that an input is
   permitted. A policy that denies everything passes every deny-only test.
 
-Because `signals` is part of the sample input, you can test detector
-combination logic without a model call. Detector-decided rules can't be
-asserted, because a stored input can't stand in for a detector.
+Because `signals` is part of the input document, you can test how rules
+combine detector results without running a detector. A rule decided by a
+detector directly can't be tested, because a stored input can't stand in for
+a detector.
 
-### Validate and evaluate
+### Validate a policy
 
-Two operations answer different questions, and neither writes anything:
+Click **Validate**, at the top or the foot of the form, to compile the policy
+and run every test without saving. The Console reports **Compiles and all tests
+pass**, or the number of tests that didn't pass. Under the tests, each result
+reads **Passed** or **Failed**, and a failure lists the denials that the test
+expected and the denials that the policy returned.
 
-- **Validate** compiles the policy and runs every stored test. It reports every
-  failure at once, each with its position in your Rego.
-- **Evaluate** compiles a draft and runs one sample input through the official
-  Open Policy Agent evaluator, the same evaluator that checks stored tests at
-  publication. Only expression rules run, because a sample input can't stand
-  in for a detector.
+### Try a sample input
 
-## Publish a policy
+To check one input without adding a test, use **Try it**:
 
-Publication runs the policy through four gates before anything reaches the
-edge:
+<Steps>
 
-1. Arcjet compiles the submitted document.
-2. It runs every stored test through the official Open Policy Agent evaluator
-   and refuses while any test fails.
-3. It asks the edge interpreter to evaluate the same compiled artifact and
-   refuses to publish if the two answers differ.
-4. It writes the policy, mirrors it to the edge, and records the
-   acknowledgement.
+1. In **Policy helpers**, open **Try it**.
 
-Each policy is its own record, so saving one policy doesn't change the others
-on the site. You can retry a failed publication, and a conflict preserves your
-draft.
+2. Enter a sample input document.
 
-### A live rule needs a test
+3. Click **Evaluate**.
 
-A policy with a live expression rule and no stored test can't be published,
-because the third gate has nothing to compare. A policy whose every rule is in
-dry run can be saved without tests, because nothing it denies is acted on.
-Detector-backed rules are exempt: a detector decides at request time and
-compiles to no artifact. New rules default to dry run, so publishing a draft
-can't start denying production traffic before you've seen it evaluate.
+</Steps>
 
-### Revisions
-
-Every save creates an immutable revision, and each decision records the
-revision that produced it. To revert a change, edit the policy and save it
-again. A published policy stays active until a replacement or a deletion
-supersedes it, so a connectivity problem doesn't retire it.
-
-Decisions record the artifact digest, the declared inputs, and the detector
-results needed to replay them, and every write records who made it.
+The result lists the rules that denied the input, or says that no rules
+denied it. **Try it** needs a label and at least one rule decided by the
+expression, and only those rules run. Nothing is saved.
 
 ## Generate the SDK call
 
-Every policy page generates the guard call that sends its inputs, in
-JavaScript, Go, and Python, plus an instruction you can hand to a coding agent.
-Use it rather than transcribing the contract: a mistyped input name produces a
-policy that silently never fires, and the snippets can't drift from the policy
-they're generated from.
+An application policy does nothing until the application sends values under
+exactly the names that the policy declares. A mistyped input name produces a
+policy that never fires, so the Console generates the call from the policy.
+
+In **Policy helpers**, open **Implement** and choose a tab:
+
+- **Coding agent**: an instruction to paste to a coding agent working in your
+  codebase. It states the policy's contract, so it works with whichever SDK
+  you have installed.
+- **JavaScript**, **Go**, or **Python**: the install command and the
+  `guard()` call that sends the policy's inputs.
+
+A coding agent policy has no **Implement** helper, because the agent's hooks
+send its inputs.
+
+## Save and publish a policy
+
+Click **Save**. Saving is publishing: there's no separate draft state, and
+each policy saves on its own, so saving one doesn't change the others on the
+site.
+
+Before it publishes, the Console checks the following:
+
+- The policy has a label, and no other policy on the site uses it.
+- Every live rule decided by the expression has at least one test to check it.
+- A coding agent policy doesn't use a detector that runs in the SDK.
+
+Arcjet then checks the policy before any guard call can use it. It compiles
+the policy, runs every test, and confirms that Arcjet's enforcement returns
+the same result for each test and can load the policy. If any check fails,
+nothing is published and the Console shows why.
+
+When the save succeeds, the Console reports **Saved and active**, or
+**Saved. Changes are being applied** while the policy reaches enforcement.
+The status beside the policy's name reads one of the following:
+
+| Status                | Meaning                                                                                     |
+| --------------------- | ------------------------------------------------------------------------------------------- |
+| **Active**            | The saved policy is in effect.                                                              |
+| **Updating**          | The save succeeded and the policy is being applied.                                         |
+| **Unsaved**           | The form has changes you haven't saved.                                                     |
+| **Changed elsewhere** | Someone saved this policy after you opened it. Reload before you save.                     |
+| **Failed**            | The last publication didn't complete. On the **Policies** page, click **Retry** next to it. |
+| **Inactive**          | The policy isn't in effect.                                                                 |
+
+If someone else saved the policy first, your save is refused and your changes
+stay in the form, so you can copy them before you reload.
+
+### A live rule needs a test
+
+A policy with a live rule decided by the expression and no stored test can't
+be saved, because nothing proves what the rule denies. Add a test, or set the
+rule back to **Dry run**. A policy whose every rule is in dry run can be saved
+without tests, because nothing it denies is acted on. Rules decided by a
+detector directly don't need a test.
+
+## Edit a policy
+
+On the **Policies** page, select the policy, change it, and click **Save**.
+Each save creates a new revision, and each decision records the revision that
+produced it. To revert a change, edit the policy back and save it again.
+
+A published policy stays active until you save a replacement or delete it, so
+a connectivity problem doesn't retire it.
+
+## Delete a policy
+
+<Steps>
+
+1. Open the policy.
+
+2. At the foot of the form, click **Delete policy**.
+
+3. To confirm, click **Delete**.
+
+</Steps>
+
+Deleting a policy unpublishes it everywhere it runs, and you can't undo it.
+Guard calls that pass its label no longer match a policy. If a delete doesn't
+complete, the **Policies** page keeps the policy listed with
+**Retry delete**.
+
+## Dry run and live rules
+
+Each rule has a **Mode**:
+
+- **Dry run**: a denial is recorded but doesn't block the action.
+- **Live**: a denial blocks the action.
+
+New rules start in dry run, and so do rules from **Describe** and from coding
+agent examples. Save a policy in dry run first, review the denials it records
+against real traffic, then switch the rules you trust to **Live**, add tests
+for them, and save again. On the **Policies** page, a policy with no live
+rules is dimmed.
 
 ## Author from a coding agent
 
 The <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page> exposes the
-same service the Console uses, so an agent and the Console compile and publish
-through one implementation:
+same service that the Console uses, so a policy written by an agent compiles,
+tests, and publishes the same way:
 
-| Tool                     | What it does                                              |
-| ------------------------ | ----------------------------------------------------------- |
-| `list-guard-policies`    | Lists the site's policies with their labels and contracts |
+| Tool                     | What it does                                                        |
+| ------------------------ | ------------------------------------------------------------------- |
+| `list-guard-policies`    | Lists the site's policies with their labels and contracts           |
 | `get-guard-policy`       | Returns one policy, including every input and its kind and exposure |
-| `validate-guard-policy`  | Compiles a draft and runs its stored tests                |
-| `evaluate-guard-policy`  | Runs one sample input through the official evaluator      |
-| `describe-guard-policy`  | Turns a description into a draft                          |
-| `suggest-guard-policies` | Proposes policies from the site's recorded input shapes   |
-| `put-guard-policy`       | Creates or replaces a policy                              |
-| `delete-guard-policy`    | Deletes a policy                                          |
-| `retry-guard-policy`     | Retries a failed publication                              |
+| `validate-guard-policy`  | Compiles a draft and runs its stored tests                          |
+| `evaluate-guard-policy`  | Runs one sample input through a draft                               |
+| `describe-guard-policy`  | Turns a description into a draft                                   |
+| `suggest-guard-policies` | Proposes policies from the site's recorded input shapes             |
+| `put-guard-policy`       | Creates or replaces a policy, which publishes it                    |
+| `delete-guard-policy`    | Deletes a policy                                                    |
+| `retry-guard-policy`     | Retries a failed publication                                        |
 
 An agent reads the policy's contract from `get-guard-policy` and writes the
-guard call from it. The summary also reports `executeOn`, which is empty for
-an application policy and names the moments a coding agent policy runs on.
-When authoring is rejected, the tool points at `validate-guard-policy` for the
-detail, because a compiler diagnostic quotes your own policy source and
-travels in a field labeled as untrusted.
-
-A policy is one of two remote configuration systems. A remote rule attaches to
-`protect()` and reads the HTTP request; a policy attaches to `guard()` and
-reads typed inputs. A rate limit written as a policy needs a `guard()` call
-the application doesn't make, and a spend cap written as a filter rule can't
-see the amount. For the comparison, see
-<Link.Page href="/guards/remote-policies#policies-and-remote-rules">Policies and remote rules</Link.Page>.
+guard call from it. Tests in a document sent to `put-guard-policy` or
+`validate-guard-policy` use `inputJson` for the sample input and
+`expectRuleIds` for the expected denials, where an empty list expects an
+allow. When a save is rejected, the tool points at `validate-guard-policy`
+for the detail.
 
 ## Related
 
 - <Link.Page href="/guards/remote-policies">Policy contract</Link.Page> – labels, actors, typed inputs, and detectors
-- <Link.Page href="/guards/rego">Write policies in Rego</Link.Page> – the input document, the profile, and its exclusions
+- <Link.Page href="/guards/remote-policies#policies-and-remote-rules">Policies and remote rules</Link.Page> – when to use a policy and when to use a remote rule
+- <Link.Page href="/guards/rego">Write policies in Rego</Link.Page> – the input document, what the language allows, and its limits
+- <Link.Page href="/coding-agents/policies">Coding agent policies</Link.Page> – the coding agent contract and starter policies
 - <Link.Page href="/guards/policy-examples">Policy examples</Link.Page> – worked policies for common agent actions
 - <Link.Page href="/guards/errors">Policy error codes</Link.Page> – what a rule reports when it can't be evaluated
