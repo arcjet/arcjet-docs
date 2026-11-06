@@ -20,6 +20,7 @@ Use sensitive information detection for any of the following purposes:
 *   Reduce your compliance burden by avoiding storage of PII and other regulated data.
 *   Prevent users from pasting card numbers or other sensitive data into generic text fields (for example, support forms, feedback forms, or chat boxes).
 *   Enforce rules that certain endpoints must not receive PII at all.
+*   Keep protected health information (PHI), such as medical record numbers and health plan member IDs, out of agent prompts and tool calls. For the PHI entity types, see [Detect protected health information (PHI)](/sensitive-info/phi).
 
 For email addresses specifically, you can also use [Arcjet email validation](/email-validation) to validate and verify addresses before creating accounts or sending email.
 
@@ -44,99 +45,7 @@ All of this logic runs locally and in-process. The SDK doesn’t send the raw re
 
 [Section titled “Detected entities”](#detected-entities)
 
-Rampart detects the following entity types:
-
-Entity type
-
-Detected by
-
-`EMAIL`
-
-Model and recognizer
-
-`PHONE_NUMBER`
-
-Model
-
-`IP_ADDRESS`
-
-Recognizer
-
-`CREDIT_CARD_NUMBER`
-
-Recognizer
-
-`URL`
-
-Model and recognizer
-
-`SSN`
-
-Recognizer
-
-`GIVEN_NAME`
-
-Model
-
-`SURNAME`
-
-Model
-
-`TAX_ID`
-
-Model
-
-`BANK_ACCOUNT`
-
-Model
-
-`ROUTING_NUMBER`
-
-Model
-
-`GOVERNMENT_ID`
-
-Model
-
-`PASSPORT`
-
-Model
-
-`DRIVERS_LICENSE`
-
-Model
-
-`BUILDING_NUMBER`
-
-Model
-
-`STREET_NAME`
-
-Model
-
-`SECONDARY_ADDRESS`
-
-Model
-
-`CITY`
-
-Model
-
-`STATE`
-
-Model
-
-`ZIP_CODE`
-
-Model
-
-Custom
-
-Your own recognizers
-
-**Model** means the on-device Rampart NER model detects the type. **Recognizer** means a deterministic, validated pattern detects it – for example, card numbers must pass the Luhn checksum. Where the model and a recognizer overlap on the same text, the recognizer wins.
-
-Phone numbers are left to the model because their digit shape overlaps with financial and government identifiers, so the default recognizers don’t include a phone number pattern.
+Rampart detects email addresses, phone numbers, IP addresses, URLs, names, street addresses, and financial and government identifiers. For every entity type and where Arcjet detects it, see [Entity types](/sensitive-info/entity-types).
 
 The Rampart model is compact (a ~14.7 MB, 4-bit quantized artifact) and fast – around 6.6 ms median inference on Node.js – so it runs inline on each request, and recalls ~98% of private terms across the seven Latin-script languages it supports. See the [reference](/sensitive-info/reference#model-accuracy-and-performance) and the [model card](https://huggingface.co/nationaldesignstudio/rampart) for the full accuracy and latency breakdown.
 

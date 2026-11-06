@@ -27,7 +27,7 @@ We recommend using Arcjet Shield WAF alongside other Arcjet features, including 
 
 Enable without code changes
 
-Shield can also be enabled as a [remote rule](/remote-rules) from the Arcjet dashboard or through the [Arcjet MCP server](/mcp-server), with no code changes or redeployment.
+Shield can also be enabled as a [remote rule](/remote-rules) from the Arcjet Console or through the [Arcjet MCP server](/mcp-server), with no code changes or redeployment.
 
 How Arcjet Shield works
 -----------------------
@@ -70,6 +70,14 @@ To ensure Shield behaves correctly, choose fingerprint characteristics that matc
 *   API key or client ID (per-client behavior for APIs).
 
 Aligning fingerprints with the right identifiers avoids blocking the wrong users and makes Shield’s decisions more meaningful.
+
+### When Shield blocks a client
+
+[Section titled “When Shield blocks a client”](#when-shield-blocks-a-client)
+
+Arcjet analyzes each request after it returns the decision, so Shield doesn’t block the request that makes a client suspicious. Shield allows that request. Once a client crosses the threshold, Arcjet blocks its later requests for a period of time.
+
+Shield blocks clients by fingerprint. Every request that shares a blocked fingerprint is blocked, so a fingerprint based only on the IP address can block every client behind a shared IP address, such as users on the same office network. Choose fingerprint characteristics that identify a single client.
 
 ### Respond to suspicious requests
 

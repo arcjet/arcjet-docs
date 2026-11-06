@@ -49,7 +49,7 @@ Configure bot rules without code changes
 
 [Section titled “Configure bot rules without code changes”](#configure-bot-rules-without-code-changes)
 
-You can also configure bot rules as [remote rules](/remote-rules) from the Arcjet dashboard or through the [MCP server](/mcp-server), applied site-wide with no code changes or redeployment. This is useful for blocking a bot category you have just spotted during an incident. Developers can keep route-specific bot policy in code, while SecOps can use remote bot rules for incident response and site-wide allow or deny changes.
+You can also configure bot rules as [remote rules](/remote-rules) from the Arcjet Console or through the [MCP server](/mcp-server), applied site-wide with no code changes or redeployment. This is useful for blocking a bot category you have just spotted during an incident. Developers can keep route-specific bot policy in code, while SecOps can use remote bot rules for incident response and site-wide allow or deny changes.
 
 In-app bot detection versus network/CDN bot protection
 ------------------------------------------------------
