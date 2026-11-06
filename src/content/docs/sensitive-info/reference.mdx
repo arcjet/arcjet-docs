@@ -127,7 +127,6 @@ import RampartBackendPythonFlask from "@/snippets/sensitive-info/reference/pytho
 import RampartBackendRemix from "@/snippets/sensitive-info/reference/remix/RampartBackend.mdx";
 import RampartBackendSvelteKit from "@/snippets/sensitive-info/reference/sveltekit/RampartBackend.mdx";
 
-import EntityTypesTable from "@/snippets/sensitive-info/EntityTypesTable.mdx";
 import RampartBackendGo from "@/snippets/sensitive-info/reference/go/RampartBackend.mdx";
 import CustomDetectGo from "@/snippets/sensitive-info/reference/go/CustomDetect.mdx";
 import DecisionLogGo from "@/snippets/sensitive-info/reference/go/DecisionLog.mdx";
@@ -615,14 +614,16 @@ This example logs the full result as well as the sensitive info rule:
 
 ## Entity types
 
-The following table lists every sensitive information entity type that Arcjet
-detects. The SDK detects the version 1 types with Rampart. List any of them in
-`allow` or `deny`. Each one is an `ArcjetSensitiveInfoType` in JS, a
-`SensitiveInfoEntityType` in Python, and an `arcjet.EntityType` in Go. The
-server-side sensitive information detector in a policy detects every type,
-including the protected health information (PHI) types.
+For every entity type that Arcjet detects, grouped by category with its
+taxonomy version and where Arcjet detects it, see
+<Link.Page href="/sensitive-info/entity-types">Sensitive information entity types</Link.Page>.
+The SDK detects the version 1 types with Rampart. List any of them in `allow` or
+`deny`. Each one is an `ArcjetSensitiveInfoType` in JS, a
+`SensitiveInfoEntityType` in Python, and an `arcjet.EntityType` in Go.
 
-<EntityTypesTable />
+Phone numbers are left to the model because their digit shape overlaps with
+financial and government identifiers, so the default recognizers don't include
+a phone number pattern.
 
 To list every type at once, use `rampartEntities` (JS), `rampart_entities`
 (Python), or `rampart.Entities()` (Go).

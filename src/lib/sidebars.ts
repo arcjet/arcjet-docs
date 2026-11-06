@@ -267,6 +267,10 @@ export const main = [
             link: "/sensitive-info/phi",
           },
           {
+            label: "Entity types",
+            link: "/sensitive-info/entity-types",
+          },
+          {
             label: "Reference",
             link: "/sensitive-info/reference",
           },
