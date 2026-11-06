@@ -5,7 +5,6 @@ description: "Detect medical record numbers, health plan numbers, vehicle identi
 
 import { Aside } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
-import PhiDetector from "@/snippets/sensitive-info/phi/PhiDetector.mdx";
 import PhiPolicy from "@/snippets/sensitive-info/phi/PhiPolicy.mdx";
 
 Protected health information (PHI) is health information that can be linked to
@@ -107,12 +106,21 @@ note to another system. It declares the following inputs:
 | `note`     | String  | `SERVER` |
 | `external` | Boolean | `SERVER` |
 
-The detector reads `note` and denies the PHI types along with Social Security
-numbers, email addresses, and phone numbers. A detector with a deny list acts
-only on the types that the list names, so list each PHI type that you want to
-block:
+In the policy editor, add a sensitive information detector with the ID `phi`
+that reads `note`. In its deny list, select the PHI types along with Social
+Security numbers, email addresses, and phone numbers:
 
-<PhiDetector />
+- `MEDICAL_RECORD_NUMBER`
+- `HEALTH_PLAN_BENEFICIARY_NUMBER`
+- `LICENSE_PLATE_NUMBER`
+- `VEHICLE_IDENTIFICATION_NUMBER`
+- `DEVICE_IDENTIFIER`
+- `SSN`
+- `EMAIL`
+- `PHONE_NUMBER`
+
+A detector with a deny list acts only on the types that the list names, so
+list each PHI type that you want to block.
 
 The policy's Rego denies a note that carries a PHI identifier anywhere, and a
 note that carries any listed identifier when it leaves your organization:
