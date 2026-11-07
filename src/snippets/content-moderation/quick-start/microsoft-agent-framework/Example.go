@@ -19,6 +19,8 @@ func postMessage(_ context.Context, in messageArgs) (map[string]bool, error) {
 }
 
 func guardedPost(guard *arcjet.GuardClient) (tool.FuncTool, error) {
+	// Arcjet denies text over 128 KiB and moderates the first 60 KB, adding an
+	// AJ1142 warning for longer text.
 	moderate := must(arcjet.GuardModerateContent(arcjet.GuardModerateContentOptions{
 		Mode: arcjet.ModeLive,
 	}))

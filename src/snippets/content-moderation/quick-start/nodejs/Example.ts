@@ -24,7 +24,10 @@ const server = http.createServer(async (req, res) => {
     rules: [moderate(message)],
   });
 
-  if (decision.conclusion === "DENY" && decision.reason === "MODERATE_CONTENT") {
+  // Deny harmful content, text over 128 KiB, and checks that Arcjet couldn't
+  // complete. Arcjet moderates the first 60 KB and adds an AJ1142 warning to
+  // decision.warnings for longer text. To moderate all of it, split it up.
+  if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
     res.writeHead(400, { "Content-Type": "application/json" });
     res.end(
       JSON.stringify({

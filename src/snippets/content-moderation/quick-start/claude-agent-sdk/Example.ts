@@ -13,6 +13,8 @@ export async function runAgent(sessionId: string, userText: string) {
         sessionId,
         inbound: {
           action: "message.received",
+          // The wrapper fails closed by default. Arcjet denies text over 128 KiB and
+          // moderates the first 60 KB, adding an AJ1142 warning for longer text.
           rules: ({ prompt }) => [moderateContent()(prompt)],
         },
       }),

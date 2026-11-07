@@ -9,6 +9,7 @@ import (
 )
 
 func inbound(guard *arcjet.GuardClient) (agent.Middleware, error) {
+	// Arcjet denies text over 128 KiB.
 	promptScan := must(arcjet.GuardPromptInjection(arcjet.GuardPromptInjectionOptions{
 		Mode: arcjet.ModeLive,
 	}))

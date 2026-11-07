@@ -35,14 +35,25 @@ func chat(w http.ResponseWriter, r *http.Request) {
 		r,
 		arcjet.WithDetectPromptInjectionMessage(body.Message),
 	)
+	// Fail closed when Arcjet can't be reached.
 	if err != nil {
 		log.Printf("arcjet: %v", err)
-	} else if decision.IsDenied() {
+		http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+		return
+	}
+	// Deny detected prompt injections, text over 128 KiB, and any other denial.
+	if decision.IsDenied() {
 		if decision.Reason.IsPromptInjection() {
 			http.Error(w, "Prompt injection detected – rephrase your message", http.StatusBadRequest)
 			return
 		}
 		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+	// Fail closed when Arcjet couldn't complete the check.
+	if decision.IsErrored() {
+		log.Printf("arcjet: %v", decision.Err())
+		http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
 		return
 	}
 

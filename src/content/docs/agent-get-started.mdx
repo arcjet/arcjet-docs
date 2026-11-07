@@ -321,7 +321,9 @@ export async function lookupOrder(userId: string, orderNumber: string) {
     ],
   });
 
-  if (decision.conclusion === "DENY") {
+  // Deny when any rule denies, and fail closed when Arcjet couldn't complete
+  // a check. Arcjet denies prompt text over 128 KiB.
+  if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
     throw new Error(`Denied: ${decision.reason}`);
   }
 
@@ -344,7 +346,9 @@ decision = await aj.guard(
     rules=[prompt_scan(order_number)],
 )
 
-if decision.conclusion == "DENY":
+# Deny when any rule denies, and fail closed when Arcjet couldn't complete
+# a check. Arcjet denies prompt text over 128 KiB.
+if decision.conclusion == "DENY" or decision.has_failed_open():
     raise RuntimeError(f"Denied: {decision.reason}")
 ```
 

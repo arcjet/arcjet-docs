@@ -10,6 +10,7 @@ export async function screenInbound(
   const verdict = await guardInbound(arcjet, message, {
     action: "message.received",
     correlationId: conversationId,
+    // The wrapper fails closed by default, and Arcjet denies text over 128 KiB.
     rules: [detectPromptInjection()(message)],
   });
 

@@ -9,6 +9,8 @@ arcjet = launch_arcjet(key=os.environ["ARCJET_KEY"])
 # guard_events runs an inbound check before each user.message reaches the
 # session, so use the async client: the sync one can't be awaited here.
 client = AsyncAnthropic()
+# Arcjet denies text over 128 KiB and moderates the first 60 KB, adding an
+# AJ1142 warning for longer text.
 moderate = ModerateContent()
 
 # guard_events wraps send. On DENY it raises and never calls the real send,
