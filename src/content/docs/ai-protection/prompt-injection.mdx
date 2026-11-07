@@ -190,6 +190,7 @@ export async function POST(req: Request) {
     sensitiveInfoValue: lastMessage,
   });
 
+  // Deny detected prompt injections, text over 128 KiB, and any other denial.
   if (decision.isDenied()) {
     if (decision.reason.isPromptInjection()) {
       console.warn("Request blocked due to prompt injection");
@@ -208,6 +209,12 @@ export async function POST(req: Request) {
     }
 
     return new Response("Forbidden", { status: 403 });
+  }
+
+  // Fail closed when Arcjet couldn't complete the check.
+  if (decision.isErrored()) {
+    console.warn("Arcjet error", decision.reason.message);
+    return new Response("Service unavailable", { status: 503 });
   }
 
   // Arcjet approved – call your AI provider
@@ -289,6 +296,7 @@ async def chat(request: Request, body: ChatRequest):
         sensitive_info_value=body.message,
     )
 
+    # Deny detected prompt injections, text over 128 KiB, and any other denial.
     if decision.is_denied():
         if decision.reason_v2.type == "PROMPT_INJECTION":
             logger.warning("Request blocked due to prompt injection")
@@ -303,6 +311,11 @@ async def chat(request: Request, body: ChatRequest):
                 status_code=400,
             )
         return JSONResponse({"error": "Forbidden"}, status_code=403)
+
+    # Fail closed when Arcjet couldn't complete the check.
+    if decision.is_error():
+        logger.warning("Arcjet error")
+        return JSONResponse({"error": "Service unavailable"}, status_code=503)
 
     # Arcjet approved – call your AI provider
     reply = await chain.ainvoke({"message": body.message})
@@ -450,7 +463,9 @@ export async function fetchTool({ url }: { url: string }, userId: string) {
     rules: [piRule(content)],
   });
 
-  if (decision.conclusion === "DENY") {
+  // Deny detected prompt injections, text over 128 KiB, and checks that
+  // Arcjet couldn't complete.
+  if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
     // Return a safe placeholder rather than the injected content
     return { content: "[Content blocked: prompt injection detected]" };
   }
@@ -483,7 +498,9 @@ async def fetch_tool(url: str, user_id: str) -> dict:
         rules=[pi_rule(content)],
     )
 
-    if decision.conclusion == "DENY":
+    # Deny detected prompt injections, text over 128 KiB, and checks that
+    # Arcjet couldn't complete.
+    if decision.conclusion == "DENY" or decision.has_failed_open():
         # Return a safe placeholder rather than the injected content
         return {"content": "[Content blocked: prompt injection detected]"}
 

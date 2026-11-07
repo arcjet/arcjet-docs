@@ -1,6 +1,6 @@
 ---
 title: "Arcjet limitations"
-description: "Things to be aware of and limitations with Arcjet."
+description: "How Arcjet handles input limits, the limits on detection and agent guard policy inputs, and other limitations to design around."
 ---
 
 import { Link } from "@/components/link";
@@ -40,6 +40,49 @@ the Arcjet platform after a request has been reported to our API. For
 to our API, so it cannot be used for analysis.
 
 Local request body analysis is on the Arcjet roadmap for Shield.
+
+## How Arcjet handles limits
+
+Each detection feature accepts text up to a hard limit. Arcjet denies text over
+the limit instead of passing it unchecked, so padding a request past the limit
+can't skip detection. A rule in dry run mode doesn't block, but still reports
+the code.
+
+When Arcjet can't complete a check, for example because of a timeout, the rule
+fails open and the decision reports the error, so a service issue doesn't block
+your application. To fail closed instead, check `decision.hasFailedOpen()` with
+`guard()` or `decision.isErrored()` with `protect()`, and deny the request
+yourself. A live rule in an <Link.Page href="/guards/remote-policies">agent guard policy</Link.Page> fails closed when it can't be evaluated.
+
+## Detection input limits
+
+The following table lists the hard limit for each detection feature:
+
+| Feature                    | Limit                       | When you exceed it                                                                |
+| -------------------------- | --------------------------- | --------------------------------------------------------------------------------- |
+| Prompt injection detection | 128&nbsp;KiB of text per call | A live rule denies the request. With `guard()`, the rule result carries `AJ1131`. |
+| Content moderation         | 128&nbsp;KiB of text per call | A live rule denies the call, and the rule result carries `AJ1141`.                |
+
+Content moderation evaluates the first 60&nbsp;KB of the text. For longer
+text, Arcjet adds the warning `AJ1142` to `decision.warnings`
+(`decision.Warnings` in Go), and the rest of the text isn't moderated. Text
+larger than 128&nbsp;KiB returns an error in dry run mode and a denial in live
+mode. To moderate all of the text, split it into parts and moderate each one.
+
+## Agent guard policy input limits
+
+The inputs that a guard call sends to an agent guard policy have the following
+limits. Going over any of them invalidates the call's inputs, so every live
+rule in the policy fails closed with `AJP1003`.
+
+| Limit                    | Value                                |
+| ------------------------ | ------------------------------------ |
+| Inputs per call          | 64                                   |
+| Server string input      | 128&nbsp;KiB                         |
+| Server string list input | 256 items, and 128&nbsp;KiB in total |
+
+Threat detection scores at most 30 distinct public hosts per call. A call that
+names more fails a live rule closed with `AJP1009`.
 
 ## Limits on agent activity
 

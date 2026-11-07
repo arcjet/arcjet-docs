@@ -61,6 +61,7 @@ async def chat(request: Request, body: ChatRequest):
         request, detect_prompt_injection_message=body.message
     )
 
+    # Deny detected prompt injections, text over 128 KiB, and any other denial.
     if decision.is_denied():
         if decision.reason_v2.type == "PROMPT_INJECTION":
             logger.warning("Request blocked due to prompt injection")
@@ -70,6 +71,11 @@ async def chat(request: Request, body: ChatRequest):
             )
         # SHIELD or any other denial
         return JSONResponse({"error": "Forbidden"}, status_code=403)
+
+    # Fail closed when Arcjet couldn't complete the check.
+    if decision.is_error():
+        logger.warning("Arcjet error")
+        return JSONResponse({"error": "Service unavailable"}, status_code=503)
 
     # Arcjet approved – call the AI model
     reply = await chain.ainvoke({"message": body.message})

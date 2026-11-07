@@ -36,7 +36,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("arcjet: %v", err)
 	}
 
-	if decision.IsDenied() && decision.Reason == arcjet.ReasonModerateContent {
+	// Deny harmful content, text over 128 KiB, and checks that Arcjet couldn't
+	// complete. Arcjet moderates the first 60 KB and adds an AJ1142 warning to
+	// decision.Warnings for longer text. To moderate all of it, split it up.
+	if decision.IsDenied() || decision.HasFailedOpen() {
 		http.Error(w, "Harmful content detected – rephrase your message", http.StatusBadRequest)
 		return
 	}

@@ -113,6 +113,10 @@ the rule returns an error result instead of a verdict. An error result doesn't
 deny, so the request is allowed. This keeps a service issue from blocking your
 AI features.
 
+Prompt injection detection accepts up to 128&nbsp;KiB of text. Larger text
+returns an error in dry run mode and a denial in live mode. To check longer
+text, split it into parts and check each one.
+
 To detect an error result, check the decision:
 
 - With `protect()`, use `decision.isErrored()` in JavaScript,
@@ -120,13 +124,11 @@ To detect an error result, check the decision:
 - With `guard()`, use `decision.hasFailedOpen()` in JavaScript,
   `decision.has_failed_open()` in Python, or `decision.HasFailedOpen()` in Go.
 
-Log the error, and deny the request yourself if your application can't accept
-an unchecked prompt. In an
+Log the error and deny the request, unless your application can accept an
+unchecked prompt. The quick start examples fail closed this way. In an
 <Link.Page href="/guards/remote-policies">agent guard policy</Link.Page>, a live
 rule that reads a prompt injection detector fails closed when the detector
-doesn't return a verdict. For
-the error codes that a guard call reports, see
-<Link.Page href="/guards/errors#prompt-injection-and-content-moderation-rule-codes">Prompt injection and content moderation rule codes</Link.Page>.
+doesn't return a verdict.
 
 ## Data handling
 

@@ -109,15 +109,16 @@ on a rule that was never evaluated.
 ## Prompt injection and content moderation rule codes
 
 The prompt injection and content moderation rules on a guard call report an
-error result with one of the following codes. An errored rule fails open, so
-it doesn't deny the call.
+error result with one of the following codes. Check the error result to decide
+how to handle it.
 
 | Code     | Meaning                                                                                    |
 | -------- | ------------------------------------------------------------------------------------------ |
 | `AJ1130` | The prompt injection rule has no text to scan. Pass the text to check.                    |
-| `AJ1131` | The prompt injection text is larger than 128&nbsp;KiB.                                     |
+| `AJ1131` | The prompt injection text is larger than 128&nbsp;KiB. A live rule denies the call.        |
 | `AJ1140` | The content moderation rule has no text to scan. Pass the text to check.                  |
-| `AJ1141` | The content moderation text is larger than 128&nbsp;KiB.                                   |
+| `AJ1141` | The content moderation text is larger than 128&nbsp;KiB. A live rule denies the call.      |
+| `AJ1142` | Content moderation checked only the leading part of the text. The rest of the text wasn't moderated. |
 | `AJ1995` | Content moderation had a temporary issue. Retry, or contact Arcjet support if it persists. |
 | `AJ1996` | Prompt injection detection had a temporary issue. Retry, or contact Arcjet support if it persists. |
 

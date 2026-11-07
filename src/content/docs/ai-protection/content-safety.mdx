@@ -71,7 +71,10 @@ export async function chat(userId: string, message: string) {
     rules: [moderate(message)],
   });
 
-  if (inputDecision.conclusion === "DENY") {
+  // Deny harmful content, text over 128 KiB, and checks that Arcjet couldn't
+  // complete. Arcjet moderates the first 60 KB and adds an AJ1142 warning to
+  // decision.warnings for longer text. To moderate all of it, split it up.
+  if (inputDecision.conclusion === "DENY" || inputDecision.hasFailedOpen()) {
     return "This message can't be processed. Rephrase it and try again.";
   }
 
@@ -85,7 +88,7 @@ export async function chat(userId: string, message: string) {
     rules: [moderate(reply)],
   });
 
-  if (outputDecision.conclusion === "DENY") {
+  if (outputDecision.conclusion === "DENY" || outputDecision.hasFailedOpen()) {
     return "This response can't be shown. Try a different request.";
   }
 
@@ -113,7 +116,10 @@ async def chat(user_id: str, message: str) -> str:
         rules=[moderate(message)],
     )
 
-    if input_decision.conclusion == "DENY":
+    # Deny harmful content, text over 128 KiB, and checks that Arcjet couldn't
+    # complete. Arcjet moderates the first 60 KB and adds an AJ1142 warning to
+    # decision.warnings for longer text. To moderate all of it, split it up.
+    if input_decision.conclusion == "DENY" or input_decision.has_failed_open():
         return "This message can't be processed. Rephrase it and try again."
 
     # Replace with your model call
@@ -126,7 +132,7 @@ async def chat(user_id: str, message: str) -> str:
         rules=[moderate(reply)],
     )
 
-    if output_decision.conclusion == "DENY":
+    if output_decision.conclusion == "DENY" or output_decision.has_failed_open():
         return "This response can't be shown. Try a different request."
 
     return reply
@@ -165,8 +171,10 @@ export async function checkMessage(userId: string, message: string) {
     rules: [moderate(message), detectInjection(message)],
   });
 
-  // Returns true when the message can go to the model
-  return decision.conclusion !== "DENY";
+  // Returns true only when both checks ran and allowed the message, so a
+  // check that Arcjet couldn't complete fails closed. Arcjet denies text over
+  // 128 KiB.
+  return decision.conclusion !== "DENY" && !decision.hasFailedOpen();
 }
 ```
 
@@ -190,8 +198,10 @@ async def check_message(user_id: str, message: str) -> bool:
         rules=[moderate(message), detect_injection(message)],
     )
 
-    # Returns True when the message can go to the model
-    return decision.conclusion != "DENY"
+    # Returns True only when both checks ran and allowed the message, so a
+    # check that Arcjet couldn't complete fails closed. Arcjet denies text over
+    # 128 KiB.
+    return decision.conclusion != "DENY" and not decision.has_failed_open()
 ```
 
 </TabItem>

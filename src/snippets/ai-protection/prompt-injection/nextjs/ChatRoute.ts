@@ -29,6 +29,7 @@ export async function POST(req: Request) {
     detectPromptInjectionMessage: lastMessage,
   });
 
+  // Deny detected prompt injections, text over 128 KiB, and any other denial.
   if (decision.isDenied()) {
     if (decision.reason.isPromptInjection()) {
       console.warn("Request blocked due to prompt injection");
@@ -37,6 +38,12 @@ export async function POST(req: Request) {
       });
     }
     return new Response("Forbidden", { status: 403 });
+  }
+
+  // Fail closed when Arcjet couldn't complete the check.
+  if (decision.isErrored()) {
+    console.warn("Arcjet error", decision.reason.message);
+    return new Response("Service unavailable", { status: 503 });
   }
 
   // Arcjet approved – call your AI provider

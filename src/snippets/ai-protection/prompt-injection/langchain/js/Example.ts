@@ -11,6 +11,8 @@ export async function screenPrompt(conversationId: string, userText: string) {
     ...langchainContext({ configurable: { thread_id: conversationId } }),
   });
 
+  // Deny detected prompt injections, text over 128 KiB, and checks that
+  // Arcjet couldn't complete.
   if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
     throw new Error("Prompt injection detected – rephrase your message");
   }

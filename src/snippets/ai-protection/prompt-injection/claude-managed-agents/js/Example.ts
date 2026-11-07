@@ -26,6 +26,7 @@ export async function sendTurn(
       ],
       inbound: {
         action: "message.received",
+        // The wrapper fails closed by default, and Arcjet denies text over 128 KiB.
         rules: ({ text }) => [detectPromptInjection()(text)],
       },
       context: claudeManagedAgentsContext({ correlationId: conversationId }),

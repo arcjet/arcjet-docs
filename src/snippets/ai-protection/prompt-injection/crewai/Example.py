@@ -12,6 +12,8 @@ def screen_prompt(user_text: str) -> None:
         label="message.received",
         rules=[inbound(user_text)],
     )
+    # Deny detected prompt injections, text over 128 KiB, and checks that
+    # Arcjet couldn't complete.
     if decision.conclusion == "DENY" or decision.has_failed_open():
         raise RuntimeError(
             "Prompt injection detected – rephrase your message"

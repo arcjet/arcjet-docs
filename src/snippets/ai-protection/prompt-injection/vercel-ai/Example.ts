@@ -11,6 +11,8 @@ export async function runAgent(userId: string, prompt: string) {
     rules: [inbound(prompt)],
   });
 
+  // Deny detected prompt injections, text over 128 KiB, and checks that
+  // Arcjet couldn't complete.
   if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
     throw new Error("Prompt injection detected – rephrase your message");
   }

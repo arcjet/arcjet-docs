@@ -6,6 +6,7 @@ const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
 
 const inbound = guardProcessor(arcjet, {
   action: "message.received",
+  // The wrapper fails closed by default, and Arcjet denies text over 128 KiB.
   rules: ({ text }) => [detectPromptInjection()(text)],
 });
 
