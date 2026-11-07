@@ -55,6 +55,11 @@ occasions you may want to update all screenshots, which you can do with:
 npm run pw:run -- --update-snapshots=all
 ```
 
+CI runs Playwright on arm64 in the devcontainer image, so screenshots only match
+CI when you generate them in the devcontainer on an arm64 machine, such as Apple
+silicon. Otherwise, run the `playwright-update.yml` workflow against your branch
+to regenerate them in CI.
+
 ## Adding content
 
 ### Add a framework

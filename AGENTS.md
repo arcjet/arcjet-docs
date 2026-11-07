@@ -31,7 +31,7 @@ Every page renders a git-derived "Last updated" date. The `<time>` element
 carries `data-playwright-mask` and `tests/screenshot.test.ts` masks that
 selector, but Playwright sizes the mask to the element's bounding box, so the
 rendered width of the date still reaches the image. A modified-but-uncommitted
-page shows its *previous* commit's date; committing changes it to today. When
+page shows its _previous_ commit's date; committing changes it to today. When
 that changes the width — a single-digit day becoming double-digit is enough —
 the snapshot differs.
 
@@ -45,9 +45,13 @@ most of the time and then is not.
 
 **A change to `src/lib/sidebars.ts` shifts every page.** Adding one top-level
 entry failed all 196 screenshots. Regenerate the whole set rather than the ones
-you expect to move, and prefer the `playwright-update.yml` workflow dispatched
-against your branch: it runs `--update-snapshots=all` on an amd64 runner, which
-is the architecture CI compares against. Note that its push does not retrigger
+you expect to move.
+
+CI runs Playwright on an arm64 runner inside the devcontainer image, so
+snapshots regenerated locally in the devcontainer on an arm64 machine (such as
+Apple silicon) match CI. On any other setup, dispatch the
+`playwright-update.yml` workflow against your branch instead: it runs
+`--update-snapshots=all` in that same environment. Its push does not retrigger
 the test workflow, so push again or re-run the checks to verify the result.
 
 ## Dependency updates

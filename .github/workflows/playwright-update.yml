@@ -44,7 +44,10 @@ jobs:
 
   update:
     needs: guard
-    runs-on: ubuntu-latest
+    # Must match the runner and image in ./playwright.yml, or the snapshots
+    # this job writes fail there. See the comment on its `build` job.
+    runs-on: ubuntu-24.04-arm
+    container: mcr.microsoft.com/devcontainers/javascript-node:24
     timeout-minutes: 20
     steps:
       - name: Harden Runner
