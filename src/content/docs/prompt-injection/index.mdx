@@ -113,10 +113,10 @@ the rule returns an error result instead of a verdict. An error result doesn't
 deny, so the request is allowed. This keeps a service issue from blocking your
 AI features.
 
-Text larger than 128&nbsp;KiB is different. Arcjet can't check it, so a live
-rule denies the request instead of returning an error result, with both
-`protect()` and `guard()`. A rule in dry run mode doesn't block. To check
-longer text, split it and check each part.
+Prompt injection detection evaluates the first 128 KiB of the text. Larger paylods
+will generate a warning to `decision.warnings` (`decision.Warnings` in Go).
+Text larger than 128 KiB will error in dry run mode and return a denial in live
+mode. To check all of the text, split it into parts and moderate each one.
 
 To detect an error result, check the decision:
 

@@ -109,10 +109,8 @@ on a rule that was never evaluated.
 ## Prompt injection and content moderation rule codes
 
 The prompt injection and content moderation rules on a guard call report an
-error result with one of the following codes. An errored rule fails open, so
-it doesn't deny the call. Text over 128&nbsp;KiB is the exception. Arcjet
-can't check it, so a live rule denies the call, and the result still carries
-the code. A rule in dry run mode doesn't deny.
+error result with one of the following codes. Check the error result to decide
+how to handle it.
 
 | Code     | Meaning                                                                                    |
 | -------- | ------------------------------------------------------------------------------------------ |
@@ -120,23 +118,9 @@ the code. A rule in dry run mode doesn't deny.
 | `AJ1131` | The prompt injection text is larger than 128&nbsp;KiB. A live rule denies the call.        |
 | `AJ1140` | The content moderation rule has no text to scan. Pass the text to check.                  |
 | `AJ1141` | The content moderation text is larger than 128&nbsp;KiB. A live rule denies the call.      |
+| `AJ1142` | Content moderation checked only the leading part of the text. The rest of the text wasn't moderated. |
 | `AJ1995` | Content moderation had a temporary issue. Retry, or contact Arcjet support if it persists. |
 | `AJ1996` | Prompt injection detection had a temporary issue. Retry, or contact Arcjet support if it persists. |
-
-### Long content moderation text is a warning
-
-When content moderation text is under 128&nbsp;KiB but longer than Arcjet
-moderates in one pass, Arcjet moderates the leading part of the text and adds a
-warning to the decision. The decision stands. Arcjet denies the call if the
-part it moderated is harmful, and allows it otherwise.
-
-| Code     | Meaning                                                                                                   |
-| -------- | --------------------------------------------------------------------------------------------------------- |
-| `AJ1142` | Content moderation checked only the leading part of the text. The rest of the text wasn't moderated. |
-
-To moderate all of the text, split it into parts and moderate each one. The
-warning message gives the size of each part. Read the warning from
-`decision.warnings` (`decision.Warnings` in Go).
 
 ## Compile codes
 

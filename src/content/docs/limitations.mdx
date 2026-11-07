@@ -45,7 +45,7 @@ Local request body analysis is on the Arcjet roadmap for Shield.
 
 Each detection feature accepts text up to a hard limit. Arcjet denies text over
 the limit instead of passing it unchecked, so padding a request past the limit
-can't skip detection. A rule in dry run mode doesn't block, and still reports
+can't skip detection. A rule in dry run mode doesn't block, but still reports
 the code.
 
 When Arcjet can't complete a check, for example because of a timeout, the rule
@@ -63,12 +63,10 @@ The following table lists the hard limit for each detection feature:
 | Prompt injection detection | 128&nbsp;KiB of text per call | A live rule denies the request. With `guard()`, the rule result carries `AJ1131`. |
 | Content moderation         | 128&nbsp;KiB of text per call | A live rule denies the call, and the rule result carries `AJ1141`.                |
 
-Content moderation also has a soft limit, below the hard limit. When the text
-is longer than Arcjet moderates in one pass, Arcjet moderates the leading part
-and adds the warning `AJ1142` to `decision.warnings` (`decision.Warnings` in
-Go). The decision stands, and the rest of the text isn't moderated. To
-moderate all of it, split the text into parts and moderate each one. The
-warning message gives the size of each part.
+Content moderation evaluates the first 60 KiB of the text. Larger paylods
+will generate a warning to `decision.warnings` (`decision.Warnings` in Go).
+Text larger than 128 KiB will error in dry run mode and return a denial in live
+mode. To moderate all of the text, split it into parts and moderate each one.
 
 For the codes, see <Link.Page href="/guards/errors#prompt-injection-and-content-moderation-rule-codes">Prompt injection and content moderation rule codes</Link.Page>.
 
