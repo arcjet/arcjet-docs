@@ -32,6 +32,11 @@ export default {
       });
     }
 
+    // Fail closed when Arcjet couldn't complete the check.
+    if (decision.isErrored()) {
+      return new Response("Service unavailable", { status: 503 });
+    }
+
     return new Response("Hello world");
   }),
 };

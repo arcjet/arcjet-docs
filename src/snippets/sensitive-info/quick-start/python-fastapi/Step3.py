@@ -42,4 +42,8 @@ async def index(request: Request, body: Message):
             status_code=400,
         )
 
+    # Fail closed when Arcjet couldn't complete the check.
+    if decision.is_error():
+        return JSONResponse({"error": "Service unavailable"}, status_code=503)
+
     return {"message": "Hello world"}

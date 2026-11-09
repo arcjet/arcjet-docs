@@ -34,4 +34,8 @@ def index():
     if decision.is_denied():
         return jsonify(error="Bad request - sensitive information detected"), 400
 
+    # Fail closed when Arcjet couldn't complete the check.
+    if decision.is_error():
+        return jsonify(error="Service unavailable"), 503
+
     return jsonify(message="Hello world")

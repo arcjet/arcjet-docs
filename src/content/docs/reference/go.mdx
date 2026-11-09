@@ -303,8 +303,8 @@ aj, err := arcjet.NewClient(arcjet.Config{
 
 `rampart.Entities()` returns every type the backend can detect. Only the model
 detects phone numbers, because their digit shape overlaps with financial and
-government identifiers. The default `MaxInputChars` is `4096`;
-longer input is truncated.
+government identifiers. The default `MaxInputChars` is `4096`. Text past that
+limit isn't scanned, so deny or split longer input before you call `Protect`.
 
 To detect your own entity types, add a recognizer to `Options.Recognizers`. A
 recognizer receives the text and returns the spans it matched, with byte

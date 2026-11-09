@@ -69,6 +69,13 @@ text, Arcjet adds the warning `AJ1142` to `decision.warnings`
 larger than 128&nbsp;KiB returns an error in dry run mode and a denial in live
 mode. To moderate all of the text, split it into parts and moderate each one.
 
+## Rules per guard call
+
+A `guard()` call evaluates at most 50 rules. Arcjet doesn't run the rules after
+the 50th, reports them as not run, and adds `AJ1003` to `decision.warnings`
+(`decision.Warnings` in Go). Rules that don't run can't deny, so keep each call
+to 50 rules or fewer, and split a larger set across calls.
+
 ## Agent guard policy input limits
 
 The inputs that a guard call sends to an agent guard policy have the following

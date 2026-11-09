@@ -55,6 +55,8 @@ ajToc:
         anchor: "model-accuracy-and-performance"
       - text: "Rampart options"
         anchor: "rampart-options"
+      - text: "Long input"
+        anchor: "long-input"
       - text: "Bundlers and runtimes"
         anchor: "bundlers-and-runtimes"
   - text: "Decision"
@@ -366,7 +368,8 @@ Runtime](https://onnxruntime.ai/) and defaults to CPU execution; select a
 different accelerator with the `providers` option (described later on this
 page). The Go backend is a nested module that embeds the same ~15&nbsp;MB
 weights and runs inference in pure Go (no cgo). Create it once with
-`rampart.New` and reuse it. The default `MaxInputChars` is `4096`.
+`rampart.New` and reuse it. It scans at most `MaxInputChars` characters, 4,096
+by default.
 
 On the model author's held-out benchmark it recalls **~98%** of private terms
 across the seven Latin-script languages it supports (English, Spanish, French,
@@ -439,8 +442,8 @@ rampart(
         # Runtime install.
         providers=("CPUExecutionProvider",),
         # Maximum number of characters scanned per request (default: 100,000).
-        # Inference runs synchronously on the request path, so input longer than
-        # this is truncated before detection to bound worst-case CPU cost.
+        # Inference runs synchronously on the request path, so text past this
+        # limit isn't scanned. Check the length before you call protect().
         max_input_chars=100_000,
         # Deterministic recognizers to run alongside the model (default:
         # `default_recognizers`). This is the extension point for custom
@@ -466,8 +469,9 @@ no `device` or ONNX provider option:
 backend, err := rampart.New(rampart.Options{
 	// Minimum confidence score for a model token to count (default: 0.5).
 	Threshold: 0.6,
-	// Character ceiling scanned per call (default: 4096). Longer input is
-	// truncated. Raise this only if you can afford the extra latency.
+	// Character ceiling scanned per call (default: 4096). Text past this
+	// limit isn't scanned. Check the length before you call Protect, and
+	// raise this only if you can afford the extra latency.
 	MaxInputChars: 4096,
 	// Deterministic recognizers run alongside the model (default:
 	// rampart.DefaultRecognizers). Pass an empty non-nil slice to rely on the
@@ -479,6 +483,14 @@ backend, err := rampart.New(rampart.Options{
 
 </TabItem>
 </Tabs>
+
+### Long input
+
+In Python and Go, Rampart scans at most a set number of characters:
+`max_input_chars` (100,000 by default) in Python, and `MaxInputChars` (4,096 by
+default) in Go. Text past that limit isn't scanned, and the decision doesn't
+say so. Check the length before you call `protect()` and deny longer input, or
+split it and scan each part. The Rampart examples on this page deny it.
 
 In JavaScript and Python, the model loads once on first use and is reused for
 every subsequent request. In Go, `rampart.New` loads and dequantizes the
@@ -707,6 +719,10 @@ rule's error result for more information.
 
 If all other rules that were run returned an `ALLOW` result, then the final
 Arcjet conclusion is `ERROR`.
+
+Sensitive information detection protects data, so deny the request when the
+decision is errored, unless your application can accept unscreened data. The
+quick start examples fail closed this way.
 
 <SlotByFramework>
   <ErrorsBun slot="bun" />

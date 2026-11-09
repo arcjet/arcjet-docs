@@ -42,14 +42,25 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		r,
 		arcjet.WithSensitiveInfoValue(string(message)),
 	)
+	// Fail closed when Arcjet can't be reached.
 	if err != nil {
 		log.Printf("arcjet: %v", err)
+		http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+		return
 	}
 
 	if decision.IsDenied() {
 		http.Error(w, "Bad request - sensitive information detected", http.StatusBadRequest)
 		return
 	}
+
+	// Fail closed when Arcjet couldn't complete the check.
+	if decision.IsErrored() {
+		log.Printf("arcjet: %v", decision.Err())
+		http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+		return
+	}
+
 	_ = json.NewEncoder(w).Encode(map[string]string{"message": "Hello world"})
 }
 

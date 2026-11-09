@@ -31,6 +31,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid email", http.StatusBadRequest)
 		return
 	}
+	// Block other denials too, such as one from a remote rule.
+	if decision.IsDenied() {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
 	w.WriteHeader(http.StatusNoContent)
 }
 
