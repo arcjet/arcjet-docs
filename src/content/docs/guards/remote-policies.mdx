@@ -116,8 +116,9 @@ inputs={
 </TabItem>
 </Tabs>
 
-A call is bounded at 64 inputs, 128 KiB per string, and 256 items and 128 KiB
-in total per list.
+A call is bounded at 64 inputs, about 100 KB per string, and 256 items and
+about 100 KB in total per list. Quotes, backslashes, and line breaks each count
+as more than one byte toward these limits.
 
 Mark an input required when a rule depends on it. An expression over an input
 the application didn't send is undefined, and a rule with an undefined

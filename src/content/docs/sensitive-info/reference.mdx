@@ -492,6 +492,13 @@ default) in Go. Text past that limit isn't scanned, and the decision doesn't
 say so. Check the length before you call `protect()` and deny longer input, or
 split it and scan each part. The Rampart examples on this page deny it.
 
+To screen longer text without splitting it, send it as a server input to the
+server-side sensitive information detector in an
+<Link.Page href="/guards/remote-policies#detectors">agent guard policy</Link.Page>. It screens values up to about
+100&nbsp;KB. A value over 2&nbsp;KB takes longer to screen, and one that Arcjet
+can't screen in time is allowed unscreened, so check `hasFailedOpen()` and
+raise the client timeout above the 2-second default.
+
 In JavaScript and Python, the model loads once on first use and is reused for
 every subsequent request. In Go, `rampart.New` loads and dequantizes the
 weights – create the backend once at startup and reuse it. It is safe for

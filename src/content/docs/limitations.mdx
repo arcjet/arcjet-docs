@@ -82,11 +82,14 @@ The inputs that a guard call sends to an agent guard policy have the following
 limits. Going over any of them invalidates the call's inputs, so every live
 rule in the policy fails closed with `AJP1003`.
 
-| Limit                    | Value                                |
-| ------------------------ | ------------------------------------ |
-| Inputs per call          | 64                                   |
-| Server string input      | 128&nbsp;KiB                         |
-| Server string list input | 256 items, and 128&nbsp;KiB in total |
+| Limit                    | Value                                     |
+| ------------------------ | ----------------------------------------- |
+| Inputs per call          | 64                                        |
+| Server string input      | About 100&nbsp;KB                         |
+| Server string list input | 256 items, and about 100&nbsp;KB in total |
+
+Quotes, backslashes, and line breaks each count as more than one byte toward
+these limits, so text with many of them reaches the limit sooner.
 
 Threat detection scores at most 30 distinct public hosts per call. A call that
 names more fails a live rule closed with `AJP1009`.
