@@ -28,5 +28,10 @@ export default async function handler(req, res) {
     });
   }
 
+  // Block other denials too, such as one from a remote rule.
+  if (decision.isDenied()) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+
   res.status(200).json({ name: "Hello world" });
 }

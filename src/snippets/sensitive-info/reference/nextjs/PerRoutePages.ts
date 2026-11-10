@@ -30,5 +30,15 @@ export default async function handler(
     // .json({ error: "You are suspicious!", reason: decision.reason });
   }
 
+  // Block other denials too, such as one from a remote rule.
+  if (decision.isDenied()) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+
+  // Fail closed when Arcjet couldn't complete the check.
+  if (decision.isErrored()) {
+    return res.status(503).json({ error: "Service unavailable" });
+  }
+
   res.status(200).json({ name: "Hello world" });
 }

@@ -22,6 +22,11 @@ export default async function handler(
     return res.status(403).json({ error: "You are a bot!" });
   }
 
+  // Block other denials too, such as one from a remote rule.
+  if (decision.isDenied()) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+
   // Paid Arcjet accounts include additional verification checks using IP data.
   // Verification isn't always possible, so we recommend checking the results
   // separately.

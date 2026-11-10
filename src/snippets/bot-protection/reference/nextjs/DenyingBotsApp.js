@@ -31,6 +31,11 @@ export async function POST(req) {
     );
   }
 
+  // Block other denials too, such as one from a remote rule.
+  if (decision.isDenied()) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   return NextResponse.json({
     message: "Hello world",
   });

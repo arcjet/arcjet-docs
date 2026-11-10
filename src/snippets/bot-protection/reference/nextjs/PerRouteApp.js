@@ -24,6 +24,11 @@ export async function GET(req) {
     );
   }
 
+  // Block other denials too, such as one from a remote rule.
+  if (decision.isDenied()) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   // Paid Arcjet accounts include additional verification checks using IP data.
   // Verification isn't always possible, so we recommend checking the results
   // separately.

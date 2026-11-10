@@ -16,36 +16,38 @@ The Go SDK requires Go 1.25 or later.
 ## Client IP address detection
 
 :::caution[Configure every trusted ingress]
-Outside supported hosting platforms, Arcjet first uses a public address from
-`Request.RemoteAddr`. When the direct peer matches `Config.Proxies`, Arcjet
-walks `X-Forwarded-For` from right to left and skips configured proxy hops. If
-`RemoteAddr` is missing or non-public, Arcjet may use a public address from a
-common forwarding header so protection can still run. That fallback has
-`Provenance == "unverified-header"` and `Verified == false`. The selection is
-logged at debug level with the `client_ip_provenance` facet, and the fallback
-produces one warning for the lifetime of each Arcjet client instance.
+Rate limits, bot detection, and other rules depend on the client IP address,
+so Arcjet needs to identify it correctly. Outside supported hosting platforms,
+Arcjet first uses a public address from `Request.RemoteAddr`. When the direct
+peer matches `Config.Proxies`, Arcjet reads `X-Forwarded-For` from right to
+left and skips the proxy hops that you configured. If `RemoteAddr` is missing
+or isn't public, Arcjet falls back to a public address from a common forwarding
+header so protection still runs. That fallback reports
+`Provenance == "unverified-header"` and `Verified == false`. Arcjet logs the
+selection at debug level with the `client_ip_provenance` facet, and logs one
+warning about the fallback per Arcjet client instance.
 
-In production, make the application reachable only through the configured
-proxies and ensure they overwrite or safely append `X-Forwarded-For`. Configure
-the actual direct proxy and every trusted hop in `Config.Proxies`. On a supported
-hosting platform, use `Config.Platform` when automatic platform detection is
-unavailable. If your application determines the client IP itself, pass a
-validated value with `WithIPSrc`. Malformed proxy entries and manual IPs are
-rejected; `0.0.0.0/0` and `::/0` produce a warning because they trust an entire
-address family. The exact addresses `0.0.0.0` and `::` do not. Use
-`client.ClientIPDetails(request)` to inspect the selected address and its
-provenance without protecting the request.
+In production, make the application reachable only through your proxies, and
+make sure that they overwrite or safely append `X-Forwarded-For`. List the
+direct proxy and every trusted hop in `Config.Proxies`. On a supported hosting
+platform, set `Config.Platform` when Arcjet can't detect the platform
+automatically. If your application determines the client IP itself, pass the
+validated value with `WithIPSrc`. Arcjet rejects malformed proxy entries and
+manual IPs. It warns about `0.0.0.0/0` and `::/0`, because they trust an entire
+address family, but not about the exact addresses `0.0.0.0` and `::`. To inspect
+the selected address and its provenance without protecting the request, call
+`client.ClientIPDetails(request)`.
 :::
 
 ## Install
 
-Use Go tooling so the project records a compatible version in `go.mod`:
+Add the SDK with `go get`, which records a compatible version in `go.mod`:
 
 ```bash
 go get github.com/arcjet/arcjet-go@latest
 ```
 
-Set `ARCJET_KEY` in the environment. Retrieve it from the
+Then set `ARCJET_KEY` in your environment. You can get a key from the
 [Arcjet Console](https://console.arcjet.com), the
 <Link.Page href="/cli">Arcjet CLI</Link.Page>, or the
 <Link.Page href="/mcp-server">MCP server</Link.Page>.
@@ -53,14 +55,13 @@ Set `ARCJET_KEY` in the environment. Retrieve it from the
 ## Environment variables
 
 `NewClient` and `NewGuardClient` read `ARCJET_KEY` when `Key` is empty. An
-explicit `Key` wins, so passing `Key: os.Getenv("ARCJET_KEY")` is still
-correct.
+explicit `Key` takes precedence, so `Key: os.Getenv("ARCJET_KEY")` also works.
 
-This differs from the JS and Python SDKs. The JS Guard SDK does not read
-environment variables. Python Guard and Python Protect require an explicit
-key.
+The other SDKs handle the key differently. The JavaScript Guard SDK doesn't
+read environment variables, and the Python SDK requires an explicit key for
+both Guard and Protect.
 
-The Go SDK does not read
+The Go SDK doesn't read
 <Link.Page href="/environment#arcjet-env">`ARCJET_ENV`</Link.Page>
 and has no development-mode switch. Set `Config.Platform` on the HTTP
 client to select a hosting platform. To override the detected client IP on
@@ -78,7 +79,7 @@ For more information, see
 | `arcjet.GuardAction` | The same operations, when you want the helper to run the function only if policy allows it |
 | `github.com/arcjet/arcjet-go/agentframework` | Microsoft Agent Framework tools and agent runs |
 
-Create either client once at package scope and reuse it. Do not create a new
+Create each client once at package scope and reuse it, rather than creating a
 client for every request or operation.
 
 ## Protect HTTP handlers
@@ -148,18 +149,17 @@ func must[T any](value T, err error) T {
 }
 ```
 
-Use `client.WithRule(...)` to derive a client with an additional route-specific
-rule.
+To add a rule for one route, derive a client with `client.WithRule(...)`.
 
-When you configure multiple Protect rules, declaration order does not control
-evaluation. `NewClient` and `WithRule` sort once: `SensitiveInfo`, `Filter`,
+Arcjet evaluates Protect rules in a fixed order, not the order that you declare
+them in. `NewClient` and `WithRule` sort them once: `SensitiveInfo`, `Filter`,
 `Shield`, rate-limit rules (`TokenBucket`, `FixedWindow`, `SlidingWindow`),
 `DetectBot`, `ValidateEmail`, then `DetectPromptInjection`. Rules with the
 same priority keep their declaration order. The first denial from a
-`ModeLive` rule stops evaluation of later rules.
+`ModeLive` rule stops evaluation, so later rules don't run.
 
-`SensitiveInfo` runs first so a denial happens before another rule can
-forward the payload.
+`SensitiveInfo` runs first, so Arcjet can deny sensitive text before another
+rule forwards the payload.
 
 `ProtectSignup` bundles a sliding-window rate limit, bot detection, and email
 validation into one `[]Rule` for a signup form:
@@ -187,8 +187,8 @@ aj, err := arcjet.NewClient(arcjet.Config{
 ```
 
 Call `arcjet.SetRateLimitHeaders(w, decision)` after `Protect` to advertise
-the limit with `RateLimit` and `RateLimit-Policy`. It is a no-op when the
-decision has no rate limit, so you can call it unconditionally.
+the limit with `RateLimit` and `RateLimit-Policy`. It does nothing when the
+decision has no rate limit, so you can call it on every request.
 
 For more information, see
 <Link.Page href="/signup-protection">Signup form protection</Link.Page>
@@ -206,17 +206,17 @@ Pass dynamic inputs with the following `Protect` options:
   [Metadata](#metadata).
 - `WithIPSrc(...)` to override the automatically detected client IP address.
 
-If the application is behind a trusted reverse proxy, configure `Config.Proxies`
-with the trusted proxy addresses or CIDRs so Arcjet receives the correct client
-IP.
+If your application runs behind a trusted reverse proxy, list the proxy
+addresses or CIDR ranges in `Config.Proxies` so Arcjet sees the real client IP.
 
 ### Timeouts
 
-`Protect` and `ProtectDetails` apply a 2 second deadline when the incoming
-context has none. An email rule doubles that to 4 seconds. A prompt-injection
-rule has a 1 second floor that the 2 second base already meets. A client
-with both email and prompt-injection rules still uses 4 seconds (the email
-doubling). A caller-supplied deadline is not shortened or replaced.
+When the incoming context has no deadline, `Protect` and `ProtectDetails`
+apply one of 2&nbsp;seconds. A client with an email rule doubles that to
+4&nbsp;seconds, including a client that also has a prompt injection rule. A
+prompt injection rule needs at least 1&nbsp;second, which the 2-second default
+already allows. Arcjet keeps a deadline that you set, without shortening or
+replacing it.
 
 ```go
 // The context has no deadline, so the SDK applies 2 seconds.
@@ -239,16 +239,17 @@ ipSrc := getClientIPFromTrustedSource(r)
 decision, err := aj.Protect(r.Context(), r, arcjet.WithIPSrc(ipSrc))
 ```
 
-A non-empty value takes precedence over automatic detection. An empty string
-is rejected, as is any malformed IPv4 or IPv6 address. `WithIPSrc` is also
-supported by `ProtectDetails`.
+A non-empty value takes precedence over automatic detection. Arcjet rejects an
+empty string and any malformed IPv4 or IPv6 address. `ProtectDetails` also
+accepts `WithIPSrc`.
 
-> **Caution:** Syntax validation does not establish provenance. Ensure the
-> value comes from a trusted source. Do not pass a
-> client-controlled header directly; doing so could allow clients to choose the
-> IP address used for fingerprinting, rate limiting, and other security checks.
+> **Caution:** Arcjet checks that the value is a valid address, not where it
+> came from. Pass a value from a trusted source, never a header that the client
+> controls – otherwise a client can choose the IP address that fingerprinting,
+> rate limiting, and other security checks use.
 
-Inspect automatic detection without sending a decision:
+To inspect automatic detection without requesting a decision, call
+`ClientIPDetails`:
 
 ```go
 details := aj.ClientIPDetails(r)
@@ -257,12 +258,12 @@ log.Printf("ip=%s provenance=%s verified=%t header=%s",
 ```
 
 Automatic detection returns `direct`, `platform`, `trusted-proxy`,
-`unverified-header`, or `none`. Protection logs may also report `manual` when
-`WithIPSrc` is used or `request` when `ProtectDetails.IP` is supplied. Debug
-logs expose the provenance as
-`client_ip_provenance` alongside `client_ip_verified` and `client_ip_header`.
-`Verified` means the SDK tied the source to the request path; it does not
-certify your deployment.
+`unverified-header`, or `none`. Protection logs can also report `manual` when
+you use `WithIPSrc`, or `request` when you supply `ProtectDetails.IP`. Debug
+logs include the provenance as `client_ip_provenance`, alongside
+`client_ip_verified` and `client_ip_header`. `Verified` means that the SDK tied
+the address to the request path. It doesn't confirm that your deployment is
+configured correctly.
 
 ### Sensitive information detection
 
@@ -301,10 +302,14 @@ aj, err := arcjet.NewClient(arcjet.Config{
 })
 ```
 
-`rampart.Entities()` returns every type the backend can detect. Only the model
-detects phone numbers, because their digit shape overlaps with financial and
-government identifiers. The default `MaxInputChars` is `4096`;
-longer input is truncated.
+`rampart.Entities()` returns every type that the backend can detect. Only the
+model detects phone numbers, because their digit shape overlaps with financial
+and government identifiers.
+
+Rampart scans up to `MaxInputChars` characters per call, 4,096 by default,
+which keeps on-device detection fast. Text past that limit isn't scanned, so
+deny or split longer input before you call `Protect` to make sure that every
+character is checked.
 
 To detect your own entity types, add a recognizer to `Options.Recognizers`. A
 recognizer receives the text and returns the spans it matched, with byte
@@ -331,7 +336,7 @@ backend, err := rampart.New(rampart.Options{
 })
 ```
 
-On a Guard client, pass the same `Backend` on `GuardSensitiveInfoOptions`.
+On a Guard client, pass the same `Backend` in `GuardSensitiveInfoOptions`.
 
 For more information about scanning request text, see
 <Link.Page href="/sensitive-info">Sensitive information detection</Link.Page>.
@@ -340,8 +345,8 @@ For more information about scanning request text, see
 
 The `github.com/arcjet/arcjet-go/redact` package detects and redacts emails,
 phone numbers, IP addresses, credit card numbers, and custom entities
-in-process. The text is never sent to Arcjet. It runs the same WebAssembly
-component as `@arcjet/redact`.
+in-process, so the text stays in your application and isn't sent to Arcjet.
+It runs the same WebAssembly component as `@arcjet/redact`.
 
 ```go
 r, err := redact.New(ctx, redact.Options{
@@ -356,27 +361,29 @@ redacted, unredact, err := r.Redact(ctx, "Contact me at test@example.com")
 answer := unredact(modelResponse)
 ```
 
-Reuse the `Redactor`. For more information about redacting strings, see
+Create the `Redactor` once and reuse it. For more information about redacting
+strings, see
 <Link.Page href="/redact">Arcjet Redact</Link.Page>.
 
 ## Error handling
 
-Arcjet fails open so a service issue does not block all requests.
+Arcjet fails open by default, so a network or service issue doesn't block your
+traffic. You choose which routes fail closed instead.
 
 When a transport failure prevents a decision, `Protect` and `ProtectDetails`
-return an `ERROR` conclusion `Decision` together with `err`:
+return a `Decision` with an `ERROR` conclusion, together with `err`:
 
-- `decision.IsAllowed()` is true. An `ERROR` conclusion is treated as allowed.
+- `decision.IsAllowed()` is true. Arcjet treats an `ERROR` conclusion as
+  allowed.
 - `decision.IsErrored()` is true. Use it to distinguish a real allow from a
   fail-open error.
 - `decision.IsDenied()` is false.
 
-If the client or request is nil, `Protect` returns the zero `Decision` together
-with `err`. The zero value has an empty `Conclusion`, so both `IsAllowed()` and
-`IsDenied()` are false.
+If the client or request is nil, `Protect` returns the zero `Decision`,
+together with `err`. The zero value has an empty `Conclusion`, so both
+`IsAllowed()` and `IsDenied()` are false.
 
-Log `err` and deny only when `IsDenied()` is true. If you only inspect `err`,
-log it and continue serving:
+To fail open, log `err` and deny only when `IsDenied()` is true:
 
 ```go
 decision, err := aj.Protect(r.Context(), r)
@@ -388,18 +395,19 @@ if err != nil {
 }
 ```
 
-If you check `decision.IsAllowed()`, an `ERROR` decision allows the request.
-The zero `Decision` from a nil client or nil request is not allowed. Check
-`decision.IsErrored()` when you need to distinguish a real allow from a
-fail-open error.
+If you check `decision.IsAllowed()` instead, an `ERROR` decision allows the
+request, but the zero `Decision` from a nil client or request doesn't. To fail
+closed, for example on a route that sends text to an AI model, deny the request
+when `err` is set or `decision.IsErrored()` is true.
 
-Guard already returns a usable decision on transport failure. See
-[Errors and warnings](#errors-and-warnings).
+Guard returns a usable decision even when a transport failure occurs. For more
+information, see [Errors and warnings](#errors-and-warnings).
 
 ## Guard non-HTTP operations
 
-Use Guard where no `*http.Request` exists. Configure the client and reusable
-rules at package scope, then pass the inputs at the operation boundary:
+Guard protects operations that have no `*http.Request`, such as tool calls and
+background jobs. Configure the client and reusable rules at package scope, then
+pass the inputs where the operation runs:
 
 ```go
 package main
@@ -463,40 +471,42 @@ Guard labels are slugs: ASCII letters, digits, dashes, underscores, and dots,
 starting and ending with a letter or digit. They are case-sensitive, so
 `tools.getWeather` and `tools.getweather` are different labels. Uppercase
 letters need `arcjet-go` v1.2.0 or later. Use a stable, hardcoded label for
-each operation and an
-explicit rate-limit key such as a user ID, session ID, or API key.
+each operation and an explicit rate-limit key such as a user ID, session ID, or
+API key.
 
 `Bucket` on a rate-limit rule is a separate identifier from the Guard label.
 It groups counters. For more information about rate limiting, see
 <Link.Page href="/rate-limiting">Rate limiting</Link.Page>.
 
-A label the service will not match reads as `ALLOW` with `HasFailedOpen()`
-false, so the guard does not run. Check a label you build yourself with
-`ValidateGuardLabel`. `Capture` warns `AJ1023` and still sends.
+The guard doesn't run for a label that the server can't match: the call
+returns `ALLOW`, and `HasFailedOpen()` is false. If you build a label at
+runtime, check it with `ValidateGuardLabel`. `Capture` still sends an event
+with such a label, and adds the `AJ1023` warning.
 
-Every Guard rule constructor requires `Mode`: `ModeLive` or `ModeDryRun`. An
-empty `Mode` returns `ErrInvalidMode`. HTTP `Protect` rules default an empty
-`Mode` to `ModeDryRun`. JavaScript and Python Guard rules default to `LIVE`.
-Go cannot require a struct field, so the constructor returns an error instead
-of defaulting to `LIVE`.
+Every Guard rule constructor requires `Mode`, either `ModeLive` or
+`ModeDryRun`, and returns `ErrInvalidMode` when it's empty. Go can't mark a
+struct field as required, so the constructor returns an error rather than
+defaulting to `LIVE` like JavaScript and Python Guard rules do. HTTP `Protect`
+rules differ: they default an empty `Mode` to `ModeDryRun`.
 
 If you omit `Bucket`, the SDK uses `default-token-bucket`,
 `default-fixed-window`, or `default-sliding-window`. Set `Bucket` explicitly
-so unrelated rules do not share a counter.
+so unrelated rules don't share a counter.
 
 Available Guard rules include rate limiting, prompt injection detection,
 content moderation (`GuardModerateContent`), sensitive information detection,
 and custom local rules.
 
-Use `Capture` to record what the application did after a Guard call –
-visibility data, never a security decision. See [Capture](#capture).
+To record what your application did after a Guard call, use `Capture`.
+Captures give you visibility and never change a decision. For more information,
+see [Capture](#capture).
 
 ### Guard an action
 
-`Guard` returns a decision for you to act on. `GuardAction` runs a function only
-if the policy allows it, so the decision and the effect cannot drift apart. It
-is the fail-closed helper for consequential effects: tool calls, jobs, and
-workers.
+`Guard` returns a decision for you to act on. `GuardAction` goes a step further
+and runs your function only if the policy allows it, so the decision and the
+action can't drift apart. It fails closed by default, which suits actions with
+real consequences, such as tool calls, jobs, and workers.
 
 ```go
 receipt, err := arcjet.GuardAction(ctx, guard, arcjet.GuardActionPolicy{
@@ -523,26 +533,26 @@ case err != nil:
 }
 ```
 
-`Action` is required and is sent as the Guard label. Every call reaches Guard,
-including one with no rules, because the server selects a remote policy by that
-label. Set `Resolve` to compute `Actor`, `Inputs`, and `Rules` at call time; it
-replaces the static fields.
+`Action` is required, and the SDK sends it as the Guard label. Every call
+reaches Guard, even one with no rules, because the server uses the label to
+select a remote policy. To compute `Actor`, `Inputs`, and `Rules` when the call
+runs, set `Resolve`, which replaces the static fields.
 
-A `DENY` decision returns `*GuardDeniedError` and does not run the function,
-whatever `OnGuardError` is set to. Policy that could not be evaluated, because
-Guard returned an error, the decision failed open, or `Resolve` failed, returns
-`*GuardUnavailableError` under the default `OnGuardErrorDeny`, and runs the
-function under `OnGuardErrorAllow`.
+A `DENY` decision returns `*GuardDeniedError` and doesn't run the function,
+whatever you set `OnGuardError` to. Sometimes Arcjet can't evaluate the policy,
+because Guard returned an error, the decision failed open, or `Resolve` failed.
+The default, `OnGuardErrorDeny`, then returns `*GuardUnavailableError` without
+running the function. To run the function anyway, set `OnGuardErrorAllow`.
 
-Each call records one capture event named by `Action` whose metadata `outcome`
-is `success`, `degraded`, `denied`, `error`, or `unavailable`. `GuardAction`
-bounds its own Guard call at two seconds when the caller's context carries no
-deadline.
+Each call records one capture event, named after `Action`, with an `outcome`
+metadata value of `success`, `degraded`, `denied`, `error`, or `unavailable`.
+When the caller's context has no deadline, `GuardAction` limits its Guard call
+to 2&nbsp;seconds.
 
 For Microsoft Agent Framework tools, the
 <Link.Page href="/guards/microsoft-agent-framework">agent framework helpers</Link.Page>
-place the same check around a tool and hand the model a denial it can read
-instead of returning an error.
+place the same check around a tool and return a denial that the model can read
+instead of an error.
 
 ### Correlate decisions
 
@@ -556,14 +566,15 @@ ctx = arcjet.ContextWithCorrelationID(ctx, conversationID)
 id, ok := arcjet.CorrelationIDFromContext(ctx)
 ```
 
-`Guard` and `Capture` never read the context; pass them `CorrelationID`
-explicitly. An empty ID is ignored rather than stored, so a call that passes
-through a missing value does not shadow an ID an outer layer already set.
-Nothing here generates an ID.
+`Guard` and `Capture` don't read the context, so pass `CorrelationID` to them
+explicitly. The SDK ignores an empty ID, so passing through a missing value
+doesn't replace an ID that an outer layer already set. The SDK doesn't generate
+an ID for you.
 
 ### Errors and warnings
 
-Guard separates enforcement decisions from processing problems:
+Guard keeps policy decisions separate from processing problems, so you can
+tell a denial from an error:
 
 - `decision.IsDenied()` reports a policy denial.
 - `decision.HasFailedOpen()` reports that an error caused the decision to allow.
@@ -571,10 +582,14 @@ Guard separates enforcement decisions from processing problems:
 - A configured rule's `ErrorResult(decision)` attributes an error to that rule.
 - `decision.Warnings` contains diagnostics that do not change the conclusion.
 
-Choose an explicit fallback policy for sensitive operations. Arcjet fails open
-by default so a service issue does not block all work.
+Arcjet fails open by default, so a service issue doesn't block your
+application. For sensitive operations, choose the fallback yourself: deny when
+`HasFailedOpen()` is true, or use `GuardAction`, which fails closed by default.
 
 ### Content moderation
+
+`GuardModerateContent` checks text for harmful content before your application
+acts on it:
 
 ```go
 moderation, err := arcjet.GuardModerateContent(arcjet.GuardModerateContentOptions{
@@ -598,8 +613,8 @@ if result := moderation.Result(decision); result != nil && result.Billing != nil
 }
 ```
 
-The result is a binary `Detected` verdict plus optional `Billing` in
-`text_units`. See <Link.Page href="/content-moderation">Content moderation</Link.Page>.
+The result is a `Detected` verdict, plus optional `Billing` in `text_units`.
+For more information, see <Link.Page href="/content-moderation">Content moderation</Link.Page>.
 
 ### Capture
 
@@ -618,10 +633,11 @@ guard.Capture(arcjet.CaptureEvent{
 })
 ```
 
-`Action` is required. An empty action drops the event. Optional fields:
-`CorrelationID`, `DecisionID`, `Metadata`, and `OccurredAt` (zero means now).
-Delivery is best-effort: a bounded queue, batched sends, no retries. Call
-`Flush` (or `Close`) on shutdown so the last batch is sent.
+`Action` is required, and the SDK drops an event without one. The optional
+fields are `CorrelationID`, `DecisionID`, `Metadata`, and `OccurredAt` (zero
+means now). Delivery is best effort: the SDK queues events in a bounded
+in-memory queue, sends them in batches, and doesn't retry a failed batch. To
+send the last batch, call `Flush` or `Close` on shutdown:
 
 ```go
 ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -629,13 +645,13 @@ defer cancel()
 guard.Flush(ctx)
 ```
 
-See <Link.Page href="/guards/capture">Capture events</Link.Page>.
+For more information, see <Link.Page href="/guards/capture">Capture events</Link.Page>.
 
 ### Metadata
 
 `Guard`, `Protect`, and every Guard rule accept `Metadata`: an
-`arcjet.Metadata` (`map[string]any`) whose values may be **any
-JSON-serializable value**, including nested maps and slices.
+`arcjet.Metadata` (`map[string]any`) whose values can be any JSON-serializable
+value, including nested maps and slices.
 
 ```go
 decision, err := guard.Guard(ctx, arcjet.GuardRequest{
@@ -652,25 +668,27 @@ decision, err := guard.Guard(ctx, arcjet.GuardRequest{
 
 On `Protect`, pass `arcjet.WithMetadata(...)`.
 
-Each top-level value is JSON-encoded by the SDK and stored verbatim, so an
-exact `int64` survives. Server-enforced limits: 128 top-level keys, 4 KiB per
-serialized value, 10 levels of nesting, and key names limited to letters,
-digits, `-`, `.`, and `_`. Over a limit, that key is dropped.
+The SDK JSON-encodes each top-level value and Arcjet stores it verbatim, so an
+`int64` keeps its exact value. The server allows 128 top-level keys,
+4&nbsp;KiB per serialized value, and 10 levels of nesting, and key names can
+contain letters, digits, `-`, `.`, and `_`. Arcjet drops a key that exceeds a
+limit.
 
-Nothing here can fail a call or change a decision. Dropped keys are reported
-on `decision.Warnings`. Keys the SDK cannot encode (a channel, a func, a
-cycle, `NaN`, or a string holding invalid UTF-8) are collected into a single
-**`AJ1017`** warning naming them. Go maps have no insertion order, so keys are
-processed in sorted order.
+Metadata never fails a call or changes a decision. Arcjet reports dropped keys
+in `decision.Warnings`. The SDK collects the keys that it can't encode (a
+channel, a func, a cycle, `NaN`, or a string holding invalid UTF-8) into a
+single `AJ1017` warning that names them. Go maps have no insertion order, so
+the SDK processes keys in sorted order.
 
-Metadata is untrusted and is not redacted – do not put secrets or PII in it. For
+Arcjet treats metadata as untrusted and doesn't redact it, so keep secrets and
+personal data out of it. For
 the full limit table, see <Link.Page href="/guards/reference#metadata">Guard metadata</Link.Page>.
 
 ## Outbound proxy
 
 The SDK honors the standard `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY`
-environment variables for Arcjet API calls. Proxy URLs may contain credentials,
-so do not log them.
+environment variables for Arcjet API calls. Proxy URLs can contain credentials,
+so don't log them.
 
 ## More resources
 

@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"unicode/utf8"
 
 	"github.com/arcjet/arcjet-go"
 	"github.com/arcjet/arcjet-go/sensitiveinfo/rampart"
@@ -36,20 +37,37 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
+	// Rampart scans at most rampart.DefaultMaxInputChars characters and skips
+	// the rest. Deny longer input so sensitive data can't hide past the limit.
+	if utf8.RuneCount(message) > rampart.DefaultMaxInputChars {
+		http.Error(w, "Message too long", http.StatusRequestEntityTooLarge)
+		return
+	}
 
 	decision, err := aj.Protect(
 		r.Context(),
 		r,
 		arcjet.WithSensitiveInfoValue(string(message)),
 	)
+	// Fail closed when Arcjet can't be reached.
 	if err != nil {
 		log.Printf("arcjet: %v", err)
+		http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+		return
 	}
 
 	if decision.IsDenied() {
 		http.Error(w, "Bad request - sensitive information detected", http.StatusBadRequest)
 		return
 	}
+
+	// Fail closed when Arcjet couldn't complete the check.
+	if decision.IsErrored() {
+		log.Printf("arcjet: %v", decision.Err())
+		http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+		return
+	}
+
 	_ = json.NewEncoder(w).Encode(map[string]string{"message": "Hello world"})
 }
 

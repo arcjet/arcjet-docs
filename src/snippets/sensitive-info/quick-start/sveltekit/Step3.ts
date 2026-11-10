@@ -30,5 +30,10 @@ export async function handle({
     return error(400, "Bad request - sensitive information detected");
   }
 
+  // Fail closed when Arcjet couldn't complete the check.
+  if (decision.isErrored()) {
+    return error(503, "Service unavailable");
+  }
+
   return resolve(event);
 }

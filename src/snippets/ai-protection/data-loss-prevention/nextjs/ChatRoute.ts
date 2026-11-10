@@ -37,6 +37,16 @@ export async function POST(req: Request) {
     );
   }
 
+  // Block other denials too, such as one from a remote rule.
+  if (decision.isDenied()) {
+    return new Response("Forbidden", { status: 403 });
+  }
+
+  // Fail closed when Arcjet couldn't complete the check.
+  if (decision.isErrored()) {
+    return new Response("Service unavailable", { status: 503 });
+  }
+
   // Arcjet approved – call your AI provider
   const result = await streamText({
     model: openai("gpt-4o"),

@@ -57,21 +57,35 @@ aj = arcjet_sync(
     ],
 )
 
+# Rampart scans at most max_input_chars characters (100,000 by default) and
+# skips the rest. Deny longer input so sensitive data can't hide past the limit.
+MAX_INPUT_CHARS = 100_000
+
 
 @app.post("/chat")
 def chat():
     body = request.get_json()
     message = body.get("message", "") if body else ""
+    if len(message) > MAX_INPUT_CHARS:
+        return jsonify(error="Message too long"), 413
 
     # Scan the user message for sensitive information before it reaches the
     # AI model. Pass the full conversation if you want to scan all messages.
     decision = aj.protect(request, sensitive_info_value=message)
 
-    if decision.is_denied() and decision.reason_v2.type == "SENSITIVE_INFO":
-        logger.warning("Request blocked due to sensitive information")
-        return jsonify(
-            error="Sensitive information detected – remove it from your prompt"
-        ), 400
+    if decision.is_denied():
+        if decision.reason_v2.type == "SENSITIVE_INFO":
+            logger.warning("Request blocked due to sensitive information")
+            return jsonify(
+                error="Sensitive information detected – remove it from your prompt"
+            ), 400
+        # Block other denials too, such as one from a remote rule.
+        return jsonify(error="Forbidden"), 403
+
+    # Fail closed when Arcjet couldn't complete the check.
+    if decision.is_error():
+        logger.warning("Arcjet error")
+        return jsonify(error="Service unavailable"), 503
 
     # Arcjet approved – call the AI model
     reply = chain.invoke({"message": message})

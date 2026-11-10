@@ -17,8 +17,8 @@ prompt_scan = DetectPromptInjection()
 
 
 async def handle_tool_call(user_id: str, message: str) -> str:
-    # Bind input and call guard() for each invocation. Hardcode `label`
-    # as a string literal so it stays greppable and groups in the dashboard.
+    # Bind input and call guard() for each invocation. Hardcode `label` as a
+    # string literal so it stays greppable and groups in the Arcjet Console.
     decision = await aj.guard(
         label="tools.weather",
         rules=[
@@ -35,6 +35,11 @@ async def handle_tool_call(user_id: str, message: str) -> str:
             retry_in = max(0, rate_limited.reset_at_unix_seconds - int(time.time()))
             raise RuntimeError(f"Rate limited – retry in {retry_in}s")
         raise RuntimeError("Blocked")
+
+    # Fail closed when Arcjet couldn't complete a check, because prompt_scan
+    # protects the tool. Arcjet denies prompt text over 128 KiB.
+    if decision.has_failed_open():
+        raise RuntimeError("Arcjet couldn't check this request")
 
     # Safe to proceed with the tool call
     return "..."

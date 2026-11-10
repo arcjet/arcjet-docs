@@ -55,6 +55,8 @@ ajToc:
         anchor: "model-accuracy-and-performance"
       - text: "Rampart options"
         anchor: "rampart-options"
+      - text: "Long input"
+        anchor: "long-input"
       - text: "Bundlers and runtimes"
         anchor: "bundlers-and-runtimes"
   - text: "Decision"
@@ -133,12 +135,13 @@ import DecisionLogGo from "@/snippets/sensitive-info/reference/go/DecisionLog.md
 import ErrorsGo from "@/snippets/sensitive-info/reference/go/Errors.mdx";
 
 
-Arcjet Sensitive Information Detection protects against clients sending you
-sensitive information such as PII that you do not wish to handle. The SDK rule
-runs detection locally in your own environment with the on-device
-[Rampart](#on-device-detection-with-rampart) NER model, which detects names,
-addresses, and government or financial identifiers as well as structured types
-such as email addresses and card numbers.
+Arcjet Sensitive Information Detection stops clients from sending you data
+that you don't want to handle, such as personally identifiable information
+(PII). The SDK rule runs detection in your own environment with the on-device
+[Rampart](#on-device-detection-with-rampart) named-entity recognition (NER)
+model. It detects names, addresses, and government or financial identifiers, as
+well as structured types such as email addresses and card numbers. The text it
+scans never leaves your environment.
 
 <FrameworkLinks
   exclude={frameworks
@@ -149,21 +152,21 @@ such as email addresses and card numbers.
 
 ## Configuration
 
-Sensitive information detection is configured by allowing or denying a subset of
-sensitive information. The `allow` and `deny` lists are mutually exclusive. With
-`allow`, Arcjet denies any detected sensitive information that the list does not
-name. With `deny`, Arcjet allows any detected sensitive information that the
-list does not name.
+You configure sensitive information detection with a list of entity types to
+allow or to deny. The two lists are mutually exclusive:
 
-The `arcjet` client can be configured with one or more Sensitive information
-rules. Construct them with `sensitiveInfo(...)` in JavaScript / TypeScript,
+- With `allow`, Arcjet denies any detected type that the list doesn't name.
+- With `deny`, Arcjet denies only the types that the list names.
+
+Add one or more sensitive information rules to the `arcjet` client. Create them
+with `sensitiveInfo(...)` in JavaScript / TypeScript,
 `detect_sensitive_info(...)` in Python, or
 `arcjet.SensitiveInfo(arcjet.SensitiveInfoOptions{...})` in Go. The lists are
-`allow` / `deny` in JS and Python, and `Allow` / `Deny` in Go.
+`allow` and `deny` in JS and Python, and `Allow` and `Deny` in Go.
 
 Set `backend` to the [Rampart backend](#on-device-detection-with-rampart):
-`rampart()` in JS and Python, or the `Backend` you create with `rampart.New` in
-Go.
+`rampart()` in JS and Python, or the `Backend` that you create with
+`rampart.New` in Go.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -241,9 +244,8 @@ type SensitiveInfoOptions struct {
 <DisplayType type="ArcjetSensitiveInfoType" from="arcjet" />
 
 :::note
-When specifying multiple rules, the order of the rules is ignored. Rule
-execution ordering is automatically optimized for performance. For details of
-examining the execution results, see [decision](#decision).
+Arcjet ignores the order of your rules and runs them in the order that performs
+best. To inspect the result of each rule, see [Decision](#decision).
 :::
 
 <SlotByFramework>
@@ -255,19 +257,20 @@ examining the execution results, see [decision](#decision).
 
 ## On-device detection with Rampart
 
-Sensitive information detection runs on-device with the
-[Rampart](https://huggingface.co/nationaldesignstudio/rampart)
-named-entity-recognition (NER) model, paired with deterministic recognizers
-for structured types. JavaScript and Python run a ~15&nbsp;MB quantized ONNX
-model. Go embeds the same ~15&nbsp;MB of weights in a nested module and infers
-in pure Go, with no cgo or ONNX runtime. The rule detects names, addresses, and
-government or financial identifiers, as well as email addresses, card numbers,
-IP addresses, and phone numbers. The model weights are bundled, so nothing is
-fetched at runtime and scanned text stays in your environment. For exactly
-what Rampart detects, see [Entity types](#entity-types).
+Sensitive information detection runs on-device. It pairs the
+[Rampart](https://huggingface.co/nationaldesignstudio/rampart) NER model, which
+understands context, with deterministic recognizers for structured types. The
+rule detects names, addresses, and government or financial identifiers, as
+well as email addresses, card numbers, IP addresses, and phone numbers. For the
+full list, see [Entity types](#entity-types).
 
-Install the Rampart package alongside your Arcjet SDK. In Python it ships as
-the `sensitive-info-rampart` extra of the `arcjet` package. In Go it is a nested
+The model weights ship with the package, so nothing is fetched at runtime and
+the text you scan stays in your environment. JavaScript and Python run a
+~15&nbsp;MB quantized ONNX model. Go embeds the same ~15&nbsp;MB of weights in a
+nested module and runs inference in pure Go, with no cgo or ONNX runtime.
+
+Install the Rampart package alongside your Arcjet SDK. In Python, it ships as
+the `sensitive-info-rampart` extra of the `arcjet` package. In Go, it's a nested
 module that bundles the model weights:
 
 <Tabs syncKey="language">
@@ -311,15 +314,14 @@ to detect in `allow` or `deny`:
 </SlotByFramework>
 
 :::note
-The same backend also works with the local sensitive info rule in
-<Link.Page href="/guards">Arcjet Guards</Link.Page>. Pass `backend: rampart()`
-(JS) / `backend=rampart()` (Python) / `Backend` from `rampart.New` (Go) to scan
-text in agent tool calls that never arrive over HTTP.
+The same backend works with the local sensitive information rule in
+<Link.Page href="/guards">Arcjet Guards</Link.Page>, so you can scan text in
+agent tool calls that never arrive over HTTP. Pass `backend: rampart()` in JS,
+`backend=rampart()` in Python, or the `Backend` from `rampart.New` in Go.
 :::
 
-The full set of types Rampart supports is exported as `rampartEntities`
-(JS) / `rampart_entities` (Python) / `rampart.Entities()` (Go). Use it to deny
-every type Rampart can detect:
+To deny every type that Rampart detects, use the full set: `rampartEntities` in
+JS, `rampart_entities` in Python, or `rampart.Entities()` in Go:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -357,22 +359,20 @@ arcjet.SensitiveInfo(arcjet.SensitiveInfoOptions{
 
 ### Model accuracy and performance
 
-Rampart is a compact model – a ~14.7&nbsp;MB artifact (~18.5M parameters,
-quantized to 4-bit weights) with a 512-token context window – so it is fast
-enough to run inline on each request. On the Node.js CPU runtime, median (p50)
-inference is **~6.6&nbsp;ms**, dropping to **~3.9&nbsp;ms** p50 on WebGPU (set
-`device: "webgpu"` in the JS SDK). The Python backend runs on [ONNX
-Runtime](https://onnxruntime.ai/) and defaults to CPU execution; select a
-different accelerator with the `providers` option (described later on this
-page). The Go backend is a nested module that embeds the same ~15&nbsp;MB
-weights and runs inference in pure Go (no cgo). Create it once with
-`rampart.New` and reuse it. The default `MaxInputChars` is `4096`.
+Rampart is compact enough to run inline on each request: a ~14.7&nbsp;MB
+artifact with ~18.5M parameters, quantized to 4-bit weights, and a 512-token
+context window. Longer text is scanned in overlapping windows. On the Node.js
+CPU runtime, median (p50) inference is **~6.6&nbsp;ms**, and **~3.9&nbsp;ms** on
+WebGPU (set `device: "webgpu"` in the JS SDK). The Python backend runs on
+[ONNX Runtime](https://onnxruntime.ai/) and uses the CPU by default. To use a
+different accelerator, set the `providers` option. In Go, create the backend
+once with `rampart.New` and reuse it.
 
-On the model author's held-out benchmark it recalls **~98%** of private terms
-across the seven Latin-script languages it supports (English, Spanish, French,
-German, Italian, Portuguese, and Dutch).
+On the model author's held-out benchmark, Rampart recalls **~98%** of private
+terms across the seven Latin-script languages it supports: English, Spanish,
+French, German, Italian, Portuguese, and Dutch.
 
-Accuracy varies by input, so it's worth knowing the trade-offs:
+Accuracy depends on the input. Keep the following trade-offs in mind:
 
 - **Non-Latin scripts** (for example Chinese, Japanese, Korean, Arabic, Hindi,
   or Cyrillic) have much lower recall – the model is trained on Latin-script
@@ -380,8 +380,8 @@ Accuracy varies by input, so it's worth knowing the trade-offs:
 - **Government or financial identifiers without a checksum** (passports,
   licenses, case numbers) are recognized less reliably than the structured types
   the deterministic recognizers validate, such as emails and card numbers.
-- Inference runs synchronously in the request path, so this latency is added to
-  each request the rule scans.
+- **Latency** – inference runs synchronously in the request path, so it adds to
+  the response time of each request that the rule scans.
 
 These figures come from the
 [Rampart model card](https://huggingface.co/nationaldesignstudio/rampart), which
@@ -439,8 +439,8 @@ rampart(
         # Runtime install.
         providers=("CPUExecutionProvider",),
         # Maximum number of characters scanned per request (default: 100,000).
-        # Inference runs synchronously on the request path, so input longer than
-        # this is truncated before detection to bound worst-case CPU cost.
+        # Inference runs synchronously on the request path, so text past this
+        # limit isn't scanned. Check the length before you call protect().
         max_input_chars=100_000,
         # Deterministic recognizers to run alongside the model (default:
         # `default_recognizers`). This is the extension point for custom
@@ -466,8 +466,9 @@ no `device` or ONNX provider option:
 backend, err := rampart.New(rampart.Options{
 	// Minimum confidence score for a model token to count (default: 0.5).
 	Threshold: 0.6,
-	// Character ceiling scanned per call (default: 4096). Longer input is
-	// truncated. Raise this only if you can afford the extra latency.
+	// Character ceiling scanned per call (default: 4096). Text past this
+	// limit isn't scanned. Check the length before you call Protect, and
+	// raise this only if you can afford the extra latency.
 	MaxInputChars: 4096,
 	// Deterministic recognizers run alongside the model (default:
 	// rampart.DefaultRecognizers). Pass an empty non-nil slice to rely on the
@@ -480,10 +481,48 @@ backend, err := rampart.New(rampart.Options{
 </TabItem>
 </Tabs>
 
-In JavaScript and Python, the model loads once on first use and is reused for
-every subsequent request. In Go, `rampart.New` loads and dequantizes the
-weights – create the backend once at startup and reuse it. It is safe for
-concurrent use.
+### Long input
+
+Rampart scans text inline on the request path, so the length of the text sets
+how long the scan takes. The following table lists how much text each SDK
+scans:
+
+| SDK        | Characters scanned | Option            |
+| ---------- | ------------------ | ----------------- |
+| JavaScript | All of the text    | None              |
+| Python     | 100,000 by default | `max_input_chars` |
+| Go         | 4,096 by default   | `MaxInputChars`   |
+
+In JavaScript, Rampart scans every character, so the scan time grows with the
+length of the text. Without a limit, a client could send very large bodies to
+tie up your server. Set a maximum length that fits your latency budget, and
+deny longer input before you call `protect()`:
+
+```ts
+const MAX_INPUT_CHARS = 10_000;
+
+const message = await request.text();
+if (message.length > MAX_INPUT_CHARS) {
+  return Response.json({ error: "Message too long" }, { status: 413 });
+}
+```
+
+In Python and Go, text past the limit isn't scanned. Check the length before
+you call `protect()` and deny longer input, or split it and scan each part.
+
+The Rampart examples on this page deny long input in every SDK. Also cap the
+request body size in your server or framework, so your application doesn't
+read an oversized body into memory before it checks the length.
+
+To screen longer text without splitting it, send it as a server input to the
+server-side sensitive information detector in an
+<Link.Page href="/guards/remote-policies#detectors">agent guard policy</Link.Page>. It screens values up to about
+100&nbsp;KB. Large values take longer to screen, so check `hasFailedOpen()` and
+raise the client timeout above the 2-second default if needed.
+
+In JavaScript and Python, the model loads on first use and is reused for every
+later request. In Go, `rampart.New` loads and dequantizes the weights, so
+create the backend once at startup and reuse it. It's safe for concurrent use.
 
 To detect your own entity types, add a recognizer. See
 [Custom entity detection](#custom-entity-detection).
@@ -491,7 +530,8 @@ To detect your own entity types, add a recognizer. See
 ### Bundlers and runtimes
 
 In JavaScript and Python, the Rampart backend loads a native ONNX runtime and
-reads its bundled model weights from disk at runtime. As a result:
+reads its model weights from disk at runtime. This affects where it runs and how
+you build your application:
 
 - It requires a server runtime with filesystem and native-addon access. In JS
   that means Node.js, Bun, or Deno – it does **not** run on edge runtimes. In
@@ -499,23 +539,22 @@ reads its bundled model weights from disk at runtime. As a result:
 - A server build must not bundle it, or the runtime fails to locate the model
   weights.
 
-In Go, inference is pure Go. Weights are compiled into the nested module, so
-there is no ONNX runtime, native addon, or extra file for a bundler to miss.
-Applications that import the module include about 15&nbsp;MB of weights in the
+In Go, inference is pure Go. The weights are compiled into the nested module,
+so there's no ONNX runtime, native addon, or extra file for a bundler to miss.
+An application that imports the module adds about 15&nbsp;MB of weights to its
 binary.
 
 In Python, the backend depends on
-[ONNX Runtime](https://onnxruntime.ai/) (`onnxruntime`), which is installed for
-you by the `arcjet[sensitive-info-rampart]` extra. Model inference is
-synchronous and blocking, so its latency is added directly to each request the
-rule scans – the same is true whether you use the `arcjet()` or `arcjet_sync()`
-client.
+[ONNX Runtime](https://onnxruntime.ai/) (`onnxruntime`), which the
+`arcjet[sensitive-info-rampart]` extra installs. Inference is synchronous, so
+it adds to the response time of each request that the rule scans, with either
+the `arcjet()` or the `arcjet_sync()` client.
 
 For Next.js, mark the package and its native dependencies as
-[server external packages](https://nextjs.org/docs/app/api-reference/config/next-config-js/serverExternalPackages)
+[server external packages](https://nextjs.org/docs/app/api-reference/config/next-config-js/serverExternalPackages),
 so that Next.js loads them from `node_modules` at runtime instead of bundling
-them. Also make sure any route handler that uses the backend runs on the Node.js
-runtime (the default) rather than the Edge runtime:
+them. Run each route handler that uses the backend on the Node.js runtime, which
+is the default, rather than the Edge runtime:
 
 ```js
 // next.config.js
@@ -538,36 +577,32 @@ export const runtime = "nodejs";
 
 ## Decision
 
-Arcjet provides a single `protect` function that is used to execute your
-protection rules.
+To evaluate your rules, call the `protect` function.
 
 <SlotByFramework>
   <NestJsGuardDecision slot="nest-js" />
 </SlotByFramework>
 
-This function returns a `Promise` that resolves to an
-`ArcjetDecision` object. This contains the following properties:
+The function returns a `Promise` that resolves to an `ArcjetDecision` object
+with the following properties:
 
-- `id` (`string`) – The unique ID for the request. This can be used to look up
-  the request in the Arcjet Console. It is prefixed with `req_` for decisions
-  involving the Arcjet cloud API. For decisions taken locally, the prefix is
-  `lreq_`.
-- `conclusion` (`ArcjetConclusion`) – The final conclusion based on evaluating
-  each of the configured rules. If you wish to accept Arcjet's recommended
-  action based on the configured rules then you can use this property.
-- `reason` (`ArcjetReason`) – An object containing more detailed
-  information about the conclusion.
-- `results` (`ArcjetRuleResult[]`) – An array of `ArcjetRuleResult` objects
-  containing the results of each rule that was executed.
-- `ip` (`ArcjetIpDetails`) – An object containing Arcjet's analysis of the
-  client IP address. For more information, see the SDK reference.
+- `id` (`string`) – The unique ID for the request. Use it to look up the
+  request in the Arcjet Console. Decisions that involve the Arcjet cloud API
+  have the prefix `req_`, and decisions made locally have the prefix `lreq_`.
+- `conclusion` (`ArcjetConclusion`) – The overall conclusion from evaluating
+  every configured rule. To follow Arcjet's recommended action, use this
+  property.
+- `reason` (`ArcjetReason`) – More detail about the conclusion.
+- `results` (`ArcjetRuleResult[]`) – The result of each rule that ran.
+- `ip` (`ArcjetIpDetails`) – Arcjet's analysis of the client IP address. For
+  more information, see the SDK reference.
 
-To check whether a sensitive info rule returned a deny conclusion, use
+To check whether a sensitive information rule denied the request, use
 `decision.isDenied()` and `decision.reason.isSensitiveInfo()` (JS) /
 `decision.is_denied()` and `decision.reason_v2.type == "SENSITIVE_INFO"`
 (Python) / `decision.IsDenied()` and `decision.Reason.IsSensitiveInfo()` (Go).
 
-You can iterate through the results and check whether a sensitive info rule was applied:
+To see what each rule found, iterate through the results:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
@@ -598,7 +633,7 @@ for _, result := range decision.Results {
 </TabItem>
 </Tabs>
 
-This example logs the full result as well as the sensitive info rule:
+The following example logs each result and the sensitive information rule:
 
 <SlotByFramework>
   <DecisionLogBun slot="bun" />
@@ -621,10 +656,6 @@ The SDK detects the version 1 types with Rampart. List any of them in `allow` or
 `deny`. Each one is an `ArcjetSensitiveInfoType` in JS, a
 `SensitiveInfoEntityType` in Python, and an `arcjet.EntityType` in Go.
 
-Phone numbers are left to the model because their digit shape overlaps with
-financial and government identifiers, so the default recognizers don't include
-a phone number pattern.
-
 To list every type at once, use `rampartEntities` (JS), `rampart_entities`
 (Python), or `rampart.Entities()` (Go).
 
@@ -635,29 +666,29 @@ validated patterns.
 
 #### Card numbers
 
-Card numbers of 13 to 19 digits are detected when the final digit is a valid
+Arcjet detects card numbers of 13 to 19 digits when the final digit is a valid
 [Luhn](https://en.wikipedia.org/wiki/Luhn_algorithm) check digit. The values
-`4242424242424242`, `4000 0566 5566 5556`, and `3782-8224-6310005` match but
-`4242424242424241` does not. Spaces and dashes are ignored because users often
-group digits.
+`4242424242424242`, `4000 0566 5566 5556`, and `3782-8224-6310005` match, but
+`4242424242424241` doesn't. Spaces and dashes are ignored, because people often
+group the digits.
 
 #### Email addresses
 
-The values `alice@example.com` and `bob.smith@subdomain.example.com` match but
-`alice.example.com` does not.
+The values `alice@example.com` and `bob.smith@subdomain.example.com` match, but
+`alice.example.com` doesn't.
 
 #### IP addresses
 
-IPv4 and IPv6 addresses are detected. The values `127.0.0.1` and `::1` match.
+Arcjet detects IPv4 and IPv6 addresses. The values `127.0.0.1` and `::1` match.
 
 #### Social Security numbers
 
-US Social Security numbers in the dashed form, such as `123-45-6789`, are
-detected.
+Arcjet detects US Social Security numbers in the dashed form, such as
+`123-45-6789`.
 
 #### URLs
 
-URLs that start with `http://`, `https://`, or `www.` are detected. The model
+Arcjet detects URLs that start with `http://`, `https://`, or `www.`. The model
 also detects URLs from context.
 
 #### Phone numbers
@@ -696,17 +727,18 @@ return.
 
 ## Error handling
 
-Arcjet is designed to fail open so that a service issue or misconfiguration does
-not block all requests. The SDK also times out and fails open after 2000&nbsp;ms
-by default. However, in most cases, the response time is less than 20&nbsp;ms to
-30&nbsp;ms.
+By default, Arcjet fails open, so a service issue or misconfiguration doesn't
+block your users. The SDK times out and fails open after 2,000&nbsp;ms. Most
+responses take 20&nbsp;ms to 30&nbsp;ms.
 
-If there is an error condition when processing the rule, Arcjet returns an
-`ERROR` result for that rule and you can check the `message` property on the
-rule's error result for more information.
+If a rule hits an error, Arcjet returns an `ERROR` result for that rule. The
+`message` property on the result explains what went wrong. If every other rule
+that ran returned `ALLOW`, the overall conclusion is `ERROR`.
 
-If all other rules that were run returned an `ALLOW` result, then the final
-Arcjet conclusion is `ERROR`.
+Sensitive information detection protects data, so deny the request when the
+decision is errored, unless your application can accept data that Arcjet didn't
+screen. The quick start examples fail closed this way. The following example
+logs the error and shows where to fail closed:
 
 <SlotByFramework>
   <ErrorsBun slot="bun" />
@@ -722,12 +754,10 @@ Arcjet conclusion is `ERROR`.
 
 ## Testing
 
-Arcjet runs the same in any environment, including locally and in CI. You can
-use the `mode` set to `DRY_RUN` to log the results of rule execution without
-blocking any requests.
+Arcjet runs the same way in every environment, including locally and in CI. To
+log the results of your rules without blocking any requests, set `mode` to
+`DRY_RUN`.
 
-We have an example test framework you can use to automatically test your rules.
-Arcjet can also be triggered based using a sample of your traffic.
-
-For details, see the <Link.Page href="/testing">Testing</Link.Page> section of
-the docs.
+You can test your rules automatically with a test framework, or with a sample
+of your traffic. For more information, see
+<Link.Page href="/testing">Testing</Link.Page>.

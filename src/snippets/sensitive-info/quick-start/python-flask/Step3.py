@@ -24,14 +24,25 @@ aj = arcjet_sync(
     ],
 )
 
+# Rampart scans at most max_input_chars characters (100,000 by default) and
+# skips the rest. Deny longer input so sensitive data can't hide past the limit.
+MAX_INPUT_CHARS = 100_000
+
 
 @app.post("/")
 def index():
     message = request.get_data(as_text=True)
+    if len(message) > MAX_INPUT_CHARS:
+        return jsonify(error="Message too long"), 413
+
     decision = aj.protect(request, sensitive_info_value=message)
     print("Arcjet decision", decision)
 
     if decision.is_denied():
         return jsonify(error="Bad request - sensitive information detected"), 400
+
+    # Fail closed when Arcjet couldn't complete the check.
+    if decision.is_error():
+        return jsonify(error="Service unavailable"), 503
 
     return jsonify(message="Hello world")

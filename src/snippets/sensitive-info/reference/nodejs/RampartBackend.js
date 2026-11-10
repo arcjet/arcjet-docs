@@ -17,9 +17,21 @@ const aj = arcjet({
   ],
 });
 
+// Rampart scans all of the text, so scanning time grows with its length. Deny
+// long input so one large request can't tie up the server. Raise the limit if
+// your latency budget allows.
+const MAX_INPUT_CHARS = 10_000;
+
 const server = http.createServer(async function (req, res) {
+  const message = await text(req);
+  if (message.length > MAX_INPUT_CHARS) {
+    res.writeHead(413, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Message too long" }));
+    return;
+  }
+
   const decision = await aj.protect(req, {
-    sensitiveInfoValue: await text(req),
+    sensitiveInfoValue: message,
   });
 
   for (const result of decision.results) {
