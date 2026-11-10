@@ -307,9 +307,11 @@ model detects phone numbers, because their digit shape overlaps with financial
 and government identifiers.
 
 Rampart scans up to `MaxInputChars` characters per call, 4,096 by default,
-which keeps on-device detection fast. Text past that limit isn't scanned, so
-deny or split longer input before you call `Protect` to make sure that every
-character is checked.
+which keeps on-device detection fast. A live `SensitiveInfo` or
+`GuardSensitiveInfo` rule denies longer input without scanning it, so nothing
+past the limit goes through unchecked. With `Protect`, the denial has an error
+reason, so `decision.IsDenied()` and `decision.Reason.IsError()` are both true.
+To accept longer text, raise `MaxInputChars`.
 
 To detect your own entity types, add a recognizer to `Options.Recognizers`. A
 recognizer receives the text and returns the spans it matched, with byte

@@ -57,10 +57,11 @@ rule in an <Link.Page href="/guards/remote-policies">agent guard policy</Link.Pa
 
 The following table lists the hard limit for each detection feature:
 
-| Feature                    | Limit                         | When you exceed it                                                                |
-| -------------------------- | ----------------------------- | --------------------------------------------------------------------------------- |
-| Prompt injection detection | 128&nbsp;KiB of text per call | A live rule denies the request. With `guard()`, the rule result carries `AJ1131`. |
-| Content moderation         | 128&nbsp;KiB of text per call | A live rule denies the call, and the rule result carries `AJ1141`.                |
+| Feature                         | Limit                                                    | When you exceed it                                                                  |
+| ------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Prompt injection detection      | 128&nbsp;KiB of text per call                            | A live rule denies the request. With `guard()`, the rule result carries `AJ1131`.   |
+| Content moderation              | 128&nbsp;KiB of text per call                            | A live rule denies the call, and the rule result carries `AJ1141`.                  |
+| On-device sensitive information | 100,000 characters in JavaScript and Python, 4,096 in Go | A live rule denies the request without scanning the text. You can change the limit. |
 
 Content moderation evaluates the first 60&nbsp;KB of the text. Longer text
 under the hard limit is still moderated on that first part, and Arcjet adds the

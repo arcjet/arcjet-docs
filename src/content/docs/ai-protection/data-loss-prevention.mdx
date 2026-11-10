@@ -379,8 +379,8 @@ Add them to `Deny`. Create the backend once at startup with `rampart.New`:
 
 The model weights ship with the package (about 15&nbsp;MB), so nothing is
 fetched at runtime. Inference is pure Go and runs on the request path. Rampart
-scans up to `MaxInputChars` characters, 4,096 by default, so the example denies
-longer messages before it calls `Protect`. Phone numbers are left to the model,
+scans up to `MaxInputChars` characters, 4,096 by default, and the rule denies a
+longer message without scanning it. Phone numbers are left to the model,
 because their digit shape overlaps with financial and government identifiers.
 For options and the full entity list, see the
 <Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart reference</Link.Page>.

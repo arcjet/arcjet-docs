@@ -28,10 +28,6 @@ aj = arcjet(
     ],
 )
 
-# Rampart scans at most max_input_chars characters (100,000 by default) and
-# skips the rest. Deny longer input so sensitive data can't hide past the limit.
-MAX_INPUT_CHARS = 100_000
-
 app = FastAPI()
 
 
@@ -41,9 +37,6 @@ class Message(BaseModel):
 
 @app.post("/")
 async def index(request: Request, body: Message):
-    if len(body.message) > MAX_INPUT_CHARS:
-        return JSONResponse({"error": "Message too long"}, status_code=413)
-
     decision = await aj.protect(request, sensitive_info_value=body.message)
 
     for result in decision.results:

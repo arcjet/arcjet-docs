@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"unicode/utf8"
 
 	"github.com/arcjet/arcjet-go"
 	"github.com/arcjet/arcjet-go/sensitiveinfo/rampart"
@@ -35,12 +34,6 @@ func chat(w http.ResponseWriter, r *http.Request) {
 	var body chatRequest
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, "bad request", http.StatusBadRequest)
-		return
-	}
-	// Rampart scans at most rampart.DefaultMaxInputChars characters and skips
-	// the rest. Deny longer input so sensitive data can't hide past the limit.
-	if utf8.RuneCountInString(body.Message) > rampart.DefaultMaxInputChars {
-		http.Error(w, "Message too long", http.StatusRequestEntityTooLarge)
 		return
 	}
 
