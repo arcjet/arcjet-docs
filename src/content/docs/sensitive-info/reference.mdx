@@ -538,8 +538,9 @@ the following options:
   finish. Set the client timeout above 3 seconds (the default is 2), so the
   client doesn't stop waiting first, and deny the request when
   `hasFailedOpen()` is true.
-- **Split the text** into parts and screen each one, for text longer than
-  about 100&nbsp;KB.
+- **Split the text** into parts, for text longer than about 100&nbsp;KB, and
+  screen each part in its own `guard()` call. A request screens up to two
+  different texts over 2&nbsp;KB.
 
 To detect protected health information (PHI), always use the server-side
 detector. On-device detection doesn't detect the PHI types. For more

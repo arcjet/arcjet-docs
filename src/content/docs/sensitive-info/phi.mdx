@@ -89,7 +89,7 @@ PHI detection always runs on Arcjet's servers, so long text follows the
 server-side detector's limits:
 
 - **Up to about 100&nbsp;KB per value.** Split longer text into parts and
-  screen each one.
+  screen each part in its own `guard()` call.
 - **3 seconds to screen a value over 2&nbsp;KB.** If a scan doesn't finish in
   time, a live rule fails closed, so PHI that Arcjet couldn't read isn't let
   through. Each request screens up to two distinct long values, and a third
