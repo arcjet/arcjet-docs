@@ -483,18 +483,36 @@ backend, err := rampart.New(rampart.Options{
 
 ### Long input
 
-Rampart scans text inline on the request path, so each SDK bounds how much it
-scans to keep latency predictable:
+Rampart scans text inline on the request path, so the length of the text sets
+how long the scan takes. The following table lists how much text each SDK
+scans:
 
-- **JavaScript** scans all of the text in overlapping windows. There's no
-  character limit, so scanning time grows with the length of the text. Set your
-  own maximum length if your routes accept large bodies.
-- **Python** scans up to `max_input_chars` characters, 100,000 by default.
-- **Go** scans up to `MaxInputChars` characters, 4,096 by default.
+| SDK        | Characters scanned | Option            |
+| ---------- | ------------------ | ----------------- |
+| JavaScript | All of the text    | None              |
+| Python     | 100,000 by default | `max_input_chars` |
+| Go         | 4,096 by default   | `MaxInputChars`   |
+
+In JavaScript, Rampart scans every character, so the scan time grows with the
+length of the text. Without a limit, a client could send very large bodies to
+tie up your server. Set a maximum length that fits your latency budget, and
+deny longer input before you call `protect()`:
+
+```ts
+const MAX_INPUT_CHARS = 10_000;
+
+const message = await request.text();
+if (message.length > MAX_INPUT_CHARS) {
+  return Response.json({ error: "Message too long" }, { status: 413 });
+}
+```
 
 In Python and Go, text past the limit isn't scanned. Check the length before
-you call `protect()` and deny longer input, or split it and scan each part. The
-Rampart examples on this page deny it.
+you call `protect()` and deny longer input, or split it and scan each part.
+
+The Rampart examples on this page deny long input in every SDK. Also cap the
+request body size in your server or framework, so your application doesn't
+read an oversized body into memory before it checks the length.
 
 To screen longer text without splitting it, send it as a server input to the
 server-side sensitive information detector in an
