@@ -201,9 +201,9 @@ agent starter, see
 <Link.Page href="/guards/threat-detection">Threat detection</Link.Page>.
 
 The server-side sensitive information detector screens values up to about
-100&nbsp;KB. Each request can include up to two different texts over
-2&nbsp;KB. The same text counts once, even if several inputs or detectors read
-it. If Arcjet can't screen a value, a live rule fails closed with `AJP1004`.
+100&nbsp;KB. In each call, it screens up to two `SERVER` inputs longer than
+2&nbsp;KB. Inputs that hold the same string count once. If Arcjet can't screen
+an input, including a third long one, a live rule fails closed with `AJP1004`.
 
 A value over 2&nbsp;KB can take up to 3 seconds to screen, which is longer than
 the Guard clients' 2-second default timeout. When you send long values, set the

@@ -92,8 +92,8 @@ server-side detector's limits:
   screen each part in its own `guard()` call.
 - **3 seconds to screen a value over 2&nbsp;KB.** If a scan doesn't finish in
   time, a live rule fails closed, so PHI that Arcjet couldn't read isn't let
-  through. Each request screens up to two distinct long values, and a third
-  also fails a live rule closed.
+  through. Each call screens up to two `SERVER` inputs longer than
+  2&nbsp;KB, and a third also fails a live rule closed.
 - **Set the client timeout above 3 seconds.** The Guard clients default to
   2 seconds, and a call that times out fails open. Deny the call when
   `hasFailedOpen()` is true.
