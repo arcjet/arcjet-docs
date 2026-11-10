@@ -48,7 +48,7 @@ ajToc:
     anchor: "get-started"
   - text: "How detection works"
     anchor: "how-detection-works"
-  - text: "Configuring detection"
+  - text: "Configure detection"
     anchor: "configure-detection"
     children:
       - text: "Choose which PII to block"
@@ -92,17 +92,17 @@ import MicrosoftAgentFrameworkStep from "@/snippets/ai-protection/data-loss-prev
 import RampartGo from "@/snippets/ai-protection/data-loss-prevention/go/Rampart.mdx";
 
 
-Users paste sensitive data into AI prompts – card numbers, phone numbers,
-home addresses, and whole résumés – often without realizing the risk. Once that
-data reaches your AI provider it can end up in logs, training pipelines, or model
-outputs, well outside your control.
+People often paste personal data into AI prompts – card numbers, phone
+numbers, home addresses, and whole résumés. Once that data
+reaches your AI provider, the provider's logging and retention apply to it, not
+yours.
 
 Arcjet sensitive info detection scans prompt content **inside your application**,
 before it reaches the AI provider. Detection runs locally in your own
 environment, so the raw text doesn't leave your app. The SDK reports the
-decision to Arcjet, along with the type and position of each finding, but not
-the matched text. When something is detected you choose what happens next:
-block the request, strip the data, or warn the user.
+decision to Arcjet with the type and position of each finding, but not the
+matched text. When Arcjet finds something, you decide what happens next: block
+the request, remove the data, or ask the user to edit their prompt.
 
 ## Get started
 
@@ -142,14 +142,14 @@ a named-entity-recognition (NER) model paired with deterministic recognizers:
 - **Deterministic recognizers** match structured types with validated
   patterns – card numbers, email addresses, IP addresses, URLs, and Social
   Security numbers.
-- **The NER model** detects the free-form PII people actually paste into
-  prompts – **names, street addresses, phone numbers, and government or
-  financial identifiers**. This is the data a structured-pattern matcher can't
-  catch.
+- **The NER model** detects the free-form PII that people paste into prompts –
+  **names, street addresses, phone numbers, and government or financial
+  identifiers**. These don't follow a fixed pattern, so a model finds them where
+  pattern matching can't.
 
 The SDK rule runs detection on your own infrastructure, so the text isn't sent
-to Arcjet or a third party for analysis. That's what makes it suitable to put in
-front of an AI provider. The server-side sensitive information detector in an
+to Arcjet or a third party for analysis. That makes it a good fit in front of an
+AI provider. The server-side sensitive information detector in an
 <Link.Page href="/guards/remote-policies#detectors">agent guard policy</Link.Page>
 and <Link.Page href="/coding-agents">coding agent hooks</Link.Page> screen text
 on Arcjet's side instead.
@@ -275,13 +275,13 @@ const aj = arcjet({
 });
 ```
 
-The model is bundled with the package (~14.7&nbsp;MB, quantized) so nothing is
+The model ships with the package (about 14.7&nbsp;MB, quantized), so nothing is
 fetched at runtime, and inference is fast enough to run inline on each request
-(~6.6&nbsp;ms median on Node.js). It recalls ~98% of private terms across seven
-Latin-script languages. Because it loads a native ONNX runtime it needs a server
-runtime – Node.js, Bun, or Deno, not edge – and on Next.js you must mark it as a
-server external package. For the bundler configuration, options, and the full
-accuracy and latency breakdown, see the <Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart reference</Link.Page>.
+(about 6.6&nbsp;ms median on Node.js). It recalls about 98% of private terms
+across seven Latin-script languages. Because it loads a native ONNX runtime, it
+needs a server runtime – Node.js, Bun, or Deno, not edge – and on Next.js you
+mark it as a server external package. For the bundler configuration, options,
+and the full accuracy and latency breakdown, see the <Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart reference</Link.Page>.
 
 </div>
 <div slot="python-fastapi">
@@ -318,12 +318,12 @@ aj = arcjet(
 )
 ```
 
-The model is bundled with the package (~14.7&nbsp;MB, quantized) so nothing is
+The model ships with the package (about 14.7&nbsp;MB, quantized), so nothing is
 fetched at runtime, and inference is fast enough to run inline on each request.
-It recalls ~98% of private terms across seven Latin-script languages. It loads a
-native ONNX runtime ([ONNX Runtime](https://onnxruntime.ai/)), which the extra
-installs for you. For the options and the full accuracy and latency breakdown,
-see the <Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart reference</Link.Page>.
+It recalls about 98% of private terms across seven Latin-script languages. It
+loads a native ONNX runtime ([ONNX Runtime](https://onnxruntime.ai/)), which the
+extra installs for you. For the options and the full accuracy and latency
+breakdown, see the <Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart reference</Link.Page>.
 
 </div>
 <div slot="python-flask">
@@ -360,12 +360,12 @@ aj = arcjet_sync(
 )
 ```
 
-The model is bundled with the package (~14.7&nbsp;MB, quantized) so nothing is
+The model ships with the package (about 14.7&nbsp;MB, quantized), so nothing is
 fetched at runtime, and inference is fast enough to run inline on each request.
-It recalls ~98% of private terms across seven Latin-script languages. It loads a
-native ONNX runtime ([ONNX Runtime](https://onnxruntime.ai/)), which the extra
-installs for you. For the options and the full accuracy and latency breakdown,
-see the <Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart reference</Link.Page>.
+It recalls about 98% of private terms across seven Latin-script languages. It
+loads a native ONNX runtime ([ONNX Runtime](https://onnxruntime.ai/)), which the
+extra installs for you. For the options and the full accuracy and latency
+breakdown, see the <Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart reference</Link.Page>.
 
 </div>
 <div slot="go">
@@ -377,12 +377,12 @@ Add them to `Deny`. Create the backend once at startup with `rampart.New`:
 
 <RampartGo />
 
-The model weights are bundled (~15&nbsp;MB) so nothing is fetched at runtime.
-Inference is pure Go and runs on the request path. The default
-`MaxInputChars` is `4096`, and text past that limit isn't scanned, so the
-example denies longer messages. Phone numbers are left to the model because their
-digit shape overlaps with financial and government identifiers. For options and
-the full entity list, see the
+The model weights ship with the package (about 15&nbsp;MB), so nothing is
+fetched at runtime. Inference is pure Go and runs on the request path. Rampart
+scans up to `MaxInputChars` characters, 4,096 by default, so the example denies
+longer messages before it calls `Protect`. Phone numbers are left to the model,
+because their digit shape overlaps with financial and government identifiers.
+For options and the full entity list, see the
 <Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart reference</Link.Page>.
 
 </div>
@@ -413,23 +413,23 @@ detectPII, err := arcjet.GuardSensitiveInfo(arcjet.GuardSensitiveInfoOptions{
 
 ### Choose what text to scan
 
-Pass the text to scan as `sensitiveInfoValue` (JS) / `sensitive_info_value`
-(Python) / `WithSensitiveInfoValue` (Go). For a chat endpoint this is usually
-the user's most recent message.
-Pass the full conversation history instead if you want to scan every message,
-not only the most recent one – PII can appear earlier in the exchange.
+Pass the text to scan as `sensitiveInfoValue` in JavaScript,
+`sensitive_info_value` in Python, or `WithSensitiveInfoValue` in Go. For a chat
+endpoint, this is usually the user's most recent message. To scan every message,
+pass the full conversation history instead – PII can appear earlier in the
+exchange.
 
 ### Test before you block
 
-Set `mode` to `"DRY_RUN"` (JS) / `Mode.DRY_RUN` (Python) / `ModeDryRun` (Go)
-to log detections without blocking any requests. Run this in production for a
-while to audit what PII actually shows up in your prompts, then switch to live
-mode once you're confident in the entity list.
+Set `mode` to `"DRY_RUN"` in JavaScript, `Mode.DRY_RUN` in Python, or
+`ModeDryRun` in Go to log detections without blocking requests. Run it in
+production to see which PII appears in your prompts, then switch to live mode
+when the entity list matches what you want to block.
 
 ## Combine with other protections
 
 Sensitive info detection controls _what data_ reaches your AI provider. Pair it
-with the other AI protection layers for full coverage:
+with the other AI protection layers, each of which covers a different risk:
 
 - <Link.Page href="/ai-protection/prompt-injection">Prompt injection detection</Link.Page>
   blocks hostile instructions and jailbreak attempts.

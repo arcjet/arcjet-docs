@@ -57,11 +57,17 @@ aj = arcjet_sync(
     ],
 )
 
+# Rampart scans at most max_input_chars characters (100,000 by default) and
+# skips the rest. Deny longer input so sensitive data can't hide past the limit.
+MAX_INPUT_CHARS = 100_000
+
 
 @app.post("/chat")
 def chat():
     body = request.get_json()
     message = body.get("message", "") if body else ""
+    if len(message) > MAX_INPUT_CHARS:
+        return jsonify(error="Message too long"), 413
 
     # Scan the user message for sensitive information before it reaches the
     # AI model. Pass the full conversation if you want to scan all messages.
