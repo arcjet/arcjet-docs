@@ -34,5 +34,10 @@ export async function POST(event: RequestEvent) {
     return error(403, "Forbidden");
   }
 
+  // Fail closed when Arcjet couldn't complete the check.
+  if (decision.isErrored()) {
+    return error(503, "Service unavailable");
+  }
+
   return json({ message: "Hello world" });
 }

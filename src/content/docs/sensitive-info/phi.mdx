@@ -83,6 +83,21 @@ Arcjet secures its platform, see
   your organization.
 </Aside>
 
+## Long text
+
+PHI detection always runs on Arcjet's servers, so long text follows the
+server-side detector's limits:
+
+- **Up to about 100&nbsp;KB per value.** Split longer text into parts and
+  screen each one.
+- **3 seconds to screen a value over 2&nbsp;KB.** If a scan doesn't finish in
+  time, a live rule fails closed, so PHI that Arcjet couldn't read isn't let
+  through. Each request screens up to two distinct long values, and a third
+  also fails a live rule closed.
+- **Set the client timeout above 3 seconds.** The Guard clients default to
+  2 seconds, and a call that times out fails open. Deny the call when
+  `hasFailedOpen()` is true.
+
 ## Taxonomy versions
 
 The sensitive information taxonomy is the list of entity types that Arcjet

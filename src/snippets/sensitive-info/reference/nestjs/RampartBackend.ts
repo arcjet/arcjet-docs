@@ -68,6 +68,14 @@ export class PageController {
       }
     }
 
+    // Fail closed when Arcjet couldn't complete the check.
+    if (decision.isErrored()) {
+      throw new HttpException(
+        "Service unavailable",
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+
     return this.pageService.message(body);
   }
 }

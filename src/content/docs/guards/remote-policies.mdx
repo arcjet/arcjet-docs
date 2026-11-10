@@ -202,24 +202,25 @@ agent starter, see
 
 The server-side sensitive information detector screens values up to about
 100&nbsp;KB. Arcjet allows up to 2 seconds to screen a value up to 2&nbsp;KB,
-and a live rule fails closed if that scan doesn't complete. A longer value takes
-more time, so Arcjet waits up to 3 seconds for the result. If the scan doesn't complete in
-that time, Arcjet allows the value unscreened and doesn't bill for it, so treat
-`detected: false` as inconclusive for an input that can exceed 2&nbsp;KB. Each
-request screens at most two distinct long values. Where an SDK is in the call,
-use the SDK-local kind.
+and up to 3 seconds for a longer value. If a scan doesn't finish in time, a live
+rule fails closed with `AJP1004`, so Arcjet never treats a value it couldn't
+read as clean. Each request screens up to two distinct long values, and a third
+also fails a live rule closed. Where an SDK is in the call, the SDK-local kind
+avoids that budget, except for the
+<Link.Page href="/sensitive-info/phi">PHI types</Link.Page>, which only the server-side kind detects.
 
-Your SDK's request timeout is separate from that 3-second budget. The
-JavaScript and Python Guard clients default to 2 seconds, so with the defaults a
-call can time out and fail open before a long scan finishes. To screen values
-longer than 2&nbsp;KB server-side, raise the client timeout to cover the scan
-plus network time, or use the SDK-local kind. For the timeout settings, see
+Your SDK's request timeout is separate from that 3-second budget. The Guard
+clients default to 2 seconds, so with the defaults a call can time out and fail
+open before a long scan finishes. To screen values longer than 2&nbsp;KB
+server-side, set the client timeout above 3 seconds to cover the scan plus
+network time, and deny when the decision failed open. For the timeout
+settings, see
 <Link.Page href="/guards/reference#direct-guard-api">Direct Guard API</Link.Page>.
 
 Both sensitive information kinds write their result to
 `input.signals.sensitive_info`, so you can move a policy between them by
 changing the input's exposure and the detector's kind, with no change to any
-rule.
+rule. A detector that lists PHI types must stay server-side.
 
 An expression reads a detector's result under `input.signals`, keyed by the
 detector ID:

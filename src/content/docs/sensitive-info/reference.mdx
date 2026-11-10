@@ -526,11 +526,25 @@ time for a request. The limit must be a positive whole number, and there's no
 setting that turns it off. Also cap the request body size in your server or
 framework, so your application doesn't read an oversized body into memory.
 
-To screen longer text without splitting it, send it as a server input to the
-server-side sensitive information detector in an
-<Link.Page href="/guards/remote-policies#detectors">agent guard policy</Link.Page>. It screens values up to about
-100&nbsp;KB. Large values take longer to screen, so check `hasFailedOpen()` and
-raise the client timeout above the 2-second default if needed.
+On-device detection suits typical request fields. For longer text, you have
+the following options:
+
+- **Raise the limit** when the extra latency fits your budget.
+- **Use a server input.** Send the text as a `SERVER` input to the server-side
+  sensitive information detector in an
+  <Link.Page href="/guards/remote-policies#detectors">agent guard policy</Link.Page>, which screens values up to about
+  100&nbsp;KB on Arcjet's servers. Arcjet allows up to 3 seconds to screen a
+  value over 2&nbsp;KB, and a live rule fails closed if the scan doesn't
+  finish. Set the client timeout above 3 seconds (the default is 2), so the
+  client doesn't stop waiting first, and deny the request when
+  `hasFailedOpen()` is true.
+- **Split the text** into parts and screen each one, for text longer than
+  about 100&nbsp;KB.
+
+To detect protected health information (PHI), always use the server-side
+detector. On-device detection doesn't detect the PHI types. For more
+information, see
+<Link.Page href="/sensitive-info/phi">Detect protected health information (PHI)</Link.Page>.
 
 In JavaScript and Python, the model loads on first use and is reused for every
 later request. In Go, `rampart.New` loads and dequantizes the weights, so

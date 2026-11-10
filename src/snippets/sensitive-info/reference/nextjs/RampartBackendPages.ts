@@ -20,6 +20,11 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  // Next.js parses JSON bodies, so check that the body is text before scanning.
+  if (typeof req.body !== "string") {
+    return res.status(400).json({ error: "Expected a text body" });
+  }
+
   const decision = await aj.protect(req, {
     sensitiveInfoValue: req.body,
   });
@@ -36,6 +41,11 @@ export default async function handler(
     return res
       .status(403)
       .json({ error: "Forbidden", reason: decision.reason });
+  }
+
+  // Fail closed when Arcjet couldn't complete the check.
+  if (decision.isErrored()) {
+    return res.status(503).json({ error: "Service unavailable" });
   }
 
   res.status(200).json({ name: "Hello world" });

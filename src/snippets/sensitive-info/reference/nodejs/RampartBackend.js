@@ -43,6 +43,10 @@ const server = http.createServer(async function (req, res) {
       res.writeHead(403, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Forbidden" }));
     }
+  } else if (decision.isErrored()) {
+    // Fail closed when Arcjet couldn't complete the check.
+    res.writeHead(503, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Service unavailable" }));
   } else {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ message: "Hello world" }));

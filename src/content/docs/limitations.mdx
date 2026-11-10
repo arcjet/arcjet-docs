@@ -95,6 +95,11 @@ these limits, so text with many of them reaches the limit sooner.
 Threat detection scores up to 30 distinct public hosts per call. A call that
 names more fails a live rule closed with `AJP1009`.
 
+The server-side sensitive information detector fails a live rule closed with
+`AJP1004` when it can't screen a value in time. Set the Guard client timeout
+above 3 seconds when you send values longer than 2&nbsp;KB, so the client
+doesn't stop waiting first and fail open.
+
 ## Limits on agent activity
 
 Capture events, OpenTelemetry ingest, and the Arcjet Console views built on

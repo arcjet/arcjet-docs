@@ -31,6 +31,11 @@ export async function action(args) {
     }
   }
 
+  // Fail closed when Arcjet couldn't complete the check.
+  if (decision.isErrored()) {
+    return Response.json({ error: "Service unavailable" }, { status: 503 });
+  }
+
   // We don't need to use the decision elsewhere, but you could return it to
   // the component
   return null;

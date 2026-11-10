@@ -37,6 +37,11 @@ export async function POST(req) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  // Fail closed when Arcjet couldn't complete the check.
+  if (decision.isErrored()) {
+    return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
+  }
+
   return NextResponse.json({
     message: "Hello world",
   });
