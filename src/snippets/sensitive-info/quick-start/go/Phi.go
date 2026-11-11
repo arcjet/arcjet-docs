@@ -26,7 +26,7 @@ func screenNote(ctx context.Context, userID, note string) error {
 	if err != nil {
 		return err
 	}
-	// Deny detected PHI and checks that Arcjet couldn't complete.
+	// A direct call fails open, so reject failed-open decisions as well.
 	if decision.IsDenied() || decision.HasFailedOpen() {
 		return errPHI
 	}

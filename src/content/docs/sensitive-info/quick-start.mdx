@@ -71,8 +71,8 @@ ajToc:
     children:
       - text: 1. Create a PHI policy
         anchor: "1-create-a-phi-policy"
-      - text: 2. Send the text to the policy
-        anchor: "2-send-the-text-to-the-policy"
+      - text: 2. Call the policy
+        anchor: "2-call-the-policy"
       - text: 3. Test with PHI
         anchor: "3-test-with-phi"
   - text: "FAQs"
@@ -396,12 +396,12 @@ The requests also appear on the actor's **Activity** tab in the
 
 ## Detect PHI with a server-side policy
 
-The quick start detects personal information, such as email addresses, on your
-machine. Protected health information (PHI) identifiers, such as medical record
-numbers and health plan member IDs, need Arcjet's server-side detector, which
-runs in an agent guard policy. The policy denies the call before the text
-reaches a model, a tool, or an external service, so you can stop AI agents
-receiving PHI.
+The on-device detector in the preceding steps covers personal information such
+as email addresses. Protected health information (PHI) identifiers, such as
+medical record numbers and health plan member IDs, often have no fixed format.
+Arcjet's server-side detector recognizes them from the label next to the value,
+and an agent guard policy turns each detection into a decision. Use it to stop
+AI agents receiving PHI and to stop their tools passing it on.
 
 <HipaaBaa />
 
@@ -418,10 +418,9 @@ label. Then configure the policy:
 | Deny     | `MEDICAL_RECORD_NUMBER`, `HEALTH_PLAN_BENEFICIARY_NUMBER`, `DEVICE_IDENTIFIER`, `VEHICLE_IDENTIFICATION_NUMBER`, `LICENSE_PLATE_NUMBER`, and `SSN` |
 | Rule     | `phi-in-note`, **Live**, decided by **A detector directly** with `phi`                                                                             |
 
-A rule decided by a detector needs no Rego and no test. Click **Save** to
-publish the policy. Until you publish it, the label matches no policy and the
-call isn't denied. Before you guard production traffic, set the rule to
-**Dry run** and review what it would deny, then set it live.
+A detector rule needs no Rego and no test. Click **Save** to publish. A label
+with no published policy denies nothing. For production traffic, start the rule
+in **Dry run**, review what it would deny, and then set it live.
 
 <details>
 <summary>Have your coding agent configure it</summary>
@@ -443,10 +442,22 @@ Publish it, then show me the guard() call that sends note.
 
 </details>
 
-To combine PHI detection with other conditions in Rego, see the example on
-<Link.Page href="/sensitive-info/phi#example-policy">Detect protected health information (PHI)</Link.Page>.
+To combine PHI detection with other conditions in Rego, see the
+<Link.Page href="/sensitive-info/phi#example-policy">PHI example policy</Link.Page>.
 
-### 2. Send the text to the policy
+### 2. Call the policy
+
+Where you call the policy decides what it protects:
+
+- **Before the model runs.** A direct `guard()` call on the user's text keeps
+  PHI out of the model. A direct call fails open, so reject a failed-open
+  decision as well as a `DENY`.
+- **When an agent calls a tool.** The framework wrapper screens the arguments
+  that the model wrote and stops the tool from running. The model has already
+  read that text, so this check protects the tool's destination, not the model.
+
+An agent needs both checks. A web app that sends text to a model needs only
+the first.
 
 <SlotByFramework>
   <PhiShared slot="bun" />
@@ -475,22 +486,21 @@ To combine PHI detection with other conditions in Rego, see the example on
 </SlotByFramework>
 
 A `SERVER` input sends the raw note to Arcjet, so sign the BAA before you send
-real PHI. For what Arcjet receives and how long it keeps it, see
+real PHI. For what Arcjet receives and keeps, see
 <Link.Page href="/privacy">Privacy</Link.Page>.
 
 ### 3. Test with PHI
 
-Send a note that carries a labeled medical record number and member ID. Use
-synthetic values, never real patient records:
+Send a note with a labeled medical record number and member ID. Use synthetic
+values, never real patient records:
 
 ```text
 Follow-up booked for next week. MRN: 4820193. Member ID: XEH948372615.
 ```
 
-Arcjet denies the call under the `phi-in-note` rule, and the note never
-reaches the next step. Arcjet recognizes identifiers with no fixed format, such
-as a medical record number, from the label next to the value. For what the
-detector covers and its limits, see
+Arcjet denies the note under `phi-in-note`. The direct call rejects it before
+the model runs, and in an agent, the wrapper stops the tool. For what the detector covers
+and its limits, see
 <Link.Page href="/sensitive-info/phi">Detect protected health information (PHI)</Link.Page>.
 
 ## FAQs

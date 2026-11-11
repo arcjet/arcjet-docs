@@ -1,7 +1,7 @@
 import Step from "./Phi.py?raw";
 import { Code } from "@astrojs/starlight/components";
 
-Pass the note to `guard_custom_tool` as a `SERVER` input under `inputs`. The
-`action` selects the policy, so it must match the policy's label.
+Call `screen_note()` before the agent runs, and wrap the tool with
+`guard_custom_tool`. The wrapper's `action` must match the policy's label:
 
 <Code code={Step} lang="py" title="agent.py" />

@@ -14,7 +14,7 @@ async def screen_note(user_id: str, note: str) -> None:
         # Arcjet's server-side detector reads the note for PHI.
         inputs={"note": server_input.string(note)},
     )
-    # Deny detected PHI and checks that Arcjet couldn't complete.
+    # A direct call fails open, so reject failed-open decisions as well.
     if decision.conclusion == "DENY" or decision.has_failed_open():
         raise HTTPException(
             status_code=400, detail="Remove health identifiers from the note"

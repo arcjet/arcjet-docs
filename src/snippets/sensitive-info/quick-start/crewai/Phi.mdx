@@ -1,8 +1,8 @@
 import Step from "./Phi.py?raw";
 import { Code } from "@astrojs/starlight/components";
 
-To detect PHI with CrewAI, pass the note to `register_arcjet_hooks` as a
-`SERVER` input under `inputs`. The `action` selects the policy, so it must match
-the policy's label.
+To detect PHI with CrewAI, call `screen_note()` before the agent runs, and
+register the tool with `register_arcjet_hooks`. The wrapper's `action` must
+match the policy's label:
 
 <Code code={Step} lang="py" title="agent.py" />

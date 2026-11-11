@@ -11,7 +11,7 @@ export async function screenNote(userId: string, note: string) {
     inputs: { note: policyInput.server.string(note) },
   });
 
-  // Deny detected PHI and checks that Arcjet couldn't complete.
+  // A direct call fails open, so reject failed-open decisions as well.
   if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
     throw new Error("Remove health identifiers from the note");
   }

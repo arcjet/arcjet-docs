@@ -1,7 +1,7 @@
 import Step from "./Phi.ts?raw";
 import { Code } from "@astrojs/starlight/components";
 
-Pass the note to `guardCustomTool` as a `SERVER` input under `inputs`. The
-`action` selects the policy, so it must match the policy's label.
+Call `screenNote()` before the agent runs, and wrap the tool with
+`guardCustomTool`. The wrapper's `action` must match the policy's label:
 
 <Code code={Step} lang="ts" title="agent.ts" />
