@@ -34,9 +34,11 @@ clears them after reviewing the session, or they expire.
 4. The `coding-agent.session-analysis` policy refuses risky tool kinds while a
    flag is active, and the denial names the flag.
 
-Arcjet sets flags only when a published policy reads `session_flags`. Without
-one, confirmed prompt injection findings still appear in **Activity**, but
-nothing locks.
+Arcjet sets flags only when a published policy reads `session_flags`. The
+background review of tool results for prompt injection runs only when a
+published policy uses the `prompt_injection` flag. Without one, Arcjet doesn't
+review tool results for prompt injection, so no prompt injection findings
+appear in **Activity**.
 
 ## What sets each flag
 
@@ -224,7 +226,9 @@ that set each flag.
 Open the session to see its status. The status reads **Session locked** when a
 live rule refuses follow-up calls, and **Session flagged (dry run)** when the
 rule is in dry run. For each flag, the session shows the tool call that set
-it and a short excerpt of the screened text.
+it and a short excerpt of the screened text. Arcjet deletes the excerpt
+24 hours after it processed the text, and the session then says the excerpt has
+expired. The flag stays.
 
 A denial caused by a flag shows **View source capture**, which opens the
 activity that set the flag.
@@ -241,6 +245,11 @@ session. The reason is required. Arcjet stores it on the session's activity,
 uses it to tune detection, and writes the clear to the audit log. A later
 finding can flag the session again.
 
+The reason and who cleared the flags are kept even when your organization uses
+zero data retention, and the Console says so where you enter the reason. Don't
+include customer content in it. For details, see
+<Link.Page href="/privacy#zero-data-retention">Arcjet privacy</Link.Page>.
+
 On the project's **Reviews** page, the **Pending** tab lists the sessions that
 are waiting to be cleared:
 
@@ -255,8 +264,9 @@ error report helps Arcjet improve detection and doesn't unlock a session.
 
 ## Expiry
 
-Flags expire automatically after a period with no new findings, and an
-`incomplete_screen` flag on its own expires sooner. A new session starts with
+Flags expire 24 hours after the agent's last activity in the session. An
+`incomplete_screen` flag on its own expires after 30 minutes. Ending the
+agent's session doesn't clear them. A new session starts with
 no flags.
 
 ## Check a session from an MCP client
