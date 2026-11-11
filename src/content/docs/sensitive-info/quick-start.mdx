@@ -447,17 +447,27 @@ To combine PHI detection with other conditions in Rego, see the
 
 ### 2. Call the policy
 
-Where you call the policy decides what it protects:
+Where you call the policy decides what it protects, and each call type handles
+an outage differently:
 
-- **Before the model runs.** A direct `guard()` call on the user's text keeps
-  PHI out of the model. A direct call fails open, so reject a failed-open
-  decision as well as a `DENY`.
-- **When an agent calls a tool.** The framework wrapper screens the arguments
-  that the model wrote and stops the tool from running. The model has already
-  read that text, so this check protects the tool's destination, not the model.
+| Call             | Runs                        | Protects               | If Arcjet can't complete the check                                   |
+| ---------------- | --------------------------- | ---------------------- | -------------------------------------------------------------------- |
+| Direct `guard()` | Before the model runs       | The model              | Fails open: the decision is `ALLOW`, and `hasFailedOpen()` is `true` |
+| Wrapped tool     | When the agent calls a tool | The tool's destination | Fails closed: the tool doesn't run                                   |
 
-An agent needs both checks. A web app that sends text to a model needs only
-the first.
+A direct call to `guard()` fails open, so you choose how to handle the flow.
+Check for a `DENY` and for a failed-open decision, and decide what each one
+does. For PHI, rejecting the text in both cases keeps the check fail-closed.
+
+A wrapped tool, such as one from `guardTool()`, fails closed, but you choose
+what happens in the flow. Set `onGuardError` to `"allow"` to run the tool when
+Arcjet can't complete the check. In most frameworks, `onDeny` sets what the
+model receives when the policy denies the call. Python and Go use the
+equivalent `on_guard_error`, `OnGuardError`, and `OnDeny` options.
+
+An agent needs both calls: the direct call keeps PHI out of the model, and the
+wrapper stops a tool that receives PHI anyway. A web app that sends text to a
+model needs only the direct call.
 
 <SlotByFramework>
   <PhiShared slot="bun" />

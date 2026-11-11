@@ -17,9 +17,15 @@ export async function screenNote(userId: string, note: string) {
     inputs: { note: policyInput.server.string(note) },
   });
 
-  // A direct call fails open, so reject failed-open decisions as well.
-  if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+  if (decision.conclusion === "DENY") {
+    // The note carries PHI. Ask the user to remove it.
     throw new Error("Remove health identifiers from the note");
+  }
+
+  if (decision.hasFailedOpen()) {
+    // Arcjet couldn't complete the check, so the call failed open. Reject the
+    // note to fail closed, or log the error and continue to fail open.
+    throw new Error("Couldn't check the note for PHI. Try again.");
   }
 }
 const client = new Anthropic();
@@ -44,6 +50,10 @@ export function saveNote(
     },
     {
       action: "note.saved",
+      // Fails closed: if Arcjet can't complete the check, the tool doesn't run.
+      // Set "allow" to run the tool anyway.
+      onGuardError: "deny",
+      // On a denial, the model receives the denial as the tool result.
       // Arcjet's server-side detector reads the note for PHI.
       inputs: (input) => ({
         note: policyInput.server.string(String(input.note)),

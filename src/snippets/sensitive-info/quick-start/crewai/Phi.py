@@ -16,9 +16,13 @@ def screen_note(user_id: str, note: str) -> None:
         actor=user_id,
         inputs={"note": server_input.string(note)},
     )
-    # A direct call fails open, so reject failed-open decisions as well.
-    if decision.conclusion == "DENY" or decision.has_failed_open():
+    if decision.conclusion == "DENY":
+        # The note carries PHI. Ask the user to remove it.
         raise ValueError("Remove health identifiers from the note")
+    if decision.has_failed_open():
+        # Arcjet couldn't complete the check, so the call failed open. Reject
+        # the note to fail closed, or log the error and continue to fail open.
+        raise RuntimeError("Couldn't check the note for PHI. Try again.")
 
 
 @tool("save_note")
@@ -33,6 +37,9 @@ handle = register_arcjet_hooks(
     guard=arcjet,
     tools=["save_note"],
     action="note.saved",
+    # Fails closed: if Arcjet can't complete the check, the tool doesn't run.
+    # Set "allow" to run the tool anyway.
+    on_guard_error="deny",
     # Arcjet's server-side detector reads the note for PHI.
     inputs=lambda arguments, _ctx: {"note": server_input.string(arguments["note"])},
 )

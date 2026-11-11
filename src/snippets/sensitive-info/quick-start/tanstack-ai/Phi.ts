@@ -15,9 +15,15 @@ export async function screenNote(userId: string, note: string) {
     inputs: { note: policyInput.server.string(note) },
   });
 
-  // A direct call fails open, so reject failed-open decisions as well.
-  if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+  if (decision.conclusion === "DENY") {
+    // The note carries PHI. Ask the user to remove it.
     throw new Error("Remove health identifiers from the note");
+  }
+
+  if (decision.hasFailedOpen()) {
+    // Arcjet couldn't complete the check, so the call failed open. Reject the
+    // note to fail closed, or log the error and continue to fail open.
+    throw new Error("Couldn't check the note for PHI. Try again.");
   }
 }
 
@@ -38,6 +44,12 @@ export const saveNote = toolDefinition({
 export const middleware = guardMiddleware(arcjet, {
   action: ({ toolName }) =>
     toolName === "save_note" ? "note.saved" : "tool.invoked",
+  // Fails closed: if Arcjet can't complete the check, the tool doesn't run.
+  // Set "allow" to run the tool anyway.
+  onGuardError: "deny",
+  // On a denial, stop the chat run instead of returning the denial to the
+  // model.
+  onDeny: "abort",
   inputs: ({ toolName, input }): PolicyInputMap => {
     if (toolName !== "save_note") {
       return {};

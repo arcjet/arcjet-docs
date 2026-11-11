@@ -19,7 +19,10 @@ func saveNote(_ context.Context, in noteArgs) (map[string]string, error) {
 	return map[string]string{"note": in.Note}, nil
 }
 
-var errPHI = errors.New("remove health identifiers from the note")
+var (
+	errPHI       = errors.New("remove health identifiers from the note")
+	errUnchecked = errors.New("couldn't check the note for PHI, try again")
+)
 
 // screenNote runs before the agent. It rejects a note that carries PHI, so the
 // model never receives it.
@@ -34,9 +37,14 @@ func screenNote(ctx context.Context, guard *arcjet.GuardClient, userID, note str
 	if err != nil {
 		return err
 	}
-	// A direct call fails open, so reject failed-open decisions as well.
-	if decision.IsDenied() || decision.HasFailedOpen() {
+	if decision.IsDenied() {
+		// The note carries PHI. Ask the user to remove it.
 		return errPHI
+	}
+	if decision.HasFailedOpen() {
+		// Arcjet couldn't complete the check, so the call failed open. Reject
+		// the note to fail closed, or log the error and continue to fail open.
+		return errUnchecked
 	}
 	return nil
 }
@@ -50,6 +58,15 @@ func guardedSaveNote(guard *arcjet.GuardClient) (tool.FuncTool, error) {
 	)
 	return agentframework.GuardTool(guard, fn, agentframework.ToolPolicy{
 		Action: "note.saved",
+		// Fails closed: if Arcjet can't complete the check, the tool doesn't
+		// run. Set arcjet.OnGuardErrorAllow to run the tool anyway.
+		OnGuardError: arcjet.OnGuardErrorDeny,
+		// On a denial, tell the model how to recover.
+		OnDeny: func(arcjet.GuardDecision) any {
+			return map[string]string{
+				"error": "The note contains health identifiers. Remove them and retry.",
+			}
+		},
 		// Arcjet's server-side detector reads the note for PHI.
 		Inputs: func(_ context.Context, raw json.RawMessage) (map[string]arcjet.GuardPolicyInput, error) {
 			var in noteArgs

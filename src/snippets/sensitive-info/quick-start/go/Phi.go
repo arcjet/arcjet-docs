@@ -10,7 +10,10 @@ import (
 // NewGuardClient reads ARCJET_KEY from the environment.
 var guard = must(arcjet.NewGuardClient(arcjet.GuardConfig{}))
 
-var errPHI = errors.New("remove health identifiers from the note")
+var (
+	errPHI       = errors.New("remove health identifiers from the note")
+	errUnchecked = errors.New("couldn't check the note for PHI, try again")
+)
 
 // screenNote runs before you store the note or pass it to a model.
 func screenNote(ctx context.Context, userID, note string) error {
@@ -22,13 +25,18 @@ func screenNote(ctx context.Context, userID, note string) error {
 			"note": arcjet.GuardPolicyServerString(note),
 		},
 	})
-	// Fail closed when Arcjet can't be reached.
+	// Arcjet couldn't be reached. Return the error to fail closed.
 	if err != nil {
 		return err
 	}
-	// A direct call fails open, so reject failed-open decisions as well.
-	if decision.IsDenied() || decision.HasFailedOpen() {
+	if decision.IsDenied() {
+		// The note carries PHI. Ask the user to remove it.
 		return errPHI
+	}
+	if decision.HasFailedOpen() {
+		// Arcjet couldn't complete the check, so the call failed open. Reject
+		// the note to fail closed, or log the error and continue to fail open.
+		return errUnchecked
 	}
 	return nil
 }
