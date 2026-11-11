@@ -253,12 +253,12 @@ export const main = [
             attrs: { class: "feature sensitive-information" },
           },
           {
-            label: "Protected health information",
-            link: "/sensitive-info/phi",
-          },
-          {
             label: "Entity types",
             link: "/sensitive-info/entity-types",
+          },
+          {
+            label: "Protected health information",
+            link: "/sensitive-info/phi",
           },
           {
             label: "Reference",

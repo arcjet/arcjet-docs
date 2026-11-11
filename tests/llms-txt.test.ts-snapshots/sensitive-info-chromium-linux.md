@@ -1,12 +1,13 @@
-Arcjet sensitive information detection lets you detect and block sensitive data in request bodies before it enters your application. Use it to prevent clients from sending personally identifiable information (PII) and other data you do not want to handle.
+Arcjet sensitive information detection lets you detect and block sensitive data before it enters your application, your AI prompts, or your agents’ tool calls. Use it to prevent clients from sending personally identifiable information (PII), protected health information (PHI), and other data you don’t want to handle.
 
 **What is Arcjet?** [Arcjet](https://arcjet.com) is the AI agent runtime security platform. Discover the agents running in your organization, enforce policy across every action, prompt, and tool call, and keep the evidence to prove what happened. Detect prompt injection, authorize agent tool calls, redact PII, and block bots and abuse.
 
 Sensitive information detection is Arcjet’s [AI Data Loss Prevention layer](/ai-protection/data-loss-prevention) – stopping PII from leaking into AI model context, training data, or third-party tool calls made by agents. When a user pastes a credit card number or email address into a chat prompt, Arcjet catches it before it reaches your AI provider. The SDK rule runs detection locally in your own environment, so the request body doesn’t leave your infrastructure. To apply the same detection inside agent tool handlers and pipelines, see [Arcjet Guards](/guards).
 
-Detection runs on-device with [Rampart](/sensitive-info/reference#on-device-detection-with-rampart), a named-entity-recognition (NER) model paired with deterministic recognizers. It detects email addresses, card numbers, IP addresses, and phone numbers, as well as **names, addresses, and government or financial identifiers**. Install `@arcjet/sensitive-info-rampart` for JavaScript, the `arcjet[sensitive-info-rampart]` extra for Python, or `github.com/arcjet/arcjet-go/sensitiveinfo/rampart` for Go. The model weights are bundled, so nothing is fetched at runtime. You can extend detection with custom recognizers you define.
+Arcjet detects sensitive information in the following places:
 
-Sensitive info detection works on the request body. To detect specific information in headers or other request fields, use [Arcjet filters](/filters). For AI endpoints, pair sensitive info detection with [prompt injection detection](/prompt-injection) to also block hostile instructions and jailbreak attempts before they reach your model.
+*   **Locally, in-process** – for supported entity types, detection happens within your own environment, before any data leaves your infrastructure.
+*   **On Arcjet’s servers** – for all supported entity types, detection happens on Arcjet’s platform, after the data leaves your infrastructure.
 
 When to use Arcjet sensitive info detection
 -------------------------------------------
@@ -20,46 +21,19 @@ Use sensitive information detection for any of the following purposes:
 *   Reduce your compliance burden by avoiding storage of PII and other regulated data.
 *   Prevent users from pasting card numbers or other sensitive data into generic text fields (for example, support forms, feedback forms, or chat boxes).
 *   Enforce rules that certain endpoints must not receive PII at all.
-*   Keep protected health information (PHI), such as medical record numbers and health plan member IDs, out of agent prompts and tool calls. For the PHI entity types, see [Detect protected health information (PHI)](/sensitive-info/phi).
+*   Keep protected health information (PHI), such as medical record numbers and health plan member IDs, out of agent prompts and tool calls. PHI detection runs in the server-side detector of an agent guard or coding agent policy. For the PHI entity types and how they map to HIPAA identifiers, see [Detect protected health information (PHI)](/sensitive-info/phi).
 
 For email addresses specifically, you can also use [Arcjet email validation](/email-validation) to validate and verify addresses before creating accounts or sending email.
-
-SDK-only rule
-
-Sensitive information detection inspects the request body locally inside the SDK and is not available as a [remote rule](/remote-rules). Configure it in code with the SDK.
-
-How Arcjet sensitive info detection works
------------------------------------------
-
-[Section titled “How Arcjet sensitive info detection works”](#how-arcjet-sensitive-info-detection-works)
-
-Arcjet analyzes the body of each request locally in your application environment:
-
-1.  The Rampart model scans the request body for names, addresses, and other identifiers.
-2.  Deterministic recognizers match structured types such as card numbers, IP addresses, and Social Security numbers, along with any custom recognizers you configure.
-3.  If sensitive information is found, Arcjet returns a decision so your application can block, sanitize, or otherwise handle the request.
-
-All of this logic runs locally and in-process. The SDK doesn’t send the raw request body to Arcjet.
 
 ### Detected entities
 
 [Section titled “Detected entities”](#detected-entities)
 
-Rampart detects email addresses, phone numbers, IP addresses, URLs, names, street addresses, and financial and government identifiers. For every entity type and where Arcjet detects it, see [Entity types](/sensitive-info/entity-types).
+Arcjet supports detection of various types of sensitive information in text, including contact details, network addresses, financial information, government IDs, PHI, and personal identifiers.
 
-The Rampart model is compact (a ~14.7 MB, 4-bit quantized artifact) and fast – around 6.6 ms median inference on Node.js – so it runs inline on each request, and recalls ~98% of private terms across the seven Latin-script languages it supports. See the [reference](/sensitive-info/reference#model-accuracy-and-performance) and the [model card](https://huggingface.co/nationaldesignstudio/rampart) for the full accuracy and latency breakdown.
+For every entity type and where Arcjet detects it, see [Entity types](/sensitive-info/entity-types).
 
 You can add your own [custom recognizers](/sensitive-info/reference#custom-entity-detection) to cover data types specific to your application.
-
-### Privacy and reporting
-
-[Section titled “Privacy and reporting”](#privacy-and-reporting)
-
-The SDK rule runs detection locally. The SDK reports the decision to Arcjet, along with the type and position of each finding, but not the matched text. The request body isn’t sent to the Arcjet Cloud API.
-
-This lets you enforce PII detection and compliance controls while keeping sensitive data within your own environment.
-
-The server-side sensitive information detector in an [agent guard policy](/guards/remote-policies#detectors) and [coding agent hooks](/coding-agents) screen text on Arcjet’s side. With these paths, the SDK or the coding agent sends the text to Arcjet for screening. For what Arcjet stores, see [Arcjet privacy](/privacy).
 
 Pricing
 -------
