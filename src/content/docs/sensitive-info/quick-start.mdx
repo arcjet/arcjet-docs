@@ -25,8 +25,8 @@ titleByFramework:
   tanstack-ai: "Sensitive information detection for TanStack AI"
   vercel-ai: "Sensitive information detection for Vercel AI SDK"
   vercel-eve: "Sensitive information detection for Vercel Eve"
-description: "Quick start guide for detecting sensitive information with Arcjet in your Next.js, Node.js, Bun, Remix, or SvelteKit app."
-sdkDescription: "Quick start guide for detecting sensitive information with Arcjet in your {sdk} app."
+description: "Quick start guide for detecting sensitive information, including protected health information (PHI), with Arcjet in your Next.js, Node.js, Bun, Remix, or SvelteKit app."
+sdkDescription: "Quick start guide for detecting sensitive information, including protected health information (PHI), with Arcjet in your {sdk} app."
 frameworks:
   - bun
   - claude-agent-sdk
@@ -66,6 +66,15 @@ ajToc:
         anchor: "3-protect-a-route"
       - text: 4. Test sending personal info
         anchor: "4-test-sending-personal-info"
+  - text: "Detect PHI with a server-side policy"
+    anchor: "detect-phi-with-a-server-side-policy"
+    children:
+      - text: 1. Create a PHI policy
+        anchor: "1-create-a-phi-policy"
+      - text: 2. Call the policy
+        anchor: "2-call-the-policy"
+      - text: 3. Test with PHI
+        anchor: "3-test-with-phi"
   - text: "FAQs"
     anchor: "faqs"
   - text: "What next?"
@@ -186,6 +195,26 @@ import MicrosoftAgentFrameworkStep1 from "@/snippets/sensitive-info/quick-start/
 import MicrosoftAgentFrameworkStep2 from "@/snippets/sensitive-info/quick-start/microsoft-agent-framework/Step2.mdx";
 import MicrosoftAgentFrameworkStep3 from "@/snippets/sensitive-info/quick-start/microsoft-agent-framework/Step3.mdx";
 import MicrosoftAgentFrameworkStep4 from "@/snippets/sensitive-info/quick-start/microsoft-agent-framework/Step4.mdx";
+
+import HipaaBaa from "@/snippets/sensitive-info/phi/HipaaBaa.mdx";
+import PhiShared from "@/snippets/sensitive-info/quick-start/shared/Phi.mdx";
+import PhiClaudeAgentSdk from "@/snippets/sensitive-info/quick-start/claude-agent-sdk/Phi.mdx";
+import PhiClaudeManagedAgents from "@/snippets/sensitive-info/quick-start/claude-managed-agents/Phi.mdx";
+import PhiCrewai from "@/snippets/sensitive-info/quick-start/crewai/Phi.mdx";
+import PhiGenkit from "@/snippets/sensitive-info/quick-start/genkit/Phi.mdx";
+import PhiGo from "@/snippets/sensitive-info/quick-start/go/Phi.mdx";
+import PhiGoogleAdk from "@/snippets/sensitive-info/quick-start/google-adk/Phi.mdx";
+import PhiLangchain from "@/snippets/sensitive-info/quick-start/langchain/Phi.mdx";
+import PhiLanggraph from "@/snippets/sensitive-info/quick-start/langgraph/Phi.mdx";
+import PhiMastra from "@/snippets/sensitive-info/quick-start/mastra/Phi.mdx";
+import PhiMicrosoftAgentFramework from "@/snippets/sensitive-info/quick-start/microsoft-agent-framework/Phi.mdx";
+import PhiOpenaiAgents from "@/snippets/sensitive-info/quick-start/openai-agents/Phi.mdx";
+import PhiPythonFastapi from "@/snippets/sensitive-info/quick-start/python-fastapi/Phi.mdx";
+import PhiPythonFlask from "@/snippets/sensitive-info/quick-start/python-flask/Phi.mdx";
+import PhiStrandsAgents from "@/snippets/sensitive-info/quick-start/strands-agents/Phi.mdx";
+import PhiTanstackAi from "@/snippets/sensitive-info/quick-start/tanstack-ai/Phi.mdx";
+import PhiVercelAi from "@/snippets/sensitive-info/quick-start/vercel-ai/Phi.mdx";
+import PhiVercelEve from "@/snippets/sensitive-info/quick-start/vercel-eve/Phi.mdx";
 
 Arcjet Sensitive Information Detection protects against clients sending you
 sensitive information such as personally identifiable information (PII) that
@@ -365,6 +394,125 @@ is a 400:
 The requests also appear on the actor's **Activity** tab in the
 [Arcjet Console](https://console.arcjet.com).
 
+## Detect PHI with a server-side policy
+
+The on-device detector in the preceding steps covers personal information such
+as email addresses. Protected health information (PHI) identifiers, such as
+medical record numbers and health plan member IDs, often have no fixed format.
+Arcjet's server-side detector recognizes them from the label next to the value,
+and an agent guard policy turns each detection into a decision. Use it to stop
+AI agents receiving PHI and to stop their tools passing it on.
+
+<HipaaBaa />
+
+### 1. Create a PHI policy
+
+In the [Arcjet Console](https://console.arcjet.com), go to **Policies**, click
+**New policy**, choose **Your application**, and enter `note.saved` as the
+label. Then configure the policy:
+
+| Part     | Configuration                                                                                                                                      |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Input    | `note`, a required **String** evaluated by **Arcjet Cloud**                                                                                        |
+| Detector | `phi`, **Sensitive information** running in **Arcjet Cloud** over `note`                                                                           |
+| Deny     | `MEDICAL_RECORD_NUMBER`, `HEALTH_PLAN_BENEFICIARY_NUMBER`, `DEVICE_IDENTIFIER`, `VEHICLE_IDENTIFICATION_NUMBER`, `LICENSE_PLATE_NUMBER`, and `SSN` |
+| Rule     | `phi-in-note`, **Live**, decided by **A detector directly** with `phi`                                                                             |
+
+A detector rule needs no Rego and no test. Click **Save** to publish. A label
+with no published policy denies nothing. For production traffic, start the rule
+in **Dry run**, review what it would deny, and then set it live.
+
+<details>
+<summary>Have your coding agent configure it</summary>
+
+Connect the <Link.Page href="/mcp-server">Arcjet MCP server</Link.Page> and
+give your agent this prompt:
+
+```text
+Create an Arcjet guard policy with the label note.saved.
+
+Declare note as a required SERVER string. Add a server-side sensitive
+information detector with the ID phi that reads note and denies
+MEDICAL_RECORD_NUMBER, HEALTH_PLAN_BENEFICIARY_NUMBER, DEVICE_IDENTIFIER,
+VEHICLE_IDENTIFICATION_NUMBER, LICENSE_PLATE_NUMBER, and SSN. Add a live
+DETECTOR rule, phi-in-note, decided by phi.
+
+Publish it, then show me the guard() call that sends note.
+```
+
+</details>
+
+To combine PHI detection with other conditions in Rego, see the
+<Link.Page href="/sensitive-info/phi#example-policy">PHI example policy</Link.Page>.
+
+### 2. Call the policy
+
+Where you call the policy decides what it protects, and each call type handles
+an outage differently:
+
+| Call             | Runs                        | Protects               | If Arcjet can't complete the check                                   |
+| ---------------- | --------------------------- | ---------------------- | -------------------------------------------------------------------- |
+| Direct `guard()` | Before the model runs       | The model              | Fails open: the decision is `ALLOW`, and `hasFailedOpen()` is `true` |
+| Wrapped tool     | When the agent calls a tool | The tool's destination | Fails closed: the tool doesn't run                                   |
+
+A direct call to `guard()` fails open, so you choose how to handle the flow.
+Check for a `DENY` and for a failed-open decision, and decide what each one
+does. For PHI, rejecting the text in both cases keeps the check fail-closed.
+
+A wrapped tool, such as one from `guardTool()`, fails closed, but you choose
+what happens in the flow. Set `onGuardError` to `"allow"` to run the tool when
+Arcjet can't complete the check. In most frameworks, `onDeny` sets what the
+model receives when the policy denies the call. Python and Go use the
+equivalent `on_guard_error`, `OnGuardError`, and `OnDeny` options.
+
+An agent needs both calls: the direct call keeps PHI out of the model, and the
+wrapper stops a tool that receives PHI anyway. A web app that sends text to a
+model needs only the direct call.
+
+<SlotByFramework>
+  <PhiShared slot="bun" />
+  <PhiClaudeAgentSdk slot="claude-agent-sdk" />
+  <PhiClaudeManagedAgents slot="claude-managed-agents" />
+  <PhiCrewai slot="crewai" />
+  <PhiGenkit slot="genkit" />
+  <PhiGo slot="go" />
+  <PhiGoogleAdk slot="google-adk" />
+  <PhiLangchain slot="langchain" />
+  <PhiLanggraph slot="langgraph" />
+  <PhiMastra slot="mastra" />
+  <PhiMicrosoftAgentFramework slot="microsoft-agent-framework" />
+  <PhiShared slot="nest-js" />
+  <PhiShared slot="next-js" />
+  <PhiShared slot="node-js" />
+  <PhiOpenaiAgents slot="openai-agents" />
+  <PhiPythonFastapi slot="python-fastapi" />
+  <PhiPythonFlask slot="python-flask" />
+  <PhiShared slot="remix" />
+  <PhiStrandsAgents slot="strands-agents" />
+  <PhiShared slot="sveltekit" />
+  <PhiTanstackAi slot="tanstack-ai" />
+  <PhiVercelAi slot="vercel-ai" />
+  <PhiVercelEve slot="vercel-eve" />
+</SlotByFramework>
+
+A `SERVER` input sends the raw note to Arcjet, so sign the BAA before you send
+real PHI. For what Arcjet receives and keeps, see
+<Link.Page href="/privacy">Privacy</Link.Page>.
+
+### 3. Test with PHI
+
+Send a note with a labeled medical record number and member ID. Use synthetic
+values, never real patient records:
+
+```text
+Follow-up booked for next week. MRN: 4820193. Member ID: XEH948372615.
+```
+
+Arcjet denies the note under `phi-in-note`. The direct call rejects it before
+the model runs, and in an agent, the wrapper stops the tool. For what the detector covers
+and its limits, see
+<Link.Page href="/sensitive-info/phi">Detect protected health information (PHI)</Link.Page>.
+
 ## FAQs
 
 <FAQs />
@@ -376,6 +524,11 @@ The requests also appear on the actor's **Activity** tab in the
     title="Sensitive Information reference"
     href="/sensitive-info/reference"
     description="Full details about Sensitive Info."
+  />
+  <Link.Card
+    title="Detect PHI"
+    href="/sensitive-info/phi"
+    description="HIPAA identifiers, coverage, and limits."
   />
   <Link.Card
     title="Testing"
