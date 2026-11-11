@@ -497,6 +497,10 @@ change:
 | Python     | 100,000 characters | `max_input_chars` |
 | Go         | 4,096 characters   | `MaxInputChars`   |
 
+Go's default is lower because the Go backend runs the model in pure Go, with no
+native runtime to install, and each scan takes several times longer than with
+the ONNX Runtime that JavaScript and Python use.
+
 A live rule denies text longer than the limit without scanning any of it, so
 nothing past the limit goes through unchecked. A rule in dry run mode reports
 the denial without blocking. The limit applies to `protect()`, to the local
