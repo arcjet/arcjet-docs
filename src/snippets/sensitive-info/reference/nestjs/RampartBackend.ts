@@ -25,11 +25,6 @@ export class PageService {
   }
 }
 
-// Rampart scans all of the text, so scanning time grows with its length. Deny
-// long input so one large request can't tie up the server. Raise the limit if
-// your latency budget allows.
-const MAX_INPUT_CHARS = 10_000;
-
 // This would normally go in your controller file, such as:
 // src/page/page.controller.ts
 @Controller("page")
@@ -46,10 +41,6 @@ export class PageController {
 
   @Post()
   async index(@Req() req: Request, @Body() body: string) {
-    if (body.length > MAX_INPUT_CHARS) {
-      throw new HttpException("Message too long", HttpStatus.PAYLOAD_TOO_LARGE);
-    }
-
     const decision = await this.arcjet
       .withRule(
         sensitiveInfo({
@@ -75,6 +66,14 @@ export class PageController {
       } else {
         throw new HttpException("Forbidden", HttpStatus.FORBIDDEN);
       }
+    }
+
+    // Fail closed when Arcjet couldn't complete the check.
+    if (decision.isErrored()) {
+      throw new HttpException(
+        "Service unavailable",
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
     }
 
     return this.pageService.message(body);

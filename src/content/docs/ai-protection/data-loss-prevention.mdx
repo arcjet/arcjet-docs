@@ -152,7 +152,10 @@ to Arcjet or a third party for analysis. That makes it a good fit in front of an
 AI provider. The server-side sensitive information detector in an
 <Link.Page href="/guards/remote-policies#detectors">agent guard policy</Link.Page>
 and <Link.Page href="/coding-agents">coding agent hooks</Link.Page> screen text
-on Arcjet's side instead.
+on Arcjet's side instead. Use the server-side detector for text longer than the
+SDK scans, and to detect
+<Link.Page href="/sensitive-info/phi">protected health information (PHI)</Link.Page>,
+which on-device detection doesn't cover.
 
 ## Configure detection
 
@@ -379,8 +382,8 @@ Add them to `Deny`. Create the backend once at startup with `rampart.New`:
 
 The model weights ship with the package (about 15&nbsp;MB), so nothing is
 fetched at runtime. Inference is pure Go and runs on the request path. Rampart
-scans up to `MaxInputChars` characters, 4,096 by default, so the example denies
-longer messages before it calls `Protect`. Phone numbers are left to the model,
+scans up to `MaxInputChars` characters, 4,096 by default, and the rule denies a
+longer message without scanning it. Phone numbers are left to the model,
 because their digit shape overlaps with financial and government identifiers.
 For options and the full entity list, see the
 <Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart reference</Link.Page>.

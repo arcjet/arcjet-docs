@@ -201,25 +201,19 @@ agent starter, see
 <Link.Page href="/guards/threat-detection">Threat detection</Link.Page>.
 
 The server-side sensitive information detector screens values up to about
-100&nbsp;KB. Arcjet allows up to 2 seconds to screen a value up to 2&nbsp;KB,
-and a live rule fails closed if that scan doesn't complete. A longer value takes
-more time, so Arcjet waits up to 3 seconds for the result. If the scan doesn't complete in
-that time, Arcjet allows the value unscreened and doesn't bill for it, so treat
-`detected: false` as inconclusive for an input that can exceed 2&nbsp;KB. Each
-request screens at most two distinct long values. Where an SDK is in the call,
-use the SDK-local kind.
+100&nbsp;KB. In each call, it screens up to two `SERVER` inputs longer than
+2&nbsp;KB. Inputs that hold the same string count once. If Arcjet can't screen
+an input, including a third long one, a live rule fails closed with `AJP1004`.
 
-Your SDK's request timeout is separate from that 3-second budget. The
-JavaScript and Python Guard clients default to 2 seconds, so with the defaults a
-call can time out and fail open before a long scan finishes. To screen values
-longer than 2&nbsp;KB server-side, raise the client timeout to cover the scan
-plus network time, or use the SDK-local kind. For the timeout settings, see
+A value over 2&nbsp;KB can take up to 3 seconds to screen, which is longer than
+the Guard clients' 2-second default timeout. When you send long values, set the
+client timeout above 3 seconds. For the timeout settings, see
 <Link.Page href="/guards/reference#direct-guard-api">Direct Guard API</Link.Page>.
 
 Both sensitive information kinds write their result to
 `input.signals.sensitive_info`, so you can move a policy between them by
 changing the input's exposure and the detector's kind, with no change to any
-rule.
+rule. A detector that lists PHI types must stay server-side.
 
 An expression reads a detector's result under `input.signals`, keyed by the
 detector ID:

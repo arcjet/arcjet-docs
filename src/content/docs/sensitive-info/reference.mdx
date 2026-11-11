@@ -404,6 +404,10 @@ rampart({
   device: "webgpu",
   // Minimum confidence score for a model token to count (default: 0.5).
   threshold: 0.6,
+  // Largest input to scan, in characters (default: 100_000). The rule denies
+  // longer input without scanning it. Lower it to bound latency, or raise it
+  // to accept longer text.
+  maxInputChars: 100_000,
   // Deterministic recognizers to run alongside the model (default:
   // `defaultRecognizers`). This is the extension point for custom detection –
   // add a recognizer that returns matched spans. Pass `[]` to rely on the
@@ -438,9 +442,9 @@ rampart(
         # Set this to use a GPU or other accelerator supported by your ONNX
         # Runtime install.
         providers=("CPUExecutionProvider",),
-        # Maximum number of characters scanned per request (default: 100,000).
-        # Inference runs synchronously on the request path, so text past this
-        # limit isn't scanned. Check the length before you call protect().
+        # Largest input to scan, in characters (default: 100,000). The rule
+        # denies longer input without scanning it. Lower it to bound latency,
+        # or raise it to accept longer text.
         max_input_chars=100_000,
         # Deterministic recognizers to run alongside the model (default:
         # `default_recognizers`). This is the extension point for custom
@@ -466,9 +470,9 @@ no `device` or ONNX provider option:
 backend, err := rampart.New(rampart.Options{
 	// Minimum confidence score for a model token to count (default: 0.5).
 	Threshold: 0.6,
-	// Character ceiling scanned per call (default: 4096). Text past this
-	// limit isn't scanned. Check the length before you call Protect, and
-	// raise this only if you can afford the extra latency.
+	// Largest input to scan, in characters (default: 4096). The rule denies
+	// longer input without scanning it. Raise it to accept longer text if you
+	// can afford the extra latency.
 	MaxInputChars: 4096,
 	// Deterministic recognizers run alongside the model (default:
 	// rampart.DefaultRecognizers). Pass an empty non-nil slice to rely on the
@@ -483,42 +487,70 @@ backend, err := rampart.New(rampart.Options{
 
 ### Long input
 
-Rampart scans text inline on the request path, so the length of the text sets
-how long the scan takes. The following table lists how much text each SDK
-scans:
+Rampart scans text on the request path, so longer text takes longer to scan.
+To keep that cost predictable, each SDK sets a maximum length, which you can
+change:
 
-| SDK        | Characters scanned | Option            |
+| SDK        | Default limit      | Option            |
 | ---------- | ------------------ | ----------------- |
-| JavaScript | All of the text    | None              |
-| Python     | 100,000 by default | `max_input_chars` |
-| Go         | 4,096 by default   | `MaxInputChars`   |
+| JavaScript | 100,000 characters | `maxInputChars`   |
+| Python     | 100,000 characters | `max_input_chars` |
+| Go         | 4,096 characters   | `MaxInputChars`   |
 
-In JavaScript, Rampart scans every character, so the scan time grows with the
-length of the text. Without a limit, a client could send very large bodies to
-tie up your server. Set a maximum length that fits your latency budget, and
-deny longer input before you call `protect()`:
+Go's default is lower because the Go backend runs the model in pure Go, with no
+native runtime to install, and each scan takes several times longer than with
+the ONNX Runtime that JavaScript and Python use.
+
+A live rule denies text longer than the limit without scanning any of it, so
+nothing past the limit goes through unchecked. A rule in dry run mode doesn't
+block: with `protect()` the SDK logs a warning, and with Guards Arcjet records
+the denial. The limit applies to `protect()`, to the local
+sensitive information rule in <Link.Page href="/guards">Arcjet Guards</Link.Page>, and to a `LOCAL` input in an
+agent guard policy. JavaScript counts UTF-16 code units, and Python and Go
+count Unicode code points.
+
+With `protect()`, the denial has an error reason instead of a sensitive
+information reason, because Arcjet didn't detect anything. The examples on this
+page block it with their catch-all denial. To return a clearer response, check
+for the error reason: `decision.reason.isError()` in JavaScript,
+`decision.reason_v2.type == "ERROR"` in Python, or `decision.Reason.IsError()`
+in Go:
 
 ```ts
-const MAX_INPUT_CHARS = 10_000;
-
-const message = await request.text();
-if (message.length > MAX_INPUT_CHARS) {
+if (decision.isDenied() && decision.reason.isError()) {
+  // The text is longer than the backend's scan limit.
   return Response.json({ error: "Message too long" }, { status: 413 });
 }
 ```
 
-In Python and Go, text past the limit isn't scanned. Check the length before
-you call `protect()` and deny longer input, or split it and scan each part.
+With Guards, the rule result is a denial with no detected entity types.
 
-The Rampart examples on this page deny long input in every SDK. Also cap the
-request body size in your server or framework, so your application doesn't
-read an oversized body into memory before it checks the length.
+Choose a limit that fits your latency budget. Each window of about 480
+characters is one inference pass, so a higher limit raises the worst-case scan
+time for a request. The limit must be a positive whole number, and there's no
+setting that turns it off. Also cap the request body size in your server or
+framework, so your application doesn't read an oversized body into memory.
 
-To screen longer text without splitting it, send it as a server input to the
-server-side sensitive information detector in an
-<Link.Page href="/guards/remote-policies#detectors">agent guard policy</Link.Page>. It screens values up to about
-100&nbsp;KB. Large values take longer to screen, so check `hasFailedOpen()` and
-raise the client timeout above the 2-second default if needed.
+On-device detection suits typical request fields. For longer text, you have
+the following options:
+
+- **Raise the limit** when the extra latency fits your budget.
+- **Use a server input.** Send the text as a `SERVER` input to the server-side
+  sensitive information detector in an
+  <Link.Page href="/guards/remote-policies#detectors">agent guard policy</Link.Page>, which screens values up to about
+  100&nbsp;KB on Arcjet's servers. Arcjet allows up to 3 seconds to screen a
+  value over 2&nbsp;KB, and a live rule fails closed if the scan doesn't
+  finish. Set the client timeout above 3 seconds (the default is 2), so the
+  client doesn't stop waiting first, and deny the request when
+  `hasFailedOpen()` is true.
+- **Split the text** into parts, for text longer than about 100&nbsp;KB, and
+  screen each part in its own `guard()` call. Each call screens up to two
+  `SERVER` inputs longer than 2&nbsp;KB.
+
+To detect protected health information (PHI), always use the server-side
+detector. On-device detection doesn't detect the PHI types. For more
+information, see
+<Link.Page href="/sensitive-info/phi">Detect protected health information (PHI)</Link.Page>.
 
 In JavaScript and Python, the model loads on first use and is reused for every
 later request. In Go, `rampart.New` loads and dequantizes the weights, so

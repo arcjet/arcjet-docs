@@ -57,10 +57,11 @@ rule in an <Link.Page href="/guards/remote-policies">agent guard policy</Link.Pa
 
 The following table lists the hard limit for each detection feature:
 
-| Feature                    | Limit                         | When you exceed it                                                                |
-| -------------------------- | ----------------------------- | --------------------------------------------------------------------------------- |
-| Prompt injection detection | 128&nbsp;KiB of text per call | A live rule denies the request. With `guard()`, the rule result carries `AJ1131`. |
-| Content moderation         | 128&nbsp;KiB of text per call | A live rule denies the call, and the rule result carries `AJ1141`.                |
+| Feature                         | Limit                                                    | When you exceed it                                                                  |
+| ------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Prompt injection detection      | 128&nbsp;KiB of text per call                            | A live rule denies the request. With `guard()`, the rule result carries `AJ1131`.   |
+| Content moderation              | 128&nbsp;KiB of text per call                            | A live rule denies the call, and the rule result carries `AJ1141`.                  |
+| On-device sensitive information | 100,000 characters in JavaScript and Python, 4,096 in Go | A live rule denies the request without scanning the text. You can change the limit. |
 
 Content moderation evaluates the first 60&nbsp;KB of the text. Longer text
 under the hard limit is still moderated on that first part, and Arcjet adds the
@@ -93,6 +94,11 @@ these limits, so text with many of them reaches the limit sooner.
 
 Threat detection scores up to 30 distinct public hosts per call. A call that
 names more fails a live rule closed with `AJP1009`.
+
+The server-side sensitive information detector fails a live rule closed with
+`AJP1004` when it can't screen a value in time. Set the Guard client timeout
+above 3 seconds when you send values longer than 2&nbsp;KB, so the client
+doesn't stop waiting first and fail open.
 
 ## Limits on agent activity
 
