@@ -5,6 +5,7 @@ description: "Detect medical record numbers, health plan numbers, vehicle identi
 
 import { Aside } from "@astrojs/starlight/components";
 import { Link } from "@/components/link";
+import HipaaBaa from "@/snippets/sensitive-info/phi/HipaaBaa.mdx";
 import PhiPolicy from "@/snippets/sensitive-info/phi/PhiPolicy.mdx";
 
 Protected health information (PHI) is health information that can be linked to
@@ -58,14 +59,7 @@ maps each class to the Arcjet entity types that detect it:
 
 See <Link.Page href="/sensitive-info/entity-types">Sensitive information entity types</Link.Page> for more details.
 
-<Aside type="caution" title="HIPAA and business associate agreements">
-  Arcjet supports HIPAA compliance and offers a HIPAA-compliant environment.
-  Arcjet enters into a business associate agreement (BAA) with Enterprise-level
-  customers whose use of Arcjet services involves PHI. Both parties must
-  formally execute the BAA before any PHI is processed through Arcjet. Using
-  Arcjet services for PHI without a signed BAA may result in non-compliance for
-  your organization.
-</Aside>
+<HipaaBaa />
 
 ## How PHI detection works
 
