@@ -502,8 +502,9 @@ native runtime to install, and each scan takes several times longer than with
 the ONNX Runtime that JavaScript and Python use.
 
 A live rule denies text longer than the limit without scanning any of it, so
-nothing past the limit goes through unchecked. A rule in dry run mode reports
-the denial without blocking. The limit applies to `protect()`, to the local
+nothing past the limit goes through unchecked. A rule in dry run mode doesn't
+block: with `protect()` the SDK logs a warning, and with Guards Arcjet records
+the denial. The limit applies to `protect()`, to the local
 sensitive information rule in <Link.Page href="/guards">Arcjet Guards</Link.Page>, and to a `LOCAL` input in an
 agent guard policy. JavaScript counts UTF-16 code units, and Python and Go
 count Unicode code points.
