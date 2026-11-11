@@ -24,13 +24,48 @@ Arcjet detects the identifiers that make health information PHI, so a policy
 can block the request or tool call before the identifier reaches a model, a
 log, or an external service.
 
+<Aside type="caution">
+  Detection helps you find identifiers. It doesn't de-identify data or make a
+  system HIPAA compliant on its own.
+</Aside>
+
 ## PHI entity types
 
-Arcjet detects five entity types for HIPAA identifiers that the other
-sensitive information types don't cover: medical record numbers, health plan
-beneficiary numbers, license plate numbers, vehicle identification numbers, and
-device identifiers. For the type names and what each one matches, see
-<Link.Page href="/sensitive-info/entity-types">Entity types</Link.Page>.
+HIPAA's Safe Harbor method lists 18 classes of identifier. Health information
+is de-identified under that method when all 18 are removed. The following table
+maps each class to the Arcjet entity types that detect it:
+
+| HIPAA identifier class                                                  | Arcjet entity types                                                                                         |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Names                                                                   | `GIVEN_NAME`, `SURNAME`                                                                                     |
+| Geographic subdivisions smaller than a state, including ZIP codes       | `BUILDING_NUMBER`, `STREET_NAME`, `SECONDARY_ADDRESS`, `CITY`, `ZIP_CODE` (no county, precinct, or geocode) |
+| Dates related to a person, other than the year, and ages over 89        | Unsupported                                                                                                 |
+| Telephone numbers                                                       | `PHONE_NUMBER`                                                                                              |
+| Fax numbers                                                             | `PHONE_NUMBER`                                                                                              |
+| Email addresses                                                         | `EMAIL`                                                                                                     |
+| Social Security numbers                                                 | `SSN`                                                                                                       |
+| Medical record numbers                                                  | `MEDICAL_RECORD_NUMBER`                                                                                     |
+| Health plan beneficiary numbers                                         | `HEALTH_PLAN_BENEFICIARY_NUMBER`                                                                            |
+| Account numbers                                                         | `BANK_ACCOUNT` (bank accounts only)                                                                         |
+| Certificate and license numbers                                         | `DRIVERS_LICENSE` (driver's licenses only)                                                                  |
+| Vehicle identifiers and serial numbers, including license plate numbers | `LICENSE_PLATE_NUMBER`, `VEHICLE_IDENTIFICATION_NUMBER`                                                     |
+| Device identifiers and serial numbers                                   | `DEVICE_IDENTIFIER`                                                                                         |
+| Web URLs                                                                | `URL`                                                                                                       |
+| IP addresses                                                            | `IP_ADDRESS`                                                                                                |
+| Biometric identifiers, including finger and voice prints                | Unsupported                                                                                                 |
+| Full-face photographs and comparable images                             | Unsupported                                                                                                 |
+| Any other unique identifying number, characteristic, or code            | Unsupported                                                                                                 |
+
+See <Link.Page href="/sensitive-info/entity-types">Sensitive information entity types</Link.Page> for more details.
+
+<Aside type="caution" title="HIPAA and business associate agreements">
+  Arcjet supports HIPAA compliance and offers a HIPAA-compliant environment.
+  Arcjet enters into a business associate agreement (BAA) with Enterprise-level
+  customers whose use of Arcjet services involves PHI. Both parties must
+  formally execute the BAA before any PHI is processed through Arcjet. Using
+  Arcjet services for PHI without a signed BAA may result in non-compliance for
+  your organization.
+</Aside>
 
 ## How PHI detection works
 
@@ -74,15 +109,6 @@ Arcjet secures its platform, see
 <Link.Page href="/security">Arcjet security</Link.Page> and the
 [Arcjet Trust Center](https://trust.arcjet.com).
 
-<Aside type="caution" title="HIPAA and business associate agreements">
-  Arcjet supports HIPAA compliance and offers a HIPAA-compliant environment.
-  Arcjet enters into a business associate agreement (BAA) with Enterprise-level
-  customers whose use of Arcjet services involves PHI. Both parties must
-  formally execute the BAA before any PHI is processed through Arcjet. Using
-  Arcjet services for PHI without a signed BAA may result in non-compliance for
-  your organization.
-</Aside>
-
 ## Long text
 
 PHI detection always runs on Arcjet's servers, so long text follows the
@@ -90,15 +116,12 @@ server-side detector's limits:
 
 - **Up to about 100&nbsp;KB per value.** Split longer text into parts and
   screen each part in its own `guard()` call.
-- **3 seconds to screen a value over 2&nbsp;KB.** If a scan doesn't finish in
-  time, a live rule fails closed, so PHI that Arcjet couldn't read isn't let
-  through.
+- Most calls should complete within a second, but we set a maximum of 3 seconds
+  for screening a value over 2&nbsp;KB. After that, the result times out and
+  fails closed.
 - **Two long inputs per call.** Arcjet screens up to two `SERVER` inputs
   longer than 2&nbsp;KB in each `guard()` call. If a call sends a third, a live
   rule fails closed. Inputs that hold the same text count once.
-- **Set the client timeout above 3 seconds.** The Guard clients default to
-  2 seconds, and a call that times out fails open. Deny the call when
-  `hasFailedOpen()` is true.
 
 ## Taxonomy versions
 
@@ -149,43 +172,6 @@ is `true` when the detector finds a listed type, and `entities` lists the types
 it found. To deny on every listed type with no Rego, declare a `DETECTOR` rule
 over the detector instead. For more examples, see
 <Link.Page href="/guards/policy-examples">Policy examples</Link.Page>.
-
-## Combine PHI types with other entity types
-
-HIPAA's Safe Harbor method lists 18 classes of identifier. Health information
-is de-identified under that method when all 18 are removed. The PHI types cover
-some of the classes, and the other entity types cover others. List both in a
-detector's filter to cover more of them. The following table maps each class
-to the Arcjet entity types that detect it:
-
-| HIPAA identifier class                                                  | Arcjet entity types                                                                                         |
-| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Names                                                                   | `GIVEN_NAME`, `SURNAME`                                                                                     |
-| Geographic subdivisions smaller than a state, including ZIP codes       | `BUILDING_NUMBER`, `STREET_NAME`, `SECONDARY_ADDRESS`, `CITY`, `ZIP_CODE` (no county, precinct, or geocode) |
-| Dates related to a person, other than the year, and ages over 89        | Unsupported                                                                                                 |
-| Telephone numbers                                                       | `PHONE_NUMBER`                                                                                              |
-| Fax numbers                                                             | `PHONE_NUMBER`                                                                                              |
-| Email addresses                                                         | `EMAIL`                                                                                                     |
-| Social Security numbers                                                 | `SSN`                                                                                                       |
-| Medical record numbers                                                  | `MEDICAL_RECORD_NUMBER`                                                                                     |
-| Health plan beneficiary numbers                                         | `HEALTH_PLAN_BENEFICIARY_NUMBER`                                                                            |
-| Account numbers                                                         | `BANK_ACCOUNT` (bank accounts only)                                                                         |
-| Certificate and license numbers                                         | `DRIVERS_LICENSE` (driver's licenses only)                                                                  |
-| Vehicle identifiers and serial numbers, including license plate numbers | `LICENSE_PLATE_NUMBER`, `VEHICLE_IDENTIFICATION_NUMBER`                                                     |
-| Device identifiers and serial numbers                                   | `DEVICE_IDENTIFIER`                                                                                         |
-| Web URLs                                                                | `URL`                                                                                                       |
-| IP addresses                                                            | `IP_ADDRESS`                                                                                                |
-| Biometric identifiers, including finger and voice prints                | Unsupported                                                                                                 |
-| Full-face photographs and comparable images                             | Unsupported                                                                                                 |
-| Any other unique identifying number, characteristic, or code            | Unsupported                                                                                                 |
-
-For what each entity type matches, see
-<Link.Page href="/sensitive-info/entity-types">Sensitive information entity types</Link.Page>.
-
-<Aside type="caution">
-  Detection helps you find identifiers. It doesn't de-identify data or make a
-  system HIPAA compliant on its own.
-</Aside>
 
 ## Related
 

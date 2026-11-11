@@ -10,27 +10,7 @@ such as an email address or a card number. You list entity types in a
 sensitive information rule or detector to choose what Arcjet allows or denies.
 This page lists every entity type, grouped by category.
 
-Each entry shows what the type matches, then the following:
-
-- **Version** is the sensitive information taxonomy version that added the
-  type. As Arcjet supports new types, the version moves forward. For how a
-  detector uses the version, see
-  <Link.Page href="/guards/remote-policies#sensitive-information-taxonomy-versions">Sensitive information taxonomy versions</Link.Page>.
-- **Detected in** shows where Arcjet detects the type:
-  - **SDK** is the SDK-local `sensitiveInfo` rule and the SDK-local detector in
-    an agent guard policy. Both run
-    <Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart</Link.Page>
-    in your process. For which types Rampart matches with a validated pattern
-    and which it leaves to its model, see
-    <Link.Page href="/sensitive-info/reference#structured-type-matching">Structured type matching</Link.Page>.
-  - **Server** is the server-side sensitive information detector in an agent
-    guard or coding agent policy. For more information, see
-    <Link.Page href="/guards/remote-policies#detectors">Detectors</Link.Page>.
-
-In the SDK, each type is an `ArcjetSensitiveInfoType` in JavaScript, a
-`SensitiveInfoEntityType` in Python, and an `arcjet.EntityType` in Go. To detect
-types that aren't on this page, use
-<Link.Page href="/sensitive-info/reference#custom-entity-detection">custom entity detection</Link.Page>.
+**Local** means the SDK detects the type in your process. **Server** means the server-side detector run on Arcjet's platform will detects it.
 
 ## All entity types
 
@@ -62,7 +42,27 @@ types that aren't on this page, use
 | `VEHICLE_IDENTIFICATION_NUMBER` | Server | 2 |
 | `DEVICE_IDENTIFIER` | Server | 2 |
 
-**Local** means the SDK detects the type in your process. **Server** means the server-side detector in a policy detects it. The sections that follow describe each type by category.
+Each entry shows what the type matches, then the following:
+
+- **Version** is the sensitive information taxonomy version that added the
+  type. As Arcjet supports new types, the version moves forward. You choose when to adopt new types. For how a
+  detector uses the version, see
+  <Link.Page href="/guards/remote-policies#sensitive-information-taxonomy-versions">Sensitive information taxonomy versions</Link.Page>.
+- **Detected in** shows where Arcjet detects the type:
+  - **SDK** is the SDK-local `sensitiveInfo` rule and the SDK-local detector in
+    an agent guard policy. Both run
+    <Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">Rampart</Link.Page>
+    in your process. For which types Rampart matches with a validated pattern
+    and which it leaves to its model, see
+    <Link.Page href="/sensitive-info/reference#structured-type-matching">Structured type matching</Link.Page>.
+  - **Server** is the server-side sensitive information detector in an agent
+    guard or coding agent policy. For more information, see
+    <Link.Page href="/guards/remote-policies#detectors">Detectors</Link.Page>.
+
+In the SDK, each type is an `ArcjetSensitiveInfoType` in JavaScript, a
+`SensitiveInfoEntityType` in Python, and an `arcjet.EntityType` in Go. To detect
+types that aren't on this page, use
+<Link.Page href="/sensitive-info/reference#custom-entity-detection">custom entity detection</Link.Page>.
 
 ## Contact
 
