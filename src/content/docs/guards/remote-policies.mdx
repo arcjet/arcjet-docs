@@ -129,9 +129,10 @@ statement doesn't fire, so a required input makes the dependency explicit.
 
 Arcjet checks each call's inputs against the policy before it evaluates a rule.
 If a required input is missing, or a declared input has the wrong kind,
-exposure, or size, the call reports `AJP1003` naming the input, and each live
-rule fails closed. A malformed call can't pass a rule that it would otherwise
-fail.
+exposure, or size, the call's inputs are invalid, and a policy with live rules
+fails closed. The expression rules report `AJP1003` naming the input, and a
+detector that reads it reports its own error. A malformed call can't pass a
+rule that it would otherwise fail.
 
 An input that the policy doesn't declare can't affect any rule, so Arcjet drops
 it, evaluates the policy, and adds an `AJ1060` warning that names the input. As

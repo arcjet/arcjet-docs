@@ -80,8 +80,8 @@ call to 50 rules or fewer and split a larger set across calls.
 
 An agent guard policy evaluates the inputs that each guard call sends. The
 following table lists the limits on those inputs. If a call goes over any of
-them, Arcjet treats its inputs as invalid, and every live rule in the policy
-fails closed with `AJP1003`.
+them, Arcjet treats its inputs as invalid, and a policy with live rules fails
+closed. The policy's expression rules report `AJP1003`.
 
 | Limit                    | Value                                     |
 | ------------------------ | ----------------------------------------- |
