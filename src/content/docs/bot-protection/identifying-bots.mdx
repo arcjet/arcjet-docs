@@ -158,7 +158,9 @@ Every bot in `CATEGORY:AI_AGENT` is also in `CATEGORY:AI`, so a rule that
 denies `CATEGORY:AI` also blocks AI agents. To block AI crawlers and let AI
 agents through, use an `allow` list that includes `CATEGORY:AI_AGENT`. An
 `allow` list blocks every other detected bot, so also include the other
-categories that you rely on, such as `CATEGORY:SEARCH_ENGINE`:
+categories that you rely on, such as `CATEGORY:SEARCH_ENGINE`. Some AI
+search crawlers, such as OAI-SearchBot and YouBot, are also in
+`CATEGORY:SEARCH_ENGINE`, so allowing that category lets them through:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
