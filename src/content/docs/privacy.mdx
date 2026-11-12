@@ -136,30 +136,80 @@ For organizations that can't allow a vendor to store customer content, Arcjet
 offers zero data retention (ZDR). To find out whether your organization is
 eligible, contact [support@arcjet.com](mailto:support@arcjet.com).
 
-With ZDR, Arcjet evaluates requests and actions as usual, so your protections
-work the same way. The difference is what Arcjet keeps after it responds:
+With ZDR, Arcjet evaluates requests and agent activity on the full input, so
+your protections work the same way. After it responds, Arcjet keeps only a
+limited record of each decision, for debugging, performance, and billing.
 
-- **Kept: decision structure.** The allow or deny conclusion, the rules that
-  fired, timings, structural metadata such as tool names and kinds, and the
-  shape of each policy input.
-- **Not kept: customer content.** Prompts, tool arguments, server policy input
-  values, and other metadata that carries a value. A tool name that Arcjet
-  records as decision metadata is kept, but the same text sent as a server
-  policy input value isn't.
-- **Unchanged: request metadata.** Records from `protect()` still include the
-  request metadata processed in the cloud – the IP address, headers, custom
-  characteristics, and email addresses used for validation.
+### What Arcjet keeps
 
-Log exports that Arcjet sends for you contain the same records, without the
-customer content.
+Depending on the product, each record contains only:
+
+- Arcjet-issued identifiers for the site, decision, capture, and rule, and your
+  site key.
+- The time Arcjet received the request and where it processed it.
+- The SDK and its version.
+- The policy and rule IDs, the policy revision, and each rule's type and mode.
+- The allow, deny, or error outcome, with a fixed reason code and error code.
+- For coding agents: the hook event, the tool category (such as `shell` or
+  `file_write`), the agent vendor, product, and surface, and the permission
+  mode.
+- Session flags, such as `prompt_injection`.
+- Latency, and counts of requests, rules, and tokens.
+
+Rate limit and Shield counters use hashed keys and expire with the rule's
+window.
+
+### What Arcjet doesn't keep
+
+Arcjet doesn't keep request IP addresses, headers, paths, query parameters,
+email addresses, prompts, tool arguments or results, transcripts, server policy
+input values, rule labels or metadata, tool, MCP server, or model names, or
+generated summaries. Because tool names aren't kept, activity can't be broken
+down by individual tool.
+
+Your own SDK capture event names are recorded as `other`. Claude Compliance
+imports are recorded as the event type and time only.
+
+Log exports that Arcjet sends for you contain the same limited records.
 
 ### Agent session data
 
-Agent session analysis needs recent session context to work. When it's enabled,
-Arcjet temporarily retains session data – such as prompts, tool call details,
-and analysis findings – while the session is active and for up to 24 hours
-after. That window lets you resume a session and lets administrators review a
-locked session. Arcjet then deletes the data automatically.
+Session analysis rules can use the minimum recent content that their decisions
+need. Arcjet deletes each item when its session ends and, in any case, no later
+than 24 hours after it processed the item. Pausing, retrying, or resuming a
+session doesn't extend that deadline.
+
+A session's flags stay active until a Console user clears them or 24 hours pass
+with no activity from the agent. Ending the agent's session doesn't clear them.
+After the content that set a flag is deleted, the session still shows which
+policy, rule, and flag applied and the tool category, but not the text or the
+tool name that triggered it.
+
+Arcjet reviews tool results for prompt injection in the background only when a
+published policy uses the `prompt_injection` session flag.
+
+### What zero data retention doesn't cover
+
+Two kinds of data are kept as usual, because you supply them on purpose:
+
+- **Discovery data from devices that you enroll.** If you deploy Arcjet
+  Discovery, the AI apps, services, and devices that it reports are kept so that
+  you can review them.
+- **The reason that you enter when you clear a session flag.** Arcjet keeps it,
+  with who cleared the flag, as the record of the decision. The Console shows a
+  notice where you enter it.
+
+### Debug a decision under zero data retention
+
+After the content is deleted, Arcjet can show the policy, rule, outcome, and
+reason code for a decision, but can't reconstruct the content. Where a field
+wasn't kept, the Console, API, CLI, and MCP server say so rather than showing
+an empty value. To keep a complete record of a decision, store the decision that
+the SDK returns in your own systems.
+
+Traffic that Arcjet processed before ZDR took effect for your organization
+follows the previous storage periods, unless you ask
+[support@arcjet.com](mailto:support@arcjet.com) to delete it.
 
 ## Geographic processing
 
