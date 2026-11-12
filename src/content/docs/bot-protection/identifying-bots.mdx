@@ -84,6 +84,8 @@ We provide the following categories:
 - `CATEGORY:ACADEMIC`: Scrape data for research purposes
 - `CATEGORY:ADVERTISING`: Scrape data for advertising and marketing purposes
 - `CATEGORY:AI`: Scrape data for AI and LLM purposes
+- `CATEGORY:AI_AGENT`: Fetch a page on demand for a person using an AI product.
+  Every bot in this category is also in `CATEGORY:AI`
 - `CATEGORY:AMAZON`: Scrape data for Amazon products and services
 - `CATEGORY:APPLE`: Scrape data for Apple products and services
 - `CATEGORY:ARCHIVE`: Scrape data for archival purposes
@@ -143,6 +145,74 @@ The Python SDK also accepts the underlying string identifiers (for example,
 `"CATEGORY:SEARCH_ENGINE"`) if you prefer not to import the enum.
 </TabItem>
 </Tabs>
+
+### Allow AI agents and block AI crawlers
+
+`CATEGORY:AI_AGENT` contains the AI bots that fetch a page on demand for a
+person who is waiting on the answer, such as ChatGPT-User, Claude-User,
+Perplexity-User, and coding agents such as Claude Code and Cursor. The rest of
+`CATEGORY:AI` collects pages ahead of time, for model training or for an AI
+search index.
+
+Every bot in `CATEGORY:AI_AGENT` is also in `CATEGORY:AI`, so a rule that
+denies `CATEGORY:AI` also blocks AI agents. To block AI crawlers and let AI
+agents through, use an `allow` list that includes `CATEGORY:AI_AGENT`. An
+`allow` list blocks every other detected bot, so also include the other
+categories that you rely on, such as `CATEGORY:SEARCH_ENGINE`. Some AI
+search crawlers, such as OAI-SearchBot and YouBot, are also in
+`CATEGORY:SEARCH_ENGINE`, so allowing that category lets them through:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+detectBot({
+   mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
+   // Block all bots except search engines and AI agents
+   allow: [
+      "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc
+      "CATEGORY:AI_AGENT", // ChatGPT-User, Claude-User, coding agents, etc
+   ],
+}),
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+from arcjet import BotCategory, detect_bot, Mode
+
+detect_bot(
+    mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
+    # Block all bots except search engines and AI agents
+    allow=[
+        BotCategory.SEARCH_ENGINE,  # Google, Bing, etc
+        BotCategory.AI_AGENT,  # ChatGPT-User, Claude-User, coding agents, etc
+    ],
+)
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+arcjet.DetectBot(arcjet.BotOptions{
+	Mode: arcjet.ModeLive, // Blocks requests. Use ModeDryRun to log only.
+	// Block all bots except search engines and AI agents
+	Allow: []string{
+		arcjet.BotCategorySearchEngine, // Google, Bing, etc
+		arcjet.BotCategoryAIAgent,      // ChatGPT-User, Claude-User, coding agents, etc
+	},
+})
+```
+
+</TabItem>
+</Tabs>
+
+Coding agents such as Claude Code fetch pages from the developer's own
+computer, not from the AI company's servers. Arcjet can't verify them against
+the company's published IP addresses, so Arcjet reports these bots as neither
+verified nor spoofed.
 
 Only configured categories are checked for performance reasons. Each detected
 bot must be compared to a category, so the worst case performance is
