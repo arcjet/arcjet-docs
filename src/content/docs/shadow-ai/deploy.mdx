@@ -1,6 +1,6 @@
 ---
 title: "Deploy the endpoint agent"
-description: "Deploy the Arcjet Discovery endpoint agent to managed macOS and Windows devices with your MDM tool, so that you can find shadow AI across your organization."
+description: "Install Arcjet Discovery on a Mac, approve its network extension, enroll it in your project, and verify reporting before an MDM rollout."
 ---
 
 import { Link } from "@/components/link";
@@ -13,52 +13,233 @@ connections to AI services to your Arcjet project.
 The agent runs in the background as a system service, so it keeps reporting
 without anyone opening an app. For more information about what it reports, see <Link.Page href="/shadow-ai/data-collected">What Discovery collects</Link.Page>.
 
+The procedures on this page cover the Mac installer. Start with one pilot Mac,
+then use your MDM tool for a wider rollout. You can also install on one Mac
+without MDM, with a local administrator approving the macOS permissions.
+For Windows devices, contact <Link.Page href="/support">Arcjet support</Link.Page> for deployment guidance.
+
 ## Before you begin
 
 Make sure that you have the following:
 
-- Administrator access to your Arcjet team.
-- Devices enrolled in your MDM tool, and permission to deploy software to
-  them.
+- An Arcjet team administrator who can select the project and create
+  enrollment tokens.
+- A Mac running macOS 26 or later, with System Integrity Protection enabled.
+- A local administrator for manual installation, or permission to deploy
+  device profiles and run installation jobs as root through your MDM tool.
+- For MDM rollout, a Mac that is already enrolled in your MDM tool.
+- A signed, notarized Mac installer from Arcjet, with its version and SHA-256
+  checksum.
+- Network access to `api.arcjet.com` for enrollment and `decide.arcjet.com`
+  for reporting, over HTTPS. Detection updates also use `detections.arcjet.com`.
 
 Tell the people whose devices you deploy to that the agent records which AI
 services and apps they use.
 
-## Deploy the agent
+Your Arcjet administrator can prepare the profile and token; your IT provider
+performs installation with MDM or local administrator access.
+The provider needs the installer and deployment instructions, not Arcjet's
+signing private keys or notarization credentials. Give the provider access to
+the enrollment token through an approved secret-delivery channel.
 
-To deploy the agent to your devices, do the following:
+## Get and verify the installer
 
 1. In the [Arcjet Console](https://console.arcjet.com), open your project and
    select the **Discovery** tab.
-2. Open the deployment steps, and then create an enrollment token. The token
-   connects devices to your project. Copy the token when it appears, because
-   the Console shows it only once.
-3. Download the agent from the Console.
-4. In your MDM tool, deploy the agent and the enrollment token to your devices
-   by following the steps in the Console. Start with a small group of devices.
-5. In the **Discovery** tab, open **Devices** and confirm that each device is
-   reporting.
+2. Select **Add one Mac** for manual installation, or **Deploy Arcjet** for
+   the **MDM rollout** instructions. Check that the selected project is the
+   destination for this Mac.
+3. Select **Download Mac installer**. Expand the version and checksum details
+   to get the expected SHA-256. If the installer is unavailable, contact <Link.Page href="/support">Arcjet support</Link.Page> for a signed installer and checksum before starting a rollout.
+4. On the Mac, verify the downloaded package:
 
-Treat the enrollment token like a password. Deliver it to devices only through
-your MDM tool.
+   ```sh
+   shasum -a 256 "PATH_TO_PACKAGE"
+   /usr/sbin/pkgutil --check-signature "PATH_TO_PACKAGE"
+   /usr/sbin/spctl --assess --type install --verbose=2 "PATH_TO_PACKAGE"
+   ```
 
-The agent needs system-level permissions to observe network connections. When
-your MDM tool installs the agent, it grants those permissions, so people don't
-need to approve anything on their device.
+   Replace `PATH_TO_PACKAGE` with the downloaded package's path. Compare the
+   checksum with the value from Console or Arcjet. The package must have an
+   accepted Developer ID Installer signature for Arcjet Labs, Inc., team
+   `222M4T5VGQ`, and pass Gatekeeper assessment. If a check fails, stop and
+   contact Arcjet. Don't bypass macOS security checks or use a development or
+   unsigned test package for rollout.
+
+## Install on one Mac
+
+Use the **Manual install** tab for a pilot that doesn't require unattended
+installation. This path doesn't install an MDM profile. If an Arcjet policy is
+already enforced by MDM, your device administrator manages its approvals and
+removal.
+
+1. Install the verified package with the macOS installer, or run:
+
+   ```sh
+   sudo /usr/sbin/installer -pkg "PATH_TO_PACKAGE" -target /
+   ```
+
+   Replace `PATH_TO_PACKAGE` with the downloaded package's path.
+
+2. Open **Arcjet** from **Applications** and select **Set Up Discovery**.
+   Follow the macOS prompts to allow the network extension and content filter.
+   If a restart is required, restart the Mac and reopen Arcjet.
+3. In Console's **Manual install** tab, enter a **Mac name**, choose a token
+   expiry, and select **Generate enrollment token**. This token enrolls one
+   Mac and is shown only once. Create it close to installation time.
+4. In Terminal on that Mac, run:
+
+   ```sh
+   sudo /bin/bash \
+     "/Library/Application Support/Arcjet/enroll-managed.sh" \
+     --interactive
+   ```
+
+   Enter your administrator password, paste the token at the hidden prompt,
+   and enter the same Mac name. Use letters, numbers, spaces, dots,
+   underscores, or hyphens. The token doesn't enter shell history.
+
+5. Return to Arcjet. Setup progresses through **Installed**, **Extension
+   approved**, **Enrolled**, and **Reporting**. Then follow <Link.Page href="/shadow-ai/deploy#verify-the-local-installation">the local installation checks</Link.Page> and <Link.Page href="/shadow-ai/deploy#confirm-that-devices-are-reporting">reporting checks</Link.Page>.
+
+## Deploy through MDM
+
+Installing the package alone doesn't preapprove Arcjet's permissions. For
+unattended deployment, install the device profile before the package.
+
+1. In Console, open **Discovery > Deploy Arcjet > MDM rollout** and select
+   **Download MDM profile**. Deploy this profile on the device channel and
+   wait for the pilot Mac to acknowledge it before installing the package.
+
+   The profile approves Arcjet's network extension, configures its socket
+   content filter and background service, and enforces the managed settings.
+   It contains public settings, not enrollment credentials. Keep the Arcjet
+   app and filter settings together when importing the profile into your MDM.
+
+2. Deploy the verified package through your MDM's package-installation job,
+   running as root. If macOS requires a restart, complete it before continuing.
+3. In the **MDM rollout** tab, enter a **Rollout name**, token expiry, and
+   **Maximum devices**, then select **Generate enrollment token**. Use a
+   device limit that matches the intended pilot or deployment group.
+4. Use your MDM's protected secret delivery to supply this JSON through
+   standard input to the enrollment command:
+
+   ```json
+   { "token": "ENROLLMENT_TOKEN", "deviceName": "MAC_NAME" }
+   ```
+
+   Replace the following:
+
+   - `ENROLLMENT_TOKEN`: the token shown once in Console.
+   - `MAC_NAME`: the name that identifies this Mac in your inventory.
+
+   Run the installed wrapper as root:
+
+   ```sh
+   /bin/bash "/Library/Application Support/Arcjet/enroll-managed.sh"
+   ```
+
+   Configure secret redaction in the MDM job and keep shell tracing disabled.
+   Don't embed the token in a script, command argument, profile, package, or
+   log. The wrapper pauses a running service for enrollment and restores it
+   even if enrollment fails. A service that an administrator deliberately
+   stopped stays stopped.
+
+5. Confirm the pilot Mac's local installation and reporting before adding
+   devices. Verify reporting after closing app windows, restarting the service
+   or Mac, and restoring connectivity after an offline interval.
+
+An enrollment token exchanges for a credential specific to each Mac. Expiring
+or revoking the rollout token doesn't revoke Macs that are already enrolled.
+Revoke unused tokens after a rollout. To stop an enrolled Mac from reporting,
+revoke the device from **Devices** in Console.
+
+## Verify the local installation
+
+Run these commands as a local administrator, or as root through MDM without
+`sudo`:
+
+```sh
+sudo /Applications/Arcjet.app/Contents/MacOS/ArcjetService \
+  verify-install
+sudo /Applications/Arcjet.app/Contents/MacOS/ArcjetService \
+  status
+```
+
+`verify-install` checks that the service and filter are running the installed
+version and build. Exit code `0` means the local check passed; `75` means a
+restart is still required. Investigate other failures before continuing.
+
+In the status output, check `filterRunning`, `isConfigured`, `needsAttention`,
+and the service and filter release information. A successful local check
+doesn't establish that Arcjet received a report.
 
 ## Confirm that devices are reporting
 
-The **Devices** view lists each enrolled device and shows whether it's
-reporting. A device's first AI activity appears after someone on it uses an AI
-app or opens an AI service in a browser. Activity then appears in the
-**People**, **Devices**, and **Providers** views.
+1. In your project's **Discovery > Devices** view, find the Mac and check
+   that it is reporting with a recent device report.
+2. Open an AI website or use an AI app on that Mac. You can also create a test
+   connection without an AI account or API key:
+
+   ```sh
+   curl --http1.1 --max-time 15 -o /dev/null https://api.anthropic.com/
+   ```
+
+   An HTTP error from this unauthenticated request is expected. The check is
+   for the connection metadata reaching Discovery, not a successful AI request.
+
+3. In the same project's Discovery view, confirm fresh activity for the Mac,
+   including the expected provider and client app. A heartbeat alone doesn't
+   verify connection capture. You can assign the Mac's local accounts to people
+   from its device page; they don't need Console accounts.
+4. Close Arcjet's windows and repeat the connection test. Confirm that the
+   background service continues reporting.
 
 After the first devices report, deploy the agent to the rest of your fleet.
 
-## Update or remove the agent
+## Troubleshoot installation and enrollment
 
-To update the agent, deploy the new version with your MDM tool.
+| Symptom | Next step |
+| --- | --- |
+| The installer isn't available in Console. | Contact Arcjet for a signed installer and its checksum. |
+| macOS requests approval during an MDM rollout. | Confirm the Arcjet device profile was applied before the package and includes the extension, content filter, background service, and managed settings. For manual installation, complete the macOS prompts in Arcjet. |
+| Enrollment is rejected. | Check the selected project, token expiry, device limit, and revocation state. A revoked device needs a fresh token; rerunning an acknowledged job doesn't restore its access. |
+| A restart is required. | Restart, then rerun `verify-install`. Don't treat package installation alone as a successful rollout. |
+| Reporting needs attention. | Open **Show Connections > Reporting Details**, or **Settings > Troubleshooting Details**, and check connectivity and enrollment. Use **Copy Details** when contacting support. |
 
-To stop a device from reporting, revoke its access from **Devices** in the
-Console. A revoked device needs a new enrollment token before it can report
-again. To uninstall the agent, remove it with your MDM tool.
+Don't delete Arcjet's local journal or relax its permissions to recover
+reporting. Status output can contain device and account metadata: redact it
+before sharing. Don't send files from the private
+`/Library/Application Support/Arcjet/Discovery` directory, which contains the
+device credential.
+
+## Update the Mac agent
+
+Install the verified package for the new version through your MDM tool, or
+use the macOS installer for a manual installation. Keep the same project and
+MDM profile. An update preserves the enrollment and pending activity; verify
+the installed versions and fresh reporting after the update. If a restart is
+required, complete it and rerun `verify-install`.
+
+Arcjet doesn't download and install app updates itself. Don't assume that
+installing an older package is a supported rollback.
+
+## Remove the Mac agent
+
+1. Revoke the device from **Discovery > Devices** in Console. This is separate
+   from revoking the enrollment token.
+2. For an MDM deployment, remove the Arcjet configuration profile and wait for
+   the Mac to acknowledge removal. A forced policy prevents local deactivation.
+3. As a local administrator, run the installed uninstaller, or run it as root
+   through MDM without `sudo`:
+
+   ```sh
+   sudo /bin/bash \
+     "/Library/Application Support/Arcjet/uninstall-managed.sh" \
+     --confirm
+   ```
+
+   If the command exits with `75`, restart the Mac and run it again. The
+   uninstaller deactivates the extension, stops the service, removes the local
+   reporting credential, and removes the app. Previously reported activity
+   remains in Arcjet.

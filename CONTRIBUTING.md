@@ -21,6 +21,10 @@ located in the [`./tests`](./tests) directory.
 
 _These instructions assume you are already running in the provided devcontainer_.
 
+The Playwright build reads Git history for page dates and sitemap metadata.
+CI trusts only the checked-out workspace and verifies its full history before
+building. A failed history check must be fixed before updating screenshots.
+
 ### Run Playwright locally
 
 Playwright will automatically detect if your local dev server is already
