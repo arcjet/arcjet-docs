@@ -22,6 +22,7 @@ Use sensitive information detection for any of the following purposes:
 *   Prevent users from pasting card numbers or other sensitive data into generic text fields (for example, support forms, feedback forms, or chat boxes).
 *   Enforce rules that certain endpoints must not receive PII at all.
 *   Keep protected health information (PHI), such as medical record numbers and health plan member IDs, out of agent prompts and tool calls. PHI detection runs in the server-side detector of an agent guard or coding agent policy. For the PHI entity types and how they map to HIPAA identifiers, see [Detect protected health information (PHI)](/sensitive-info/phi).
+*   Keep secrets, such as API keys, access tokens, and private keys, out of AI prompts, agent tool calls, and coding agent sessions. Secret detection runs in the server-side detector of an agent guard or coding agent policy. For more information, see [Detect secrets and API keys](/sensitive-info/secrets).
 
 For email addresses specifically, you can also use [Arcjet email validation](/email-validation) to validate and verify addresses before creating accounts or sending email.
 
@@ -29,7 +30,7 @@ For email addresses specifically, you can also use [Arcjet email validation](/em
 
 [Section titled “Detected entities”](#detected-entities)
 
-Arcjet supports detection of various types of sensitive information in text, including contact details, network addresses, financial information, government IDs, PHI, and personal identifiers.
+Arcjet supports detection of various types of sensitive information in text, including contact details, network addresses, financial information, government IDs, PHI, credentials, and personal identifiers.
 
 For every entity type and where Arcjet detects it, see [Entity types](/sensitive-info/entity-types).
 
