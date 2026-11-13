@@ -41,6 +41,7 @@ This page lists every entity type, grouped by category.
 | `LICENSE_PLATE_NUMBER` | Server | 2 |
 | `VEHICLE_IDENTIFICATION_NUMBER` | Server | 2 |
 | `DEVICE_IDENTIFIER` | Server | 2 |
+| `SECRET` | Server | 3 |
 
 Each entry shows what the type matches, then the following:
 
@@ -134,8 +135,15 @@ Identifiers that link a device to its user. HIPAA treats them as PHI identifiers
 
 - `DEVICE_IDENTIFIER`: A number that identifies a device, such as an IMEI, a MAC address, or a serial number. _Version 2. Detected on the server._
 
+## Credentials
+
+Values that grant access to a system. Arcjet reports every credential as one type and records the rule that matched it, such as `github-pat`. For how to detect them, see <Link.Page href="/sensitive-info/secrets">Detect secrets and API keys</Link.Page>.
+
+- `SECRET`: A credential, such as an API key, an access token, a private key, or a connection string with a password in it. _Version 3. Detected on the server._
+
 ## Related
 
 - <Link.Page href="/sensitive-info">Sensitive information detection</Link.Page>
 - <Link.Page href="/sensitive-info/phi">Detect protected health information (PHI)</Link.Page>
+- <Link.Page href="/sensitive-info/secrets">Detect secrets and API keys</Link.Page>
 - <Link.Page href="/sensitive-info/reference">Sensitive information reference</Link.Page>

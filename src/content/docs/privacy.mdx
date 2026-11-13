@@ -104,6 +104,11 @@ text that you send for detection as follows:
 Arcjet redacts the values of authentication headers, such as `Authorization`,
 before it stores a request.
 
+Arcjet also masks credentials, such as API keys and access tokens, in every
+value that it stores, whether or not a policy screens for them. A masked
+credential keeps at most its first four characters. For more information, see
+<Link.Page href="/sensitive-info/secrets#secrets-in-stored-values">Secrets in stored values</Link.Page>.
+
 To stop Arcjet from storing prompt injection text for your organization,
 contact [support@arcjet.com](mailto:support@arcjet.com). To stop Arcjet from
 storing customer content altogether, use

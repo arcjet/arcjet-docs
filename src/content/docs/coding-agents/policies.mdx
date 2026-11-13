@@ -318,11 +318,14 @@ deny contains "injected-prompt" if {
 ### Sensitive information in a developer's prompt
 
 Arcjet runs server-side sensitive information detection over the `prompt`
-input, so a hook can refuse a turn that pastes a card number or Social
-Security number into the prompt.
+input, so a hook can refuse a turn that pastes a card number, a Social
+Security number, or a credential such as an API key into the prompt.
 
 Declare a **server-side** sensitive information detector with the ID `pii`
-over `prompt`, denying the `CREDIT_CARD_NUMBER` and `SSN` entity types.
+over `prompt`, denying the `CREDIT_CARD_NUMBER`, `SSN`, and `SECRET` entity
+types. `SECRET` needs taxonomy version 3, which a detector that you add uses.
+For how Arcjet detects credentials, see
+<Link.Page href="/sensitive-info/secrets">Detect secrets and API keys</Link.Page>.
 To also block protected health information, add the PHI entity types, such as
 `MEDICAL_RECORD_NUMBER`, to the deny list. For more information, see
 <Link.Page href="/sensitive-info/phi">Detect protected health information (PHI)</Link.Page>.
@@ -333,8 +336,8 @@ with the `AJ1062` warning.
 
 Claude Code submits a background subagent's report as a prompt. That report is
 already in the session, so Arcjet allows it even when the detector finds a
-denied entity type, and flags the session with `sensitive_data_exposure`
-instead. A published test card number in the report doesn't flag the session.
+denied entity type, and flags the session instead: with `credential_access`
+for a `SECRET`, and with `sensitive_data_exposure` for any other type. A published test card number in the report doesn't flag the session.
 A prompt that the developer typed is still denied.
 
 ```rego
