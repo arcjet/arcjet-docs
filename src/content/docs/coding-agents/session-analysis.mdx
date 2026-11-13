@@ -48,8 +48,8 @@ appear in **Activity**.
 | `data_exfiltration` | A tool call looks like it sends local data out | Shell, web, MCP, and file writes |
 | `code_execution_risk` | A tool call looks like it runs untrusted code | Shell, web, MCP, and file writes |
 | `elevated_risk` | The session as a whole looks like an attack | Shell, web, MCP, and file writes |
-| `credential_access` | A tool call looks like it reads credentials | Web and MCP calls |
-| `sensitive_data_exposure` | A tool result contains an entity type that the policy's sensitive information detector denies | Web and MCP calls |
+| `credential_access` | A tool call looks like it reads credentials, or a tool result contains a `SECRET` that the policy's sensitive information detector denies | Web and MCP calls |
+| `sensitive_data_exposure` | A tool result contains any other entity type that the policy's sensitive information detector denies | Web and MCP calls |
 | `workspace_transfer` | The agent sent project content to a collaboration tool, such as an issue tracker or team chat, where sharing it is often expected | Nothing |
 | `incomplete_screen` | Arcjet couldn't screen a tool result in full | Nothing |
 
@@ -96,9 +96,15 @@ carries an empty `prompt`, so neither detector refuses a call. Arcjet reads
 them to decide which tool-result screens to run:
 
 - A sensitive information detector with a non-empty deny list turns on
-  sensitive information screening. A result that contains a listed entity type
-  sets `sensitive_data_exposure`. The starter lists `CREDIT_CARD_NUMBER` and
-  `SSN`. An empty list detects nothing.
+  sensitive information screening. A result that contains a listed `SECRET`
+  sets `credential_access`, and a result that contains any other listed entity
+  type sets `sensitive_data_exposure`. The starter lists `SECRET`,
+  `CREDIT_CARD_NUMBER`, and `SSN`, and ignores published test card numbers
+  and SSNs. An empty list detects nothing.
+- Arcjet screens shell output for `SECRET` alone, because shell output is
+  where an agent most often reads a credential, such as with `cat .env` or
+  `printenv`. For more information, see
+  <Link.Page href="/sensitive-info/secrets">Detect secrets and API keys</Link.Page>.
 - A prompt injection detector turns on the `evil.arcjet.com` test trigger.
 
 Remove a detector to turn its screen off. A policy that has only the Rego
@@ -141,8 +147,19 @@ The starter's inputs and detectors, as the Console publishes them:
       "kind": "GUARD_POLICY_DETECTOR_KIND_SENSITIVE_INFO",
       "inputName": "prompt",
       "sensitiveInfo": {
+        "taxonomyVersion": 3,
         "entitiesDeny": {
-          "entities": ["CREDIT_CARD_NUMBER", "SSN"]
+          "entities": ["SECRET"],
+          "entries": [
+            {
+              "entity": "CREDIT_CARD_NUMBER",
+              "attributes": [{ "name": "test_value", "value": false }]
+            },
+            {
+              "entity": "SSN",
+              "attributes": [{ "name": "test_value", "value": false }]
+            }
+          ]
         }
       }
     }
@@ -200,7 +217,8 @@ Edit the sets in place rather than publishing a second policy:
 - To refuse shell commands such as `curl` after a credential or sensitive
   information finding, add `shell` to `egress`.
 - To change which entity types set `sensitive_data_exposure`, edit
-  `entitiesDeny` on the `pii` detector.
+  `entitiesDeny` on the `pii` detector. Remove `SECRET` from it to stop
+  flagging a session that reads a credential in a tool result.
 
 ## What a locked denial says
 

@@ -101,6 +101,7 @@ const PATHS_FROM_SITEMAP = [
   "/sensitive-info/",
   "/sensitive-info/quick-start/",
   "/sensitive-info/phi/",
+  "/sensitive-info/secrets/",
   "/sensitive-info/entity-types/",
   "/sensitive-info/reference/",
   "/shadow-ai/",

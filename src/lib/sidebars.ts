@@ -261,6 +261,10 @@ export const main = [
             link: "/sensitive-info/phi",
           },
           {
+            label: "Secrets and API keys",
+            link: "/sensitive-info/secrets",
+          },
+          {
             label: "Reference",
             link: "/sensitive-info/reference",
           },

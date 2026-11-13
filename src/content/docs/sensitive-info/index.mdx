@@ -1,6 +1,6 @@
 ---
 title: "Introduction to Arcjet sensitive information detection"
-description: "Arcjet sensitive info detection finds and blocks PII and protected health information (PHI) in request bodies, prompts, and agent tool calls, locally in the SDK or with a server-side detector."
+description: "Arcjet sensitive info detection finds and blocks PII, protected health information (PHI), and secrets such as API keys in request bodies, prompts, and agent tool calls, locally in the SDK or with a server-side detector."
 prev: false
 generateMarkdownRoute: true
 ---
@@ -53,6 +53,11 @@ Use sensitive information detection for any of the following purposes:
   runs in the server-side detector of an agent guard or coding agent policy.
   For the PHI entity types and how they map to HIPAA identifiers, see
   <Link.Page href="/sensitive-info/phi">Detect protected health information (PHI)</Link.Page>.
+- Keep secrets, such as API keys, access tokens, and private keys, out of AI
+  prompts, agent tool calls, and coding agent sessions. Secret detection runs
+  in the server-side detector of an agent guard or coding agent policy. For
+  more information, see
+  <Link.Page href="/sensitive-info/secrets">Detect secrets and API keys</Link.Page>.
 
 For email addresses specifically, you can also use
 <Link.Page href="/email-validation">Arcjet email validation</Link.Page> to
@@ -62,7 +67,7 @@ validate and verify addresses before creating accounts or sending email.
 
 Arcjet supports detection of various types of sensitive information in text, including
 contact details, network addresses, financial information, government IDs, PHI,
-and personal identifiers.
+credentials, and personal identifiers.
 
 For every entity type and where Arcjet detects it, see
 <Link.Page href="/sensitive-info/entity-types">Entity types</Link.Page>.

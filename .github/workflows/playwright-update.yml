@@ -49,6 +49,14 @@ jobs:
     runs-on: ubuntu-24.04-arm
     container: mcr.microsoft.com/devcontainers/javascript-node:24
     timeout-minutes: 20
+    # As in ./playwright.yml: the build reads Git history in child processes,
+    # which refuse a workspace owned by another user inside the container.
+    # Without this, every page loses its commit date, the sitemap test fails,
+    # and the regenerated snapshots are never pushed.
+    env:
+      GIT_CONFIG_COUNT: "1"
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: ${{ github.workspace }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
