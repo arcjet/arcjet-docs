@@ -21,6 +21,12 @@ on:
 jobs:
   build:
     timeout-minutes: 10
+    # Checkout configures trust in its own temporary Git home. The build also
+    # reads history in child processes, so trust this workspace for the job.
+    env:
+      GIT_CONFIG_COUNT: "1"
+      GIT_CONFIG_KEY_0: safe.directory
+      GIT_CONFIG_VALUE_0: ${{ github.workspace }}
     # Screenshots are compared pixel for pixel, and font rendering differs
     # between architectures and between distributions' font packages. Every
     # job here runs on arm64 in the image .devcontainer/devcontainer.json uses,
@@ -49,6 +55,10 @@ jobs:
           # Anything that does ask for an old blob still gets it, fetched on
           # demand.
           filter: blob:none
+      - name: Verify Git history
+        run: |
+          test "$(git rev-parse --is-shallow-repository)" = false
+          git log --format=t:%ct --name-status -- src/content/docs > /dev/null
       # `package-manager-cache: false` turns off the npm download cache. It is
       # only read when `npm ci` runs, and the node_modules cache below means
       # that happens at most once per lockfile change, in this job. Restoring
