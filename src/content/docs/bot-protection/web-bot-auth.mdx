@@ -3,7 +3,7 @@ title: "Verify signed bots with Web Bot Auth"
 description: "Use Arcjet to verify Web Bot Auth signatures from AI agents and bots, and allow or deny them by verified identity instead of User-Agent."
 ---
 
-import { Code } from "@astrojs/starlight/components";
+import { Code, TabItem, Tabs } from "@astrojs/starlight/components";
 import Comments from "@/components/Comments.astro";
 import { Link } from "@/components/link";
 
@@ -65,8 +65,14 @@ reverse DNS verification, and a signer that you allow by name skips advanced
 signals. For the full list, see
 <Link.Page href="#how-a-verified-signature-changes-the-decision">How a verified signature changes the decision</Link.Page>.
 
-The JavaScript SDK supports Web Bot Auth from version 1.15.0. The examples on
-this page use `@arcjet/node`.
+The following SDK versions support Web Bot Auth:
+
+- JavaScript SDK 1.15.0 and later
+- Python SDK 1.5.0 and later
+- Go SDK 1.3.0 and later
+
+The examples on this page use `@arcjet/node` for JavaScript, FastAPI for
+Python, and `net/http` for Go.
 
 ## Allow or deny a signed bot by ID
 
@@ -76,7 +82,7 @@ signers by their bot ID, so you configure them the same way as any other bot:
 
 | Bot ID                   | Key directory origin                                                | Categories                                                   |
 | ------------------------ | ------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `BROWSERBASE`            | `https://www.browserbase.com`                                       | `CATEGORY:AI`, `CATEGORY:AI_AGENT`, `CATEGORY:TOOL`          |
+| `BROWSERBASE` (beta)     | `https://www.browserbase.com`                                       | `CATEGORY:AI`, `CATEGORY:AI_AGENT`, `CATEGORY:TOOL`          |
 | `CHATGPT_AGENT`          | `https://chatgpt.com`                                               | `CATEGORY:AI`, `CATEGORY:AI_AGENT`                           |
 | `CLOUDFLARE_BROWSER_RUN` | `https://web-bot-auth.cloudflare-browser-rendering-085.workers.dev` | `CATEGORY:TOOL`                                              |
 | `CONTEXT7_CRAWLER`       | `https://context7.com`                                              | `CATEGORY:AI`, `CATEGORY:SEARCH_ENGINE`                      |
@@ -90,28 +96,204 @@ signers by their bot ID, so you configure them the same way as any other bot:
 | `LANE_AGENT`             | `https://agent.getonlane.com`                                       | `CATEGORY:TOOL`                                              |
 | `LINER_BOT`              | `https://liner-bot.liner.com`                                       | `CATEGORY:AI`, `CATEGORY:SEARCH_ENGINE`                      |
 | `LINER_USER`             | `https://liner-user.liner.com`                                      | `CATEGORY:AI`, `CATEGORY:AI_AGENT`                           |
-| `MANUS_BOT`              | `https://api.manus.im`                                              | `CATEGORY:AI`, `CATEGORY:AI_AGENT`                           |
+| `MANUS_BOT` (beta)       | `https://api.manus.im`                                              | `CATEGORY:AI`, `CATEGORY:AI_AGENT`                           |
 | `OSANO_BOT`              | `https://bots.osano.com`                                            | `CATEGORY:MONITOR`                                           |
+| `RIVER_CRAWLER`          | `https://river.ai`                                                  | `CATEGORY:AI`                                                |
 | `SHOPIFY_CLOUDSURF`      | `https://cloudsurf.shopify.io`                                      | `CATEGORY:TOOL`                                              |
 | `YOU_CRAWLER`            | `https://you.com`                                                   | `CATEGORY:AI`, `CATEGORY:SEARCH_ENGINE`                      |
 
 A category that contains a signer also matches it. For example,
 `CATEGORY:SEARCH_ENGINE` allows a verified DuckAssistBot request.
 
+For signers marked beta, Arcjet hasn't yet validated signature verification
+against real signed production traffic from the provider.
+
+The bot ID types in JavaScript SDK 1.15.0 don't include `RIVER_CRAWLER`. To
+configure RiverBot with that version, use a `SIGNED_BOT:` entry instead:
+`SIGNED_BOT:https://river.ai/.well-known/http-message-signatures-directory`.
+For more information, see
+<Link.Page href="#allow-or-deny-a-custom-signer">Allow or deny a custom signer</Link.Page>.
+
 The following example allows search engines, ChatGPT's agent, and Google's
 agent, and denies every other detected bot:
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
 <Code code={AllowSigners} lang="ts" title="index.ts" />
+
+</TabItem>
+<TabItem label="Python">
+
+```py title="main.py"
+import os
+
+from arcjet import (
+    BotCategory,
+    Mode,
+    arcjet,
+    detect_bot,
+    is_spoofed_bot,
+    is_verified_bot,
+)
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+
+app = FastAPI()
+
+aj = arcjet(
+    key=os.environ["ARCJET_KEY"],
+    rules=[
+        detect_bot(
+            mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
+            # Deny every detected bot except search engines and two signed agents
+            allow=[BotCategory.SEARCH_ENGINE, "CHATGPT_AGENT", "GOOGLE_AGENT"],
+        ),
+    ],
+)
+
+
+@app.get("/")
+async def index(request: Request):
+    decision = await aj.protect(request)
+
+    if decision.is_denied() or any(is_spoofed_bot(r) for r in decision.results):
+        return JSONResponse({"error": "Forbidden"}, status_code=403)
+
+    if any(is_verified_bot(r) for r in decision.results):
+        # A crawler or signed agent that this rule allows by name
+        pass
+
+    return {"message": "Hello world"}
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go title="main.go"
+package main
+
+import (
+	"log"
+	"net/http"
+	"os"
+
+	"github.com/arcjet/arcjet-go"
+)
+
+func main() {
+	aj, err := arcjet.NewClient(arcjet.Config{
+		Key: os.Getenv("ARCJET_KEY"),
+		Rules: []arcjet.Rule{
+			arcjet.DetectBot(arcjet.BotOptions{
+				Mode: arcjet.ModeLive, // Blocks requests. Use ModeDryRun to log only.
+				// Deny every detected bot except search engines and two signed agents
+				Allow: []string{
+					arcjet.BotCategorySearchEngine,
+					"CHATGPT_AGENT",
+					"GOOGLE_AGENT",
+				},
+			}),
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		decision, err := aj.Protect(r.Context(), r)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		if decision.IsDenied() || decision.IsSpoofedBot() {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
+
+		if decision.IsVerifiedBot() {
+			// A crawler or signed agent that this rule allows by name
+		}
+
+		w.Write([]byte("Hello world"))
+	})
+
+	log.Fatal(http.ListenAndServe(":3000", nil))
+}
+```
+
+</TabItem>
+</Tabs>
 
 `isVerifiedBot` is true when Arcjet confirmed a named bot, whether by IP
 address, reverse DNS, or a signature. Check `isDenied()` first, then use
-`isVerifiedBot` to decide what an allowed client gets.
+`isVerifiedBot` to decide what an allowed client gets. In Python, use
+`is_denied()` and `is_verified_bot`. In Go, use `IsDenied()` and
+`IsVerifiedBot()`.
 
 To block a signed agent, add its ID to a `deny` list. The following rule allows
 other bots but denies verified Browserbase and Manus sessions, without blocking
 every browser user on the same cloud networks:
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
 <Code code={DenySigners} lang="ts" title="index.ts" />
+
+</TabItem>
+<TabItem label="Python">
+
+```py title="main.py"
+import os
+
+from arcjet import Mode, arcjet, detect_bot
+
+aj = arcjet(
+    key=os.environ["ARCJET_KEY"],
+    rules=[
+        detect_bot(
+            mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
+            # Allow other bots, but deny verified Browserbase and Manus sessions
+            deny=["BROWSERBASE", "MANUS_BOT"],
+        ),
+    ],
+)
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go title="main.go"
+package main
+
+import (
+	"log"
+	"os"
+
+	"github.com/arcjet/arcjet-go"
+)
+
+func main() {
+	aj, err := arcjet.NewClient(arcjet.Config{
+		Key: os.Getenv("ARCJET_KEY"),
+		Rules: []arcjet.Rule{
+			arcjet.DetectBot(arcjet.BotOptions{
+				Mode: arcjet.ModeLive, // Blocks requests. Use ModeDryRun to log only.
+				// Allow other bots, but deny verified Browserbase and Manus sessions
+				Deny: []string{"BROWSERBASE", "MANUS_BOT"},
+			}),
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	_ = aj
+}
+```
+
+</TabItem>
+</Tabs>
 
 ## Allow or deny a custom signer
 
@@ -119,7 +301,71 @@ To trust or block an operator that isn't in the catalog, add `SIGNED_BOT:`
 followed by the operator's key directory URL to an `allow` or `deny` list. You
 don't need to wait for the operator to be added to the catalog.
 
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
 <Code code={CustomSigner} lang="ts" title="index.ts" />
+
+</TabItem>
+<TabItem label="Python">
+
+```py title="main.py"
+import os
+
+from arcjet import BotCategory, Mode, arcjet, detect_bot
+
+aj = arcjet(
+    key=os.environ["ARCJET_KEY"],
+    rules=[
+        detect_bot(
+            mode=Mode.DRY_RUN,  # Logs only. Use Mode.LIVE to block requests
+            allow=[
+                BotCategory.SEARCH_ENGINE,
+                # A signer that isn't in the catalog, identified by its key directory
+                "SIGNED_BOT:https://bot.example.com/.well-known/http-message-signatures-directory",
+            ],
+        ),
+    ],
+)
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go title="main.go"
+package main
+
+import (
+	"log"
+	"os"
+
+	"github.com/arcjet/arcjet-go"
+)
+
+func main() {
+	aj, err := arcjet.NewClient(arcjet.Config{
+		Key: os.Getenv("ARCJET_KEY"),
+		Rules: []arcjet.Rule{
+			arcjet.DetectBot(arcjet.BotOptions{
+				Mode: arcjet.ModeDryRun, // Logs only. Use ModeLive to block requests.
+				Allow: []string{
+					arcjet.BotCategorySearchEngine,
+					// A signer that isn't in the catalog, identified by its key directory
+					"SIGNED_BOT:https://bot.example.com/.well-known/http-message-signatures-directory",
+				},
+			}),
+		},
+	})
+	if err != nil {
+		// NewClient returns an error for a malformed SIGNED_BOT directory URL
+		log.Fatal(err)
+	}
+	_ = aj
+}
+```
+
+</TabItem>
+</Tabs>
 
 The directory URL must meet the following requirements:
 
@@ -129,8 +375,10 @@ The directory URL must meet the following requirements:
 - Its hostname isn't a reserved name such as `localhost`, or a host under
   `.internal`, `.local`, or `.test`.
 
-The SDK checks the scheme, path, query string, and fragment when you create
-the `detectBot` rule. Arcjet Cloud checks the rest. An entry that fails only the Arcjet
+The SDK checks the scheme, path, query string, and fragment when you
+configure the rule. The JavaScript and Python SDKs raise an error when you
+create the rule, and the Go SDK returns an error from `arcjet.NewClient`.
+Arcjet Cloud checks the rest. An entry that fails only the Arcjet
 Cloud checks passes the SDK, but Arcjet never fetches its directory, so that
 signer never verifies.
 
@@ -220,11 +468,30 @@ following adapters forward it:
 - Fastify (`@arcjet/fastify`)
 - NestJS (`@arcjet/nest`)
 - Next.js Pages Router API routes (`@arcjet/next`)
+- Python ASGI frameworks such as FastAPI and Starlette, when the ASGI server
+  sets `raw_path` in the request scope
+- Python Flask and Django on a WSGI server that sets the `RAW_URI` or
+  `REQUEST_URI` key in the WSGI environment
+- Go `Client.Protect`, which reads the `RequestURI` field that the `net/http`
+  server sets on each request
 
-The Next.js App Router and middleware, Bun, Deno, SvelteKit, Remix, React
-Router, Astro, and Nuxt adapters don't forward the original path. With these
-adapters, signatures that cover only `@authority`, such as DuckAssistBot's,
-still verify. Signatures that cover `@path`, such as ChatGPT's, stay unverified,
+If you call `ProtectDetails` in Go, set `RawPath` only from the original
+request target. Leave it empty if you have only a parsed URL.
+
+In JavaScript SDK releases after 1.15.0, the following adapters also forward
+the original path:
+
+- SvelteKit (`@arcjet/sveltekit`), with `@sveltejs/adapter-node` only
+- Nuxt (`@arcjet/nuxt`), with the Node.js server preset only
+- Deno (`@arcjet/deno`), when you wrap the handler that you pass to
+  `Deno.serve` with `aj.handler()`
+
+The Next.js App Router and middleware, Bun, Remix, React Router, and Astro
+adapters don't forward the original path, because their runtimes give the
+adapter only a parsed URL. Neither do the SvelteKit, Nuxt, and Deno adapters in
+JavaScript SDK 1.15.0, or in other configurations. With these adapters,
+signatures that cover only `@authority`, such as DuckAssistBot's, still
+verify. Signatures that cover `@path`, such as ChatGPT's, stay unverified,
 and Arcjet decides the request with the other bot signals.
 
 A reverse proxy can also break verification if it strips the signature
