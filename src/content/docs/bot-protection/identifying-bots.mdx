@@ -290,4 +290,235 @@ protect against new and rapidly evolving bots.
 If you want to be more permissive and only block known, named bots, you can
 include `UNKNOWN_BOT` in your `allow` rules.
 
+## Bot identity
+
+When Arcjet Cloud detects a bot, the bot rule's reason includes one primary
+bot identity: who Arcjet thinks sent the request, and how it knows. A request
+can match several bots, so the identity is the detected bot with the strongest
+evidence. If two bots have equally strong evidence, Arcjet prefers an AI agent,
+then an AI crawler. The identity is available in the next release of the
+JavaScript, Python, and Go SDKs.
+
+Only Arcjet Cloud computes the identity. It's unset when no bot was detected,
+and decisions that the SDK makes locally, such as a denial from the SDK's
+local bot detection, never have one.
+
+The identity has the following fields. In Python, `botId` is `bot_id`. In Go,
+each field name starts with a capital letter, such as `BotID`.
+
+| Field      | Description                                                                                                     |
+| ---------- | --------------------------------------------------------------------------------------------------------------- |
+| `kind`     | What kind of client the bot is: `AI_AGENT`, `AI_CRAWLER`, `AUTOMATION`, or `OTHER`.                             |
+| `botId`    | The bot ID, such as `CHATGPT_AGENT` or a `SIGNED_BOT:` directory. Empty for `AUTOMATION`.                       |
+| `operator` | The hostname that operates the bot, such as `chatgpt.com`. Set only when the evidence is `SIGNATURE`.           |
+| `evidence` | How Arcjet established the identity: `UNVERIFIED`, `FINGERPRINT`, `IP`, or `SIGNATURE`.                         |
+| `spoofed`  | `true` when IP address or reverse DNS verification showed that the request didn't come from the bot's operator. |
+
+To read the identity, check each rule result: `result.reason.identity` in
+JavaScript, `result.reason_v2.identity` in Python, or
+`result.Reason.Bot.Identity` in Go.
+
+The `kind` field has the following values:
+
+- `AI_AGENT`: An AI product that fetches a page on demand for a person who is
+  waiting on the answer. The bot is in `CATEGORY:AI_AGENT`.
+- `AI_CRAWLER`: An AI bot that collects pages ahead of time, for model training
+  or an AI search index. The bot is in `CATEGORY:AI` but not in
+  `CATEGORY:AI_AGENT`.
+- `AUTOMATION`: Browser automation that
+  <Link.Page href="/bot-protection/advanced-signals">advanced signals</Link.Page>
+  detected, with no named bot.
+- `OTHER`: Any other detected bot.
+
+The `evidence` field has the following values, from weakest to strongest:
+
+- `UNVERIFIED`: Arcjet matched the bot by its `User-Agent` header or by IP
+  reputation, and didn't verify it. A spoofed identity always has this
+  evidence.
+- `FINGERPRINT`: The advanced signals browser checks failed.
+- `IP`: The IP address is in the operator's published ranges, or reverse DNS
+  confirmed it.
+- `SIGNATURE`: A <Link.Page href="/bot-protection/web-bot-auth">Web Bot Auth</Link.Page>
+  signature verified against the operator's key directory.
+
+:::caution[A bot identity isn't authorization]
+The identity tells you who sent the request, not whether to allow it:
+
+- `UNVERIFIED` is only what the `User-Agent` header claims. Any client can
+  send it.
+- `SIGNATURE` identifies the operator of the signing key directory, such as a
+  hosted-browser platform like Browserbase. It doesn't identify the end user or
+  what they intend. A signature that covers only `@authority` can be replayed
+  until it expires.
+- `IP` evidence is only as reliable as the client IP address that the SDK
+  resolves. If your application runs behind a proxy or load balancer,
+  <Link.Page href="/best-practices#configure-proxies-and-load-balancers">configure trusted proxies</Link.Page>.
+
+Authorize sensitive actions, such as signups, purchases, and data changes,
+with your own checks.
+:::
+
+### Check for an AI agent
+
+To check whether a request came from an AI agent, use `isAiAgent` from
+`@arcjet/inspect` in JavaScript, `is_ai_agent` in Python, or
+`decision.IsAIAgent()` in Go. The helper returns true when a `LIVE` bot rule
+reports an identity with kind `AI_AGENT` that isn't spoofed. It ignores
+`DRY_RUN` results and doesn't check the evidence, so read `evidence` when the
+strength of the identity matters to you.
+
+The following example allows search engines and AI agents, and logs the bot
+ID and evidence for each AI agent:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts title="index.ts"
+import arcjet, { detectBot } from "@arcjet/node";
+import { isAiAgent } from "@arcjet/inspect";
+import http from "node:http";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    detectBot({
+      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+      // Block all bots except search engines and AI agents
+      allow: ["CATEGORY:SEARCH_ENGINE", "CATEGORY:AI_AGENT"],
+    }),
+  ],
+});
+
+const server = http.createServer(async (req, res) => {
+  const decision = await aj.protect(req);
+
+  if (decision.isDenied()) {
+    res.writeHead(403, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Forbidden" }));
+    return;
+  }
+
+  if (decision.results.some(isAiAgent)) {
+    for (const { reason } of decision.results) {
+      if (reason.isBot() && reason.identity) {
+        const { botId, evidence, operator } = reason.identity;
+        // For example: CHATGPT_AGENT SIGNATURE chatgpt.com
+        console.log(botId, evidence, operator);
+      }
+    }
+  }
+
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(JSON.stringify({ message: "Hello world" }));
+});
+
+server.listen(3000);
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py title="main.py"
+import os
+
+from arcjet import BotCategory, Mode, arcjet, detect_bot, is_ai_agent
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+
+app = FastAPI()
+
+aj = arcjet(
+    key=os.environ["ARCJET_KEY"],
+    rules=[
+        detect_bot(
+            mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
+            # Block all bots except search engines and AI agents
+            allow=[BotCategory.SEARCH_ENGINE, BotCategory.AI_AGENT],
+        ),
+    ],
+)
+
+
+@app.get("/")
+async def index(request: Request):
+    decision = await aj.protect(request)
+
+    if decision.is_denied():
+        return JSONResponse({"error": "Forbidden"}, status_code=403)
+
+    if any(is_ai_agent(r) for r in decision.results):
+        for result in decision.results:
+            reason = result.reason_v2
+            if reason.type == "BOT" and reason.identity:
+                identity = reason.identity
+                # For example: CHATGPT_AGENT SIGNATURE chatgpt.com
+                print(identity.bot_id, identity.evidence, identity.operator)
+
+    return {"message": "Hello world"}
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go title="main.go"
+package main
+
+import (
+	"log"
+	"net/http"
+	"os"
+
+	"github.com/arcjet/arcjet-go"
+)
+
+func main() {
+	aj, err := arcjet.NewClient(arcjet.Config{
+		Key: os.Getenv("ARCJET_KEY"),
+		Rules: []arcjet.Rule{
+			arcjet.DetectBot(arcjet.BotOptions{
+				Mode: arcjet.ModeLive, // Blocks requests. Use ModeDryRun to log only.
+				// Block all bots except search engines and AI agents
+				Allow: []string{
+					arcjet.BotCategorySearchEngine,
+					arcjet.BotCategoryAIAgent,
+				},
+			}),
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		decision, err := aj.Protect(r.Context(), r)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		if decision.IsDenied() {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
+
+		if decision.IsAIAgent() {
+			for _, result := range decision.Results {
+				if bot := result.Reason.Bot; bot != nil && bot.Identity != nil {
+					id := bot.Identity
+					// For example: CHATGPT_AGENT SIGNATURE chatgpt.com
+					log.Println(id.BotID, id.Evidence, id.Operator)
+				}
+			}
+		}
+
+		w.Write([]byte("Hello world"))
+	})
+
+	log.Fatal(http.ListenAndServe(":3000", nil))
+}
+```
+
+</TabItem>
+</Tabs>
+
 <Comments />
