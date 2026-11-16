@@ -1,6 +1,6 @@
 ---
-title: "Identifying bots"
-description: "Arcjet can detect many different bots and automated clients."
+title: "Bot identity, IDs, and categories"
+description: "Reference for Arcjet bot detection: bot IDs, the 24 bot categories, including CATEGORY:AI and CATEGORY:AI_AGENT, and the bot identity and evidence levels that Arcjet reports for each detected bot."
 next: false
 ---
 
@@ -8,16 +8,22 @@ import { Link } from "@/components/link";
 import { Badge, Tabs, TabItem } from "@astrojs/starlight/components";
 import Comments from "/src/components/Comments.astro";
 
-Arcjet lets you configure a list of bots to allow or deny. Pass exactly one of
-`allow` or `deny` on each rule. An empty `allow` list blocks every detected
-bot. To construct the list, you can specify individual bots, use categories to
-allow or deny all bots in a category, or both.
+Arcjet identifies bots by ID, such as `GOOGLE_CRAWLER`, and groups them into
+categories, such as `CATEGORY:SEARCH_ENGINE`. A `detectBot` rule allows or
+denies bots by ID, by category, or both, and for each detected bot Arcjet Cloud
+reports a bot identity that says what kind of client it is and how Arcjet
+established it.
 
-If you are using TypeScript, these appear as autocomplete values for the `allow`
-or `deny` options while writing your rules. In Python, the same string
-identifiers are accepted on `allow` / `deny`; categories are also available
-through the `BotCategory` enum. In Go, use the same strings or a
-`BotCategory*` constant such as `arcjet.BotCategorySearchEngine`.
+This page is the reference for bot IDs, categories, and the bot identity. For
+the scenarios, see <Link.Page href="/bot-protection/ai-agents">Detect AI agents</Link.Page>
+and <Link.Page href="/bot-protection/malicious-bots">Block malicious bots</Link.Page>.
+
+Pass exactly one of `allow` or `deny` on each rule. An empty `allow` list
+blocks every detected bot. If you use TypeScript, bot IDs and categories appear
+as autocomplete values for the `allow` and `deny` options. In Python, the same
+string identifiers are accepted, and categories are also available through the
+`BotCategory` enum. In Go, use the same strings or a `BotCategory*` constant
+such as `arcjet.BotCategorySearchEngine`.
 
 ## Individual bots
 
@@ -79,7 +85,7 @@ arcjet.DetectBot(arcjet.BotOptions{
 
 ## Bot categories
 
-We provide the following categories:
+Arcjet uses the following categories:
 
 - `CATEGORY:ACADEMIC`: Scrape data for research purposes
 - `CATEGORY:ADVERTISING`: Scrape data for advertising and marketing purposes
@@ -148,66 +154,11 @@ The Python SDK also accepts the underlying string identifiers (for example,
 
 ### Allow AI agents and block AI crawlers
 
-`CATEGORY:AI_AGENT` contains the AI bots that fetch a page on demand for a
-person who is waiting on the answer, such as ChatGPT-User, Claude-User,
-Perplexity-User, and coding agents such as Claude Code and Cursor. The rest of
-`CATEGORY:AI` collects pages ahead of time, for model training or for an AI
-search index.
-
 Every bot in `CATEGORY:AI_AGENT` is also in `CATEGORY:AI`, so a rule that
 denies `CATEGORY:AI` also blocks AI agents. To block AI crawlers and let AI
-agents through, use an `allow` list that includes `CATEGORY:AI_AGENT`. An
-`allow` list blocks every other detected bot, so also include the other
-categories that you rely on, such as `CATEGORY:SEARCH_ENGINE`. Some AI
-search crawlers, such as OAI-SearchBot and YouBot, are also in
-`CATEGORY:SEARCH_ENGINE`, so allowing that category lets them through:
-
-<Tabs syncKey="language">
-<TabItem label="JavaScript / TypeScript">
-
-```ts
-detectBot({
-   mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-   // Block all bots except search engines and AI agents
-   allow: [
-      "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc
-      "CATEGORY:AI_AGENT", // ChatGPT-User, Claude-User, coding agents, etc
-   ],
-}),
-```
-
-</TabItem>
-<TabItem label="Python">
-
-```py
-from arcjet import BotCategory, detect_bot, Mode
-
-detect_bot(
-    mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
-    # Block all bots except search engines and AI agents
-    allow=[
-        BotCategory.SEARCH_ENGINE,  # Google, Bing, etc
-        BotCategory.AI_AGENT,  # ChatGPT-User, Claude-User, coding agents, etc
-    ],
-)
-```
-
-</TabItem>
-<TabItem label="Go">
-
-```go
-arcjet.DetectBot(arcjet.BotOptions{
-	Mode: arcjet.ModeLive, // Blocks requests. Use ModeDryRun to log only.
-	// Block all bots except search engines and AI agents
-	Allow: []string{
-		arcjet.BotCategorySearchEngine, // Google, Bing, etc
-		arcjet.BotCategoryAIAgent,      // ChatGPT-User, Claude-User, coding agents, etc
-	},
-})
-```
-
-</TabItem>
-</Tabs>
+agents through, use an `allow` list that includes `CATEGORY:AI_AGENT`, plus the
+other categories that your site needs. For examples in each language, see
+<Link.Page href="/bot-protection/ai-agents#allow-ai-agents-and-block-ai-crawlers">Allow AI agents and block AI crawlers</Link.Page>.
 
 Coding agents such as Claude Code fetch pages from the developer's own
 computer, not from the AI company's servers. Arcjet can't verify them against
@@ -341,22 +292,10 @@ The `evidence` field has the following values, from weakest to strongest:
 - `SIGNATURE`: A <Link.Page href="/bot-protection/web-bot-auth">Web Bot Auth</Link.Page>
   signature verified against the operator's key directory.
 
-:::caution[A bot identity isn't authorization]
-The identity tells you who sent the request, not whether to allow it:
-
-- `UNVERIFIED` is only what the `User-Agent` header claims. Any client can
-  send it.
-- `SIGNATURE` identifies the operator of the signing key directory, such as a
-  hosted-browser platform like Browserbase. It doesn't identify the end user or
-  what they intend. A signature that covers only `@authority` can be replayed
-  until it expires.
-- `IP` evidence is only as reliable as the client IP address that the SDK
-  resolves. If your application runs behind a proxy or load balancer,
-  <Link.Page href="/best-practices#configure-proxies-and-load-balancers">configure trusted proxies</Link.Page>.
-
-Authorize sensitive actions, such as signups, purchases, and data changes,
-with your own checks.
-:::
+A bot identity tells you who sent the request, not whether to allow it.
+`UNVERIFIED` is only a `User-Agent` claim, and `SIGNATURE` identifies the
+operator of the signing key directory, not the end user. For details, see
+<Link.Page href="/bot-protection/ai-agents#a-bot-identity-isnt-authorization">A bot identity isn't authorization</Link.Page>.
 
 ### Check for an AI agent
 
@@ -365,160 +304,7 @@ To check whether a request came from an AI agent, use `isAiAgent` from
 `decision.IsAIAgent()` in Go. The helper returns true when a `LIVE` bot rule
 reports an identity with kind `AI_AGENT` that isn't spoofed. It ignores
 `DRY_RUN` results and doesn't check the evidence, so read `evidence` when the
-strength of the identity matters to you.
-
-The following example allows search engines and AI agents, and logs the bot
-ID and evidence for each AI agent:
-
-<Tabs syncKey="language">
-<TabItem label="JavaScript / TypeScript">
-
-```ts title="index.ts"
-import arcjet, { detectBot } from "@arcjet/node";
-import { isAiAgent } from "@arcjet/inspect";
-import http from "node:http";
-
-const aj = arcjet({
-  key: process.env.ARCJET_KEY!,
-  rules: [
-    detectBot({
-      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
-      // Block all bots except search engines and AI agents
-      allow: ["CATEGORY:SEARCH_ENGINE", "CATEGORY:AI_AGENT"],
-    }),
-  ],
-});
-
-const server = http.createServer(async (req, res) => {
-  const decision = await aj.protect(req);
-
-  if (decision.isDenied()) {
-    res.writeHead(403, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: "Forbidden" }));
-    return;
-  }
-
-  if (decision.results.some(isAiAgent)) {
-    for (const { reason } of decision.results) {
-      if (reason.isBot() && reason.identity) {
-        const { botId, evidence, operator } = reason.identity;
-        // For example: CHATGPT_AGENT SIGNATURE chatgpt.com
-        console.log(botId, evidence, operator);
-      }
-    }
-  }
-
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(JSON.stringify({ message: "Hello world" }));
-});
-
-server.listen(3000);
-```
-
-</TabItem>
-<TabItem label="Python">
-
-```py title="main.py"
-import os
-
-from arcjet import BotCategory, Mode, arcjet, detect_bot, is_ai_agent
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
-
-app = FastAPI()
-
-aj = arcjet(
-    key=os.environ["ARCJET_KEY"],
-    rules=[
-        detect_bot(
-            mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
-            # Block all bots except search engines and AI agents
-            allow=[BotCategory.SEARCH_ENGINE, BotCategory.AI_AGENT],
-        ),
-    ],
-)
-
-
-@app.get("/")
-async def index(request: Request):
-    decision = await aj.protect(request)
-
-    if decision.is_denied():
-        return JSONResponse({"error": "Forbidden"}, status_code=403)
-
-    if any(is_ai_agent(r) for r in decision.results):
-        for result in decision.results:
-            reason = result.reason_v2
-            if reason.type == "BOT" and reason.identity:
-                identity = reason.identity
-                # For example: CHATGPT_AGENT SIGNATURE chatgpt.com
-                print(identity.bot_id, identity.evidence, identity.operator)
-
-    return {"message": "Hello world"}
-```
-
-</TabItem>
-<TabItem label="Go">
-
-```go title="main.go"
-package main
-
-import (
-	"log"
-	"net/http"
-	"os"
-
-	"github.com/arcjet/arcjet-go"
-)
-
-func main() {
-	aj, err := arcjet.NewClient(arcjet.Config{
-		Key: os.Getenv("ARCJET_KEY"),
-		Rules: []arcjet.Rule{
-			arcjet.DetectBot(arcjet.BotOptions{
-				Mode: arcjet.ModeLive, // Blocks requests. Use ModeDryRun to log only.
-				// Block all bots except search engines and AI agents
-				Allow: []string{
-					arcjet.BotCategorySearchEngine,
-					arcjet.BotCategoryAIAgent,
-				},
-			}),
-		},
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		decision, err := aj.Protect(r.Context(), r)
-		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
-		}
-
-		if decision.IsDenied() {
-			http.Error(w, "Forbidden", http.StatusForbidden)
-			return
-		}
-
-		if decision.IsAIAgent() {
-			for _, result := range decision.Results {
-				if bot := result.Reason.Bot; bot != nil && bot.Identity != nil {
-					id := bot.Identity
-					// For example: CHATGPT_AGENT SIGNATURE chatgpt.com
-					log.Println(id.BotID, id.Evidence, id.Operator)
-				}
-			}
-		}
-
-		w.Write([]byte("Hello world"))
-	})
-
-	log.Fatal(http.ListenAndServe(":3000", nil))
-}
-```
-
-</TabItem>
-</Tabs>
+strength of the identity matters to you. For complete examples, see
+<Link.Page href="/bot-protection/ai-agents#customize-the-response-for-ai-agents">Customize the response for AI agents</Link.Page>.
 
 <Comments />
