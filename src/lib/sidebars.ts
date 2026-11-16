@@ -291,7 +291,15 @@ export const main = [
             attrs: { class: "feature bot-protection" },
           },
           {
-            label: "Identifying bots",
+            label: "Detect AI agents",
+            link: "/bot-protection/ai-agents",
+          },
+          {
+            label: "Block malicious bots",
+            link: "/bot-protection/malicious-bots",
+          },
+          {
+            label: "Bot IDs and categories",
             link: "/bot-protection/identifying-bots",
           },
           {

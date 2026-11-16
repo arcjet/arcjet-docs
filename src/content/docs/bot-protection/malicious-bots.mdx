@@ -1,0 +1,593 @@
+---
+title: "Block malicious bots, scrapers, and spoofed crawlers"
+description: "Block bad bots, scrapers, credential stuffing, and fake signups. Detect spoofed Googlebot, headless browsers, and risky IP addresses with Arcjet for Node.js, Next.js, Python, and Go."
+generateMarkdownRoute: true
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import Comments from "@/components/Comments.astro";
+import { Link } from "@/components/link";
+
+A malicious bot is an automated client that requests your site to take
+something or to abuse it, such as a scraper that copies your content, a tool
+that tries stolen passwords, or a script that creates fake accounts. Arcjet
+blocks malicious bots by denying every bot that your site doesn't need,
+catching clients that pretend to be a good bot, and flagging automated browsers
+and risky networks.
+
+No single check catches every bot. The sections on this page add one layer each,
+and the last section combines them on a signup route. The examples use
+`@arcjet/node`, FastAPI, and `net/http`. The same rules work in Next.js and the
+other JavaScript SDKs.
+
+## What malicious bots do
+
+The following kinds of bots cause most of the harm:
+
+- **Scrapers** copy content, prices, and listings, and add load to your
+  servers. Many send a browser `User-Agent` header and rotate through cloud and
+  proxy IP addresses.
+- **Credential stuffing tools** try stolen username and password pairs against
+  your login form, often from many IP addresses at a low rate each.
+- **Signup and form bots** create fake accounts to abuse free tiers, trials,
+  and referral programs, or fill contact forms with spam.
+- **Spoofed crawlers** send Googlebot's or another search engine's
+  `User-Agent` header, because many sites let search engines through.
+
+## Allow only the bots that you need
+
+Start from deny by default. Use an `allow` list that names the bots and
+categories that your site needs, and Arcjet blocks every other detected bot,
+including bots that it can't name (`UNKNOWN_BOT`). Most sites need search
+engines, link previews in chat and social apps, and their own uptime monitors.
+
+An allowed bot can still be a fake. Arcjet verifies bots that claim to be from
+an operator that publishes its IP addresses or hostnames, such as Googlebot,
+and marks a request that fails the check as spoofed. Don't rely on the `allow`
+list alone to stop a spoofed bot. Also deny the request when `isSpoofedBot` in
+JavaScript, `is_spoofed_bot` in Python, or `decision.IsSpoofedBot()` in Go
+returns true:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts title="index.ts"
+import arcjet, { detectBot } from "@arcjet/node";
+import { isSpoofedBot } from "@arcjet/inspect";
+import http from "node:http";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    detectBot({
+      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+      // Block every detected bot except the ones this site needs
+      allow: [
+        "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc
+        "CATEGORY:PREVIEW", // Link previews in chat apps
+        "CATEGORY:MONITOR", // Uptime monitors
+      ],
+    }),
+  ],
+});
+
+const server = http.createServer(async (req, res) => {
+  const decision = await aj.protect(req);
+
+  // Deny blocked bots and allowed bots that failed verification
+  if (decision.isDenied() || decision.results.some(isSpoofedBot)) {
+    res.writeHead(403, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Forbidden" }));
+    return;
+  }
+
+  res.writeHead(200, { "Content-Type": "application/json" });
+  res.end(JSON.stringify({ message: "Hello world" }));
+});
+
+server.listen(3000);
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py title="main.py"
+import os
+
+from arcjet import BotCategory, Mode, arcjet, detect_bot, is_spoofed_bot
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+
+app = FastAPI()
+
+aj = arcjet(
+    key=os.environ["ARCJET_KEY"],
+    rules=[
+        detect_bot(
+            mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
+            # Block every detected bot except the ones this site needs
+            allow=[
+                BotCategory.SEARCH_ENGINE,  # Google, Bing, etc
+                BotCategory.PREVIEW,  # Link previews in chat and social apps
+                BotCategory.MONITOR,  # Uptime monitors
+            ],
+        ),
+    ],
+)
+
+
+@app.get("/")
+async def index(request: Request):
+    decision = await aj.protect(request)
+
+    # Deny bots that aren't allowed, and allowed bots that failed verification
+    if decision.is_denied() or any(is_spoofed_bot(r) for r in decision.results):
+        return JSONResponse({"error": "Forbidden"}, status_code=403)
+
+    return {"message": "Hello world"}
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go title="main.go"
+package main
+
+import (
+	"log"
+	"net/http"
+	"os"
+
+	"github.com/arcjet/arcjet-go"
+)
+
+func main() {
+	aj, err := arcjet.NewClient(arcjet.Config{
+		Key: os.Getenv("ARCJET_KEY"),
+		Rules: []arcjet.Rule{
+			arcjet.DetectBot(arcjet.BotOptions{
+				Mode: arcjet.ModeLive, // Blocks requests. Use ModeDryRun to log only.
+				// Block every detected bot except the ones this site needs
+				Allow: []string{
+					arcjet.BotCategorySearchEngine, // Google, Bing, etc
+					arcjet.BotCategoryPreview,      // Link previews in chat apps
+					arcjet.BotCategoryMonitor,      // Uptime monitors
+				},
+			}),
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		decision, err := aj.Protect(r.Context(), r)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		// Deny blocked bots and allowed bots that failed verification
+		if decision.IsDenied() || decision.IsSpoofedBot() {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
+
+		w.Write([]byte("Hello world"))
+	})
+
+	log.Fatal(http.ListenAndServe(":3000", nil))
+}
+```
+
+</TabItem>
+</Tabs>
+
+If you rely on AI agents, add `CATEGORY:AI_AGENT` to the list. For more
+information, see <Link.Page href="/bot-protection/ai-agents">Detect AI agents</Link.Page>.
+For every category, see <Link.Page href="/bot-protection/identifying-bots#bot-categories">Bot categories</Link.Page>.
+
+## Catch headless browsers and browser automation
+
+Many scrapers and signup bots run a real browser, such as headless Chrome
+driven by Playwright or Puppeteer. They send a normal `User-Agent` header, so
+the bots list doesn't name them.
+
+<Link.Page href="/bot-protection/advanced-signals">Advanced signals</Link.Page>
+catch these bots in the browser. A script on your pages runs checks that detect
+automation, and stores the result in the `aj_signals` cookie. On the next
+request, `detectBot` reads the cookie and denies a browser that failed the
+checks, with an identity of kind `AUTOMATION` and `FINGERPRINT` evidence.
+
+A bot that never runs your pages' JavaScript never gets the cookie. A missing
+cookie doesn't make `detectBot` deny a request, so on routes that only a
+browser reaches, such as a form `POST` handler, require the cookie with a
+filter rule:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+rules: [
+  // Deny requests without the advanced signals cookie
+  filter({
+    mode: "LIVE",
+    deny: ['len(http.request.cookie["aj_signals"]) eq 0'],
+  }),
+  // Deny every detected bot, including failed advanced signals checks
+  detectBot({ mode: "LIVE", allow: [] }),
+],
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+rules=[
+    # Deny requests without the advanced signals cookie
+    filter_request(
+        mode=Mode.LIVE,
+        deny=['len(http.request.cookie["aj_signals"]) eq 0'],
+    ),
+    # Deny every detected bot, including failed advanced signals checks
+    detect_bot(mode=Mode.LIVE, allow=[]),
+],
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+Rules: []arcjet.Rule{
+	// Deny requests without the advanced signals cookie
+	arcjet.Filter(arcjet.FilterOptions{
+		Mode: arcjet.ModeLive,
+		Deny: []string{`len(http.request.cookie["aj_signals"]) eq 0`},
+	}),
+	// Deny every detected bot, including failed advanced signals checks
+	arcjet.DetectBot(arcjet.BotOptions{
+		Mode:  arcjet.ModeLive,
+		Allow: []string{},
+	}),
+},
+```
+
+</TabItem>
+</Tabs>
+
+Load the signals script on every page that leads to the route, so that real
+visitors have the cookie before they submit the form. For setup, see
+<Link.Page href="/bot-protection/advanced-signals#setup">Advanced signals setup</Link.Page>.
+
+## Use IP threat intelligence
+
+Bots run where computing is cheap and hard to trace: hosting providers, VPNs,
+open proxies, and Tor. Each decision includes Arcjet's analysis of the client
+IP address, so you can treat these networks differently from home and mobile
+connections:
+
+- In JavaScript, use `decision.ip.isHosting()`, `isVpn()`, `isProxy()`, and
+  `isTor()`, and read the threat assessment from `decision.ip.threat`.
+- In Python, use `decision.ip.is_hosting()`, `is_vpn()`, `is_proxy()`, and
+  `is_tor()`, and read the assessment from `decision.ip_details.threat`.
+- In Go, read `decision.IP.IsHosting`, `IsVPN`, `IsProxy`, and `IsTor`, and the
+  assessment from `decision.IP.Threat`.
+
+The threat assessment is present only when Arcjet has one. It includes a risk
+level from `none` to `critical`, a reputation such as `malicious` or
+`suspicious`, and the abuse activities that Arcjet has seen from the IP address,
+such as `brute_force`. Skip a denial when `isSafe` is true, because that marks
+trusted infrastructure.
+
+People also use VPNs and hosting networks, so a network type alone isn't proof
+of abuse. Block the strongest signals, such as Tor or a `high` or `critical`
+risk level, on sensitive routes, and challenge the weaker ones, for example
+with email verification. The example in the next section does both. For every
+field and value, see <Link.Page href="/ip-threat-intelligence">IP threat intelligence</Link.Page>.
+
+## Layer rate limiting and Shield
+
+Bots that pass every identity check can still send too many requests or attack
+your application. Add a
+<Link.Page href="/rate-limiting">rate limit</Link.Page> to cap how often one
+client can call a route, and <Link.Page href="/shield">Shield</Link.Page> to
+block common attacks, such as SQL injection.
+
+The following example protects a signup route with every layer on this page.
+It blocks attacks, rate limits each IP address, requires the advanced signals
+cookie, blocks every detected bot and spoofed bot, blocks Tor, open proxies, and
+high-risk IP addresses, and asks hosting and VPN traffic to verify an email
+address:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts title="index.ts"
+import arcjet, { detectBot, filter, shield, slidingWindow } from "@arcjet/node";
+import { isSpoofedBot } from "@arcjet/inspect";
+import http from "node:http";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    // Block common attacks, such as SQL injection
+    shield({ mode: "LIVE" }),
+    // Allow 5 signup attempts per IP address every 10 minutes
+    slidingWindow({ mode: "LIVE", interval: "10m", max: 5 }),
+    // Require the advanced signals cookie
+    filter({
+      mode: "LIVE",
+      deny: ['len(http.request.cookie["aj_signals"]) eq 0'],
+    }),
+    // Block every detected bot and failed advanced signals checks
+    detectBot({ mode: "LIVE", allow: [] }),
+  ],
+});
+
+const server = http.createServer(async (req, res) => {
+  if (req.method !== "POST" || req.url !== "/signup") {
+    res.writeHead(404);
+    res.end();
+    return;
+  }
+
+  const decision = await aj.protect(req);
+
+  if (decision.isDenied()) {
+    const status = decision.reason.isRateLimit() ? 429 : 403;
+    res.writeHead(status, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Request blocked" }));
+    return;
+  }
+
+  const { ip } = decision;
+  const threat = ip.threat;
+  const highRisk =
+    threat &&
+    !threat.isSafe &&
+    (threat.riskLevel === "high" || threat.riskLevel === "critical");
+
+  // Block spoofed bots, Tor, open proxies, and high-risk IP addresses
+  if (
+    decision.results.some(isSpoofedBot) ||
+    ip.isTor() ||
+    ip.isProxy() ||
+    highRisk
+  ) {
+    res.writeHead(403, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Request blocked" }));
+    return;
+  }
+
+  // Challenge hosting and VPN traffic instead of blocking it
+  if (ip.isHosting() || ip.isVpn() || threat?.reputation === "suspicious") {
+    res.writeHead(202, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ next: "verify-email" }));
+    return;
+  }
+
+  res.writeHead(201, { "Content-Type": "application/json" });
+  res.end(JSON.stringify({ message: "Account created" }));
+});
+
+server.listen(3000);
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py title="main.py"
+import os
+
+from arcjet import (
+    Mode,
+    arcjet,
+    detect_bot,
+    filter_request,
+    is_spoofed_bot,
+    shield,
+    sliding_window,
+)
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+
+app = FastAPI()
+
+aj = arcjet(
+    key=os.environ["ARCJET_KEY"],
+    rules=[
+        # Block common attacks, such as SQL injection
+        shield(mode=Mode.LIVE),
+        # Allow 5 signup attempts per IP address every 10 minutes
+        sliding_window(mode=Mode.LIVE, interval=600, max=5),
+        # Require the advanced signals cookie
+        filter_request(
+            mode=Mode.LIVE,
+            deny=['len(http.request.cookie["aj_signals"]) eq 0'],
+        ),
+        # Block every detected bot, including failed advanced signals checks
+        detect_bot(mode=Mode.LIVE, allow=[]),
+    ],
+)
+
+
+@app.post("/signup")
+async def signup(request: Request):
+    decision = await aj.protect(request)
+
+    if decision.is_denied():
+        status = 429 if decision.reason_v2.type == "RATE_LIMIT" else 403
+        return JSONResponse({"error": "Request blocked"}, status_code=status)
+
+    ip = decision.ip
+    details = decision.ip_details
+    threat = details.threat if details else None
+    high_risk = (
+        threat is not None
+        and not threat.is_safe
+        and threat.risk_level in ("high", "critical")
+    )
+
+    # Block spoofed bots, Tor, open proxies, and high-risk IP addresses
+    if (
+        any(is_spoofed_bot(r) for r in decision.results)
+        or ip.is_tor()
+        or ip.is_proxy()
+        or high_risk
+    ):
+        return JSONResponse({"error": "Request blocked"}, status_code=403)
+
+    # Challenge hosting and VPN traffic instead of blocking it
+    if (
+        ip.is_hosting()
+        or ip.is_vpn()
+        or (threat is not None and threat.reputation == "suspicious")
+    ):
+        return JSONResponse({"next": "verify-email"}, status_code=202)
+
+    return JSONResponse({"message": "Account created"}, status_code=201)
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go title="main.go"
+package main
+
+import (
+	"log"
+	"net/http"
+	"os"
+	"time"
+
+	"github.com/arcjet/arcjet-go"
+)
+
+func main() {
+	aj, err := arcjet.NewClient(arcjet.Config{
+		Key: os.Getenv("ARCJET_KEY"),
+		Rules: []arcjet.Rule{
+			// Block common attacks, such as SQL injection
+			arcjet.Shield(arcjet.ShieldOptions{Mode: arcjet.ModeLive}),
+			// Allow 5 signup attempts per IP address every 10 minutes
+			arcjet.SlidingWindow(arcjet.SlidingWindowOptions{
+				Mode:        arcjet.ModeLive,
+				Interval:    10 * time.Minute,
+				MaxRequests: 5,
+			}),
+			// Require the advanced signals cookie
+			arcjet.Filter(arcjet.FilterOptions{
+				Mode: arcjet.ModeLive,
+				Deny: []string{`len(http.request.cookie["aj_signals"]) eq 0`},
+			}),
+			// Block every detected bot and failed advanced signals checks
+			arcjet.DetectBot(arcjet.BotOptions{
+				Mode:  arcjet.ModeLive,
+				Allow: []string{},
+			}),
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	http.HandleFunc("POST /signup", func(w http.ResponseWriter, r *http.Request) {
+		decision, err := aj.Protect(r.Context(), r)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		if decision.IsDenied() {
+			status := http.StatusForbidden
+			if decision.Reason.IsRateLimit() {
+				status = http.StatusTooManyRequests
+			}
+			http.Error(w, "Request blocked", status)
+			return
+		}
+
+		ip := decision.IP
+		threat := ip.Threat
+		highRisk := threat != nil && !threat.IsSafe &&
+			(threat.RiskLevel == "high" || threat.RiskLevel == "critical")
+
+		// Block spoofed bots, Tor, open proxies, and high-risk IP addresses
+		if decision.IsSpoofedBot() || ip.IsTor || ip.IsProxy || highRisk {
+			http.Error(w, "Request blocked", http.StatusForbidden)
+			return
+		}
+
+		// Challenge hosting and VPN traffic instead of blocking it
+		if ip.IsHosting || ip.IsVPN ||
+			(threat != nil && threat.Reputation == "suspicious") {
+			w.WriteHeader(http.StatusAccepted)
+			w.Write([]byte(`{"next":"verify-email"}`))
+			return
+		}
+
+		w.WriteHeader(http.StatusCreated)
+		w.Write([]byte(`{"message":"Account created"}`))
+	})
+
+	log.Fatal(http.ListenAndServe(":3000", nil))
+}
+```
+
+</TabItem>
+</Tabs>
+
+Start new rules in `DRY_RUN` mode and review the results in the
+[Arcjet Console](https://console.arcjet.com) before you block traffic. For
+signup forms, also consider
+<Link.Page href="/signup-protection">signup form protection</Link.Page>, which
+adds email validation.
+
+## FAQs
+
+### How do I block bad bots?
+
+Add a `detectBot` rule with an `allow` list that names only the bots that your
+site needs, such as `CATEGORY:SEARCH_ENGINE`. Arcjet then blocks every other
+detected bot, including bots that it can't name. Add advanced signals, IP
+threat intelligence, and rate limiting to catch bots that hide their identity.
+
+### How do I stop bots from spoofing Googlebot?
+
+Allow Googlebot, then deny requests where `isSpoofedBot` in JavaScript,
+`is_spoofed_bot` in Python, or `decision.IsSpoofedBot()` in Go returns true.
+Arcjet checks a Googlebot claim against Google's published IP address ranges
+and reverse DNS, and marks a request that fails the check as spoofed.
+
+### How do I verify Googlebot?
+
+Arcjet verifies Googlebot for you when your `allow` list includes it, for
+example through `CATEGORY:SEARCH_ENGINE`. Check `isVerifiedBot` in JavaScript,
+`is_verified_bot` in Python, or `decision.IsVerifiedBot()` in Go to see whether
+Arcjet confirmed the bot. For more information, see
+<Link.Page href="/bot-protection/reference#bot-verification">Bot verification</Link.Page>.
+
+### How do I detect headless browsers?
+
+Use <Link.Page href="/bot-protection/advanced-signals">advanced signals</Link.Page>.
+A script on your pages runs checks in the browser that detect automation, such
+as headless Chrome driven by Playwright or Puppeteer, and `detectBot` denies a
+browser that fails them. Require the `aj_signals` cookie with a filter rule to
+also block clients that never run the script.
+
+### Can Arcjet stop credential stuffing?
+
+Arcjet helps reduce credential stuffing on a login route when you combine a
+`detectBot` rule, advanced signals, a rate limit, and IP threat intelligence,
+which reports IP addresses seen in brute force activity. No bot detection is
+complete, so keep your own account protections, such as multi-factor
+authentication.
+
+### Should I block all hosting and VPN traffic?
+
+Not on public pages, because real people use VPNs and some legitimate clients
+run on hosting providers. On sensitive routes, such as signup and login, block
+Tor and high-risk IP addresses, and challenge hosting and VPN traffic instead
+of blocking it.
+
+<Comments />
