@@ -312,7 +312,7 @@ each field name starts with a capital letter, such as `BotID`.
 | `botId`    | The bot ID, such as `CHATGPT_AGENT` or a `SIGNED_BOT:` directory. Empty for `AUTOMATION`.                       |
 | `operator` | The hostname that operates the bot, such as `chatgpt.com`. Set only when the evidence is `SIGNATURE`.           |
 | `evidence` | How Arcjet established the identity: `UNVERIFIED`, `FINGERPRINT`, `IP`, or `SIGNATURE`.                         |
-| `spoofed`  | `true` when IP address or reverse DNS verification showed that the request didn't come from the bot's operator. |
+| `spoofed`  | `true` when IP address or reverse DNS verification showed that the request didn't come from the bot's operator. Arcjet checks this only when it has data for the IP address. |
 
 To read the identity, check each rule result: `result.reason.identity` in
 JavaScript, `result.reason_v2.identity` in Python, or
@@ -336,8 +336,8 @@ The `evidence` field has the following values, from weakest to strongest:
   reputation, and didn't verify it. A spoofed identity always has this
   evidence.
 - `FINGERPRINT`: The advanced signals browser checks failed.
-- `IP`: The IP address is in the operator's published ranges, or reverse DNS
-  confirmed it.
+- `IP`: The IP address is in the operator's published ranges, Arcjet's IP data
+  names the bot as a known crawler, or reverse DNS confirmed it.
 - `SIGNATURE`: A <Link.Page href="/bot-protection/web-bot-auth">Web Bot Auth</Link.Page>
   signature verified against the operator's key directory.
 
