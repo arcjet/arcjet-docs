@@ -136,16 +136,6 @@ Individual plan shows the last hour and the Startup plan shows the last
 window, see [Arcjet pricing](https://arcjet.com/pricing). Arcjet keeps
 aggregated data for longer, so that you can review traffic patterns over time.
 
-### Anonymized bot detection counts
-
-To measure and improve bot and AI agent detection, Arcjet keeps daily counts of
-bot detection results across all customers for 400 days. Each count records the
-detected bot, its kind, the evidence for it, the decision, the browser family
-and major version, the network type, and the country, with the number of sites
-that it came from. The counts contain no site key, IP address, request ID, path,
-header, or full `User-Agent` string, so they can't be traced back to your site
-or your users. Organizations that use zero data retention are left out.
-
 ## Zero data retention
 
 For organizations that can't allow a vendor to store customer content, Arcjet
@@ -171,8 +161,7 @@ Depending on the product, each record contains only:
   mode.
 - For bot detection: the kind of bot (such as `AI_AGENT`), the bot ID from
   the Arcjet bot list, the evidence for it (such as `SIGNATURE` or `IP`),
-  whether the identity was spoofed, whether a rule or passive detection found
-  it, and the version of the detector.
+  whether the identity was spoofed, and the version of the detector.
 - Session flags, such as `prompt_injection`.
 - Latency, and counts of requests, rules, and tokens.
 
@@ -193,11 +182,6 @@ Your own SDK capture event names are recorded as `other`. Claude Compliance
 imports are recorded as the event type and time only.
 
 Log exports that Arcjet sends for you contain the same limited records.
-
-When a request has no bot detection rule, Arcjet doesn't run passive bot
-detection for your organization, because that would send your users' IP
-addresses to DNS lookups. Your traffic is also left out of the
-[anonymized bot detection counts](#anonymized-bot-detection-counts).
 
 ### Agent session data
 
