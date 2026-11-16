@@ -105,8 +105,8 @@ activities are suppressed. Network types and entity labels can still appear
 for context.
 
 `entityName` and `service` are free-form strings when Arcjet identifies a
-specific client or provider (for example a scanner or crawler name). They
-are empty when unidentified. Compare them only when you know the exact
+specific client or provider (for example a crawler or cloud provider name).
+They are empty when unidentified. Compare them only when you know the exact
 value you want to allow or deny.
 
 For outbound destination scoring on Guard policies, Rego reads a subset of
@@ -585,7 +585,8 @@ if threat := decision.IP.Threat; threat != nil && !threat.IsSafe &&
 
 ### Deny malicious reputation
 
-`reputation` is the upstream label. `malicious` is the strongest deny signal.
+`reputation` is Arcjet's reputation label for the IP. `malicious` is the
+strongest deny signal.
 `suspicious` is weaker – treat it as a signal to challenge or rate limit
 rather than an automatic deny on every route.
 
