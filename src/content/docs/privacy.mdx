@@ -122,11 +122,12 @@ How long Arcjet stores a record depends on its type:
 | ----------------------------------------------------------------------------------------------- | -------------- |
 | Request decisions from `protect()`, including prompt injection text                             | 30 days        |
 | Request headers and query parameters                                                            | 3 days         |
-| Guard decisions, including server policy inputs and prompt injection text                       | 90 days        |
-| Captures and agent activity, including coding agent hooks, OpenTelemetry, and Claude Compliance | 90 days        |
+| Guard decisions, including server policy inputs and prompt injection text                       | 30 days        |
+| Captures and agent activity, including coding agent hooks, OpenTelemetry, and Claude Compliance | 30 days        |
 
-Arcjet also keeps backups for disaster recovery, and a backup can retain data
-for longer than the storage period.
+Arcjet deletes Guard decisions and captures within 7 days after their storage
+period ends. Arcjet also keeps backups for disaster recovery, and a backup can
+retain data for longer than the storage period.
 
 Your plan's log retention sets how far back you can view records in the
 Console, API, CLI, and MCP server, up to the storage period. For example, the
@@ -134,6 +135,16 @@ Individual plan shows the last hour and the Startup plan shows the last
 24 hours. Enterprise plans can include custom retention. For each plan's
 window, see [Arcjet pricing](https://arcjet.com/pricing). Arcjet keeps
 aggregated data for longer, so that you can review traffic patterns over time.
+
+### Anonymized bot detection counts
+
+To measure and improve bot and AI agent detection, Arcjet keeps daily counts of
+bot detection results across all customers for 400 days. Each count records the
+detected bot, its kind, the evidence for it, the decision, the browser family
+and major version, the network type, and the country, with the number of sites
+that it came from. The counts contain no site key, IP address, request ID, path,
+header, or full `User-Agent` string, so they can't be traced back to your site
+or your users. Organizations that use zero data retention are left out.
 
 ## Zero data retention
 
@@ -158,6 +169,10 @@ Depending on the product, each record contains only:
 - For coding agents: the hook event, the tool category (such as `shell` or
   `file_write`), the agent vendor, product, and surface, and the permission
   mode.
+- For bot detection: the kind of bot (such as `AI_AGENT`), the bot ID from
+  the Arcjet bot list, the evidence for it (such as `SIGNATURE` or `IP`),
+  whether the identity was spoofed, whether a rule or passive detection found
+  it, and the version of the detector.
 - Session flags, such as `prompt_injection`.
 - Latency, and counts of requests, rules, and tokens.
 
@@ -169,13 +184,20 @@ window.
 Arcjet doesn't keep request IP addresses, headers, paths, query parameters,
 email addresses, prompts, tool arguments or results, transcripts, server policy
 input values, rule labels or metadata, tool, MCP server, or model names, or
-generated summaries. Because tool names aren't kept, activity can't be broken
+generated summaries. For bot detection, it doesn't keep the `User-Agent`
+string, a custom `SIGNED_BOT:` directory from your rules, or the operator
+hostname of a signed bot. Because tool names aren't kept, activity can't be broken
 down by individual tool.
 
 Your own SDK capture event names are recorded as `other`. Claude Compliance
 imports are recorded as the event type and time only.
 
 Log exports that Arcjet sends for you contain the same limited records.
+
+When a request has no bot detection rule, Arcjet doesn't run passive bot
+detection for your organization, because that would send your users' IP
+addresses to DNS lookups. Your traffic is also left out of the
+[anonymized bot detection counts](#anonymized-bot-detection-counts).
 
 ### Agent session data
 
