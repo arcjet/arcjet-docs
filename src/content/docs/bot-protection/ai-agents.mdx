@@ -157,8 +157,8 @@ spoofed. It ignores `DRY_RUN` results and doesn't check the evidence, so read
 the identity's `evidence` field when the strength of the identity matters to
 you.
 
-The bot identity and the AI agent helpers are available in the next release of
-the JavaScript, Python, and Go SDKs. Only Arcjet Cloud reports the identity, so
+The JavaScript, Python, and Go SDKs expose the bot identity and the AI agent
+helpers. Only Arcjet Cloud reports the identity, so
 a decision that the SDK makes locally, such as a denial from its local bot
 detection, never has one.
 
@@ -658,14 +658,20 @@ and signs in through your OAuth server with scopes the user approves, instead
 of using the user's password. Arcjet verifies the session and reports the
 agent with `SIGNATURE` evidence and `delegated` set to true.
 
+Arcjet verifies sessions only from agents in the
+[well-known bots catalog](https://github.com/arcjet/well-known-bots), which
+records each agent's `client_id`. To add an agent, open a pull request with the
+`client_id` that its operator publishes.
+
 ### How do I detect Meta Muse?
 
 Muse is Meta's personal agent. It browses from a cloud browser and doesn't
-name itself in the `User-Agent` header. If your site publishes a
-`/.well-known/poppy.json` file, Muse can present a Personal Agent Protocol
-session, which Arcjet verifies and reports with `delegated` set to true.
-Without a session, Muse looks like a browser, so use advanced signals and rate
-limits.
+name itself in the `User-Agent` header. Muse signs requests with Web Bot Auth
+from `muse.ai`, which Arcjet verifies and reports as `META_MUSE` with
+`SIGNATURE` evidence. If your site publishes a `/.well-known/poppy.json` file,
+Muse can also present a Personal Agent Protocol session, which Arcjet reports
+with `delegated` set to true. A Muse request with neither a signature nor a
+session looks like a browser, so use advanced signals and rate limits.
 
 ### How do I detect Instinct?
 
