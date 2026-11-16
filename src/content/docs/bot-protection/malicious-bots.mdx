@@ -43,10 +43,10 @@ engines, link previews in chat and social apps, and their own uptime monitors.
 
 An allowed bot can still be a fake. Arcjet verifies bots that claim to be from
 an operator that publishes its IP addresses or hostnames, such as Googlebot,
-and marks a request that fails the check as spoofed. Don't rely on the `allow`
-list alone to stop a spoofed bot. Also deny the request when `isSpoofedBot` in
-JavaScript, `is_spoofed_bot` in Python, or `decision.IsSpoofedBot()` in Go
-returns true:
+and marks a request that fails the check as spoofed. The `allow` list still
+allows a spoofed bot, so the decision alone doesn't stop it. Also deny the
+request when `isSpoofedBot` in JavaScript, `is_spoofed_bot` in Python, or
+`decision.IsSpoofedBot()` in Go returns true:
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
