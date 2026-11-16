@@ -1,6 +1,6 @@
 ---
 title: "Detect AI agents and block AI crawlers"
-description: "Detect AI agents such as ChatGPT agent, Claude, and Perplexity, block AI crawlers, verify agents with IP ranges and Web Bot Auth, and customize responses in Node.js, Next.js, Python, and Go."
+description: "Detect AI agents such as ChatGPT agent, Claude, Perplexity, Meta Muse, and Instinct, block AI crawlers, verify agents with IP ranges, Web Bot Auth, and the Personal Agent Protocol, and customize responses in Node.js, Next.js, Python, and Go."
 generateMarkdownRoute: true
 ---
 
@@ -119,6 +119,11 @@ the claim where the operator gives it a way to:
   they publish on their own domain. A verified signature has `SIGNATURE`
   evidence and names the operator, such as `chatgpt.com`. For the full list,
   see <Link.Page href="/bot-protection/web-bot-auth">Verify signed bots with Web Bot Auth</Link.Page>.
+- **Personal Agent Protocol sessions.** A personal agent that acts for a
+  signed-in or anonymous user sends a signed session with each request. A
+  verified session has `SIGNATURE` evidence, names the agent's operator, and
+  sets `delegated`. For more information, see
+  [Agents that act for a user](#agents-that-act-for-a-user).
 
 When a request claims to be an AI agent but its IP address isn't in the
 operator's ranges, Arcjet marks the identity as spoofed. A spoofed identity
@@ -472,6 +477,85 @@ one budget, whichever person they're for. To limit each agent per IP address
 instead, add `ip.src` to the characteristics. For more information, see
 <Link.Page href="/rate-limiting/configuration">Rate limit configuration</Link.Page>.
 
+## Agents that act for a user
+
+The [Personal Agent Protocol](https://personalagentprotocol.org) lets a
+personal agent, such as Meta's Muse, act on your site for a person who
+delegated access to it. Instead of signing in with the person's password, the
+agent sends a `Poppy-Session` header with each request: a token signed by a key
+that the agent publishes on its own domain, and bound to the request's method
+and URL.
+
+Arcjet verifies the session for agents in the
+[well-known bots catalog](https://github.com/arcjet/well-known-bots) and
+reports the following identity:
+
+- `evidence` is `SIGNATURE` and `operator` is the agent's domain.
+- `kind` is `AI_AGENT` and `botId` is the agent's bot ID.
+- `delegated` is true.
+
+A verified session proves which agent sent the request and that it acts for one
+of its users. It never identifies the user: the session carries an ID that is
+different for each site and contains no personal information. It also doesn't
+prove that the person approved this action, so keep your own checks for
+purchases and other account changes.
+
+An agent sends a session only to sites that publish a
+`/.well-known/poppy.json` file, which your authorization server provides along
+with the OAuth endpoints that the agent signs in through. Arcjet checks the
+session against the request; your authorization server checks the access token
+and its scopes. For more information, see the
+[Personal Agent Protocol specification](https://personalagentprotocol.org/docs/1.0/spec).
+
+To give delegated agents more than other agents, check `delegated` on the
+identity. The following example extends the `aiAgent` helper in the preceding
+section:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+const agent = aiAgent(decision);
+
+if (agent?.delegated) {
+  // A verified Personal Agent Protocol session: the agent's bot ID,
+  // SIGNATURE, the agent's domain, and true
+  console.log(agent.botId, agent.evidence, agent.operator, agent.delegated);
+}
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+agent = ai_agent(decision)
+
+if agent is not None and agent.delegated:
+    # A verified Personal Agent Protocol session: the agent's bot ID,
+    # SIGNATURE, the agent's domain, and true
+    print(agent.bot_id, agent.evidence, agent.operator, agent.delegated)
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+agent := aiAgent(decision)
+
+if agent != nil && agent.Delegated {
+	// A verified Personal Agent Protocol session: the agent's bot ID,
+	// SIGNATURE, the agent's domain, and true
+	log.Println(agent.BotID, agent.Evidence, agent.Operator, agent.Delegated)
+}
+```
+
+</TabItem>
+</Tabs>
+
+`delegated` is only true with `SIGNATURE` evidence. A session that fails
+verification, or comes from an agent that isn't in the catalog, doesn't change
+the identity.
+
 ## A bot identity isn't authorization
 
 :::caution
@@ -483,6 +567,8 @@ The bot identity tells you who sent the request, not whether to allow it:
   hosted browser platform like Browserbase. It doesn't identify the end user or
   what they intend. A signature that covers only `@authority` can be replayed
   until it expires.
+- `delegated` means the agent acts for one of its users. It doesn't identify
+  the user or prove that they approved the action.
 - `IP` evidence is only as reliable as the client IP address that the SDK
   resolves. If your application runs behind a proxy or load balancer,
   <Link.Page href="/best-practices#configure-proxies-and-load-balancers">configure trusted proxies</Link.Page>.
@@ -563,5 +649,75 @@ Claude Code and other coding agents fetch pages from the developer's computer,
 so their requests never come from the AI company's published IP addresses.
 Arcjet reports them with `UNVERIFIED` evidence and doesn't mark them as
 spoofed.
+
+### What is the Personal Agent Protocol?
+
+The Personal Agent Protocol is an open protocol for personal agents that act
+for a user. The agent identifies itself with a signed session on each request,
+and signs in through your OAuth server with scopes the user approves, instead
+of using the user's password. Arcjet verifies the session and reports the
+agent with `SIGNATURE` evidence and `delegated` set to true.
+
+### How do I detect Meta Muse?
+
+Muse is Meta's personal agent. It browses from a cloud browser and doesn't
+name itself in the `User-Agent` header. If your site publishes a
+`/.well-known/poppy.json` file, Muse can present a Personal Agent Protocol
+session, which Arcjet verifies and reports with `delegated` set to true.
+Without a session, Muse looks like a browser, so use advanced signals and rate
+limits.
+
+### How do I detect Instinct?
+
+Instinct is a personal agent that browses from a cloud browser and doesn't name
+itself in the `User-Agent` header or sign its requests, so Arcjet can't name it
+from a request alone. Advanced signals detect browser automation, and rate
+limits and your own authorization checks still apply. Instinct is a design
+partner of the Personal Agent Protocol; when it sends a verified session,
+Arcjet reports it like any other delegated agent.
+
+### How do I detect Manus?
+
+Manus signs the requests from its cloud browser with Web Bot Auth, and Arcjet
+reports them as `MANUS_BOT` with `SIGNATURE` evidence. The Manus Browser
+Operator extension runs in a person's own browser, with their sign-in and IP
+address, so those requests look like that person's browser.
+
+### How do I detect Claude?
+
+Claude's on-demand fetcher, Claude-User, has the bot ID
+`ANTHROPIC_CRAWLER_USER`, and Arcjet verifies it against Anthropic's published
+IP address ranges. Claude Code has the bot ID `ANTHROPIC_CLAUDE_CODE`. Claude
+in Chrome runs in a person's own browser, so its requests look like that
+person's browser.
+
+### How do I detect Perplexity Comet?
+
+Perplexity's on-demand fetcher, Perplexity-User, has the bot ID
+`PERPLEXITY_USER`, and Arcjet verifies it against Perplexity's published IP
+address ranges. Comet is a browser that runs on a person's own computer and
+sends a standard browser `User-Agent` header, so Arcjet treats it as a browser
+unless advanced signals detect automation.
+
+### How do I detect Google's AI agent?
+
+Google's agent sends `Google-Agent` in its `User-Agent` header and signs its
+requests with Web Bot Auth. Arcjet reports it as `GOOGLE_AGENT`, with
+`SIGNATURE` evidence when the signature verifies and `IP` evidence from
+Google's published address ranges.
+
+### How do I detect Grok?
+
+xAI's agent sends `grok-agent` in its `User-Agent` header, and Arcjet reports
+it as `XAI_GROK_AGENT` with `UNVERIFIED` evidence, because xAI publishes no IP
+address ranges or signing keys for it.
+
+### Which AI agents look like a normal browser?
+
+Agents that run in a person's own browser, such as Claude in Chrome, Perplexity
+Comet, and the Manus Browser Operator extension, send that browser's requests.
+Agents that run a cloud browser without signing, such as Instinct, send a
+standard browser `User-Agent` header. For these agents, use advanced signals,
+rate limits, and your own authorization checks.
 
 <Comments />

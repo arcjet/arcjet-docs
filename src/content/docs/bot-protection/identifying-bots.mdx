@@ -262,6 +262,7 @@ each field name starts with a capital letter, such as `BotID`.
 | `kind`     | What kind of client the bot is: `AI_AGENT`, `AI_CRAWLER`, `AUTOMATION`, or `OTHER`.                             |
 | `botId`    | The bot ID, such as `CHATGPT_AGENT` or a `SIGNED_BOT:` directory. Empty for `AUTOMATION`.                       |
 | `operator` | The hostname that operates the bot, such as `chatgpt.com`. Set only when the evidence is `SIGNATURE`.           |
+| `delegated` | `true` when the agent presented a verified Personal Agent Protocol session, so it acts for a user who delegated access to it. Set only when the evidence is `SIGNATURE`. The user is never identified. |
 | `evidence` | How Arcjet established the identity: `UNVERIFIED`, `FINGERPRINT`, `IP`, or `SIGNATURE`.                         |
 | `spoofed`  | `true` when IP address or reverse DNS verification showed that the request didn't come from the bot's operator. Arcjet checks this only when it has data for the IP address. |
 
@@ -290,7 +291,9 @@ The `evidence` field has the following values, from weakest to strongest:
 - `IP`: The IP address is in the operator's published ranges, Arcjet's IP data
   names the bot as a known crawler, or reverse DNS confirmed it.
 - `SIGNATURE`: A <Link.Page href="/bot-protection/web-bot-auth">Web Bot Auth</Link.Page>
-  signature verified against the operator's key directory.
+  signature verified against the operator's key directory, or a
+  <Link.Page href="/bot-protection/ai-agents#agents-that-act-for-a-user">Personal Agent Protocol</Link.Page>
+  session verified against the agent's published keys.
 
 A bot identity tells you who sent the request, not whether to allow it.
 `UNVERIFIED` is only a `User-Agent` claim, and `SIGNATURE` identifies the
