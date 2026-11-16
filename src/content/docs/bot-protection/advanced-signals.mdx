@@ -110,10 +110,15 @@ import SvelteKitFilterDecision from "@/snippets/bot-protection/advanced-signals/
 import PythonFastapiFilterDecision from "@/snippets/bot-protection/advanced-signals/shared-py/FilterDecision.mdx";
 import PythonFlaskFilterDecision from "@/snippets/bot-protection/advanced-signals/shared-py/FilterDecision.mdx";
 
-Arcjet advanced bot signals provides browser-based bot detection using client-side
-telemetry. A WebAssembly module runs in the browser to collect signals about
-the environment to detect automation anomalies. The result is stored in the `aj_signals`
-cookie and evaluated server-side as part of the `detectBot` rule.
+Some bots run a real browser, such as headless Chrome driven by Playwright or
+Puppeteer, and look like a person to your server. Arcjet advanced bot signals
+detect these bots in the browser: a WebAssembly module runs checks on the
+browser environment to detect automation, stores the result in the
+`aj_signals` cookie, and the `detectBot` rule evaluates it on your server.
+
+A failed check gives the request a bot identity with kind `AUTOMATION` and
+`FINGERPRINT` evidence. For how advanced signals fit with the other layers of
+bot protection, see <Link.Page href="/bot-protection/malicious-bots">Block malicious bots</Link.Page>.
 
 ## When to use advanced signals
 

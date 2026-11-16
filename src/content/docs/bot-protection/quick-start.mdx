@@ -126,7 +126,9 @@ import GoStep2 from "@/snippets/bot-protection/quick-start/go/Step2.mdx";
 import GoStep3 from "@/snippets/bot-protection/quick-start/go/Step3.mdx";
 import GoStep4 from "@/snippets/bot-protection/quick-start/go/Step4.mdx";
 
-Arcjet bot detection lets you manage traffic by automated clients and bots.
+Add Arcjet bot protection to your application to block bots that you don't
+want and allow the ones that you do, such as search engines. This guide adds a
+`detectBot` rule to one route and shows the result of each request.
 
 <WhatIsArcjet />
 
@@ -139,8 +141,8 @@ Arcjet bot detection lets you manage traffic by automated clients and bots.
 
 ## Quick start
 
-This guide shows you how to protect your <FrameworkName client:load />
-application from bots and automated clients.
+The following steps protect your <FrameworkName client:load /> application
+from bots and automated clients.
 
 ### 1. Install Arcjet
 
@@ -217,15 +219,19 @@ The requests also appear on the actor's **Activity** tab in the
 
 ### 5. Choose bots to allow or deny
 
-Arcjet maintains a list of known bots so you can choose to either only
+Arcjet maintains a list of known bots, so you can either
 <Link.Page href="/bot-protection/reference#allow-specific-bots">allow specific bots</Link.Page>
-or only
-<Link.Page href="/bot-protection/reference#deny-specific-bots">deny specific bots</Link.Page>.
-Pass exactly one of `allow` or `deny` on each rule. An empty `allow` list
-blocks every detected bot.
+and block the rest, or
+<Link.Page href="/bot-protection/reference#deny-specific-bots">deny specific bots</Link.Page>
+and allow the rest. Pass exactly one of `allow` or `deny` on each rule. An
+empty `allow` list blocks every detected bot.
 
-Bots can be identified individually or through managed categories. For more
-details, see <Link.Page href="/bot-protection/identifying-bots">Identifying bots</Link.Page>.
+You can name bots individually or by category. For more information, see
+<Link.Page href="/bot-protection/identifying-bots">Bot identity, IDs, and categories</Link.Page>.
+
+For complete examples of the two most common goals, see
+<Link.Page href="/bot-protection/ai-agents">Detect AI agents</Link.Page> and
+<Link.Page href="/bot-protection/malicious-bots">Block malicious bots</Link.Page>.
 
 ## FAQs
 
@@ -234,6 +240,16 @@ details, see <Link.Page href="/bot-protection/identifying-bots">Identifying bots
 ## What next?
 
 <CardGrid>
+  <Link.Card
+    title="Detect AI agents"
+    href="/bot-protection/ai-agents"
+    description="Allow AI agents, block AI crawlers, and customize responses."
+  />
+  <Link.Card
+    title="Block malicious bots"
+    href="/bot-protection/malicious-bots"
+    description="Stop scrapers, spoofed crawlers, and signup bots."
+  />
   <Link.Card
     title="Bot protection reference"
     href="/bot-protection/reference"

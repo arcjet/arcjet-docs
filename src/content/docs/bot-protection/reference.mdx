@@ -171,8 +171,10 @@ import GoErrors from "@/snippets/bot-protection/reference/go/Errors.mdx";
 import GoFiltering from "@/snippets/bot-protection/reference/go/Filtering.mdx";
 import GoIdentifiedBots from "@/snippets/bot-protection/reference/go/IdentifiedBots.mdx";
 
-
-Arcjet bot detection lets you manage traffic by automated clients and bots.
+This reference covers the configuration options, decision fields, error
+handling, and verification checks of the Arcjet `detectBot` rule. For
+task-based guides, see <Link.Page href="/bot-protection/ai-agents">Detect AI agents</Link.Page>
+and <Link.Page href="/bot-protection/malicious-bots">Block malicious bots</Link.Page>.
 
 <FrameworkLinks
   exclude={frameworks
@@ -183,7 +185,7 @@ Arcjet bot detection lets you manage traffic by automated clients and bots.
 
 ## Configuration
 
-Bot detection is configured by allowing or denying a subset of bots. You must
+You configure bot detection by allowing or denying a subset of bots. You must
 pass exactly one of `allow` or `deny`. The lists are mutually exclusive. With
 `allow`, Arcjet denies any detected bot that the list does not name. With
 `deny`, Arcjet allows any detected bot that the list does not name.

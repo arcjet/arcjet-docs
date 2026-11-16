@@ -1,6 +1,6 @@
 ---
-title: "Identifying bots"
-description: "Arcjet can detect many different bots and automated clients."
+title: "Bot identity, IDs, and categories"
+description: "Reference for Arcjet bot detection: bot IDs, the 24 bot categories, including CATEGORY:AI and CATEGORY:AI_AGENT, and the bot identity and evidence levels that Arcjet reports for each detected bot."
 next: false
 ---
 
@@ -8,16 +8,22 @@ import { Link } from "@/components/link";
 import { Badge, Tabs, TabItem } from "@astrojs/starlight/components";
 import Comments from "/src/components/Comments.astro";
 
-Arcjet lets you configure a list of bots to allow or deny. Pass exactly one of
-`allow` or `deny` on each rule. An empty `allow` list blocks every detected
-bot. To construct the list, you can specify individual bots, use categories to
-allow or deny all bots in a category, or both.
+Arcjet identifies bots by ID, such as `GOOGLE_CRAWLER`, and groups them into
+categories, such as `CATEGORY:SEARCH_ENGINE`. A `detectBot` rule allows or
+denies bots by ID, by category, or both, and for each detected bot Arcjet Cloud
+reports a bot identity that says what kind of client it is and how Arcjet
+established it.
 
-If you are using TypeScript, these appear as autocomplete values for the `allow`
-or `deny` options while writing your rules. In Python, the same string
-identifiers are accepted on `allow` / `deny`; categories are also available
-through the `BotCategory` enum. In Go, use the same strings or a
-`BotCategory*` constant such as `arcjet.BotCategorySearchEngine`.
+This page is the reference for bot IDs, categories, and the bot identity. For
+the scenarios, see <Link.Page href="/bot-protection/ai-agents">Detect AI agents</Link.Page>
+and <Link.Page href="/bot-protection/malicious-bots">Block malicious bots</Link.Page>.
+
+Pass exactly one of `allow` or `deny` on each rule. An empty `allow` list
+blocks every detected bot. If you use TypeScript, bot IDs and categories appear
+as autocomplete values for the `allow` and `deny` options. In Python, the same
+string identifiers are accepted, and categories are also available through the
+`BotCategory` enum. In Go, use the same strings or a `BotCategory*` constant
+such as `arcjet.BotCategorySearchEngine`.
 
 ## Individual bots
 
@@ -79,7 +85,7 @@ arcjet.DetectBot(arcjet.BotOptions{
 
 ## Bot categories
 
-We provide the following categories:
+Arcjet uses the following categories:
 
 - `CATEGORY:ACADEMIC`: Scrape data for research purposes
 - `CATEGORY:ADVERTISING`: Scrape data for advertising and marketing purposes
@@ -148,66 +154,11 @@ The Python SDK also accepts the underlying string identifiers (for example,
 
 ### Allow AI agents and block AI crawlers
 
-`CATEGORY:AI_AGENT` contains the AI bots that fetch a page on demand for a
-person who is waiting on the answer, such as ChatGPT-User, Claude-User,
-Perplexity-User, and coding agents such as Claude Code and Cursor. The rest of
-`CATEGORY:AI` collects pages ahead of time, for model training or for an AI
-search index.
-
 Every bot in `CATEGORY:AI_AGENT` is also in `CATEGORY:AI`, so a rule that
 denies `CATEGORY:AI` also blocks AI agents. To block AI crawlers and let AI
-agents through, use an `allow` list that includes `CATEGORY:AI_AGENT`. An
-`allow` list blocks every other detected bot, so also include the other
-categories that you rely on, such as `CATEGORY:SEARCH_ENGINE`. Some AI
-search crawlers, such as OAI-SearchBot and YouBot, are also in
-`CATEGORY:SEARCH_ENGINE`, so allowing that category lets them through:
-
-<Tabs syncKey="language">
-<TabItem label="JavaScript / TypeScript">
-
-```ts
-detectBot({
-   mode: "LIVE", // will block requests. Use "DRY_RUN" to log only
-   // Block all bots except search engines and AI agents
-   allow: [
-      "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc
-      "CATEGORY:AI_AGENT", // ChatGPT-User, Claude-User, coding agents, etc
-   ],
-}),
-```
-
-</TabItem>
-<TabItem label="Python">
-
-```py
-from arcjet import BotCategory, detect_bot, Mode
-
-detect_bot(
-    mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
-    # Block all bots except search engines and AI agents
-    allow=[
-        BotCategory.SEARCH_ENGINE,  # Google, Bing, etc
-        BotCategory.AI_AGENT,  # ChatGPT-User, Claude-User, coding agents, etc
-    ],
-)
-```
-
-</TabItem>
-<TabItem label="Go">
-
-```go
-arcjet.DetectBot(arcjet.BotOptions{
-	Mode: arcjet.ModeLive, // Blocks requests. Use ModeDryRun to log only.
-	// Block all bots except search engines and AI agents
-	Allow: []string{
-		arcjet.BotCategorySearchEngine, // Google, Bing, etc
-		arcjet.BotCategoryAIAgent,      // ChatGPT-User, Claude-User, coding agents, etc
-	},
-})
-```
-
-</TabItem>
-</Tabs>
+agents through, use an `allow` list that includes `CATEGORY:AI_AGENT`, plus the
+other categories that your site needs. For examples in each language, see
+<Link.Page href="/bot-protection/ai-agents#allow-ai-agents-and-block-ai-crawlers">Allow AI agents and block AI crawlers</Link.Page>.
 
 Coding agents such as Claude Code fetch pages from the developer's own
 computer, not from the AI company's servers. Arcjet can't verify them against
@@ -289,5 +240,74 @@ protect against new and rapidly evolving bots.
 
 If you want to be more permissive and only block known, named bots, you can
 include `UNKNOWN_BOT` in your `allow` rules.
+
+## Bot identity
+
+When Arcjet Cloud detects a bot, the bot rule's reason includes one primary
+bot identity: who Arcjet thinks sent the request, and how it knows. A request
+can match several bots, so the identity is the detected bot with the strongest
+evidence. If two bots have equally strong evidence, Arcjet prefers an AI agent,
+then an AI crawler. The identity is available in the next release of the
+JavaScript, Python, and Go SDKs.
+
+Only Arcjet Cloud computes the identity. It's unset when no bot was detected,
+and decisions that the SDK makes locally, such as a denial from the SDK's
+local bot detection, never have one.
+
+The identity has the following fields. In Python, `botId` is `bot_id`. In Go,
+each field name starts with a capital letter, such as `BotID`.
+
+| Field      | Description                                                                                                     |
+| ---------- | --------------------------------------------------------------------------------------------------------------- |
+| `kind`     | What kind of client the bot is: `AI_AGENT`, `AI_CRAWLER`, `AUTOMATION`, or `OTHER`.                             |
+| `botId`    | The bot ID, such as `CHATGPT_AGENT` or a `SIGNED_BOT:` directory. Empty for `AUTOMATION`.                       |
+| `operator` | The hostname that operates the bot, such as `chatgpt.com`. Set only when the evidence is `SIGNATURE`.           |
+| `delegated` | `true` when the agent presented a verified Personal Agent Protocol session, so it acts for a user who delegated access to it. Set only when the evidence is `SIGNATURE`. The user is never identified. |
+| `evidence` | How Arcjet established the identity: `UNVERIFIED`, `FINGERPRINT`, `IP`, or `SIGNATURE`.                         |
+| `spoofed`  | `true` when IP address or reverse DNS verification showed that the request didn't come from the bot's operator. Arcjet checks this only when it has data for the IP address. |
+
+To read the identity, check each rule result: `result.reason.identity` in
+JavaScript, `result.reason_v2.identity` in Python, or
+`result.Reason.Bot.Identity` in Go.
+
+The `kind` field has the following values:
+
+- `AI_AGENT`: An AI product that fetches a page on demand for a person who is
+  waiting on the answer. The bot is in `CATEGORY:AI_AGENT`.
+- `AI_CRAWLER`: An AI bot that collects pages ahead of time, for model training
+  or an AI search index. The bot is in `CATEGORY:AI` but not in
+  `CATEGORY:AI_AGENT`.
+- `AUTOMATION`: Browser automation that
+  <Link.Page href="/bot-protection/advanced-signals">advanced signals</Link.Page>
+  detected, with no named bot.
+- `OTHER`: Any other detected bot.
+
+The `evidence` field has the following values, from weakest to strongest:
+
+- `UNVERIFIED`: Arcjet matched the bot by its `User-Agent` header or by IP
+  reputation, and didn't verify it. A spoofed identity always has this
+  evidence.
+- `FINGERPRINT`: The advanced signals browser checks failed.
+- `IP`: The IP address is in the operator's published ranges, Arcjet's IP data
+  names the bot as a known crawler, or reverse DNS confirmed it.
+- `SIGNATURE`: A <Link.Page href="/bot-protection/web-bot-auth">Web Bot Auth</Link.Page>
+  signature verified against the operator's key directory, or a
+  <Link.Page href="/bot-protection/ai-agents#agents-that-act-for-a-user">Personal Agent Protocol</Link.Page>
+  session verified against the agent's published keys.
+
+A bot identity tells you who sent the request, not whether to allow it.
+`UNVERIFIED` is only a `User-Agent` claim, and `SIGNATURE` identifies the
+operator of the signing key directory, not the end user. For details, see
+<Link.Page href="/bot-protection/ai-agents#a-bot-identity-isnt-authorization">A bot identity isn't authorization</Link.Page>.
+
+### Check for an AI agent
+
+To check whether a request came from an AI agent, use `isAiAgent` from
+`@arcjet/inspect` in JavaScript, `is_ai_agent` in Python, or
+`decision.IsAIAgent()` in Go. The helper returns true when a `LIVE` bot rule
+reports an identity with kind `AI_AGENT` that isn't spoofed. It ignores
+`DRY_RUN` results and doesn't check the evidence, so read `evidence` when the
+strength of the identity matters to you. For complete examples, see
+<Link.Page href="/bot-protection/ai-agents#customize-the-response-for-ai-agents">Customize the response for AI agents</Link.Page>.
 
 <Comments />

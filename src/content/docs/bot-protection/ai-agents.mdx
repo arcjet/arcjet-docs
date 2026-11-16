@@ -1,0 +1,723 @@
+---
+title: "Detect AI agents and block AI crawlers"
+description: "Detect AI agents such as ChatGPT agent, Claude, Perplexity, Meta Muse, and Instinct, block AI crawlers, verify agents with IP ranges, Web Bot Auth, and the Personal Agent Protocol, and customize responses in Node.js, Next.js, Python, and Go."
+generateMarkdownRoute: true
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+import Comments from "@/components/Comments.astro";
+import { Link } from "@/components/link";
+
+An AI agent is an AI product that fetches a page or takes an action for a person
+who is waiting on the result, such as ChatGPT fetching a page that a user asked
+about. Arcjet detects AI agents with the `detectBot` rule, tells them apart from
+AI crawlers that collect pages for model training, and reports how it
+identified each one.
+
+With that information, you can let AI agents use your site, keep AI crawlers
+out, and decide what each agent gets. The examples on this page use
+`@arcjet/node`, FastAPI, and `net/http`. The same rules and helpers work in
+Next.js and the other JavaScript SDKs.
+
+## AI agents and AI crawlers
+
+AI traffic falls into two groups, and most sites want to treat them
+differently:
+
+| Kind       | What it does                                                                 | Category            | Examples                                                                                  |
+| ---------- | ---------------------------------------------------------------------------- | ------------------- | ----------------------------------------------------------------------------------------- |
+| AI agent   | Fetches a page or acts on demand, for a person who is waiting on the answer. | `CATEGORY:AI_AGENT` | `OPENAI_CRAWLER_USER` (ChatGPT-User), `CHATGPT_AGENT`, `ANTHROPIC_CRAWLER_USER` (Claude-User), `PERPLEXITY_USER`, `GOOGLE_AGENT`, `ANTHROPIC_CLAUDE_CODE` |
+| AI crawler | Collects pages ahead of time, for model training or an AI search index.      | `CATEGORY:AI`       | `OPENAI_CRAWLER` (GPTBot), `ANTHROPIC_CRAWLER` (ClaudeBot), `PERPLEXITY_CRAWLER`, `COMMONCRAWL_CRAWLER` |
+
+AI agents reach your site in several ways:
+
+- **Fetchers** request a single page when a person asks a chatbot about it,
+  such as ChatGPT-User, Claude-User, and Perplexity-User.
+- **Cloud browsers** run a full browser on the AI company's servers to complete
+  a task, such as ChatGPT agent (`CHATGPT_AGENT`) and Google's agent
+  (`GOOGLE_AGENT`).
+- **Hosted browser platforms** run browser sessions for other companies'
+  agents, such as Browserbase (`BROWSERBASE`) and Manus (`MANUS_BOT`).
+- **Coding agents** fetch documentation from a developer's own computer, such
+  as Claude Code (`ANTHROPIC_CLAUDE_CODE`), Cursor (`CURSOR`), and GitHub
+  Copilot (`GITHUB_COPILOT`).
+
+Every bot in `CATEGORY:AI_AGENT` is also in `CATEGORY:AI`. For the full list of
+bot IDs, see <Link.Page href="/bot-protection/identifying-bots">Bot identity, IDs, and categories</Link.Page>.
+
+## Allow AI agents and block AI crawlers
+
+To keep crawlers out and let agents through, use an `allow` list that includes
+`CATEGORY:AI_AGENT`. A rule that denies `CATEGORY:AI` also blocks AI agents,
+because every agent is in that category too.
+
+An `allow` list blocks every other detected bot, so also include the categories
+that your site relies on, such as `CATEGORY:SEARCH_ENGINE`. Some AI search
+crawlers, such as OAI-SearchBot and YouBot, are also in `CATEGORY:SEARCH_ENGINE`,
+so allowing that category lets them through.
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+detectBot({
+  mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+  // Block all bots except search engines and AI agents
+  allow: [
+    "CATEGORY:SEARCH_ENGINE", // Google, Bing, etc
+    "CATEGORY:AI_AGENT", // ChatGPT-User, Claude-User, coding agents, etc
+  ],
+}),
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+from arcjet import BotCategory, detect_bot, Mode
+
+detect_bot(
+    mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
+    # Block all bots except search engines and AI agents
+    allow=[
+        BotCategory.SEARCH_ENGINE,  # Google, Bing, etc
+        BotCategory.AI_AGENT,  # ChatGPT-User, Claude-User, coding agents, etc
+    ],
+)
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+arcjet.DetectBot(arcjet.BotOptions{
+	Mode: arcjet.ModeLive, // Blocks requests. Use ModeDryRun to log only.
+	// Block all bots except search engines and AI agents
+	Allow: []string{
+		arcjet.BotCategorySearchEngine, // Google, Bing, etc
+		arcjet.BotCategoryAIAgent,      // ChatGPT-User, Claude-User, coding agents, etc
+	},
+})
+```
+
+</TabItem>
+</Tabs>
+
+To block AI agents as well as crawlers, add `CATEGORY:AI` to a `deny` list. To
+block one agent, add its bot ID to a `deny` list.
+
+## How Arcjet verifies an AI agent
+
+Any client can claim to be ChatGPT-User in its `User-Agent` header, so Arcjet checks
+the claim where the operator gives it a way to:
+
+- **Published IP address ranges.** OpenAI, Anthropic, Perplexity, and Google
+  publish the addresses that their fetchers use. A ChatGPT-User request from one
+  of OpenAI's addresses has `IP` evidence.
+- **Web Bot Auth signatures.** ChatGPT agent, Google's agent, DuckAssistBot,
+  Browserbase, Manus, and other operators sign each request with a key that
+  they publish on their own domain. A verified signature has `SIGNATURE`
+  evidence and names the operator, such as `chatgpt.com`. For the full list,
+  see <Link.Page href="/bot-protection/web-bot-auth">Verify signed bots with Web Bot Auth</Link.Page>.
+- **Personal Agent Protocol sessions.** A personal agent that acts for a
+  signed-in or anonymous user sends a signed session with each request. A
+  verified session has `SIGNATURE` evidence, names the agent's operator, and
+  sets `delegated`. For more information, see
+  [Agents that act for a user](#agents-that-act-for-a-user).
+
+When a request claims to be an AI agent but its IP address isn't in the
+operator's ranges, Arcjet marks the identity as spoofed. A spoofed identity
+always has `UNVERIFIED` evidence, and the AI agent helpers in the following
+section return false for it.
+
+Coding agents such as Claude Code fetch pages from the developer's own computer,
+not from the AI company's servers. Arcjet can't verify them against published
+addresses, so it reports them with `UNVERIFIED` evidence, as neither verified
+nor spoofed.
+
+## Customize the response for AI agents
+
+Blocking or allowing is only the first choice. Once you know that a request
+came from an AI agent, you can give it a response that suits an agent and
+protects your site, such as the following:
+
+- Serve a lighter version of the page, such as Markdown without scripts and
+  layout, which costs you less to serve and is easier for the agent to read.
+- Apply a separate rate limit to each agent, so that one agent can't use up
+  capacity that your other visitors need.
+- Return a helpful message that points the agent to your API instead of a page
+  that it would have to scrape.
+- Require a person to sign in for account actions, such as purchases, password
+  changes, and data deletion.
+
+To check for an AI agent, use `isAiAgent` from `@arcjet/inspect` in JavaScript,
+`is_ai_agent` in Python, or `decision.IsAIAgent()` in Go. The helper returns
+true when a `LIVE` bot rule reports an identity with kind `AI_AGENT` that isn't
+spoofed. It ignores `DRY_RUN` results and doesn't check the evidence, so read
+the identity's `evidence` field when the strength of the identity matters to
+you.
+
+The bot identity and the AI agent helpers are available in the next release of
+the JavaScript, Python, and Go SDKs. Only Arcjet Cloud reports the identity, so
+a decision that the SDK makes locally, such as a denial from its local bot
+detection, never has one.
+
+The following example allows search engines and AI agents. It gives each AI
+agent its own rate limit, keyed by the bot ID, keeps account actions for
+signed-in people, and serves agents a Markdown version of the page:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts title="index.ts"
+import arcjet, {
+  detectBot,
+  slidingWindow,
+  type ArcjetBotIdentity,
+  type ArcjetDecision,
+} from "@arcjet/node";
+import { isAiAgent } from "@arcjet/inspect";
+import http from "node:http";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    detectBot({
+      mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+      // Block all bots except search engines and AI agents
+      allow: ["CATEGORY:SEARCH_ENGINE", "CATEGORY:AI_AGENT"],
+    }),
+  ],
+});
+
+// A separate budget for each AI agent, keyed by its bot ID
+const agentLimit = arcjet({
+  key: process.env.ARCJET_KEY!,
+  characteristics: ["botId"],
+  rules: [slidingWindow({ mode: "LIVE", interval: "1m", max: 60 })],
+});
+
+// Return the identity of the AI agent that sent the request, if any
+function aiAgent(decision: ArcjetDecision): ArcjetBotIdentity | undefined {
+  for (const result of decision.results) {
+    if (isAiAgent(result) && result.reason.isBot()) {
+      return result.reason.identity;
+    }
+  }
+  return undefined;
+}
+
+const server = http.createServer(async (req, res) => {
+  const decision = await aj.protect(req);
+
+  if (decision.isDenied()) {
+    res.writeHead(403, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Forbidden" }));
+    return;
+  }
+
+  const agent = aiAgent(decision);
+
+  if (!agent) {
+    res.writeHead(200, { "Content-Type": "text/html" });
+    res.end("<h1>Pricing</h1><p>The full page for people.</p>");
+    return;
+  }
+
+  // For example: CHATGPT_AGENT SIGNATURE chatgpt.com
+  console.log(agent.botId, agent.evidence, agent.operator);
+
+  const limit = await agentLimit.protect(req, { botId: agent.botId });
+  if (limit.isDenied()) {
+    res.writeHead(429, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Too many requests" }));
+    return;
+  }
+
+  // Keep account actions for signed-in people and your API
+  if (req.url?.startsWith("/account")) {
+    res.writeHead(401, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        error: "Sign in to manage an account.",
+        api: "https://api.example.com/docs",
+      }),
+    );
+    return;
+  }
+
+  // Serve a lighter Markdown version of the page
+  res.writeHead(200, { "Content-Type": "text/markdown" });
+  res.end("# Pricing\n\nThe same content, without scripts or layout.");
+});
+
+server.listen(3000);
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py title="main.py"
+import os
+
+from arcjet import (
+    BotCategory,
+    BotIdentity,
+    Decision,
+    Mode,
+    arcjet,
+    detect_bot,
+    is_ai_agent,
+    sliding_window,
+)
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
+
+app = FastAPI()
+
+aj = arcjet(
+    key=os.environ["ARCJET_KEY"],
+    rules=[
+        detect_bot(
+            mode=Mode.LIVE,  # Blocks requests. Use Mode.DRY_RUN to log only
+            # Block all bots except search engines and AI agents
+            allow=[BotCategory.SEARCH_ENGINE, BotCategory.AI_AGENT],
+        ),
+    ],
+)
+
+# A separate budget for each AI agent, keyed by its bot ID
+agent_limit = arcjet(
+    key=os.environ["ARCJET_KEY"],
+    rules=[
+        sliding_window(
+            mode=Mode.LIVE, interval=60, max=60, characteristics=["botId"]
+        ),
+    ],
+)
+
+
+def ai_agent(decision: Decision) -> BotIdentity | None:
+    """Return the identity of the AI agent that sent the request, if any."""
+    for result in decision.results:
+        reason = result.reason_v2
+        if is_ai_agent(result) and reason.type == "BOT":
+            return reason.identity
+    return None
+
+
+@app.get("/pricing")
+async def pricing(request: Request):
+    decision = await aj.protect(request)
+
+    if decision.is_denied():
+        return JSONResponse({"error": "Forbidden"}, status_code=403)
+
+    agent = ai_agent(decision)
+
+    if agent is None:
+        return HTMLResponse("<h1>Pricing</h1><p>The full page for people.</p>")
+
+    # For example: CHATGPT_AGENT SIGNATURE chatgpt.com
+    print(agent.bot_id, agent.evidence, agent.operator)
+
+    limit = await agent_limit.protect(
+        request, characteristics={"botId": agent.bot_id}
+    )
+    if limit.is_denied():
+        return JSONResponse({"error": "Too many requests"}, status_code=429)
+
+    # Serve a lighter Markdown version of the page
+    return PlainTextResponse(
+        "# Pricing\n\nThe same content, without scripts or layout.",
+        media_type="text/markdown",
+    )
+
+
+@app.post("/account")
+async def account(request: Request):
+    decision = await aj.protect(request)
+
+    if decision.is_denied():
+        return JSONResponse({"error": "Forbidden"}, status_code=403)
+
+    # Keep account actions for signed-in people and your API
+    if any(is_ai_agent(r) for r in decision.results):
+        return JSONResponse(
+            {
+                "error": "Sign in to manage an account.",
+                "api": "https://api.example.com/docs",
+            },
+            status_code=401,
+        )
+
+    return {"message": "Account updated"}
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go title="main.go"
+package main
+
+import (
+	"encoding/json"
+	"log"
+	"net/http"
+	"os"
+	"strings"
+	"time"
+
+	"github.com/arcjet/arcjet-go"
+)
+
+// aiAgent returns the identity of the AI agent that sent the request, if any.
+func aiAgent(decision arcjet.Decision) *arcjet.BotIdentity {
+	if !decision.IsAIAgent() {
+		return nil
+	}
+	for _, result := range decision.Results {
+		if bot := result.Reason.Bot; bot != nil && bot.Identity != nil &&
+			bot.Identity.Kind == arcjet.BotKindAIAgent && !bot.Identity.Spoofed {
+			return bot.Identity
+		}
+	}
+	return nil
+}
+
+func main() {
+	aj, err := arcjet.NewClient(arcjet.Config{
+		Key: os.Getenv("ARCJET_KEY"),
+		Rules: []arcjet.Rule{
+			arcjet.DetectBot(arcjet.BotOptions{
+				Mode: arcjet.ModeLive, // Blocks requests. Use ModeDryRun to log only.
+				// Block all bots except search engines and AI agents
+				Allow: []string{
+					arcjet.BotCategorySearchEngine,
+					arcjet.BotCategoryAIAgent,
+				},
+			}),
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// A separate budget for each AI agent, keyed by its bot ID
+	agentLimit, err := arcjet.NewClient(arcjet.Config{
+		Key: os.Getenv("ARCJET_KEY"),
+		Rules: []arcjet.Rule{
+			arcjet.SlidingWindow(arcjet.SlidingWindowOptions{
+				Mode:            arcjet.ModeLive,
+				Characteristics: []string{"botId"},
+				Interval:        time.Minute,
+				MaxRequests:     60,
+			}),
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		decision, err := aj.Protect(r.Context(), r)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		if decision.IsDenied() {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
+
+		agent := aiAgent(decision)
+
+		if agent == nil {
+			w.Header().Set("Content-Type", "text/html")
+			w.Write([]byte("<h1>Pricing</h1><p>The full page for people.</p>"))
+			return
+		}
+
+		// For example: CHATGPT_AGENT SIGNATURE chatgpt.com
+		log.Println(agent.BotID, agent.Evidence, agent.Operator)
+
+		limit, err := agentLimit.Protect(r.Context(), r,
+			arcjet.WithCharacteristic("botId", agent.BotID))
+		if err == nil && limit.IsDenied() {
+			http.Error(w, "Too Many Requests", http.StatusTooManyRequests)
+			return
+		}
+
+		// Keep account actions for signed-in people and your API
+		if strings.HasPrefix(r.URL.Path, "/account") {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "Sign in to manage an account.",
+				"api":   "https://api.example.com/docs",
+			})
+			return
+		}
+
+		// Serve a lighter Markdown version of the page
+		w.Header().Set("Content-Type", "text/markdown")
+		w.Write([]byte("# Pricing\n\nThe same content, without scripts or layout."))
+	})
+
+	log.Fatal(http.ListenAndServe(":3000", nil))
+}
+```
+
+</TabItem>
+</Tabs>
+
+The rate limit uses the bot ID as its key, so all requests from one agent share
+one budget, whichever person they're for. To limit each agent per IP address
+instead, add `ip.src` to the characteristics. For more information, see
+<Link.Page href="/rate-limiting/configuration">Rate limit configuration</Link.Page>.
+
+## Agents that act for a user
+
+The [Personal Agent Protocol](https://personalagentprotocol.org) lets a
+personal agent, such as Meta's Muse, act on your site for a person who
+delegated access to it. Instead of signing in with the person's password, the
+agent sends a `Poppy-Session` header with each request: a token signed by a key
+that the agent publishes on its own domain, and bound to the request's method
+and URL.
+
+Arcjet verifies the session for agents in the
+[well-known bots catalog](https://github.com/arcjet/well-known-bots) and
+reports the following identity:
+
+- `evidence` is `SIGNATURE` and `operator` is the agent's domain.
+- `kind` is `AI_AGENT` and `botId` is the agent's bot ID.
+- `delegated` is true.
+
+A verified session proves which agent sent the request and that it acts for one
+of its users. It never identifies the user: the session carries an ID that is
+different for each site and contains no personal information. It also doesn't
+prove that the person approved this action, so keep your own checks for
+purchases and other account changes.
+
+An agent sends a session only to sites that publish a
+`/.well-known/poppy.json` file, which your authorization server provides along
+with the OAuth endpoints that the agent signs in through. Arcjet checks the
+session against the request; your authorization server checks the access token
+and its scopes. For more information, see the
+[Personal Agent Protocol specification](https://personalagentprotocol.org/docs/1.0/spec).
+
+To give delegated agents more than other agents, check `delegated` on the
+identity. The following example extends the `aiAgent` helper in the preceding
+section:
+
+<Tabs syncKey="language">
+<TabItem label="JavaScript / TypeScript">
+
+```ts
+const agent = aiAgent(decision);
+
+if (agent?.delegated) {
+  // A verified Personal Agent Protocol session: the agent's bot ID,
+  // SIGNATURE, the agent's domain, and true
+  console.log(agent.botId, agent.evidence, agent.operator, agent.delegated);
+}
+```
+
+</TabItem>
+<TabItem label="Python">
+
+```py
+agent = ai_agent(decision)
+
+if agent is not None and agent.delegated:
+    # A verified Personal Agent Protocol session: the agent's bot ID,
+    # SIGNATURE, the agent's domain, and true
+    print(agent.bot_id, agent.evidence, agent.operator, agent.delegated)
+```
+
+</TabItem>
+<TabItem label="Go">
+
+```go
+agent := aiAgent(decision)
+
+if agent != nil && agent.Delegated {
+	// A verified Personal Agent Protocol session: the agent's bot ID,
+	// SIGNATURE, the agent's domain, and true
+	log.Println(agent.BotID, agent.Evidence, agent.Operator, agent.Delegated)
+}
+```
+
+</TabItem>
+</Tabs>
+
+`delegated` is only true with `SIGNATURE` evidence. A session that fails
+verification, or comes from an agent that isn't in the catalog, doesn't change
+the identity.
+
+## A bot identity isn't authorization
+
+:::caution
+The bot identity tells you who sent the request, not whether to allow it:
+
+- `UNVERIFIED` is only what the `User-Agent` header claims. Any client can
+  send it.
+- `SIGNATURE` identifies the operator of the signing key directory, such as a
+  hosted browser platform like Browserbase. It doesn't identify the end user or
+  what they intend. A signature that covers only `@authority` can be replayed
+  until it expires.
+- `delegated` means the agent acts for one of its users. It doesn't identify
+  the user or prove that they approved the action.
+- `IP` evidence is only as reliable as the client IP address that the SDK
+  resolves. If your application runs behind a proxy or load balancer,
+  <Link.Page href="/best-practices#configure-proxies-and-load-balancers">configure trusted proxies</Link.Page>.
+
+Authorize sensitive actions, such as signups, purchases, and data changes,
+with your own checks.
+:::
+
+## AI agents that use a normal browser
+
+Some agents don't send a `User-Agent` header that names them. A cloud browser
+or a hosted browser platform runs a real browser and sends a standard browser
+`User-Agent` header, and an agent that controls a browser on a person's own
+computer looks like that person's browser.
+
+The following signals help with these agents:
+
+- **Web Bot Auth signatures.** If the operator signs its requests, Arcjet names
+  the operator even though the `User-Agent` header looks like a browser.
+- **Advanced signals.** The browser checks can detect automation in the
+  browser. Arcjet then reports an identity with kind `AUTOMATION` and
+  `FINGERPRINT` evidence. This tells you that a program drives the browser, but
+  not which agent it is. For more information, see
+  <Link.Page href="/bot-protection/advanced-signals">Advanced bot signals</Link.Page>.
+
+If an agent sends no signature and passes the browser checks, Arcjet treats the
+request as a browser. Rate limits and your own authorization checks still
+apply.
+
+## FAQs
+
+### How do I detect AI agents?
+
+Add a `detectBot` rule that allows or denies `CATEGORY:AI_AGENT`, then check
+each rule result with `isAiAgent` in JavaScript, `is_ai_agent` in Python, or
+`decision.IsAIAgent()` in Go. Read the identity's `botId` and `evidence` fields
+to see which agent it is and how Arcjet identified it.
+
+### How do I detect ChatGPT agent?
+
+ChatGPT agent signs its requests with Web Bot Auth, and Arcjet reports it as
+`CHATGPT_AGENT` with `SIGNATURE` evidence and the operator `chatgpt.com`.
+ChatGPT's on-demand fetcher, ChatGPT-User, has the bot ID
+`OPENAI_CRAWLER_USER`, and Arcjet verifies it against OpenAI's published IP
+address ranges. Both are in `CATEGORY:AI_AGENT`.
+
+### What's the difference between an AI agent and an AI crawler?
+
+An AI agent fetches a page for a person who is waiting on the answer, and an AI
+crawler collects pages ahead of time for model training or an AI search index.
+In Arcjet, agents are in `CATEGORY:AI_AGENT`, and crawlers are the rest of
+`CATEGORY:AI`.
+
+### Should I block AI agents?
+
+Usually not on public pages, because an AI agent often acts for a real person
+who might become your customer. Allow agents where they help your visitors,
+rate limit them, and require sign-in for account actions. Block them on routes
+where automated access does harm, such as signup forms.
+
+### How do I block AI crawlers but allow AI agents?
+
+Use an `allow` list that includes `CATEGORY:AI_AGENT` and leaves out
+`CATEGORY:AI`. Also include the other categories that your site needs, such as
+`CATEGORY:SEARCH_ENGINE`, because an `allow` list blocks every other detected
+bot.
+
+### Can a bot pretend to be an AI agent?
+
+Yes, any client can send an AI agent's `User-Agent` header. Arcjet checks the
+claim against the operator's published IP addresses and Web Bot Auth
+signatures where they exist, marks a failed check as spoofed, and reports the
+evidence level, so you can trust a verified agent more than a claim.
+
+### Why does Arcjet report Claude Code as unverified?
+
+Claude Code and other coding agents fetch pages from the developer's computer,
+so their requests never come from the AI company's published IP addresses.
+Arcjet reports them with `UNVERIFIED` evidence and doesn't mark them as
+spoofed.
+
+### What is the Personal Agent Protocol?
+
+The Personal Agent Protocol is an open protocol for personal agents that act
+for a user. The agent identifies itself with a signed session on each request,
+and signs in through your OAuth server with scopes the user approves, instead
+of using the user's password. Arcjet verifies the session and reports the
+agent with `SIGNATURE` evidence and `delegated` set to true.
+
+### How do I detect Meta Muse?
+
+Muse is Meta's personal agent. It browses from a cloud browser and doesn't
+name itself in the `User-Agent` header. If your site publishes a
+`/.well-known/poppy.json` file, Muse can present a Personal Agent Protocol
+session, which Arcjet verifies and reports with `delegated` set to true.
+Without a session, Muse looks like a browser, so use advanced signals and rate
+limits.
+
+### How do I detect Instinct?
+
+Instinct is a personal agent that browses from a cloud browser and doesn't name
+itself in the `User-Agent` header or sign its requests, so Arcjet can't name it
+from a request alone. Advanced signals detect browser automation, and rate
+limits and your own authorization checks still apply. Instinct is a design
+partner of the Personal Agent Protocol; when it sends a verified session,
+Arcjet reports it like any other delegated agent.
+
+### How do I detect Manus?
+
+Manus signs the requests from its cloud browser with Web Bot Auth, and Arcjet
+reports them as `MANUS_BOT` with `SIGNATURE` evidence. The Manus Browser
+Operator extension runs in a person's own browser, with their sign-in and IP
+address, so those requests look like that person's browser.
+
+### How do I detect Claude?
+
+Claude's on-demand fetcher, Claude-User, has the bot ID
+`ANTHROPIC_CRAWLER_USER`, and Arcjet verifies it against Anthropic's published
+IP address ranges. Claude Code has the bot ID `ANTHROPIC_CLAUDE_CODE`. Claude
+in Chrome runs in a person's own browser, so its requests look like that
+person's browser.
+
+### How do I detect Perplexity Comet?
+
+Perplexity's on-demand fetcher, Perplexity-User, has the bot ID
+`PERPLEXITY_USER`, and Arcjet verifies it against Perplexity's published IP
+address ranges. Comet is a browser that runs on a person's own computer and
+sends a standard browser `User-Agent` header, so Arcjet treats it as a browser
+unless advanced signals detect automation.
+
+### How do I detect Google's AI agent?
+
+Google's agent sends `Google-Agent` in its `User-Agent` header and signs its
+requests with Web Bot Auth. Arcjet reports it as `GOOGLE_AGENT`, with
+`SIGNATURE` evidence when the signature verifies and `IP` evidence from
+Google's published address ranges.
+
+### How do I detect Grok?
+
+xAI's agent sends `grok-agent` in its `User-Agent` header, and Arcjet reports
+it as `XAI_GROK_AGENT` with `UNVERIFIED` evidence, because xAI publishes no IP
+address ranges or signing keys for it.
+
+### Which AI agents look like a normal browser?
+
+Agents that run in a person's own browser, such as Claude in Chrome, Perplexity
+Comet, and the Manus Browser Operator extension, send that browser's requests.
+Agents that run a cloud browser without signing, such as Instinct, send a
+standard browser `User-Agent` header. For these agents, use advanced signals,
+rate limits, and your own authorization checks.
+
+<Comments />
