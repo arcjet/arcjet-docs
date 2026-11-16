@@ -11,10 +11,15 @@ import AllowSigners from "@/snippets/bot-protection/web-bot-auth/AllowSigners.ts
 import DenySigners from "@/snippets/bot-protection/web-bot-auth/DenySigners.ts?raw";
 import CustomSigner from "@/snippets/bot-protection/web-bot-auth/CustomSigner.ts?raw";
 
-Some bots and AI agents sign their HTTP requests so that the site they visit
-can check who sent them. Arcjet verifies these signatures as part of the
-`detectBot` rule. You can allow or deny a signed agent by its verified identity,
-next to the bots and categories that you already configure.
+Web Bot Auth is a standard way for bots and AI agents to sign their HTTP
+requests, so that the site they visit can check which operator sent them.
+Arcjet verifies these signatures as part of the `detectBot` rule, so you can
+allow or deny a signed agent, such as ChatGPT agent, by its verified identity
+instead of a `User-Agent` header that any client can fake.
+
+A verified signature gives a bot identity `SIGNATURE` evidence, the strongest
+level that Arcjet reports. For how to use it with AI agents, see
+<Link.Page href="/bot-protection/ai-agents">Detect AI agents</Link.Page>.
 
 ## What Web Bot Auth is
 
