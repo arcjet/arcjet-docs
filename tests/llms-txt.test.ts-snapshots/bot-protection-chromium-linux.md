@@ -78,7 +78,7 @@ When Arcjet Cloud detects a bot, the result includes one primary bot identity: w
 3.  `FINGERPRINT`: The advanced signals browser checks failed.
 4.  `UNVERIFIED`: Arcjet matched the `User-Agent` header or IP reputation, and couldn’t verify it.
 
-The evidence level lets you trust a signed or IP-verified agent more than a `User-Agent` claim. The bot identity is available in the next release of the JavaScript, Python, and Go SDKs. For every field, see [Bot identity](/bot-protection/identifying-bots#bot-identity).
+The evidence level lets you trust a signed or IP-verified agent more than a `User-Agent` claim. The JavaScript, Python, and Go SDKs expose the bot identity. For every field, see [Bot identity](/bot-protection/identifying-bots#bot-identity).
 
 Bot rules in your application code
 ----------------------------------
