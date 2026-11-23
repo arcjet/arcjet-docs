@@ -1,5 +1,9 @@
  [![npm badge](https://img.shields.io/npm/v/@arcjet/deno?style=flat-square&label=%E2%9C%A6Aj&labelColor=ECE6F0&color=ECE6F0)](https://www.npmjs.com/package/@arcjet/deno)
 
+Deprecated
+
+`@arcjet/deno` is deprecated and receives no further updates. On Deno, use [`@arcjet/node`](/reference/nodejs) with a `node:http` server, which Deno runs through its Node.js compatibility layer. The rest of this page documents the deprecated package.
+
 This guide shows how to use the package [`@arcjet/deno`](https://www.npmjs.com/package/@arcjet/deno). Its source code is [on GitHub](https://github.com/arcjet/arcjet-js/tree/main/arcjet-deno). The code is open source and licensed under Apache 2.0.
 
 **What is Arcjet?** [Arcjet](https://arcjet.com) is the AI agent runtime security platform. Discover the agents running in your organization, enforce policy across every action, prompt, and tool call, and keep the evidence to prove what happened. Detect prompt injection, authorize agent tool calls, redact PII, and block bots and abuse.
