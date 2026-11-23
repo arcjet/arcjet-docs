@@ -610,13 +610,19 @@ if decision.IsDenied() || decision.HasFailedOpen() {
 	return errors.New("content flagged by moderation")
 }
 
-if result := moderation.Result(decision); result != nil && result.Billing != nil {
-	fmt.Printf("charged %d %s\n", result.Billing.Count, result.Billing.Unit)
+if result := moderation.Result(decision); result != nil {
+	fmt.Printf("detected=%v categories=%v\n", result.Detected, result.DetectedCategories)
+	if result.Billing != nil {
+		fmt.Printf("charged %d %s\n", result.Billing.Count, result.Billing.Unit)
+	}
 }
 ```
 
-The result is a `Detected` verdict, plus optional `Billing` in `text_units`.
-For more information, see <Link.Page href="/content-moderation">Content moderation</Link.Page>.
+The result is a `Detected` verdict, `DetectedCategories`
+(`SEXUALLY_EXPLICIT`, `MISCONDUCT`, `HATE_SPEECH`, `INSULTS`, plus any future
+string), and optional `Billing` in `text_units`. Scores and thresholds aren't
+returned. For more information, see
+<Link.Page href="/content-moderation">Content moderation</Link.Page>.
 
 ### Capture
 

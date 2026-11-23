@@ -1,11 +1,11 @@
 ---
 prev: false
 title: "Arcjet Deno SDK reference"
-description: "Reference for the Arcjet Deno SDK: install `@arcjet/deno`, configure a client, protect a `Deno.serve` handler, and read the decision."
+description: "Reference for the deprecated Arcjet Deno SDK. Prefer `@arcjet/node` on Deno with a `node:http` server."
 generateMarkdownRoute: true
 ---
 
-import { Code } from "@astrojs/starlight/components";
+import { Aside, Code } from "@astrojs/starlight/components";
 import Comments from "@/components/Comments.astro";
 import NpmSdkVersion from "@/components/NpmSdkVersion.astro";
 import WhatIsArcjet from "/src/components/WhatIsArcjet.astro";
@@ -18,6 +18,13 @@ import ExplicitClientIP from "/src/snippets/reference/shared/ExplicitClientIP.md
 import ProtectMetadata from "@/snippets/reference/shared/ProtectMetadata.mdx";
 
 [<NpmSdkVersion packageName="@arcjet/deno" />](https://www.npmjs.com/package/@arcjet/deno)
+
+<Aside type="caution" title="Deprecated">
+  `@arcjet/deno` is deprecated and receives no further updates. On Deno, use
+  <Link.Page href="/reference/nodejs">`@arcjet/node`</Link.Page> with a
+  `node:http` server, which Deno runs through its Node.js compatibility layer.
+  The rest of this page documents the deprecated package.
+</Aside>
 
 This guide shows how to use the package
 [`@arcjet/deno`](https://www.npmjs.com/package/@arcjet/deno).
