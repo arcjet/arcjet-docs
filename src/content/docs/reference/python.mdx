@@ -981,8 +981,9 @@ loads the model, so it takes noticeably longer than the ones after it.
 #### Content moderation
 
 Guard-only. Instantiate once, then bind the untrusted text per call. The
-result reports `detected` and optional `billing` (`text_units`) – not
-per-category scores. See
+result reports `detected`, `detected_categories` (`SEXUALLY_EXPLICIT`,
+`MISCONDUCT`, `HATE_SPEECH`, `INSULTS`, plus any future string), and optional
+`billing` (`text_units`). Scores and thresholds aren't returned. See
 <Link.Page href="/content-moderation">Content moderation</Link.Page>.
 
 ```py
@@ -1003,7 +1004,7 @@ if decision.conclusion == "DENY" or decision.has_failed_open():
 
 result = moderate.result(decision)
 if result:
-    print(result.detected)
+    print(result.detected, result.detected_categories)
     if result.billing:
         print(result.billing.unit, result.billing.count)
 ```

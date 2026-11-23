@@ -93,13 +93,21 @@ with the Guard SDK. It is not available as a
 2. At the action boundary, bind the untrusted text and submit it with
    `guard()` / `Guard`.
 3. Arcjet returns `ALLOW` or `DENY`. A denial has reason `MODERATE_CONTENT`.
-4. The per-rule result is a binary `detected` / `Detected` verdict plus
-   optional billing in `text_units`.
+4. The per-rule result is a `detected` / `Detected` verdict, the categories
+   that fired, and optional billing in `text_units`.
 
-The result shape does not include per-category scores. For what the default
-policy enforces and why it focuses on sexual content for payment processor
-compliance, see the <Link.Page href="/content-moderation/policy">content
-moderation policy</Link.Page>.
+The result lists which categories fired as `detectedCategories` (JavaScript),
+`detected_categories` (Python), or `DetectedCategories` (Go):
+`SEXUALLY_EXPLICIT`, `MISCONDUCT`, `HATE_SPEECH`, and `INSULTS`. Arcjet may
+add categories later, so treat an unrecognized value as harmful content of an
+unknown kind. Categories arrive in a fixed order, not by score. Scores and
+thresholds are never returned. Treat `detected` / `Detected` as authoritative:
+the list can be empty even when harmful content was detected, for example from
+an older Arcjet server.
+
+For what the default policy enforces and why it focuses on sexual content for
+payment processor compliance, see the
+<Link.Page href="/content-moderation/policy">content moderation policy</Link.Page>.
 
 ### SDK availability
 
@@ -139,6 +147,9 @@ const result = moderate.result(decision);
 // `detected` is true when harmful content was found. Billing is undefined
 // when the service does not report usage. Content moderation uses text_units.
 console.log(result?.detected, result?.billing?.unit, result?.billing?.count);
+// `detectedCategories` names what was found, such as "HATE_SPEECH" or
+// "INSULTS". Decide on `detected`: the list can be empty even when it is true.
+console.log(result?.detectedCategories);
 ```
 
 </TabItem>
@@ -167,6 +178,9 @@ result = moderate.result(decision)
 # `detected` is True when harmful content was found. Billing is None
 # when the service does not report usage. Content moderation uses text_units.
 print(result.detected if result else None)
+# `detected_categories` names what was found, such as "HATE_SPEECH" or
+# "INSULTS". Decide on `detected`: the tuple can be empty even when it is True.
+print(result.detected_categories if result else ())
 if result and result.billing:
     print(result.billing.unit, result.billing.count)
 ```
@@ -196,9 +210,14 @@ if decision.IsDenied() || decision.HasFailedOpen() {
 	return errors.New("content flagged by moderation")
 }
 
-// Billing is optional. Content moderation usage is measured in text_units.
-if result := moderation.Result(decision); result != nil && result.Billing != nil {
-	fmt.Printf("charged %d %s\n", result.Billing.Count, result.Billing.Unit)
+if result := moderation.Result(decision); result != nil {
+	// DetectedCategories names what was found, such as HATE_SPEECH or
+	// INSULTS. Decide on Detected: the list can be empty even when it is true.
+	fmt.Printf("detected=%v categories=%v\n", result.Detected, result.DetectedCategories)
+	// Billing is optional. Content moderation usage is measured in text_units.
+	if result.Billing != nil {
+		fmt.Printf("charged %d %s\n", result.Billing.Count, result.Billing.Unit)
+	}
 }
 ```
 
