@@ -3,7 +3,7 @@ title: "Arcjet Redact reference"
 description: "Reference for `@arcjet/redact` and `github.com/arcjet/arcjet-go/redact`, which replace sensitive strings with tokens before they reach an LLM or a log, and restore them afterwards."
 ---
 
-import { Code, Tabs, TabItem } from "@astrojs/starlight/components";
+import { Aside, Code, Tabs, TabItem } from "@astrojs/starlight/components";
 import WhatAreArcjetUtilities from "@/components/WhatAreArcjetUtilities.astro";
 import FAQs from "/src/components/FAQs.astro";
 import CustomEntities from "/src/snippets/redact/CustomEntities.ts?raw";
@@ -15,6 +15,12 @@ import QuickStartUnredactGo from "/src/snippets/redact/QuickStartUnredact.go?raw
 import Comments from "/src/components/Comments.astro";
 
 The Arcjet Redaction library helps you redact sensitive information locally.
+
+<Aside type="caution" title="Deprecated">
+  `@arcjet/redact` and `github.com/arcjet/arcjet-go/redact` are no longer
+  maintained. Existing versions keep working, but they will not receive fixes,
+  including security fixes.
+</Aside>
 
 <WhatAreArcjetUtilities />
 
