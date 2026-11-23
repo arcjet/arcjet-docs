@@ -33,10 +33,11 @@ insults – and returns `DENY` when the text crosses the threshold for any one o
 them.
 
 The policy inspects the text you submit. Use it on the input to a model, the
-output from a model, or both. Content moderation returns a binary `detected`
-verdict for each rule. It doesn't return per-category scores, so keep your
-response to a denied decision generic and don't try to explain exactly what was
-flagged.
+output from a model, or both. Content moderation returns a `detected` / `Detected`
+verdict for each rule, plus the categories that fired
+(`SEXUALLY_EXPLICIT`, `MISCONDUCT`, `HATE_SPEECH`, `INSULTS`). It doesn't return
+per-category scores or thresholds. You can tell a user which categories were
+flagged, but don't invent a score-based explanation.
 
 ## Why the policy focuses on sexual content
 
@@ -68,29 +69,33 @@ see [Custom policies](#custom-policies).
 
 ## Categories
 
-The default policy evaluates text against the following categories:
+The default policy evaluates text against the following categories. The decision
+response uses the matching uppercase names: `SEXUALLY_EXPLICIT`, `MISCONDUCT`,
+`HATE_SPEECH`, and `INSULTS`.
 
-- **Sexual content** – content that is sexual, suggestive, borderline, or
-  sexually provocative. This covers references to sexual acts and lewd content;
-  nudity or partial nudity; revealing, tight, fetish, or minimal clothing such
-  as lingerie and swimwear; sexualized posing; and framing that objectifies or
-  draws attention to a person's body. This category is enforced most strictly
-  for payment processor compliance.
-- **Misconduct** – content that depicts or facilitates criminal or deceptive
-  activity, such as fraud, tax evasion, money laundering, embezzlement, insider
-  trading, counterfeiting, forgery, drug trafficking, copyright infringement,
-  unauthorized access to computer systems, or illegal surveillance. Theft,
-  stealing, and shoplifting on their own aren't covered. Theft that involves
-  violence, weapons, explosives, hostages, or threats is covered.
-- **Hate speech** – content that targets a person or group based on a protected
-  attribute such as race, ethnicity, religion, disability, age, nationality,
-  veteran status, sexual orientation, gender, gender identity, caste, or any
-  other protected status. This includes slurs, promotion of discrimination,
-  calls to violence, and content that dehumanizes, belittles, or vilifies
-  people based on those attributes. References to a protected individual or
-  group in a positive manner are allowed.
-- **Insults** – content that uses demeaning, humiliating, mocking, or belittling
-  language directed at a person or group, also known as bullying.
+- **Sexual content** (`SEXUALLY_EXPLICIT`) – content that is sexual, suggestive,
+  borderline, or sexually provocative. This covers references to sexual acts
+  and lewd content; nudity or partial nudity; revealing, tight, fetish, or
+  minimal clothing such as lingerie and swimwear; sexualized posing; and
+  framing that objectifies or draws attention to a person's body. This category
+  is enforced most strictly for payment processor compliance.
+- **Misconduct** (`MISCONDUCT`) – content that depicts or facilitates criminal
+  or deceptive activity, such as fraud, tax evasion, money laundering,
+  embezzlement, insider trading, counterfeiting, forgery, drug trafficking,
+  copyright infringement, unauthorized access to computer systems, illegal
+  surveillance, terrorism, or murder. Theft, stealing, shoplifting, and
+  robberies in video games on their own aren't covered. Real-world robbery
+  planning is covered. Theft that involves violence, weapons, explosives,
+  hostages, or threats is covered.
+- **Hate speech** (`HATE_SPEECH`) – content that targets a person or group based
+  on a protected attribute such as race, ethnicity, religion, disability, age,
+  nationality, veteran status, sexual orientation, gender, gender identity,
+  caste, or any other protected status. This includes slurs, promotion of
+  discrimination, calls to violence, and content that dehumanizes, belittles, or
+  vilifies people based on those attributes. References to a protected
+  individual or group in a positive manner are allowed.
+- **Insults** (`INSULTS`) – content that uses demeaning, humiliating, mocking,
+  or belittling language directed at a person or group, also known as bullying.
 
 ## Custom policies
 
