@@ -57,21 +57,22 @@ type Options struct {
 
 - `entities`: The list of entities that you wish to redact. If undefined then all
   entities are redacted. Valid values are: `email`, `phone-number`,
-  `ip-address`, `credit-card`, or any string returned from `detect`. In Go the
-  constants are `redact.EntityEmail`, `redact.EntityPhoneNumber`,
-  `redact.EntityIPAddress`, and `redact.EntityCreditCardNumber`
-  (`credit-card-number`).
+  `ip-address`, `credit-card-number`, or any string returned from `detect`. In
+  Go the constants are `redact.EntityEmail`, `redact.EntityPhoneNumber`,
+  `redact.EntityIPAddress`, and `redact.EntityCreditCardNumber`. Listing any
+  other name without `detect` is an error: `redact` throws in JavaScript, and
+  `redact.New` returns an error in Go.
 - `contextWindowSize` - How many tokens to pass to the `detect` function at a
   time. Setting this to a higher value allows for more context to be used when
   determining if a token is sensitive or not. For best performance, set this to
   the lowest number that provides the context that you need.
 - `detect` - An optional function that lets you detect custom entities. Arcjet
   passes it a list of tokens as big as `contextWindowSize`, and it must return a
-  list of detected entities of the same length.
+  list of the same length, with one entry per token in the same order.
 - `replace` - An optional function that lets you define your own replacements
-  for detected entities. In JavaScript, Arcjet passes it the entity type and it
-  must return a replacement or `undefined`. In Go it receives the entity type
-  and the plaintext, and returns `(replacement, ok)`.
+  for detected entities. Arcjet passes it the entity type and the plaintext. In
+  JavaScript it returns a replacement or `undefined` to use the default. In Go
+  it returns `(replacement, ok)`.
 
 ## Redact and unredact text
 
@@ -133,7 +134,9 @@ that look exactly like the real ones.
 :::note
 If you are using `unredact()` it is important that each redacted entity is
 unique. If the same string replaces many pieces of sensitive info, then
-unredaction doesn't work correctly.
+unredaction doesn't work correctly. If the text already contains a replacement
+that `redact` would produce, it can't be unredacted reliably, so `redact`
+throws in JavaScript and returns `redact.ErrNotReversible` in Go.
 :::
 
 <Tabs syncKey="language">
