@@ -379,7 +379,7 @@ Accuracy depends on the input. Keep the following trade-offs in mind:
   text.
 - **Government or financial identifiers without a checksum** (passports,
   licenses, case numbers) are recognized less reliably than the structured types
-  the deterministic recognizers validate, such as emails and card numbers.
+  the deterministic checks validate, such as emails and card numbers.
 - **Latency** – inference runs synchronously in the request path, so it adds to
   the response time of each request that the rule scans.
 
@@ -694,15 +694,20 @@ To list every type at once, use `rampartEntities` (JS), `rampart_entities`
 ### Structured type matching
 
 The default recognizers match these structured types with deterministic,
-validated patterns.
+validated patterns. Card numbers use Arcjet's own card detection instead of a
+recognizer.
 
 #### Card numbers
 
-Arcjet detects card numbers of 13 to 19 digits when the final digit is a valid
+Card numbers come from Arcjet's card detection, the same definition the default
+backend and the Arcjet server use, whatever recognizers you configure. Arcjet
+detects card numbers of 13 to 19 digits from a known card issuer, at that
+issuer's lengths, when the final digit is a valid
 [Luhn](https://en.wikipedia.org/wiki/Luhn_algorithm) check digit. The values
 `4242424242424242`, `4000 0566 5566 5556`, and `3782-8224-6310005` match, but
-`4242424242424241` doesn't. Spaces and dashes are ignored, because people often
-group the digits.
+`4242424242424241` doesn't. Spaces and dashes between groups of
+digits are ignored, because people often group the digits. The model's own card
+labels aren't used.
 
 #### Email addresses
 
