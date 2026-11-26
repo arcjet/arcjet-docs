@@ -558,9 +558,11 @@ bot reason lists the bot in `denied` and sets `spoofed`. These bots are:
 - `YANDEX_CRAWLER`
 - `YOU_CRAWLER`
 
-A request from the operator's own network is never denied this way: if its
-reverse DNS does not match, Arcjet treats the claim as unverifiable and allows
-it. A `DRY_RUN` rule logs the denial without blocking.
+A request from Google's, Apple's or Yandex's own network is never denied this
+way: if its reverse DNS does not match, Arcjet treats the claim as unverifiable
+and allows it. Cloud networks those operators share with their customers, such
+as Google Cloud and Azure, don't count. A `DRY_RUN` rule logs the denial
+without blocking.
 
 For any other bot, a spoofed claim that matches an `allow` rule is still
 allowed, so check for it in your code.
