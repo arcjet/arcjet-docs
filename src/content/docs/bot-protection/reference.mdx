@@ -74,6 +74,8 @@ ajToc:
     children:
       - text: "Example: Allowing verified bots"
         anchor: "example-allowing-verified-bots"
+      - text: "Spoofed search engine crawlers are denied"
+        anchor: "spoofed-search-engine-crawlers-are-denied"
       - text: "Check for spoofed bots"
         anchor: "check-for-spoofed-bots"
       - text: "Check bot verification"
@@ -542,10 +544,32 @@ if decision.is_denied():
 </TabItem>
 </Tabs>
 
+### Spoofed search engine crawlers are denied
+
+Some crawlers fetch only from their operator's own servers, and Arcjet verifies
+them by reverse DNS. When an `allow` rule names one of these bots and a request
+claiming to be it fails verification, Arcjet denies the request. The decision's
+bot reason lists the bot in `denied` and sets `spoofed`. These bots are:
+
+- `GOOGLE_CRAWLER`, `GOOGLE_CRAWLER_IMAGE`, `GOOGLE_CRAWLER_MOBILE`,
+  `GOOGLE_CRAWLER_VIDEO` and `GOOGLE_INSPECTION_TOOL`
+- `BING_CRAWLER`
+- `APPLE_CRAWLER`
+- `YANDEX_CRAWLER`
+- `YOU_CRAWLER`
+
+A request from the operator's own network is never denied this way: if its
+reverse DNS does not match, Arcjet treats the claim as unverifiable and allows
+it. A `DRY_RUN` rule logs the denial without blocking.
+
+For any other bot, a spoofed claim that matches an `allow` rule is still
+allowed, so check for it in your code.
+
 ### Check for spoofed bots
 
 This checks whether the bot is spoofed. You would usually return a 403 or
-similar response to block the request.
+similar response to block the request. Arcjet already denies spoofed claims
+of the search engine crawlers listed in the previous section.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
