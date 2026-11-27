@@ -96,6 +96,10 @@ call `Close` on shutdown.
 </TabItem>
 </Tabs>
 
+Each call to `redact()` numbers its replacements from `#0`, so two calls can
+produce the same replacement for different values. Only use an `unredact()`
+function on text derived from the output of the call that returned it.
+
 ## Custom entity detection
 
 When configuring a redaction you can provide a custom entity detect function,
@@ -110,6 +114,12 @@ If you need additional context to perform detections then you can increase this
 value.
 
 In cases of a conflict the first identified entity type is used.
+
+Give a custom entity a name that is not close to a built-in one. A name that
+matches a built-in entity with case and punctuation ignored, or that has five
+or more characters and is the start of one or one typo away from one, is
+rejected even with a custom detect function, because it is almost always a
+typo.
 
 <Tabs syncKey="language">
 <TabItem label="JavaScript / TypeScript">
