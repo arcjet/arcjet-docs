@@ -536,6 +536,20 @@ export const main = [
     ],
   },
   {
+    label: "Security frameworks",
+    collapsed: false,
+    items: [
+      {
+        label: "Overview",
+        link: "/security-frameworks",
+      },
+      {
+        label: "OWASP Top 10 for LLM Applications",
+        link: "/security-frameworks/owasp-llm-top-10",
+      },
+    ],
+  },
+  {
     label: "Tools for AI",
     collapsed: false,
     items: [

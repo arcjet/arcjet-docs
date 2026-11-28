@@ -115,6 +115,8 @@ const PATHS_FROM_SITEMAP = [
   "/signup-protection/reference/",
   "/support/",
   "/testing/",
+  "/security-frameworks/",
+  "/security-frameworks/owasp-llm-top-10/",
   "/tools-for-ai/",
   "/troubleshooting/",
   "/upgrading/sdk-migration/",

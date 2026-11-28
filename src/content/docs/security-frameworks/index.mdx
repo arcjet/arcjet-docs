@@ -1,0 +1,53 @@
+---
+title: "Security frameworks"
+description: "How Arcjet controls map to industry security frameworks for AI applications, such as the OWASP Top 10 for LLM Applications, with the coverage level of each risk."
+prev: false
+generateMarkdownRoute: true
+---
+
+import { CardGrid } from "@astrojs/starlight/components";
+import { Link } from "@/components/link";
+
+A security framework is a published list of risks, or of controls, that
+reviewers use to check whether a system is protected. Security teams map their
+controls to a framework so that they can show which risks a control addresses,
+which risks another tool addresses, and which risks remain open.
+
+The pages in this section map Arcjet controls to one framework each. Every
+mapping names the risk, the Arcjet control that addresses it, where in your
+application the control runs, and the part of the risk that stays with your own
+code or with another tool.
+
+## Coverage levels
+
+Each risk in a mapping has one of the following coverage levels:
+
+| Coverage    | Meaning                                                                                                                                                                                  |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Product     | An Arcjet control that ships today enforces the control the framework describes.                                                                                                         |
+| Partial     | Arcjet controls the point in your application that the risk passes through, such as a prompt, a tool call, or a document on its way to an index. Part of the control stays in your code. |
+| Not covered | The risk is outside what Arcjet does. Your application code, your build pipeline, or another tool handles it.                                                                            |
+
+A risk marked partial isn't a gap in the Arcjet control. It means that the
+framework describes more than one control for that risk, and Arcjet is one of
+them. Each mapping lists what remains.
+
+## Evidence for reviewers
+
+Arcjet records each decision with the rule or policy that produced it and the
+inputs it read. Agent guard decisions also record the policy revision. When a
+reviewer asks how a risk is controlled, you can show the decisions that the
+control made, alongside the mapping. Decisions appear in the
+[Arcjet Console](https://console.arcjet.com) and through the
+
+<Link.Page href="/mcp-server">Arcjet MCP server</Link.Page>.
+
+## Frameworks
+
+<CardGrid>
+  <Link.Card
+    title="OWASP Top 10 for LLM Applications"
+    href="/security-frameworks/owasp-llm-top-10"
+    description="The 2026 edition, mapped risk by risk to Arcjet prompt injection detection, sensitive information detection, agent guards, and token budgets."
+  />
+</CardGrid>

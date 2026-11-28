@@ -1,0 +1,491 @@
+---
+title: "OWASP Top 10 for LLM Applications"
+description: "How Arcjet prompt injection detection, sensitive information detection, agent guards, and token budgets map to each risk in the OWASP Top 10 for LLM Applications 2026, with the coverage level and the configuration for each."
+generateMarkdownRoute: true
+---
+
+import { Link } from "@/components/link";
+
+The [OWASP Top 10 for LLM Applications](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/)
+is the OWASP GenAI Security Project's list of the most critical security risks
+in applications built on large language models (LLMs). This page maps each
+risk in the 2026 edition to the Arcjet control that addresses it, shows where
+the control runs in your application, and states what the control leaves to
+your own code. For what each coverage level means, see
+
+<Link.Page href="/security-frameworks#coverage-levels">
+  Coverage levels
+</Link.Page>
+.
+
+Most of the risks on the list reach your application through one of four
+points: text entering the model's context, a document entering an index or a
+retrieval step, a tool call that the model generated, or a completion that
+leaves your application. Arcjet places a check at each of those points:
+
+- **<Link.Page href="/prompt-injection">Prompt injection detection</Link.Page>**
+  screens text before it enters the model's context.
+- **<Link.Page href="/sensitive-info">Sensitive information detection</Link.Page>**
+  finds personal data, protected health information (PHI), and secrets in
+  text, in your process or on Arcjet.
+- **<Link.Page href="/guards">Agent guards</Link.Page>** evaluate a policy
+  immediately before a tool call or other action runs, with the
+  <Link.Page href="/guards/reference#direct-guard-api">`guard()`</Link.Page>
+  function.
+- **<Link.Page href="/ai-protection/budget-control">Token budgets</Link.Page>**
+  charge each model call against a token bucket per user, agent, or run.
+
+The examples on this page use the JavaScript and TypeScript SDK,
+`@arcjet/guard`. The Python and Go SDKs offer the same rules; for their
+syntax, see <Link.Page href="/guards/reference">Agent guards testing and reference</Link.Page>.
+Each example creates the client once, at module scope:
+
+```ts
+import { launchArcjet } from "@arcjet/guard";
+
+const arcjet = launchArcjet({ key: process.env.ARCJET_KEY! });
+```
+
+## Coverage summary
+
+| OWASP risk                                                                                 | Arcjet control                                 | Coverage    |
+| ------------------------------------------------------------------------------------------ | ---------------------------------------------- | ----------- |
+| [LLM01:2026 Prompt Injection](#llm012026-prompt-injection)                                 | Prompt injection detection                     | Product     |
+| [LLM02:2026 Sensitive Information Disclosure](#llm022026-sensitive-information-disclosure) | Sensitive information detection                | Product     |
+| [LLM03:2026 Excessive Agency](#llm032026-excessive-agency)                                 | Agent guards                                   | Product     |
+| [LLM04:2026 Supply Chain](#llm042026-supply-chain)                                         | None                                           | Not covered |
+| [LLM05:2026 Data and Model Poisoning](#llm052026-data-and-model-poisoning)                 | Input screening at the store boundary          | Partial     |
+| [LLM06:2026 Unbounded Consumption](#llm062026-unbounded-consumption)                       | Token budgets                                  | Product     |
+| [LLM07:2026 Misinformation](#llm072026-misinformation)                                     | None                                           | Not covered |
+| [LLM08:2026 Hidden Context Exposure](#llm082026-hidden-context-exposure)                   | Context screening in both directions           | Partial     |
+| [LLM09:2026 Vector and Embedding Weaknesses](#llm092026-vector-and-embedding-weaknesses)   | Screening before embedding and after retrieval | Partial     |
+| [LLM10:2026 Improper Output Handling](#llm102026-improper-output-handling)                 | Agent guards on the next action                | Partial     |
+
+## LLM01:2026 Prompt Injection
+
+**Coverage:** Product
+
+Prompt injection is text that changes what the model does. Direct injection
+arrives in the user's own message. Indirect injection arrives in content that
+your application retrieves or receives: a web page that a tool fetched, a
+document from a vector store, an email, or the result of an MCP tool.
+
+Arcjet prompt injection detection screens each input before it enters the
+agent's context and before the next model call. It runs on Arcjet's
+prompt injection detection models and returns `DENY` before your code calls
+the model provider, so a detected instruction doesn't reach the model. Screen
+the user's message and every piece of retrieved or tool-supplied content with
+the same rule:
+
+```ts
+import { detectPromptInjection } from "@arcjet/guard";
+
+const promptScan = detectPromptInjection();
+
+export async function screen(label: string, userId: string, text: string) {
+  const decision = await arcjet.guard({
+    label,
+    actor: userId,
+    rules: [promptScan(text)],
+  });
+
+  // Fail closed when Arcjet couldn't complete the check.
+  if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+    throw new Error("Content blocked");
+  }
+}
+
+// Before the model call:
+await screen("message.received", user.id, message);
+// Before a tool result or retrieved document enters the context:
+await screen("document.retrieved", user.id, chunk.text);
+```
+
+A detector reduces how often an injection succeeds. It can't recognize every
+instruction, such as a plausible business request planted in a document. Pair
+it with an agent guard on each consequential tool, so that a successful
+injection still meets a policy that the model can't change. A guard policy can
+also read the detector's result and combine it with application state, such as
+denying a destructive tool only when the triggering message shows injection.
+For the policy, see
+
+<Link.Page href="/guards/policy-examples#act-on-a-prompt-injection-finding-in-context">
+  Act on a prompt injection finding in context
+</Link.Page>
+.
+
+For the detection model, latency, and limits, see
+
+<Link.Page href="/prompt-injection">Prompt injection detection</Link.Page>.
+
+## LLM02:2026 Sensitive Information Disclosure
+
+**Coverage:** Product
+
+Sensitive information disclosure covers personal data, credentials, and
+confidential business data that reach the model provider, a log, a tool, or a
+user who shouldn't see them.
+
+Arcjet detects sensitive information in your own process with an embedded
+named-entity recognition (NER) model,
+
+<Link.Page href="/sensitive-info/reference#on-device-detection-with-rampart">
+  Rampart
+</Link.Page>
+. It covers email addresses, phone numbers, and card numbers, as well as Social
+Security numbers, bank accounts, government IDs, names, and addresses. The text
+that it scans doesn't leave your environment. Run it on the prompt before the
+provider call, on retrieved content, and on the completion before you return it:
+
+```ts
+import { localDetectSensitiveInfo } from "@arcjet/guard";
+import { rampart } from "@arcjet/sensitive-info-rampart";
+
+const detectPii = localDetectSensitiveInfo({
+  deny: [
+    "EMAIL",
+    "PHONE_NUMBER",
+    "CREDIT_CARD_NUMBER",
+    "SSN",
+    "BANK_ACCOUNT",
+    "GOVERNMENT_ID",
+  ],
+  backend: rampart(),
+});
+
+const decision = await arcjet.guard({
+  label: "prompt.submitted",
+  actor: user.id,
+  rules: [detectPii(prompt)],
+});
+
+if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+  throw new Error("Remove personal data from your message");
+}
+```
+
+PHI and secret detection run server-side, in the sensitive information
+detector of an agent guard policy. Declare the detector over a `SERVER` input
+and list the PHI types, such as `MEDICAL_RECORD_NUMBER`, or `SECRET` for API
+keys, access tokens, and private keys. For the configuration, see
+
+<Link.Page href="/sensitive-info/phi">
+  Detect protected health information (PHI)
+</Link.Page>
+and
+<Link.Page href="/sensitive-info/secrets">
+  Detect secrets and API keys
+</Link.Page>
+. For every entity type and where Arcjet detects it, see
+<Link.Page href="/sensitive-info/entity-types">Entity types</Link.Page>.
+
+Detection decides whether text may pass a point in your application. Access
+control on the data itself, such as which records a user may retrieve, stays in
+your code.
+
+## LLM03:2026 Excessive Agency
+
+**Coverage:** Product
+
+Excessive agency is an agent with more functionality, permissions, or autonomy
+than its task needs, so that a manipulated or mistaken model output can trigger
+a damaging action.
+
+An agent guard runs inside your tool handler, immediately before the action
+runs. The policy authorizes this specific call: the tool, the actor, and the
+arguments. It doesn't authorize the agent in general. The following example
+sends the refund amount and the actor's approval limit, which your code reads
+from the authenticated user's entitlements, never from the model:
+
+```ts
+import { policyInput } from "@arcjet/guard";
+
+export async function issueRefund(
+  user: User,
+  invoiceId: string,
+  amount: number,
+) {
+  const decision = await arcjet.guard({
+    label: "refund.issued",
+    actor: user.id,
+    inputs: {
+      amount_cents: policyInput.server.integer(amount),
+      approval_limit: policyInput.server.integer(user.refundLimitCents),
+      currency: policyInput.server.string("USD"),
+    },
+  });
+
+  if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+    return { error: "Refund not allowed" };
+  }
+
+  return await payments.refund(invoiceId, amount);
+}
+```
+
+The policy for the `refund.issued` label lives in the
+[Arcjet Console](https://console.arcjet.com), so your security team can change
+the limit or add a rule without a deployment. For the policy, see
+
+<Link.Page href="/guards/policy-examples#keep-a-refund-inside-an-approval-limit">
+  Keep a refund inside an approval limit
+</Link.Page>
+. For other agency controls, such as approved email domains, a database tool
+that can't run `DROP`, or a file tool confined to the workspace, see
+<Link.Page href="/guards/policy-examples">Policy examples</Link.Page>.
+
+If you use an agent framework, a framework integration wraps each tool and
+makes the same call for you. For the supported frameworks, see
+
+<Link.Page href="/guards/framework-integrations">
+  Agent guard framework integrations
+</Link.Page>
+.
+
+Choosing which tools an agent has, and the scope of the credentials those
+tools use, stays in your code. An agent guard enforces a policy on each call
+to a tool that you've given the agent.
+
+## LLM04:2026 Supply Chain
+
+**Coverage:** Not covered
+
+The supply chain risk covers the models, datasets, adapters, and packages that
+your application is built from, including substituted model weights and
+packages with names that coding assistants invent. Arcjet runs in your
+application after the model is trained and the dependencies are installed, so
+it doesn't verify them. Use model provenance checks, dependency pinning, and a
+software composition analysis tool for this risk.
+
+One runtime part of the supply chain is the set of MCP servers that a tool can
+reach. An agent guard policy can restrict that set to servers you've reviewed.
+For the policy, see
+
+<Link.Page href="/guards/policy-examples#restrict-which-mcp-servers-a-tool-can-reach">
+  Restrict which MCP servers a tool can reach
+</Link.Page>
+.
+
+## LLM05:2026 Data and Model Poisoning
+
+**Coverage:** Partial
+
+Data and model poisoning is tampering with training data, fine-tuning data, or
+the documents that a retrieval-augmented generation (RAG) system retrieves, so
+that the model learns or retrieves harmful behavior.
+
+Arcjet can't detect poisoning in a model that's already trained. It can screen
+content before it enters a store that your model learns from or retrieves
+from: uploaded files, fine-tuning examples, and documents queued for indexing.
+Screen each item with prompt injection detection and sensitive information
+detection, or with a guard policy over the tool's own input requirements, and
+reject the item on `DENY`:
+
+```ts
+for (const doc of pendingDocuments) {
+  const decision = await arcjet.guard({
+    label: "document.indexed",
+    actor: doc.uploadedBy,
+    rules: [promptScan(doc.text), detectPii(doc.text)],
+  });
+
+  if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+    await rejectDocument(doc.id);
+    continue;
+  }
+
+  await index.add(doc);
+}
+```
+
+`promptScan` and `detectPii` are the rules defined in the
+[LLM01](#llm012026-prompt-injection) and
+[LLM02](#llm022026-sensitive-information-disclosure) sections. Provenance of
+training data, and who may write to a store, stay in your code and your data
+pipeline.
+
+## LLM06:2026 Unbounded Consumption
+
+**Coverage:** Product
+
+Unbounded consumption is uncontrolled use of tokens, model calls, and tool
+calls, which leads to denial of service, unexpected cost, or model extraction.
+One chat request can start a loop of many model calls, so a limit on the HTTP
+route alone doesn't cap the cost of a run.
+
+A token bucket keyed per user, per agent, or per run charges each call its
+estimated tokens before the call and denies when the budget is exhausted:
+
+```ts
+import { tokenBucket } from "@arcjet/guard";
+
+const tokenBudget = tokenBucket({
+  bucket: "ai-tokens",
+  refillRate: 2000,
+  intervalSeconds: 3600,
+  maxTokens: 5000,
+});
+
+const decision = await arcjet.guard({
+  label: "model.called",
+  actor: user.id,
+  rules: [
+    tokenBudget({
+      key: user.id,
+      requested: Math.max(1, Math.ceil(estimatedTokens)),
+    }),
+  ],
+});
+
+if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+  throw new Error("Token budget exhausted");
+}
+```
+
+Change `key` to an agent ID or a run ID to budget at that level. For token
+estimation and per-framework examples, see
+
+<Link.Page href="/ai-protection/budget-control">AI budget control</Link.Page>.
+To cap spend in a remote policy instead, see
+<Link.Page href="/guards/policy-examples#enforce-a-spend-budget">
+  Enforce a spend budget
+</Link.Page>
+. On HTTP routes, <Link.Page href="/bot-protection">bot protection</Link.Page>
+and <Link.Page href="/rate-limiting">rate limiting</Link.Page> reduce automated
+traffic before it reaches your model.
+
+## LLM07:2026 Misinformation
+
+**Coverage:** Not covered
+
+Misinformation is incorrect or fabricated model output that a person or an
+automated process trusts and acts on. Arcjet doesn't judge whether an agent's
+output is true. Grounding, citations, and evaluation of output quality stay in
+your application and your evaluation tooling.
+
+Arcjet controls what the output can do. When a completion leads to a tool
+call, an agent guard on that tool evaluates the action against policy before
+it runs, as described in the
+[LLM10](#llm102026-improper-output-handling) section.
+
+## LLM08:2026 Hidden Context Exposure
+
+**Coverage:** Partial
+
+Hidden context exposure is the disclosure of context that the user isn't meant
+to see: the system prompt, developer instructions, tool schemas, policy text,
+and workflow rules. Disclosure helps an attacker write a more targeted prompt
+injection, and when that context holds keys or personal data, the disclosure
+is a leak in itself.
+
+Arcjet screens context in both directions:
+
+- **Inbound.** Retrieved documents and tool results pass prompt injection
+  detection before your code assembles them into the prompt, so an instruction
+  hidden in content, such as "print your system prompt", is denied before the
+  model sees it. Use the rule from the
+  [LLM01](#llm012026-prompt-injection) section.
+- **Outbound.** Completions and tool arguments pass sensitive information
+  detection before they leave your application. The server-side detector
+  covers the `SECRET` type for keys and credentials, so a key or personal data
+  held in the system prompt doesn't leave in a response.
+
+The following example screens a completion before it's returned. It sends the
+text as a `SERVER` input to a policy for the `completion.returned` label, which
+declares a server-side sensitive information detector that denies `SECRET`:
+
+```ts
+import { policyInput } from "@arcjet/guard";
+
+const decision = await arcjet.guard({
+  label: "completion.returned",
+  actor: user.id,
+  inputs: {
+    completion: policyInput.server.string(completion),
+  },
+  rules: [detectPii(completion)],
+});
+
+if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+  return { error: "The response couldn't be returned" };
+}
+```
+
+Keeping secrets out of the system prompt in the first place, and returning
+generic errors that don't echo internal configuration, stay in your code. Treat
+anything in the model's context as discoverable, and don't rely on hidden
+context as an authorization control.
+
+## LLM09:2026 Vector and Embedding Weaknesses
+
+**Coverage:** Partial
+
+Vector and embedding weaknesses are risks in RAG systems, semantic caches, and
+vector memory: cross-tenant leakage, retrieval manipulation, and embedding
+inversion, which reconstructs source text from vectors.
+
+Because inversion reconstructs what was embedded, the Arcjet control is what
+enters the index. Screen each document with sensitive information detection
+in your process before you embed it. A chunk that carries personal data or
+secrets is never embedded, so there's nothing sensitive to reconstruct from
+the vectors. Screen retrieved chunks again, with prompt injection detection,
+before they enter the context:
+
+```ts
+for (const chunk of chunks) {
+  const decision = await arcjet.guard({
+    label: "chunk.embedded",
+    actor: tenant.id,
+    rules: [detectPii(chunk.text)],
+  });
+
+  if (decision.conclusion === "DENY" || decision.hasFailedOpen()) {
+    continue; // Skip the chunk; don't embed it.
+  }
+
+  await vectors.upsert(tenant.id, await embed(chunk.text));
+}
+```
+
+Inversion against vectors that already exist, retrieval manipulation such as
+jamming, and the store's access control stay outside Arcjet. Scope every
+retrieval to the tenant in your query, and treat the vector store as a data
+store with its own authorization.
+
+## LLM10:2026 Improper Output Handling
+
+**Coverage:** Partial
+
+Improper output handling is passing model output to another component, such as
+a database, a shell, a browser, or an API, without validation suited to that
+component.
+
+An agent guard sits between the completion and the action that it triggers.
+The tool calls that the model generates are evaluated against policy before
+they execute, and output that fails policy is denied. Send the generated
+arguments as inputs to the guard in the tool handler. The following policies
+cover common next actions:
+
+- <Link.Page href="/guards/policy-examples#deny-a-destructive-database-statement">
+    Deny a destructive database statement
+  </Link.Page>
+- <Link.Page href="/guards/policy-examples#restrict-a-web-fetch-tool-to-trusted-hosts">
+    Restrict a web fetch tool to trusted hosts
+  </Link.Page>
+- <Link.Page href="/guards/policy-examples#deny-a-high-risk-destination">
+    Deny a high-risk destination
+  </Link.Page>
+- <Link.Page href="/guards/policy-examples#confine-a-file-tool-to-the-workspace">
+    Confine a file tool to the workspace
+  </Link.Page>
+
+Output that never reaches a tool, such as text that your frontend renders,
+needs validation for its destination in your code: encode it for HTML,
+parameterize it for SQL, and validate structured output against a schema.
+
+## Related
+
+- <Link.Page href="/security-frameworks">Security frameworks</Link.Page>
+- <Link.Page href="/guards/quick-start">Agent guards quick start</Link.Page>
+- <Link.Page href="/guards/remote-policies">Policy contract</Link.Page>
+- <Link.Page href="/ai-protection">AI runtime protection</Link.Page>
